@@ -1,0 +1,56 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function profile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function approvedMember() { return signedIn() && profile().status == 'approved'; }
+    function admin() { return signedIn() && profile().role in ['admin', 'super_admin']; }
+    function owner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    match /products/{productId} {
+      allow read: if resource.data.isVisible == true || admin();
+      allow write: if admin();
+    }
+
+    match /productOptions/{optionId} {
+      allow read: if approvedMember() || admin();
+      allow write: if admin();
+    }
+
+    match /users/{uid} {
+      allow read: if owner(uid) || admin();
+      allow create: if owner(uid);
+      allow update: if admin() || (owner(uid) && request.resource.data.role == resource.data.role && request.resource.data.status == resource.data.status);
+    }
+
+    match /memberApplications/{uid} {
+      allow create, read: if owner(uid) || admin();
+      allow update: if admin();
+    }
+
+    match /carts/{uid}/items/{itemId} {
+      allow read, write: if owner(uid);
+    }
+
+    match /orders/{orderId} {
+      allow read: if admin() || (signedIn() && resource.data.userId == request.auth.uid);
+      allow write: if false;
+    }
+
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    match /homeSections/{sectionId} {
+      allow read: if true;
+      allow write: if admin();
+    }
+  }
+}
