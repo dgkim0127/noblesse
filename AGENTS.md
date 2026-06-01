@@ -1,46 +1,159 @@
-# Noblesse Development Guidelines
+# Project identity
 
-## Project Definition
+This repository is for the Noblesse website.
 
-- This project is a website for Noblesse overseas buyers to browse a piercing B2B catalog.
-- This project is not a mobile application.
-- Do not create APK builds, Capacitor integrations, or mobile app project structures.
-- Build responsive web experiences for mobile, tablet, and desktop viewports.
+Noblesse is a B2B piercing catalog website for global buyers.
+It is not a mobile app, POS app, shopping live service, review platform, or instant checkout store.
 
-## Version 1 Scope
+# Core product direction
 
-- Do not build shopping live features.
-- Do not build reviews.
-- Do not build immediate payment features.
-- Do not use the terms `Cart`, `Checkout`, `Buy Now`, or `Pay Now` in the customer-facing UI.
-- Use `Inquiry List` instead of cart-related terminology.
-- Use `Request Quote` instead of purchase-related terminology.
+Build a premium jewelry-style website that works as a wholesale buyer catalog.
 
-## Data Strategy
+The user flow should be:
 
-- Implement version 1 with mock data before connecting to a live Firebase project.
-- Mock data must use the same field names as the intended Firebase document structure.
-- Do not store image binary data in the database.
-- Store only Firebase Storage or CDN image URLs in database image fields.
+Home
+→ Product List
+→ Product Detail
+→ Inquiry List
+→ Request Quote
+→ My Inquiries
 
-## Member Access
+The website should look like a refined retail jewelry brand, but the business logic should stay B2B.
 
-Use these member states:
+# Do not build
 
-- `guest`
-- `pending`
-- `approved`
-- `admin`
+Do not implement:
 
-Access rules:
+- Shopping live
+- Review-centered features
+- Instant checkout
+- Payment
+- Buy Now
+- Pay Now
+- Checkout
+- Coupon system
+- Point system
+- Real-time ranking
+- Mobile app / APK / Capacitor structure
 
-- `guest` and `pending` users cannot view prices or use Inquiry features.
-- `approved` users can view prices, use the Inquiry List, and submit a Request Quote.
-- `admin` users can access administrative catalog and inquiry management features.
+# Required terminology
 
-## Design Direction
+Use these terms:
 
-- The customer-facing website should feel like a premium jewelry brand.
-- Use `#ff8fa9` as the primary color.
-- Use `#2a234f` as the secondary color.
-- Keep the interface responsive across mobile, tablet, and desktop layouts.
+- Inquiry List
+- Request Quote
+- Buyer
+- Buyer Approval
+- Approved Buyer Price
+- Price available after approval
+- My Inquiries
+- Quote Requested
+
+Do not use:
+
+- Cart
+- Checkout
+- Buy Now
+- Pay Now
+
+# User states
+
+Support these mock user states first:
+
+- guest
+- pending
+- approved
+- admin
+
+Rules:
+
+- guest can browse products but cannot see prices or request quotes.
+- pending can browse products but sees approval waiting messages.
+- approved can see prices, use Inquiry List, and submit Request Quote.
+- admin will be handled later.
+
+# Image and data policy
+
+Do not store image binary data in Firestore.
+
+Use this structure:
+
+- Firestore stores product metadata and image URLs only.
+- Firebase Storage stores actual image files.
+- Firebase Hosting serves the website through CDN.
+- Product images should be prepared as WebP files in multiple sizes.
+
+Image sizes:
+
+- thumb: 300px WebP
+- card: 600px WebP
+- detail: 1200px WebP
+- zoom: 1800px WebP
+
+Product data should use:
+
+```js
+imageSet: {
+  thumb: string,
+  card: string,
+  detail: string,
+  zoom: string
+}
+```
+
+# First version scope
+
+Use mock data first.
+However, mock data must follow the same shape as the future Firestore schema.
+
+Do not connect Firebase yet.
+Do not add real authentication yet.
+Do not add real payment.
+Do not add admin dashboard yet unless explicitly requested.
+
+# Design direction
+
+Style:
+
+- Premium jewelry brand
+- Clean B2B catalog
+- White or ivory background
+- Main color: #ff8fa9
+- Secondary color: #2a234f
+- Large product images
+- Clear spacing
+- Mobile responsive layout
+
+Responsive rules:
+
+- Desktop: 4-column product grid
+- Tablet: 3-column product grid
+- Mobile: 2-column product grid
+- Product detail and Inquiry List should have mobile-friendly CTA placement
+
+# Technical direction
+
+Prefer:
+
+- Vite
+- React
+- Plain CSS or CSS modules unless a framework already exists
+- Simple file structure
+- Mock data under src/data
+- Reusable components under src/components
+- Pages under src/pages
+- Services under src/services
+
+Avoid unnecessary dependencies.
+
+# Validation
+
+Before finishing, check:
+
+- npm install works
+- npm run dev works
+- npm run build works
+- No payment/checkout wording appears
+- No app/APK/Capacitor setup is introduced
+- Main pages are responsive
+- User status UI differences are visible
