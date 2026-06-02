@@ -22,14 +22,14 @@ Brand name:
 
 Korean name:
 
-- 귀족 주얼리
+- 귀족 피어싱
 
 Brand labels:
 
-- 주얼리
+- 피어싱
 - Piercing
-- 신상품
-- 이벤트
+- ピアス
+- 冲孔
 
 Colors:
 
@@ -180,7 +180,7 @@ The common header should include:
 
 - left: Noblesse logo or elegant text logo fallback
 - center: Noblesse Piercing brand name
-- nearby labels: 주얼리 / Piercing / 신상품 / 이벤트
+- nearby labels: 피어싱 / Piercing / ピアス / 冲孔
 - centered rounded search bar
 - search icon inside the right side of the search bar
 - right: Inquiry List icon
