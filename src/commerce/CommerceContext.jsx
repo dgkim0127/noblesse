@@ -6,10 +6,7 @@ const formatInquiryId = () => `INQ-${new Date().toISOString().slice(0, 10).repla
 
 export function CommerceProvider({ children }) {
   const [viewerState, setViewerState] = useState('approved')
-  const [inquiryItems, setInquiryItems] = useState([
-    { productId: 'KZ-P-1004', quantity: 40 },
-    { productId: 'KZ-H-2418', quantity: 24 },
-  ])
+  const [inquiryItems, setInquiryItems] = useState([])
   const [inquiries, setInquiries] = useState(mockInquiries)
   const buyer = mockUsers[viewerState]
   const isApproved = viewerState === 'approved'
@@ -20,15 +17,16 @@ export function CommerceProvider({ children }) {
   }, [buyer.assignedMarket, isApproved])
 
   const approvedPrice = useCallback((productId) => {
+    if (!isApproved) return null
     const price = getPrice(productId)
     return price ? Math.round(price.wholesalePrice * (1 - buyer.discountRate / 100)) : null
-  }, [buyer.discountRate, getPrice])
+  }, [buyer.discountRate, getPrice, isApproved])
 
   const inquiryRows = useMemo(() => inquiryItems.map((item) => {
     const product = mockProducts.find((candidate) => candidate.productId === item.productId)
     const price = getPrice(item.productId)
-    const unitPrice = approvedPrice(item.productId)
-    return product && price && unitPrice ? { ...item, product, price, unitPrice, subtotal: unitPrice * item.quantity } : null
+    const priceSnapshot = approvedPrice(item.productId)
+    return product && price && priceSnapshot ? { ...item, product, price, priceSnapshot, subtotal: priceSnapshot * item.quantity } : null
   }).filter(Boolean), [approvedPrice, getPrice, inquiryItems])
 
   const estimatedTotal = inquiryRows.reduce((sum, row) => sum + row.subtotal, 0)
@@ -55,7 +53,7 @@ export function CommerceProvider({ children }) {
 
   const removeInquiryItem = (productId) => setInquiryItems((current) => current.filter((item) => item.productId !== productId))
 
-  const submitQuoteRequest = (requestMemo) => {
+  const submitRequestQuote = (requestMemo) => {
     if (!isApproved || inquiryRows.length === 0) return null
     const inquiryId = formatInquiryId()
     const inquiry = {
@@ -65,17 +63,18 @@ export function CommerceProvider({ children }) {
       buyerCountry: buyer.country,
       buyerLanguage: buyer.preferredLanguage,
       currency: buyer.currency,
-      status: 'quote_requested',
+      status: 'requested',
       items: inquiryRows.map((row) => ({
         productId: row.product.productId,
-        code: row.product.code,
-        nameEn: row.product.nameEn,
-        imageUrl: row.product.imageSet.card,
-        market: buyer.assignedMarket,
-        currency: buyer.currency,
-        unitPrice: row.unitPrice,
+        productCode: row.product.code,
+        productName: row.product.nameEn,
+        thumbnailUrl: row.product.imageSet.thumb,
+        material: row.product.material,
+        color: row.product.colors[0] ?? '',
+        size: row.product.sizes[0] ?? '',
         moq: row.price.moq,
         quantity: row.quantity,
+        priceSnapshot: row.priceSnapshot,
         subtotal: row.subtotal,
       })),
       totalItems: inquiryRows.length,
@@ -104,7 +103,7 @@ export function CommerceProvider({ children }) {
     products: mockProducts,
     removeInquiryItem,
     setViewerState,
-    submitQuoteRequest,
+    submitRequestQuote,
     totalQuantity,
     updateInquiryQuantity,
     viewerState,

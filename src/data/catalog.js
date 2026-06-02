@@ -79,8 +79,8 @@ const imageSet = (productId) => ({
 
 export const mockProducts = [
   {
-    productId: 'KZ-P-1004',
-    code: 'KZ-P-1004',
+    productId: 'NB-001',
+    code: 'NB-001',
     nameKo: '실버 베이직 볼 바벨',
     nameEn: 'Silver Basic Ball Barbell',
     nameJa: 'シルバー ベーシック ボールバーベル',
@@ -92,7 +92,7 @@ export const mockProducts = [
     moqDefault: 20,
     leadTime: '7-14 days',
     origin: 'KR',
-    imageSet: imageSet('KZ-P-1004'),
+    imageSet: imageSet('NB-001'),
     imageAlt: { en: 'Silver basic ball barbell piercing' },
     isVisible: true,
     isExportAvailable: true,
@@ -104,8 +104,8 @@ export const mockProducts = [
     tone: 'silver',
   },
   {
-    productId: 'KZ-H-2418',
-    code: 'KZ-H-2418',
+    productId: 'NB-002',
+    code: 'NB-002',
     nameKo: '오팔 하트 큐빅 라블렛',
     nameEn: 'Opal Heart Cubic Labret',
     nameJa: 'オパール ハート キュービック ラブレット',
@@ -117,7 +117,7 @@ export const mockProducts = [
     moqDefault: 12,
     leadTime: '10-18 days',
     origin: 'KR',
-    imageSet: imageSet('KZ-H-2418'),
+    imageSet: imageSet('NB-002'),
     imageAlt: { en: 'Opal heart cubic labret piercing' },
     isVisible: true,
     isExportAvailable: true,
@@ -129,8 +129,8 @@ export const mockProducts = [
     tone: 'opal',
   },
   {
-    productId: 'KZ-R-0682',
-    code: 'KZ-R-0682',
+    productId: 'NB-003',
+    code: 'NB-003',
     nameKo: '골드 원터치 세그먼트 링',
     nameEn: 'Gold One-Touch Segment Ring',
     nameJa: 'ゴールド ワンタッチ セグメントリング',
@@ -142,7 +142,7 @@ export const mockProducts = [
     moqDefault: 16,
     leadTime: '7-14 days',
     origin: 'KR',
-    imageSet: imageSet('KZ-R-0682'),
+    imageSet: imageSet('NB-003'),
     imageAlt: { en: 'Gold one-touch segment ring piercing' },
     isVisible: true,
     isExportAvailable: true,
@@ -154,8 +154,8 @@ export const mockProducts = [
     tone: 'gold',
   },
   {
-    productId: 'KZ-C-5520',
-    code: 'KZ-C-5520',
+    productId: 'NB-004',
+    code: 'NB-004',
     nameKo: '블랙 크로스 체인 드롭',
     nameEn: 'Black Cross Chain Drop',
     nameJa: 'ブラック クロス チェーンドロップ',
@@ -167,7 +167,7 @@ export const mockProducts = [
     moqDefault: 8,
     leadTime: '14-21 days',
     origin: 'KR',
-    imageSet: imageSet('KZ-C-5520'),
+    imageSet: imageSet('NB-004'),
     imageAlt: { en: 'Black cross chain drop piercing' },
     isVisible: true,
     isExportAvailable: true,
@@ -181,10 +181,10 @@ export const mockProducts = [
 ]
 
 export const mockProductPrices = [
-  { productId: 'KZ-P-1004', market: 'jp', currency: 'JPY', wholesalePrice: 1250, retailPrice: 3900, moq: 20, minOrderAmount: 0, visibleTo: ['approved'], isActive: true, updatedAt: '2026-06-01T00:00:00.000Z' },
-  { productId: 'KZ-H-2418', market: 'jp', currency: 'JPY', wholesalePrice: 2680, retailPrice: 7900, moq: 12, minOrderAmount: 0, visibleTo: ['approved'], isActive: true, updatedAt: '2026-06-01T00:00:00.000Z' },
-  { productId: 'KZ-R-0682', market: 'jp', currency: 'JPY', wholesalePrice: 1820, retailPrice: 5900, moq: 16, minOrderAmount: 0, visibleTo: ['approved'], isActive: true, updatedAt: '2026-06-01T00:00:00.000Z' },
-  { productId: 'KZ-C-5520', market: 'jp', currency: 'JPY', wholesalePrice: 3350, retailPrice: 9900, moq: 8, minOrderAmount: 0, visibleTo: ['approved'], isActive: true, updatedAt: '2026-06-01T00:00:00.000Z' },
+  { productId: 'NB-001', market: 'jp', currency: 'JPY', wholesalePrice: 1250, retailPrice: 3900, moq: 20, minOrderAmount: 0, visibleTo: ['approved'], isActive: true, updatedAt: '2026-06-01T00:00:00.000Z' },
+  { productId: 'NB-002', market: 'jp', currency: 'JPY', wholesalePrice: 2680, retailPrice: 7900, moq: 12, minOrderAmount: 0, visibleTo: ['approved'], isActive: true, updatedAt: '2026-06-01T00:00:00.000Z' },
+  { productId: 'NB-003', market: 'jp', currency: 'JPY', wholesalePrice: 1820, retailPrice: 5900, moq: 16, minOrderAmount: 0, visibleTo: ['approved'], isActive: true, updatedAt: '2026-06-01T00:00:00.000Z' },
+  { productId: 'NB-004', market: 'jp', currency: 'JPY', wholesalePrice: 3350, retailPrice: 9900, moq: 8, minOrderAmount: 0, visibleTo: ['approved'], isActive: true, updatedAt: '2026-06-01T00:00:00.000Z' },
 ]
 
 export const mockCategories = [
@@ -202,8 +202,8 @@ export const mockInquiries = [
     buyerCountry: 'JP',
     buyerLanguage: 'ja',
     currency: 'JPY',
-    status: 'quote_requested',
-    items: [{ productId: 'KZ-P-1004', code: 'KZ-P-1004', nameEn: 'Silver Basic Ball Barbell', imageUrl: '/mock/products/KZ-P-1004/card.webp', market: 'jp', currency: 'JPY', unitPrice: 1100, moq: 20, quantity: 40, subtotal: 44000 }],
+    status: 'requested',
+    items: [{ productId: 'NB-001', productCode: 'NB-001', productName: 'Silver Basic Ball Barbell', thumbnailUrl: '/mock/products/NB-001/thumb.webp', material: 'Surgical Steel', color: 'Silver', size: '6mm', quantity: 40, moq: 20, priceSnapshot: 1100, subtotal: 44000 }],
     totalItems: 1,
     totalQuantity: 40,
     estimatedTotal: 44000,

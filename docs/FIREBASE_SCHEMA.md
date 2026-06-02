@@ -114,10 +114,10 @@ Stores public product metadata for catalog browsing. It does not contain protect
 ### Example Document
 
 ```js
-products/KZ-P-1004
+products/NB-001
 {
-  productId: "KZ-P-1004",
-  code: "KZ-P-1004",
+  productId: "NB-001",
+  code: "NB-001",
   nameKo: "실버 베이직 볼 바벨",
   nameEn: "Silver Basic Ball Barbell",
   nameJa: "シルバー ベーシック ボールバーベル",
@@ -130,10 +130,10 @@ products/KZ-P-1004
   leadTime: "7-14 days",
   origin: "KR",
   imageSet: {
-    thumb: "https://cdn.example.com/products/KZ-P-1004/thumb/thumb.webp",
-    card: "https://cdn.example.com/products/KZ-P-1004/card/card.webp",
-    detail: "https://cdn.example.com/products/KZ-P-1004/detail/detail.webp",
-    zoom: "https://cdn.example.com/products/KZ-P-1004/zoom/zoom.webp"
+    thumb: "https://cdn.example.com/products/NB-001/thumb/thumb.webp",
+    card: "https://cdn.example.com/products/NB-001/card/card.webp",
+    detail: "https://cdn.example.com/products/NB-001/detail/detail.webp",
+    zoom: "https://cdn.example.com/products/NB-001/zoom/zoom.webp"
   },
   imageAlt: {
     ko: "실버 베이직 볼 바벨 피어싱",
@@ -180,9 +180,9 @@ Stores protected market-specific pricing and Inquiry conditions separately from 
 ### Example Document
 
 ```js
-productPrices/KZ-P-1004_jp
+productPrices/NB-001_jp
 {
-  productId: "KZ-P-1004",
+  productId: "NB-001",
   market: "jp",
   currency: "JPY",
   wholesalePrice: 1250,
@@ -281,7 +281,7 @@ collections/daily-basics
     ja: "毎日使いやすいベーシックピアス"
   },
   coverUrl: "https://cdn.example.com/collections/daily-basics/cover.webp",
-  productIds: ["KZ-P-1004"],
+  productIds: ["NB-001"],
   isVisible: true,
   sortOrder: 10,
   createdAt: Timestamp,
@@ -310,7 +310,7 @@ Stores Request Quote submissions as immutable Buyer-facing snapshots. Future pri
 | `buyerCountry` | `string` | Buyer country snapshot |
 | `buyerLanguage` | `string` | Buyer language snapshot |
 | `currency` | `string` | Inquiry currency |
-| `status` | `string` | `quote_requested`, `reviewing`, `quoted`, `confirmed`, `closed`, or `cancelled` |
+| `status` | `string` | `requested`, `checking`, `quoted`, `confirmed`, or `cancelled` |
 | `items` | `map[]` | Product and price snapshots |
 | `totalItems` | `number` | Number of distinct product rows |
 | `totalQuantity` | `number` | Sum of requested quantities |
@@ -325,14 +325,15 @@ Each `items` entry should contain:
 | Field | Type | Description |
 | --- | --- | --- |
 | `productId` | `string` | Product ID snapshot |
-| `code` | `string` | Product code snapshot |
-| `nameEn` | `string` | Product name snapshot |
-| `imageUrl` | `string` | Card image URL snapshot |
-| `market` | `string` | Applied market |
-| `currency` | `string` | Applied currency |
-| `unitPrice` | `number` | Approved Buyer Price snapshot |
+| `productCode` | `string` | Product code snapshot |
+| `productName` | `string` | Product name snapshot |
+| `thumbnailUrl` | `string` | Thumbnail image URL snapshot |
+| `material` | `string` | Material snapshot |
+| `color` | `string` | Selected color snapshot |
+| `size` | `string` | Selected size snapshot |
 | `moq` | `number` | Applied MOQ |
 | `quantity` | `number` | Requested quantity |
+| `priceSnapshot` | `number` | Approved Buyer Price snapshot |
 | `subtotal` | `number` | Estimated row subtotal |
 
 ### Example Document
@@ -346,18 +347,19 @@ inquiries/INQ-20260601-001
   buyerCountry: "JP",
   buyerLanguage: "ja",
   currency: "JPY",
-  status: "quote_requested",
+  status: "requested",
   items: [
     {
-      productId: "KZ-P-1004",
-      code: "KZ-P-1004",
-      nameEn: "Silver Basic Ball Barbell",
-      imageUrl: "https://cdn.example.com/products/KZ-P-1004/card/card.webp",
-      market: "jp",
-      currency: "JPY",
-      unitPrice: 1100,
+      productId: "NB-001",
+      productCode: "NB-001",
+      productName: "Silver Basic Ball Barbell",
+      thumbnailUrl: "https://cdn.example.com/products/NB-001/thumb/thumb.webp",
+      material: "Surgical Steel",
+      color: "Silver",
+      size: "6mm",
       moq: 20,
       quantity: 40,
+      priceSnapshot: 1100,
       subtotal: 44000
     }
   ],
@@ -468,4 +470,3 @@ catalogFiles/noblesse-jp-catalog
 - Public catalogs may be read by all visitors.
 - Market-specific catalogs may be read only by matching approved Buyers and `admin`.
 - Only `admin` may write catalog metadata.
-

@@ -27,10 +27,10 @@ Firestore `products.imageSet` stores only the derivative URLs:
 
 ```js
 imageSet: {
-  thumb: "https://cdn.example.com/products/KZ-P-1004/thumb/thumb.webp",
-  card: "https://cdn.example.com/products/KZ-P-1004/card/card.webp",
-  detail: "https://cdn.example.com/products/KZ-P-1004/detail/detail.webp",
-  zoom: "https://cdn.example.com/products/KZ-P-1004/zoom/zoom.webp"
+  thumb: "https://cdn.example.com/products/NB-001/thumb/thumb.webp",
+  card: "https://cdn.example.com/products/NB-001/card/card.webp",
+  detail: "https://cdn.example.com/products/NB-001/detail/detail.webp",
+  zoom: "https://cdn.example.com/products/NB-001/zoom/zoom.webp"
 }
 ```
 
@@ -95,4 +95,3 @@ imageSet: {
 - Generate WebP derivatives before publishing product metadata.
 - Use Firebase Hosting or a CDN URL for delivery.
 - Keep mock image URLs structurally identical to future Storage URLs.
-

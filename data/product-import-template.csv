@@ -1,5 +1,5 @@
-id,ko,ja,category,subcategory,material,size,gauge,wholesale,retail,vat,moq,status,rank,isNew,isRestocked,tags,imageUrl
-KZ-P-1004,실버 베이직 볼 바벨,シルバー ベーシック ボールバーベル,바벨,스트레이트,Surgical Steel,6mm,16G,1250,3900,true,20,판매중,1,true,false,베스트;MOQ특가,
-KZ-H-2418,오팔 하트 큐빅 라블렛,オパール ハート キュービック ラブレット,라블렛,하트,Titanium,4mm,14G,2680,7900,true,12,판매중,2,true,false,추천;베스트,
-KZ-R-0682,골드 원터치 세그먼트 링,ゴールド ワンタッチ セグメントリング,링,원터치,316L,8mm,18G,1820,5900,false,16,품절,4,false,true,재입고,
-KZ-C-5520,블랙 크로스 체인 드롭,ブラック クロス チェーンドロップ,체인,드롭,Surgical Steel,12mm,16G,3350,9900,true,8,숨김,3,false,true,체인;추천,
+id,ko,ja,category,subcategory,material,size,gauge,wholesale,retail,vat,moq,status,rank,isNew,isRestocked,tags,imageSetCardUrl
+NB-001,실버 베이직 볼 바벨,シルバー ベーシック ボールバーベル,바벨,스트레이트,Surgical Steel,6mm,16G,1250,3900,true,20,판매중,1,true,false,베스트;MOQ특가,
+NB-002,오팔 하트 큐빅 라블렛,オパール ハート キュービック ラブレット,라블렛,하트,Titanium,4mm,14G,2680,7900,true,12,판매중,2,true,false,추천;베스트,
+NB-003,골드 원터치 세그먼트 링,ゴールド ワンタッチ セグメントリング,링,원터치,316L,8mm,18G,1820,5900,false,16,품절,4,false,true,재입고,
+NB-004,블랙 크로스 체인 드롭,ブラック クロス チェーンドロップ,체인,드롭,Surgical Steel,12mm,16G,3350,9900,true,8,숨김,3,false,true,체인;추천,
