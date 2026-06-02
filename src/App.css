@@ -309,8 +309,33 @@ a {
 }
 
 .catalog-image {
+  display: block;
   aspect-ratio: 1 / 1.12;
   border-radius: 6px;
+}
+
+.catalog-image img,
+.detail-image img,
+.mini-image img {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #fffdf9;
+}
+
+.catalog-image b {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  border-radius: 12px;
+  padding: 4px 7px;
+  color: #2a234f;
+  background: #fff0f3;
+  font-size: 10px;
 }
 
 .jewel-shape {
@@ -478,6 +503,7 @@ a {
 }
 
 .detail-image {
+  aspect-ratio: 1;
   min-height: 520px;
   border-radius: 6px;
 }
@@ -554,6 +580,15 @@ a {
   width: 82px;
   aspect-ratio: 1;
   border-radius: 5px;
+}
+
+.quote-thumb {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  border-radius: 4px;
+  object-fit: contain;
+  background: #fffdf9;
 }
 
 .inquiry-row h3 {
