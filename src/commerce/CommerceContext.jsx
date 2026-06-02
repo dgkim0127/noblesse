@@ -1,141 +1,112 @@
-import { useMemo, useState } from 'react'
-import {
-  SALE_STATUS,
-  defaultSettings,
-  fallbackBuyers,
-  fallbackOptions,
-  fallbackOrders,
-  fallbackProducts,
-} from '../data/catalog'
-import { submitOrderRequest as submitRemoteOrder } from '../services/catalogService'
-import { createOrderNumber, getDiscountedPrice, normalizeQuantity } from '../utils/commerce'
+import { useCallback, useMemo, useState } from 'react'
+import { mockInquiries, mockProductPrices, mockProducts, mockUsers } from '../data/catalog'
 import { CommerceContext } from './commerceStore'
 
+const formatInquiryId = () => `INQ-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${String(Date.now()).slice(-3)}`
+
 export function CommerceProvider({ children }) {
-  const [viewerMode, setViewerMode] = useState('member')
-  const [products] = useState(fallbackProducts)
-  const [options] = useState(fallbackOptions)
-  const [orders, setOrders] = useState(fallbackOrders)
-  const [cart, setCart] = useState([
-    { productId: 'KZ-P-1004', optionId: 'OPT-P-1004-S', qty: 40 },
-    { productId: 'KZ-H-2418', optionId: 'OPT-H-2418-W', qty: 24 },
+  const [viewerState, setViewerState] = useState('approved')
+  const [inquiryItems, setInquiryItems] = useState([
+    { productId: 'KZ-P-1004', quantity: 40 },
+    { productId: 'KZ-H-2418', quantity: 24 },
   ])
-  const [message, setMessage] = useState('')
-  const settings = defaultSettings
-  const demoBuyer = fallbackBuyers[0]
-  const activeBuyer = viewerMode === 'member' ? demoBuyer : null
-  const isApprovedMember = activeBuyer?.approvalStatus === 'approved'
-  const adjustedRate = settings.exchangeRate * (1 + settings.exchangeAdjust / 100)
+  const [inquiries, setInquiries] = useState(mockInquiries)
+  const buyer = mockUsers[viewerState]
+  const isApproved = viewerState === 'approved'
 
-  const getProductOptions = (productId) => options.filter((option) => option.productId === productId)
+  const getPrice = useCallback((productId) => {
+    if (!isApproved) return null
+    return mockProductPrices.find((price) => price.productId === productId && price.market === buyer.assignedMarket && price.isActive) ?? null
+  }, [buyer.assignedMarket, isApproved])
 
-  const cartRows = useMemo(
-    () =>
-      cart
-        .map((item) => {
-          const product = products.find((candidate) => candidate.id === item.productId)
-          const option = options.find((candidate) => candidate.id === item.optionId)
-          if (!product || !option) return null
-          const discounted = getDiscountedPrice({ wholesale: option.baseWholesalePrice }, activeBuyer?.discount ?? 0)
-          const supply = discounted * item.qty
-          const vat = product.vat ? Math.round(supply * 0.1) : 0
-          return { ...item, product, option, discounted, supply, vat, total: supply + vat }
-        })
-        .filter(Boolean),
-    [activeBuyer?.discount, cart, options, products],
-  )
+  const approvedPrice = useCallback((productId) => {
+    const price = getPrice(productId)
+    return price ? Math.round(price.wholesalePrice * (1 - buyer.discountRate / 100)) : null
+  }, [buyer.discountRate, getPrice])
 
-  const orderTotal = cartRows.reduce((sum, row) => sum + row.total, 0)
-  const cartQuantity = cartRows.reduce((sum, row) => sum + row.qty, 0)
-  const minOrderAmount = activeBuyer?.minOrder ?? 300000
-  const minOrderGap = Math.max(0, minOrderAmount - orderTotal)
-  const minOrderProgress = Math.min(100, Math.round((orderTotal / minOrderAmount) * 100))
-  const canOrder = isApprovedMember && cartRows.length > 0 && minOrderGap === 0
+  const inquiryRows = useMemo(() => inquiryItems.map((item) => {
+    const product = mockProducts.find((candidate) => candidate.productId === item.productId)
+    const price = getPrice(item.productId)
+    const unitPrice = approvedPrice(item.productId)
+    return product && price && unitPrice ? { ...item, product, price, unitPrice, subtotal: unitPrice * item.quantity } : null
+  }).filter(Boolean), [approvedPrice, getPrice, inquiryItems])
 
-  const addToCart = (productId, optionId) => {
-    if (!isApprovedMember) {
-      setMessage('승인 회원 로그인 후 장바구니를 이용할 수 있습니다.')
-      return
-    }
-    const product = products.find((candidate) => candidate.id === productId)
-    const option = options.find((candidate) => candidate.id === optionId) ?? getProductOptions(productId)[0]
-    if (!product || !option || product.status !== SALE_STATUS || option.stockStatus === 'sold_out') return
-    setCart((current) => {
-      const found = current.find((item) => item.optionId === option.id)
+  const estimatedTotal = inquiryRows.reduce((sum, row) => sum + row.subtotal, 0)
+  const totalQuantity = inquiryRows.reduce((sum, row) => sum + row.quantity, 0)
+
+  const addInquiryItem = (productId) => {
+    if (!isApproved) return
+    const price = getPrice(productId)
+    if (!price) return
+    setInquiryItems((current) => {
+      const found = current.find((item) => item.productId === productId)
       return found
-        ? current.map((item) => (item.optionId === option.id ? { ...item, qty: item.qty + option.moq } : item))
-        : [...current, { productId, optionId: option.id, qty: option.moq }]
+        ? current.map((item) => item.productId === productId ? { ...item, quantity: item.quantity + price.moq } : item)
+        : [...current, { productId, quantity: price.moq }]
     })
-    setMessage(`${product.ko} 상품을 장바구니에 담았습니다.`)
   }
 
-  const updateCartQty = (optionId, rawQty) => {
-    const option = options.find((candidate) => candidate.id === optionId)
-    setCart((current) =>
-      current.map((item) => (item.optionId === optionId ? { ...item, qty: normalizeQuantity(rawQty, option?.moq ?? 1) } : item)),
-    )
+  const updateInquiryQuantity = (productId, rawQuantity) => {
+    const moq = getPrice(productId)?.moq ?? 1
+    const numeric = Number(rawQuantity)
+    const quantity = Math.max(moq, Math.ceil((Number.isFinite(numeric) ? numeric : moq) / moq) * moq)
+    setInquiryItems((current) => current.map((item) => item.productId === productId ? { ...item, quantity } : item))
   }
 
-  const removeFromCart = (optionId) => setCart((current) => current.filter((item) => item.optionId !== optionId))
+  const removeInquiryItem = (productId) => setInquiryItems((current) => current.filter((item) => item.productId !== productId))
 
-  const submitOrder = async (requestMemo = '') => {
-    if (!canOrder) throw new Error(`최소 주문금액까지 ${minOrderGap.toLocaleString('ko-KR')}원 남았습니다.`)
-    const payload = { items: cartRows.map((row) => ({ optionId: row.option.id, quantity: row.qty })), requestMemo }
-    let orderNumber
-    try {
-      const result = await submitRemoteOrder(payload)
-      orderNumber = result.orderNumber
-    } catch {
-      orderNumber = createOrderNumber()
-    }
-    const order = {
-      id: orderNumber,
-      orderNumber,
-      status: 'requested',
-      createdAtLabel: new Date().toLocaleDateString('ko-KR'),
-      totalQuantity: cartQuantity,
-      finalAmount: orderTotal,
-      items: cartRows.map((row) => ({
-        productId: row.product.id,
-        productName: row.product.ko,
-        optionLabel: row.option.label,
-        quantity: row.qty,
-        subtotal: row.total,
+  const submitQuoteRequest = (requestMemo) => {
+    if (!isApproved || inquiryRows.length === 0) return null
+    const inquiryId = formatInquiryId()
+    const inquiry = {
+      inquiryId,
+      buyerId: buyer.uid,
+      buyerCompanyName: buyer.companyName,
+      buyerCountry: buyer.country,
+      buyerLanguage: buyer.preferredLanguage,
+      currency: buyer.currency,
+      status: 'quote_requested',
+      items: inquiryRows.map((row) => ({
+        productId: row.product.productId,
+        code: row.product.code,
+        nameEn: row.product.nameEn,
+        imageUrl: row.product.imageSet.card,
+        market: buyer.assignedMarket,
+        currency: buyer.currency,
+        unitPrice: row.unitPrice,
+        moq: row.price.moq,
+        quantity: row.quantity,
+        subtotal: row.subtotal,
       })),
+      totalItems: inquiryRows.length,
+      totalQuantity,
+      estimatedTotal,
+      requestMemo,
+      adminMemo: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     }
-    setOrders((current) => [order, ...current])
-    setCart([])
-    setMessage(`주문 요청 ${orderNumber}이 접수되었습니다.`)
-    return order
+    setInquiries((current) => [inquiry, ...current])
+    setInquiryItems([])
+    return inquiry
   }
 
-  return (
-    <CommerceContext.Provider
-      value={{
-        activeBuyer,
-        adjustedRate,
-        addToCart,
-        canOrder,
-        cartQuantity,
-        cartRows,
-        getProductOptions,
-        isApprovedMember,
-        message,
-        minOrderGap,
-        minOrderProgress,
-        options,
-        orderTotal,
-        orders,
-        products,
-        removeFromCart,
-        setMessage,
-        setViewerMode,
-        submitOrder,
-        updateCartQty,
-        viewerMode,
-      }}
-    >
-      {children}
-    </CommerceContext.Provider>
-  )
+  return <CommerceContext.Provider value={{
+    addInquiryItem,
+    approvedPrice,
+    buyer,
+    estimatedTotal,
+    getPrice,
+    inquiries,
+    inquiryItems,
+    inquiryRows,
+    isApproved,
+    products: mockProducts,
+    removeInquiryItem,
+    setViewerState,
+    submitQuoteRequest,
+    totalQuantity,
+    updateInquiryQuantity,
+    viewerState,
+  }}>{children}</CommerceContext.Provider>
 }

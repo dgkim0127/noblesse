@@ -1,10 +1,8 @@
-import { BadgeCheck, LogIn } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { BadgeCheck, Clock3, UserRound } from 'lucide-react'
 import { useCommerce } from '../commerce/commerceStore'
-import { formatWon } from '../utils/commerce'
+import { formatMoney } from '../utils/commerce'
 
 export function AccountPage() {
-  const { activeBuyer, isApprovedMember } = useCommerce()
-  if (!isApprovedMember) return <main className="store-main"><div className="locked-page"><LogIn size={26} /><h1>로그인 후 거래처 정보를 확인할 수 있습니다.</h1><Link to="/login">로그인</Link></div></main>
-  return <main className="store-main"><div className="page-heading"><div><p>MEMBER ACCOUNT</p><h1>거래처 정보</h1></div></div><section className="account-card"><BadgeCheck size={26} /><h2>{activeBuyer.name}</h2><p>담당자 {activeBuyer.contactName}</p><p>{activeBuyer.grade}등급 · 승인 회원</p><strong>할인율 {activeBuyer.discount}% · 최소 주문 {formatWon(activeBuyer.minOrder)}</strong></section></main>
+  const { buyer, viewerState } = useCommerce()
+  return <main className="content"><div className="page-title"><div><p>BUYER PROFILE</p><h1>Buyer access</h1></div></div><section className="account-panel">{viewerState === 'guest' ? <><UserRound size={25} /><h2>Guest buyer</h2><p>Browse the catalog and contact Noblesse to request Buyer Approval.</p></> : viewerState === 'pending' ? <><Clock3 size={25} /><h2>Buyer Approval pending</h2><p>{buyer.companyName} is waiting for review. Prices and Inquiry features will unlock after approval.</p></> : <><BadgeCheck size={25} /><h2>{buyer.companyName}</h2><p>{buyer.contactName} · {buyer.country} · {buyer.assignedMarket.toUpperCase()} market</p><strong>{buyer.discountRate}% buyer discount · minimum inquiry {formatMoney(buyer.minOrderAmount, buyer.currency)}</strong></>}</section></main>
 }
