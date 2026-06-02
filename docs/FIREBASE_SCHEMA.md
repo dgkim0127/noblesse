@@ -239,9 +239,11 @@ Use the slug-like category ID: `categories/{categoryId}`.
 | `categoryId` | `string` |
 | `nameKo`, `nameEn`, `nameJa` | `string` |
 | `slug` | `string` |
-| `imageUrl` | `string` |
+| `coverUrl` | `string` |
 | `isVisible` | `boolean` |
 | `sortOrder` | `number` |
+| `createdAt` | `timestamp` |
+| `updatedAt` | `timestamp` |
 
 ### Example Document
 
@@ -253,9 +255,11 @@ categories/barbell
   nameEn: "Barbells",
   nameJa: "バーベル",
   slug: "barbell",
-  imageUrl: "https://cdn.example.com/categories/barbell/cover.webp",
+  coverUrl: "https://cdn.example.com/categories/barbell/cover.webp",
   isVisible: true,
-  sortOrder: 10
+  sortOrder: 10,
+  createdAt: Timestamp,
+  updatedAt: Timestamp
 }
 ```
 
@@ -284,10 +288,12 @@ Use the collection slug: `collections/{collectionId}`.
 | `collectionId` | `string` |
 | `titleKo`, `titleEn`, `titleJa` | `string` |
 | `slug` | `string` |
-| `imageUrl` | `string` |
+| `coverUrl` | `string` |
 | `productIds` | `string[]` |
 | `isVisible` | `boolean` |
 | `sortOrder` | `number` |
+| `createdAt` | `timestamp` |
+| `updatedAt` | `timestamp` |
 
 ### Example Document
 
@@ -299,10 +305,12 @@ collections/daily-basics
   titleEn: "Daily Basics",
   titleJa: "デイリーベーシック",
   slug: "daily-basics",
-  imageUrl: "https://cdn.example.com/collections/daily-basics/cover.webp",
+  coverUrl: "https://cdn.example.com/collections/daily-basics/cover.webp",
   productIds: ["NB-001"],
   isVisible: true,
-  sortOrder: 10
+  sortOrder: 10,
+  createdAt: Timestamp,
+  updatedAt: Timestamp
 }
 ```
 
@@ -425,12 +433,16 @@ Use a stable slug: `banners/{bannerId}`.
 | `bannerId` | `string` |
 | `titleKo`, `titleEn`, `titleJa` | `string` |
 | `subtitleKo`, `subtitleEn`, `subtitleJa` | `string` |
-| `imageUrl` | `string` |
+| `desktopImageUrl` | `string` |
 | `mobileImageUrl` | `string` |
 | `linkType` | `string` |
 | `linkValue` | `string` |
 | `isVisible` | `boolean` |
 | `sortOrder` | `number` |
+| `startsAt` | `timestamp \| null` |
+| `endsAt` | `timestamp \| null` |
+| `createdAt` | `timestamp` |
+| `updatedAt` | `timestamp` |
 
 ### Example Document
 
@@ -444,12 +456,16 @@ banners/summer-edit
   subtitleKo: "글로벌 바이어 셀렉션",
   subtitleEn: "Curated styles for global buyers",
   subtitleJa: "海外バイヤー向けセレクション",
-  imageUrl: "https://cdn.example.com/banners/summer-edit/desktop.webp",
+  desktopImageUrl: "https://cdn.example.com/banners/summer-edit/desktop.webp",
   mobileImageUrl: "https://cdn.example.com/banners/summer-edit/mobile.webp",
   linkType: "collection",
   linkValue: "summer-edit",
   isVisible: true,
-  sortOrder: 10
+  sortOrder: 10,
+  startsAt: null,
+  endsAt: null,
+  createdAt: Timestamp,
+  updatedAt: Timestamp
 }
 ```
 
@@ -478,10 +494,11 @@ Use a stable file slug: `catalogFiles/{fileId}`.
 | `fileId` | `string` |
 | `titleKo`, `titleEn`, `titleJa` | `string` |
 | `fileUrl` | `string` |
-| `market` | `string` |
+| `market` | `string` | `KR`, `JP`, `US`, or `GLOBAL` |
 | `priceIncluded` | `boolean` |
-| `visibleTo` | `string` |
+| `visibleTo` | `string` | `public` or `approved_only` |
 | `uploadedAt` | `timestamp` |
+| `version` | `string` | Catalog release version |
 
 ### Example Document
 
@@ -496,7 +513,8 @@ catalogFiles/noblesse-jp-catalog
   market: "JP",
   priceIncluded: true,
   visibleTo: "approved_only",
-  uploadedAt: Timestamp
+  uploadedAt: Timestamp,
+  version: "2026-06"
 }
 ```
 

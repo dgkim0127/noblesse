@@ -86,8 +86,10 @@ Suggested `Cache-Control` draft:
 | --- | --- |
 | Hashed WebP derivatives | `public, max-age=31536000, immutable` |
 | Stable editorial URLs | `public, max-age=3600, stale-while-revalidate=86400` |
-| Protected PDFs | `private, max-age=300` |
-| Original uploads | `private, no-store` |
+| PDF catalogs | `public, max-age=3600` |
+| Original uploads | Admin-only access; long cache is unnecessary |
+
+Protected market PDFs still require Storage authorization. The cache header does not replace access rules.
 
 ## Future Processing Pipeline
 

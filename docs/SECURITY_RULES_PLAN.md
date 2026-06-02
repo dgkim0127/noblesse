@@ -7,13 +7,15 @@ Version 1 remains mock-only. Do not deploy production rules or connect Firebase 
 
 | State | Meaning |
 | --- | --- |
-| `guest` | Visitor without an authenticated Buyer profile |
-| `pending` | Signed-in Buyer waiting for approval |
-| `approved` | Approved Buyer with an assigned market |
+| `guest` | Visitor with no authenticated Firebase user |
+| `pending` | Signed-in profile where `role == "buyer"` and `status == "pending"` |
+| `approved` | Signed-in profile where `role == "buyer"` and `status == "approved"` |
 | `admin` | Internal operator where `users/{uid}.role == "admin"` |
 
 Persisted user documents use `role: "buyer" | "admin"` and `status: "pending" | "approved" | "blocked"`.
 The `guest` state exists only when no authenticated Buyer document is available.
+Firestore market values and `users.assignedMarket` use uppercase enum values: `KR`, `JP`, `US`, and `GLOBAL`.
+Storage folder segments remain lowercase paths such as `/catalogs/jp/**` and `/catalogs/us/**`.
 
 ## Firestore Access Table
 
@@ -27,6 +29,32 @@ The `guest` state exists only when no authenticated Buyer document is available.
 | `productPrices` | Denied | Denied | Read active matching market | Read/write all |
 | `users` | Denied | Read own | Read and safe-update own | Read/write all |
 | `inquiries` | Denied | Denied | Create and read own | Read/write all |
+
+## State Requirements
+
+### `guest`
+
+- Has no authenticated Firebase user.
+- May read visible `products`, `categories`, `collections`, and `banners`.
+- May read public `catalogFiles` only.
+- Must not read `productPrices` or create Inquiries.
+
+### `pending`
+
+- Has `users/{uid}.role == "buyer"` and `users/{uid}.status == "pending"`.
+- May read visible public catalog content and their own user document.
+- Must not read `productPrices` or create Inquiries.
+
+### `approved`
+
+- Has `users/{uid}.role == "buyer"` and `users/{uid}.status == "approved"`.
+- May read active `productPrices` only when the price market matches `users/{uid}.assignedMarket`.
+- May read and create only their own Inquiries.
+
+### `admin`
+
+- Has `users/{uid}.role == "admin"`.
+- May manage all catalog, user, price, Inquiry, and Storage resources.
 
 ## Required Protections
 
@@ -144,6 +172,8 @@ match /catalogs/{market}/{fileName} {
   allow write: if isAdmin();
 }
 ```
+
+The Storage pseudo rule lowercases the uppercase Firestore `assignedMarket` only to match the required lowercase Storage folder segments.
 
 ## Future Firebase Phase Checklist
 
