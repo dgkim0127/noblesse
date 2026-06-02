@@ -1,21 +1,26 @@
 # Firebase Firestore Schema
 
-This document defines the future Firestore schema for the Noblesse B2B piercing catalog website.
-Version 1 must use mock data with the same field names before any live Firebase connection is added.
+This document defines the future Firestore schema for the Noblesse Piercing B2B catalog website.
+Version 1 remains mock-only. Live Firebase connection is intentionally deferred.
 
 ## General Conventions
 
 - Store timestamps as Firestore `Timestamp`.
-- Store money as integer minor-free amounts in the document currency, such as `1200` for JPY 1,200.
+- Store money as integer amounts in the document currency.
 - Store image URLs only. Image binary files belong in Firebase Storage.
-- Use `guest`, `pending`, `approved`, and `admin` as the supported user states.
 - Keep public product metadata separate from protected Buyer pricing.
+- Use uppercase markets: `KR`, `JP`, `US`, and `GLOBAL`.
+- Use `KRW`, `JPY`, and `USD` currency codes.
 
 ## `users`
 
 ### Purpose
 
-Stores Buyer profiles, Buyer Approval state, assigned market, currency, and account-specific pricing conditions.
+Stores Buyer profiles, Buyer Approval status, assigned market, and account pricing conditions.
+
+### Document ID Rule
+
+Use the Firebase Authentication UID: `users/{uid}`.
 
 ### Fields
 
@@ -23,30 +28,30 @@ Stores Buyer profiles, Buyer Approval state, assigned market, currency, and acco
 | --- | --- | --- |
 | `uid` | `string` | Firebase Authentication UID |
 | `email` | `string` | Buyer login email |
-| `companyName` | `string` | Buyer company name |
-| `contactName` | `string` | Primary contact person |
-| `country` | `string` | Buyer country code, such as `JP` |
-| `preferredLanguage` | `string` | UI and communication language, such as `ja` |
-| `phone` | `string` | Contact phone number |
-| `messengerType` | `string` | Preferred messenger, such as `LINE` or `WhatsApp` |
-| `messengerId` | `string` | Messenger account identifier |
-| `salesChannel` | `string` | Buyer sales channel, such as `online_store` |
-| `businessNumber` | `string` | Business registration or tax identifier |
-| `role` | `string` | Account role: `guest`, `pending`, `approved`, or `admin` |
-| `status` | `string` | Operational account status: `pending`, `approved`, or `blocked` |
-| `assignedMarket` | `string` | Pricing market, such as `jp` or `us` |
-| `currency` | `string` | Buyer currency, such as `JPY` or `USD` |
-| `discountRate` | `number` | Buyer-specific discount percentage |
+| `companyName` | `string` | Buyer company |
+| `contactName` | `string` | Primary contact |
+| `country` | `string` | Country code, such as `JP` |
+| `preferredLanguage` | `string` | Language code, such as `ja` |
+| `phone` | `string` | Contact phone |
+| `messengerType` | `string` | Such as `LINE` or `WhatsApp` |
+| `messengerId` | `string` | Messenger account |
+| `salesChannel` | `string` | Such as `online_store` |
+| `businessNumber` | `string` | Tax or business identifier |
+| `role` | `string` | `buyer` or `admin` |
+| `status` | `string` | `pending`, `approved`, or `blocked` |
+| `assignedMarket` | `string` | `KR`, `JP`, `US`, or `GLOBAL` |
+| `currency` | `string` | `KRW`, `JPY`, or `USD` |
+| `discountRate` | `number` | Buyer discount percent |
 | `minOrderAmount` | `number` | Minimum Request Quote amount |
-| `createdAt` | `timestamp` | Profile creation time |
-| `updatedAt` | `timestamp` | Latest profile update time |
+| `createdAt` | `timestamp` | Created time |
+| `updatedAt` | `timestamp` | Updated time |
 | `approvedAt` | `timestamp \| null` | Buyer Approval time |
-| `approvedBy` | `string \| null` | Admin UID that approved the Buyer |
+| `approvedBy` | `string \| null` | Approving admin UID |
 
 ### Example Document
 
 ```js
-users/{uid}
+users/buyer_tokyo_001
 {
   uid: "buyer_tokyo_001",
   email: "buyer@example.jp",
@@ -59,9 +64,9 @@ users/{uid}
   messengerId: "tokyo-piercing-lab",
   salesChannel: "online_store",
   businessNumber: "JP-123456789",
-  role: "approved",
+  role: "buyer",
   status: "approved",
-  assignedMarket: "jp",
+  assignedMarket: "JP",
   currency: "JPY",
   discountRate: 12,
   minOrderAmount: 30000,
@@ -72,44 +77,50 @@ users/{uid}
 }
 ```
 
-### Permission Considerations
+### Permissions
 
-- A Buyer may read their own profile.
-- A Buyer must not change `role`, `status`, `assignedMarket`, `discountRate`, `minOrderAmount`, `approvedAt`, or `approvedBy`.
-- Only `admin` may list all users or change Buyer Approval fields.
+- A signed-in Buyer may read their own document and update safe contact fields only.
+- Only `admin` may list users or change approval, market, discount, and minimum amount fields.
+
+### Mock Mapping
+
+`src/data/catalog.js` exports `mockUsers`. UI-only preview keys `guest`, `pending`, and `approved` represent future authentication states; persisted Buyer documents use `role: "buyer"` with an operational `status`.
 
 ## `products`
 
 ### Purpose
 
-Stores public product metadata for catalog browsing. It does not contain protected Buyer pricing.
+Stores public product metadata. It never contains protected Buyer pricing or image binaries.
+
+### Document ID Rule
+
+Use the stable product ID: `products/{productId}`, such as `products/NB-001`.
 
 ### Fields
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `productId` | `string` | Stable product identifier |
+| `productId` | `string` | Stable product ID |
 | `code` | `string` | Buyer-facing product code |
-| `nameKo` | `string` | Korean product name |
-| `nameEn` | `string` | English product name |
-| `nameJa` | `string` | Japanese product name |
+| `nameKo`, `nameEn`, `nameJa` | `string` | Localized names |
 | `categoryId` | `string` | Primary category ID |
-| `collectionIds` | `string[]` | Editorial collection IDs |
-| `material` | `string` | Main material |
-| `colors` | `string[]` | Available color labels |
-| `sizes` | `string[]` | Available size labels |
-| `moqDefault` | `number` | Default MOQ used for catalog guidance |
-| `leadTime` | `string` | Typical lead time label |
-| `origin` | `string` | Country of origin |
-| `imageSet` | `map` | Storage or CDN URLs for `thumb`, `card`, `detail`, and `zoom` |
-| `imageAlt` | `map` | Localized image alternative text |
+| `collectionIds` | `string[]` | Curated collection IDs |
+| `material` | `string` | Primary material |
+| `colors` | `string[]` | Available colors |
+| `sizes` | `string[]` | Available sizes |
+| `moqDefault` | `number` | Public fallback MOQ guidance |
+| `leadTime` | `string` | Typical lead time |
+| `origin` | `string` | Origin country code |
+| `imageSet` | `map` | `thumb`, `card`, `detail`, and `zoom` URLs |
+| `imageAlt` | `map` | `ko`, `en`, and `ja` alternative text |
 | `isVisible` | `boolean` | Public catalog visibility |
-| `isExportAvailable` | `boolean` | Whether export inquiry is available |
-| `isNew` | `boolean` | New product badge |
-| `isBest` | `boolean` | Curated best product badge |
+| `isExportAvailable` | `boolean` | Export inquiry availability |
+| `isNew` | `boolean` | New badge |
+| `isBest` | `boolean` | Curated best badge |
 | `sortOrder` | `number` | Manual display order |
-| `createdAt` | `timestamp` | Creation time |
-| `updatedAt` | `timestamp` | Latest update time |
+| `descriptionKo`, `descriptionEn`, `descriptionJa` | `string` | Localized description |
+| `createdAt` | `timestamp` | Created time |
+| `updatedAt` | `timestamp` | Updated time |
 
 ### Example Document
 
@@ -124,7 +135,7 @@ products/NB-001
   categoryId: "barbell",
   collectionIds: ["daily-basics"],
   material: "Surgical Steel",
-  colors: ["silver"],
+  colors: ["Silver"],
   sizes: ["6mm", "8mm"],
   moqDefault: 20,
   leadTime: "7-14 days",
@@ -135,92 +146,102 @@ products/NB-001
     detail: "https://cdn.example.com/products/NB-001/detail/detail.webp",
     zoom: "https://cdn.example.com/products/NB-001/zoom/zoom.webp"
   },
-  imageAlt: {
-    ko: "실버 베이직 볼 바벨 피어싱",
-    en: "Silver basic ball barbell piercing",
-    ja: "シルバー ベーシック ボールバーベル"
-  },
+  imageAlt: { ko: "실버 볼 바벨", en: "Silver ball barbell", ja: "シルバーボールバーベル" },
   isVisible: true,
   isExportAvailable: true,
   isNew: true,
-  isBest: false,
+  isBest: true,
   sortOrder: 10,
+  descriptionKo: "데일리 피어싱",
+  descriptionEn: "A daily piercing essential.",
+  descriptionJa: "デイリーピアス",
   createdAt: Timestamp,
   updatedAt: Timestamp
 }
 ```
 
-### Permission Considerations
+### Permissions
 
-- `guest`, `pending`, and `approved` may read documents where `isVisible == true`.
-- Only `admin` may create, update, hide, or reorder products.
-- Product documents must never contain protected wholesale prices.
+- Everyone may read documents where `isVisible == true`.
+- Only `admin` may write products.
+
+### Mock Mapping
+
+`src/data/catalog.js` exports `mockProducts`. Version 1 already uses the same product and `imageSet` field names; localized descriptions may be added when Product Detail content is expanded.
 
 ## `productPrices`
 
 ### Purpose
 
-Stores protected market-specific pricing and Inquiry conditions separately from public product metadata.
+Stores protected market-specific prices and Inquiry conditions separately from products.
+
+### Document ID Rule
+
+Use `{productId}_{market}`: `productPrices/NB-001_JP`.
 
 ### Fields
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `productId` | `string` | Related product ID |
-| `market` | `string` | Assigned market, such as `jp` |
-| `currency` | `string` | Price currency |
-| `wholesalePrice` | `number` | Base wholesale price before Buyer discount |
-| `retailPrice` | `number` | Optional reference retail price |
-| `moq` | `number` | Market-specific MOQ |
-| `minOrderAmount` | `number` | Optional product-level minimum inquiry amount |
-| `visibleTo` | `string[]` | Allowed roles, normally `["approved", "admin"]` |
-| `isActive` | `boolean` | Whether the price record is active |
-| `updatedAt` | `timestamp` | Latest price update time |
+| `productId` | `string` | Related product |
+| `market` | `string` | `KR`, `JP`, `US`, or `GLOBAL` |
+| `currency` | `string` | `KRW`, `JPY`, or `USD` |
+| `wholesalePrice` | `number` | Base wholesale price |
+| `retailPrice` | `number` | Optional reference price |
+| `moq` | `number` | Market MOQ |
+| `minOrderAmount` | `number` | Optional product-level minimum |
+| `visibleTo` | `string` | `approved_only` |
+| `isActive` | `boolean` | Active price record |
+| `updatedAt` | `timestamp` | Updated time |
 
 ### Example Document
 
 ```js
-productPrices/NB-001_jp
+productPrices/NB-001_JP
 {
   productId: "NB-001",
-  market: "jp",
+  market: "JP",
   currency: "JPY",
   wholesalePrice: 1250,
   retailPrice: 3900,
   moq: 20,
   minOrderAmount: 0,
-  visibleTo: ["approved", "admin"],
+  visibleTo: "approved_only",
   isActive: true,
   updatedAt: Timestamp
 }
 ```
 
-### Permission Considerations
+### Permissions
 
-- `guest` and `pending` must not read this collection.
-- `approved` may read only records matching their `assignedMarket`.
-- Only `admin` may write price records.
-- Approved Buyer Price is calculated from this base record and the Buyer's `discountRate`.
+- `guest` and `pending` must never read prices.
+- An approved Buyer may read active records for their assigned market only.
+- Only `admin` may write prices.
+
+### Mock Mapping
+
+`src/data/catalog.js` exports `mockProductPrices`. Before Firebase integration, normalize its market casing and `visibleTo` representation to this final schema.
 
 ## `categories`
 
 ### Purpose
 
-Stores catalog navigation categories and localized labels.
+Stores localized catalog navigation categories.
+
+### Document ID Rule
+
+Use the slug-like category ID: `categories/{categoryId}`.
 
 ### Fields
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `categoryId` | `string` | Stable category ID |
-| `nameKo` | `string` | Korean label |
-| `nameEn` | `string` | English label |
-| `nameJa` | `string` | Japanese label |
-| `coverUrl` | `string` | Storage or CDN cover image URL |
-| `isVisible` | `boolean` | Public visibility |
-| `sortOrder` | `number` | Manual display order |
-| `createdAt` | `timestamp` | Creation time |
-| `updatedAt` | `timestamp` | Latest update time |
+| Field | Type |
+| --- | --- |
+| `categoryId` | `string` |
+| `nameKo`, `nameEn`, `nameJa` | `string` |
+| `slug` | `string` |
+| `imageUrl` | `string` |
+| `isVisible` | `boolean` |
+| `sortOrder` | `number` |
 
 ### Example Document
 
@@ -231,40 +252,42 @@ categories/barbell
   nameKo: "바벨",
   nameEn: "Barbells",
   nameJa: "バーベル",
-  coverUrl: "https://cdn.example.com/categories/barbell/cover.webp",
+  slug: "barbell",
+  imageUrl: "https://cdn.example.com/categories/barbell/cover.webp",
   isVisible: true,
-  sortOrder: 10,
-  createdAt: Timestamp,
-  updatedAt: Timestamp
+  sortOrder: 10
 }
 ```
 
-### Permission Considerations
+### Permissions
 
-- All visitors may read visible categories.
-- Only `admin` may write categories.
+- Everyone may read visible categories. Only `admin` may write.
+
+### Mock Mapping
+
+`src/data/catalog.js` exports `mockCategories`. Localized labels and image metadata remain a version 1 expansion point.
 
 ## `collections`
 
 ### Purpose
 
-Stores curated product groupings for premium catalog presentation, such as seasonal edits or material collections.
+Stores curated product groupings for editorial catalog presentation.
+
+### Document ID Rule
+
+Use the collection slug: `collections/{collectionId}`.
 
 ### Fields
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `collectionId` | `string` | Stable collection ID |
-| `nameKo` | `string` | Korean title |
-| `nameEn` | `string` | English title |
-| `nameJa` | `string` | Japanese title |
-| `description` | `map` | Localized editorial description |
-| `coverUrl` | `string` | Storage or CDN cover image URL |
-| `productIds` | `string[]` | Manually curated product IDs |
-| `isVisible` | `boolean` | Public visibility |
-| `sortOrder` | `number` | Manual display order |
-| `createdAt` | `timestamp` | Creation time |
-| `updatedAt` | `timestamp` | Latest update time |
+| Field | Type |
+| --- | --- |
+| `collectionId` | `string` |
+| `titleKo`, `titleEn`, `titleJa` | `string` |
+| `slug` | `string` |
+| `imageUrl` | `string` |
+| `productIds` | `string[]` |
+| `isVisible` | `boolean` |
+| `sortOrder` | `number` |
 
 ### Example Document
 
@@ -272,69 +295,72 @@ Stores curated product groupings for premium catalog presentation, such as seaso
 collections/daily-basics
 {
   collectionId: "daily-basics",
-  nameKo: "데일리 베이직",
-  nameEn: "Daily Basics",
-  nameJa: "デイリーベーシック",
-  description: {
-    ko: "매일 활용하기 좋은 기본 피어싱",
-    en: "Essential piercing styles for daily wear",
-    ja: "毎日使いやすいベーシックピアス"
-  },
-  coverUrl: "https://cdn.example.com/collections/daily-basics/cover.webp",
+  titleKo: "데일리 베이직",
+  titleEn: "Daily Basics",
+  titleJa: "デイリーベーシック",
+  slug: "daily-basics",
+  imageUrl: "https://cdn.example.com/collections/daily-basics/cover.webp",
   productIds: ["NB-001"],
   isVisible: true,
-  sortOrder: 10,
-  createdAt: Timestamp,
-  updatedAt: Timestamp
+  sortOrder: 10
 }
 ```
 
-### Permission Considerations
+### Permissions
 
-- All visitors may read visible collections.
-- Only `admin` may write collections.
+- Everyone may read visible collections. Only `admin` may write.
+
+### Mock Mapping
+
+Version 1 product records already include `collectionIds`; a dedicated mock collection list is not yet required.
 
 ## `inquiries`
 
 ### Purpose
 
-Stores Request Quote submissions as immutable Buyer-facing snapshots. Future price changes must not alter an existing Inquiry.
+Stores Request Quote submissions as Buyer-facing snapshots. Future price changes must not alter existing Inquiries.
+
+### Document ID Rule
+
+Use the generated Inquiry number: `inquiries/{inquiryId}`, such as `inquiries/INQ-20260601-001`.
 
 ### Fields
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `inquiryId` | `string` | Stable Inquiry identifier |
-| `buyerId` | `string` | Requesting Buyer UID |
-| `buyerCompanyName` | `string` | Buyer company snapshot |
-| `buyerCountry` | `string` | Buyer country snapshot |
-| `buyerLanguage` | `string` | Buyer language snapshot |
+| `inquiryId` | `string` | Inquiry number |
+| `buyerId` | `string` | Buyer UID |
+| `buyerCompanyName` | `string` | Company snapshot |
+| `buyerCountry` | `string` | Country snapshot |
+| `buyerLanguage` | `string` | Language snapshot |
 | `currency` | `string` | Inquiry currency |
 | `status` | `string` | `requested`, `checking`, `quoted`, `confirmed`, or `cancelled` |
-| `items` | `map[]` | Product and price snapshots |
-| `totalItems` | `number` | Number of distinct product rows |
-| `totalQuantity` | `number` | Sum of requested quantities |
-| `estimatedTotal` | `number` | Estimated total before final quote |
+| `items` | `map[]` | Item snapshots |
+| `totalItems` | `number` | Distinct rows |
+| `totalQuantity` | `number` | Requested units |
+| `estimatedTotal` | `number` | Estimated value |
 | `requestMemo` | `string` | Buyer memo |
-| `adminMemo` | `string` | Internal admin memo |
-| `createdAt` | `timestamp` | Submission time |
-| `updatedAt` | `timestamp` | Latest update time |
+| `adminMemo` | `string` | Internal memo |
+| `createdAt` | `timestamp` | Created time |
+| `updatedAt` | `timestamp` | Updated time |
 
-Each `items` entry should contain:
+Each `items` entry contains:
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `productId` | `string` | Product ID snapshot |
-| `productCode` | `string` | Product code snapshot |
-| `productName` | `string` | Product name snapshot |
-| `thumbnailUrl` | `string` | Thumbnail image URL snapshot |
-| `material` | `string` | Material snapshot |
-| `color` | `string` | Selected color snapshot |
-| `size` | `string` | Selected size snapshot |
-| `moq` | `number` | Applied MOQ |
-| `quantity` | `number` | Requested quantity |
-| `priceSnapshot` | `number` | Approved Buyer Price snapshot |
-| `subtotal` | `number` | Estimated row subtotal |
+```js
+{
+  productId: string,
+  productCode: string,
+  productName: string,
+  thumbnailUrl: string,
+  material: string,
+  color: string,
+  size: string,
+  quantity: number,
+  moq: number,
+  priceSnapshot: number,
+  subtotal: number
+}
+```
 
 ### Example Document
 
@@ -348,60 +374,63 @@ inquiries/INQ-20260601-001
   buyerLanguage: "ja",
   currency: "JPY",
   status: "requested",
-  items: [
-    {
-      productId: "NB-001",
-      productCode: "NB-001",
-      productName: "Silver Basic Ball Barbell",
-      thumbnailUrl: "https://cdn.example.com/products/NB-001/thumb/thumb.webp",
-      material: "Surgical Steel",
-      color: "Silver",
-      size: "6mm",
-      moq: 20,
-      quantity: 40,
-      priceSnapshot: 1100,
-      subtotal: 44000
-    }
-  ],
+  items: [{
+    productId: "NB-001",
+    productCode: "NB-001",
+    productName: "Silver Basic Ball Barbell",
+    thumbnailUrl: "https://cdn.example.com/products/NB-001/thumb/thumb.webp",
+    material: "Surgical Steel",
+    color: "Silver",
+    size: "6mm",
+    quantity: 40,
+    moq: 20,
+    priceSnapshot: 1100,
+    subtotal: 44000
+  }],
   totalItems: 1,
   totalQuantity: 40,
   estimatedTotal: 44000,
-  requestMemo: "Please confirm the available lead time.",
+  requestMemo: "Please confirm lead time.",
   adminMemo: "",
   createdAt: Timestamp,
   updatedAt: Timestamp
 }
 ```
 
-### Permission Considerations
+### Permissions
 
-- `guest` and `pending` cannot read or create inquiries.
-- `approved` may create inquiries for their own `buyerId` and read only their own inquiries.
-- Client input must not be trusted for price calculation. Future server-side validation should recalculate price, discount, MOQ, and totals.
-- Only `admin` may update status or `adminMemo`.
+- Only approved Buyers may create Inquiries for their own UID.
+- Buyers may read their own Inquiries only.
+- Only `admin` may update workflow status and `adminMemo`.
+- Trusted server logic must recalculate prices, MOQ, discounts, and totals before persistence.
+
+### Mock Mapping
+
+`src/data/catalog.js` exports `mockInquiries`; `src/commerce/CommerceContext.jsx` builds the same snapshot shape in `submitRequestQuote`.
 
 ## `banners`
 
 ### Purpose
 
-Stores public website banner metadata and responsive image URLs.
+Stores public responsive banner metadata.
+
+### Document ID Rule
+
+Use a stable slug: `banners/{bannerId}`.
 
 ### Fields
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `bannerId` | `string` | Stable banner ID |
-| `title` | `map` | Localized title |
-| `subtitle` | `map` | Localized supporting text |
-| `desktopImageUrl` | `string` | Desktop banner URL |
-| `mobileImageUrl` | `string` | Mobile banner URL |
-| `linkUrl` | `string` | Internal website link |
-| `isVisible` | `boolean` | Public visibility |
-| `sortOrder` | `number` | Manual display order |
-| `startsAt` | `timestamp \| null` | Optional publishing start |
-| `endsAt` | `timestamp \| null` | Optional publishing end |
-| `createdAt` | `timestamp` | Creation time |
-| `updatedAt` | `timestamp` | Latest update time |
+| Field | Type |
+| --- | --- |
+| `bannerId` | `string` |
+| `titleKo`, `titleEn`, `titleJa` | `string` |
+| `subtitleKo`, `subtitleEn`, `subtitleJa` | `string` |
+| `imageUrl` | `string` |
+| `mobileImageUrl` | `string` |
+| `linkType` | `string` |
+| `linkValue` | `string` |
+| `isVisible` | `boolean` |
+| `sortOrder` | `number` |
 
 ### Example Document
 
@@ -409,64 +438,74 @@ Stores public website banner metadata and responsive image URLs.
 banners/summer-edit
 {
   bannerId: "summer-edit",
-  title: { en: "Summer Piercing Edit", ja: "サマーピアスセレクション" },
-  subtitle: { en: "Curated styles for global buyers", ja: "海外バイヤー向けセレクション" },
-  desktopImageUrl: "https://cdn.example.com/banners/summer-edit/desktop.webp",
+  titleKo: "서머 피어싱",
+  titleEn: "Summer Piercing Edit",
+  titleJa: "サマーピアス",
+  subtitleKo: "글로벌 바이어 셀렉션",
+  subtitleEn: "Curated styles for global buyers",
+  subtitleJa: "海外バイヤー向けセレクション",
+  imageUrl: "https://cdn.example.com/banners/summer-edit/desktop.webp",
   mobileImageUrl: "https://cdn.example.com/banners/summer-edit/mobile.webp",
-  linkUrl: "/collections/summer-edit",
+  linkType: "collection",
+  linkValue: "summer-edit",
   isVisible: true,
-  sortOrder: 10,
-  startsAt: null,
-  endsAt: null,
-  createdAt: Timestamp,
-  updatedAt: Timestamp
+  sortOrder: 10
 }
 ```
 
-### Permission Considerations
+### Permissions
 
-- All visitors may read visible banners.
-- Only `admin` may write banners.
+- Everyone may read visible banners. Only `admin` may write.
+
+### Mock Mapping
+
+No banner mock collection exists yet. Home banner content is static until editorial controls are introduced.
 
 ## `catalogFiles`
 
 ### Purpose
 
-Stores downloadable public or market-specific PDF catalog metadata. PDF binary files remain in Firebase Storage.
+Stores downloadable PDF catalog metadata. PDF binaries remain in Storage.
+
+### Document ID Rule
+
+Use a stable file slug: `catalogFiles/{fileId}`.
 
 ### Fields
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `catalogFileId` | `string` | Stable catalog file ID |
-| `market` | `string` | `public`, `jp`, or `us` |
-| `language` | `string` | Catalog language |
-| `title` | `string` | Display title |
-| `fileUrl` | `string` | Storage or CDN PDF URL |
-| `isPublic` | `boolean` | Whether guests may download it |
-| `visibleTo` | `string[]` | Allowed roles |
-| `version` | `string` | Catalog release version |
-| `updatedAt` | `timestamp` | Latest file update time |
+| Field | Type |
+| --- | --- |
+| `fileId` | `string` |
+| `titleKo`, `titleEn`, `titleJa` | `string` |
+| `fileUrl` | `string` |
+| `market` | `string` |
+| `priceIncluded` | `boolean` |
+| `visibleTo` | `string` |
+| `uploadedAt` | `timestamp` |
 
 ### Example Document
 
 ```js
 catalogFiles/noblesse-jp-catalog
 {
-  catalogFileId: "noblesse-jp-catalog",
-  market: "jp",
-  language: "ja",
-  title: "Noblesse JP Buyer Catalog",
+  fileId: "noblesse-jp-catalog",
+  titleKo: "노블레스 일본 카탈로그",
+  titleEn: "Noblesse JP Buyer Catalog",
+  titleJa: "ノブレス日本カタログ",
   fileUrl: "https://cdn.example.com/catalogs/jp/noblesse-jp-catalog.pdf",
-  isPublic: false,
-  visibleTo: ["approved", "admin"],
-  version: "2026-06",
-  updatedAt: Timestamp
+  market: "JP",
+  priceIncluded: true,
+  visibleTo: "approved_only",
+  uploadedAt: Timestamp
 }
 ```
 
-### Permission Considerations
+### Permissions
 
-- Public catalogs may be read by all visitors.
-- Market-specific catalogs may be read only by matching approved Buyers and `admin`.
-- Only `admin` may write catalog metadata.
+- Public catalogs without prices may be readable by everyone.
+- Market catalogs and price-included PDFs require an approved Buyer in the matching market or `admin`.
+- Only `admin` may write metadata.
+
+### Mock Mapping
+
+No PDF catalog mock collection exists yet. Add metadata mocks only when download UI is introduced.

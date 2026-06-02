@@ -1,129 +1,156 @@
 # Firebase Security Rules Plan
 
-This document defines the intended future Firestore and Firebase Storage access model.
-Version 1 uses mock data only. Do not connect Firebase or add production rules until explicitly requested.
+This document defines the future Firestore and Storage access model for Noblesse Piercing.
+Version 1 remains mock-only. Do not deploy production rules or connect Firebase yet.
 
 ## User States
 
 | State | Meaning |
 | --- | --- |
-| `guest` | Visitor without Buyer Approval |
-| `pending` | Registered Buyer waiting for approval |
+| `guest` | Visitor without an authenticated Buyer profile |
+| `pending` | Signed-in Buyer waiting for approval |
 | `approved` | Approved Buyer with an assigned market |
-| `admin` | Internal Noblesse operator |
+| `admin` | Internal operator where `users/{uid}.role == "admin"` |
 
-## Access Summary
+Persisted user documents use `role: "buyer" | "admin"` and `status: "pending" | "approved" | "blocked"`.
+The `guest` state exists only when no authenticated Buyer document is available.
 
-| Capability | `guest` | `pending` | `approved` | `admin` |
+## Firestore Access Table
+
+| Collection | `guest` | `pending` | `approved` | `admin` |
 | --- | --- | --- | --- | --- |
-| Read visible product metadata | Allowed | Allowed | Allowed | Allowed |
-| Read public product images | Allowed | Allowed | Allowed | Allowed |
-| Read product prices | Denied | Denied | Own market only | Allowed |
-| Use Inquiry List | Denied | Denied | Allowed | Allowed for support |
-| Submit Request Quote | Denied | Denied | Allowed | Allowed for support |
-| Read inquiries | Denied | Denied | Own inquiries only | Allowed |
-| Update inquiry status | Denied | Denied | Denied | Allowed |
-| Manage catalog content | Denied | Denied | Denied | Allowed |
+| `products` | Read visible | Read visible | Read visible | Read/write all |
+| `categories` | Read visible | Read visible | Read visible | Read/write all |
+| `collections` | Read visible | Read visible | Read visible | Read/write all |
+| `banners` | Read visible | Read visible | Read visible | Read/write all |
+| `catalogFiles` | Read public price-free files | Read public price-free files | Read public and matching market files | Read/write all |
+| `productPrices` | Denied | Denied | Read active matching market | Read/write all |
+| `users` | Denied | Read own | Read and safe-update own | Read/write all |
+| `inquiries` | Denied | Denied | Create and read own | Read/write all |
 
-## Firestore Rules Intent
+## Required Protections
 
-### `users`
+- UI hiding is not price security. Rules must deny `productPrices` reads for `guest` and `pending`.
+- Approved Buyers may read prices only when `productPrices.market` matches `users/{uid}.assignedMarket`.
+- An Inquiry must use `buyerId == request.auth.uid`.
+- Buyers may not modify pricing snapshots, totals, workflow status, or `adminMemo`.
+- Price, discount, MOQ, and totals must be recalculated by trusted server logic before persistence.
+- Price-included PDF catalogs must never be publicly readable.
 
-- A signed-in Buyer may read their own user document.
-- A Buyer may update only safe profile fields such as contact details and preferred language.
-- A Buyer must not change their own `role`, `status`, `assignedMarket`, `currency`, `discountRate`, `minOrderAmount`, `approvedAt`, or `approvedBy`.
-- `admin` may read and update all user documents.
+## Firestore Pseudo Rules
 
-### `products`
+This is an implementation-oriented draft, not deployable rules code.
 
-- Everyone may read product documents where `isVisible == true`.
-- Only `admin` may create, update, delete, hide, or reorder products.
-- Public product documents must not contain protected wholesale prices.
+```js
+function signedIn() {
+  return request.auth != null;
+}
 
-### `productPrices`
+function currentUser() {
+  return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+}
 
-- `guest` and `pending` access is denied.
-- `approved` may read active price documents only when `productPrices.market == users/{uid}.assignedMarket`.
-- `admin` may read and write all price documents.
-- Buyer-specific discount calculation must be validated by trusted server logic before an Inquiry is stored.
+function isAdmin() {
+  return signedIn() && currentUser().role == "admin";
+}
 
-### `categories`, `collections`, and `banners`
+function isApprovedBuyer() {
+  return signedIn()
+    && currentUser().role == "buyer"
+    && currentUser().status == "approved";
+}
 
-- Everyone may read visible documents.
-- Only `admin` may write.
+match /products/{productId} {
+  allow read: if resource.data.isVisible == true || isAdmin();
+  allow write: if isAdmin();
+}
 
-### `catalogFiles`
+match /categories/{id}, /collections/{id}, /banners/{id} {
+  allow read: if resource.data.isVisible == true || isAdmin();
+  allow write: if isAdmin();
+}
 
-- Everyone may read documents where `isPublic == true`.
-- `approved` may read non-public documents only when the catalog market matches their assigned market.
-- `admin` may read and write all documents.
+match /productPrices/{priceId} {
+  allow read: if isAdmin()
+    || (isApprovedBuyer()
+      && resource.data.isActive == true
+      && resource.data.market == currentUser().assignedMarket);
+  allow write: if isAdmin();
+}
 
-### `inquiries`
+match /users/{uid} {
+  allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+  allow update: if isAdmin()
+    || (signedIn()
+      && request.auth.uid == uid
+      && onlySafeProfileFieldsChanged());
+}
 
-- `guest` and `pending` access is denied.
-- `approved` may create an Inquiry only for their own `buyerId`.
-- `approved` may read only documents where `buyerId == request.auth.uid`.
-- `approved` must not update status, totals, pricing snapshots, or `adminMemo`.
-- `admin` may read all inquiries and update operational fields such as status and `adminMemo`.
-- Future server logic must recalculate Approved Buyer Price, MOQ, and totals instead of trusting client-submitted amounts.
+match /inquiries/{inquiryId} {
+  allow create: if isApprovedBuyer()
+    && request.resource.data.buyerId == request.auth.uid
+    && createdByTrustedRequestQuoteFlow();
+  allow read: if isAdmin()
+    || (isApprovedBuyer() && resource.data.buyerId == request.auth.uid);
+  allow update: if isAdmin();
+}
 
-## Firebase Storage Rules Intent
-
-### Product Assets
-
-```text
-/products/{productId}/original/original.jpg
+match /catalogFiles/{fileId} {
+  allow read: if isAdmin()
+    || (resource.data.priceIncluded == false && resource.data.visibleTo == "public")
+    || (isApprovedBuyer()
+      && resource.data.visibleTo == "approved_only"
+      && resource.data.market == currentUser().assignedMarket);
+  allow write: if isAdmin();
+}
 ```
 
-- Read: `admin` only
-- Write: `admin` only
+`onlySafeProfileFieldsChanged()` and `createdByTrustedRequestQuoteFlow()` are placeholders for a future rules and server implementation.
 
-```text
-/products/{productId}/thumb/thumb.webp
-/products/{productId}/card/card.webp
-/products/{productId}/detail/detail.webp
-/products/{productId}/zoom/zoom.webp
+## Storage Access Table
+
+| Path | `guest` | `pending` | `approved` | `admin` |
+| --- | --- | --- | --- | --- |
+| `/products/**` display WebP | Read | Read | Read | Read/write |
+| `/products/**/original/**` | Denied | Denied | Denied | Read/write |
+| `/banners/**`, `/categories/**`, `/collections/**` | Read | Read | Read | Read/write |
+| `/catalogs/public/**` | Read | Read | Read | Read/write |
+| `/catalogs/jp/**` | Denied | Denied | Matching JP Buyer | Read/write |
+| `/catalogs/us/**` | Denied | Denied | Matching US Buyer | Read/write |
+
+## Storage Pseudo Rules
+
+```js
+match /products/{productId}/{variant}/{fileName} {
+  allow read: if variant != "original" || isAdmin();
+  allow write: if isAdmin();
+}
+
+match /banners/{allPaths=**},
+      /categories/{allPaths=**},
+      /collections/{allPaths=**} {
+  allow read: if true;
+  allow write: if isAdmin();
+}
+
+match /catalogs/public/{fileName} {
+  allow read: if true;
+  allow write: if isAdmin();
+}
+
+match /catalogs/{market}/{fileName} {
+  allow read: if isAdmin()
+    || (isApprovedBuyer() && currentUser().assignedMarket.lower() == market);
+  allow write: if isAdmin();
+}
 ```
 
-- Read: public
-- Write: `admin` only
+## Future Firebase Phase Checklist
 
-### Public Editorial Assets
-
-```text
-/banners/{bannerId}/desktop.webp
-/banners/{bannerId}/mobile.webp
-/categories/{categoryId}/cover.webp
-/collections/{collectionId}/cover.webp
-```
-
-- Read: public
-- Write: `admin` only
-
-### PDF Catalogs
-
-```text
-/catalogs/public/noblesse-public-catalog.pdf
-```
-
-- Read: public
-- Write: `admin` only
-
-```text
-/catalogs/jp/noblesse-jp-catalog.pdf
-/catalogs/us/noblesse-us-catalog.pdf
-```
-
-- Read: approved Buyers assigned to the matching market and `admin`
-- Write: `admin` only
-
-## Implementation Notes for a Future Firebase Phase
-
-- Keep public product metadata separate from protected price documents.
-- Use trusted server logic for Request Quote creation.
-- Use mock data with these exact field names during version 1.
-- Add Firebase Emulator tests before deploying rules.
-- Verify denied reads for `guest` and `pending`.
-- Verify market isolation for approved Buyers.
-- Verify that non-admin users cannot alter price or Inquiry status fields.
-
+- Implement trusted Request Quote creation, then persist validated Inquiry snapshots.
+- Add Firebase Emulator tests before deployment.
+- Verify denied price reads for `guest` and `pending`.
+- Verify assigned-market isolation for approved Buyers.
+- Verify that Buyers cannot modify protected user fields.
+- Verify that Buyers cannot alter Inquiry status, totals, or price snapshots.
+- Verify that price-included PDFs cannot be downloaded publicly.

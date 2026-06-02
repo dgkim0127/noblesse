@@ -1,11 +1,9 @@
 # Firebase Storage Structure
 
-This document defines the future Firebase Storage paths for Noblesse catalog assets.
-Do not connect Firebase Storage in version 1. Use mock URLs with the same path shape.
+This document defines the future Firebase Storage paths for Noblesse Piercing assets.
+Version 1 remains mock-only. Firestore stores URLs; Storage stores actual files.
 
 ## Product Images
-
-Store the original upload separately from generated WebP derivatives.
 
 ```text
 /products/{productId}/original/original.jpg
@@ -15,15 +13,17 @@ Store the original upload separately from generated WebP derivatives.
 /products/{productId}/zoom/zoom.webp
 ```
 
-| Variant | Target Size | Format | Intended Use |
-| --- | ---: | --- | --- |
-| `original` | Source size | JPG or original format | Admin upload source only |
-| `thumb` | 300px | WebP | Compact lists and Inquiry rows |
-| `card` | 600px | WebP | Product cards |
-| `detail` | 1200px | WebP | Product Detail main image |
-| `zoom` | 1800px | WebP | Product Detail zoom view |
+| Variant | Size | Use |
+| --- | ---: | --- |
+| `original` | source | Reprocessing source only |
+| `thumb` | 300px WebP | Inquiry List, My Inquiries, compact thumbnails |
+| `card` | 600px WebP | Product Card, Product List, Home sections |
+| `detail` | 1200px WebP | Product Detail main image |
+| `zoom` | 1800px WebP | Product Detail gallery or zoom |
 
-Firestore `products.imageSet` stores only the derivative URLs:
+Original uploads may be JPG or PNG. Display variants use WebP.
+
+Firestore stores derivative URLs only:
 
 ```js
 imageSet: {
@@ -34,34 +34,21 @@ imageSet: {
 }
 ```
 
-## Banner Images
+## Editorial Images
 
 ```text
 /banners/{bannerId}/desktop.webp
 /banners/{bannerId}/mobile.webp
-```
-
-- Use `desktop.webp` for wide desktop and tablet banners.
-- Use `mobile.webp` for mobile-first banner crops.
-- Firestore `banners` documents store `desktopImageUrl` and `mobileImageUrl`.
-
-## Category Covers
-
-```text
 /categories/{categoryId}/cover.webp
-```
-
-- Use a square or near-square cover image suitable for category shortcuts and category landing pages.
-- Firestore `categories.coverUrl` stores the URL.
-
-## Collection Covers
-
-```text
 /collections/{collectionId}/cover.webp
 ```
 
-- Use an editorial cover image for curated jewelry collections.
-- Firestore `collections.coverUrl` stores the URL.
+| Path | Use |
+| --- | --- |
+| `/banners/{bannerId}/desktop.webp` | Desktop and tablet banner |
+| `/banners/{bannerId}/mobile.webp` | Mobile banner crop |
+| `/categories/{categoryId}/cover.webp` | Category shortcut or landing cover |
+| `/collections/{collectionId}/cover.webp` | Editorial collection cover |
 
 ## PDF Catalogs
 
@@ -71,27 +58,47 @@ imageSet: {
 /catalogs/us/noblesse-us-catalog.pdf
 ```
 
-- Public PDFs may be accessible to guests.
-- Market PDFs should be available only to approved Buyers assigned to that market and to admins.
-- Firestore `catalogFiles.fileUrl` stores the PDF URL and metadata.
+- Public catalogs must omit protected Buyer prices.
+- Market catalogs may include approved Buyer content and require matching market access.
 
-## Access Planning
+## Storage Access Summary
 
-| Path | Read Access | Write Access |
+| Path | Read | Write |
 | --- | --- | --- |
-| `/products/**` derivative images | Public | `admin` only |
-| `/products/**/original/**` | `admin` only | `admin` only |
-| `/banners/**` | Public | `admin` only |
-| `/categories/**` | Public | `admin` only |
-| `/collections/**` | Public | `admin` only |
-| `/catalogs/public/**` | Public | `admin` only |
-| `/catalogs/jp/**` | Approved JP Buyers and `admin` | `admin` only |
-| `/catalogs/us/**` | Approved US Buyers and `admin` | `admin` only |
+| `/products/**/original/**` | `admin` | `admin` |
+| `/products/**` display variants | Public | `admin` |
+| `/banners/**`, `/categories/**`, `/collections/**` | Public | `admin` |
+| `/catalogs/public/**` | Public | `admin` |
+| `/catalogs/jp/**` | Approved JP Buyers and `admin` | `admin` |
+| `/catalogs/us/**` | Approved US Buyers and `admin` | `admin` |
 
-## Processing Notes
+## Frontend Performance Policy
 
-- Do not store binary image data in Firestore.
-- Preserve original uploads for future reprocessing.
-- Generate WebP derivatives before publishing product metadata.
-- Use Firebase Hosting or a CDN URL for delivery.
-- Keep mock image URLs structurally identical to future Storage URLs.
+- Use native lazy loading for images below the initial viewport.
+- Always provide width and height or a stable aspect-ratio image box.
+- Avoid layout shifts while assets load.
+- Prefer versioned or hashed filenames when an asset can be replaced.
+- Keep the stable path examples above for documentation; production publishing may append a version or content hash.
+
+Suggested `Cache-Control` draft:
+
+| Asset Type | Suggested Header |
+| --- | --- |
+| Hashed WebP derivatives | `public, max-age=31536000, immutable` |
+| Stable editorial URLs | `public, max-age=3600, stale-while-revalidate=86400` |
+| Protected PDFs | `private, max-age=300` |
+| Original uploads | `private, no-store` |
+
+## Future Processing Pipeline
+
+1. An admin uploads an original JPG or PNG.
+2. A trusted Cloud Function generates `thumb`, `card`, `detail`, and `zoom` WebP variants.
+3. Product metadata is published only after variants are ready.
+4. CDN caching is strengthened for versioned assets.
+5. AVIF derivatives may be evaluated after WebP delivery is stable.
+
+## Version 1 Boundary
+
+- Do not connect Firebase Storage yet.
+- Keep mock URLs structurally similar to future Storage URLs.
+- Do not store image binaries in Firestore.
