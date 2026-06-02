@@ -220,7 +220,7 @@ productPrices/NB-001_JP
 
 ### Mock Mapping
 
-`src/data/catalog.js` exports `mockProductPrices`. Before Firebase integration, normalize its market casing and `visibleTo` representation to this final schema.
+`src/data/catalog.js` exports `mockProductPrices` with uppercase markets and the `visibleTo: "approved_only"` representation used by this final schema.
 
 ## `categories`
 
