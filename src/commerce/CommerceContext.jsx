@@ -26,7 +26,22 @@ export function CommerceProvider({ children }) {
     const product = mockProducts.find((candidate) => candidate.productId === item.productId)
     const price = getPrice(item.productId)
     const priceSnapshot = approvedPrice(item.productId)
-    return product && price && priceSnapshot ? { ...item, product, price, priceSnapshot, subtotal: priceSnapshot * item.quantity } : null
+    return product && price && priceSnapshot ? {
+      ...item,
+      product,
+      price,
+      productCode: product.code,
+      productName: product.nameEn,
+      thumbnailUrl: product.imageSet?.thumb ?? '',
+      imageAlt: product.imageAlt,
+      material: product.material,
+      color: product.colors[0] ?? '',
+      size: product.sizes[0] ?? '',
+      moq: price.moq,
+      priceSnapshot,
+      subtotal: priceSnapshot * item.quantity,
+      tone: product.tone,
+    } : null
   }).filter(Boolean), [approvedPrice, getPrice, inquiryItems])
 
   const estimatedTotal = inquiryRows.reduce((sum, row) => sum + row.subtotal, 0)
@@ -65,14 +80,14 @@ export function CommerceProvider({ children }) {
       currency: buyer.currency,
       status: 'requested',
       items: inquiryRows.map((row) => ({
-        productId: row.product.productId,
-        productCode: row.product.code,
-        productName: row.product.nameEn,
-        thumbnailUrl: row.product.imageSet.thumb,
-        material: row.product.material,
-        color: row.product.colors[0] ?? '',
-        size: row.product.sizes[0] ?? '',
-        moq: row.price.moq,
+        productId: row.productId,
+        productCode: row.productCode,
+        productName: row.productName,
+        thumbnailUrl: row.thumbnailUrl,
+        material: row.material,
+        color: row.color,
+        size: row.size,
+        moq: row.moq,
         quantity: row.quantity,
         priceSnapshot: row.priceSnapshot,
         subtotal: row.subtotal,

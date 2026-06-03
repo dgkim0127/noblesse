@@ -597,6 +597,22 @@ a {
   font-size: 15px;
 }
 
+.inquiry-product {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.inquiry-product strong {
+  color: #2a234f;
+}
+
+.inquiry-product span,
+.inquiry-product small {
+  color: #857d89;
+  font-size: 12px;
+}
+
 .inquiry-row p,
 .inquiry-row small {
   margin: 0;
@@ -695,6 +711,36 @@ a {
   gap: 12px;
 }
 
+.quote-section {
+  border: 1px solid #f0e8e3;
+  border-radius: 6px;
+  padding: 14px;
+  background: #fffdf9;
+}
+
+.quote-section h3 {
+  margin: 0 0 10px;
+  color: #2a234f;
+  font-size: 15px;
+}
+
+.quote-section dl,
+.inquiry-meta {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 14px;
+  margin: 0;
+  color: #746b7e;
+  font-size: 14px;
+}
+
+.quote-section dd,
+.inquiry-meta dd {
+  margin: 0;
+  color: #2a234f;
+  font-weight: 700;
+}
+
 .quote-line,
 .quote-total,
 .inquiry-card {
@@ -703,6 +749,21 @@ a {
   gap: 12px;
   border-bottom: 1px solid #eee8e3;
   padding: 12px 0;
+}
+
+.inquiry-detail-line {
+  align-items: center;
+}
+
+.inquiry-detail-line span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.inquiry-detail-line small {
+  color: #857d89;
+  font-size: 12px;
 }
 
 .quote-total {
@@ -722,6 +783,30 @@ a {
 .inquiries {
   display: grid;
   gap: 12px;
+}
+
+.status-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 0 0 18px;
+  padding-bottom: 3px;
+}
+
+.status-tabs button {
+  flex: 0 0 auto;
+  border: 1px solid #e9e1dd;
+  border-radius: 16px;
+  padding: 7px 12px;
+  color: #746b7e;
+  background: #fff;
+  cursor: pointer;
+}
+
+.status-tabs button.active {
+  border-color: #ff8fa9;
+  color: #2a234f;
+  background: #fff1f4;
 }
 
 .inquiry-card {
@@ -746,6 +831,19 @@ a {
   color: #2a234f;
   background: #fff0f3;
   font-size: 12px;
+}
+
+.status-checking,
+.status-quoted {
+  background: #f4efff;
+}
+
+.status-confirmed {
+  background: #edf8f1;
+}
+
+.status-cancelled {
+  background: #f4f0ee;
 }
 
 .account-panel {
@@ -929,7 +1027,7 @@ a {
   }
 
   .inquiry-row {
-    grid-template-columns: 64px 1fr auto;
+    grid-template-columns: 64px minmax(0, 1fr) auto;
     gap: 10px;
   }
 
@@ -943,6 +1041,21 @@ a {
 
   .quantity {
     grid-column: 2;
+  }
+
+  .inquiry-row > b {
+    grid-column: 2 / 4;
+  }
+
+  .inquiry-card,
+  .quote-line {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .quote-section dl,
+  .inquiry-meta {
+    grid-template-columns: 1fr;
   }
 
   .account-panel dl {
