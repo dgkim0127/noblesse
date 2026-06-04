@@ -1,7 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
-import { getFunctions } from 'firebase/functions'
 import { getStorage } from 'firebase/storage'
 
 const firebaseConfig = {
@@ -13,10 +12,11 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-export const isFirebaseConfigured = Object.values(firebaseConfig).every(Boolean)
+export const hasFirebaseConfig = Object.values(firebaseConfig).every(Boolean)
 
-export const firebaseApp = isFirebaseConfigured ? initializeApp(firebaseConfig) : null
-export const db = firebaseApp ? getFirestore(firebaseApp) : null
-export const auth = firebaseApp ? getAuth(firebaseApp) : null
-export const storage = firebaseApp ? getStorage(firebaseApp) : null
-export const functions = firebaseApp ? getFunctions(firebaseApp, 'asia-northeast3') : null
+export const app = hasFirebaseConfig ? initializeApp(firebaseConfig) : null
+export const auth = app ? getAuth(app) : null
+export const db = app ? getFirestore(app) : null
+export const storage = app ? getStorage(app) : null
+
+export { firebaseConfig }

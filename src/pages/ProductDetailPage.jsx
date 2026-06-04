@@ -1,42 +1,18 @@
-import { ChevronLeft, LockKeyhole, Minus, Plus, ShoppingCart } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { ChevronLeft, LockKeyhole, Plus } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
-import { formatWon, getDiscountedPrice, normalizeQuantity } from '../utils/commerce'
+import { formatMoney } from '../utils/commerce'
 
 export function ProductDetailPage() {
   const { productId } = useParams()
-  const { activeBuyer, addToCart, getProductOptions, isApprovedMember, products } = useCommerce()
-  const product = products.find((item) => item.id === productId)
-  const options = getProductOptions(productId)
-  const [optionId, setOptionId] = useState(options[0]?.id ?? '')
-  const selectedOption = useMemo(() => options.find((item) => item.id === optionId) ?? options[0], [optionId, options])
-  const [quantity, setQuantity] = useState(selectedOption?.moq ?? 1)
+  const { addInquiryItem, approvedPrice, buyer, getPrice, isApproved, products, viewerState } = useCommerce()
+  const product = products.find((item) => item.productId === productId)
+  if (!product) return <main className="content"><div className="empty">Product not found.</div></main>
+  const price = getPrice(product.productId)
+  const description = product.descriptionEn ?? product.descriptionKo ?? ''
+  const moqLabel = isApproved && price ? price.moq : product.moqDefault || 'Available after approval'
+  const accessLink = viewerState === 'pending' ? '/approval-pending' : '/register'
+  const accessLabel = viewerState === 'pending' ? 'Approval Pending' : 'Request Buyer Access'
 
-  if (!product) return <main className="store-main"><div className="empty-state">상품을 찾을 수 없습니다.</div></main>
-  const price = selectedOption ? getDiscountedPrice({ wholesale: selectedOption.baseWholesalePrice }, activeBuyer?.discount ?? 0) : 0
-  const changeQty = (next) => setQuantity(normalizeQuantity(next, selectedOption?.moq ?? 1))
-
-  return (
-    <main className="store-main">
-      <Link className="back-link" to="/products"><ChevronLeft size={17} />상품 목록</Link>
-      <section className="detail-layout">
-        <div className="detail-gallery"><div className={`product-thumb ${product.tone ?? 'silver'}`} aria-hidden="true"><span /></div></div>
-        <div className="detail-info">
-          <span className="product-code">{product.id}</span>
-          <h1>{product.ko}</h1><p className="detail-ja">{product.ja}</p><p className="detail-description">{product.description}</p>
-          {isApprovedMember ? (
-            <>
-              <div className="detail-price"><span>회원 전용가</span><strong>{formatWon(price)}</strong><em>거래처 할인 {activeBuyer.discount}% 적용</em></div>
-              <label className="option-select"><span>옵션 선택</span><select value={optionId} onChange={(event) => { setOptionId(event.target.value); const next = options.find((item) => item.id === event.target.value); setQuantity(next?.moq ?? 1) }}>{options.map((option) => <option key={option.id} value={option.id}>{option.label} · MOQ {option.moq} · {option.stockStatus === 'in_stock' ? '판매중' : option.stockStatus === 'ask' ? '문의 필요' : '품절'}</option>)}</select></label>
-              <div className="detail-quantity"><span>수량</span><div><button type="button" onClick={() => changeQty(quantity - selectedOption.moq)}><Minus size={15} /></button><input value={quantity} type="number" onChange={(event) => changeQty(event.target.value)} /><button type="button" onClick={() => changeQty(quantity + selectedOption.moq)}><Plus size={15} /></button></div></div>
-              <button className="detail-cart-button" disabled={selectedOption?.stockStatus === 'sold_out'} type="button" onClick={() => addToCart(product.id, selectedOption.id)}><ShoppingCart size={18} />장바구니 담기</button>
-            </>
-          ) : (
-            <div className="detail-locked"><LockKeyhole size={20} /><strong>회원 승인 후 가격과 주문 조건을 확인할 수 있습니다.</strong><Link to="/register">거래처 회원 신청</Link></div>
-          )}
-        </div>
-      </section>
-    </main>
-  )
+  return <main className="content"><Link className="back" to="/products"><ChevronLeft size={17} />Product List</Link><section className="detail"><div className={`detail-image tone-${product.tone}`}><span className="jewel-shape" />{product.imageSet?.detail && <img src={product.imageSet.detail} alt={product.imageAlt?.en ?? product.nameEn} loading="lazy" width="1200" height="1200" onError={(event) => { event.currentTarget.hidden = true }} />}</div><div className="detail-copy"><small>{product.code}</small><h1>{product.nameEn}</h1><p>{product.nameJa}</p><dl className="product-info-list"><div><dt>Product Code</dt><dd>{product.code}</dd></div><div><dt>Material</dt><dd>{product.material}</dd></div><div><dt>Colors</dt><dd>{product.colors.join(' / ')}</dd></div><div><dt>Sizes</dt><dd>{product.sizes.join(' / ')}</dd></div><div><dt>MOQ</dt><dd>{moqLabel}</dd></div><div><dt>Lead Time</dt><dd>{product.leadTime}</dd></div><div><dt>Origin</dt><dd>{product.origin}</dd></div><div><dt>Export Available</dt><dd>{product.isExportAvailable ? 'Available' : 'Unavailable'}</dd></div></dl>{description && <section className="product-description"><h2>Description</h2><p>{description}</p></section>}{isApproved ? <><div className="detail-price"><small>Approved Buyer Price</small><strong>{formatMoney(approvedPrice(product.productId), buyer.currency)}</strong><span>MOQ {price.moq} / Market {price.market}</span></div><button className="primary-action" type="button" onClick={() => addInquiryItem(product.productId)}><Plus size={17} />Add to Inquiry List</button></> : <div className="approval-lock"><LockKeyhole size={19} /><strong>Price available after approval</strong><span>Buyer Approval unlocks price details and Inquiry List access.</span><Link className="secondary-action" to={accessLink}>{accessLabel}</Link></div>}</div></section></main>
 }
