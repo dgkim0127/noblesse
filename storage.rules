@@ -1,0 +1,12 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Development placeholder only.
+    // TODO: Replace with production rules from docs/SECURITY_RULES_PLAN.md and docs/STORAGE_STRUCTURE.md before launch.
+    // Product images, Buyer documents, catalog PDFs, and banner assets need path-specific access rules.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

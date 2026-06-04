@@ -1,0 +1,13 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Development placeholder only.
+    // TODO: Replace with production rules from docs/SECURITY_RULES_PLAN.md before launch.
+    // productPrices must be readable only by approved Buyers for their assigned market.
+    // inquiries must be readable/writable only by the owning Buyer and admins.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
