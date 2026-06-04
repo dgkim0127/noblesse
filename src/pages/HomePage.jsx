@@ -7,7 +7,7 @@ export function HomePage() {
   const { buyer, isApproved, products, viewerState } = useCommerce()
   return <main>
     <section className="hero">
-      <div><p>GLOBAL BUYER CATALOG</p><h1>Fine piercing details<br />for your next edit.</h1><span>Discover a curated collection of export-ready piercing styles for your store.</span><Link to="/products">Explore collection <ArrowRight size={17} /></Link></div>
+      <div className="hero-copy"><p className="eyebrow">GLOBAL BUYER CATALOG</p><h1>Fine piercing details<br />for your next edit.</h1><span>Premium piercing catalog for global buyers, built around Request Quote rather than direct purchase.</span><small>Korean piercing wholesale catalog with Approved Buyer Price available after approval.</small><div className="hero-actions"><Link className="primary-action" to="/products">View Catalog <ArrowRight size={17} /></Link>{isApproved ? <Link className="secondary-action" to="/inquiry-list">Inquiry List</Link> : viewerState === 'pending' ? <Link className="secondary-action" to="/approval-pending">Approval Pending</Link> : <Link className="secondary-action" to="/register">Request Buyer Access</Link>}</div></div>
       <div className="hero-art"><span className="hero-ring" /><span className="hero-gem" /></div>
     </section>
     <section className="buyer-strip"><BadgeCheck size={19} /><div><strong>{isApproved ? `${buyer.companyName} / Approved Buyer` : viewerState === 'pending' ? 'Buyer Approval is pending' : 'Wholesale access for approved buyers'}</strong><span>{isApproved ? `Your ${buyer.assignedMarket} market price list is active.` : 'Browse the catalog now. Prices and Inquiry features unlock after approval.'}</span></div><Globe2 size={19} /></section>

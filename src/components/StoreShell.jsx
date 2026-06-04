@@ -11,8 +11,8 @@ export function StoreShell() {
   return <div className="site-shell">
     <header className="site-header">
       <div className="header-main">
-        <Link className="brand" to="/"><span className="brand-mark">N</span><span><strong>NOBLESSE</strong><small>PIERCING COLLECTION</small></span></Link>
-        <button className="header-search" type="button" onClick={() => navigate('/products')}><Search size={19} /><span>Search product name or code</span></button>
+        <Link className="brand" to="/"><span className="brand-mark">N</span><span><strong>NOBLESSE</strong><small>피어싱 · Piercing · ピアス · 冲孔</small></span></Link>
+        <button className="header-search" type="button" onClick={() => navigate('/products')}><Search size={19} /><span>피어싱, 재질, 스타일을 검색해보세요</span></button>
         <nav className="header-actions" aria-label="Buyer navigation">
           {isGuest && <><NavLink to="/login"><LogIn size={18} />Login</NavLink><NavLink to="/register"><UserRound size={18} />Request Access</NavLink></>}
           {isPending && <NavLink to="/approval-pending"><Clock3 size={18} />Approval Pending</NavLink>}

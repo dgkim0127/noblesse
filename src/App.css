@@ -64,6 +64,7 @@ a {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
   color: #2a234f;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 22px;
@@ -83,11 +84,15 @@ a {
 
 .brand small {
   display: block;
+  max-width: 260px;
   margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-family: Inter, Pretendard, Arial, sans-serif;
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 500;
-  letter-spacing: 1px;
+  letter-spacing: 0;
 }
 
 .header-search {
@@ -195,6 +200,27 @@ a {
   margin: 22px 0 30px;
   color: #6a6276;
   line-height: 1.7;
+}
+
+.hero-copy > span,
+.hero-copy > small {
+  display: block;
+  max-width: 540px;
+  color: #6a6276;
+  line-height: 1.7;
+}
+
+.hero-copy > small {
+  margin-top: 8px;
+  color: #8a8190;
+  font-size: 13px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
 }
 
 .primary-action,
@@ -542,6 +568,48 @@ a {
   font-weight: 700;
 }
 
+.product-info-list {
+  display: grid;
+  gap: 10px;
+  margin: 24px 0;
+}
+
+.product-info-list div {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 14px;
+  border-bottom: 1px solid #eee8e3;
+  padding-bottom: 10px;
+}
+
+.product-info-list dt {
+  color: #8a8190;
+  font-size: 13px;
+}
+
+.product-info-list dd {
+  margin: 0;
+  color: #2a234f;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.product-description {
+  margin: 24px 0;
+}
+
+.product-description h2 {
+  margin: 0 0 8px;
+  color: #2a234f;
+  font-size: 17px;
+}
+
+.product-description p {
+  margin: 0;
+  color: #746c7a;
+  line-height: 1.7;
+}
+
 .detail-price {
   margin: 20px 0;
   font-size: 24px;
@@ -559,6 +627,8 @@ a {
 }
 
 .approval-lock {
+  display: grid;
+  gap: 8px;
   margin: 20px 0;
   color: #766d7b;
 }
@@ -1046,6 +1116,12 @@ a {
 
   .brand {
     font-size: 18px;
+    letter-spacing: 1px;
+  }
+
+  .brand small {
+    max-width: 170px;
+    font-size: 8px;
   }
 
   .header-search {
@@ -1083,6 +1159,10 @@ a {
 
   .hero h1 {
     font-size: 46px;
+  }
+
+  .hero-actions {
+    display: grid;
   }
 
   .hero-art {
@@ -1192,6 +1272,7 @@ a {
 
   .account-panel dl,
   .account-panel dl div,
+  .product-info-list div,
   .register-grid {
     grid-template-columns: 1fr;
     gap: 5px;
