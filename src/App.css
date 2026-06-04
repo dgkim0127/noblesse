@@ -119,6 +119,12 @@ a {
   font-size: 13px;
 }
 
+.header-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
 .inquiry-link {
   border-radius: 18px;
   padding: 9px 13px;
@@ -865,9 +871,35 @@ a {
   max-width: 680px;
 }
 
+.account-overview {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.account-overview p {
+  margin: 0;
+  color: #746b7e;
+  line-height: 1.65;
+}
+
+.account-actions,
+.auth-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 8px;
+}
+
 .account-panel dl {
   display: grid;
-  grid-template-columns: 150px 1fr;
+  gap: 12px;
+}
+
+.account-panel dl div {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
   gap: 12px;
 }
 
@@ -877,6 +909,99 @@ a {
 
 .account-panel dd {
   margin: 0;
+  color: #2a234f;
+}
+
+.auth-page {
+  padding-top: 42px;
+}
+
+.auth-panel {
+  display: grid;
+  gap: 14px;
+  max-width: 620px;
+}
+
+.auth-panel.wide {
+  max-width: 860px;
+}
+
+.auth-panel h1 {
+  margin: 0;
+  color: #2a234f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 400;
+}
+
+.auth-panel p {
+  margin: 0;
+  color: #746b7e;
+  line-height: 1.65;
+}
+
+.auth-form {
+  display: grid;
+  gap: 12px;
+}
+
+.register-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.auth-form label {
+  display: grid;
+  gap: 6px;
+  color: #665d72;
+  font-size: 13px;
+}
+
+.auth-form input,
+.auth-form textarea {
+  width: 100%;
+  border: 1px solid #e9e1dd;
+  border-radius: 8px;
+  padding: 12px 13px;
+  color: #2a234f;
+  background: #fffdf9;
+}
+
+.auth-form textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.full-span {
+  grid-column: 1 / -1;
+}
+
+.text-action {
+  border: 0;
+  padding: 0;
+  color: #746b7e;
+  background: transparent;
+  cursor: pointer;
+}
+
+.auth-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #2a234f;
+  font-weight: 700;
+}
+
+.approval-note {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #f0e8e3;
+  border-radius: 8px;
+  padding: 14px;
+  color: #746b7e;
+  background: #fffdf9;
+}
+
+.approval-note strong {
   color: #2a234f;
 }
 
@@ -938,14 +1063,6 @@ a {
 
   .header-actions a {
     font-size: 11px;
-  }
-
-  .header-actions a:first-child {
-    display: none;
-  }
-
-  .header-actions a:nth-child(2) {
-    display: none;
   }
 
   .preview-bar {
@@ -1073,7 +1190,9 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .account-panel dl {
+  .account-panel dl,
+  .account-panel dl div,
+  .register-grid {
     grid-template-columns: 1fr;
     gap: 5px;
   }

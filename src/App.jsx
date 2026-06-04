@@ -3,11 +3,14 @@ import './App.css'
 import { CommerceProvider } from './commerce/CommerceContext'
 import { StoreShell } from './components/StoreShell'
 import { AccountPage } from './pages/AccountPage'
+import { ApprovalPendingPage } from './pages/ApprovalPendingPage'
 import { HomePage } from './pages/HomePage'
 import { InquiryListPage } from './pages/InquiryListPage'
+import { LoginPage } from './pages/LoginPage'
 import { MyInquiriesPage } from './pages/MyInquiriesPage'
 import { ProductDetailPage } from './pages/ProductDetailPage'
 import { ProductsPage } from './pages/ProductsPage'
+import { RegisterPage } from './pages/RegisterPage'
 import { RequestQuotePage } from './pages/RequestQuotePage'
 
 function LegacyInquiryDetailRedirect() {
@@ -26,6 +29,9 @@ function App() {
       <Route path="/my-inquiries" element={<MyInquiriesPage />} />
       <Route path="/my-inquiries/:inquiryId" element={<MyInquiriesPage />} />
       <Route path="/account" element={<AccountPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/approval-pending" element={<ApprovalPendingPage />} />
       <Route path="/cart" element={<Navigate replace to="/inquiry-list" />} />
       <Route path="/order-request" element={<Navigate replace to="/request-quote" />} />
       <Route path="/orders" element={<Navigate replace to="/my-inquiries" />} />
