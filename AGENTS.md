@@ -3,8 +3,7 @@
 This repository is for the Noblesse Piercing website.
 
 Noblesse Piercing is a premium B2B piercing catalog website for global buyers.
-It should look like a refined jewelry brand shopping site, but the business
-flow must remain B2B.
+It should look like a refined jewelry brand catalog, while the business flow remains B2B.
 
 This is not:
 
@@ -12,7 +11,7 @@ This is not:
 - a POS system
 - a shopping live platform
 - a review-centered marketplace
-- an instant checkout store
+- an instant purchase store
 
 # Brand
 
@@ -40,7 +39,7 @@ Mood:
 
 - noble but not heavy
 - modern luxury
-- image-centered piercing and jewelry brand
+- image-centered piercing and jewelry mood
 - premium but practical B2B catalog
 
 # Core UX Flow
@@ -67,11 +66,10 @@ Do not implement:
 
 - Shopping live
 - Review-centered features
-- Instant purchase
-- Payment
-- Buy Now
-- Pay Now
-- Checkout
+- Instant purchase flow
+- Online settlement flow
+- Direct-buy buttons
+- Direct-pay buttons
 - Coupon system
 - Point system
 - Real-time ranking
@@ -94,20 +92,11 @@ Korean terms:
 
 - 견적 리스트
 - 견적 요청
+- 견적 요청서
 - 내 견적 요청
 - 승인 후 가격 확인 가능
 
-Do not use in user-facing UI:
-
-- Cart
-- Checkout
-- Buy Now
-- Pay Now
-- Payment
-- 장바구니
-- 주문/결제
-- 구매하기
-- 결제하기
+Avoid direct-purchase terminology in user-facing UI.
 
 # User States
 
@@ -183,14 +172,14 @@ The common header should include:
 - nearby labels: 피어싱 / Piercing / ピアス / 冲孔
 - centered rounded search bar
 - search icon inside the right side of the search bar
-- right: Inquiry List icon
+- right: Inquiry List icon for approved Buyers
 - login or my page link
 - optional notification icon without emphasis
 
 Search placeholder:
 
 ```text
-피어싱, 소재, 스타일을 검색해보세요
+피어싱, 재질, 스타일을 검색해보세요
 ```
 
 # First Version Scope
@@ -200,7 +189,7 @@ Mock data must follow the same shape as the future Firestore schema.
 
 Do not connect Firebase yet.
 Do not add real authentication yet.
-Do not add real payment.
+Do not add real online settlement.
 Do not add an admin dashboard unless explicitly requested.
 
 Prioritize:
@@ -257,7 +246,7 @@ Use these routes:
 - `/my-inquiries`
 - `/my-inquiries/:inquiryId`
 
-Do not create payment routes.
+Do not create online settlement routes.
 
 Redirect old routes if needed:
 
@@ -289,7 +278,7 @@ Responsive rules:
 - Mobile: 2-column product grid
 - Search bar must not break on mobile.
 - Product detail stacks image -> info -> CTA on mobile.
-- Inquiry List has a fixed bottom Request Quote CTA on mobile.
+- Inquiry List keeps Request Quote CTA visible on mobile.
 
 # Technical Direction
 
@@ -313,7 +302,7 @@ Avoid:
 
 - recreating the project from scratch
 - adding Capacitor or APK files
-- adding payment dependencies
+- adding settlement dependencies
 - adding unnecessary dependencies
 - adding complex state libraries unless required
 
@@ -324,7 +313,7 @@ Before finishing any task, check:
 - `npm install` works
 - `npm run dev` works
 - `npm run build` works
-- no payment or checkout wording appears in user-facing UI
+- no direct-purchase wording appears in user-facing UI
 - no app, APK, or Capacitor setup is introduced
 - main pages are responsive
 - user status UI differences are visible
