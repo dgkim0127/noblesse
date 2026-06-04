@@ -222,7 +222,8 @@ a {
 .hero-art,
 .catalog-image,
 .detail-image,
-.mini-image {
+.mini-image,
+.quote-thumb {
   position: relative;
   overflow: hidden;
   background: linear-gradient(140deg, #f7e8eb, #fefaf6);
@@ -316,7 +317,8 @@ a {
 
 .catalog-image img,
 .detail-image img,
-.mini-image img {
+.mini-image img,
+.quote-thumb img {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -583,11 +585,11 @@ a {
 }
 
 .quote-thumb {
-  width: 46px;
-  height: 46px;
+  width: 52px;
+  height: 52px;
   flex: 0 0 auto;
-  border-radius: 4px;
-  object-fit: contain;
+  border: 1px solid #eee8e2;
+  border-radius: 8px;
   background: #fffdf9;
 }
 
@@ -745,10 +747,23 @@ a {
 .quote-total,
 .inquiry-card {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   border-bottom: 1px solid #eee8e3;
   padding: 12px 0;
+}
+
+.quote-line span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  margin-right: auto;
+}
+
+.quote-line small {
+  color: #857d89;
+  font-size: 12px;
 }
 
 .inquiry-detail-line {
