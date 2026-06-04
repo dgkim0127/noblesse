@@ -5,7 +5,8 @@ import { formatMoney } from '../utils/commerce'
 
 function AccessNotice({ viewerState }) {
   const isPending = viewerState === 'pending'
-  return <main className="content"><div className="approval-page"><LockKeyhole size={25} /><h1>{isPending ? 'Buyer Approval is pending.' : 'Request Buyer Access to use Inquiry List.'}</h1><p>{isPending ? 'Prices, subtotals, and Request Quote features will unlock after approval.' : 'Please request access or log in as an approved Buyer to see prices and create an Inquiry List.'}</p><Link to="/account">View Buyer Access</Link></div></main>
+  const isBlocked = viewerState === 'blocked'
+  return <main className="content"><div className="approval-page"><LockKeyhole size={25} /><h1>{isBlocked ? 'Account review required.' : isPending ? 'Buyer Approval is pending.' : 'Request Buyer Access to use Inquiry List.'}</h1><p>{isBlocked ? 'Contact Noblesse to review your Buyer profile before using Inquiry features.' : isPending ? 'Prices, subtotals, and Request Quote features will unlock after approval.' : 'Please request access or log in as an approved Buyer to see prices and create an Inquiry List.'}</p><Link to="/account">View Buyer Access</Link></div></main>
 }
 
 export function InquiryListPage() {

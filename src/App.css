@@ -142,6 +142,18 @@ a {
   min-width: max-content;
 }
 
+.header-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: max-content;
+  border: 0;
+  padding: 0;
+  color: #5d5575;
+  background: transparent;
+  cursor: pointer;
+}
+
 .inquiry-link {
   border-radius: 18px;
   padding: 9px 13px;
@@ -1076,11 +1088,30 @@ a {
 }
 
 .text-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   border: 0;
   padding: 0;
   color: #746b7e;
   background: transparent;
   cursor: pointer;
+}
+
+.text-action:disabled,
+.header-button:disabled {
+  cursor: progress;
+  opacity: 0.55;
+}
+
+.form-error {
+  margin: 0;
+  border: 1px solid #ffd2dc;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #9b2d4c;
+  background: #fff5f7;
+  font-size: 13px;
 }
 
 .auth-links a {

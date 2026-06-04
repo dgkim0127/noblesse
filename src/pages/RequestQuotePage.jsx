@@ -35,7 +35,8 @@ function QuoteLine({ row, currency }) {
 
 function AccessNotice({ viewerState }) {
   const isPending = viewerState === 'pending'
-  return <main className="content"><div className="approval-page"><LockKeyhole size={25} /><h1>{isPending ? 'Buyer Approval is pending.' : 'Request Buyer Access to use Request Quote.'}</h1><p>{isPending ? 'Request Quote becomes available after approval. Prices and subtotals are hidden until then.' : 'Please request access or log in as an approved Buyer before sending an Inquiry.'}</p><Link to="/account">View Buyer Access</Link></div></main>
+  const isBlocked = viewerState === 'blocked'
+  return <main className="content"><div className="approval-page"><LockKeyhole size={25} /><h1>{isBlocked ? 'Account review required.' : isPending ? 'Buyer Approval is pending.' : 'Request Buyer Access to use Request Quote.'}</h1><p>{isBlocked ? 'Contact Noblesse to review your Buyer profile before sending Request Quote.' : isPending ? 'Request Quote becomes available after approval. Prices and subtotals are hidden until then.' : 'Please request access or log in as an approved Buyer before sending an Inquiry.'}</p><Link to="/account">View Buyer Access</Link></div></main>
 }
 
 export function RequestQuotePage() {
