@@ -5,6 +5,35 @@ This document provides local PostgreSQL analytics queries for POS sales, buyer b
 These queries are for development/testing and admin analytics planning.
 They do not connect the website to a database and do not change POS data.
 
+## Analytics Views
+
+Repeated analytics queries are also provided as reusable PostgreSQL views in:
+
+```text
+database/postgres/003_pos_analytics_views.sql
+```
+
+Use the view file after applying `database/postgres/001_pos_primary_schema.sql`.
+If local sample checks are needed, run `database/postgres/002_sample_pos_data.sql` before creating or querying the views.
+
+Views that include amount fields also include `currency` where possible to avoid mixing KRW, JPY, USD, or other currencies in one comparison.
+
+Available views:
+
+| View | Purpose | Main fields |
+| --- | --- | --- |
+| `v_buyer_purchase_summary` | Buyer purchase summary | `buyer_id`, `customer_name`, `currency`, `purchase_count`, `total_purchase_amount`, `average_purchase_amount`, `latest_purchase_date`, `total_quantity` |
+| `v_buyer_monthly_amount_change` | Monthly buyer amount and month-over-month change | `buyer_id`, `customer_name`, `currency`, `month`, `current_amount`, `previous_amount`, `amount_delta`, `amount_change_rate` |
+| `v_buyer_product_summary` | Frequently purchased product summary by buyer | `buyer_id`, `customer_name`, `currency`, `product_code`, `product_name`, `total_quantity`, `total_amount` |
+| `v_buyer_product_quantity_change` | Monthly product quantity change by buyer | `buyer_id`, `customer_name`, `currency`, `product_code`, `product_name`, `month`, `current_quantity`, `previous_quantity`, `quantity_delta`, `quantity_change_rate` |
+| `v_buyer_reduced_products` | Products whose quantity decreased by buyer | `buyer_id`, `customer_name`, `currency`, `product_code`, `product_name`, `month`, `current_quantity`, `previous_quantity`, `quantity_delta`, `quantity_change_rate` |
+| `v_product_monthly_trend` | Monthly product sales trend | `product_id`, `product_code`, `product_name`, `currency`, `month`, `monthly_quantity`, `monthly_amount`, `buyer_count` |
+| `v_inactive_buyer_candidates` | Buyers with no recent sales | `buyer_id`, `customer_name`, `latest_purchase_date`, `inactive_days` |
+
+`v_inactive_buyer_candidates` uses 30 days as the default threshold.
+
+With the local sample data, `v_buyer_reduced_products` should show `Tokyo Piercing Lab` with reduced quantities for `NB-001` and `NB-002` in the current month compared with the previous month.
+
 ## 1. Buyer Purchase Count
 
 Purpose:
