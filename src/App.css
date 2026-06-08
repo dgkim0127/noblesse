@@ -50,6 +50,7 @@ a {
 }
 
 .header-main,
+.header-lower,
 .preview-bar,
 .content,
 .section-wrap,
@@ -60,10 +61,10 @@ a {
 
 .header-main {
   display: grid;
-  grid-template-columns: auto minmax(260px, 1fr) auto;
-  gap: 28px;
+  grid-template-columns: minmax(170px, auto) minmax(220px, 1fr) minmax(220px, auto);
+  gap: 22px;
   align-items: center;
-  min-height: 78px;
+  min-height: 70px;
 }
 
 .brand {
@@ -73,63 +74,105 @@ a {
   min-width: 0;
   color: #2a234f;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 22px;
-  letter-spacing: 3px;
+  font-size: 18px;
+  letter-spacing: 1px;
 }
 
 .brand-mark {
   display: inline-grid;
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   place-items: center;
-  border: 1px solid #ff8fa9;
+  border: 1px solid rgb(255 143 169 / 70%);
   border-radius: 50%;
   color: #ff8fa9;
-  font-size: 12px;
+  background: #fff7f9;
+  box-shadow: 0 8px 20px rgb(42 35 79 / 8%);
+  font-size: 13px;
 }
 
-.brand small {
+.brand-korean {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brand-center {
+  min-width: 0;
+  text-align: center;
+  color: #2a234f;
+}
+
+.brand-center strong {
   display: block;
-  max-width: 260px;
-  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.brand-center small {
+  display: block;
+  margin-top: 3px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: Inter, Pretendard, Arial, sans-serif;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0;
+  color: #8c8192;
 }
 
 .brand > span:last-child {
   min-width: 0;
 }
 
+.header-lower {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.1fr);
+  gap: 18px;
+  align-items: center;
+  padding-bottom: 12px;
+}
+
 .header-search {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   min-width: 0;
   width: 100%;
   overflow: hidden;
   border: 1px solid #e4ded7;
-  border-radius: 24px;
-  padding: 12px 16px;
+  border-radius: 999px;
+  padding: 12px 14px 12px 18px;
   color: #8a8190;
   background: #fff;
   cursor: pointer;
+  box-shadow: 0 10px 30px rgb(42 35 79 / 6%);
 }
 
 .header-search span {
-  margin-left: 9px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: left;
+}
+
+.header-search svg {
+  flex: 0 0 auto;
+  color: #ff8fa9;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  justify-content: flex-end;
+  gap: 12px;
   min-width: 0;
   color: #5d5575;
   font-size: 13px;
@@ -140,6 +183,42 @@ a {
   align-items: center;
   gap: 5px;
   min-width: max-content;
+  border-radius: 999px;
+  padding: 7px 9px;
+}
+
+.header-actions a.active {
+  color: #2a234f;
+  background: #fff1f4;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+  overflow-x: auto;
+  color: #625a70;
+  font-size: 13px;
+  scrollbar-width: none;
+}
+
+.header-nav::-webkit-scrollbar,
+.header-actions::-webkit-scrollbar,
+.preview-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.header-nav a {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 8px 11px;
+}
+
+.header-nav a.active {
+  color: #2a234f;
+  background: #fff1f4;
 }
 
 .inquiry-link {
@@ -154,10 +233,16 @@ a {
   gap: 8px;
   align-items: center;
   overflow-x: auto;
-  padding: 9px 0;
+  padding: 8px 0 10px;
   color: #746d83;
   font-size: 12px;
   white-space: nowrap;
+}
+
+.preview-bar span {
+  flex: 0 0 auto;
+  color: #2a234f;
+  font-weight: 700;
 }
 
 .preview-bar button {
@@ -1112,15 +1197,24 @@ a {
 
 @media (max-width: 1100px) {
   .header-main {
-    grid-template-columns: auto 1fr;
-    gap: 18px;
+    grid-template-columns: minmax(150px, auto) minmax(180px, 1fr);
+    gap: 16px;
   }
 
   .header-actions {
     grid-column: 1 / -1;
     justify-content: flex-end;
-    margin-top: -18px;
-    padding-bottom: 12px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .header-lower {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .header-nav {
+    justify-content: flex-start;
   }
 
   .catalog-grid,
@@ -1140,6 +1234,7 @@ a {
 
 @media (max-width: 760px) {
   .header-main,
+  .header-lower,
   .preview-bar,
   .content,
   .section-wrap,
@@ -1148,10 +1243,10 @@ a {
   }
 
   .header-main {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 12px;
     min-height: auto;
-    padding: 12px 0;
+    padding: 12px 0 8px;
   }
 
   .brand {
@@ -1159,21 +1254,47 @@ a {
     letter-spacing: 1px;
   }
 
-  .brand small {
-    max-width: min(260px, calc(100vw - 82px));
-    font-size: 8px;
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+  }
+
+  .brand-korean {
+    max-width: min(150px, calc(100vw - 210px));
+  }
+
+  .brand-center {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    text-align: left;
+  }
+
+  .brand-center strong {
+    font-size: 22px;
+  }
+
+  .brand-center small {
+    max-width: 100%;
+    font-size: 10px;
+  }
+
+  .header-lower {
+    grid-template-columns: 1fr;
+    gap: 9px;
+    padding-bottom: 8px;
   }
 
   .header-search {
     grid-column: auto;
     grid-row: auto;
     min-height: 44px;
+    padding: 11px 13px 11px 15px;
   }
 
   .header-actions {
-    grid-column: auto;
-    grid-row: auto;
-    justify-content: flex-start;
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
     max-width: 100%;
     overflow-x: auto;
     margin: 0;
@@ -1185,6 +1306,17 @@ a {
   .header-actions a {
     flex: 0 0 auto;
     font-size: 12px;
+    padding: 7px 8px;
+  }
+
+  .header-nav {
+    justify-content: flex-start;
+    padding-bottom: 2px;
+    font-size: 12px;
+  }
+
+  .header-nav a {
+    padding: 7px 9px;
   }
 
   .inquiry-link {
@@ -1354,6 +1486,7 @@ a {
 
 @media (max-width: 430px) {
   .header-main,
+  .header-lower,
   .preview-bar,
   .content,
   .section-wrap,
@@ -1368,6 +1501,22 @@ a {
   .brand-mark {
     width: 26px;
     height: 26px;
+  }
+
+  .brand-korean {
+    max-width: 92px;
+  }
+
+  .brand-center strong {
+    font-size: 20px;
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .header-actions a {
+    font-size: 11px;
   }
 
   .hero h1,
