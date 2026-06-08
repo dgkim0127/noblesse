@@ -86,6 +86,39 @@ psql -U postgres -d noblesse_analytics -f database/postgres/001_pos_primary_sche
 Do not put passwords in this command inside repository files.
 Use local password prompts, a secure local environment, or a local-only secret manager.
 
+## Optional Sample Data
+
+After applying `database/postgres/001_pos_primary_schema.sql`, you may optionally run:
+
+```text
+database/postgres/002_sample_pos_data.sql
+```
+
+This sample data is for local development/testing only.
+Do not run it against a production database.
+
+The sample data adds:
+
+- two test buyers
+- three test products
+- multiple POS sales across the previous month and current month
+- repeated product lines for buyer and product analytics checks
+
+pgAdmin method:
+
+1. Select the `noblesse_analytics` database.
+2. Open Query Tool.
+3. Paste the contents of `database/postgres/002_sample_pos_data.sql`.
+4. Run the query.
+
+psql method:
+
+```bash
+psql -U postgres -d noblesse_analytics -f database/postgres/002_sample_pos_data.sql
+```
+
+After loading the optional sample data, use `docs/POS_ANALYTICS_QUERIES.md` to confirm buyer and product analytics query results.
+
 ## Backfill Usage
 
 Existing Firebase sales can be used for:
