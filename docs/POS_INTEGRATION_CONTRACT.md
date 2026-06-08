@@ -23,6 +23,10 @@ pors POS app:
 
 The two products should be connected through shared data contracts, not by merging their UI or codebases.
 
+PostgreSQL is selected as the future analytics database for Noblesse admin reporting.
+Firebase sales remains the operational POS source for pors.
+Firebase sales will be normalized into PostgreSQL tables for analytics, while Noblesse will not mutate POS sales data.
+
 ## 2. Integration Principle
 
 - Noblesse web must not modify POS sales directly in the first version.
@@ -30,6 +34,8 @@ The two products should be connected through shared data contracts, not by mergi
 - pors remains the source of truth for actual store sales.
 - Noblesse remains the source of truth for B2B catalog and quote workflow.
 - Shared IDs and product codes must be aligned before automatic sync.
+- Missing fields such as productCode, buyerId, storeId, deviceId, syncedAt, and stable sale line IDs should be added later before automatic sync.
+- PostgreSQL analytics tables should be treated as read models derived from POS source data.
 
 ## 3. Required POS Data for Web Analytics
 
@@ -117,14 +123,17 @@ Product analytics:
 Version 1:
 
 - manual JSON/CSV import or read-only Firebase data check
+- PostgreSQL schema draft and mapping review only
 
 Version 2:
 
 - read POS sales from Firebase with read-only service
+- normalize Firebase sales into PostgreSQL tables
 
 Version 3:
 
 - scheduled sync or server-side aggregation
+- admin analytics queries read from PostgreSQL
 
 Do not implement automatic write-back to POS data in version 1.
 
