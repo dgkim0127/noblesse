@@ -26,6 +26,8 @@ The two products should be connected through shared data contracts, not by mergi
 PostgreSQL is selected as the primary structured data layer for POS sales and analytics.
 Firebase is used for Auth / Storage / Push / Config and lightweight operational support.
 Existing Firebase sales are a historical/backfill source, not the long-term primary analytics source.
+Local PostgreSQL can be used for development/testing.
+Production should use managed PostgreSQL or a secured server.
 Long-term POS sales should be sent to PostgreSQL through an API layer.
 pors POS app must not connect directly to PostgreSQL.
 Noblesse will read PostgreSQL analytics and will not mutate POS sales directly.
