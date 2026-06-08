@@ -1,0 +1,75 @@
+{
+  "sample": true,
+  "source": "synthetic_firebase_sales_export",
+  "description": "Local development sample only. This is not production data.",
+  "sales": [
+    {
+      "id": "fb-sale-sample-001",
+      "customerId": "fb-customer-tokyo-001",
+      "customerName": "Tokyo Piercing Lab",
+      "createdAt": "2026-05-12T10:15:00+09:00",
+      "currency": "JPY",
+      "totals": {
+        "subtotal": 72000,
+        "discount": 6000,
+        "supply": 66000,
+        "vat": 0,
+        "total": 66000
+      },
+      "lines": [
+        {
+          "itemId": "fb-item-barbell-001",
+          "productCode": "NB-001",
+          "name": "Silver Basic Ball Barbell",
+          "categoryId": "barbell",
+          "quantity": 30,
+          "price": 1200,
+          "discountable": true
+        },
+        {
+          "itemId": "fb-item-labret-002",
+          "productCode": "NB-002",
+          "name": "Opal Heart Cubic Labret",
+          "categoryId": "labret",
+          "quantity": 15,
+          "price": 2400,
+          "discountable": true
+        }
+      ]
+    },
+    {
+      "id": "fb-sale-sample-002",
+      "customerId": "fb-customer-seoul-001",
+      "customerName": "Seoul Style Studio",
+      "createdAt": "2026-06-05T16:40:00+09:00",
+      "currency": "KRW",
+      "totals": {
+        "subtotal": 132000,
+        "discount": 0,
+        "supply": 120000,
+        "vat": 12000,
+        "total": 132000
+      },
+      "lines": [
+        {
+          "itemId": "fb-item-labret-002",
+          "productCode": "NB-002",
+          "name": "Opal Heart Cubic Labret",
+          "categoryId": "labret",
+          "quantity": 40,
+          "price": 2200,
+          "discountable": true
+        },
+        {
+          "itemId": "fb-item-ring-003",
+          "productCode": "NB-003",
+          "name": "Gold One-Touch Segment Ring",
+          "categoryId": "ring",
+          "quantity": 20,
+          "price": 2200,
+          "discountable": true
+        }
+      ]
+    }
+  ]
+}
