@@ -507,3 +507,160 @@ Admin screen:
 
 - Product trend chart
 - Product monthly report
+
+## 15. Buyer Product Quantity Change
+
+Purpose:
+
+- Compare monthly product quantity by buyer.
+- Identify which products each buyer purchased more or less than the previous month.
+
+SQL:
+
+```sql
+with monthly_product_quantity as (
+  select
+    ps.buyer_id,
+    coalesce(psi.product_code, p.product_code) as product_code,
+    coalesce(p.product_name, psi.item_name) as product_name,
+    date_trunc('month', ps.sale_date)::date as month,
+    sum(psi.quantity) as total_quantity
+  from pos_sales ps
+  join pos_sale_items psi on psi.pos_sale_id = ps.id
+  left join products p on p.id = psi.product_id
+  group by
+    ps.buyer_id,
+    coalesce(psi.product_code, p.product_code),
+    coalesce(p.product_name, psi.item_name),
+    date_trunc('month', ps.sale_date)::date
+),
+with_previous as (
+  select
+    monthly_product_quantity.*,
+    lag(total_quantity) over (
+      partition by buyer_id, product_code
+      order by month
+    ) as previous_quantity
+  from monthly_product_quantity
+)
+select
+  b.id as buyer_id,
+  b.customer_name,
+  wp.product_code,
+  wp.product_name,
+  wp.month,
+  wp.total_quantity as current_quantity,
+  wp.previous_quantity,
+  wp.total_quantity - coalesce(wp.previous_quantity, 0) as quantity_delta,
+  case
+    when wp.previous_quantity is null or wp.previous_quantity = 0 then null
+    else round(((wp.total_quantity - wp.previous_quantity)::numeric / wp.previous_quantity) * 100, 2)
+  end as quantity_change_rate
+from with_previous wp
+join buyers b on b.id = wp.buyer_id
+order by b.customer_name, wp.month desc, quantity_delta desc, wp.product_name;
+```
+
+Result columns:
+
+- buyer_id: internal buyer ID
+- customer_name: buyer/customer display name
+- product_code: product code when available
+- product_name: product display name
+- month: month bucket
+- current_quantity: current month quantity for the buyer and product
+- previous_quantity: previous month quantity for the buyer and product
+- quantity_delta: current quantity minus previous quantity
+- quantity_change_rate: percentage quantity change from the previous month
+
+Admin screen:
+
+- Buyer detail product trend
+- Buyer follow-up recommendation
+- Product retention review
+
+## 16. Reduced Products by Buyer
+
+Purpose:
+
+- Find products whose monthly quantity decreased for each buyer.
+- Support follow-up planning and reorder recommendation review.
+
+SQL:
+
+```sql
+with monthly_product_quantity as (
+  select
+    ps.buyer_id,
+    coalesce(psi.product_code, p.product_code) as product_code,
+    coalesce(p.product_name, psi.item_name) as product_name,
+    date_trunc('month', ps.sale_date)::date as month,
+    sum(psi.quantity) as total_quantity
+  from pos_sales ps
+  join pos_sale_items psi on psi.pos_sale_id = ps.id
+  left join products p on p.id = psi.product_id
+  group by
+    ps.buyer_id,
+    coalesce(psi.product_code, p.product_code),
+    coalesce(p.product_name, psi.item_name),
+    date_trunc('month', ps.sale_date)::date
+),
+with_previous as (
+  select
+    monthly_product_quantity.*,
+    lag(total_quantity) over (
+      partition by buyer_id, product_code
+      order by month
+    ) as previous_quantity
+  from monthly_product_quantity
+),
+quantity_change as (
+  select
+    b.id as buyer_id,
+    b.customer_name,
+    wp.product_code,
+    wp.product_name,
+    wp.month,
+    wp.total_quantity as current_quantity,
+    wp.previous_quantity,
+    wp.total_quantity - wp.previous_quantity as quantity_delta,
+    case
+      when wp.previous_quantity is null or wp.previous_quantity = 0 then null
+      else round(((wp.total_quantity - wp.previous_quantity)::numeric / wp.previous_quantity) * 100, 2)
+    end as quantity_change_rate
+  from with_previous wp
+  join buyers b on b.id = wp.buyer_id
+)
+select
+  buyer_id,
+  customer_name,
+  product_code,
+  product_name,
+  month,
+  current_quantity,
+  previous_quantity,
+  quantity_delta,
+  quantity_change_rate
+from quantity_change
+where previous_quantity is not null
+  and current_quantity < previous_quantity
+order by month desc, quantity_delta asc, customer_name, product_name;
+```
+
+Result columns:
+
+- buyer_id: internal buyer ID
+- customer_name: buyer/customer display name
+- product_code: product code when available
+- product_name: product display name
+- month: month bucket
+- current_quantity: current month quantity for the buyer and product
+- previous_quantity: previous month quantity for the buyer and product
+- quantity_delta: current quantity minus previous quantity
+- quantity_change_rate: percentage quantity change from the previous month
+
+Admin screen:
+
+- Buyer detail reduced products
+- Buyer follow-up recommendation
+- Product retention review
