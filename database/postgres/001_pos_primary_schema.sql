@@ -82,6 +82,8 @@ create table if not exists pos_sales (
   id uuid primary key default gen_random_uuid(),
   source_system text not null default 'pors_firebase',
   source_sale_id text not null,
+  local_sale_id text,
+  idempotency_key text,
   store_id uuid references stores(id),
   device_id uuid references pos_devices(id),
   buyer_id uuid references buyers(id),
@@ -97,8 +99,10 @@ create table if not exists pos_sales (
   total_quantity integer not null default 0,
   line_count integer not null default 0,
   writer_name text,
+  app_version text,
   raw_sale_json jsonb,
   imported_at timestamptz not null default now(),
+  synced_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint pos_sales_source_unique unique (source_system, source_sale_id)
@@ -198,6 +202,10 @@ create table if not exists pos_source_mappings (
 );
 
 create index if not exists idx_pos_sales_source on pos_sales(source_system, source_sale_id);
+create unique index if not exists idx_pos_sales_idempotency_unique
+on pos_sales(source_system, idempotency_key)
+where idempotency_key is not null;
+create index if not exists idx_pos_sales_local_sale on pos_sales(source_system, local_sale_id);
 create index if not exists idx_pos_sales_buyer_date on pos_sales(buyer_id, sale_date desc);
 create index if not exists idx_pos_sales_sale_date on pos_sales(sale_date);
 create index if not exists idx_pos_sale_items_sale on pos_sale_items(pos_sale_id);

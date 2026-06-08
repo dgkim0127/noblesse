@@ -39,6 +39,8 @@ Current POS source:
 
 Fields such as `productCode`, `buyerId`, `storeId`, `deviceId`, `lineTotal`, and `syncedAt` are not guaranteed yet.
 
+Future POS API payloads should add `localSaleId`, `idempotencyKey`, `appVersion`, and `syncedAt` for reliable server sync.
+
 ## Core Tables
 
 - stores
@@ -57,6 +59,10 @@ Fields such as `productCode`, `buyerId`, `storeId`, `deviceId`, `lineTotal`, and
 ## Firestore Sales to PostgreSQL Mapping
 
 - Firebase sales.id -> pos_sales.source_sale_id
+- POS API localSaleId -> pos_sales.local_sale_id
+- POS API idempotencyKey -> pos_sales.idempotency_key
+- POS API appVersion -> pos_sales.app_version
+- POS API syncedAt -> pos_sales.synced_at
 - Firebase sales.createdAt -> pos_sales.sale_date
 - Firebase sales.customerId -> buyers.source_customer_id and pos_sales.source_customer_id
 - Firebase sales.customerName -> buyers.customer_name and pos_sales.customer_name
@@ -76,6 +82,40 @@ Fields such as `productCode`, `buyerId`, `storeId`, `deviceId`, `lineTotal`, and
 Backfill imports must be idempotent through:
 
 - unique(source_system, source_sale_id)
+
+New API sync writes should be idempotent through:
+
+- unique partial index on pos_sales(source_system, idempotency_key)
+- idempotency_key can be null for historical backfill records
+- records with idempotency_key are treated as API sync records and must not be duplicated
+
+## POS Sync Fields
+
+local_sale_id:
+
+- POS app local sale ID.
+- Used to trace a sale created while the POS app was offline or working locally.
+
+idempotency_key:
+
+- Key sent by the POS app to prevent duplicate persistence when the same sale is retried.
+- Use a unique partial index because historical backfill records may have null idempotency_key.
+
+app_version:
+
+- POS app version at the time the sale was created or synced.
+- Useful for debugging sync behavior by deployed app version.
+
+synced_at:
+
+- Time when the POS app synced the sale to the server/API.
+- Different from sale_date, which means when the sale happened.
+
+Backfill versus API sync:
+
+- Existing Firebase backfill data uses source_system and source_sale_id uniqueness.
+- New API synchronization data uses idempotency_key for duplicate prevention.
+- If both source_sale_id and idempotency_key are available, keep both for traceability.
 
 ## JSONB Usage
 
