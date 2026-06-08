@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "postgres:transform-sample": "node scripts/postgres/transformFirebaseSalesSample.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
