@@ -105,7 +105,7 @@ Mapping rules:
 - Long-term API payload localSaleId maps to pos_sales.local_sale_id.
 - idempotencyKey must prevent duplicate sale sync.
 - API payload appVersion and syncedAt map to pos_sales.app_version and pos_sales.synced_at.
-- SQL uses a unique partial index for idempotency_key so historical records without idempotency_key remain valid.
+- SQL uses unique(source_system, idempotency_key); PostgreSQL allows multiple null values, so historical records without idempotency_key remain valid.
 - storeId and deviceId must identify the selling location and device.
 
 ## 5. Analytics Required by Noblesse

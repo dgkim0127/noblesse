@@ -85,9 +85,10 @@ Backfill imports must be idempotent through:
 
 New API sync writes should be idempotent through:
 
-- unique partial index on pos_sales(source_system, idempotency_key)
-- idempotency_key can be null for historical backfill records
+- unique(source_system, idempotency_key)
+- PostgreSQL unique constraints allow multiple null values, so historical backfill records with null idempotency_key remain valid
 - records with idempotency_key are treated as API sync records and must not be duplicated
+- idx_pos_sales_idempotency supports lookup by source_system and idempotency_key
 
 ## POS Sync Fields
 
@@ -99,7 +100,8 @@ local_sale_id:
 idempotency_key:
 
 - Key sent by the POS app to prevent duplicate persistence when the same sale is retried.
-- Use a unique partial index because historical backfill records may have null idempotency_key.
+- Use unique(source_system, idempotency_key) for duplicate prevention.
+- PostgreSQL allows multiple null values in a unique constraint, so backfill rows without idempotency_key can coexist.
 
 app_version:
 

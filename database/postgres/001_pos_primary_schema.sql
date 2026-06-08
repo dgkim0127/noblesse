@@ -105,7 +105,8 @@ create table if not exists pos_sales (
   synced_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint pos_sales_source_unique unique (source_system, source_sale_id)
+  constraint pos_sales_source_unique unique (source_system, source_sale_id),
+  constraint pos_sales_idempotency_unique unique (source_system, idempotency_key)
 );
 
 create table if not exists pos_sale_items (
@@ -202,9 +203,7 @@ create table if not exists pos_source_mappings (
 );
 
 create index if not exists idx_pos_sales_source on pos_sales(source_system, source_sale_id);
-create unique index if not exists idx_pos_sales_idempotency_unique
-on pos_sales(source_system, idempotency_key)
-where idempotency_key is not null;
+create index if not exists idx_pos_sales_idempotency on pos_sales(source_system, idempotency_key);
 create index if not exists idx_pos_sales_local_sale on pos_sales(source_system, local_sale_id);
 create index if not exists idx_pos_sales_buyer_date on pos_sales(buyer_id, sale_date desc);
 create index if not exists idx_pos_sales_sale_date on pos_sales(sale_date);
