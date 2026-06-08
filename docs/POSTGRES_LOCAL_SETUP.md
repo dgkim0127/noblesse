@@ -51,6 +51,12 @@ The SQL draft:
 - does not include destructive migrations
 - leaves RLS as a later production task
 
+After the base schema is applied, analytics views can be created with:
+
+```text
+database/postgres/003_pos_analytics_views.sql
+```
+
 ## pgAdmin Method
 
 1. Open pgAdmin 4.
@@ -118,6 +124,38 @@ psql -U postgres -d noblesse_analytics -f database/postgres/002_sample_pos_data.
 ```
 
 After loading the optional sample data, use `docs/POS_ANALYTICS_QUERIES.md` to confirm buyer and product analytics query results.
+
+## Analytics Views
+
+Run the files in this order:
+
+1. `database/postgres/001_pos_primary_schema.sql`
+2. Optional: `database/postgres/002_sample_pos_data.sql`
+3. `database/postgres/003_pos_analytics_views.sql`
+
+The view file uses `create or replace view` and does not include destructive migrations.
+
+pgAdmin method:
+
+1. Select the `noblesse_analytics` database.
+2. Open Query Tool.
+3. Paste the contents of `database/postgres/003_pos_analytics_views.sql`.
+4. Run the query.
+
+psql method:
+
+```bash
+psql -U postgres -d noblesse_analytics -f database/postgres/003_pos_analytics_views.sql
+```
+
+After creating the views, these checks can be run:
+
+```sql
+select * from v_buyer_purchase_summary;
+select * from v_buyer_monthly_amount_change;
+select * from v_buyer_product_summary;
+select * from v_buyer_reduced_products;
+```
 
 ## Backfill Usage
 
