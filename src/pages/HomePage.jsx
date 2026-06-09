@@ -5,15 +5,15 @@ import { useCommerce } from '../commerce/commerceStore'
 import { mockCollections } from '../data/catalog'
 
 const quickCategories = [
-  'New',
-  'Best',
-  'Ring',
-  'Barbell',
-  'Labret',
-  'Silver',
-  'Gold',
-  'Titanium',
-  'Surgical Steel',
+  { label: 'New', query: '?tag=new' },
+  { label: 'Best', query: '?tag=best' },
+  { label: 'Ring', query: '?category=piercing' },
+  { label: 'Barbell', query: '?category=barbell' },
+  { label: 'Labret', query: '?category=labret' },
+  { label: 'Silver', query: '?color=Silver' },
+  { label: 'Gold', query: '?color=Gold' },
+  { label: 'Titanium', query: '?material=Titanium' },
+  { label: 'Surgical Steel', query: '?material=Surgical%20Steel' },
 ]
 
 const collectionCopy = {
@@ -94,9 +94,9 @@ export function HomePage() {
         </div>
       </div>
       <div className="quick-category-grid">
-        {quickCategories.map((category) => <Link className="quick-category-card" key={category} to="/products">
-          <span>{category.slice(0, 1)}</span>
-          <strong>{category}</strong>
+        {quickCategories.map((category) => <Link className="quick-category-card" key={category.label} to={`/products${category.query}`}>
+          <span>{category.label.slice(0, 1)}</span>
+          <strong>{category.label}</strong>
         </Link>)}
       </div>
     </section>
@@ -111,7 +111,7 @@ export function HomePage() {
         <Link to="/products">Explore products</Link>
       </div>
       <div className="collection-grid">
-        {mockCollections.map((collection) => <Link className="collection-card" key={collection.collectionId} to="/products">
+        {mockCollections.map((collection) => <Link className="collection-card" key={collection.collectionId} to={`/products?collection=${collection.collectionId}`}>
           <small>{collection.productIds.length} styles</small>
           <strong>{collection.titleEn}</strong>
           <span>{collectionCopy[collection.collectionId]}</span>
