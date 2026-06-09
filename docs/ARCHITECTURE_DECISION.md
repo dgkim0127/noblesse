@@ -1,0 +1,166 @@
+# Noblesse Data Architecture Decision
+
+## Project Reality
+
+Noblesse Piercing looks like a lightweight premium catalog website, but the business logic is closer to a B2B wholesale transaction system.
+
+The system needs:
+
+- Buyer approval
+- Market-specific prices
+- MOQ
+- Request Quote
+- Admin confirmed quote
+- Price snapshot
+- Product performance analytics
+- Buyer activity analytics
+- Market/category/product reporting
+
+## Core Problem
+
+Client-side price calculation cannot be trusted. Users can manipulate browser-side values.
+
+Therefore:
+
+- Client-side price is only a display reference.
+- `priceSnapshot` records the requested price at inquiry time.
+- `adminQuote` stores the final confirmed quote.
+- Future server-side validation is required.
+- The final confirmed quote must be calculated by trusted server logic or an admin-confirmed workflow.
+
+## Option A: Firebase-only
+
+### Description
+
+Firebase-only means using:
+
+- Firebase Auth for Buyer and admin identity
+- Firestore for catalog, Buyer profile, Inquiry, and quote workflow data
+- Firebase Storage for product and banner images
+- Firebase Hosting for the React website
+- Cloud Functions for price, MOQ, discount, and market validation
+
+### Pros
+
+- Fast MVP path
+- Simple integration with the current React website
+- Good for catalog display
+- Easy image and auth setup
+- Cloud Functions can protect the Request Quote creation path
+
+### Cons
+
+- Complex analytics are harder than SQL
+- Aggregations are limited compared with PostgreSQL
+- Relationship-heavy data becomes harder to query
+- Product, Buyer, market, and category reporting may require extra denormalized collections
+- Long-term operational dashboards may require BigQuery export or separate analytics storage
+
+### Best For
+
+- 1st version
+- Simple catalog
+- Request Quote MVP
+- Buyer approval prototype
+- Image-centered product browsing
+
+### Risks
+
+- Long-term reporting may become difficult.
+- Product performance analysis may require BigQuery, scheduled exports, or a separate SQL database.
+- Firestore document shape must be carefully denormalized for every report.
+- Price validation still requires trusted Cloud Functions; client-side totals are not enough.
+
+## Option B: PostgreSQL / Supabase
+
+### Description
+
+PostgreSQL / Supabase means using:
+
+- PostgreSQL as the main operational database
+- Supabase Auth or external auth
+- Supabase Storage or Firebase Storage for product images
+- pgAdmin4 for database inspection and local operation
+- SQL views or materialized views for analytics
+- API, Edge Functions, or server-side services for trusted writes
+
+### Pros
+
+- Strong relational data model
+- Better for `inquiries`, `inquiry_items`, `admin_quotes`, and `admin_quote_items`
+- Better for product, Buyer, market, and category analytics
+- Easier reporting with SQL
+- pgAdmin4 can inspect and manage data directly during development
+- SQL constraints and indexes can protect data integrity
+
+### Cons
+
+- More setup than Firebase
+- Requires API/RLS/Edge Functions
+- Direct client database writes are dangerous if not protected
+- Needs stricter schema design before production
+- Storage/auth integration must be planned carefully
+
+### Best For
+
+- Real B2B wholesale system
+- Product performance tracking
+- Market-specific reporting
+- Long-term admin dashboard
+- Quote conversion analysis
+- Buyer activity analytics
+
+## Option C: Hybrid
+
+### Description
+
+Hybrid means using:
+
+- React frontend
+- Firebase Storage for images, if desired
+- Firebase Auth or Supabase Auth
+- PostgreSQL/Supabase for business data
+- pgAdmin4 for database management
+- Server-side validation for Request Quote and admin quote confirmation
+
+### Pros
+
+- Keeps image delivery simple
+- Uses SQL for complex business data
+- Good long-term structure
+- Allows a gradual migration from mock data to production data
+- Keeps catalog UX flexible while giving the admin side stronger reporting
+
+### Cons
+
+- More moving parts
+- Auth integration must be designed carefully
+- More deployment complexity
+- Requires clear ownership boundaries between Storage, auth, and business data
+
+## Recommendation
+
+Recommended path:
+
+- 1st version can keep the current React UI and mock structure.
+- For real production business data, use PostgreSQL/Supabase if analytics and wholesale reporting are important.
+- Firebase may still be used for Storage/Hosting if desired.
+- Do not rely on client-side price calculation.
+- Add server-side validation before storing final Inquiry and quote data.
+- Treat `priceSnapshot` as the Buyer-facing requested price at Inquiry time, not the final confirmed price.
+- Store final admin-confirmed quote data separately through `adminQuote`/`adminQuoteItems` or PostgreSQL `admin_quotes`/`admin_quote_items`.
+
+## Final Direction
+
+The strongest long-term architecture for Noblesse is:
+
+```text
+React website
+-> Auth provider
+-> API / server-side validation
+-> PostgreSQL or Supabase business data
+-> Storage/CDN for image files
+-> SQL views for admin analytics
+```
+
+This keeps the website premium and simple for Buyers while giving the business a reliable operational data model for wholesale pricing, Requests Quote, quote confirmation, and reporting.

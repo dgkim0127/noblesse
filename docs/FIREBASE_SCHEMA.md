@@ -12,6 +12,20 @@ Version 1 remains mock-only. Live Firebase connection is intentionally deferred.
 - Use uppercase markets: `KR`, `JP`, `US`, and `GLOBAL`.
 - Use `KRW`, `JPY`, and `USD` currency codes.
 
+## Architecture Note
+
+Firestore-only is suitable for the MVP catalog and Request Quote workflow, especially while Noblesse remains mock-first and image-centered.
+
+However, Noblesse is not only a public catalog. The long-term business needs include Buyer activity analytics, product performance reporting, market/category reporting, and requested-to-confirmed quote analysis. If those reporting needs become important, PostgreSQL/Supabase is recommended for core business data.
+
+Important pricing rules:
+
+- Client-side price calculation must not be trusted.
+- Client-side totals are display references only.
+- `priceSnapshot` is not a final confirmed price.
+- Trusted server logic must validate Buyer approval, market price, discount, MOQ, and totals before persistence.
+- The final confirmed quote should be stored separately as `adminQuote`/`adminQuoteItems`, or moved into PostgreSQL tables such as `admin_quotes` and `admin_quote_items`.
+
 ## `users`
 
 ### Purpose
