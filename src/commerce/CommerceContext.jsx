@@ -4,6 +4,19 @@ import { CommerceContext } from './commerceStore'
 
 const formatInquiryId = () => `INQ-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${String(Date.now()).slice(-3)}`
 
+const normalizeQuantity = (rawQuantity, moq) => {
+  const numeric = Number(rawQuantity)
+  const safeMoq = Math.max(Number(moq) || 1, 1)
+  return Math.max(safeMoq, Math.ceil((Number.isFinite(numeric) ? numeric : safeMoq) / safeMoq) * safeMoq)
+}
+
+const getDefaultOption = (product, option = {}) => ({
+  color: option.color ?? product?.colors?.[0] ?? '',
+  size: option.size ?? product?.sizes?.[0] ?? '',
+})
+
+const isSameInquiryItem = (item, productId, option) => item.productId === productId && item.color === option.color && item.size === option.size
+
 export function CommerceProvider({ children }) {
   const [viewerState, setViewerState] = useState('approved')
   const [inquiryItems, setInquiryItems] = useState([])
@@ -26,6 +39,7 @@ export function CommerceProvider({ children }) {
     const product = mockProducts.find((candidate) => candidate.productId === item.productId)
     const price = getPrice(item.productId)
     const priceSnapshot = approvedPrice(item.productId)
+    const option = getDefaultOption(product, item)
     return product && price && priceSnapshot ? {
       ...item,
       product,
@@ -35,8 +49,8 @@ export function CommerceProvider({ children }) {
       thumbnailUrl: product.imageSet?.thumb ?? '',
       imageAlt: product.imageAlt,
       material: product.material,
-      color: product.colors[0] ?? '',
-      size: product.sizes[0] ?? '',
+      color: option.color,
+      size: option.size,
       moq: price.moq,
       priceSnapshot,
       subtotal: priceSnapshot * item.quantity,
@@ -47,26 +61,36 @@ export function CommerceProvider({ children }) {
   const estimatedTotal = inquiryRows.reduce((sum, row) => sum + row.subtotal, 0)
   const totalQuantity = inquiryRows.reduce((sum, row) => sum + row.quantity, 0)
 
-  const addInquiryItem = (productId) => {
+  const addInquiryItem = (productId, option = {}, rawQuantity) => {
     if (!isApproved) return
+    const product = mockProducts.find((candidate) => candidate.productId === productId)
     const price = getPrice(productId)
-    if (!price) return
+    if (!product || !price) return
+    const selectedOption = getDefaultOption(product, option)
+    const quantity = normalizeQuantity(rawQuantity, price.moq)
     setInquiryItems((current) => {
-      const found = current.find((item) => item.productId === productId)
+      const found = current.find((item) => isSameInquiryItem(item, productId, selectedOption))
       return found
-        ? current.map((item) => item.productId === productId ? { ...item, quantity: item.quantity + price.moq } : item)
-        : [...current, { productId, quantity: price.moq }]
+        ? current.map((item) => isSameInquiryItem(item, productId, selectedOption) ? { ...item, quantity: item.quantity + quantity } : item)
+        : [...current, { productId, color: selectedOption.color, size: selectedOption.size, quantity }]
     })
   }
 
-  const updateInquiryQuantity = (productId, rawQuantity) => {
+  const updateInquiryQuantity = (productId, rawQuantity, option = {}) => {
+    const product = mockProducts.find((candidate) => candidate.productId === productId)
+    if (!product) return
+    const selectedOption = getDefaultOption(product, option)
     const moq = getPrice(productId)?.moq ?? 1
-    const numeric = Number(rawQuantity)
-    const quantity = Math.max(moq, Math.ceil((Number.isFinite(numeric) ? numeric : moq) / moq) * moq)
-    setInquiryItems((current) => current.map((item) => item.productId === productId ? { ...item, quantity } : item))
+    const quantity = normalizeQuantity(rawQuantity, moq)
+    setInquiryItems((current) => current.map((item) => isSameInquiryItem(item, productId, selectedOption) ? { ...item, quantity } : item))
   }
 
-  const removeInquiryItem = (productId) => setInquiryItems((current) => current.filter((item) => item.productId !== productId))
+  const removeInquiryItem = (productId, option = {}) => {
+    const product = mockProducts.find((candidate) => candidate.productId === productId)
+    if (!product) return
+    const selectedOption = getDefaultOption(product, option)
+    setInquiryItems((current) => current.filter((item) => !isSameInquiryItem(item, productId, selectedOption)))
+  }
 
   const submitRequestQuote = (requestMemo) => {
     if (!isApproved || inquiryRows.length === 0) return null

@@ -353,6 +353,7 @@ a {
 .hero-art,
 .catalog-image,
 .detail-image,
+.detail-thumb,
 .mini-image,
 .quote-thumb {
   position: relative;
@@ -685,6 +686,7 @@ a {
 
 .catalog-image img,
 .detail-image img,
+.detail-thumb img,
 .mini-image img,
 .quote-thumb img {
   position: absolute;
@@ -946,14 +948,45 @@ a {
 
 .detail {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  grid-template-columns: minmax(0, 3fr) minmax(320px, 2fr);
   gap: 46px;
+  align-items: start;
+}
+
+.detail-gallery {
+  display: grid;
+  gap: 12px;
 }
 
 .detail-image {
   aspect-ratio: 1;
   min-height: 520px;
   border-radius: 6px;
+}
+
+.detail-thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.detail-thumb {
+  width: 76px;
+  aspect-ratio: 1;
+  border: 1px solid #eee8e2;
+  border-radius: 8px;
+}
+
+.zoom-link {
+  display: inline-flex;
+  width: auto;
+  min-width: 112px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  color: #2a234f;
+  font-size: 12px;
+  text-decoration: none;
 }
 
 .detail-copy h1 {
@@ -967,6 +1000,12 @@ a {
 .detail-copy > p {
   color: #746c7a;
   line-height: 1.7;
+}
+
+.local-name {
+  margin-top: -6px;
+  color: #9a8f99;
+  font-size: 14px;
 }
 
 .detail-specs {
@@ -1008,6 +1047,13 @@ a {
   font-weight: 700;
 }
 
+.product-info-list dd small {
+  display: block;
+  margin-top: 4px;
+  color: #958b96;
+  font-weight: 500;
+}
+
 .product-description {
   margin: 24px 0;
 }
@@ -1027,6 +1073,131 @@ a {
 .detail-price {
   margin: 20px 0;
   font-size: 24px;
+}
+
+.detail-price strong,
+.detail-price span {
+  display: block;
+}
+
+.detail-price span {
+  margin-top: 5px;
+  color: #81788a;
+  font-size: 13px;
+}
+
+.option-group {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.option-group > span {
+  color: #2a234f;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.option-group > small,
+.quote-note {
+  color: #81788a;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.option-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.option-button {
+  border: 1px solid #e8dfdb;
+  border-radius: 999px;
+  padding: 8px 13px;
+  color: #665d70;
+  background: #fff;
+  cursor: pointer;
+}
+
+.option-button.active {
+  border-color: #ff8fa9;
+  color: #2a234f;
+  background: #fff1f4;
+  box-shadow: inset 0 0 0 1px #ff8fa9;
+}
+
+.quantity-control {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e8dfdb;
+  border-radius: 999px;
+  padding: 6px;
+  background: #fff;
+}
+
+.quantity-control button {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  color: #2a234f;
+  background: #fff1f4;
+  cursor: pointer;
+}
+
+.quantity-control input {
+  width: 76px;
+  border: 0;
+  color: #2a234f;
+  text-align: center;
+  font-weight: 700;
+  background: transparent;
+}
+
+.quote-note {
+  margin: 12px 0 0;
+}
+
+.detail-guide {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 44px;
+}
+
+.detail-guide article {
+  border: 1px solid #ece4df;
+  border-radius: 8px;
+  padding: 20px;
+  background: #fff;
+}
+
+.detail-guide h2,
+.related-products h2 {
+  margin: 0 0 8px;
+  color: #2a234f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+}
+
+.detail-guide p {
+  margin: 0;
+  color: #746c7a;
+  line-height: 1.7;
+}
+
+.related-products {
+  margin-top: 48px;
+}
+
+.related-empty {
+  color: #81788a;
 }
 
 .approval-lock,
@@ -1792,6 +1963,10 @@ a {
     display: block;
   }
 
+  .detail-gallery {
+    gap: 10px;
+  }
+
   .detail-image {
     min-height: 0;
     max-height: 420px;
@@ -1808,6 +1983,24 @@ a {
   .detail-copy .primary-action,
   .approval-lock .secondary-action {
     width: 100%;
+  }
+
+  .detail-guide {
+    grid-template-columns: 1fr;
+    margin-top: 28px;
+  }
+
+  .related-products {
+    margin-top: 34px;
+  }
+
+  .quantity-control {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .quantity-control input {
+    flex: 1;
   }
 
   .inquiry-summary {
