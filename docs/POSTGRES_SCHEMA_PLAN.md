@@ -12,6 +12,16 @@ It is a planning document only. Version 1 remains mock-first and does not add ru
 - Support market, category, product, and Buyer analytics with SQL.
 - Make pgAdmin4 inspection straightforward during local development.
 
+## Production Direction
+
+- PostgreSQL is mandatory for production business data.
+- Supabase can be used as managed PostgreSQL.
+- pgAdmin4 can be used to inspect and manage PostgreSQL data.
+- Firebase may remain for Hosting and optionally Storage.
+- Client-side writes must be limited by RLS or routed through Edge Functions/API.
+- Request Quote creation should be server-validated.
+- Browser-side price values are display-only and must not be trusted.
+
 ## Tables
 
 ## `users`

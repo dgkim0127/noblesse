@@ -18,6 +18,14 @@ Firestore-only is suitable for the MVP catalog and Request Quote workflow, espec
 
 However, Noblesse is not only a public catalog. The long-term business needs include Buyer activity analytics, product performance reporting, market/category reporting, and requested-to-confirmed quote analysis. If those reporting needs become important, PostgreSQL/Supabase is recommended for core business data.
 
+Production direction:
+
+- Firestore schema is MVP/reference only.
+- Production business data should move to PostgreSQL/Supabase.
+- Firebase Hosting target `noblesse` is used only for web deployment.
+- Do not mix the POS Hosting site and Noblesse Hosting site.
+- Do not rely on Firestore-only analytics for long-term wholesale reporting.
+
 Important pricing rules:
 
 - Client-side price calculation must not be trusted.

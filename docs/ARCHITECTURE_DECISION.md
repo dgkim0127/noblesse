@@ -150,6 +150,18 @@ Recommended path:
 - Treat `priceSnapshot` as the Buyer-facing requested price at Inquiry time, not the final confirmed price.
 - Store final admin-confirmed quote data separately through `adminQuote`/`adminQuoteItems` or PostgreSQL `admin_quotes`/`admin_quote_items`.
 
+## Final Decision
+
+PostgreSQL/Supabase is the required production business database for Noblesse Piercing.
+
+- Firebase may remain for Hosting and optionally Storage.
+- Firestore is not the long-term source of truth for business transactions.
+- Product, Buyer, price, Inquiry, Inquiry Item, Admin Quote, and Analytics data belong in PostgreSQL.
+- Supabase can be used as managed PostgreSQL.
+- pgAdmin4 is a PostgreSQL management tool, not a database.
+- Browser-side price calculation is never trusted.
+- Server-side validation or trusted database RPC must validate price, MOQ, Buyer status, market, discount, and totals.
+
 ## Final Direction
 
 The strongest long-term architecture for Noblesse is:
@@ -164,3 +176,23 @@ React website
 ```
 
 This keeps the website premium and simple for Buyers while giving the business a reliable operational data model for wholesale pricing, Requests Quote, quote confirmation, and reporting.
+
+## Service Layer Plan
+
+Current `src/services` uses mock data.
+
+Future service responsibilities:
+
+- `productService` can call a Supabase/PostgreSQL-backed API.
+- `pricingService` must not expose protected prices to `guest` or `pending` users.
+- `inquiryService.submitRequestQuote()` should call a trusted endpoint.
+
+Trusted Request Quote creation should:
+
+- validate Buyer status
+- reload `product_prices`
+- validate MOQ and minimum amount rules
+- recalculate `price_snapshot` and `subtotal`
+- insert `inquiries` and `inquiry_items` in a transaction
+
+Do not execute SQL directly from React components. Do not put database connection strings or privileged server keys in frontend code.
