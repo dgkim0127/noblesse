@@ -5,24 +5,40 @@ import {
   getApprovedBuyerPrice,
   getDefaultOption,
   getInquiries,
+  getBuyerAccessFeatures,
   getPriceForBuyer,
   getProducts,
   getViewerProfile,
   isApprovedBuyer,
+  isAdmin,
+  isGuestViewer,
+  isPendingBuyer,
   isSameInquiryItem,
   normalizeQuantity,
 } from '../services'
 import { CommerceContext } from './commerceStore'
 
 const formatInquiryId = () => `INQ-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${String(Date.now()).slice(-3)}`
+const viewerStateStorageKey = 'noblesse.viewerState'
+const viewerStates = new Set(['guest', 'pending', 'approved', 'admin'])
+
+const getInitialViewerState = () => {
+  if (typeof window === 'undefined') return 'approved'
+  const savedState = window.localStorage.getItem(viewerStateStorageKey)
+  return viewerStates.has(savedState) ? savedState : 'approved'
+}
 
 export function CommerceProvider({ children }) {
-  const [viewerState, setViewerState] = useState('approved')
+  const [viewerState, setViewerStateValue] = useState(getInitialViewerState)
   const [products] = useState(() => getProducts())
   const [inquiryItems, setInquiryItems] = useState([])
   const [inquiries, setInquiries] = useState(() => getInquiries())
   const buyer = getViewerProfile(viewerState)
   const isApproved = isApprovedBuyer(buyer)
+  const isPending = isPendingBuyer(buyer)
+  const isGuest = isGuestViewer(viewerState)
+  const isAdminViewer = isAdmin(buyer)
+  const buyerAccess = getBuyerAccessFeatures(viewerState, buyer)
 
   const getPrice = useCallback((productId) => getPriceForBuyer(productId, buyer, isApproved), [buyer, isApproved])
 
@@ -33,6 +49,14 @@ export function CommerceProvider({ children }) {
   const inquiryRows = useMemo(() => buildInquiryRows(inquiryItems, products, buyer, isApproved), [buyer, inquiryItems, isApproved, products])
   const estimatedTotal = inquiryRows.reduce((sum, row) => sum + row.subtotal, 0)
   const totalQuantity = inquiryRows.reduce((sum, row) => sum + row.quantity, 0)
+
+  const setViewerState = useCallback((nextViewerState) => {
+    const safeState = viewerStates.has(nextViewerState) ? nextViewerState : 'guest'
+    setViewerStateValue(safeState)
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(viewerStateStorageKey, safeState)
+    }
+  }, [])
 
   const addInquiryItem = (productId, option = {}, rawQuantity) => {
     if (!isApproved) return
@@ -85,12 +109,16 @@ export function CommerceProvider({ children }) {
     addInquiryItem,
     approvedPrice,
     buyer,
+    buyerAccess,
     estimatedTotal,
     getPrice,
     inquiries,
     inquiryItems,
     inquiryRows,
+    isAdmin: isAdminViewer,
     isApproved,
+    isGuest,
+    isPending,
     products,
     removeInquiryItem,
     setViewerState,

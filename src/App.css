@@ -837,6 +837,18 @@ a {
   margin-bottom: 24px;
 }
 
+.page-title > span {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 10px;
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: #2a234f;
+  background: #fff1f4;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .page-title h1 {
   font-size: 40px;
 }
@@ -1605,12 +1617,53 @@ a {
   line-height: 1.65;
 }
 
+.brand-mini {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #f0e8e3;
+  border-radius: 8px;
+  padding: 14px;
+  background: #fffdf9;
+}
+
+.brand-mini strong {
+  color: #2a234f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.brand-mini span,
+.approval-helper {
+  color: #80788b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 .auth-form {
   display: grid;
   gap: 12px;
 }
 
+.form-section {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  border: 1px solid #f0e8e3;
+  border-radius: 10px;
+  padding: 16px;
+  background: #fffdf9;
+}
+
+.form-section legend {
+  padding: 0 6px;
+  color: #2a234f;
+  font-weight: 700;
+}
+
 .register-grid {
+  display: grid;
+  gap: 12px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -1669,6 +1722,87 @@ a {
 
 .approval-note strong {
   color: #2a234f;
+}
+
+.approval-steps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.approval-steps span {
+  border: 1px solid #eee8e2;
+  border-radius: 999px;
+  padding: 9px 12px;
+  color: #2a234f;
+  background: #fff8fa;
+  font-size: 13px;
+}
+
+.preview-action,
+.logout-action {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.account-status-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #f0e8e3;
+  border-radius: 10px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at top right, rgb(255 143 169 / 16%), transparent 32%),
+    #fffdf9;
+}
+
+.account-status-card > svg {
+  color: #ff6f91;
+}
+
+.account-status-card strong {
+  color: #2a234f;
+}
+
+.buyer-feature-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.buyer-feature-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #eee8e2;
+  border-radius: 8px;
+  padding: 11px 12px;
+  color: #2a234f;
+  background: #fffdf9;
+}
+
+.buyer-feature-list li span {
+  order: 2;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.buyer-feature-list li.enabled span {
+  color: #1f6f45;
+  background: #edf8f1;
+}
+
+.buyer-feature-list li.disabled span {
+  color: #8b8293;
+  background: #f4f0ee;
 }
 
 .empty {
@@ -2065,9 +2199,24 @@ a {
   .account-panel dl,
   .account-panel dl div,
   .product-info-list div,
+  .approval-steps,
   .register-grid {
     grid-template-columns: 1fr;
     gap: 5px;
+  }
+
+  .account-status-card,
+  .form-section {
+    padding: 14px;
+  }
+
+  .buyer-feature-list li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .buyer-feature-list li span {
+    order: 0;
   }
 
   .account-panel dd {
