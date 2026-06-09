@@ -1,5 +1,6 @@
 import { Clock3, FileText, Heart, ListPlus, LogIn, Search, ShieldCheck, UserRound } from 'lucide-react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import noblesseLogo from '../assets/noblesse-logo.png'
 import { useCommerce } from '../commerce/commerceStore'
 
 const viewerLabels = {
@@ -20,7 +21,7 @@ export function StoreShell() {
     <header className="site-header">
       <div className="header-main">
         <Link className="brand" to="/" aria-label="Noblesse Piercing home">
-          <span className="brand-mark">N</span>
+          <img className="brand-logo" src={noblesseLogo} alt="Noblesse Piercing logo" width="48" height="48" />
           <span className="brand-korean">귀족 피어싱</span>
         </Link>
         <div className="brand-center">
