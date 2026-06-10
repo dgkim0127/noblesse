@@ -2263,12 +2263,15 @@ a {
 }
 
 .auth-page {
+  display: flex;
+  justify-content: center;
   padding-top: 42px;
 }
 
 .auth-panel {
   display: grid;
   gap: 14px;
+  width: 100%;
   max-width: 620px;
 }
 
@@ -2288,6 +2291,36 @@ a {
   margin: 0;
   color: #746b7e;
   line-height: 1.65;
+}
+
+.buyer-access-intro {
+  display: grid;
+  gap: 6px;
+}
+
+.buyer-access-notice {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgb(249 156 175 / 28%);
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #fff8fa, #fffdf9);
+  box-shadow: 0 14px 36px rgb(42 36 87 / 6%);
+}
+
+.buyer-access-notice strong {
+  color: var(--noblesse-sub);
+  font-size: 14px;
+}
+
+.buyer-access-notice ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: #746b7e;
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .brand-mini {

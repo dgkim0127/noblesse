@@ -11,27 +11,204 @@ import {
 } from '../services'
 import { useLocalePath } from '../utils/locale'
 
-const approvalHelper = 'Buyer Approval이 완료되면 Approved Buyer Price, MOQ, Inquiry List, Request Quote 기능을 사용할 수 있습니다.'
+const registerCopy = {
+  kr: {
+    eyebrow: '거래처 승인 신청',
+    title: '노블레스 바이어 승인 신청',
+    intro: '거래처 정보를 제출하면 Noblesse가 바이어 프로필을 검토합니다.',
+    helper: '승인 바이어는 회원가, MOQ, Inquiry List, Request Quote 기능을 사용할 수 있습니다.',
+    noticeTitle: '신청 전 확인해주세요',
+    noticeItems: [
+      '거래처 승인은 수동 검토로 처리합니다.',
+      '회원가는 승인 후 확인할 수 있습니다.',
+      '견적 요청은 최종 주문이 아닙니다.',
+      '최종 견적은 Noblesse 확인 후 안내합니다.',
+    ],
+    groups: { buyer: '바이어 정보', contact: '연락처 정보', business: '비즈니스 정보', memo: '요청 메모' },
+    fields: {
+      email: '이메일',
+      password: '비밀번호',
+      companyName: '회사명',
+      contactName: '담당자명',
+      country: '국가',
+      preferredLanguage: '선호 언어',
+      phone: '전화번호',
+      messengerType: '메신저 종류',
+      messengerId: '메신저 ID',
+      salesChannel: '판매 채널',
+      businessNumber: '사업자 번호',
+      requestMemo: '요청 메모',
+    },
+    memoPlaceholder: '운영 중인 스토어, 주요 시장, 관심 있는 피어싱 라인을 알려주세요.',
+    approvalTitle: '승인 안내',
+    approvalBody: '바이어 승인은 수동으로 검토됩니다. 승인 전까지 가격과 Request Quote 기능은 잠겨 있습니다.',
+    agreementsEyebrow: '약관',
+    agreementsTitle: '약관 및 개인정보 동의',
+    agreementsIntro: '거래처 승인 요청에는 필수 약관 3개 동의가 필요합니다. 마케팅 안내 수신은 선택입니다.',
+    allAgree: '전체 동의',
+    allAgreeSub: '필수 및 선택 항목에 모두 동의',
+    required: '[필수]',
+    optional: '[선택]',
+    viewDetails: '자세히 보기',
+    privacyPolicy: '개인정보 처리방침 보기',
+    warning: '거래처 승인 요청을 위해 필수 약관을 모두 동의해주세요.',
+    warningSub: 'Please agree to all required terms to request buyer access.',
+    submit: '바이어 신청하기',
+    back: '로그인으로 돌아가기',
+  },
+  en: {
+    eyebrow: 'BUYER ACCESS REQUEST',
+    title: 'Noblesse Buyer Access Request',
+    intro: 'Submit your company details so Noblesse can review your buyer profile.',
+    helper: 'Approved buyers can access buyer-only prices, MOQ, Inquiry List, and Request Quote.',
+    noticeTitle: 'Before you request access',
+    noticeItems: [
+      'Buyer approval is reviewed manually.',
+      'Buyer-only prices are available after approval.',
+      'Request Quote is not a final order.',
+      'Final quote is confirmed by Noblesse.',
+    ],
+    groups: { buyer: 'Buyer Information', contact: 'Contact Information', business: 'Business Information', memo: 'Request Memo' },
+    fields: {
+      email: 'Email',
+      password: 'Password',
+      companyName: 'Company Name',
+      contactName: 'Contact Name',
+      country: 'Country',
+      preferredLanguage: 'Preferred Language',
+      phone: 'Phone',
+      messengerType: 'Messenger Type',
+      messengerId: 'Messenger ID',
+      salesChannel: 'Sales Channel',
+      businessNumber: 'Business Number',
+      requestMemo: 'Request Memo',
+    },
+    memoPlaceholder: 'Tell us about your store, market, or preferred piercing line.',
+    approvalTitle: 'Approval Notice',
+    approvalBody: 'Buyer Approval is reviewed manually. Prices and Request Quote features remain locked until approval.',
+    agreementsEyebrow: 'AGREEMENTS',
+    agreementsTitle: 'Terms and privacy consent',
+    agreementsIntro: 'Buyer Access Request requires acceptance of three required agreement items. Marketing updates are optional.',
+    allAgree: 'Agree to all',
+    allAgreeSub: 'Agree to all required and optional items',
+    required: '[Required]',
+    optional: '[Optional]',
+    viewDetails: 'View details',
+    privacyPolicy: 'View Privacy Policy',
+    warning: 'Please agree to all required terms to request buyer access.',
+    warningSub: 'All required items must be checked before submitting.',
+    submit: 'Request Buyer Access',
+    back: 'Back to Login',
+  },
+  jp: {
+    eyebrow: '取引先承認申請',
+    title: 'Noblesse バイヤー承認申請',
+    intro: '取引先情報をご提出いただくと、Noblesseがバイヤープロフィールを確認します。',
+    helper: '承認後、会員価格、MOQ、Inquiry List、Request Quoteをご利用いただけます。',
+    noticeTitle: '申請前にご確認ください',
+    noticeItems: [
+      '取引先承認は手動で確認します。',
+      'バイヤー専用価格は承認後に確認できます。',
+      'Request Quoteは最終注文ではありません。',
+      '最終見積はNoblesse確認後にご案内します。',
+    ],
+    groups: { buyer: 'バイヤー情報', contact: '連絡先情報', business: '事業者情報', memo: 'リクエストメモ' },
+    fields: {
+      email: 'メールアドレス',
+      password: 'パスワード',
+      companyName: '会社名',
+      contactName: '担当者名',
+      country: '国',
+      preferredLanguage: '希望言語',
+      phone: '電話番号',
+      messengerType: 'メッセンジャー種別',
+      messengerId: 'メッセンジャーID',
+      salesChannel: '販売チャネル',
+      businessNumber: '事業者番号',
+      requestMemo: 'リクエストメモ',
+    },
+    memoPlaceholder: '運営中のストア、主な市場、関心のあるピアスラインを入力してください。',
+    approvalTitle: '承認案内',
+    approvalBody: 'バイヤー承認は手動で確認されます。承認前は価格とRequest Quote機能は利用できません。',
+    agreementsEyebrow: '規約',
+    agreementsTitle: '規約および個人情報同意',
+    agreementsIntro: '取引先承認申請には3つの必須同意が必要です。マーケティング案内の受信は任意です。',
+    allAgree: 'すべて同意',
+    allAgreeSub: '必須および任意項目にすべて同意',
+    required: '[必須]',
+    optional: '[任意]',
+    viewDetails: '詳細を見る',
+    privacyPolicy: '個人情報処理方針を見る',
+    warning: '取引先承認申請のため、必須規約にすべて同意してください。',
+    warningSub: 'Please agree to all required terms to request buyer access.',
+    submit: 'バイヤー申請',
+    back: 'ログインへ戻る',
+  },
+  cn: {
+    eyebrow: '买家权限申请',
+    title: 'Noblesse 买家权限申请',
+    intro: '提交公司资料后，Noblesse 将审核您的买家资料。',
+    helper: '审核通过后，可使用买家价格、MOQ、Inquiry List 和 Request Quote。',
+    noticeTitle: '申请前请确认',
+    noticeItems: [
+      '买家审批将由人工审核。',
+      '买家专属价格会在审批后开放。',
+      'Request Quote 不是最终订单。',
+      '最终报价由 Noblesse 确认后提供。',
+    ],
+    groups: { buyer: '买家信息', contact: '联系方式', business: '业务信息', memo: '申请备注' },
+    fields: {
+      email: '邮箱',
+      password: '密码',
+      companyName: '公司名称',
+      contactName: '联系人',
+      country: '国家',
+      preferredLanguage: '首选语言',
+      phone: '电话',
+      messengerType: '通讯工具类型',
+      messengerId: '通讯工具 ID',
+      salesChannel: '销售渠道',
+      businessNumber: '营业登记号',
+      requestMemo: '申请备注',
+    },
+    memoPlaceholder: '请填写您的店铺、主要市场或感兴趣的穿孔产品线。',
+    approvalTitle: '审核说明',
+    approvalBody: '买家资质将由人工审核。审核通过前，价格和 Request Quote 功能将保持锁定。',
+    agreementsEyebrow: '条款',
+    agreementsTitle: '条款及个人信息同意',
+    agreementsIntro: '申请合作买家权限需要同意3项必选条款。营销及新品通知为可选项。',
+    allAgree: '全部同意',
+    allAgreeSub: '同意所有必选及可选项目',
+    required: '[必选]',
+    optional: '[可选]',
+    viewDetails: '查看详情',
+    privacyPolicy: '查看隐私政策',
+    warning: '请同意所有必选条款后再申请买家权限。',
+    warningSub: 'Please agree to all required terms to request buyer access.',
+    submit: '提交买家申请',
+    back: '返回登录',
+  },
+}
 
-const buyerFields = [
-  ['Email', 'email', 'email'],
-  ['Password', 'password', 'password'],
-  ['Company Name', 'companyName', 'text'],
-  ['Contact Name', 'contactName', 'text'],
-  ['Country', 'country', 'text'],
-  ['Preferred Language', 'preferredLanguage', 'text'],
-]
-
-const contactFields = [
-  ['Phone', 'phone', 'tel'],
-  ['Messenger Type', 'messengerType', 'text'],
-  ['Messenger ID', 'messengerId', 'text'],
-]
-
-const businessFields = [
-  ['Sales Channel', 'salesChannel', 'text'],
-  ['Business Number', 'businessNumber', 'text'],
-]
+const fieldGroups = {
+  buyer: [
+    ['email', 'email'],
+    ['password', 'password'],
+    ['companyName', 'text'],
+    ['contactName', 'text'],
+    ['country', 'text'],
+    ['preferredLanguage', 'text'],
+  ],
+  contact: [
+    ['phone', 'tel'],
+    ['messengerType', 'text'],
+    ['messengerId', 'text'],
+  ],
+  business: [
+    ['salesChannel', 'text'],
+    ['businessNumber', 'text'],
+  ],
+}
 
 function FieldGroup({ title, children }) {
   return <fieldset className="form-section">
@@ -40,32 +217,36 @@ function FieldGroup({ title, children }) {
   </fieldset>
 }
 
-function AgreementDocument({ document }) {
+function AgreementDocument({ document, locale }) {
+  const useEnglish = locale !== 'kr'
+
   return <div className="agreement-scroll">
     {document.sections.map((section) => <section key={`${document.key}-${section.headingEn}`} className="agreement-copy-section">
-      <h4>{section.headingKo}</h4>
-      <p>{section.bodyKo}</p>
-      <h5>{section.headingEn}</h5>
-      <p>{section.bodyEn}</p>
+      <h4>{useEnglish ? section.headingEn : section.headingKo}</h4>
+      <p>{useEnglish ? section.bodyEn : section.bodyKo}</p>
+      {locale === 'kr' && <>
+        <h5>{section.headingEn}</h5>
+        <p>{section.bodyEn}</p>
+      </>}
     </section>)}
   </div>
 }
 
-function AgreementRow({ agreement, checked, onChange }) {
-  const labelPrefix = agreement.required ? '[필수]' : '[선택]'
+function AgreementRow({ agreement, checked, locale, onChange, t }) {
+  const labelPrefix = agreement.required ? t.required : t.optional
 
   return <div className={`agreement-card agreement-row ${agreement.required ? 'required' : 'optional'}`}>
     <label>
       <input checked={checked} data-agreement-key={agreement.key} onChange={(event) => onChange(agreement.key, event.target.checked)} type="checkbox" />
       <span>
-        <strong>{labelPrefix} {agreement.titleKo}</strong>
-        <small>{agreement.titleEn}</small>
+        <strong>{labelPrefix} {locale === 'kr' ? agreement.titleKo : agreement.titleEn}</strong>
+        <small>{locale === 'kr' ? agreement.titleEn : agreement.titleKo}</small>
         <em className="agreement-version">version: {agreement.version}</em>
       </span>
     </label>
     <details className="agreement-details">
-      <summary>자세히 보기 / View details</summary>
-      <AgreementDocument document={agreement} />
+      <summary>{t.viewDetails}</summary>
+      <AgreementDocument document={agreement} locale={locale} />
     </details>
   </div>
 }
@@ -73,7 +254,8 @@ function AgreementRow({ agreement, checked, onChange }) {
 export function RegisterPage() {
   const navigate = useNavigate()
   const { setViewerState } = useCommerce()
-  const { toLocalePath } = useLocalePath()
+  const { locale, toLocalePath } = useLocalePath()
+  const t = registerCopy[locale] ?? registerCopy.kr
   const [agreements, setAgreements] = useState(getInitialAgreements)
   const agreementSummaries = getAgreementSummaryForRegister()
   const privacyPolicy = getAgreementDocument('privacy_policy')
@@ -99,44 +281,57 @@ export function RegisterPage() {
     navigate(toLocalePath('/approval-pending'))
   }
 
+  const renderField = ([name, type]) => <label key={name}>
+    {t.fields[name]}
+    <input autoComplete="off" name={name} placeholder={t.fields[name]} type={type} />
+  </label>
+
   return <main className="content auth-page">
     <section className="account-panel auth-panel wide">
       <FileText size={25} />
-      <p className="eyebrow">BUYER ACCESS</p>
-      <h1>Request access to Approved Buyer Price</h1>
-      <p>Submit your buyer information for Noblesse review. This mock form routes to the pending state before real authentication is connected.</p>
-      <p className="approval-helper">{approvalHelper}</p>
+      <p className="eyebrow">{t.eyebrow}</p>
+      <h1>{t.title}</h1>
+      <div className="buyer-access-intro">
+        <p>{t.intro}</p>
+        <p className="approval-helper">{t.helper}</p>
+      </div>
+      <aside className="buyer-access-notice" aria-label={t.noticeTitle}>
+        <strong>{t.noticeTitle}</strong>
+        <ul>
+          {t.noticeItems.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+      </aside>
       <form className="auth-form" onSubmit={submitRequest}>
-        <FieldGroup title="Buyer Information">
-          {buyerFields.map(([label, name, type]) => <label key={name}>{label}<input autoComplete="off" name={name} placeholder={label} type={type} /></label>)}
+        <FieldGroup title={t.groups.buyer}>
+          {fieldGroups.buyer.map(renderField)}
         </FieldGroup>
-        <FieldGroup title="Contact Information">
-          {contactFields.map(([label, name, type]) => <label key={name}>{label}<input autoComplete="off" name={name} placeholder={label} type={type} /></label>)}
+        <FieldGroup title={t.groups.contact}>
+          {fieldGroups.contact.map(renderField)}
         </FieldGroup>
-        <FieldGroup title="Business Information">
-          {businessFields.map(([label, name, type]) => <label key={name}>{label}<input autoComplete="off" name={name} placeholder={label} type={type} /></label>)}
+        <FieldGroup title={t.groups.business}>
+          {fieldGroups.business.map(renderField)}
         </FieldGroup>
         <fieldset className="form-section">
-          <legend>Request Memo</legend>
-          <label>Request Memo<textarea name="requestMemo" placeholder="Tell us about your store, market, or preferred piercing line." /></label>
+          <legend>{t.groups.memo}</legend>
+          <label>{t.fields.requestMemo}<textarea name="requestMemo" placeholder={t.memoPlaceholder} /></label>
         </fieldset>
         <div className="approval-note">
-          <strong>Approval Notice</strong>
-          <span>Buyer Approval is reviewed manually. Prices and Request Quote features remain locked until approval.</span>
+          <strong>{t.approvalTitle}</strong>
+          <span>{t.approvalBody}</span>
         </div>
 
         <section className="agreement-section" aria-labelledby="agreement-title">
           <div className="agreement-summary">
             <div>
-              <p className="eyebrow">AGREEMENTS</p>
-              <h2 id="agreement-title">약관 및 개인정보 동의</h2>
-              <span>거래처 승인 요청에는 필수 약관 3개 동의가 필요합니다. 마케팅 안내 수신은 선택입니다.</span>
+              <p className="eyebrow">{t.agreementsEyebrow}</p>
+              <h2 id="agreement-title">{t.agreementsTitle}</h2>
+              <span>{t.agreementsIntro}</span>
             </div>
             <label className="agreement-card agreement-row agreement-all">
               <input checked={allAccepted} data-testid="agreement-all" onChange={(event) => setAllAgreements(event.target.checked)} type="checkbox" />
               <span>
-                <strong>전체 동의</strong>
-                <small>Agree to all required and optional items</small>
+                <strong>{t.allAgree}</strong>
+                <small>{t.allAgreeSub}</small>
               </span>
             </label>
           </div>
@@ -145,23 +340,25 @@ export function RegisterPage() {
             agreement={agreement}
             checked={agreements[agreement.key] === true}
             key={agreement.key}
+            locale={locale}
             onChange={setAgreement}
+            t={t}
           />)}
 
           {privacyPolicy && <details className="agreement-details privacy-policy-detail">
-            <summary>개인정보 처리방침 보기 / View Privacy Policy</summary>
-            <AgreementDocument document={privacyPolicy} />
+            <summary>{t.privacyPolicy}</summary>
+            <AgreementDocument document={privacyPolicy} locale={locale} />
           </details>}
 
           {!requiredAccepted && <p className="agreement-warning">
-            Please agree to all required terms to request buyer access.
-            <span>거래처 승인 요청을 위해 필수 약관을 모두 동의해주세요.</span>
+            {t.warning}
+            <span>{t.warningSub}</span>
           </p>}
         </section>
 
         <div className="account-actions agreement-actions">
-          <button className="primary-action" data-testid="request-buyer-access-submit" disabled={!requiredAccepted} type="submit">Request Buyer Access</button>
-          <Link className="secondary-action" to={toLocalePath('/login')}>Back to Login</Link>
+          <button className="primary-action" data-testid="request-buyer-access-submit" disabled={!requiredAccepted} type="submit">{t.submit}</button>
+          <Link className="secondary-action" to={toLocalePath('/login')}>{t.back}</Link>
         </div>
       </form>
     </section>
