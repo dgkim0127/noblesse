@@ -2298,6 +2298,11 @@ a {
   gap: 6px;
 }
 
+.english-support {
+  color: #8a8190;
+  font-size: 13px;
+}
+
 .buyer-access-notice {
   display: grid;
   gap: 10px;
@@ -2320,6 +2325,11 @@ a {
   padding-left: 18px;
   color: #746b7e;
   font-size: 13px;
+  line-height: 1.55;
+}
+
+.buyer-access-notice small {
+  color: #8a8190;
   line-height: 1.55;
 }
 

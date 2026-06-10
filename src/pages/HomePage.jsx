@@ -276,7 +276,7 @@ const heroBanners = [
       cn: '锆石系列',
     },
     text: {
-      kr: '큐빅과 오팔 포인트 중심의 피어싱 셀렉션',
+      kr: '큐빅과 오팔 디테일 중심의 피어싱 셀렉션',
       en: 'A piercing selection focused on cubic and opal details.',
       jp: 'キュービックとオパールポイント中心のピアスセレクション。',
       cn: '以锆石与欧泊细节为中心的穿孔饰品选择。',
