@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { useLocalePath } from '../utils/locale'
 
-const brandKoreanName = '귀족 피어싱'
+const brandKoreanName = '귀족'
 const brandLanguageLabel = '피어싱 / Piercing / ピアス / 冲孔'
 
 export function LoginPage() {

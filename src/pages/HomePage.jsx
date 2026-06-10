@@ -9,7 +9,7 @@ import { useLocalePath } from '../utils/locale'
 const homeCopy = {
   kr: {
     eyebrow: '한국 피어싱 도매 카탈로그',
-    title: '귀족 피어싱',
+    title: '귀족',
     lead: '글로벌 고객을 위한 프리미엄 피어싱 카탈로그입니다.',
     note: '회원 확인 후 가격과 견적 문의 기능을 이용할 수 있습니다.',
     viewCatalog: '상품 보기',
@@ -35,7 +35,7 @@ const homeCopy = {
     exportTitle: '수출 베스트',
     exportNote: '소싱 정보가 명확한 수출 추천 스타일입니다.',
     viewAll: '전체 보기',
-    campaignTitle: '귀족 피어싱 시그니처',
+    campaignTitle: '귀족 시그니처',
     campaignNote: '글로벌 고객을 위해 큐레이션한 피어싱 스타일입니다.',
     campaignCta: '확인 후 견적 문의',
     recentTitle: '최근 본 상품',

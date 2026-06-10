@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { Clock3, Heart, LogIn, Search, ShieldCheck, UserRound } from 'lucide-react'
+import { ChevronDown, Clock3, Heart, Search, ShieldCheck, UserRound } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import noblesseLogo from '../assets/noblesse-logo.png'
 import { useCommerce } from '../commerce/commerceStore'
 import { supportedLocales, useLocalePath } from '../utils/locale'
 
 const searchHistoryKey = 'noblesse-search-history'
+const topMarqueeText = 'SILVER 925 & Surgical Piercing & Brass Piercing · 실버 & 써지컬 & 신주 피어싱 · Allergy-conscious materials · Since 2010'
 
 const shellCopy = {
   kr: {
@@ -33,6 +34,8 @@ const shellCopy = {
     mainNav: '주요 메뉴',
     memberNav: '회원 바로가기',
     popularHeading: '인기 검색어',
+    recentViewed: '최근 본 상품',
+    noRecentViewed: '최근 본 상품이 없습니다.',
     popularSearches: [
       { term: '티타늄 라블렛', trend: 'up' },
       { term: '써지컬 스틸 바벨', trend: 'up' },
@@ -77,6 +80,8 @@ const shellCopy = {
     mainNav: 'Main menu',
     memberNav: 'Member shortcuts',
     popularHeading: 'Popular searches',
+    recentViewed: 'Recently viewed',
+    noRecentViewed: 'No recently viewed products yet.',
     popularSearches: [
       { term: 'Titanium labret', trend: 'up' },
       { term: 'Surgical steel barbell', trend: 'up' },
@@ -121,6 +126,8 @@ const shellCopy = {
     mainNav: 'メインメニュー',
     memberNav: '会員ショートカット',
     popularHeading: '人気検索',
+    recentViewed: '最近見た商品',
+    noRecentViewed: '最近見た商品はありません。',
     popularSearches: [
       { term: 'チタンラブレット', trend: 'up' },
       { term: 'サージカルバーベル', trend: 'up' },
@@ -165,6 +172,8 @@ const shellCopy = {
     mainNav: '主菜单',
     memberNav: '会员快捷入口',
     popularHeading: '热门搜索',
+    recentViewed: '最近浏览',
+    noRecentViewed: '暂无最近浏览商品。',
     popularSearches: [
       { term: '钛钢唇钉', trend: 'up' },
       { term: '医用钢杠铃', trend: 'up' },
@@ -209,10 +218,15 @@ function AnimatedBrandName({ text }) {
   </span>
 }
 
-function LanguageSwitch({ countryLabels, languageSwitch, locale, toLanguagePath }) {
+function LanguageSwitch({ countryLabels, isCompact = false, languageSwitch, locale, toLanguagePath }) {
   const activeIndex = supportedLocales.indexOf(locale)
+  const activeCountry = countryLabels[locale]
 
-  return <div className="language-switch compact" style={{ '--language-index': activeIndex }} aria-label={languageSwitch}>
+  return <div className={`language-switch compact ${isCompact ? 'is-dropdown' : ''}`} style={{ '--language-index': activeIndex }} aria-label={languageSwitch}>
+    <button className="language-dropdown-trigger" type="button" aria-label={`${languageSwitch}: ${activeCountry}`}>
+      <span className={`flag-icon flag-${locale}`} aria-hidden="true" />
+      <ChevronDown size={13} />
+    </button>
     <span className="language-switch-indicator" aria-hidden="true" />
     {supportedLocales.map((item) => <Link
       aria-label={countryLabels[item]}
@@ -244,9 +258,13 @@ export function StoreShell() {
   const location = useLocation()
   const navRef = useRef(null)
   const searchRef = useRef(null)
+  const compactSearchRef = useRef(null)
+  const compactSearchInputRef = useRef(null)
   const [headerSearch, setHeaderSearch] = useState('')
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [isCompactSearchOpen, setIsCompactSearchOpen] = useState(false)
   const [searchHistory, setSearchHistory] = useState(readSearchHistory)
+  const [isHeaderCompact, setIsHeaderCompact] = useState(false)
   const [navIndicator, setNavIndicator] = useState({ left: 0, ready: false, width: 0 })
   const { buyerAccess, inquiryItems, isAdmin, isApproved, isGuest, isPending, setViewerState, viewerState } = useCommerce()
   const { locale, localeMeta, toLanguagePath, toLocalePath } = useLocalePath()
@@ -284,8 +302,50 @@ export function StoreShell() {
   }, [buyerAccess.canRequestQuote, isPending, location.pathname, locale])
 
   useEffect(() => {
+    const handleScroll = () => {
+      const compact = window.scrollY > 260
+      setIsHeaderCompact(compact)
+      document.documentElement.classList.toggle('noblesse-compact-header', compact)
+    }
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    document.addEventListener('scroll', handleScroll, { passive: true })
+    let animationFrame = 0
+    const interval = window.setInterval(handleScroll, 120)
+
+    const syncScroll = () => {
+      handleScroll()
+      animationFrame = window.requestAnimationFrame(syncScroll)
+    }
+
+    animationFrame = window.requestAnimationFrame(syncScroll)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      document.removeEventListener('scroll', handleScroll)
+      window.cancelAnimationFrame(animationFrame)
+      window.clearInterval(interval)
+      document.documentElement.classList.remove('noblesse-compact-header')
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isHeaderCompact) setIsCompactSearchOpen(false)
+  }, [isHeaderCompact])
+
+  useEffect(() => {
+    if (!isCompactSearchOpen) return
+    window.requestAnimationFrame(() => {
+      window.setTimeout(() => compactSearchInputRef.current?.focus(), 0)
+    })
+  }, [isCompactSearchOpen])
+
+  useEffect(() => {
     const handleOutsideClick = (event) => {
       if (!searchRef.current?.contains(event.target)) setIsSearchOpen(false)
+      if (!compactSearchRef.current?.contains(event.target) && !event.target.closest?.('.compact-search-action')) {
+        setIsCompactSearchOpen(false)
+      }
     }
 
     document.addEventListener('mousedown', handleOutsideClick)
@@ -304,6 +364,7 @@ export function StoreShell() {
     saveSearchHistory(query)
     setHeaderSearch(query)
     setIsSearchOpen(false)
+    setIsCompactSearchOpen(false)
     const target = query ? `/products?q=${encodeURIComponent(query)}` : '/products'
     navigate(toLocalePath(target))
   }
@@ -324,11 +385,26 @@ export function StoreShell() {
     window.localStorage.removeItem(searchHistoryKey)
   }
 
-  return <div className="site-shell">
-    <header className="site-header">
+  const toggleCompactSearch = () => {
+    setIsCompactSearchOpen((current) => !current)
+    setIsSearchOpen(false)
+  }
+
+  return <div className={`site-shell ${isHeaderCompact ? 'has-compact-header' : ''}`}>
+    <div className="top-marquee" aria-label="Noblesse material notice">
+      <div className="top-marquee-track">
+        {Array.from({ length: 4 }).map((_, index) => <span key={index}>{topMarqueeText}</span>)}
+      </div>
+    </div>
+
+    <header className={`site-header ${isHeaderCompact ? 'is-compact' : ''}`}>
       <div className="header-main">
         <Link className="brand" to={toLocalePath('/')} aria-label="Noblesse Piercing home">
           <img className="brand-logo" src={noblesseLogo} alt="Noblesse Piercing logo" width="48" height="48" />
+          <AnimatedBrandName text={localeMeta.brandName} />
+        </Link>
+
+        <Link className="compact-brand-title" to={toLocalePath('/')} aria-label="Noblesse Piercing home">
           <AnimatedBrandName text={localeMeta.brandName} />
         </Link>
 
@@ -385,10 +461,7 @@ export function StoreShell() {
         </div>
 
         <nav className="header-actions" aria-label={copy.memberNav}>
-          {isGuest && <>
-            <IconAction label={copy.login} to={toLocalePath('/login')}><LogIn size={18} /></IconAction>
-            <IconAction label={copy.register} to={toLocalePath('/register')}><UserRound size={18} /></IconAction>
-          </>}
+          {isGuest && <IconAction label={copy.login} to={toLocalePath('/login')}><UserRound size={18} /></IconAction>}
           {isPending && <>
             <IconAction label={copy.pending} to={toLocalePath('/approval-pending')}><Clock3 size={18} /></IconAction>
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
@@ -404,9 +477,54 @@ export function StoreShell() {
             <IconAction label={copy.adminPreview} to={toLocalePath('/account')}><ShieldCheck size={18} /></IconAction>
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}
-          <LanguageSwitch countryLabels={copy.countryLabels} languageSwitch={copy.languageSwitch} locale={locale} toLanguagePath={toLanguagePath} />
+          <button className={`icon-action compact-search-action ${isCompactSearchOpen ? 'active' : ''}`} type="button" aria-label={copy.search} title={copy.search} onClick={toggleCompactSearch}><Search size={18} /></button>
+          <LanguageSwitch countryLabels={copy.countryLabels} isCompact={isHeaderCompact} languageSwitch={copy.languageSwitch} locale={locale} toLanguagePath={toLanguagePath} />
         </nav>
       </div>
+
+      {isCompactSearchOpen && <div className="compact-search-panel" ref={compactSearchRef}>
+        <form className="compact-search-form" role="search" onSubmit={submitSearch}>
+          <input
+            aria-label={copy.searchAria}
+            autoComplete="off"
+            autoFocus
+            name="compactSiteSearch"
+            onChange={(event) => setHeaderSearch(event.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            placeholder={copy.searchPlaceholder}
+            ref={compactSearchInputRef}
+            type="search"
+            value={headerSearch}
+          />
+          <button aria-label={copy.search} type="submit"><Search size={24} /></button>
+        </form>
+
+        <div className="compact-search-content">
+          <section>
+            <h2>{copy.popularHeading}</h2>
+            <div className="compact-popular-list">
+              {copy.popularSearches.map(({ term, trend }, index) => <button key={term} type="button" onClick={() => runHeaderSearch(term)}>
+                <b>{index + 1}</b>
+                <i className={`trend trend-${trend}`} aria-hidden="true" />
+                <span>{term}</span>
+              </button>)}
+            </div>
+          </section>
+
+          <section>
+            <h2>{copy.recentSearches}</h2>
+            {searchHistory.length > 0
+              ? <div className="compact-history-list">{searchHistory.slice(0, 6).map((term) => <button key={term} type="button" onClick={() => runHeaderSearch(term)}>{term}</button>)}</div>
+              : <p>{copy.noHistory}</p>}
+            <button className="clear-search-history compact-clear" type="button" onClick={clearSearchHistory}>{copy.clearHistory}</button>
+          </section>
+
+          <section>
+            <h2>{copy.recentViewed}</h2>
+            <p>{copy.noRecentViewed}</p>
+          </section>
+        </div>
+      </div>}
 
       <div className="header-lower">
         <nav className="header-nav" ref={navRef} aria-label={copy.mainNav}>

@@ -7,7 +7,7 @@ export const localeMeta = {
   kr: {
     code: 'KR',
     flag: '🇰🇷',
-    brandName: '귀족 피어싱',
+    brandName: '귀족',
     languageLabel: '피어싱 / Piercing / ピアス / 冲孔',
   },
   en: {
