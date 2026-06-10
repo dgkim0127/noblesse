@@ -1,27 +1,27 @@
 export const privacyPolicy = {
   key: 'privacy_policy',
   version: 'privacy-policy-v1.0',
-  titleKo: 'Noblesse Piercing 개인정보 처리방침',
+  titleKo: '귀족 개인정보 처리방침',
   titleEn: 'Noblesse Piercing Privacy Policy',
   required: false,
   sections: [
     {
       headingKo: '제1조 처리 목적',
       headingEn: 'Article 1. Processing Purpose',
-      bodyKo: 'Noblesse는 Member request, Member Review, Member price 접근, Inquiry list, Quote Inquiry, Inquiry history, Final quote 안내, 고객 문의, 서비스 운영 및 부정 이용 방지를 위해 개인정보를 처리합니다.',
-      bodyEn: 'Noblesse processes personal information for Member request, Member Review, Member price access, Inquiry list, Quote Inquiry, Inquiry history, Final quote guidance, customer support, service operation, and misuse prevention.',
+      bodyKo: 'Noblesse는 도매 회원가입 신청, 도매 회원 승인 검토, 회원가 접근 권한 관리, Inquiry List, Request Quote, My Inquiries, Admin Quote 안내, 고객 문의, 서비스 운영 및 부정 이용 방지를 위해 개인정보를 처리합니다.',
+      bodyEn: 'Noblesse processes personal information for wholesale member requests, approval review, member price access management, Inquiry List, Request Quote, My Inquiries, Admin Quote guidance, customer support, service operation, and misuse prevention.',
     },
     {
       headingKo: '제2조 처리하는 개인정보 항목',
       headingEn: 'Article 2. Personal Information Items',
-      bodyKo: '처리 항목은 이메일, 비밀번호, 회사명, 담당자명, 국가, 선호 언어, 전화번호, 메신저 종류, 메신저 ID, 판매 채널, 사업자 정보, 요청 메모, 서비스 이용 기록, 접속 로그, 쿠키, Inquiry list 기록, Quote Inquiry 기록, Inquiry history 기록, 회원 상태, assignedMarket, currency, discountRate, minOrderAmount입니다.',
-      bodyEn: 'Processed items include email, password, company name, contact name, country, preferred language, phone, messenger type, messenger ID, sales channel, business information, request memo, service usage records, access logs, cookies, Inquiry list records, Quote Inquiry records, Inquiry history records, review status, assignedMarket, currency, discountRate, and minOrderAmount.',
+      bodyKo: '처리 항목은 이메일, 비밀번호, 회사명, 담당자명, 국가, 선호 언어, 전화번호, 메신저 종류, 메신저 ID, 판매 채널, 사업자 정보, 요청 메모, 서비스 이용 기록, 접속 로그, 쿠키, Inquiry List 기록, Request Quote 기록, My Inquiries 기록, 회원 상태, assignedMarket, currency, discountRate, minOrderAmount입니다.',
+      bodyEn: 'Processed items include email, password, company name, contact name, country, preferred language, phone, messenger type, messenger ID, sales channel, business information, request memo, service usage records, access logs, cookies, Inquiry List records, Request Quote records, My Inquiries records, review status, assignedMarket, currency, discountRate, and minOrderAmount.',
     },
     {
       headingKo: '제3조 수집 방법',
       headingEn: 'Article 3. Collection Method',
-      bodyKo: '개인정보는 회원가입, Member request, 계정 정보 입력, Inquiry list 이용, Quote Inquiry 제출, 문의, 서비스 이용 과정에서 수집될 수 있습니다.',
-      bodyEn: 'Personal information may be collected through registration, Member request, account information entry, Inquiry list use, Quote Inquiry submission, inquiries, and service use.',
+      bodyKo: '개인정보는 회원가입, 도매 회원가입 신청, 계정 정보 입력, Inquiry List 이용, Request Quote 제출, 문의, 서비스 이용 과정에서 수집될 수 있습니다.',
+      bodyEn: 'Personal information may be collected through registration, wholesale member requests, account information entry, Inquiry List use, Request Quote submission, inquiries, and service use.',
     },
     {
       headingKo: '제4조 보유 및 이용 기간',

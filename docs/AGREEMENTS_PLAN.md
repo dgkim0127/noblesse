@@ -1,17 +1,25 @@
 # Agreements Plan
 
-This document defines the first-version agreement and consent structure for the Noblesse Piercing Buyer Access Request flow.
+This document defines the first-version agreement and consent structure for the Noblesse Piercing wholesale member sign-up request flow.
 
 Version 1 is mock-first. The current website does not connect to Firebase Auth, Supabase Auth, or a production database for agreement persistence.
 
+## Brand Naming Standard
+
+- Korean brand name: 귀족
+- English brand name: Noblesse Piercing
+- 피어싱 is used as a category or service descriptor.
+- Do not combine the Korean brand name with the category descriptor as the main Korean brand label.
+- Korean agreement copy should prefer 도매 회원, 승인 도매 회원, 회원가, 견적 리스트, 견적 요청, and 견적 요청 내역 where natural.
+
 ## 1. Why Agreements Are Needed
 
-Buyer Access Request collects company and contact information before a Buyer can access Approved Buyer Price and Request Quote features.
+Wholesale member sign-up request collects company and contact information before a member can access member prices and Request Quote features.
 
 The website needs a clear consent checkpoint for:
 
 - service usage terms
-- B2B Buyer and quote terms
+- B2B wholesale member and quote terms
 - privacy collection and use
 - optional marketing and new arrival updates
 - privacy policy review
@@ -23,9 +31,9 @@ The agreement text in this repository is a first-version operating draft. Final 
 | Key | Version | Required | Register checkbox | Purpose |
 | --- | --- | --- | --- | --- |
 | `terms_of_service` | `terms-v1.0` | yes | yes | General site and service usage rules |
-| `buyer_terms` | `buyer-terms-v1.0` | yes | yes | B2B Buyer, Approved Buyer Price, MOQ, Request Quote, and Admin Quote rules |
-| `privacy_collection_use` | `privacy-v1.0` | yes | yes | Consent for collecting and using Buyer Access Request information |
-| `marketing_updates` | `marketing-v1.0` | no | yes | Optional product, catalog, collection, and Buyer update notices |
+| `buyer_terms` | `buyer-terms-v1.0` | yes | yes | Wholesale member, member price, MOQ, Request Quote, and Admin Quote rules |
+| `privacy_collection_use` | `privacy-v1.0` | yes | yes | Consent for collecting and using wholesale member sign-up request information |
+| `marketing_updates` | `marketing-v1.0` | no | yes | Optional product, catalog, collection, and member update notices |
 | `privacy_policy` | `privacy-policy-v1.0` | no | no | Full privacy policy reference document |
 
 `privacy_policy` is available from RegisterPage as a full document link, but it is not a checkbox target in version 1.
@@ -35,24 +43,24 @@ The agreement text in this repository is a first-version operating draft. Final 
 Required:
 
 - Terms of Service
-- B2B Buyer and Quote Terms
+- B2B wholesale member and Quote Terms
 - Privacy Collection and Use
 
 Optional:
 
 - Marketing and New Arrival Updates
 
-Buyer Access Request must be blocked when any required consent is missing. Optional marketing consent must not block Buyer Access Request.
+Wholesale member sign-up request must be blocked when any required consent is missing. Optional marketing consent must not block wholesale member sign-up request.
 
 ## 4. Terms Of Service Scope
 
 The Terms of Service should cover:
 
 - service purpose and definitions
-- site, user, guest, Buyer, Approved Buyer, admin, product, Approved Buyer Price, Inquiry List, Request Quote, Admin Quote, and priceSnapshot
+- site, user, guest, wholesale member, approved wholesale member, admin, product, member price, Inquiry List, Request Quote, Admin Quote, and priceSnapshot
 - service changes and suspension
-- Buyer Access Request
-- Buyer Approval and access rights
+- wholesale member sign-up request
+- wholesale member approval and access rights
 - product information and image limitations
 - pricing access restrictions
 - Inquiry List and Request Quote meaning
@@ -69,14 +77,14 @@ Important operating rule:
 - priceSnapshot is a request-time reference price.
 - Final price, stock, lead time, shipping conditions, and export conditions are confirmed by Noblesse through Admin Quote or manager review.
 
-## 5. B2B Buyer And Quote Terms Scope
+## 5. B2B wholesale member And Quote Terms Scope
 
-The B2B Buyer terms should cover:
+The B2B wholesale member terms should cover:
 
-- buyer approval criteria
+- wholesale member approval criteria
 - submitted information accuracy
 - country and market-specific pricing
-- Approved Buyer Price conditions
+- member price conditions
 - MOQ variability
 - price change possibility
 - Request Quote nature
@@ -90,17 +98,17 @@ The B2B Buyer terms should cover:
 - misuse and account limits
 - disputes and inquiries
 
-Noblesse may show some price information only to Approved Buyers. Market prices can differ by assignedMarket and currency.
+Noblesse may show some price information only to approved wholesale members. Market prices can differ by assignedMarket and currency.
 
 ## 6. Privacy Collection And Use
 
 Purpose:
 
-- Buyer access review
+- Wholesale member approval review
 - company verification
 - contact
 - country and market assignment
-- Approved Buyer Price access
+- member price access
 - Request Quote processing
 - customer support
 - dispute and record management
@@ -130,8 +138,8 @@ Retention:
 
 Right to refuse:
 
-- Buyers may refuse consent.
-- Buyer Access Request cannot be processed without required privacy consent.
+- Members may refuse consent.
+- wholesale member sign-up request cannot be processed without required privacy consent.
 
 ## 7. Privacy Policy
 
@@ -179,7 +187,7 @@ Purpose:
 - catalog updates
 - collection updates
 - event notices
-- Buyer update notices
+- member update notices
 - market-specific product recommendations
 
 Channels:
@@ -189,7 +197,7 @@ Channels:
 - phone
 - other submitted contact channels
 
-Refusing marketing consent must not block Buyer Access Request. Buyers should be able to withdraw marketing consent later.
+Refusing marketing consent must not block wholesale member sign-up request. Members should be able to withdraw marketing consent later.
 
 ## 9. RegisterPage UI
 
@@ -197,11 +205,11 @@ RegisterPage should show:
 
 - Agree to all
 - required Terms of Service
-- required B2B Buyer and Quote Terms
+- required B2B wholesale member and Quote Terms
 - required Privacy Collection and Use
 - optional Marketing and New Arrival Updates
 - Privacy Policy full document link
-- disabled Request Buyer Access button until all required items are accepted
+- disabled membership request button until all required items are accepted
 - long agreement content inside a scrollable details area
 
 The current version builds an agreement snapshot in memory only. It does not persist the snapshot.
@@ -252,7 +260,7 @@ The trusted layer should:
 - load active required agreement versions
 - verify `terms_of_service`, `buyer_terms`, and `privacy_collection_use`
 - record optional `marketing_updates` status
-- create the Buyer application or Buyer profile
+- create the wholesale member application or buyer profile
 - store agreement snapshots in one controlled flow
 - record IP address and user agent only if the final privacy policy allows it
 - reject stale or missing required agreement versions
