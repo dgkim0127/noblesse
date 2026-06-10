@@ -6,6 +6,7 @@
     "rules": "storage.rules"
   },
   "hosting": {
+    "target": "noblesse",
     "public": "dist",
     "ignore": [
       "firebase.json",

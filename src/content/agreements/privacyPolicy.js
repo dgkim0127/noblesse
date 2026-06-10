@@ -1,0 +1,112 @@
+// Draft privacy policy for Noblesse. Privacy/legal expert review is required before public launch.
+export const privacyPolicy = {
+  key: 'privacy_policy',
+  version: 'privacy-v1.0',
+  titleKo: '귀족 개인정보 처리방침',
+  titleEn: 'Noblesse Piercing Privacy Policy',
+  required: true,
+  sections: [
+    {
+      headingKo: '제1조 개인정보 처리 목적',
+      headingEn: 'Article 1. Purpose of Processing',
+      bodyKo: '귀족은 회원가입, 본인 식별, 도매 회원 승인 검토, 상품 카탈로그 이용, 견적 리스트 및 견적 요청 처리, 고객 문의 대응, 서비스 보안 및 운영 관리를 위해 개인정보를 처리합니다. 수집된 정보는 명시된 목적 범위 안에서만 이용됩니다.',
+      bodyEn: 'Personal data is processed for account, approval review, catalog use, quotation workflows, support, security, and operation.',
+    },
+    {
+      headingKo: '제2조 수집 항목',
+      headingEn: 'Article 2. Collected Items',
+      bodyKo: '수집 항목은 이메일, 비밀번호, 회사명, 담당자명, 국가, 희망 언어, 전화번호, 메신저 종류, 메신저 ID, 판매 채널, 사업자 번호, 요청 메모, 접속 기록, 서비스 이용 기록, 브라우저 정보 등이 포함될 수 있습니다.',
+      bodyEn: 'Collected data may include email, account information, company and contact information, business details, memo, and usage logs.',
+    },
+    {
+      headingKo: '제3조 수집 방법',
+      headingEn: 'Article 3. Collection Method',
+      bodyKo: '귀족은 회원이 직접 입력하는 정보, 서비스 이용 과정에서 자동 생성되는 정보, 고객 문의 과정에서 제공되는 정보를 통해 개인정보를 수집할 수 있습니다. 실제 인증 또는 외부 연동이 도입되는 경우 별도 고지 및 동의 절차를 둘 수 있습니다.',
+      bodyEn: 'Data is collected through user input, generated service records, and support interactions.',
+    },
+    {
+      headingKo: '제4조 보유 및 이용 기간',
+      headingEn: 'Article 4. Retention Period',
+      bodyKo: '개인정보는 수집 및 이용 목적이 달성될 때까지 보유합니다. 회원 탈퇴, 승인 취소, 보관 목적 종료 시 지체 없이 파기하는 것을 원칙으로 하되, 관계 법령상 보관 의무가 있거나 분쟁 대응에 필요한 경우 해당 기간 동안 보관할 수 있습니다.',
+      bodyEn: 'Data is retained until the purpose is fulfilled, unless legal or dispute-related retention is required.',
+    },
+    {
+      headingKo: '제5조 파기 절차 및 방법',
+      headingEn: 'Article 5. Disposal',
+      bodyKo: '보유 기간이 지나거나 처리 목적이 달성된 개인정보는 내부 확인 절차 후 안전하게 파기합니다. 전자 파일은 복구하기 어렵도록 삭제하고, 출력물은 분쇄 또는 이에 준하는 방식으로 파기합니다.',
+      bodyEn: 'Expired or unnecessary data is securely deleted or destroyed after internal confirmation.',
+    },
+    {
+      headingKo: '제6조 제3자 제공',
+      headingEn: 'Article 6. Third-Party Provision',
+      bodyKo: '귀족은 원칙적으로 회원의 개인정보를 외부에 제공하지 않습니다. 다만 회원의 별도 동의가 있거나 법령상 의무 이행, 수출 및 배송 검토, 권리 보호를 위해 필요한 경우 관련 법령에 따라 제한적으로 제공될 수 있습니다.',
+      bodyEn: 'Personal data is not provided to third parties except with consent, legal obligation, or necessary operational review.',
+    },
+    {
+      headingKo: '제7조 처리 위탁',
+      headingEn: 'Article 7. Processing Delegation',
+      bodyKo: '귀족은 서비스 운영, 호스팅, 데이터 보관, 이메일 발송, 고객 응대 등 필요한 업무를 외부 업체에 위탁할 수 있습니다. 위탁이 발생하는 경우 위탁받는 자, 업무 내용, 보호 조치 등을 적절한 방식으로 안내합니다.',
+      bodyEn: 'Processing may be delegated for hosting, storage, email, or support, with appropriate notice and safeguards.',
+    },
+    {
+      headingKo: '제8조 국외 이전 여부',
+      headingEn: 'Article 8. International Transfer',
+      bodyKo: '글로벌 바이어 지원, 클라우드 인프라, 해외 서비스 도구 사용 과정에서 개인정보가 국외에 저장되거나 처리될 가능성이 있습니다. 실제 국외 이전이 발생하는 경우 이전 국가, 항목, 목적, 보유 기간, 보호 조치를 별도로 안내해야 합니다.',
+      bodyEn: 'International transfer may occur through global cloud or support tools and must be disclosed when implemented.',
+    },
+    {
+      headingKo: '제9조 쿠키',
+      headingEn: 'Article 9. Cookies',
+      bodyKo: '귀족은 로그인 유지, 언어 설정, 서비스 품질 개선, 보안 확인을 위해 쿠키 또는 유사 기술을 사용할 수 있습니다. 회원은 브라우저 설정을 통해 쿠키 저장을 제한할 수 있으나, 일부 기능 이용에 제한이 생길 수 있습니다.',
+      bodyEn: 'Cookies may be used for sessions, language settings, quality improvement, and security.',
+    },
+    {
+      headingKo: '제10조 정보주체 권리',
+      headingEn: 'Article 10. Data Subject Rights',
+      bodyKo: '회원은 자신의 개인정보에 대해 열람, 정정, 삭제, 처리 정지, 동의 철회를 요청할 수 있습니다. 귀족은 본인 확인 후 관련 법령에서 정한 범위와 절차에 따라 요청을 처리합니다.',
+      bodyEn: 'Members may request access, correction, deletion, suspension, or withdrawal subject to verification and law.',
+    },
+    {
+      headingKo: '제11조 만 14세 미만 아동',
+      headingEn: 'Article 11. Children Under 14',
+      bodyKo: '귀족 서비스는 사업 목적의 B2B 카탈로그로, 만 14세 미만 아동을 대상으로 하지 않습니다. 만 14세 미만 아동의 정보가 수집된 사실을 확인한 경우 지체 없이 필요한 조치를 합니다.',
+      bodyEn: 'The service is not directed to children under 14, and related data will be handled promptly if discovered.',
+    },
+    {
+      headingKo: '제12조 안전성 확보 조치',
+      headingEn: 'Article 12. Security Measures',
+      bodyKo: '귀족은 개인정보의 안전한 처리를 위해 접근 권한 관리, 전송 구간 보호, 보관 정보 보호, 접속 기록 관리, 내부 권한 통제, 정기 점검 등 필요한 기술적·관리적 조치를 마련합니다.',
+      bodyEn: 'Noblesse applies technical and administrative safeguards for secure processing.',
+    },
+    {
+      headingKo: '제13조 고객 계정 접근 관리',
+      headingEn: 'Article 13. Account Access Control',
+      bodyKo: '회원은 비밀번호와 계정 접근 수단을 안전하게 관리해야 합니다. 계정 도용이나 무단 접근이 의심되는 경우 즉시 귀족에 알려야 하며, 귀족은 피해 방지를 위해 계정 보호 조치를 할 수 있습니다.',
+      bodyEn: 'Members must protect account credentials and report suspected unauthorized access.',
+    },
+    {
+      headingKo: '제14조 개인정보 보호책임자',
+      headingEn: 'Article 14. Privacy Officer',
+      bodyKo: '귀족은 개인정보 처리에 관한 문의, 권리 행사, 불만 처리를 담당할 개인정보 보호책임자 또는 담당 부서를 지정해야 합니다. 실제 공개 전 담당자명, 연락처, 이메일 등 운영 정보를 확정하여 표시해야 합니다.',
+      bodyEn: 'A privacy contact must be designated and published before public operation.',
+    },
+    {
+      headingKo: '제15조 권익침해 구제',
+      headingEn: 'Article 15. Remedies',
+      bodyKo: '회원은 개인정보 침해에 대한 상담이나 구제를 위해 관련 기관에 문의할 수 있습니다. 실제 운영 시에는 개인정보침해 신고센터, 개인정보분쟁조정위원회 등 국내 관련 기관 정보를 최신 기준으로 확인하여 안내해야 합니다.',
+      bodyEn: 'Members may seek remedies through relevant privacy protection authorities, with final contacts confirmed before launch.',
+    },
+    {
+      headingKo: '제16조 처리방침 변경',
+      headingEn: 'Article 16. Changes',
+      bodyKo: '개인정보 처리방침은 서비스 변경, 법령 개정, 운영 정책 변경에 따라 수정될 수 있습니다. 중요한 변경 사항은 시행 전 웹사이트 또는 계정 화면 등을 통해 안내합니다.',
+      bodyEn: 'The policy may change due to service, law, or operational updates, with notice for material changes.',
+    },
+    {
+      headingKo: '제17조 운영 전 검토 및 시행일',
+      headingEn: 'Article 17. Review and Effective Date',
+      bodyKo: '본 개인정보 처리방침은 개발 단계 초안입니다. 실제 서비스 공개 전 개인정보 보호 전문가 및 법무 검토를 통해 수집 항목, 보관 기간, 위탁, 국외 이전, 담당자 정보, 시행일을 최종 확정해야 합니다.',
+      bodyEn: 'This draft requires privacy and legal review before public launch. The effective date must be finalized.',
+    },
+  ],
+}

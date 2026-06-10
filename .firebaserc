@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "pors-piercing-pos"
+  },
+  "targets": {
+    "pors-piercing-pos": {
+      "hosting": {
+        "noblesse": [
+          "noblesse-piercing-b2b"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

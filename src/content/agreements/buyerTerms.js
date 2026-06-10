@@ -1,0 +1,100 @@
+// Draft buyer terms for Noblesse. Legal review is required before public launch.
+export const buyerTerms = {
+  key: 'buyer_terms',
+  version: 'buyer-terms-v1.0',
+  titleKo: '귀족 도매 회원 약관',
+  titleEn: 'Noblesse Piercing Wholesale Member Terms',
+  required: true,
+  sections: [
+    {
+      headingKo: '제1조 도매 회원 약관 목적',
+      headingEn: 'Article 1. Purpose',
+      bodyKo: '본 약관은 귀족 웹사이트에서 도매 회원으로 승인된 회원이 회원가, MOQ, 견적 리스트, Request Quote 및 Admin Quote 안내를 이용할 때 적용되는 세부 조건을 정합니다. 본 약관은 일반 이용약관과 함께 적용됩니다.',
+      bodyEn: 'These terms define wholesale member access to prices, MOQ, Inquiry List, Request Quote, and Admin Quote.',
+    },
+    {
+      headingKo: '제2조 도매 회원 승인 기준',
+      headingEn: 'Article 2. Approval Criteria',
+      bodyKo: '귀족은 회원이 제출한 회사명, 국가, 판매 채널, 연락처, 사업자 정보, 요청 메모 등을 바탕으로 도매 회원 승인 여부를 검토합니다. 승인 기준은 시장 상황, 운영 정책, 상품 공급 조건에 따라 달라질 수 있습니다.',
+      bodyEn: 'Approval is reviewed based on business information, market, sales channel, and operating policies.',
+    },
+    {
+      headingKo: '제3조 국가 및 시장별 가격',
+      headingEn: 'Article 3. Market-Based Prices',
+      bodyKo: '회원가는 회원에게 배정된 시장, 통화, 공급 조건에 따라 다르게 표시될 수 있습니다. 같은 상품이라도 국가, 물류 조건, 통화, 도매 정책에 따라 표시 금액과 안내 조건이 달라질 수 있습니다.',
+      bodyEn: 'Buyer-only prices may vary by assigned market, currency, logistics, and wholesale policy.',
+    },
+    {
+      headingKo: '제4조 회원가 공개 조건',
+      headingEn: 'Article 4. Price Visibility',
+      bodyKo: '회원가는 도매 회원 승인 후 해당 계정에서만 확인할 수 있습니다. 회원은 회원가, 견적 내용, 공급 조건을 외부에 무단 공개하거나 제3자의 구매 판단 자료로 제공해서는 안 됩니다.',
+      bodyEn: 'Buyer-only prices are visible only after approval and must not be disclosed without permission.',
+    },
+    {
+      headingKo: '제5조 MOQ',
+      headingEn: 'Article 5. MOQ',
+      bodyKo: 'MOQ는 상품별 최소 요청 수량 또는 수량 단위를 의미합니다. 화면에 표시된 MOQ는 견적 요청 준비를 돕기 위한 기준이며, 실제 안내 과정에서 재고, 생산, 포장, 물류 조건에 따라 조정될 수 있습니다.',
+      bodyEn: 'MOQ indicates minimum request quantity or quantity unit and may be adjusted during review.',
+    },
+    {
+      headingKo: '제6조 가격 변경 가능성',
+      headingEn: 'Article 6. Price Changes',
+      bodyKo: '상품 단가, 회원가, 통화 기준, 수출 관련 비용, 공급 조건은 원자재, 환율, 물류, 생산 상황에 따라 변경될 수 있습니다. 견적 리스트 또는 Request Quote 화면의 금액은 최종 확정 전 참고 금액입니다.',
+      bodyEn: 'Prices may change due to materials, exchange rate, logistics, or production conditions.',
+    },
+    {
+      headingKo: '제7조 Request Quote의 성격',
+      headingEn: 'Article 7. Nature of Request Quote',
+      bodyKo: 'Request Quote는 회원이 관심 상품과 수량을 귀족에 전달하여 검토를 요청하는 기능입니다. Request Quote를 제출해도 상품 준비, 수량 확보, 최종 단가 안내, 거래 확정이 자동으로 이루어지지 않습니다.',
+      bodyEn: 'Request Quote is a review request and does not automatically confirm products, quantity, price, or transaction.',
+    },
+    {
+      headingKo: '제8조 priceSnapshot의 의미',
+      headingEn: 'Article 8. Meaning of priceSnapshot',
+      bodyKo: 'priceSnapshot은 회원이 견적 요청을 제출한 시점에 화면에서 참고한 단가 정보를 기록하기 위한 값입니다. priceSnapshot은 과거 요청 확인과 운영 검토를 돕기 위한 기록이며, 최종 안내 단가를 보장하지 않습니다.',
+      bodyEn: 'priceSnapshot records the reference unit price at submission time and does not guarantee final pricing.',
+    },
+    {
+      headingKo: '제9조 Admin Quote의 의미',
+      headingEn: 'Article 9. Meaning of Admin Quote',
+      bodyKo: 'Admin Quote는 귀족 운영자가 견적 요청을 검토한 뒤 회원에게 안내하는 관리용 견적 정보입니다. Admin Quote는 상품 가능 여부, 수량, 단가, 납기, 배송 조건, 조정 사항을 포함할 수 있습니다.',
+      bodyEn: 'Admin Quote is the reviewed quotation prepared by Noblesse staff after checking the request.',
+    },
+    {
+      headingKo: '제10조 최종 견적 확정 전 거래 미성립',
+      headingEn: 'Article 10. No Transaction Before Final Quotation',
+      bodyKo: 'Request Quote 제출, Inquiry List 작성, Admin Quote 초안 확인만으로 최종 거래가 성립하지 않습니다. 최종 조건은 귀족과 회원이 별도로 확인한 안내에 따르며, 필요한 경우 추가 확인 절차가 진행될 수 있습니다.',
+      bodyEn: 'No transaction is formed before final conditions are confirmed separately.',
+    },
+    {
+      headingKo: '제11조 재고, 납기, 배송 조건 확인',
+      headingEn: 'Article 11. Availability, Lead Time, and Shipping',
+      bodyKo: '귀족은 견적 요청 후 상품별 공급 가능 여부, 예상 납기, 포장 방식, 배송 가능 지역, 배송 조건을 확인합니다. 상품 상태와 물류 상황에 따라 일부 상품은 제외되거나 대체 제안이 안내될 수 있습니다.',
+      bodyEn: 'Noblesse checks availability, lead time, packing, shipping region, and shipping conditions after request.',
+    },
+    {
+      headingKo: '제12조 수출, 통관, 국가별 제한 가능성',
+      headingEn: 'Article 12. Export and Country Restrictions',
+      bodyKo: '상품의 수출 가능 여부와 통관 조건은 국가별 규정, 소재, 수량, 운송 방식에 따라 달라질 수 있습니다. 특정 국가 또는 지역에서는 일부 상품의 공급이 제한되거나 추가 서류가 필요할 수 있습니다.',
+      bodyEn: 'Export and customs conditions may vary by country, material, quantity, and shipping method.',
+    },
+    {
+      headingKo: '제13조 견적 조정 가능성',
+      headingEn: 'Article 13. Quotation Adjustment',
+      bodyKo: '귀족은 견적 검토 과정에서 수량, 옵션, 단가, 납기, 배송 조건, 대체 상품을 조정하여 안내할 수 있습니다. 회원은 안내받은 최종 조건을 확인한 뒤 진행 여부를 결정할 수 있습니다.',
+      bodyEn: 'Noblesse may adjust quantity, options, price, lead time, shipping, or alternatives during quotation review.',
+    },
+    {
+      headingKo: '제14조 승인 취소 및 이용 제한',
+      headingEn: 'Article 14. Approval Revocation and Restriction',
+      bodyKo: '회원이 허위 정보를 제출하거나 회원가를 무단 공유하거나 견적 정보를 부적절하게 이용하는 경우 귀족은 도매 회원 승인을 취소하거나 서비스 이용을 제한할 수 있습니다. 본 조치는 서비스와 다른 회원을 보호하기 위한 운영상 조치입니다.',
+      bodyEn: 'Approval may be revoked or restricted for false information, unauthorized price sharing, or misuse.',
+    },
+    {
+      headingKo: '제15조 운영 전 검토',
+      headingEn: 'Article 15. Pre-Launch Review',
+      bodyKo: '본 도매 회원 약관은 개발 단계의 초안입니다. 실제 운영 전 거래 조건, 국가별 고지, 책임 범위, 개인정보 처리와의 관계에 대해 법무 및 개인정보 전문가 검토를 완료해야 합니다.',
+      bodyEn: 'This draft requires legal and privacy review before public operation.',
+    },
+  ],
+}

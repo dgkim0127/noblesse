@@ -21,7 +21,9 @@ Brand name:
 
 Korean name:
 
-- 귀족 피어싱
+- 귀족
+
+Use `피어싱` as a category or service descriptor, not as the main Korean brand name.
 
 Brand labels:
 
