@@ -511,6 +511,82 @@ Stores downloadable catalog PDF metadata.
 
 Can later support catalog download reporting by market.
 
+## `terms_versions`
+
+### Purpose
+
+Stores versioned agreement documents for Buyer Access Request consent.
+
+These records are planning data for future production. Version 1 only shows placeholder agreement text in `RegisterPage`.
+
+### Important Columns
+
+- `id uuid primary key`
+- `agreement_key text not null` (`terms_of_service`, `privacy_collection_use`, `marketing_updates`)
+- `version text not null`
+- `title_ko text`
+- `title_en text`
+- `content_ko text`
+- `content_en text`
+- `required boolean default true`
+- `is_active boolean default true`
+- `effective_at timestamptz`
+- `created_at timestamptz`
+
+### Relationships
+
+- Referenced by `buyer_agreements`.
+
+### Indexes
+
+- `unique(agreement_key, version)`
+- `index(agreement_key, is_active)`
+
+### Production Notes
+
+- Legal and privacy text must be reviewed before launch.
+- Only active agreement versions should be shown to Buyers.
+- Admin changes should create a new version instead of mutating historical consent meaning.
+
+## `buyer_agreements`
+
+### Purpose
+
+Stores which Buyer accepted which agreement version and when.
+
+### Important Columns
+
+- `id uuid primary key`
+- `buyer_id uuid references buyers(id)`
+- `terms_version_id uuid references terms_versions(id)`
+- `agreement_key text not null`
+- `version text not null`
+- `required boolean default true`
+- `accepted boolean not null`
+- `accepted_at timestamptz`
+- `ip_address text`
+- `user_agent text`
+- `created_at timestamptz`
+
+### Relationships
+
+- Belongs to `buyers`.
+- References `terms_versions`.
+
+### Indexes
+
+- `index(buyer_id)`
+- `index(agreement_key, version)`
+- `index(accepted_at)`
+
+### Production Notes
+
+- Version 1 does not persist agreements.
+- Future registration should store agreement snapshots through a trusted API/RPC.
+- Browser-provided consent values must be validated server-side.
+- IP address and user agent collection should be handled by the server/API layer, not directly trusted from the browser.
+- Pending Buyer application storage before a `buyers` row exists should be finalized during API design.
+
 ## Analytics SQL Examples
 
 ### Top Requested Products In Last 30 Days

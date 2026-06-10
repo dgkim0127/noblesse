@@ -60,6 +60,83 @@ on conflict (user_id) do update set
   approved_by = excluded.approved_by,
   updated_at = now();
 
+insert into public.terms_versions (
+  agreement_key,
+  version,
+  title_ko,
+  title_en,
+  content_ko,
+  content_en,
+  required,
+  is_active
+)
+values
+  (
+    'terms_of_service',
+    'terms-v1.0',
+    '이용약관 동의',
+    'Terms of Service',
+    'Noblesse Piercing은 글로벌 바이어를 위한 B2B 카탈로그 웹사이트입니다. 견적 요청은 최종 확정 거래가 아니며, 최종 단가와 재고, 납기, 배송 조건은 Noblesse 확인 후 안내됩니다.',
+    'Noblesse Piercing is a B2B catalog website for global buyers. Request Quote is not a final order. Final pricing, stock, lead time, and shipping conditions are confirmed by Noblesse.',
+    true,
+    true
+  ),
+  (
+    'privacy_collection_use',
+    'privacy-v1.0',
+    '개인정보 수집 및 이용 동의',
+    'Privacy Collection and Use',
+    '바이어 접근 권한 검토, 회사 확인, 연락, 마켓 배정, 견적 요청 처리를 위해 신청 정보를 수집합니다.',
+    'Buyer application information is collected for buyer access review, company verification, contact, market assignment, and Request Quote processing.',
+    true,
+    true
+  ),
+  (
+    'marketing_updates',
+    'marketing-v1.0',
+    '마케팅 및 신상품 안내 수신 동의',
+    'Marketing and New Arrival Updates',
+    '신상품, 카탈로그, 컬렉션, 이벤트, 바이어 업데이트 안내를 위한 선택 동의입니다.',
+    'Optional consent for new product, catalog, collection, event, and buyer update notices.',
+    false,
+    true
+  )
+on conflict (agreement_key, version) do update set
+  title_ko = excluded.title_ko,
+  title_en = excluded.title_en,
+  content_ko = excluded.content_ko,
+  content_en = excluded.content_en,
+  required = excluded.required,
+  is_active = excluded.is_active;
+
+insert into public.buyer_agreements (
+  buyer_id,
+  terms_version_id,
+  agreement_key,
+  version,
+  required,
+  accepted,
+  accepted_at
+)
+select
+  b.id,
+  tv.id,
+  tv.agreement_key,
+  tv.version,
+  tv.required,
+  true,
+  now()
+from public.buyers b
+join public.terms_versions tv on tv.version in ('terms-v1.0', 'privacy-v1.0', 'marketing-v1.0')
+where b.company_name = 'Tokyo Piercing Lab'
+  and not exists (
+    select 1
+    from public.buyer_agreements existing
+    where existing.buyer_id = b.id
+      and existing.agreement_key = tv.agreement_key
+      and existing.version = tv.version
+  );
+
 insert into public.categories (category_id, name_ko, name_en, name_ja, slug, cover_url, sort_order)
 values
   ('barbell', 'Barbell', 'Barbell', 'Barbell', 'barbell', 'https://cdn.example.com/categories/barbell/cover.webp', 10),

@@ -92,6 +92,8 @@ alter table public.admin_quotes enable row level security;
 alter table public.admin_quote_items enable row level security;
 alter table public.banners enable row level security;
 alter table public.catalog_files enable row level security;
+alter table public.terms_versions enable row level security;
+alter table public.buyer_agreements enable row level security;
 
 create policy "users read own or admin"
 on public.users for select
@@ -283,3 +285,57 @@ create policy "catalog files admin write"
 on public.catalog_files for all
 using (public.is_admin())
 with check (public.is_admin());
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'terms_versions'
+      and policyname = 'terms versions active public read'
+  ) then
+    execute 'create policy "terms versions active public read"
+      on public.terms_versions for select
+      using (is_active = true or public.is_admin())';
+  end if;
+
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'terms_versions'
+      and policyname = 'terms versions admin write'
+  ) then
+    execute 'create policy "terms versions admin write"
+      on public.terms_versions for all
+      using (public.is_admin())
+      with check (public.is_admin())';
+  end if;
+
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'buyer_agreements'
+      and policyname = 'buyer agreements read own or admin'
+  ) then
+    execute 'create policy "buyer agreements read own or admin"
+      on public.buyer_agreements for select
+      using (buyer_id = public.current_buyer_id() or public.is_admin())';
+  end if;
+
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'buyer_agreements'
+      and policyname = 'buyer agreements admin write'
+  ) then
+    execute 'create policy "buyer agreements admin write"
+      on public.buyer_agreements for all
+      using (public.is_admin())
+      with check (public.is_admin())';
+  end if;
+end;
+$$;
+
+-- Browser direct insert into buyer_agreements is intentionally not enabled here.
+-- Production registration should record required agreement versions through a trusted API/RPC
+-- after validating the required consent snapshot, client identity, IP handling, and user agent handling.

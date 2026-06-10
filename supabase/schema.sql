@@ -220,6 +220,35 @@ create table if not exists public.catalog_files (
   version text
 );
 
+create table if not exists public.terms_versions (
+  id uuid primary key default gen_random_uuid(),
+  agreement_key text not null check (agreement_key in ('terms_of_service', 'privacy_collection_use', 'marketing_updates')),
+  version text not null,
+  title_ko text,
+  title_en text,
+  content_ko text,
+  content_en text,
+  required boolean default true,
+  is_active boolean default true,
+  effective_at timestamptz default now(),
+  created_at timestamptz default now(),
+  unique(agreement_key, version)
+);
+
+create table if not exists public.buyer_agreements (
+  id uuid primary key default gen_random_uuid(),
+  buyer_id uuid references public.buyers(id) on delete cascade,
+  terms_version_id uuid references public.terms_versions(id),
+  agreement_key text not null check (agreement_key in ('terms_of_service', 'privacy_collection_use', 'marketing_updates')),
+  version text not null,
+  required boolean default true,
+  accepted boolean not null,
+  accepted_at timestamptz,
+  ip_address text,
+  user_agent text,
+  created_at timestamptz default now()
+);
+
 drop trigger if exists trg_users_updated_at on public.users;
 create trigger trg_users_updated_at before update on public.users
 for each row execute function public.update_updated_at_column();
@@ -288,3 +317,8 @@ create index if not exists idx_banners_visible_sort on public.banners(is_visible
 create index if not exists idx_banners_starts_ends on public.banners(starts_at, ends_at);
 create index if not exists idx_catalog_files_market_visible on public.catalog_files(market, visible_to);
 create index if not exists idx_catalog_files_uploaded_at on public.catalog_files(uploaded_at);
+create index if not exists idx_terms_versions_key_version on public.terms_versions(agreement_key, version);
+create index if not exists idx_terms_versions_active on public.terms_versions(agreement_key, is_active);
+create index if not exists idx_buyer_agreements_buyer_id on public.buyer_agreements(buyer_id);
+create index if not exists idx_buyer_agreements_key_version on public.buyer_agreements(agreement_key, version);
+create index if not exists idx_buyer_agreements_accepted_at on public.buyer_agreements(accepted_at);

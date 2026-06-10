@@ -20,11 +20,21 @@ It is not connected to the React frontend yet. Do not run these files against pr
 3. `analytics_views.sql`
 4. `seed_mock_data.sql` only for local/dev
 
+`schema.sql` includes draft `terms_versions` and `buyer_agreements` tables for future Buyer Access Request consent persistence.
+
+`seed_mock_data.sql` includes development-only agreement version samples:
+
+- `terms_of_service` / `terms-v1.0`
+- `privacy_collection_use` / `privacy-v1.0`
+- `marketing_updates` / `marketing-v1.0`
+
 ## Local Review
 
 Use pgAdmin4, Supabase SQL editor, or another PostgreSQL client to inspect tables and views.
 
 Do not run the seed file against production. The seed file is only for development verification.
+
+Before production registration is enabled, agreement snapshots should be written through a trusted API/RPC. Browser direct writes to `buyer_agreements` are intentionally not part of the first-version frontend.
 
 ## Validation Expectations
 
