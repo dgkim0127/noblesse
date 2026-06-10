@@ -95,6 +95,11 @@ alter table public.catalog_files enable row level security;
 alter table public.terms_versions enable row level security;
 alter table public.buyer_agreements enable row level security;
 
+-- terms_versions stores active agreement text for:
+-- terms_of_service, buyer_terms, privacy_collection_use, marketing_updates, privacy_policy.
+-- Public read is limited to active versions so RegisterPage can show current documents.
+-- Writes remain admin-only.
+
 create policy "users read own or admin"
 on public.users for select
 using (id = public.current_app_user_id() or public.is_admin());
@@ -338,4 +343,7 @@ $$;
 
 -- Browser direct insert into buyer_agreements is intentionally not enabled here.
 -- Production registration should record required agreement versions through a trusted API/RPC
--- after validating the required consent snapshot, client identity, IP handling, and user agent handling.
+-- after validating terms_of_service, buyer_terms, and privacy_collection_use acceptance.
+-- marketing_updates is optional and privacy_policy is a reference document, not a required checkbox.
+-- The trusted layer should also validate client identity, IP handling, user agent handling,
+-- and active agreement versions before writing buyer_agreements.

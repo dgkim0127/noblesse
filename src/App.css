@@ -2517,6 +2517,47 @@ a {
   padding: 12px;
 }
 
+.agreement-scroll {
+  max-height: 320px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.agreement-copy-section {
+  display: grid;
+  gap: 6px;
+  border-bottom: 1px solid #eee8e2;
+  padding-bottom: 12px;
+}
+
+.agreement-copy-section:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.agreement-copy-section h4,
+.agreement-copy-section h5,
+.agreement-copy-section p {
+  margin: 0;
+}
+
+.agreement-copy-section h4 {
+  color: var(--noblesse-sub);
+  font-size: 13px;
+}
+
+.agreement-copy-section h5 {
+  color: #6f6578;
+  font-size: 12px;
+}
+
+.agreement-copy-section p {
+  color: #746b7e;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
 .agreement-details ul {
   display: grid;
   gap: 5px;
@@ -2547,8 +2588,18 @@ a {
 }
 
 .agreement-version {
+  display: block;
+  margin-top: 3px;
   color: #948b97;
   font-size: 11px;
+}
+
+.agreement-actions {
+  align-items: center;
+}
+
+.privacy-policy-detail {
+  border: 1px solid #eee8e2;
 }
 
 .approval-steps {

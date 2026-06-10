@@ -76,8 +76,18 @@ values
     'terms-v1.0',
     '이용약관 동의',
     'Terms of Service',
-    'Noblesse Piercing은 글로벌 바이어를 위한 B2B 카탈로그 웹사이트입니다. 견적 요청은 최종 확정 거래가 아니며, 최종 단가와 재고, 납기, 배송 조건은 Noblesse 확인 후 안내됩니다.',
-    'Noblesse Piercing is a B2B catalog website for global buyers. Request Quote is not a final order. Final pricing, stock, lead time, and shipping conditions are confirmed by Noblesse.',
+    'Noblesse Piercing은 글로벌 바이어를 위한 B2B 피어싱 카탈로그 웹사이트입니다. Request Quote는 최종 거래 확정이 아니며, 최종 단가와 재고, 납기, 배송 조건은 Noblesse 확인 후 안내됩니다.',
+    'Noblesse Piercing is a B2B piercing catalog website for global buyers. Request Quote is not a final transaction. Final unit price, availability, lead time, and shipping conditions are confirmed by Noblesse.',
+    true,
+    true
+  ),
+  (
+    'buyer_terms',
+    'buyer-terms-v1.0',
+    'B2B 거래처 및 견적 약관',
+    'B2B Buyer and Quote Terms',
+    '승인 바이어 가격, MOQ, 시장별 가격, priceSnapshot, Request Quote, Admin Quote 기준을 설명합니다. 화면 가격은 참고용이며 최종 견적은 관리자 확인으로 안내됩니다.',
+    'This document explains Approved Buyer Price, MOQ, market pricing, priceSnapshot, Request Quote, and Admin Quote standards. Displayed prices are references and final quotation is provided after administrator review.',
     true,
     true
   ),
@@ -98,6 +108,16 @@ values
     'Marketing and New Arrival Updates',
     '신상품, 카탈로그, 컬렉션, 이벤트, 바이어 업데이트 안내를 위한 선택 동의입니다.',
     'Optional consent for new product, catalog, collection, event, and buyer update notices.',
+    false,
+    true
+  ),
+  (
+    'privacy_policy',
+    'privacy-policy-v1.0',
+    '개인정보 처리방침',
+    'Privacy Policy',
+    'Noblesse 개인정보 처리방침 초안입니다. 개인정보 보호책임자, 위탁, 국외 이전, 보존 기간은 운영 전 최종 검토가 필요합니다.',
+    'This is a draft Noblesse Privacy Policy. Privacy officer, outsourcing, overseas transfer, and retention periods require final review before operation.',
     false,
     true
   )
@@ -127,7 +147,7 @@ select
   true,
   now()
 from public.buyers b
-join public.terms_versions tv on tv.version in ('terms-v1.0', 'privacy-v1.0', 'marketing-v1.0')
+join public.terms_versions tv on tv.version in ('terms-v1.0', 'buyer-terms-v1.0', 'privacy-v1.0', 'marketing-v1.0')
 where b.company_name = 'Tokyo Piercing Lab'
   and not exists (
     select 1

@@ -515,14 +515,14 @@ Can later support catalog download reporting by market.
 
 ### Purpose
 
-Stores versioned agreement documents for Buyer Access Request consent.
+Stores versioned agreement documents for Buyer Access Request consent and privacy references.
 
-These records are planning data for future production. Version 1 only shows placeholder agreement text in `RegisterPage`.
+These records are planning data for future production. Version 1 shows agreement text from `src/content/agreements` and does not write to PostgreSQL.
 
 ### Important Columns
 
 - `id uuid primary key`
-- `agreement_key text not null` (`terms_of_service`, `privacy_collection_use`, `marketing_updates`)
+- `agreement_key text not null` (`terms_of_service`, `buyer_terms`, `privacy_collection_use`, `marketing_updates`, `privacy_policy`)
 - `version text not null`
 - `title_ko text`
 - `title_en text`
@@ -541,6 +541,25 @@ These records are planning data for future production. Version 1 only shows plac
 
 - `unique(agreement_key, version)`
 - `index(agreement_key, is_active)`
+- `index(is_active)`
+
+### Register Flow Connection
+
+`RegisterPage` should show active agreement versions for:
+
+- `terms_of_service`
+- `buyer_terms`
+- `privacy_collection_use`
+- `marketing_updates`
+- `privacy_policy`
+
+Only the first three are required checkbox consent targets. `marketing_updates` is optional. `privacy_policy` is a full document reference and can be opened separately.
+
+### RLS Direction
+
+- Active `terms_versions` can be readable so registration can display current agreement text.
+- Only admins or trusted internal tools should create new terms versions.
+- Production registration should validate active version keys through a trusted API/RPC before writing consent history.
 
 ### Production Notes
 
@@ -578,6 +597,33 @@ Stores which Buyer accepted which agreement version and when.
 - `index(buyer_id)`
 - `index(agreement_key, version)`
 - `index(accepted_at)`
+
+### Register Flow Connection
+
+Future registration should write one row per checkbox agreement target:
+
+- required `terms_of_service`
+- required `buyer_terms`
+- required `privacy_collection_use`
+- optional `marketing_updates`
+
+`privacy_policy` is included in the agreement key constraint for future flexibility, but it is not a required checkbox target in version 1.
+
+### RLS Direction
+
+- Buyers may read their own agreement history.
+- Admins may read agreement history for approval and audit workflows.
+- Browser direct insert should stay disabled until a trusted registration API/RPC validates active versions, required acceptance, identity, IP handling, and user agent handling.
+
+### Analytics Use
+
+`buyer_agreements` can later support:
+
+- buyer approval audit
+- agreement version adoption review
+- required consent completion checks
+- optional marketing consent segmentation
+- historical proof of consent at the time of Buyer Access Request
 
 ### Production Notes
 

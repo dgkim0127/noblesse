@@ -4,87 +4,107 @@ This document defines the first-version agreement and consent structure for the 
 
 Version 1 is mock-first. The current website does not connect to Firebase Auth, Supabase Auth, or a production database for agreement persistence.
 
-## Why Agreements Are Needed
+## 1. Why Agreements Are Needed
 
 Buyer Access Request collects company and contact information before a Buyer can access Approved Buyer Price and Request Quote features.
 
-The website therefore needs a clear consent checkpoint for:
+The website needs a clear consent checkpoint for:
 
 - service usage terms
+- B2B Buyer and quote terms
 - privacy collection and use
 - optional marketing and new arrival updates
+- privacy policy review
 
-The current text is placeholder copy. Final operating terms and privacy policy must be reviewed by the business owner and legal/privacy reviewer before launch.
+The agreement text in this repository is a first-version operating draft. Final operating terms and privacy policy must be reviewed by the business owner and legal/privacy reviewer before launch.
 
-## Required And Optional Consent
+## 2. Agreement Documents
+
+| Key | Version | Required | Register checkbox | Purpose |
+| --- | --- | --- | --- | --- |
+| `terms_of_service` | `terms-v1.0` | yes | yes | General site and service usage rules |
+| `buyer_terms` | `buyer-terms-v1.0` | yes | yes | B2B Buyer, Approved Buyer Price, MOQ, Request Quote, and Admin Quote rules |
+| `privacy_collection_use` | `privacy-v1.0` | yes | yes | Consent for collecting and using Buyer Access Request information |
+| `marketing_updates` | `marketing-v1.0` | no | yes | Optional product, catalog, collection, and Buyer update notices |
+| `privacy_policy` | `privacy-policy-v1.0` | no | no | Full privacy policy reference document |
+
+`privacy_policy` is available from RegisterPage as a full document link, but it is not a checkbox target in version 1.
+
+## 3. Required And Optional Consent
 
 Required:
 
 - Terms of Service
+- B2B Buyer and Quote Terms
 - Privacy Collection and Use
 
 Optional:
 
 - Marketing and New Arrival Updates
 
-Buyer Access Request must be blocked when required consent is missing. Optional marketing consent must not block Buyer Access Request.
+Buyer Access Request must be blocked when any required consent is missing. Optional marketing consent must not block Buyer Access Request.
 
-## RegisterPage UI Structure
+## 4. Terms Of Service Scope
 
-`RegisterPage` shows an Agreements section before the final submit action.
+The Terms of Service should cover:
 
-The section includes:
+- service purpose and definitions
+- site, user, guest, Buyer, Approved Buyer, admin, product, Approved Buyer Price, Inquiry List, Request Quote, Admin Quote, and priceSnapshot
+- service changes and suspension
+- Buyer Access Request
+- Buyer Approval and access rights
+- product information and image limitations
+- pricing access restrictions
+- Inquiry List and Request Quote meaning
+- Admin Quote as the final quote basis
+- user obligations and prohibited behavior
+- intellectual property
+- privacy reference
+- notices, disputes, governing law, and revision notice
 
-- Agree to all
-- [Required] Terms of Service
-- [Required] Privacy Collection and Use
-- [Optional] Marketing and New Arrival Updates
-- details/summary placeholders for each notice
-- a disabled Request Buyer Access button until required consent is accepted
+Important operating rule:
 
-The legal text is intentionally compact so the registration form does not feel like a heavy legal document.
+- Request Quote is not a final transaction.
+- Displayed price, subtotal, and estimatedTotal are references only.
+- priceSnapshot is a request-time reference price.
+- Final price, stock, lead time, shipping conditions, and export conditions are confirmed by Noblesse through Admin Quote or manager review.
 
-## Agreement Versioning
+## 5. B2B Buyer And Quote Terms Scope
 
-Agreement text should be versioned because Buyers may apply under different versions over time.
+The B2B Buyer terms should cover:
 
-Current frontend helper versions:
+- buyer approval criteria
+- submitted information accuracy
+- country and market-specific pricing
+- Approved Buyer Price conditions
+- MOQ variability
+- price change possibility
+- Request Quote nature
+- priceSnapshot meaning
+- Admin Quote
+- final quote not completed at request submission
+- availability, lead time, shipping, and export limits
+- quote adjustment when MOQ or supply conditions do not match
+- approval revocation and access limitation
+- buyer responsibility for incorrect input
+- misuse and account limits
+- disputes and inquiries
 
-- `termsOfService`: `terms-v1.0`
-- `privacyCollectionUse`: `privacy-v1.0`
-- `marketingUpdates`: `marketing-v1.0`
+Noblesse may show some price information only to Approved Buyers. Market prices can differ by assignedMarket and currency.
 
-Future database keys:
-
-- `terms_of_service`
-- `privacy_collection_use`
-- `marketing_updates`
-
-## `buyer_agreements` Purpose
-
-Future production storage should record:
-
-- Buyer ID
-- agreement key
-- agreement version
-- required flag
-- accepted flag
-- accepted timestamp
-- related terms version ID
-- server-side IP address if legally required
-- server-side user agent if legally required
-
-Historical consent records should not be overwritten when terms change.
-
-## Privacy Collection And Use Items
+## 6. Privacy Collection And Use
 
 Purpose:
 
 - Buyer access review
 - company verification
 - contact
-- market assignment
+- country and market assignment
+- Approved Buyer Price access
 - Request Quote processing
+- customer support
+- dispute and record management
+- misuse prevention
 
 Collected items:
 
@@ -98,22 +118,60 @@ Collected items:
 - messenger type
 - messenger ID
 - sales channel
-- business number
+- business information
 - request memo
 
 Retention:
 
-- retained while the Buyer account is active
-- retained as required for business or legal record keeping
+- until account withdrawal
+- until buyer application withdrawal
+- until processing purpose is fulfilled
+- longer when required by law, dispute handling, transaction record retention, or misuse prevention
 
 Right to refuse:
 
-- Buyers may refuse consent
-- Buyer Access Request cannot be processed without required information
+- Buyers may refuse consent.
+- Buyer Access Request cannot be processed without required privacy consent.
 
-## Marketing Consent
+## 7. Privacy Policy
 
-Marketing and new arrival updates are optional.
+The full privacy policy should be available separately from the required checkbox list.
+
+It should include:
+
+- processing purposes
+- processed items
+- collection methods
+- retention and disposal
+- third-party provision
+- outsourcing
+- overseas transfer
+- user rights and request methods
+- cookies and access logs
+- security measures
+- children under 14
+- privacy officer
+- remedies
+- policy changes
+- effective date
+
+Current placeholder privacy officer:
+
+- privacy officer: to be confirmed before operation
+- email: `privacy@noblesse.example`
+
+Items requiring final review:
+
+- actual business information
+- privacy officer name and contact
+- outsourcing vendors
+- overseas transfer countries and processors
+- legal retention periods
+- user rights request channel
+
+## 8. Marketing Consent
+
+Marketing consent is optional.
 
 Purpose:
 
@@ -122,30 +180,86 @@ Purpose:
 - collection updates
 - event notices
 - Buyer update notices
+- market-specific product recommendations
 
 Channels:
 
 - email
 - messenger
+- phone
 - other submitted contact channels
 
-Refusing marketing consent must not block Buyer Access Request.
+Refusing marketing consent must not block Buyer Access Request. Buyers should be able to withdraw marketing consent later.
 
-## Production Handling
+## 9. RegisterPage UI
+
+RegisterPage should show:
+
+- Agree to all
+- required Terms of Service
+- required B2B Buyer and Quote Terms
+- required Privacy Collection and Use
+- optional Marketing and New Arrival Updates
+- Privacy Policy full document link
+- disabled Request Buyer Access button until all required items are accepted
+- long agreement content inside a scrollable details area
+
+The current version builds an agreement snapshot in memory only. It does not persist the snapshot.
+
+## 10. Versioning
+
+Agreement versions are defined in frontend content and should match database seed values.
+
+Current versions:
+
+- `terms_of_service`: `terms-v1.0`
+- `buyer_terms`: `buyer-terms-v1.0`
+- `privacy_collection_use`: `privacy-v1.0`
+- `marketing_updates`: `marketing-v1.0`
+- `privacy_policy`: `privacy-policy-v1.0`
+
+When terms change, create a new version instead of mutating historical meaning.
+
+## 11. Database Direction
+
+Future production storage should use:
+
+- `terms_versions`
+- `buyer_agreements`
+
+`terms_versions` stores active and historical agreement documents.
+
+`buyer_agreements` stores:
+
+- Buyer ID
+- agreement key
+- version
+- required flag
+- accepted flag
+- accepted timestamp
+- related terms version ID
+- server-side IP address if legally allowed
+- server-side user agent if legally allowed
+
+Historical consent records should not be overwritten when terms change.
+
+## 12. Trusted API/RPC Validation
 
 Actual persistence should be handled by a trusted API/RPC, not direct browser database writes.
 
 The trusted layer should:
 
 - load active required agreement versions
-- verify that required consent is accepted
+- verify `terms_of_service`, `buyer_terms`, and `privacy_collection_use`
+- record optional `marketing_updates` status
 - create the Buyer application or Buyer profile
 - store agreement snapshots in one controlled flow
 - record IP address and user agent only if the final privacy policy allows it
+- reject stale or missing required agreement versions
 
 Browser values are display/input values only and must be validated again server-side.
 
-## Excluded From Version 1
+## 13. Excluded From Version 1
 
 Version 1 does not add:
 
@@ -155,5 +269,5 @@ Version 1 does not add:
 - PostgreSQL direct connection code
 - Supabase `createClient`
 - service role keys
-- `DATABASE_URL`
-- direct settlement or direct purchase features
+- database connection URL values
+- direct online settlement features

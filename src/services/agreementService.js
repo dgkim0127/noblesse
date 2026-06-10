@@ -1,42 +1,74 @@
+import { agreementDocuments } from '../content/agreements'
+
 export const AGREEMENT_VERSIONS = {
-  termsOfService: 'terms-v1.0',
-  privacyCollectionUse: 'privacy-v1.0',
-  marketingUpdates: 'marketing-v1.0',
+  terms_of_service: 'terms-v1.0',
+  buyer_terms: 'buyer-terms-v1.0',
+  privacy_collection_use: 'privacy-v1.0',
+  marketing_updates: 'marketing-v1.0',
+  privacy_policy: 'privacy-policy-v1.0',
 }
+
+export const REQUIRED_AGREEMENT_KEYS = [
+  'terms_of_service',
+  'buyer_terms',
+  'privacy_collection_use',
+]
+
+export const OPTIONAL_AGREEMENT_KEYS = ['marketing_updates']
+
+const CHECKBOX_AGREEMENT_KEYS = [
+  ...REQUIRED_AGREEMENT_KEYS,
+  ...OPTIONAL_AGREEMENT_KEYS,
+]
 
 export function getInitialAgreements() {
   return {
-    termsOfService: false,
-    privacyCollectionUse: false,
-    marketingUpdates: false,
+    terms_of_service: false,
+    buyer_terms: false,
+    privacy_collection_use: false,
+    marketing_updates: false,
   }
 }
 
 export function areRequiredAgreementsAccepted(agreements) {
-  return Boolean(agreements.termsOfService && agreements.privacyCollectionUse)
+  return REQUIRED_AGREEMENT_KEYS.every((key) => agreements[key] === true)
 }
 
 export function buildAgreementSnapshot(agreements) {
   const acceptedAt = new Date().toISOString()
 
-  return {
-    termsOfService: {
-      required: true,
-      accepted: agreements.termsOfService,
-      version: AGREEMENT_VERSIONS.termsOfService,
-      acceptedAt: agreements.termsOfService ? acceptedAt : null,
-    },
-    privacyCollectionUse: {
-      required: true,
-      accepted: agreements.privacyCollectionUse,
-      version: AGREEMENT_VERSIONS.privacyCollectionUse,
-      acceptedAt: agreements.privacyCollectionUse ? acceptedAt : null,
-    },
-    marketingUpdates: {
-      required: false,
-      accepted: agreements.marketingUpdates,
-      version: AGREEMENT_VERSIONS.marketingUpdates,
-      acceptedAt: agreements.marketingUpdates ? acceptedAt : null,
-    },
-  }
+  return CHECKBOX_AGREEMENT_KEYS.map((key) => {
+    const accepted = agreements[key] === true
+
+    return {
+      key,
+      version: AGREEMENT_VERSIONS[key],
+      required: REQUIRED_AGREEMENT_KEYS.includes(key),
+      accepted,
+      acceptedAt: accepted ? acceptedAt : null,
+    }
+  })
+}
+
+export function getAgreementDocuments() {
+  return agreementDocuments
+}
+
+export function getAgreementDocument(key) {
+  return agreementDocuments.find((document) => document.key === key) ?? null
+}
+
+export function getAgreementSummaryForRegister() {
+  return CHECKBOX_AGREEMENT_KEYS.map((key) => {
+    const document = getAgreementDocument(key)
+
+    return {
+      key,
+      version: AGREEMENT_VERSIONS[key],
+      required: REQUIRED_AGREEMENT_KEYS.includes(key),
+      titleKo: document?.titleKo ?? key,
+      titleEn: document?.titleEn ?? key,
+      sections: document?.sections ?? [],
+    }
+  })
 }

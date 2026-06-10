@@ -25,16 +25,26 @@ It is not connected to the React frontend yet. Do not run these files against pr
 `seed_mock_data.sql` includes development-only agreement version samples:
 
 - `terms_of_service` / `terms-v1.0`
+- `buyer_terms` / `buyer-terms-v1.0`
 - `privacy_collection_use` / `privacy-v1.0`
 - `marketing_updates` / `marketing-v1.0`
+- `privacy_policy` / `privacy-policy-v1.0`
+
+## Agreement Tables
+
+`terms_versions` is the agreement version management table. It stores active and historical text for service terms, B2B Buyer terms, privacy consent, optional marketing consent, and the privacy policy reference document.
+
+`buyer_agreements` is the Buyer agreement history table. It should store the exact agreement key and version accepted by a Buyer when Buyer Access Request is submitted.
+
+The seed file is for local development only. Do not run development seed data against production.
+
+Before production registration is enabled, required consent and active agreement versions must be validated through a trusted registration API/RPC. Browser direct writes to `buyer_agreements` are intentionally not part of the first-version frontend.
 
 ## Local Review
 
 Use pgAdmin4, Supabase SQL editor, or another PostgreSQL client to inspect tables and views.
 
 Do not run the seed file against production. The seed file is only for development verification.
-
-Before production registration is enabled, agreement snapshots should be written through a trusted API/RPC. Browser direct writes to `buyer_agreements` are intentionally not part of the first-version frontend.
 
 ## Validation Expectations
 
