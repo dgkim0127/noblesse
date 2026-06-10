@@ -1,43 +1,45 @@
 import { ArrowRight, LogIn } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
+import { useLocalePath } from '../utils/locale'
 
-const brandKoreanName = '\uADC0\uC871 \uD53C\uC5B4\uC2F1'
-const brandLanguageLabel = '\uD53C\uC5B4\uC2F1 / Piercing / \u30D4\u30A2\u30B9 / \u51B2\u5B54'
+const brandKoreanName = '귀족 피어싱'
+const brandLanguageLabel = '피어싱 / Piercing / ピアス / 冲孔'
 
 export function LoginPage() {
   const navigate = useNavigate()
   const { setViewerState } = useCommerce()
+  const { toLocalePath } = useLocalePath()
 
   const loginAsApprovedBuyer = (event) => {
     event.preventDefault()
     setViewerState('approved')
-    navigate('/account')
+    navigate(toLocalePath('/account'))
   }
 
   const browseAsGuest = () => {
     setViewerState('guest')
-    navigate('/products')
+    navigate(toLocalePath('/products'))
   }
 
   return <main className="content auth-page">
     <section className="account-panel auth-panel">
       <LogIn size={25} />
-      <p className="eyebrow">BUYER LOGIN</p>
-      <h1>Noblesse Piercing buyer access</h1>
+      <p className="eyebrow">회원 로그인</p>
+      <h1>Noblesse 회원 전용 접근</h1>
       <div className="brand-mini">
         <strong>{brandKoreanName}</strong>
         <span>{brandLanguageLabel}</span>
       </div>
-      <p>Approved buyers can access prices, Inquiry List, and Request Quote.</p>
+      <p>확인된 회원은 회원가, 문의 리스트, 견적 문의 기능을 사용할 수 있습니다.</p>
       <form className="auth-form" onSubmit={loginAsApprovedBuyer}>
-        <label>Email<input autoComplete="email" name="email" placeholder="buyer@example.com" type="email" /></label>
-        <label>Password<input autoComplete="current-password" name="password" placeholder="Password" type="password" /></label>
-        <button className="primary-action" type="submit">Login</button>
+        <label>이메일<input autoComplete="email" name="email" placeholder="member@example.com" type="email" /></label>
+        <label>비밀번호<input autoComplete="current-password" name="password" placeholder="비밀번호" type="password" /></label>
+        <button className="primary-action" type="submit">로그인</button>
       </form>
       <div className="auth-links">
-        <button className="text-action" type="button" onClick={browseAsGuest}>Browse as Guest</button>
-        <Link to="/register">Register / Request Buyer Access <ArrowRight size={15} /></Link>
+        <button className="text-action" type="button" onClick={browseAsGuest}>비회원으로 둘러보기</button>
+        <Link to={toLocalePath('/register')}>회원 신청 <ArrowRight size={15} /></Link>
       </div>
     </section>
   </main>

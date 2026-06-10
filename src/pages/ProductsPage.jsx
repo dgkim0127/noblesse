@@ -4,28 +4,38 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { CatalogCard } from '../components/CatalogCard'
 import { useCommerce } from '../commerce/commerceStore'
 import { mockCollections } from '../data/catalog'
+import { useLocalePath } from '../utils/locale'
 
 const categoryLabels = {
-  all: 'All',
-  piercing: 'Piercing',
-  earrings: 'Earrings',
-  barbell: 'Barbell',
-  labret: 'Labret',
-  'nose-piercing': 'Nose Piercing',
-  'belly-ring': 'Belly Ring',
-  cubic: 'Cubic',
-  pearl: 'Pearl',
-  '14k-gold': '14K Gold',
-  titanium: 'Titanium',
-  'surgical-steel': 'Surgical Steel',
+  all: '전체',
+  piercing: '피어싱',
+  earrings: '귀걸이',
+  barbell: '바벨',
+  labret: '라블렛',
+  'nose-piercing': '노즈 피어싱',
+  'belly-ring': '배꼽 링',
+  cubic: '큐빅',
+  pearl: '진주',
+  '14k-gold': '14K 골드',
+  titanium: '티타늄',
+  'surgical-steel': '써지컬 스틸',
 }
 
 const tagLabels = {
-  new: 'New',
-  best: 'Best',
+  new: '신상품',
+  best: '베스트',
 }
 
-const collectionLabels = Object.fromEntries(mockCollections.map((collection) => [collection.collectionId, collection.titleEn]))
+const filterLabelNames = {
+  Category: '카테고리',
+  Collection: '컬렉션',
+  Material: '재질',
+  Color: '컬러',
+  Tag: '태그',
+  Search: '검색어',
+}
+
+const collectionLabels = Object.fromEntries(mockCollections.map((collection) => [collection.collectionId, collection.titleKo]))
 
 const formatCategoryLabel = (categoryId) => categoryLabels[categoryId] ?? categoryId.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')
 
@@ -35,6 +45,7 @@ export function ProductsPage() {
   const { products } = useCommerce()
   const [searchParams, setSearchParams] = useSearchParams()
   const [gridMode, setGridMode] = useState('two')
+  const { toLocalePath } = useLocalePath()
 
   const q = searchParams.get('q') ?? ''
   const category = searchParams.get('category') ?? ''
@@ -97,21 +108,21 @@ export function ProductsPage() {
 
   return <main className="content">
     <div className="page-title">
-      <div><p>PRODUCT LIST</p><h1>Piercing catalog</h1></div>
-      <span>{filtered.length} items</span>
+      <div><p>상품 목록</p><h1>피어싱 카탈로그</h1></div>
+      <span>{filtered.length}개 상품</span>
     </div>
 
     <form className="product-search" onSubmit={submitSearch}>
       <Search size={18} />
-      <input key={q} name="q" defaultValue={q} placeholder="Search piercing, material, or style" />
-      <button type="submit">Search</button>
+      <input key={q} name="q" defaultValue={q} placeholder="피어싱, 재질, 스타일을 검색해보세요" />
+      <button type="submit">검색</button>
     </form>
 
     {hasFilters && <div className="filter-summary">
       <div className="filter-chips">
-        {filterChips.map(([label, value]) => <span className="filter-chip" key={`${label}-${value}`}><b>{label}:</b> {value}</span>)}
+        {filterChips.map(([label, value]) => <span className="filter-chip" key={`${label}-${value}`}><b>{filterLabelNames[label]}:</b> {value}</span>)}
       </div>
-      <Link className="clear-filters" to="/products"><X size={14} />Clear filters</Link>
+      <Link className="clear-filters" to={toLocalePath('/products')}><X size={14} />필터 초기화</Link>
     </div>}
 
     <div className="product-tools">
@@ -119,13 +130,13 @@ export function ProductsPage() {
         {categories.map((item) => <button className={(item === 'all' ? !category : category === item) ? 'active' : ''} key={item} type="button" onClick={() => setFilter('category', item === 'all' ? '' : item)}>{formatCategoryLabel(item)}</button>)}
       </div>
       <div className="view-switch">
-        <button className={gridMode === 'two' ? 'active' : ''} type="button" aria-label="Grid view" onClick={() => setGridMode('two')}><Grid2X2 size={16} /></button>
-        <button className={gridMode === 'one' ? 'active' : ''} type="button" aria-label="List view" onClick={() => setGridMode('one')}><List size={17} /></button>
+        <button className={gridMode === 'two' ? 'active' : ''} type="button" aria-label="그리드 보기" onClick={() => setGridMode('two')}><Grid2X2 size={16} /></button>
+        <button className={gridMode === 'one' ? 'active' : ''} type="button" aria-label="리스트 보기" onClick={() => setGridMode('one')}><List size={17} /></button>
       </div>
     </div>
 
     {filtered.length > 0
       ? <div className={`catalog-grid product-results ${gridMode === 'one' ? 'one-column' : ''}`}>{filtered.map((product) => <CatalogCard key={product.productId} product={product} />)}</div>
-      : <section className="empty product-empty"><h2>No products found for this filter.</h2><p>Try another category or clear filters.</p><small>조건에 맞는 상품이 없습니다. 필터를 초기화하거나 다른 카테고리를 선택하세요.</small><Link className="secondary-action" to="/products">Clear filters</Link></section>}
+      : <section className="empty product-empty"><h2>조건에 맞는 상품이 없습니다.</h2><p>필터를 초기화하거나 다른 카테고리를 선택해보세요.</p><small>No products found for this filter. Try another category or clear filters.</small><Link className="secondary-action" to={toLocalePath('/products')}>필터 초기화</Link></section>}
   </main>
 }

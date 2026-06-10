@@ -8,25 +8,25 @@ export const privacyPolicy = {
     {
       headingKo: '제1조 처리 목적',
       headingEn: 'Article 1. Processing Purpose',
-      bodyKo: 'Noblesse는 Buyer Access Request, Buyer Approval, Approved Buyer Price 접근, Inquiry List, Request Quote, My Inquiries, Admin Quote 안내, 고객 문의, 서비스 운영 및 부정 이용 방지를 위해 개인정보를 처리합니다.',
-      bodyEn: 'Noblesse processes personal information for Buyer Access Request, Buyer Approval, Approved Buyer Price access, Inquiry List, Request Quote, My Inquiries, Admin Quote guidance, customer support, service operation, and misuse prevention.',
+      bodyKo: 'Noblesse는 Member Access Request, Member Review, Member Price 접근, Inquiry List, Request Quote, My Inquiries, Admin Quote 안내, 고객 문의, 서비스 운영 및 부정 이용 방지를 위해 개인정보를 처리합니다.',
+      bodyEn: 'Noblesse processes personal information for Member Access Request, Member Review, Member Price access, Inquiry List, Request Quote, My Inquiries, Admin Quote guidance, customer support, service operation, and misuse prevention.',
     },
     {
       headingKo: '제2조 처리하는 개인정보 항목',
       headingEn: 'Article 2. Personal Information Items',
-      bodyKo: '처리 항목은 이메일, 비밀번호, 회사명, 담당자명, 국가, 선호 언어, 전화번호, 메신저 종류, 메신저 ID, 판매 채널, 사업자 정보, 요청 메모, 서비스 이용 기록, 접속 로그, 쿠키, Inquiry List 기록, Request Quote 기록, My Inquiries 기록, 승인 상태, assignedMarket, currency, discountRate, minOrderAmount입니다.',
+      bodyKo: '처리 항목은 이메일, 비밀번호, 회사명, 담당자명, 국가, 선호 언어, 전화번호, 메신저 종류, 메신저 ID, 판매 채널, 사업자 정보, 요청 메모, 서비스 이용 기록, 접속 로그, 쿠키, Inquiry List 기록, Request Quote 기록, My Inquiries 기록, 회원 상태, assignedMarket, currency, discountRate, minOrderAmount입니다.',
       bodyEn: 'Processed items include email, password, company name, contact name, country, preferred language, phone, messenger type, messenger ID, sales channel, business information, request memo, service usage records, access logs, cookies, Inquiry List records, Request Quote records, My Inquiries records, approval status, assignedMarket, currency, discountRate, and minOrderAmount.',
     },
     {
       headingKo: '제3조 수집 방법',
       headingEn: 'Article 3. Collection Method',
-      bodyKo: '개인정보는 회원가입, Buyer Access Request, 계정 정보 입력, Inquiry List 이용, Request Quote 제출, 문의, 서비스 이용 과정에서 수집될 수 있습니다.',
-      bodyEn: 'Personal information may be collected through registration, Buyer Access Request, account information entry, Inquiry List use, Request Quote submission, inquiries, and service use.',
+      bodyKo: '개인정보는 회원가입, Member Access Request, 계정 정보 입력, Inquiry List 이용, Request Quote 제출, 문의, 서비스 이용 과정에서 수집될 수 있습니다.',
+      bodyEn: 'Personal information may be collected through registration, Member Access Request, account information entry, Inquiry List use, Request Quote submission, inquiries, and service use.',
     },
     {
       headingKo: '제4조 보유 및 이용 기간',
       headingEn: 'Article 4. Retention And Use Period',
-      bodyKo: '개인정보는 회원 탈퇴 또는 거래처 승인 요청 철회 시까지 보유될 수 있습니다. 관련 법령, 분쟁 처리, 거래 기록 보존, 부정 이용 방지 목적이 필요한 경우 일정 기간 보관될 수 있으며 실제 법정 보존 기간은 운영 전 법률 검토를 통해 확정해야 합니다.',
+      bodyKo: '개인정보는 회원 탈퇴 또는 회원 확인 요청 철회 시까지 보유될 수 있습니다. 관련 법령, 분쟁 처리, 거래 기록 보존, 부정 이용 방지 목적이 필요한 경우 일정 기간 보관될 수 있으며 실제 법정 보존 기간은 운영 전 법률 검토를 통해 확정해야 합니다.',
       bodyEn: 'Personal information may be retained until account withdrawal or buyer application withdrawal. It may be retained for a defined period when required by law, dispute handling, transaction record retention, or misuse prevention. Legal retention periods must be finalized before operation.',
     },
     {
@@ -50,7 +50,7 @@ export const privacyPolicy = {
     {
       headingKo: '제8조 국외 이전',
       headingEn: 'Article 8. Overseas Transfer',
-      bodyKo: '글로벌 바이어 지원 및 클라우드 서비스 이용 과정에서 개인정보가 국외에 보관 또는 처리될 수 있습니다. 국외 이전 국가, 이전 항목, 이전 시점, 보유 기간, 수탁자는 운영 전 법률 및 개인정보 검토를 통해 확정해야 합니다.',
+      bodyKo: '글로벌 회원 지원 및 클라우드 서비스 이용 과정에서 개인정보가 국외에 보관 또는 처리될 수 있습니다. 국외 이전 국가, 이전 항목, 이전 시점, 보유 기간, 수탁자는 운영 전 법률 및 개인정보 검토를 통해 확정해야 합니다.',
       bodyEn: 'Personal information may be stored or processed overseas when supporting global buyers or using cloud services. Transfer countries, items, timing, retention period, and processors must be finalized through legal and privacy review before operation.',
     },
     {
@@ -80,7 +80,7 @@ export const privacyPolicy = {
     {
       headingKo: '제13조 만 14세 미만 아동',
       headingEn: 'Article 13. Children Under 14',
-      bodyKo: 'Noblesse는 B2B 거래처용 카탈로그 서비스로, 만 14세 미만 아동을 대상으로 하지 않습니다. 관련 신청이 확인될 경우 처리가 제한될 수 있습니다.',
+      bodyKo: 'Noblesse는 B2B 회원용 카탈로그 서비스로, 만 14세 미만 아동을 대상으로 하지 않습니다. 관련 신청이 확인될 경우 처리가 제한될 수 있습니다.',
       bodyEn: 'Noblesse is a B2B buyer catalog service and is not directed to children under 14. Related requests may be restricted if identified.',
     },
     {
@@ -92,7 +92,7 @@ export const privacyPolicy = {
     {
       headingKo: '제15조 권익침해 구제',
       headingEn: 'Article 15. Remedies',
-      bodyKo: '개인정보 침해 관련 상담이나 구제 절차는 관련 기관 또는 Noblesse가 안내하는 연락 채널을 통해 진행할 수 있습니다. 국가별 바이어의 경우 적용 기관이 다를 수 있습니다.',
+      bodyKo: '개인정보 침해 관련 상담이나 구제 절차는 관련 기관 또는 Noblesse가 안내하는 연락 채널을 통해 진행할 수 있습니다. 국가별 회원의 경우 적용 기관이 다를 수 있습니다.',
       bodyEn: 'Consultation or remedies for privacy infringement may be handled through relevant authorities or contact channels provided by Noblesse. Applicable authorities may differ by Buyer country.',
     },
     {
