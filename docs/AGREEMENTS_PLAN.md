@@ -1,27 +1,44 @@
 # Agreements Plan
 
-This document defines the first-version agreement and consent structure for the Noblesse Piercing wholesale member sign-up request flow.
+This document defines the first-version agreement and consent structure for the Noblesse Piercing membership request flow.
 
 Version 1 is mock-first. The current website does not connect to Firebase Auth, Supabase Auth, or a production database for agreement persistence.
 
-## Brand Naming Standard
+## Brand Standard
 
 - Korean brand name: 귀족
 - English brand name: Noblesse Piercing
-- 피어싱 is used as a category or service descriptor.
-- Do not combine the Korean brand name with the category descriptor as the main Korean brand label.
-- Korean agreement copy should prefer 도매 회원, 승인 도매 회원, 회원가, 견적 리스트, 견적 요청, and 견적 요청 내역 where natural.
+- 피어싱 is used as a category or service description.
+- The combined Korean brand/category wording should not be used as the main Korean brand name in agreement documents.
+
+Korean agreement wording should prefer:
+
+- 도매 회원
+- 승인 도매 회원
+- 회원가
+- 도매 회원가입 신청
+- 견적 요청
+- 최종 견적
+- MOQ
+
+System terms that can remain in Korean documents:
+
+- Inquiry List
+- Request Quote
+- Admin Quote
+- My Inquiries
+- priceSnapshot
 
 ## 1. Why Agreements Are Needed
 
-Wholesale member sign-up request collects company and contact information before a member can access member prices and Request Quote features.
+The membership request flow collects company and contact information before a member can access approved buyer pricing and Request Quote features.
 
 The website needs a clear consent checkpoint for:
 
 - service usage terms
-- B2B wholesale member and quote terms
+- wholesale member and quote terms
 - privacy collection and use
-- optional marketing and new arrival updates
+- optional product and catalog updates
 - privacy policy review
 
 The agreement text in this repository is a first-version operating draft. Final operating terms and privacy policy must be reviewed by the business owner and legal/privacy reviewer before launch.
@@ -31,9 +48,9 @@ The agreement text in this repository is a first-version operating draft. Final 
 | Key | Version | Required | Register checkbox | Purpose |
 | --- | --- | --- | --- | --- |
 | `terms_of_service` | `terms-v1.0` | yes | yes | General site and service usage rules |
-| `buyer_terms` | `buyer-terms-v1.0` | yes | yes | Wholesale member, member price, MOQ, Request Quote, and Admin Quote rules |
-| `privacy_collection_use` | `privacy-v1.0` | yes | yes | Consent for collecting and using wholesale member sign-up request information |
-| `marketing_updates` | `marketing-v1.0` | no | yes | Optional product, catalog, collection, and member update notices |
+| `buyer_terms` | `buyer-terms-v1.0` | yes | yes | Wholesale member, approved pricing, MOQ, Request Quote, and Admin Quote rules |
+| `privacy_collection_use` | `privacy-v1.0` | yes | yes | Consent for collecting and using membership request information |
+| `marketing_updates` | `marketing-v1.0` | no | yes | Optional product and catalog update notices |
 | `privacy_policy` | `privacy-policy-v1.0` | no | no | Full privacy policy reference document |
 
 `privacy_policy` is available from RegisterPage as a full document link, but it is not a checkbox target in version 1.
@@ -43,24 +60,24 @@ The agreement text in this repository is a first-version operating draft. Final 
 Required:
 
 - Terms of Service
-- B2B wholesale member and Quote Terms
+- Wholesale Member and Quote Terms
 - Privacy Collection and Use
 
 Optional:
 
-- Marketing and New Arrival Updates
+- Product and Catalog Updates
 
-Wholesale member sign-up request must be blocked when any required consent is missing. Optional marketing consent must not block wholesale member sign-up request.
+Membership request submission must be blocked when any required consent is missing. Optional marketing consent must not block submission.
 
 ## 4. Terms Of Service Scope
 
 The Terms of Service should cover:
 
 - service purpose and definitions
-- site, user, guest, wholesale member, approved wholesale member, admin, product, member price, Inquiry List, Request Quote, Admin Quote, and priceSnapshot
+- site, user, guest, wholesale member, approved wholesale member, admin, product, approved buyer pricing, Inquiry List, Request Quote, Admin Quote, and priceSnapshot
 - service changes and suspension
-- wholesale member sign-up request
-- wholesale member approval and access rights
+- membership request
+- member review and access rights
 - product information and image limitations
 - pricing access restrictions
 - Inquiry List and Request Quote meaning
@@ -70,31 +87,31 @@ The Terms of Service should cover:
 - privacy reference
 - notices, disputes, governing law, and revision notice
 
-Important operating rule:
+Important operating rules:
 
 - Request Quote is not a final transaction.
 - Displayed price, subtotal, and estimatedTotal are references only.
 - priceSnapshot is a request-time reference price.
 - Final price, stock, lead time, shipping conditions, and export conditions are confirmed by Noblesse through Admin Quote or manager review.
 
-## 5. B2B wholesale member And Quote Terms Scope
+## 5. Wholesale Member And Quote Terms Scope
 
-The B2B wholesale member terms should cover:
+The wholesale member terms should cover:
 
-- wholesale member approval criteria
+- member approval criteria
 - submitted information accuracy
 - country and market-specific pricing
-- member price conditions
+- approved buyer pricing conditions
 - MOQ variability
 - price change possibility
 - Request Quote nature
 - priceSnapshot meaning
 - Admin Quote
-- final quote not completed at request submission
+- final quotation not completed at request submission
 - availability, lead time, shipping, and export limits
 - quote adjustment when MOQ or supply conditions do not match
 - approval revocation and access limitation
-- buyer responsibility for incorrect input
+- member responsibility for incorrect input
 - misuse and account limits
 - disputes and inquiries
 
@@ -104,11 +121,11 @@ Noblesse may show some price information only to approved wholesale members. Mar
 
 Purpose:
 
-- Wholesale member approval review
+- membership request review
 - company verification
 - contact
 - country and market assignment
-- member price access
+- approved buyer pricing access
 - Request Quote processing
 - customer support
 - dispute and record management
@@ -132,14 +149,14 @@ Collected items:
 Retention:
 
 - until account withdrawal
-- until buyer application withdrawal
+- until application withdrawal
 - until processing purpose is fulfilled
 - longer when required by law, dispute handling, transaction record retention, or misuse prevention
 
 Right to refuse:
 
 - Members may refuse consent.
-- wholesale member sign-up request cannot be processed without required privacy consent.
+- Membership request cannot be processed without required privacy consent.
 
 ## 7. Privacy Policy
 
@@ -177,9 +194,9 @@ Items requiring final review:
 - legal retention periods
 - user rights request channel
 
-## 8. Marketing Consent
+## 8. Product And Catalog Update Consent
 
-Marketing consent is optional.
+Product and catalog update consent is optional.
 
 Purpose:
 
@@ -197,7 +214,7 @@ Channels:
 - phone
 - other submitted contact channels
 
-Refusing marketing consent must not block wholesale member sign-up request. Members should be able to withdraw marketing consent later.
+Refusing optional update consent must not block membership request submission. Members should be able to withdraw consent later.
 
 ## 9. RegisterPage UI
 
@@ -205,11 +222,11 @@ RegisterPage should show:
 
 - Agree to all
 - required Terms of Service
-- required B2B wholesale member and Quote Terms
+- required Wholesale Member and Quote Terms
 - required Privacy Collection and Use
-- optional Marketing and New Arrival Updates
+- optional Product and Catalog Updates
 - Privacy Policy full document link
-- disabled membership request button until all required items are accepted
+- disabled submit button until all required items are accepted
 - long agreement content inside a scrollable details area
 
 The current version builds an agreement snapshot in memory only. It does not persist the snapshot.
@@ -239,7 +256,7 @@ Future production storage should use:
 
 `buyer_agreements` stores:
 
-- Buyer ID
+- member ID
 - agreement key
 - version
 - required flag
@@ -260,7 +277,7 @@ The trusted layer should:
 - load active required agreement versions
 - verify `terms_of_service`, `buyer_terms`, and `privacy_collection_use`
 - record optional `marketing_updates` status
-- create the wholesale member application or buyer profile
+- create the member application or member profile
 - store agreement snapshots in one controlled flow
 - record IP address and user agent only if the final privacy policy allows it
 - reject stale or missing required agreement versions
@@ -275,7 +292,7 @@ Version 1 does not add:
 - real Supabase Auth
 - production database writes
 - PostgreSQL direct connection code
-- Supabase `createClient`
+- Supabase client initialization
 - service role keys
 - database connection URL values
 - direct online settlement features

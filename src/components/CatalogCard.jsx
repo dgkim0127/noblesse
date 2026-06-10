@@ -9,7 +9,7 @@ const cardCopy = {
     add: '문의 리스트에 담기',
     locked: '회원 확인 후 가격 보기',
     lockedButton: '회원 확인 필요',
-    minQty: '최소 수량',
+    minQty: 'MOQ',
     memberPrice: '회원가',
   },
   en: {
@@ -17,7 +17,7 @@ const cardCopy = {
     locked: 'Price after member review',
     lockedButton: 'Member review needed',
     minQty: 'Minimum qty',
-    memberPrice: 'Member price',
+    memberPrice: 'Approved pricing',
   },
   jp: {
     add: 'お問い合わせリストに追加',

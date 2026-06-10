@@ -31,7 +31,7 @@ export function MyInquiriesPage() {
       <h1>{selected.inquiryId}</h1>
       <p>{selected.buyerCompanyName} / {selected.buyerCountry} / {new Date(selected.createdAt).toLocaleDateString('ko-KR')}</p>
       <dl className="inquiry-meta"><dt>상품 수</dt><dd>{selected.totalItems}</dd><dt>총 수량</dt><dd>{selected.totalQuantity}</dd><dt>예상 합계</dt><dd>{formatMoney(selected.estimatedTotal, selected.currency)}</dd></dl>
-      {selected.items.map((item) => <div className="quote-line inquiry-detail-line" key={`${item.productId}-${item.color}-${item.size}`}>{item.thumbnailUrl && <img className="quote-thumb" src={item.thumbnailUrl} alt={item.productName} loading="lazy" width="300" height="300" onError={(event) => { event.currentTarget.hidden = true }} />}<span>{item.productCode} / {item.productName}<small>{item.material} / {item.color} / {item.size} / 최소 수량 {item.moq}</small></span><strong>{formatMoney(item.subtotal, selected.currency)}</strong></div>)}
+      {selected.items.map((item) => <div className="quote-line inquiry-detail-line" key={`${item.productId}-${item.color}-${item.size}`}>{item.thumbnailUrl && <img className="quote-thumb" src={item.thumbnailUrl} alt={item.productName} loading="lazy" width="300" height="300" onError={(event) => { event.currentTarget.hidden = true }} />}<span>{item.productCode} / {item.productName}<small>{item.material} / {item.color} / {item.size} / MOQ {item.moq}</small></span><strong>{formatMoney(item.subtotal, selected.currency)}</strong></div>)}
       <div className="quote-total"><span>예상 합계</span><strong>{formatMoney(selected.estimatedTotal, selected.currency)}</strong></div>
     </section>
   </main>

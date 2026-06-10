@@ -92,7 +92,7 @@ const shellCopy = {
     viewerLabels: {
       guest: 'Guest preview',
       pending: 'Under review',
-      approved: 'Member price / JP region',
+      approved: 'Approved pricing / JP region',
       admin: 'Admin preview',
     },
   },

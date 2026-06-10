@@ -8,8 +8,8 @@ export const privacyPolicy = {
     {
       headingKo: '제1조 처리 목적',
       headingEn: 'Article 1. Processing Purpose',
-      bodyKo: 'Noblesse는 도매 회원가입 신청, 도매 회원 승인 검토, 회원가 접근 권한 관리, Inquiry List, Request Quote, My Inquiries, Admin Quote 안내, 고객 문의, 서비스 운영 및 부정 이용 방지를 위해 개인정보를 처리합니다.',
-      bodyEn: 'Noblesse processes personal information for wholesale member requests, approval review, member price access management, Inquiry List, Request Quote, My Inquiries, Admin Quote guidance, customer support, service operation, and misuse prevention.',
+      bodyKo: '귀족은 회원가입 신청, 도매 회원가입 신청, 도매 회원 승인 검토, 회원가 접근, Inquiry List, Request Quote, My Inquiries, Admin Quote 안내, 고객 문의, 서비스 운영 및 부정 이용 방지를 위해 개인정보를 처리합니다.',
+      bodyEn: 'Noblesse processes personal information for membership requests, member review, approved buyer pricing access, Inquiry List, Request Quote, My Inquiries, Admin Quote guidance, customer support, service operation, and misuse prevention.',
     },
     {
       headingKo: '제2조 처리하는 개인정보 항목',
@@ -20,13 +20,13 @@ export const privacyPolicy = {
     {
       headingKo: '제3조 수집 방법',
       headingEn: 'Article 3. Collection Method',
-      bodyKo: '개인정보는 회원가입, 도매 회원가입 신청, 계정 정보 입력, Inquiry List 이용, Request Quote 제출, 문의, 서비스 이용 과정에서 수집될 수 있습니다.',
-      bodyEn: 'Personal information may be collected through registration, wholesale member requests, account information entry, Inquiry List use, Request Quote submission, inquiries, and service use.',
+      bodyKo: '개인정보는 회원가입 신청, 도매 회원가입 신청, 계정 정보 입력, Inquiry List 이용, Request Quote 제출, 문의, 서비스 이용 과정에서 수집될 수 있습니다.',
+      bodyEn: 'Personal information may be collected through registration, membership request, account information entry, Inquiry List use, Request Quote submission, inquiries, and service use.',
     },
     {
       headingKo: '제4조 보유 및 이용 기간',
       headingEn: 'Article 4. Retention And Use Period',
-      bodyKo: '개인정보는 회원 탈퇴 또는 회원 확인 요청 철회 시까지 보유될 수 있습니다. 관련 법령, 분쟁 처리, 거래 기록 보존, 부정 이용 방지 목적이 필요한 경우 일정 기간 보관될 수 있으며 실제 법정 보존 기간은 운영 전 법률 검토를 통해 확정해야 합니다.',
+      bodyKo: '개인정보는 회원 탈퇴 또는 도매 회원가입 신청 철회 시까지 보유할 수 있습니다. 관련 법령, 분쟁 처리, 거래 기록 보존, 부정 이용 방지 목적이 필요한 경우 일정 기간 보관할 수 있으며 실제 법정 보존 기간은 운영 전 법률 검토를 통해 확정해야 합니다.',
       bodyEn: 'Personal information may be retained until account withdrawal or member request withdrawal. It may be retained for a defined period when required by law, dispute handling, transaction record retention, or misuse prevention. Legal retention periods must be finalized before operation.',
     },
     {
@@ -38,7 +38,7 @@ export const privacyPolicy = {
     {
       headingKo: '제6조 제3자 제공',
       headingEn: 'Article 6. Third-Party Provision',
-      bodyKo: 'Noblesse는 법령상 근거가 있거나 사용자의 별도 동의가 있는 경우를 제외하고 개인정보를 제3자에게 제공하지 않는 것을 원칙으로 합니다. 실제 운영 시 제3자 제공 항목은 별도로 확정해야 합니다.',
+      bodyKo: '귀족은 법령상 근거가 있거나 이용자의 별도 동의가 있는 경우를 제외하고 개인정보를 제3자에게 제공하지 않는 것을 원칙으로 합니다. 실제 운영 시 제3자 제공 항목은 별도로 확정해야 합니다.',
       bodyEn: 'Noblesse does not provide personal information to third parties unless required by law or separately consented to by the user. Any actual third-party provision details must be finalized before operation.',
     },
     {
@@ -62,37 +62,37 @@ export const privacyPolicy = {
     {
       headingKo: '제10조 권리 행사 방법',
       headingEn: 'Article 10. How To Exercise Rights',
-      bodyKo: '개인정보 관련 요청은 사이트 내 계정 기능, 이메일 또는 Noblesse가 안내하는 연락 채널을 통해 접수할 수 있습니다. 본인 확인이 필요한 경우 추가 확인 절차가 진행될 수 있습니다.',
+      bodyKo: '개인정보 관련 요청은 사이트 내 계정 기능, 이메일 또는 귀족이 안내하는 연락 채널을 통해 접수할 수 있습니다. 본인 확인이 필요한 경우 추가 확인 절차가 진행될 수 있습니다.',
       bodyEn: 'Privacy-related requests may be submitted through account features, email, or contact channels provided by Noblesse. Additional identity verification may be required.',
     },
     {
       headingKo: '제11조 쿠키 및 접속 정보',
       headingEn: 'Article 11. Cookies And Access Information',
-      bodyKo: 'Noblesse는 서비스 안정화, 접속 상태 관리, 이용 패턴 확인을 위해 쿠키와 접속 로그를 사용할 수 있습니다. 사용자는 브라우저 설정을 통해 쿠키 저장을 제한할 수 있습니다.',
+      bodyKo: '귀족은 서비스 안정성, 접속 상태 관리, 이용 패턴 확인을 위해 쿠키와 접속 로그를 사용할 수 있습니다. 이용자는 브라우저 설정을 통해 쿠키 저장을 제한할 수 있습니다.',
       bodyEn: 'Noblesse may use cookies and access logs for service stability, session management, and usage pattern review. Users may limit cookie storage through browser settings.',
     },
     {
       headingKo: '제12조 개인정보 보호 조치',
       headingEn: 'Article 12. Security Measures',
-      bodyKo: 'Noblesse는 접근 권한 관리, 전송 구간 보호, 로그 관리, 최소 권한 원칙, 내부 접근 통제 등 필요한 보호 조치를 마련해야 합니다. 실제 운영 보안 정책은 서비스 공개 전 확정되어야 합니다.',
+      bodyKo: '귀족은 접근 권한 관리, 전송 구간 보호, 로그 관리, 최소 권한 원칙, 내부 접근 통제 등 필요한 보호 조치를 마련해야 합니다. 실제 운영 보안 정책은 서비스 공개 전 확정되어야 합니다.',
       bodyEn: 'Noblesse should prepare security measures such as access control, transmission protection, log management, least privilege, and internal access restrictions. Actual operating security policies must be finalized before launch.',
     },
     {
       headingKo: '제13조 만 14세 미만 아동',
       headingEn: 'Article 13. Children Under 14',
-      bodyKo: 'Noblesse는 B2B 회원용 카탈로그 서비스로, 만 14세 미만 아동을 대상으로 하지 않습니다. 관련 신청이 확인될 경우 처리가 제한될 수 있습니다.',
-      bodyEn: 'Noblesse is a B2B buyer catalog service and is not directed to children under 14. Related requests may be restricted if identified.',
+      bodyKo: '귀족은 도매 회원 카탈로그 서비스로, 만 14세 미만 아동을 대상으로 하지 않습니다. 관련 신청이 확인될 경우 처리가 제한될 수 있습니다.',
+      bodyEn: 'Noblesse is a B2B catalog service and is not directed to children under 14. Related requests may be restricted if identified.',
     },
     {
       headingKo: '제14조 개인정보 보호책임자',
       headingEn: 'Article 14. Privacy Officer',
-      bodyKo: '개인정보 보호책임자: 운영 전 확정 예정. 문의 이메일: privacy@noblesse.example. 실제 담당자명, 직책, 연락처는 운영 전 반드시 확정해야 합니다.',
+      bodyKo: '개인정보 보호책임자는 운영 전 확정 예정입니다. 문의 이메일은 privacy@noblesse.example입니다. 실제 담당자명, 직책, 연락처는 운영 전 반드시 확정해야 합니다.',
       bodyEn: 'Privacy officer: to be confirmed before operation. Contact email: privacy@noblesse.example. Actual name, title, and contact details must be finalized before operation.',
     },
     {
       headingKo: '제15조 권익침해 구제',
       headingEn: 'Article 15. Remedies',
-      bodyKo: '개인정보 침해 관련 상담이나 구제 절차는 관련 기관 또는 Noblesse가 안내하는 연락 채널을 통해 진행할 수 있습니다. 국가별 회원의 경우 적용 기관이 다를 수 있습니다.',
+      bodyKo: '개인정보 침해 관련 상담이나 구제 절차는 관련 기관 또는 귀족이 안내하는 연락 채널을 통해 진행할 수 있습니다. 국가별 회원의 경우 적용 기관이 다를 수 있습니다.',
       bodyEn: 'Consultation or remedies for privacy infringement may be handled through relevant authorities or contact channels provided by Noblesse. Applicable authorities may differ by member country.',
     },
     {

@@ -15,18 +15,16 @@ const registerCopy = {
   kr: {
     eyebrow: '회원가입',
     title: '귀족 회원가입',
-    intro: '피어싱 도매 카탈로그를 둘러보고, 도매 회원 승인을 신청해보세요.',
-    helper: '회원가입 후 상품 카탈로그를 확인할 수 있으며, 도매 회원 승인 완료 시 회원가, MOQ, Inquiry List, Request Quote 기능을 사용할 수 있습니다.',
-    englishSupport: 'Create your Noblesse Piercing account and request wholesale buyer access. Approved members can view buyer-only prices, MOQ, Inquiry List, and Request Quote features.',
-    noticeTitle: '가입 전 안내',
+    intro: '기본 정보만 남겨주시면 확인 후 이용할 수 있습니다.',
+    helper: '확인 후 회원가, MOQ, 문의 리스트, 견적 문의 기능을 사용할 수 있습니다.',
+    noticeTitle: '신청 전 확인해주세요',
     noticeItems: [
-      '회원가입 직후에는 승인 대기 상태로 시작됩니다.',
-      '회원가는 도매 회원 승인 후 확인할 수 있습니다.',
-      '견적 요청은 최종 주문이 아닙니다.',
-      '최종 가격, 재고, 납기, 배송 조건은 Noblesse 확인 후 안내됩니다.',
+      '회원 정보는 담당자가 직접 확인합니다.',
+      '회원가는 확인 후 볼 수 있습니다.',
+      '견적 문의는 최종 확정이 아닙니다.',
+      '최종 견적은 Noblesse 확인 후 안내합니다.',
     ],
-    noticeEnglish: 'Request Quote is not a final order. Final price, stock, lead time, and shipping conditions are confirmed by Noblesse.',
-    groups: { buyer: '기본 정보', contact: '연락처 정보', business: '도매 회원 정보', memo: '요청 메모' },
+    groups: { buyer: '회원 정보', contact: '연락처 정보', business: '비즈니스 정보', memo: '요청 메모' },
     fields: {
       email: '이메일',
       password: '비밀번호',
@@ -45,28 +43,28 @@ const registerCopy = {
     approvalTitle: '확인 안내',
     approvalBody: '회원 정보는 담당자가 직접 확인합니다. 확인 전까지 가격과 견적 문의 기능은 잠겨 있습니다.',
     agreementsEyebrow: '약관',
-    agreementsTitle: '약관 동의',
-    agreementsIntro: '회원가입에는 필수 약관 동의가 필요합니다. 마케팅 안내 수신은 선택입니다.',
+    agreementsTitle: '약관 및 개인정보 동의',
+    agreementsIntro: '회원 신청에는 필수 약관 3개 동의가 필요합니다. 마케팅 안내 수신은 선택입니다.',
     allAgree: '전체 동의',
     allAgreeSub: '필수 및 선택 항목에 모두 동의',
     required: '[필수]',
     optional: '[선택]',
     viewDetails: '자세히 보기',
     privacyPolicy: '개인정보 처리방침 보기',
-    warning: '회원가입을 위해 필수 약관을 모두 동의해주세요.',
+    warning: '회원 신청을 위해 필수 약관을 모두 동의해주세요.',
     warningSub: 'Please agree to all required terms to request access.',
-    submit: '회원가입 신청',
+    submit: '회원 신청하기',
     back: '로그인으로 돌아가기',
   },
   en: {
-    eyebrow: 'SIGN UP',
-    title: 'Create a Noblesse account',
-    intro: 'Create an account to browse the piercing wholesale catalog and request wholesale member approval.',
-    helper: 'Approved members can access member prices, MOQ, Inquiry List, and Request Quote.',
-    noticeTitle: 'Before you request access',
+    eyebrow: 'MEMBER REQUEST',
+    title: 'Noblesse Member Request',
+    intro: 'Leave your basic company details and Noblesse will review them.',
+    helper: 'After review, you can view approved pricing, MOQ, Inquiry List, and Request Quote features.',
+    noticeTitle: 'Before you apply',
     noticeItems: [
       'Member details are reviewed by the Noblesse team.',
-      'Protected prices open after review.',
+      'Approved pricing opens after review.',
       'Request Quote is not a final confirmation.',
       'Admin Quote is confirmed by Noblesse.',
     ],
@@ -87,10 +85,10 @@ const registerCopy = {
     },
     memoPlaceholder: 'Tell us about your store, market, or preferred piercing line.',
     approvalTitle: 'Review Notice',
-    approvalBody: 'Member information is reviewed manually. Prices and Request Quote features remain locked until review is complete.',
+    approvalBody: 'Member information is reviewed manually. Prices and quote inquiry features remain locked until review is complete.',
     agreementsEyebrow: 'AGREEMENTS',
     agreementsTitle: 'Terms and privacy consent',
-    agreementsIntro: 'Membership request requires acceptance of three required agreement items. Marketing updates are optional.',
+    agreementsIntro: 'Membership request requires acceptance of three required agreement items. Product and catalog updates are optional.',
     allAgree: 'Agree to all',
     allAgreeSub: 'Agree to all required and optional items',
     required: '[Required]',
@@ -103,10 +101,10 @@ const registerCopy = {
     back: 'Back to Login',
   },
   jp: {
-    eyebrow: '会員登録',
-    title: 'Noblesse 会員登録',
-    intro: 'ピアス卸カタログを閲覧し、卸会員承認を申請できます。',
-    helper: '承認後、会員価格、MOQ、Inquiry List、Request Quoteをご利用いただけます。',
+    eyebrow: '会員申請',
+    title: 'Noblesse 会員申請',
+    intro: '基本情報を入力すると、Noblesseが確認します。',
+    helper: '確認後、会員価格、最小数量、お問い合わせリスト、見積相談をご利用いただけます。',
     noticeTitle: '申請前にご確認ください',
     noticeItems: [
       '会員情報は担当者が確認します。',
@@ -134,23 +132,23 @@ const registerCopy = {
     approvalBody: '会員情報は担当者が確認します。確認前は価格と見積相談機能は利用できません。',
     agreementsEyebrow: '規約',
     agreementsTitle: '規約および個人情報同意',
-    agreementsIntro: '会員登録には3つの必須同意が必要です。マーケティング案内の受信は任意です。',
+    agreementsIntro: '会員申請には3つの必須同意が必要です。マーケティング案内の受信は任意です。',
     allAgree: 'すべて同意',
     allAgreeSub: '必須および任意項目にすべて同意',
     required: '[必須]',
     optional: '[任意]',
     viewDetails: '詳細を見る',
     privacyPolicy: '個人情報処理方針を見る',
-    warning: '会員登録のため、必須規約にすべて同意してください。',
+    warning: '会員申請のため、必須規約にすべて同意してください。',
     warningSub: 'Please agree to all required terms to request access.',
     submit: '会員申請',
     back: 'ログインへ戻る',
   },
   cn: {
-    eyebrow: '会员注册',
-    title: 'Noblesse 会员注册',
-    intro: '创建账号后，可浏览穿孔批发目录并申请批发会员权限。',
-    helper: '审核通过后，可使用会员价格、MOQ、Inquiry List 和 Request Quote。',
+    eyebrow: '会员申请',
+    title: 'Noblesse 会员申请',
+    intro: '留下基本公司信息后，Noblesse 会进行确认。',
+    helper: '确认后，可查看会员价格、最小数量、咨询清单和报价咨询功能。',
     noticeTitle: '申请前请确认',
     noticeItems: [
       '会员信息将由工作人员确认。',
@@ -296,14 +294,12 @@ export function RegisterPage() {
       <div className="buyer-access-intro">
         <p>{t.intro}</p>
         <p className="approval-helper">{t.helper}</p>
-        {t.englishSupport && <p className="approval-helper english-support">{t.englishSupport}</p>}
       </div>
       <aside className="buyer-access-notice" aria-label={t.noticeTitle}>
         <strong>{t.noticeTitle}</strong>
         <ul>
           {t.noticeItems.map((item) => <li key={item}>{item}</li>)}
         </ul>
-        {t.noticeEnglish && <small>{t.noticeEnglish}</small>}
       </aside>
       <form className="auth-form" onSubmit={submitRequest}>
         <FieldGroup title={t.groups.buyer}>
