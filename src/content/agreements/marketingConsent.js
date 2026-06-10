@@ -26,8 +26,8 @@ export const marketingConsent = {
     {
       headingKo: '4. 선택 동의 및 철회',
       headingEn: '4. Optional Consent And Withdrawal',
-      bodyKo: '마케팅 수신 동의를 거부해도 Member Access Request는 가능합니다. 회원는 언제든지 수신 거부를 요청할 수 있습니다.',
-      bodyEn: 'Member Access Request remains available even if marketing consent is refused. A Buyer may request opt-out at any time.',
+      bodyKo: '마케팅 수신 동의를 거부해도 Member request는 가능합니다. 회원는 언제든지 수신 거부를 요청할 수 있습니다.',
+      bodyEn: 'Member request remains available even if marketing consent is refused. A member may request opt-out at any time.',
     },
   ],
 }

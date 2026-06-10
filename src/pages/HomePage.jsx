@@ -62,8 +62,8 @@ const homeCopy = {
     buyerStripGuest: 'Global piercing catalog',
     buyerStripPending: 'Under review',
     buyerStripApproved: 'Member Price Access',
-    buyerStripGuestNote: 'Browse product images first. Prices and quote tools open after approval.',
-    buyerStripApprovedNote: 'Regional price access is active.',
+    buyerStripGuestNote: 'Browse product images first. Prices and inquiry tools open after review.',
+    buyerStripApprovedNote: 'Regional prices are ready for you.',
     quickTitle: 'Quick Categories',
     quickNote: 'Start from piercing styles members search for most often.',
     collectionsTitle: 'Featured Collections',
@@ -79,7 +79,7 @@ const homeCopy = {
     viewAll: 'View All',
     campaignTitle: 'Noblesse Signature',
     campaignNote: 'Curated piercing styles for global partners.',
-    campaignCta: 'Quote Inquiry After Review',
+    campaignCta: 'Ask For A Quote After Review',
     recentTitle: 'Recently Viewed',
     recentNote: 'Recently viewed products will appear here later.',
     supportTitle: 'Customer Center',
@@ -89,27 +89,27 @@ const homeCopy = {
     companyNote: 'Noblesse Piercing',
     companySmall: 'Korean piercing wholesale catalog / Global partner support',
     brandNoteTitle: 'Built For Global Partners',
-    brandNoteText: 'Large product images, export sourcing information, and a simple quotation request flow.',
+    brandNoteText: 'Large product images, export sourcing information, and a simple inquiry flow.',
   },
   jp: {
     eyebrow: '韓国ピアス卸カタログ',
     title: '貴族ピアス',
     lead: 'グローバル会員向けのプレミアムピアスカタログです。',
-    note: '承認済み会員は会員価格と見積依頼機能を確認できます。',
+    note: '会員確認後、会員価格と見積相談機能をご利用いただけます。',
     viewCatalog: '商品を見る',
     access: '会員申請',
-    pending: '承認待ち確認',
-    approved: '見積リスト',
+    pending: '確認状況を見る',
+    approved: 'お問い合わせリスト',
     admin: '管理者プレビュー',
     buyerStripGuest: 'グローバルピアスカタログ',
-    buyerStripPending: '会員承認待ち',
-    buyerStripApproved: '承認済み会員',
-    buyerStripGuestNote: '商品画像は閲覧できます。価格と見積機能は承認後に利用できます。',
-    buyerStripApprovedNote: 'マーケット価格表が有効です。',
+    buyerStripPending: '会員確認中です',
+    buyerStripApproved: '会員価格を見られます',
+    buyerStripGuestNote: '価格と相談機能は会員確認後にご利用いただけます。',
+    buyerStripApprovedNote: '地域価格が適用されています。',
     quickTitle: 'クイックカテゴリー',
     quickNote: 'よく探されるピアススタイルから始めましょう。',
     collectionsTitle: 'おすすめコレクション',
-    collectionsNote: 'マーケット別の仕入れに合わせたブランドセレクションです。',
+    collectionsNote: '地域ごとの好みに合わせたブランドセレクションです。',
     browseProducts: '商品を見る',
     stylesLabel: 'スタイル',
     featuredTitle: 'おすすめピアス',
@@ -121,37 +121,37 @@ const homeCopy = {
     viewAll: 'すべて見る',
     campaignTitle: '貴族ピアス シグネチャー',
     campaignNote: 'グローバル会員向けにキュレーションしたピアススタイルです。',
-    campaignCta: '承認後に見積依頼',
+    campaignCta: '確認後に見積相談',
     recentTitle: '最近見た商品',
     recentNote: '最近確認した商品は今後ここに表示されます。',
     supportTitle: 'カスタマーサポート',
     supportNote: 'Email、KakaoTalk、WhatsAppの相談チャネルを準備中です。',
-    supportSmall: '詳しい仕入れ相談は見積依頼後に続きます。',
+    supportSmall: '詳しい相談は見積相談のあとに続きます。',
     companyTitle: '会社情報',
     companyNote: 'Noblesse Piercing',
     companySmall: '韓国ピアス卸カタログ / グローバル会員サポート',
     brandNoteTitle: 'グローバル会員向け構成',
-    brandNoteText: '大きな商品画像、輸出相談に必要な情報、簡単な見積依頼フローを提供します。',
+    brandNoteText: '大きな商品画像、輸出相談に必要な情報、わかりやすい相談フローを提供します。',
   },
   cn: {
     eyebrow: '韩国穿孔批发目录',
     title: '高贵的穿孔',
     lead: '面向全球会员的高端穿孔商品目录。',
-    note: '会员审批通过后，可以查看会员价格并提交报价请求。',
+    note: '会员确认后，可以查看会员价格并进行报价咨询。',
     viewCatalog: '查看商品',
-    access: '申请会员权限',
-    pending: '查看审批状态',
-    approved: '询价清单',
+    access: '申请会员',
+    pending: '查看确认状态',
+    approved: '咨询清单',
     admin: '管理员预览',
     buyerStripGuest: '全球穿孔目录',
-    buyerStripPending: '会员审批等待中',
-    buyerStripApproved: '已批准会员',
-    buyerStripGuestNote: '可先浏览商品图片，价格和询价功能将在审批后开放。',
-    buyerStripApprovedNote: '市场价格表已启用。',
+    buyerStripPending: '会员确认中',
+    buyerStripApproved: '可查看会员价',
+    buyerStripGuestNote: '可先浏览商品图片，价格和咨询功能将在会员确认后开放。',
+    buyerStripApprovedNote: '已应用地区价格。',
     quickTitle: '快速分类',
     quickNote: '从常见穿孔款式开始浏览。',
     collectionsTitle: '推荐系列',
-    collectionsNote: '为不同市场采购整理的品牌精选。',
+    collectionsNote: '按地区偏好整理的品牌精选。',
     browseProducts: '浏览商品',
     stylesLabel: '款式',
     featuredTitle: '推荐穿孔',
@@ -163,17 +163,17 @@ const homeCopy = {
     viewAll: '查看全部',
     campaignTitle: '高贵的穿孔 Signature',
     campaignNote: '为全球会员精选的穿孔风格。',
-    campaignCta: '审批后请求报价',
+    campaignCta: '确认后咨询报价',
     recentTitle: '最近浏览',
     recentNote: '最近查看的商品稍后会显示在这里。',
     supportTitle: '客户中心',
     supportNote: 'Email、KakaoTalk、WhatsApp 咨询渠道正在准备中。',
-    supportSmall: '详细采购咨询将在提交报价请求后继续。',
+    supportSmall: '详细咨询将在报价咨询后继续。',
     companyTitle: '公司信息',
     companyNote: 'Noblesse Piercing',
     companySmall: '韩国穿孔批发目录 / 全球会员支持',
     brandNoteTitle: '为全球会员设计',
-    brandNoteText: '提供大图商品展示、出口采购信息和简洁的报价请求流程。',
+    brandNoteText: '提供大图商品展示、出口采购信息和简洁的咨询流程。',
   },
 }
 
@@ -192,15 +192,15 @@ const quickCategories = [
 const collectionCopy = {
   'japan-buyer-picks': {
     kr: '일본 지역 취향에 맞춘 정제된 셀렉션입니다.',
-    en: 'A refined selection for Japan market partners.',
-    jp: '日本マーケット向けに整えたセレクションです。',
-    cn: '面向日本市场的精选系列。',
+    en: 'A refined selection for Japan-area members.',
+    jp: '日本地域の好みに合わせたセレクションです。',
+    cn: '适合日本地区偏好的精选系列。',
   },
   'us-buyer-picks': {
     kr: '미국 지역을 위한 깔끔한 스타일과 회전율 높은 피어싱입니다.',
-    en: 'Clean, sellable piercing styles for US partners.',
-    jp: '米国マーケット向けのクリーンで回転率の高いスタイルです。',
-    cn: '适合美国市场的简洁高周转款式。',
+    en: 'Clean, easy-to-select piercing styles for US-area members.',
+    jp: '米国地域に向けたクリーンで回転率の高いスタイルです。',
+    cn: '适合美国地区的简洁高周转款式。',
   },
   'minimal-piercing-line': {
     kr: '데일리 진열에 어울리는 미니멀 피어싱 라인입니다.',
@@ -228,6 +228,15 @@ const collectionCopy = {
   },
 }
 
+const collectionTitleCn = {
+  'japan-buyer-picks': '日本精选',
+  'us-buyer-picks': '美国精选',
+  'minimal-piercing-line': '极简穿孔系列',
+  'premium-cubic-line': '高级锆石系列',
+  'export-best-items': '出口热选单品',
+  'new-arrivals': '新品上架',
+}
+
 const heroBanners = [
   {
     key: 'titanium-labret',
@@ -245,9 +254,9 @@ const heroBanners = [
     },
     text: {
       kr: '회원가 이용 고객을 위한 티타늄 라블렛 추천 라인',
-      en: 'Recommended titanium labret styles for approved members.',
-      jp: '承認済み会員向けのチタンラブレット推薦ライン。',
-      cn: '为已批准会员准备的钛钢唇钉推荐系列。',
+      en: 'Recommended titanium labret styles for members.',
+      jp: '会員向けのチタンラブレット推薦ライン。',
+      cn: '为会员准备的钛钢唇钉推荐系列。',
     },
     to: '/products?material=Titanium',
     image: 'https://images.unsplash.com/photo-1518049362265-d5b2a6467637?auto=format&fit=crop&crop=entropy&w=1400&h=760&q=82',
@@ -314,9 +323,9 @@ const heroBanners = [
     },
     text: {
       kr: '해외 지역용 수출 추천 베스트 아이템',
-      en: 'Export-ready best items for global partner sourcing.',
-      jp: '海外マーケット向けの輸出推薦ベストアイテム。',
-      cn: '适合全球市场采购的出口推荐单品。',
+      en: 'Export-ready best items for global sourcing.',
+      jp: '海外地域向けの輸出推薦ベストアイテム。',
+      cn: '适合海外地区采购的出口推荐单品。',
     },
     to: '/products?collection=export-best-items',
     image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&crop=entropy&w=1400&h=760&q=82',
@@ -325,6 +334,13 @@ const heroBanners = [
 
 function getLocalizedValue(values, locale) {
   return values[locale] ?? values.en ?? values.kr
+}
+
+function getCollectionTitle(collection, locale) {
+  if (locale === 'kr') return collection.titleKo
+  if (locale === 'jp') return collection.titleJa
+  if (locale === 'cn') return collectionTitleCn[collection.collectionId] ?? collection.titleEn
+  return collection.titleEn
 }
 
 const latinScrambleCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
@@ -580,7 +596,7 @@ export function HomePage() {
       <div className="collection-grid">
         {mockCollections.map((collection) => <Link className="collection-card" key={collection.collectionId} to={toLocalePath(`/products?collection=${collection.collectionId}`)}>
           <ScrambleText as="small" persistKey={`collection-count-${collection.collectionId}`}>{`${collection.productIds.length} ${copy.stylesLabel}`}</ScrambleText>
-          <ScrambleText as="strong" persistKey={`collection-title-${collection.collectionId}`}>{locale === 'kr' ? collection.titleKo : locale === 'jp' ? collection.titleJa : collection.titleEn}</ScrambleText>
+          <ScrambleText as="strong" persistKey={`collection-title-${collection.collectionId}`}>{getCollectionTitle(collection, locale)}</ScrambleText>
           <ScrambleText persistKey={`collection-note-${collection.collectionId}`}>{getLocalizedValue(collectionCopy[collection.collectionId], locale)}</ScrambleText>
         </Link>)}
       </div>

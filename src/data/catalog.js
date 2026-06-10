@@ -173,7 +173,7 @@ export const mockProducts = productSeeds.map(([nameEn, nameKo, nameJa, categoryI
     sortOrder: (index + 1) * 10,
     descriptionKo: `${nameKo} 디자인의 수출용 피어싱입니다.`,
     descriptionEn: `${nameEn} selected for the Noblesse global catalog.`,
-    descriptionJa: `${nameJa}。海外マーケット向けのピアスです。`,
+    descriptionJa: `${nameJa}。海外地域向けのピアスです。`,
     createdAt: `2026-05-${String(10 + (index % 20)).padStart(2, '0')}T00:00:00.000Z`,
     updatedAt: timestamp,
     tone,
@@ -228,8 +228,8 @@ export const mockCategories = [
 }))
 
 export const mockCollections = [
-  ['japan-buyer-picks', '일본 셀렉션', 'Japan Selection', '日本マーケットピック'],
-  ['us-buyer-picks', '미국 셀렉션', 'US Selection', '米国マーケットピック'],
+  ['japan-buyer-picks', '일본 셀렉션', 'Japan Selection', '日本セレクション'],
+  ['us-buyer-picks', '미국 셀렉션', 'US Selection', '米国セレクション'],
   ['minimal-piercing-line', '미니멀 피어싱 라인', 'Minimal Piercing Line', 'ミニマルピアスライン'],
   ['premium-cubic-line', '프리미엄 큐빅 라인', 'Premium Cubic Line', 'プレミアムキュービックライン'],
   ['export-best-items', '수출 베스트 아이템', 'Export Best Items', '輸出ベストアイテム'],
