@@ -71,11 +71,16 @@ const buildMarketSummary = () => adminBuyers.reduce((markets, buyer) => {
 
 export const getAdminDashboardSummary = () => {
   const statusCounts = getStatusCounts()
+  const activeMarkets = new Set(mockProductPrices.filter((price) => price.isActive).map((price) => price.market))
   return {
     pendingBuyers: adminBuyers.filter((buyer) => buyer.status === 'pending').length,
     requestedInquiries: statusCounts.requested ?? 0,
     quotedInquiries: statusCounts.quoted ?? 0,
     confirmedInquiries: statusCounts.confirmed ?? 0,
+    activePriceMarkets: activeMarkets.size,
+    openRequestQuotes: mockInquiries.filter((inquiry) => ['requested', 'checking'].includes(inquiry.status)).length,
+    draftAdminQuotes: mockInquiries.filter((inquiry) => inquiry.status !== 'cancelled').length,
+    analyticsViewsReady: 7,
     estimatedRequestTotal: sum(mockInquiries, (inquiry) => inquiry.estimatedTotal),
     topRequestedProducts: buildTopRequestedProducts(),
     marketSummary: [...buildMarketSummary().values()],

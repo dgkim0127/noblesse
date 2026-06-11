@@ -1,14 +1,14 @@
 import { getAdminAnalyticsSummary } from '../../services'
 import { AdminMoney, AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
 
-const viewNames = [
-  'v_top_requested_products_30d',
-  'v_top_requested_products_by_market',
-  'v_buyer_inquiry_summary',
-  'v_category_inquiry_summary',
-  'v_quote_conversion_monthly',
-  'v_popular_option_combinations',
-  'v_monthly_inquiry_trend',
+const viewCards = [
+  ['v_top_requested_products_30d', 'Recent 30-day most requested products.'],
+  ['v_top_requested_products_by_market', 'Popular requested products by market.'],
+  ['v_buyer_inquiry_summary', 'Buyer-level Request Quote summary.'],
+  ['v_category_inquiry_summary', 'Requested quantity and amount by category.'],
+  ['v_quote_conversion_monthly', 'Monthly requested to quoted to confirmed conversion.'],
+  ['v_popular_option_combinations', 'Requested color and size option combinations.'],
+  ['v_monthly_inquiry_trend', 'Monthly market and currency request trend.'],
 ]
 
 export function AdminAnalyticsPage() {
@@ -19,10 +19,10 @@ export function AdminAnalyticsPage() {
     <AdminPreviewNote>No database query runs in this preview. Production analytics should read from trusted PostgreSQL/Supabase views through a protected admin API/RPC.</AdminPreviewNote>
 
     <section className="admin-analytics-grid">
-      {viewNames.map((viewName) => <article className="admin-card" key={viewName}>
+      {viewCards.map(([viewName, description]) => <article className="admin-card" key={viewName}>
         <p className="eyebrow">Reference View</p>
         <h2>{viewName}</h2>
-        <span>Preview card prepared for admin analytics.</span>
+        <span>{description}</span>
       </article>)}
     </section>
 

@@ -7,14 +7,26 @@ const marketTabs = ['ALL', 'JP', 'US', 'GLOBAL', 'KR']
 export function AdminPricesPage() {
   const prices = getAdminPriceSummary()
   const [market, setMarket] = useState('ALL')
-  const filteredPrices = useMemo(() => prices.filter((price) => market === 'ALL' || price.market === market), [market, prices])
+  const [query, setQuery] = useState('')
+  const [activeOnly, setActiveOnly] = useState(false)
+  const filteredPrices = useMemo(() => prices.filter((price) => {
+    const term = query.trim().toLowerCase()
+    const matchesMarket = market === 'ALL' || price.market === market
+    const matchesQuery = !term || [price.product?.code, price.product?.nameEn].some((value) => String(value).toLowerCase().includes(term))
+    const matchesActive = !activeOnly || price.isActive
+    return matchesMarket && matchesQuery && matchesActive
+  }), [activeOnly, market, prices, query])
 
   return <>
     <AdminPageHeader title="Price Management Preview" description="Market price rows are display-only and remain separated from public product metadata." />
-    <AdminPreviewNote>Client-side price editing is preview-only. Production price changes must be validated and written through trusted admin API/RPC.</AdminPreviewNote>
+    <AdminPreviewNote>Client-side price editing is preview-only. Production price changes must be validated and written through trusted admin API/RPC. PostgreSQL product_prices is the source of truth.</AdminPreviewNote>
 
-    <div className="admin-filter-tabs">
-      {marketTabs.map((tab) => <button className={market === tab ? 'active' : ''} key={tab} type="button" onClick={() => setMarket(tab)}>{tab}</button>)}
+    <div className="admin-toolbar">
+      <label className="admin-search">Search prices<input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Product code or name" /></label>
+      <label className="admin-toggle"><input checked={activeOnly} onChange={(event) => setActiveOnly(event.target.checked)} type="checkbox" /> Active only</label>
+      <div className="admin-filter-tabs">
+        {marketTabs.map((tab) => <button className={market === tab ? 'active' : ''} key={tab} type="button" onClick={() => setMarket(tab)}>{tab}</button>)}
+      </div>
     </div>
 
     <section className="admin-card">

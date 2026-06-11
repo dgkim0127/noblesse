@@ -366,12 +366,22 @@ a {
 }
 
 .admin-preview-note {
+  align-items: center;
   background: rgba(42, 36, 87, 0.92);
   border-radius: 16px;
   color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   font-weight: 700;
   line-height: 1.6;
   padding: 16px 18px;
+}
+
+.admin-preview-note strong {
+  background: rgba(255, 143, 169, 0.22);
+  border-radius: 999px;
+  padding: 4px 10px;
 }
 
 .admin-grid,
@@ -379,6 +389,10 @@ a {
   display: grid;
   gap: 14px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-grid.compact {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .admin-layout.two,
@@ -524,6 +538,101 @@ a {
   color: #fff;
 }
 
+.admin-preview-badge,
+.admin-pill,
+.admin-toggle {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-weight: 800;
+}
+
+.admin-preview-badge {
+  background: rgba(255, 143, 169, 0.15);
+  color: var(--navy);
+  font-size: 0.78rem;
+  justify-content: center;
+  padding: 7px 10px;
+}
+
+.admin-toolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-search {
+  color: var(--admin-muted);
+  display: grid;
+  flex: 1 1 260px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  gap: 6px;
+  max-width: 420px;
+}
+
+.admin-search input,
+.admin-filter-row select {
+  background: #fff;
+  border: 1px solid rgba(42, 36, 87, 0.16);
+  border-radius: 12px;
+  color: var(--navy);
+  font: inherit;
+  min-height: 42px;
+  padding: 9px 12px;
+}
+
+.admin-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-filter-row label {
+  color: var(--admin-muted);
+  display: grid;
+  font-size: 0.78rem;
+  font-weight: 800;
+  gap: 6px;
+}
+
+.admin-toggle {
+  background: #fff;
+  border: 1px solid rgba(42, 36, 87, 0.14);
+  color: var(--navy);
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.admin-check-grid,
+.admin-workflow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-pill {
+  background: rgba(255, 143, 169, 0.14);
+  color: var(--navy);
+  padding: 8px 12px;
+}
+
+.admin-workflow-step {
+  background: #fff;
+  border: 1px solid rgba(42, 36, 87, 0.14);
+  border-radius: 14px;
+  color: var(--navy);
+  font-weight: 800;
+  padding: 10px 12px;
+}
+
+.admin-workflow-step.active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+
 .admin-filter-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -618,6 +727,7 @@ a {
   }
 
   .admin-grid,
+  .admin-grid.compact,
   .admin-analytics-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -636,6 +746,7 @@ a {
   }
 
   .admin-grid,
+  .admin-grid.compact,
   .admin-analytics-grid {
     grid-template-columns: 1fr;
   }

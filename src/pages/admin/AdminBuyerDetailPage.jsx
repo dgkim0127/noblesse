@@ -19,6 +19,14 @@ export function AdminBuyerDetailPage() {
     <AdminPageHeader title={buyer.companyName} description="Wholesale member profile, agreement summary, and review status preview." actions={<AdminLink to="/admin/buyers">Back to Buyers</AdminLink>} />
     <AdminPreviewNote>Agreement history is displayed from mock summary. Production should read accepted versions from buyer agreement records.</AdminPreviewNote>
 
+    <section className="admin-card">
+      <h2>Approval Checklist</h2>
+      <div className="admin-check-grid">
+        {['Company information reviewed', 'Contact channel reviewed', 'Market assigned', 'Agreement consent checked', 'Price access ready'].map((item) => <span className="admin-pill" key={item}>{item}</span>)}
+      </div>
+      <p className="admin-local-message">Production approval must validate admin role server-side before changing member access.</p>
+    </section>
+
     <section className="admin-detail-grid">
       <article className="admin-card">
         <h2>Company Profile</h2>

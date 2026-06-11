@@ -24,6 +24,7 @@ export function AdminShell() {
           <span>Noblesse Piercing Admin Preview</span>
         </div>
       </div>
+      <span className="admin-preview-badge">Mock Preview</span>
       <nav>
         {adminNav.map(({ end, icon: Icon, label, path }) => <NavLink end={end} key={path} to={toLocalePath(path)}>
           <Icon size={17} />

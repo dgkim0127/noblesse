@@ -7,14 +7,24 @@ const statusTabs = ['all', 'requested', 'checking', 'quoted', 'confirmed', 'canc
 export function AdminInquiriesPage() {
   const inquiries = getAdminInquiries()
   const [status, setStatus] = useState('all')
-  const filteredInquiries = useMemo(() => inquiries.filter((inquiry) => status === 'all' || inquiry.status === status), [inquiries, status])
+  const [query, setQuery] = useState('')
+  const filteredInquiries = useMemo(() => inquiries
+    .filter((inquiry) => status === 'all' || inquiry.status === status)
+    .filter((inquiry) => {
+      const term = query.trim().toLowerCase()
+      if (!term) return true
+      return [inquiry.inquiryId, inquiry.buyerCompanyName, inquiry.market, inquiry.currency].some((value) => String(value).toLowerCase().includes(term))
+    }), [inquiries, query, status])
 
   return <>
     <AdminPageHeader title="Inquiry Management" description="Manage Request Quote records from approved members in preview mode." />
     <AdminPreviewNote>Admin status controls are not connected to production data. Admin Quote is the final quotation basis after Noblesse review.</AdminPreviewNote>
 
-    <div className="admin-filter-tabs">
-      {statusTabs.map((tab) => <button className={status === tab ? 'active' : ''} key={tab} type="button" onClick={() => setStatus(tab)}>{tab === 'all' ? 'All' : tab[0].toUpperCase() + tab.slice(1)}</button>)}
+    <div className="admin-toolbar">
+      <label className="admin-search">Search inquiries<input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Inquiry, company, market, or currency" /></label>
+      <div className="admin-filter-tabs">
+        {statusTabs.map((tab) => <button className={status === tab ? 'active' : ''} key={tab} type="button" onClick={() => setStatus(tab)}>{tab === 'all' ? 'All' : tab[0].toUpperCase() + tab.slice(1)}</button>)}
+      </div>
     </div>
 
     <section className="admin-card">

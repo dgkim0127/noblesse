@@ -9,9 +9,17 @@ export function AdminDashboardPage() {
     <AdminPageHeader
       title="Admin Dashboard"
       description="Review member access, Request Quote activity, price preview coverage, and analytics signals from mock data."
-      actions={<><AdminLink to="/admin/buyers">Review Buyers</AdminLink><AdminLink to="/admin/inquiries">View Inquiries</AdminLink><AdminLink to="/admin/prices">Manage Prices</AdminLink><AdminLink to="/admin/analytics">View Analytics</AdminLink></>}
+      actions={<><AdminLink to="/admin/buyers">Review Buyers</AdminLink><AdminLink to="/admin/inquiries">View Inquiries</AdminLink><AdminLink to="/admin/prices">Manage Prices</AdminLink><AdminLink to="/admin/analytics">View Analytics</AdminLink><AdminLink to="/admin/quotes">View Quotes</AdminLink></>}
     />
-    <AdminPreviewNote>Production data will be loaded from PostgreSQL/Supabase through trusted API/RPC. This dashboard is mock preview only.</AdminPreviewNote>
+    <AdminPreviewNote><strong>Admin Preview</strong><span>Mock data only. Production actions require trusted API/RPC.</span></AdminPreviewNote>
+
+    <section className="admin-grid compact">
+      <article className="admin-stat-card"><Handshake size={20} /><span>Pending Buyer Review</span><strong>{summary.pendingBuyers}</strong></article>
+      <article className="admin-stat-card"><Tags size={20} /><span>Active Price Markets</span><strong>{summary.activePriceMarkets}</strong></article>
+      <article className="admin-stat-card"><FileText size={20} /><span>Open Request Quotes</span><strong>{summary.openRequestQuotes}</strong></article>
+      <article className="admin-stat-card"><FileText size={20} /><span>Draft Admin Quotes</span><strong>{summary.draftAdminQuotes}</strong></article>
+      <article className="admin-stat-card"><BarChart3 size={20} /><span>Analytics Views Ready</span><strong>{summary.analyticsViewsReady}</strong></article>
+    </section>
 
     <section className="admin-grid">
       <article className="admin-stat-card"><Handshake size={20} /><span>Pending Buyers</span><strong>{summary.pendingBuyers}</strong></article>

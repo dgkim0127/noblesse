@@ -19,6 +19,14 @@ export function AdminInquiryDetailPage() {
     <AdminPageHeader title={inquiry.inquiryId} description="Inquiry detail and item snapshot preview." actions={<><AdminLink to="/admin/inquiries">Back to Inquiries</AdminLink><AdminLink className="primary-action" to={`/admin/quotes/${inquiry.inquiryId}`}>Create Admin Quote</AdminLink></>} />
     <AdminPreviewNote>priceSnapshot is the reference price captured when the Request Quote was submitted. Admin Quote is the final quotation basis after review.</AdminPreviewNote>
 
+    <section className="admin-card">
+      <h2>Review Workflow</h2>
+      <div className="admin-workflow" aria-label="Inquiry review workflow">
+        {['Requested', 'Checking', 'Admin Quote', 'Confirmed / Cancelled'].map((step, index) => <span className={`admin-workflow-step ${index === 1 ? 'active' : ''}`} key={step}>{index + 1}. {step}</span>)}
+      </div>
+      <p className="admin-local-message">final unit price is confirmed in Admin Quote. This screen only reviews the submitted snapshot.</p>
+    </section>
+
     <section className="admin-detail-grid">
       <article className="admin-card">
         <h2>Buyer Info</h2>
@@ -32,7 +40,7 @@ export function AdminInquiryDetailPage() {
       <article className="admin-card">
         <h2>Inquiry Status</h2>
         <AdminStatus status={status} />
-        <div className="admin-actions"><button type="button" onClick={() => setStatus('checking')}>Mark Checking Preview</button><button type="button" onClick={() => setStatus('cancelled')}>Cancel Preview</button></div>
+        <div className="admin-actions"><button type="button" onClick={() => setStatus('checking')}>Mark Checking Preview</button><AdminLink to={`/admin/quotes/${inquiry.inquiryId}`}>Create Admin Quote</AdminLink><button type="button" onClick={() => setStatus('cancelled')}>Cancel Preview</button></div>
       </article>
       <article className="admin-card wide-card">
         <h2>Request Memo</h2>

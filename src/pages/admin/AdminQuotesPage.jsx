@@ -25,6 +25,7 @@ export function AdminQuotesPage() {
               <th>Currency</th>
               <th>Requested Total</th>
               <th>Quote Draft Total</th>
+              <th>Difference</th>
               <th>Lead Time</th>
               <th>Actions</th>
             </tr>
@@ -37,6 +38,7 @@ export function AdminQuotesPage() {
               <td>{draft.currency}</td>
               <td className="admin-quote-total"><AdminMoney value={draft.requestedTotal} currency={draft.currency} /></td>
               <td className="admin-quote-total"><AdminMoney value={draft.confirmedTotal} currency={draft.currency} /></td>
+              <td className="admin-quote-total"><AdminMoney value={draft.confirmedTotal - draft.requestedTotal} currency={draft.currency} /></td>
               <td>{draft.leadTime}</td>
               <td>
                 <div className="admin-actions tight">
