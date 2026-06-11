@@ -1,8 +1,19 @@
 import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
 import './App.css'
 import { CommerceProvider } from './commerce/CommerceContext'
+import { AdminRoute } from './components/AdminRoute'
+import { AdminShell } from './components/AdminShell'
 import { StoreShell } from './components/StoreShell'
 import { AccountPage } from './pages/AccountPage'
+import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage'
+import { AdminBuyerDetailPage } from './pages/admin/AdminBuyerDetailPage'
+import { AdminBuyersPage } from './pages/admin/AdminBuyersPage'
+import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
+import { AdminInquiriesPage } from './pages/admin/AdminInquiriesPage'
+import { AdminInquiryDetailPage } from './pages/admin/AdminInquiryDetailPage'
+import { AdminPricesPage } from './pages/admin/AdminPricesPage'
+import { AdminProductsPage } from './pages/admin/AdminProductsPage'
+import { AdminQuotePage } from './pages/admin/AdminQuotePage'
 import { ApprovalPendingPage } from './pages/ApprovalPendingPage'
 import { HomePage } from './pages/HomePage'
 import { InquiryListPage } from './pages/InquiryListPage'
@@ -39,6 +50,17 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/approval-pending" element={<ApprovalPendingPage />} />
+      <Route path="/admin" element={<AdminRoute><AdminShell /></AdminRoute>}>
+        <Route index element={<AdminDashboardPage />} />
+        <Route path="buyers" element={<AdminBuyersPage />} />
+        <Route path="buyers/:buyerId" element={<AdminBuyerDetailPage />} />
+        <Route path="products" element={<AdminProductsPage />} />
+        <Route path="prices" element={<AdminPricesPage />} />
+        <Route path="inquiries" element={<AdminInquiriesPage />} />
+        <Route path="inquiries/:inquiryId" element={<AdminInquiryDetailPage />} />
+        <Route path="quotes/:inquiryId" element={<AdminQuotePage />} />
+        <Route path="analytics" element={<AdminAnalyticsPage />} />
+      </Route>
       <Route path="/cart" element={<Navigate replace to="/inquiry-list" />} />
       <Route path="/order-request" element={<Navigate replace to="/request-quote" />} />
       <Route path="/orders" element={<Navigate replace to="/my-inquiries" />} />
@@ -56,6 +78,17 @@ function App() {
       <Route path="login" element={<LoginPage />} />
       <Route path="register" element={<RegisterPage />} />
       <Route path="approval-pending" element={<ApprovalPendingPage />} />
+      <Route path="admin" element={<AdminRoute><AdminShell /></AdminRoute>}>
+        <Route index element={<AdminDashboardPage />} />
+        <Route path="buyers" element={<AdminBuyersPage />} />
+        <Route path="buyers/:buyerId" element={<AdminBuyerDetailPage />} />
+        <Route path="products" element={<AdminProductsPage />} />
+        <Route path="prices" element={<AdminPricesPage />} />
+        <Route path="inquiries" element={<AdminInquiriesPage />} />
+        <Route path="inquiries/:inquiryId" element={<AdminInquiryDetailPage />} />
+        <Route path="quotes/:inquiryId" element={<AdminQuotePage />} />
+        <Route path="analytics" element={<AdminAnalyticsPage />} />
+      </Route>
       <Route path="cart" element={<Navigate replace to="../inquiry-list" />} />
       <Route path="order-request" element={<Navigate replace to="../request-quote" />} />
       <Route path="orders" element={<Navigate replace to="../my-inquiries" />} />

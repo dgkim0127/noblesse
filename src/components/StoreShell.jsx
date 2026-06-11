@@ -477,7 +477,7 @@ export function StoreShell() {
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}
           {isAdmin && <>
-            <IconAction label={copy.adminPreview} to={toLocalePath('/account')}><ShieldCheck size={18} /></IconAction>
+            <IconAction label={copy.adminPreview} to={toLocalePath('/admin')}><ShieldCheck size={18} /></IconAction>
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}
           <button className={`icon-action compact-search-action ${isCompactSearchOpen ? 'active' : ''}`} type="button" aria-label={copy.search} title={copy.search} onClick={toggleCompactSearch}><Search size={18} /></button>
