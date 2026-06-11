@@ -36,6 +36,16 @@ Excluded from this step:
 
 ## 4. Execution Order
 
+Before executing SQL, complete the 21B static review:
+
+- confirm file existence
+- compare table and column names across schema, RLS, views, and seed
+- confirm check constraint values
+- confirm seed order matches FK dependencies
+- confirm no frontend connection, credential, or migration command was added
+
+Static review must pass before any SQL execution or local/dev dry-run.
+
 Run the files in this order:
 
 1. `schema.sql`
@@ -67,6 +77,7 @@ Confirm before execution:
   - `privacy_collection_use`
   - `marketing_updates`
   - `privacy_policy`
+- `supabase/STATIC_REVIEW_REPORT.md` says the scaffold is ready for local/dev SQL dry-run.
 
 ## 6. Schema Validation Checklist
 

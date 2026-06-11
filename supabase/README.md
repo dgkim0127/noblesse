@@ -17,6 +17,8 @@ These SQL files are scaffold files for local/dev validation first. Review `docs/
 
 ## Recommended Execution Order
 
+Before SQL execution, complete the static review documented in `supabase/STATIC_REVIEW_REPORT.md`.
+
 1. `schema.sql`
 2. `rls_policies.sql`
 3. `analytics_views.sql`

@@ -14,6 +14,7 @@ The current admin screens are mock preview only. They must not write directly fr
 - Price changes, buyer approval, Request Quote review, and Admin Quote state changes need a trusted layer.
 - PostgreSQL/Supabase should remain the production business source of truth.
 - `docs/SUPABASE_MIGRATION_CHECKLIST.md` must pass before production admin API/RPC work starts.
+- 21B static SQL review must pass before local/dev SQL dry-run and before API/RPC implementation planning moves into build work.
 - Schema, RLS, analytics views, and seed validation must be completed in local/dev first.
 - `audit_logs` is required before production admin writes.
 

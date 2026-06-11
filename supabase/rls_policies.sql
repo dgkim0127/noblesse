@@ -100,42 +100,51 @@ alter table public.buyer_agreements enable row level security;
 -- Public read is limited to active versions so RegisterPage can show current documents.
 -- Writes remain admin-only.
 
+drop policy if exists "users read own or admin" on public.users;
 create policy "users read own or admin"
 on public.users for select
 using (id = public.current_app_user_id() or public.is_admin());
 
+drop policy if exists "users admin write" on public.users;
 create policy "users admin write"
 on public.users for all
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "buyers read own or admin" on public.buyers;
 create policy "buyers read own or admin"
 on public.buyers for select
 using (id = public.current_buyer_id() or public.is_admin());
 
+drop policy if exists "buyers admin write" on public.buyers;
 create policy "buyers admin write"
 on public.buyers for all
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "categories public visible read" on public.categories;
 create policy "categories public visible read"
 on public.categories for select
 using (is_visible = true or public.is_admin());
 
+drop policy if exists "categories admin write" on public.categories;
 create policy "categories admin write"
 on public.categories for all
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "products public visible read" on public.products;
 create policy "products public visible read"
 on public.products for select
 using (is_visible = true or public.is_admin());
 
+drop policy if exists "products admin write" on public.products;
 create policy "products admin write"
 on public.products for all
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "product prices approved market read" on public.product_prices;
 create policy "product prices approved market read"
 on public.product_prices for select
 using (
@@ -148,20 +157,24 @@ using (
   )
 );
 
+drop policy if exists "product prices admin write" on public.product_prices;
 create policy "product prices admin write"
 on public.product_prices for all
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "collections public visible read" on public.collections;
 create policy "collections public visible read"
 on public.collections for select
 using (is_visible = true or public.is_admin());
 
+drop policy if exists "collections admin write" on public.collections;
 create policy "collections admin write"
 on public.collections for all
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "product collections visible read" on public.product_collections;
 create policy "product collections visible read"
 on public.product_collections for select
 using (
@@ -176,15 +189,18 @@ using (
   )
 );
 
+drop policy if exists "product collections admin write" on public.product_collections;
 create policy "product collections admin write"
 on public.product_collections for all
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "inquiries buyer read own" on public.inquiries;
 create policy "inquiries buyer read own"
 on public.inquiries for select
 using (buyer_id = public.current_buyer_id() or public.is_admin());
 
+drop policy if exists "inquiries approved buyer create own" on public.inquiries;
 create policy "inquiries approved buyer create own"
 on public.inquiries for insert
 with check (
@@ -193,11 +209,13 @@ with check (
   and market = public.current_buyer_market()
 );
 
+drop policy if exists "inquiries admin write" on public.inquiries;
 create policy "inquiries admin write"
 on public.inquiries for update
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "inquiry items buyer read own" on public.inquiry_items;
 create policy "inquiry items buyer read own"
 on public.inquiry_items for select
 using (
@@ -212,6 +230,7 @@ using (
 
 -- Browser inserts into inquiry_items should be replaced by trusted RPC/API validation.
 -- If temporary direct insert is needed, keep this policy narrow and remove it after RPC is ready.
+drop policy if exists "inquiry items approved buyer create own draft" on public.inquiry_items;
 create policy "inquiry items approved buyer create own draft"
 on public.inquiry_items for insert
 with check (
@@ -225,11 +244,13 @@ with check (
   )
 );
 
+drop policy if exists "inquiry items admin write" on public.inquiry_items;
 create policy "inquiry items admin write"
 on public.inquiry_items for update
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "admin quotes buyer read own" on public.admin_quotes;
 create policy "admin quotes buyer read own"
 on public.admin_quotes for select
 using (
@@ -242,11 +263,13 @@ using (
   )
 );
 
+drop policy if exists "admin quotes admin write" on public.admin_quotes;
 create policy "admin quotes admin write"
 on public.admin_quotes for all
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "admin quote items buyer read own" on public.admin_quote_items;
 create policy "admin quote items buyer read own"
 on public.admin_quote_items for select
 using (
@@ -260,20 +283,24 @@ using (
   )
 );
 
+drop policy if exists "admin quote items admin write" on public.admin_quote_items;
 create policy "admin quote items admin write"
 on public.admin_quote_items for all
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "banners public visible read" on public.banners;
 create policy "banners public visible read"
 on public.banners for select
 using (is_visible = true or public.is_admin());
 
+drop policy if exists "banners admin write" on public.banners;
 create policy "banners admin write"
 on public.banners for all
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "catalog files public or approved read" on public.catalog_files;
 create policy "catalog files public or approved read"
 on public.catalog_files for select
 using (
@@ -286,6 +313,7 @@ using (
   )
 );
 
+drop policy if exists "catalog files admin write" on public.catalog_files;
 create policy "catalog files admin write"
 on public.catalog_files for all
 using (public.is_admin())

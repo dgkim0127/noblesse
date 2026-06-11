@@ -13,6 +13,13 @@ Do not paste secrets, service keys, or production connection details into this f
 
 ## Execution Results
 
+### Static Review
+
+- Result:
+- Reviewed files:
+- Changes required before SQL execution:
+- Ready for local/dev SQL dry-run:
+
 ### schema.sql
 
 - Result:

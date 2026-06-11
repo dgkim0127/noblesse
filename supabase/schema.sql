@@ -265,6 +265,10 @@ drop trigger if exists trg_products_updated_at on public.products;
 create trigger trg_products_updated_at before update on public.products
 for each row execute function public.update_updated_at_column();
 
+drop trigger if exists trg_product_prices_updated_at on public.product_prices;
+create trigger trg_product_prices_updated_at before update on public.product_prices
+for each row execute function public.update_updated_at_column();
+
 drop trigger if exists trg_collections_updated_at on public.collections;
 create trigger trg_collections_updated_at before update on public.collections
 for each row execute function public.update_updated_at_column();

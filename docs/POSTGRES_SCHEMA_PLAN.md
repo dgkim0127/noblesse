@@ -35,12 +35,34 @@ Required SQL validation order:
 
 Rules:
 
+- Complete the static review in `supabase/STATIC_REVIEW_REPORT.md` before running SQL in local/dev.
 - Validate in local Supabase or a separate dev Supabase project first.
 - Do not apply this scaffold to production until the checklist passes.
 - `seed_mock_data.sql` is local/dev only.
 - Add an `audit_logs` table before real admin operations.
 - Trusted API/RPC is required before admin writes, buyer approval, product price changes, and Admin Quote creation.
 - Frontend code must not hold database connection strings or privileged keys.
+
+## Column Naming Map
+
+SQL uses snake_case while the React/mock layer uses camelCase. Keep this mapping stable:
+
+- `product_code` maps to `productCode`
+- `product_name` maps to `productName`
+- `price_snapshot` maps to `priceSnapshot`
+- `min_order_amount` maps to `minOrderAmount`
+- `assigned_market` maps to `assignedMarket`
+- `admin_quote_items` maps to `adminQuoteItems`
+
+The SQL schema should stay snake_case. API/RPC responses can translate names at the boundary if needed.
+
+## RLS Helper Assumptions
+
+- RLS helpers assume a Supabase environment where `auth.uid()` is available.
+- `users.auth_uid` must store the Supabase Auth UID as text.
+- `public.is_admin()` reads `users.role = 'admin'`.
+- Approved buyer price access requires `users.role = 'buyer'`, `users.status = 'approved'`, and `buyers.assigned_market`.
+- These helpers must be smoke-tested in local/dev Supabase before production use.
 
 ## Tables
 

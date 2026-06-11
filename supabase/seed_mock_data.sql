@@ -76,7 +76,7 @@ values
     'terms-v1.0',
     '귀족 이용약관',
     'Terms of Service',
-    'Noblesse Piercing은 글로벌 도매 회원을 위한 피어싱 도매 카탈로그 웹사이트입니다. Request Quote는 최종 거래 확정이 아니며, 최종 단가와 재고, 납기, 배송 조건은 Noblesse 확인 후 안내됩니다.',
+    '귀족은 Noblesse Piercing 웹사이트를 통해 피어싱 도매 카탈로그, 회원가 열람, Inquiry List, Request Quote, My Inquiries 및 Admin Quote 관련 서비스를 제공합니다. Request Quote는 최종 거래 확정이 아니며 최종 단가, 재고, 납기, 배송 조건은 귀족 확인 후 안내됩니다.',
     'Noblesse Piercing is a B2B piercing catalog website for global buyers. Request Quote is not a final transaction. Final unit price, availability, lead time, and shipping conditions are confirmed by Noblesse.',
     true,
     true
@@ -96,7 +96,7 @@ values
     'privacy-v1.0',
     '개인정보 수집·이용 동의',
     'Privacy Collection and Use',
-    '도매 회원 접근 권한 검토, 회사 확인, 연락, 마켓 배정, 견적 요청 처리를 위해 신청 정보를 수집합니다.',
+    '도매 회원가입 신청 처리, 회사 확인, 연락, 시장 배정, 회원가 접근, Inquiry List 이용, Request Quote 처리를 위해 신청 정보를 수집합니다.',
     'Wholesale member request information is collected for access review, company verification, contact, market assignment, and Request Quote processing.',
     true,
     true
@@ -116,7 +116,7 @@ values
     'privacy-policy-v1.0',
     '귀족 개인정보 처리방침',
     'Privacy Policy',
-    'Noblesse 개인정보 처리방침 초안입니다. 개인정보 보호책임자, 위탁, 국외 이전, 보존 기간은 운영 전 최종 검토가 필요합니다.',
+    '귀족 개인정보 처리방침 초안입니다. 개인정보 보호책임자, 위탁, 국외 이전, 보존 기간은 운영 전 최종 검토가 필요합니다.',
     'This is a draft Noblesse Privacy Policy. Privacy officer, outsourcing, overseas transfer, and retention periods require final review before operation.',
     false,
     true
@@ -128,33 +128,6 @@ on conflict (agreement_key, version) do update set
   content_en = excluded.content_en,
   required = excluded.required,
   is_active = excluded.is_active;
-
-update public.terms_versions
-set
-  title_ko = case agreement_key
-    when 'terms_of_service' then '귀족 이용약관'
-    when 'buyer_terms' then '귀족 도매 회원 및 견적 이용 조건'
-    when 'privacy_collection_use' then '개인정보 수집·이용 동의'
-    when 'marketing_updates' then '신상품 및 카탈로그 안내 수신 동의'
-    when 'privacy_policy' then '귀족 개인정보 처리방침'
-    else title_ko
-  end,
-  content_ko = case agreement_key
-    when 'terms_of_service' then '귀족은 Noblesse Piercing 웹사이트를 통해 피어싱 도매 카탈로그, 회원가 열람, Inquiry List, Request Quote, My Inquiries 및 Admin Quote 관련 서비스를 제공합니다. Request Quote는 최종 거래 확정이 아니며 최종 단가, 재고, 납기, 배송 조건은 귀족 확인 후 안내됩니다.'
-    when 'buyer_terms' then '승인 도매 회원의 회원가, MOQ, 시장별 가격, priceSnapshot, Request Quote, Admin Quote 기준을 설명합니다. 화면 가격은 참고용이며 최종 견적은 관리자 확인으로 안내됩니다.'
-    when 'privacy_collection_use' then '도매 회원가입 신청 처리, 회사 확인, 연락, 시장 배정, 회원가 접근, Inquiry List 이용, Request Quote 처리를 위해 신청 정보를 수집합니다.'
-    when 'marketing_updates' then '신상품, 카탈로그, 컬렉션, 이벤트, 회원 업데이트 안내를 위한 선택 동의입니다.'
-    when 'privacy_policy' then '귀족 개인정보 처리방침 초안입니다. 개인정보 보호책임자, 위탁, 국외 이전, 보존 기간은 운영 전 최종 검토가 필요합니다.'
-    else content_ko
-  end
-where agreement_key in (
-  'terms_of_service',
-  'buyer_terms',
-  'privacy_collection_use',
-  'marketing_updates',
-  'privacy_policy'
-);
-
 insert into public.buyer_agreements (
   buyer_id,
   terms_version_id,
