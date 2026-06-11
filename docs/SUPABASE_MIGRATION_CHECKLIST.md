@@ -33,6 +33,8 @@ Excluded from this step:
 - Do not use the production project for first validation.
 - Use an environment that can be reset after testing.
 - Keep validation data synthetic or development-only.
+- For manual SQL Editor validation, follow `docs/DEV_SUPABASE_SQL_EDITOR_RUNBOOK.md`.
+- Record dry-run results in `supabase/VALIDATION_NOTES.md` without recording secrets.
 
 ## 4. Execution Order
 
@@ -58,6 +60,7 @@ Notes:
 - `seed_mock_data.sql` is local/dev only.
 - Do not run seed data in production.
 - If any earlier file fails, stop and fix that layer before continuing.
+- `supabase/SQL_EDITOR_COPY_ORDER.md` provides a short copy order, but the runbook remains the full safety reference.
 
 ## 5. Pre-flight Checks
 
@@ -137,6 +140,8 @@ Notes:
 - Current RLS is draft.
 - Supabase `auth.uid()` behavior must be tested in dev.
 - Admin role helper logic must be reviewed before production.
+- Service-role-based execution can create or inspect policies, but it does not validate buyer/admin RLS behavior.
+- Auth-context RLS smoke tests may require a separate dev setup with real pending buyer, approved buyer, and admin sessions.
 
 ## 8. Analytics View Validation Checklist
 
@@ -207,6 +212,7 @@ Go conditions:
 
 - all SQL files execute in dev
 - RLS smoke test passes
+- manual SQL Editor dry-run results are recorded in `supabase/VALIDATION_NOTES.md`
 - analytics views return expected seed rows
 - no frontend secrets
 - no direct admin write from browser

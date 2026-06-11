@@ -87,3 +87,23 @@ Do not paste secrets, service keys, or production connection details into this f
 
 - Go / No-Go: No-Go for completed dry-run. Ready for dry-run once a non-production Supabase/dev environment is available.
 - Follow-up owner: Project maintainer with access to local/dev Supabase.
+
+## Next Manual Dev Run
+
+- Date:
+- Environment:
+- Dev project confirmed:
+- Production excluded:
+- schema.sql:
+- rls_policies.sql:
+- analytics_views.sql:
+- seed_mock_data.sql:
+- Row count smoke test:
+- Analytics view smoke test:
+- RLS policy creation check:
+- Auth-context RLS smoke test:
+- Go / No-Go:
+- Issues:
+- Next action:
+
+Do not record Supabase URLs, anon keys, service role keys, database passwords, connection strings, or production project details in this file.

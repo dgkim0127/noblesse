@@ -19,12 +19,16 @@ These SQL files are scaffold files for local/dev validation first. Review `docs/
 
 Before SQL execution, complete the static review documented in `supabase/STATIC_REVIEW_REPORT.md`.
 
+For a manual dev Supabase SQL Editor run, follow `docs/DEV_SUPABASE_SQL_EDITOR_RUNBOOK.md`. The short copy order is also available in `supabase/SQL_EDITOR_COPY_ORDER.md`.
+
 1. `schema.sql`
 2. `rls_policies.sql`
 3. `analytics_views.sql`
 4. `seed_mock_data.sql` only for local/dev
 
 Production execution requires separate review and an approved migration strategy. The seed file must not be used in production.
+
+The 21C dry-run was not executed because a non-production Supabase connection was not available without entering or recording secrets. The next runner should use a separate dev project or local Supabase, keep secrets out of this repo, and record only execution results in `supabase/VALIDATION_NOTES.md`.
 
 `schema.sql` includes draft `terms_versions` and `buyer_agreements` tables for future Buyer Access Request consent persistence.
 
@@ -54,6 +58,8 @@ Do not run the seed file against production. The seed file is only for developme
 
 For validation, use local Supabase or a separate dev Supabase project that can be reset safely. Run the SQL files in the recommended order, then confirm RLS behavior and analytics view output.
 
+Do not treat SQL Editor execution with privileged bypass credentials as proof that RLS behavior works. Policy creation can be checked in SQL Editor, but buyer/admin behavior requires a separate Auth-context smoke test.
+
 ## Security Boundary
 
 - Do not expose service role credentials to the frontend.
@@ -62,6 +68,7 @@ For validation, use local Supabase or a separate dev Supabase project that can b
 - Future public client usage may use an anon key, but admin write operations must go through trusted API/RPC.
 - Request Quote and Admin Quote totals must be recalculated server-side.
 - See `docs/SUPABASE_MIGRATION_CHECKLIST.md` for Go / No-Go criteria.
+- Do not start production migration until the checklist and `supabase/VALIDATION_NOTES.md` show a passing local/dev dry-run.
 
 ## Validation Expectations
 
