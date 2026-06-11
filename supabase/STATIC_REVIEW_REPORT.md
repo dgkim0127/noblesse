@@ -75,3 +75,7 @@ This report records a static review only. No SQL was executed, no migration was 
 ## Next Step Recommendation
 
 A. Ready for local/dev SQL dry-run
+
+## 21C Follow-up
+
+21C dry-run was attempted later, but no non-production Supabase/dev connection was available in the current session without entering a secret. No SQL was executed. See `supabase/VALIDATION_NOTES.md`.
