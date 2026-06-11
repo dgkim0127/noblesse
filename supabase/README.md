@@ -4,6 +4,8 @@ This folder is a PostgreSQL/Supabase planning and migration scaffold for Nobless
 
 It is not connected to the React frontend yet. Do not run these files against production without review.
 
+These SQL files are scaffold files for local/dev validation first. Review `docs/SUPABASE_MIGRATION_CHECKLIST.md` before applying them to any shared environment.
+
 ## Direction
 
 - PostgreSQL/Supabase is the required production business database for Noblesse.
@@ -19,6 +21,8 @@ It is not connected to the React frontend yet. Do not run these files against pr
 2. `rls_policies.sql`
 3. `analytics_views.sql`
 4. `seed_mock_data.sql` only for local/dev
+
+Production execution requires separate review and an approved migration strategy. The seed file must not be used in production.
 
 `schema.sql` includes draft `terms_versions` and `buyer_agreements` tables for future Buyer Access Request consent persistence.
 
@@ -45,6 +49,17 @@ Before production registration is enabled, required consent and active agreement
 Use pgAdmin4, Supabase SQL editor, or another PostgreSQL client to inspect tables and views.
 
 Do not run the seed file against production. The seed file is only for development verification.
+
+For validation, use local Supabase or a separate dev Supabase project that can be reset safely. Run the SQL files in the recommended order, then confirm RLS behavior and analytics view output.
+
+## Security Boundary
+
+- Do not expose service role credentials to the frontend.
+- Do not add service role values to `.env.example`.
+- Do not connect browser code directly for admin writes.
+- Future public client usage may use an anon key, but admin write operations must go through trusted API/RPC.
+- Request Quote and Admin Quote totals must be recalculated server-side.
+- See `docs/SUPABASE_MIGRATION_CHECKLIST.md` for Go / No-Go criteria.
 
 ## Validation Expectations
 

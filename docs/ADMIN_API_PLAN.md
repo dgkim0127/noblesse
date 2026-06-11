@@ -13,6 +13,9 @@ The current admin screens are mock preview only. They must not write directly fr
 - Admin role must be verified server-side.
 - Price changes, buyer approval, Request Quote review, and Admin Quote state changes need a trusted layer.
 - PostgreSQL/Supabase should remain the production business source of truth.
+- `docs/SUPABASE_MIGRATION_CHECKLIST.md` must pass before production admin API/RPC work starts.
+- Schema, RLS, analytics views, and seed validation must be completed in local/dev first.
+- `audit_logs` is required before production admin writes.
 
 ## Future Trusted Operations
 
@@ -33,6 +36,7 @@ Validation:
 - buyer exists
 - required agreements accepted
 - market and currency are valid
+- required `buyer_agreements` rows are present for the active terms versions
 
 Result:
 
@@ -95,6 +99,7 @@ Validation:
 - price is greater than or equal to zero
 - MOQ is greater than zero
 - product exists
+- market, currency, MOQ, wholesale price, retail price, and minimum amount are validated server-side
 
 Result:
 
@@ -138,6 +143,8 @@ Validation:
 - product_prices are reloaded server-side
 - MOQ is validated
 - confirmed totals are recalculated server-side
+- operation is transaction-safe
+- inquiry status and quote rows are committed together
 
 Result:
 
@@ -189,6 +196,7 @@ Result:
 - RLS remains active
 - admin writes go through API/RPC only
 - audit_logs table is needed before real admin operations
+- admin API/RPC should not be implemented against production until schema/RLS/views pass the migration checklist
 
 ## Future Table Suggestion
 

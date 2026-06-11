@@ -22,6 +22,26 @@ It is a planning document only. Version 1 remains mock-first and does not add ru
 - Request Quote creation should be server-validated.
 - Browser-side price values are display-only and must not be trusted.
 
+## 21A Migration Validation Reference
+
+Before any production migration, validate the scaffold with `docs/SUPABASE_MIGRATION_CHECKLIST.md`.
+
+Required SQL validation order:
+
+1. `supabase/schema.sql`
+2. `supabase/rls_policies.sql`
+3. `supabase/analytics_views.sql`
+4. `supabase/seed_mock_data.sql`
+
+Rules:
+
+- Validate in local Supabase or a separate dev Supabase project first.
+- Do not apply this scaffold to production until the checklist passes.
+- `seed_mock_data.sql` is local/dev only.
+- Add an `audit_logs` table before real admin operations.
+- Trusted API/RPC is required before admin writes, buyer approval, product price changes, and Admin Quote creation.
+- Frontend code must not hold database connection strings or privileged keys.
+
 ## Tables
 
 ## `users`
