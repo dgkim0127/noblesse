@@ -16,6 +16,7 @@ The current implementation is mock data only. It does not connect to real Auth, 
 - Price Management preview
 - Inquiry Management
 - Inquiry detail preview
+- Admin Quotes list preview
 - Admin Quote draft preview
 - Analytics Dashboard preview
 
@@ -45,6 +46,7 @@ Product Management displays product metadata from mock data:
 - new and best flags
 
 Product creation, image upload, and Storage integration are intentionally out of scope for this preview.
+The preview aligns product metadata with future PostgreSQL/Supabase product and catalog records.
 
 ## Price Management
 
@@ -73,6 +75,8 @@ priceSnapshot is a reference captured at request time. Admin Quote is the final 
 Admin Quote preview is generated from a Request Quote record.
 It includes requested quantities, confirmed quantities, requested priceSnapshot, confirmed unit price, confirmed subtotal, lead time, shipping note, and admin memo.
 
+The `/admin/quotes` route provides an Admin Quotes list preview. The `/admin/quotes/:inquiryId` route provides the individual Admin Quote draft preview.
+
 Save Draft Preview and Send Quote Preview change local UI state only. They do not send email, messenger messages, or write production data.
 
 ## Analytics Dashboard
@@ -88,6 +92,7 @@ Analytics preview cards are prepared for future PostgreSQL/Supabase views:
 - v_monthly_inquiry_trend
 
 The current dashboard reads mock summaries only.
+Dashboard cards include pending buyers, requested inquiries, quoted inquiries, confirmed inquiries, and estimated request total.
 
 ## Production Connection Plan
 
@@ -101,13 +106,15 @@ Production admin functions require:
 - audit history for admin actions
 
 Admin role must not be trusted from client viewerState. viewerState is only a mock preview tool.
+Firebase/Firestore is not the production business source of truth for admin operations.
 
 ## Current Safety Boundary
 
 - mock data only
+- current admin screens are mock preview only
 - no production write path
 - no credential usage
 - no direct PostgreSQL connection
 - no real Auth connection
 - no Hosting release step in this phase
-- no POS, APK, or Capacitor file changes
+- no POS, APK, or mobile runtime file changes

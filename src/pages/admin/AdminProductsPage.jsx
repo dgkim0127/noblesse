@@ -5,7 +5,7 @@ export function AdminProductsPage() {
   const products = getAdminProductSummary()
 
   return <>
-    <AdminPageHeader title="Product Management Preview" description="Display-only product metadata preview aligned with future Firebase product documents." />
+    <AdminPageHeader title="Product Management Preview" description="Display-only product metadata preview aligned with future PostgreSQL/Supabase product and catalog records." />
     <AdminPreviewNote>Product creation, image upload, and Storage connection are intentionally not implemented in this preview.</AdminPreviewNote>
 
     <section className="admin-card">

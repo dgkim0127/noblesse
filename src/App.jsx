@@ -14,6 +14,7 @@ import { AdminInquiryDetailPage } from './pages/admin/AdminInquiryDetailPage'
 import { AdminPricesPage } from './pages/admin/AdminPricesPage'
 import { AdminProductsPage } from './pages/admin/AdminProductsPage'
 import { AdminQuotePage } from './pages/admin/AdminQuotePage'
+import { AdminQuotesPage } from './pages/admin/AdminQuotesPage'
 import { ApprovalPendingPage } from './pages/ApprovalPendingPage'
 import { HomePage } from './pages/HomePage'
 import { InquiryListPage } from './pages/InquiryListPage'
@@ -58,6 +59,7 @@ function App() {
         <Route path="prices" element={<AdminPricesPage />} />
         <Route path="inquiries" element={<AdminInquiriesPage />} />
         <Route path="inquiries/:inquiryId" element={<AdminInquiryDetailPage />} />
+        <Route path="quotes" element={<AdminQuotesPage />} />
         <Route path="quotes/:inquiryId" element={<AdminQuotePage />} />
         <Route path="analytics" element={<AdminAnalyticsPage />} />
       </Route>
@@ -86,6 +88,7 @@ function App() {
         <Route path="prices" element={<AdminPricesPage />} />
         <Route path="inquiries" element={<AdminInquiriesPage />} />
         <Route path="inquiries/:inquiryId" element={<AdminInquiryDetailPage />} />
+        <Route path="quotes" element={<AdminQuotesPage />} />
         <Route path="quotes/:inquiryId" element={<AdminQuotePage />} />
         <Route path="analytics" element={<AdminAnalyticsPage />} />
       </Route>

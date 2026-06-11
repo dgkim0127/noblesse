@@ -9,7 +9,7 @@ export function AdminDashboardPage() {
     <AdminPageHeader
       title="Admin Dashboard"
       description="Review member access, Request Quote activity, price preview coverage, and analytics signals from mock data."
-      actions={<><AdminLink to="/admin/buyers">Review Buyers</AdminLink><AdminLink to="/admin/inquiries">View Inquiries</AdminLink></>}
+      actions={<><AdminLink to="/admin/buyers">Review Buyers</AdminLink><AdminLink to="/admin/inquiries">View Inquiries</AdminLink><AdminLink to="/admin/prices">Manage Prices</AdminLink><AdminLink to="/admin/analytics">View Analytics</AdminLink></>}
     />
     <AdminPreviewNote>Production data will be loaded from PostgreSQL/Supabase through trusted API/RPC. This dashboard is mock preview only.</AdminPreviewNote>
 
@@ -17,6 +17,7 @@ export function AdminDashboardPage() {
       <article className="admin-stat-card"><Handshake size={20} /><span>Pending Buyers</span><strong>{summary.pendingBuyers}</strong></article>
       <article className="admin-stat-card"><FileText size={20} /><span>Requested Inquiries</span><strong>{summary.requestedInquiries}</strong></article>
       <article className="admin-stat-card"><Tags size={20} /><span>Quoted</span><strong>{summary.quotedInquiries}</strong></article>
+      <article className="admin-stat-card"><FileText size={20} /><span>Confirmed</span><strong>{summary.confirmedInquiries}</strong></article>
       <article className="admin-stat-card"><BarChart3 size={20} /><span>Estimated Request Total</span><strong><AdminMoney value={summary.estimatedRequestTotal} currency="JPY" /></strong></article>
     </section>
 

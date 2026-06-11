@@ -8,6 +8,7 @@ const adminNav = [
   { label: 'Products', path: '/admin/products', icon: Gem },
   { label: 'Prices', path: '/admin/prices', icon: Tags },
   { label: 'Inquiries', path: '/admin/inquiries', icon: FileText },
+  { label: 'Quotes', path: '/admin/quotes', icon: FileText },
   { label: 'Analytics', path: '/admin/analytics', icon: BarChart3 },
 ]
 
