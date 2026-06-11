@@ -9,7 +9,7 @@ Version 1 is mock-first. The current website does not connect to Firebase Auth, 
 - Korean brand name: 귀족
 - English brand name: Noblesse Piercing
 - 피어싱 is used as a category or service description.
-- The phrase "귀족 피어싱" must not be used as the main Korean brand name.
+- Do not combine the Korean brand name and category label as the main Korean brand name.
 - The combined Korean brand/category wording should not be used as the main Korean brand name in agreement documents.
 
 Korean agreement wording should prefer:

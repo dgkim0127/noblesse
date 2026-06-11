@@ -461,7 +461,7 @@ function ScrambleText({ as: Tag = 'span', children, className = '', persistKey =
     style={textWidth ? { '--scramble-width': `${textWidth}px` } : undefined}
     aria-label={text}
   >
-    <span className="scramble-text-measure" ref={measureRef} aria-hidden="true">{displayText}</span>
+    <span className="scramble-text-measure" ref={measureRef} aria-hidden="true" data-measure-text={displayText} />
     <span className="scramble-text-visual" aria-hidden="true">
       {displayCharacters.map((char, index) => <span
         className="scramble-text-char"

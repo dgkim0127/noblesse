@@ -243,6 +243,10 @@ a {
   pointer-events: none;
 }
 
+.scramble-text-measure::before {
+  content: attr(data-measure-text);
+}
+
 .scramble-text-visual {
   display: inline-block;
   white-space: nowrap;

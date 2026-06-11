@@ -206,10 +206,10 @@ const readSearchHistory = () => {
   }
 }
 
-function AnimatedBrandName({ text }) {
+function AnimatedBrandName({ ariaHidden = false, text }) {
   const characters = Array.from(text)
 
-  return <span className="brand-name-window" aria-label={text}>
+  return <span className="brand-name-window" aria-hidden={ariaHidden ? 'true' : undefined} aria-label={ariaHidden ? undefined : text}>
     <span className="brand-name-slot" key={text} aria-hidden="true">
       {characters.map((char, index) => <span className="brand-name-char" key={`${text}-${index}-${char}`} style={{ '--char-index': index }}>
         {char === ' ' ? '\u00A0' : char}
@@ -389,23 +389,26 @@ export function StoreShell() {
     setIsCompactSearchOpen((current) => !current)
     setIsSearchOpen(false)
   }
+  const brandHomeLabel = localeMeta.brandName === 'Noblesse Piercing'
+    ? 'Noblesse Piercing home'
+    : `${localeMeta.brandName} Noblesse Piercing home`
 
   return <div className={`site-shell ${isHeaderCompact ? 'has-compact-header' : ''}`}>
     <div className="top-marquee" aria-label="Noblesse material notice">
-      <div className="top-marquee-track">
+      <div className="top-marquee-track" aria-hidden="true">
         {Array.from({ length: 4 }).map((_, index) => <span key={index}>{topMarqueeText}</span>)}
       </div>
     </div>
 
     <header className={`site-header ${isHeaderCompact ? 'is-compact' : ''}`}>
       <div className="header-main">
-        <Link className="brand" to={toLocalePath('/')} aria-label="Noblesse Piercing home">
-          <img className="brand-logo" src={noblesseLogo} alt="Noblesse Piercing logo" width="48" height="48" />
-          <AnimatedBrandName text={localeMeta.brandName} />
+        <Link className="brand" to={toLocalePath('/')} aria-label={brandHomeLabel}>
+          <img className="brand-logo" src={noblesseLogo} alt="" aria-hidden="true" width="48" height="48" />
+          <AnimatedBrandName ariaHidden text={localeMeta.brandName} />
         </Link>
 
-        <Link className="compact-brand-title" to={toLocalePath('/')} aria-label="Noblesse Piercing home">
-          <AnimatedBrandName text={localeMeta.brandName} />
+        <Link className="compact-brand-title" to={toLocalePath('/')} aria-label={brandHomeLabel}>
+          <AnimatedBrandName ariaHidden text={localeMeta.brandName} />
         </Link>
 
         <div className="header-search-wrap top-search" ref={searchRef}>
