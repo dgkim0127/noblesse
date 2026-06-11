@@ -9,6 +9,7 @@ Version 1 is mock-first. The current website does not connect to Firebase Auth, 
 - Korean brand name: 귀족
 - English brand name: Noblesse Piercing
 - 피어싱 is used as a category or service description.
+- The phrase "귀족 피어싱" must not be used as the main Korean brand name.
 - The combined Korean brand/category wording should not be used as the main Korean brand name in agreement documents.
 
 Korean agreement wording should prefer:
@@ -41,7 +42,7 @@ The website needs a clear consent checkpoint for:
 - optional product and catalog updates
 - privacy policy review
 
-The agreement text in this repository is a first-version operating draft. Final operating terms and privacy policy must be reviewed by the business owner and legal/privacy reviewer before launch.
+The agreement text in this repository is a first-version operating draft. Final operating terms and privacy policy must be reviewed by the business owner, legal reviewer, and privacy specialist before launch.
 
 ## 2. Agreement Documents
 
@@ -193,6 +194,7 @@ Items requiring final review:
 - overseas transfer countries and processors
 - legal retention periods
 - user rights request channel
+- whether overseas transfer applies to the final hosting, storage, email, messaging, analytics, and support vendors
 
 ## 8. Product And Catalog Update Consent
 
@@ -254,6 +256,8 @@ Future production storage should use:
 
 `terms_versions` stores active and historical agreement documents.
 
+It is the source table for agreement version management. New legal text should create a new active version instead of changing the meaning of a historical version.
+
 `buyer_agreements` stores:
 
 - member ID
@@ -267,6 +271,8 @@ Future production storage should use:
 - server-side user agent if legally allowed
 
 Historical consent records should not be overwritten when terms change.
+
+It is the consent history table for wholesale members. It should preserve the exact agreement key, version, required flag, accepted flag, and accepted timestamp used at submission time.
 
 ## 12. Trusted API/RPC Validation
 
@@ -283,6 +289,8 @@ The trusted layer should:
 - reject stale or missing required agreement versions
 
 Browser values are display/input values only and must be validated again server-side.
+
+The browser must not be trusted as the final authority for agreement persistence. A trusted API/RPC must re-check the active versions and required consent before writing `buyer_agreements`.
 
 ## 13. Excluded From Version 1
 

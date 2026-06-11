@@ -15,14 +15,14 @@ const registerCopy = {
   kr: {
     eyebrow: '회원가입',
     title: '귀족 회원가입',
-    intro: '기본 정보만 남겨주시면 확인 후 이용할 수 있습니다.',
-    helper: '확인 후 회원가, MOQ, 문의 리스트, 견적 문의 기능을 사용할 수 있습니다.',
+    intro: '피어싱 도매 카탈로그를 둘러보고, 도매 회원 승인을 신청해보세요.',
+    helper: '회원가입 후 상품 카탈로그를 확인할 수 있으며, 도매 회원 승인 완료 시 회원가, MOQ, Inquiry List, Request Quote 기능을 사용할 수 있습니다.',
     noticeTitle: '신청 전 확인해주세요',
     noticeItems: [
-      '회원 정보는 담당자가 직접 확인합니다.',
-      '회원가는 확인 후 볼 수 있습니다.',
-      '견적 문의는 최종 확정이 아닙니다.',
-      '최종 견적은 Noblesse 확인 후 안내합니다.',
+      '회원가입 직후에는 승인 대기 상태로 시작됩니다.',
+      '회원가는 도매 회원 승인 후 확인할 수 있습니다.',
+      '견적 요청은 최종 주문이 아닙니다.',
+      '최종 가격, 재고, 납기, 배송 조건은 Noblesse 확인 후 안내됩니다.',
     ],
     groups: { buyer: '회원 정보', contact: '연락처 정보', business: '비즈니스 정보', memo: '요청 메모' },
     fields: {
@@ -57,10 +57,10 @@ const registerCopy = {
     back: '로그인으로 돌아가기',
   },
   en: {
-    eyebrow: 'MEMBER REQUEST',
-    title: 'Noblesse Member Request',
-    intro: 'Leave your basic company details and Noblesse will review them.',
-    helper: 'After review, you can view approved pricing, MOQ, Inquiry List, and Request Quote features.',
+    eyebrow: 'SIGN UP',
+    title: 'Create your Noblesse account',
+    intro: 'Create your Noblesse Piercing account and request wholesale buyer access.',
+    helper: 'Approved members can view buyer-only prices, MOQ, Inquiry List, and Request Quote features.',
     noticeTitle: 'Before you apply',
     noticeItems: [
       'Member details are reviewed by the Noblesse team.',

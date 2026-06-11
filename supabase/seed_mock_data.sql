@@ -84,9 +84,9 @@ values
   (
     'buyer_terms',
     'buyer-terms-v1.0',
-    '도매 회원 및 견적 이용 조건',
+    '귀족 도매 회원 및 견적 이용 조건',
     'B2B wholesale member and Quote Terms',
-    '회원가, MOQ, 시장별 가격, priceSnapshot, Request Quote, Admin Quote 기준을 설명합니다. 화면 가격은 참고용이며 최종 견적은 관리자 확인으로 안내됩니다.',
+    '승인 도매 회원의 회원가, MOQ, 시장별 가격, priceSnapshot, Request Quote, Admin Quote 기준을 설명합니다. 화면 가격은 참고용이며 최종 견적은 관리자 확인으로 안내됩니다.',
     'This document explains member price, MOQ, market pricing, priceSnapshot, Request Quote, and Admin Quote standards. Displayed prices are references and final quotation is provided after administrator review.',
     true,
     true
