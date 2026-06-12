@@ -69,7 +69,7 @@ This report records a static review only. No SQL was executed, no migration was 
 
 - RLS helpers depend on Supabase `auth.uid()` and must be smoke-tested in a real local/dev Supabase environment.
 - Direct approved-buyer insert policies for Request Quote draft data remain a draft bridge; production should use trusted RPC/API.
-- `audit_logs` table is still planned and must be added before production admin write operations.
+- `audit_logs` is scaffolded, but production write operations still need backend API authorization and database role review.
 - Static review cannot prove SQL runtime behavior; local/dev SQL dry-run is still required.
 
 ## Next Step Recommendation
@@ -97,3 +97,9 @@ Future `psql` dry-runs should enable stop-on-error to avoid partial seed state. 
 The PostgreSQL-only clean retry dry-run passed in local PostgreSQL. `schema.sql`, `analytics_views.sql`, and `seed_mock_data.sql` executed successfully, and the row count and analytics view smoke tests passed.
 
 `rls_policies.sql` remains excluded from the PostgreSQL-only dry-run because it depends on Supabase-specific `auth.uid()` behavior. Production readiness still requires backend API design, `audit_logs`, server-side validation, and no frontend database credentials.
+
+## 23B Audit Logs Clean Dry-run Result
+
+The PostgreSQL-only audit dry-run passed in local PostgreSQL with `audit_logs` included. `schema.sql`, `analytics_views.sql`, and `seed_mock_data.sql` executed successfully, and `audit_logs` existed with 0 rows after seed.
+
+`rls_policies.sql` remains excluded from the PostgreSQL-only dry-run because it is Supabase-specific. Production still requires backend API implementation planning, auth design, server-side validation, and no frontend database credentials.

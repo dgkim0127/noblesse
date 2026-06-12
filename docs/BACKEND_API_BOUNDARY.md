@@ -10,7 +10,7 @@ The React frontend must not connect directly to PostgreSQL. Database credentials
 
 - Frontend mock preview
 - Admin mock preview
-- PostgreSQL scaffold local dry-run passed
+- PostgreSQL scaffold local dry-run passed with `audit_logs`
 - No production DB connection
 - No backend implementation yet
 

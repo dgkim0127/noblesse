@@ -69,7 +69,7 @@ Do not treat Supabase policy creation as the PostgreSQL-only security model. Pla
 
 For Windows `psql` dry-runs, force UTF-8 client encoding before running seed data and enable stop-on-error. Use `\set ON_ERROR_STOP on` in an interactive session or `-v ON_ERROR_STOP=1` on the command line. If a seed file fails mid-run and creates a partial seed state, retry in a clean dev database such as `noblesse_dev_retry`.
 
-The PostgreSQL-only clean retry dry-run passed locally with `schema.sql`, `analytics_views.sql`, and `seed_mock_data.sql`. `rls_policies.sql` remains excluded from the PostgreSQL-only path because it is Supabase-specific. Production work still requires a backend API, `audit_logs`, server-side validation, and no frontend database credentials.
+The PostgreSQL-only clean retry dry-run passed locally with `schema.sql`, `analytics_views.sql`, and `seed_mock_data.sql`. A later audit dry-run also passed with `audit_logs` included; the table exists and has 0 rows after seed, which is expected. `rls_policies.sql` remains excluded from the PostgreSQL-only path because it is Supabase-specific. Production work still requires a backend API, auth design, server-side validation, and no frontend database credentials.
 
 ## Security Boundary
 

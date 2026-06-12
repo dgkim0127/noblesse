@@ -53,11 +53,10 @@
 - Frontend mock preview
 - Admin mock preview
 - SQL scaffold exists
-- PostgreSQL-only local clean retry dry-run passed for schema, analytics views, and seed data
-- 23A adds `audit_logs` scaffold, so the next local dry-run must recheck schema and row counts
+- PostgreSQL-only local clean retry dry-run passed for schema, analytics views, seed data, and `audit_logs`
 - No production DB connection
 - No backend API yet
-- Next architecture step: backend API boundary and `audit_logs` planning before real frontend writes
+- Next architecture step: backend API provider/auth design before real frontend writes
 
 ## SQL Scaffold Location
 
