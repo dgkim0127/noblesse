@@ -129,9 +129,9 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 - seed_mock_data.sql: Not executed.
 - Row count smoke test: Not executed.
 - Analytics view smoke test: Not executed.
-- Issues: Local PostgreSQL connection was blocked by authentication/password requirement before the dev database could be created. No password or connection details were entered or recorded.
+- Issues: Local PostgreSQL connection was blocked by authentication/password requirement before the dev database could be created. Manual password input required. No password or connection details were entered or recorded.
 - Go / No-Go: No-Go for completed dry-run.
-- Next action: Run the dry-run manually with a confirmed local/dev credential path, or adjust the local dev authentication setup without recording secrets.
+- Next action: Run the dry-run manually with direct user password input in a local terminal, or adjust the local dev authentication setup without recording secrets.
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
