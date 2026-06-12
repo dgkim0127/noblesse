@@ -55,7 +55,9 @@
 - SQL scaffold exists
 - PostgreSQL-only local clean retry dry-run passed for schema, analytics views, seed data, and `audit_logs`
 - Backend provider/auth decision document created
+- Backend implementation readiness document created
 - Proposed v1 candidate is Firebase Hosting + Cloud Run API + PostgreSQL + Firebase Auth
+- API/Auth/DB provider choices are still provisional
 - No production DB connection
 - No backend API yet
 - Final provider choice is still pending before implementation
@@ -68,6 +70,7 @@
 - Backend API is mandatory before frontend writes.
 - Direct React-to-PostgreSQL access is prohibited.
 - Audit logs are required before real admin writes.
+- Production DB migration must not run before provider confirmation.
 
 ## Non-goals
 

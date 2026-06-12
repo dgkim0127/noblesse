@@ -281,6 +281,10 @@ Use this as the default candidate until final implementation planning changes it
 - Auth: Firebase Auth identity plus PostgreSQL business authorization
 - PostgreSQL: Cloud SQL if staying inside Google Cloud, or Neon if a simpler managed PostgreSQL workflow is preferred
 
+See `docs/BACKEND_IMPLEMENTATION_READINESS.md` for the pre-implementation checklist, route priority, and Cloud SQL versus Neon readiness notes.
+
+This recommendation remains provisional. Provider and auth choices must be confirmed before backend code, provider resources, or database connections are added.
+
 ## Not Implemented In This Step
 
 - No backend API code

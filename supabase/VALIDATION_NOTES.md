@@ -317,6 +317,18 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 24B Backend Implementation Readiness Follow-up
+
+- Date: 2026-06-12
+- Change: Added `docs/BACKEND_IMPLEMENTATION_READINESS.md`.
+- DB scaffold validation: Complete for local PostgreSQL with `audit_logs`.
+- Next phase: Backend implementation readiness and provider confirmation.
+- SQL execution required in 24B: No.
+- Implementation status: Documentation only. No backend API, auth integration, DB connection, dependency, SQL execution, migration, provider setup, Firebase configuration change, or deploy action was added.
+- Next action: Confirm API hosting, Auth provider details, PostgreSQL production provider, secret storage, and `/api/**` rewrite strategy before code implementation.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## PostgreSQL Local Environment Check
 
 - Date: 2026-06-12
