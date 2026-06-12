@@ -135,6 +135,26 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## PostgreSQL-only 22F Manual Dry-run Result Intake
+
+- Date: 2026-06-12
+- Environment option: Local PostgreSQL
+- Provider or local type: User-executed local PostgreSQL dry-run
+- Production excluded: User stated production DB was not used.
+- POS DB excluded: User stated POS DB was not used.
+- Secret recorded: No password, username, host, port, connection string, or `DATABASE_URL` was provided or recorded.
+- schema.sql: Result not recorded. The 22G intake message did not include the actual 22F execution result.
+- analytics_views.sql: Result not recorded. The 22G intake message did not include the actual 22F execution result.
+- seed_mock_data.sql: Result not recorded. The 22G intake message did not include the actual 22F execution result.
+- Row count smoke test: Result not recorded. No table counts were provided.
+- Analytics view smoke test: Result not recorded. No view success/failure or row-return summary was provided.
+- SQL changes made: None.
+- Issues: The intake request contained a placeholder instead of concrete 22F dry-run output, so this file cannot mark the dry-run as passed.
+- Go / No-Go: No-Go for verified dry-run completion until concrete SQL execution results, row counts, and analytics view smoke-test summaries are provided.
+- Next action: Provide the 22F dry-run summary without secrets, including each SQL file success/failure, row count results, analytics view smoke-test results, issues, and final Go / No-Go recommendation.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## PostgreSQL Local Environment Check
 
 - Date: 2026-06-12
