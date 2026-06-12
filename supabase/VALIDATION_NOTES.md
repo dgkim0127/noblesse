@@ -159,3 +159,24 @@ Do not record database password, host, port, username, connection string, or pro
 - Secret recorded: No
 
 Do not record database password, host, port, username, connection string, or provider secrets in this section.
+
+## PostgreSQL-only Dev Dry-run Retry
+
+- Date: 2026-06-12
+- Environment option: Local PostgreSQL
+- Provider or local type: PostgreSQL Windows service
+- Production excluded: Yes
+- POS DB excluded: Yes
+- Secret recorded: No
+- dev database target: `noblesse_dev`
+- dev database created: No
+- schema.sql: Not executed.
+- analytics_views.sql: Not executed.
+- seed_mock_data.sql: Not executed.
+- Row count smoke test: Not executed.
+- Analytics view smoke test: Not executed.
+- Issues: The local PostgreSQL client requires manual password input before a dev database can be created. The dry-run was stopped before database creation and before SQL execution.
+- Go / No-Go: No-Go for completed dry-run.
+- Next action: Run the dry-run in a local terminal or pgAdmin4 session where the user enters the PostgreSQL password directly, without recording it in chat, docs, GitHub, or config files.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
