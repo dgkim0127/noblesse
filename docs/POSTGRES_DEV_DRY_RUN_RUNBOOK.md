@@ -101,7 +101,8 @@ union all select 'inquiry_items', count(*) from public.inquiry_items
 union all select 'admin_quotes', count(*) from public.admin_quotes
 union all select 'admin_quote_items', count(*) from public.admin_quote_items
 union all select 'terms_versions', count(*) from public.terms_versions
-union all select 'buyer_agreements', count(*) from public.buyer_agreements;
+union all select 'buyer_agreements', count(*) from public.buyer_agreements
+union all select 'audit_logs', count(*) from public.audit_logs;
 ```
 
 Expected:
@@ -110,6 +111,9 @@ Expected:
 - `terms_versions` >= 5
 - `buyer_agreements` > 0
 - `inquiries` > 0
+- `audit_logs` = 0 after seed, and the table exists
+
+`audit_logs` should stay empty after seed because it records future backend actions.
 
 ### Analytics View Query
 

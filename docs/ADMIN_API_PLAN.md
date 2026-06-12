@@ -21,7 +21,7 @@ The current admin screens are mock preview only. They must not write directly fr
 - `docs/POSTGRES_DEV_DRY_RUN_RUNBOOK.md` should pass before production admin API work starts.
 - 21B static SQL review must pass before local/dev SQL dry-run and before API implementation planning moves into build work.
 - Schema, analytics views, and seed validation must be completed in local/dev first.
-- `audit_logs` is required before production admin writes.
+- `audit_logs` is now scaffolded in `schema.sql` and is required before production admin writes.
 
 ## Future Trusted Operations
 
@@ -48,7 +48,7 @@ Result:
 
 - buyer status becomes approved
 - approved_at and approved_by are recorded
-- audit log is recorded
+- audit log is recorded in the same transaction
 
 ### 2. blockBuyer
 
@@ -65,7 +65,7 @@ Validation:
 Result:
 
 - buyer status becomes blocked
-- audit log is recorded
+- audit log is recorded in the same transaction
 
 ### 3. updateProduct
 
@@ -83,7 +83,7 @@ Result:
 
 - products record is updated
 - updated_at is recorded
-- audit log is recorded
+- audit log is recorded in the same transaction
 
 ### 4. updateProductPrice
 
@@ -110,7 +110,7 @@ Validation:
 Result:
 
 - product_prices record is updated
-- audit log is recorded
+- audit log is recorded in the same transaction
 
 ### 5. reviewInquiry
 
@@ -129,7 +129,7 @@ Validation:
 Result:
 
 - inquiries status is updated
-- audit log is recorded
+- audit log is recorded in the same transaction
 
 ### 6. createAdminQuote
 
@@ -158,7 +158,7 @@ Result:
 - admin_quotes row is inserted
 - admin_quote_items rows are inserted
 - inquiry status becomes quoted
-- audit log is recorded
+- audit log is recorded in the same transaction
 
 ### 7. sendAdminQuote
 
@@ -177,7 +177,7 @@ Result:
 - quote status becomes sent
 - quoted_at is set
 - notification job is created
-- audit log is recorded
+- audit log is recorded in the same transaction
 
 ### 8. getAnalyticsDashboard
 
@@ -202,12 +202,13 @@ Result:
 - no database connection string in frontend
 - Supabase RLS is not assumed in the PostgreSQL-only plan
 - admin writes go through API only
-- audit_logs table is needed before real admin operations
+- no frontend write to `audit_logs`
+- `audit_logs` table is scaffolded and must be written by trusted backend operations
 - admin API should not be implemented against production until schema/views pass the PostgreSQL dev dry-run and the backend security model is reviewed
 
-## Future Table Suggestion
+## Audit Log Table
 
-audit_logs:
+`audit_logs` records admin and sensitive operation history.
 
 - id
 - actor_user_id
@@ -219,6 +220,7 @@ audit_logs:
 - after_snapshot jsonb
 - ip_address
 - user_agent
+- request_id
 - created_at
 
 ## Current Boundary

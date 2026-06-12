@@ -223,6 +223,19 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 23A Audit Logs Scaffold Follow-up
+
+- Date: 2026-06-12
+- Change: Added `audit_logs` table scaffold and indexes to `schema.sql`.
+- Backend API boundary: Documented in `docs/BACKEND_API_BOUNDARY.md`.
+- Previous dry-run status: 22I PostgreSQL-only clean retry dry-run passed before `audit_logs` was added.
+- Current validation status: The previous Go result does not cover the new `audit_logs` table until a new local/dev dry-run passes.
+- Required next dry-run: Re-run `schema.sql`, `analytics_views.sql`, and `seed_mock_data.sql` in a clean dev database.
+- Expected audit result after seed: `audit_logs` table exists and row count is 0.
+- Go / No-Go: No-Go for the updated schema until the 23A schema change is rerun locally.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## PostgreSQL Local Environment Check
 
 - Date: 2026-06-12

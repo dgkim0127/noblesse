@@ -54,6 +54,7 @@
 - Admin mock preview
 - SQL scaffold exists
 - PostgreSQL-only local clean retry dry-run passed for schema, analytics views, and seed data
+- 23A adds `audit_logs` scaffold, so the next local dry-run must recheck schema and row counts
 - No production DB connection
 - No backend API yet
 - Next architecture step: backend API boundary and `audit_logs` planning before real frontend writes
@@ -65,6 +66,7 @@
 - PostgreSQL-only primary dry-run excludes `supabase/rls_policies.sql`.
 - Backend API is mandatory before frontend writes.
 - Direct React-to-PostgreSQL access is prohibited.
+- Audit logs are required before real admin writes.
 
 ## Non-goals
 

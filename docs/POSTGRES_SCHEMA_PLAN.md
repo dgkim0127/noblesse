@@ -680,6 +680,56 @@ Future registration should write one row per checkbox agreement target:
 - IP address and user agent collection should be handled by the server/API layer, not directly trusted from the browser.
 - Pending Buyer application storage before a `buyers` row exists should be finalized during API design.
 
+## `audit_logs`
+
+### Purpose
+
+Stores append-only history for admin and sensitive buyer operations before real production writes are enabled.
+
+Audit logs should cover:
+
+- buyer approval and blocking
+- product metadata changes
+- product price changes
+- inquiry review
+- Admin Quote create/send actions
+- other sensitive backend API operations
+
+### Important Columns
+
+- `id uuid primary key`
+- `actor_user_id uuid references users(id)`
+- `actor_role text` (`admin`, `buyer`, `system`, `anonymous`)
+- `action text not null`
+- `target_table text`
+- `target_id text`
+- `before_snapshot jsonb`
+- `after_snapshot jsonb`
+- `ip_address text`
+- `user_agent text`
+- `request_id text`
+- `created_at timestamptz`
+
+### Relationships
+
+- Optionally references `users` through `actor_user_id`.
+- Targets are stored as `target_table` and `target_id` so the log can reference multiple business tables without polymorphic foreign keys.
+
+### Indexes
+
+- `index(actor_user_id)`
+- `index(action)`
+- `index(target_table, target_id)`
+- `index(created_at)`
+- `index(request_id)`
+
+### Production Notes
+
+- `audit_logs` is append-only in production intent.
+- The backend API writes audit logs as part of the same transaction as sensitive operations.
+- The frontend must never write `audit_logs` directly.
+- Delete/update restrictions should be enforced by backend permissions and database role design before production.
+
 ## Analytics SQL Examples
 
 ### Top Requested Products In Last 30 Days

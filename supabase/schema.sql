@@ -250,6 +250,21 @@ create table if not exists public.buyer_agreements (
   created_at timestamptz default now()
 );
 
+create table if not exists public.audit_logs (
+  id uuid primary key default gen_random_uuid(),
+  actor_user_id uuid references public.users(id) on delete set null,
+  actor_role text check (actor_role in ('admin', 'buyer', 'system', 'anonymous')),
+  action text not null,
+  target_table text,
+  target_id text,
+  before_snapshot jsonb,
+  after_snapshot jsonb,
+  ip_address text,
+  user_agent text,
+  request_id text,
+  created_at timestamptz default now()
+);
+
 drop trigger if exists trg_users_updated_at on public.users;
 create trigger trg_users_updated_at before update on public.users
 for each row execute function public.update_updated_at_column();
@@ -328,3 +343,8 @@ create index if not exists idx_terms_versions_is_active on public.terms_versions
 create index if not exists idx_buyer_agreements_buyer_id on public.buyer_agreements(buyer_id);
 create index if not exists idx_buyer_agreements_key_version on public.buyer_agreements(agreement_key, version);
 create index if not exists idx_buyer_agreements_accepted_at on public.buyer_agreements(accepted_at);
+create index if not exists idx_audit_logs_actor_user_id on public.audit_logs(actor_user_id);
+create index if not exists idx_audit_logs_action on public.audit_logs(action);
+create index if not exists idx_audit_logs_target on public.audit_logs(target_table, target_id);
+create index if not exists idx_audit_logs_created_at on public.audit_logs(created_at);
+create index if not exists idx_audit_logs_request_id on public.audit_logs(request_id);
