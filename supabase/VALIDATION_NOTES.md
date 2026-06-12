@@ -117,20 +117,21 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 
 ## PostgreSQL-only Dev Dry-run
 
-- Date:
-- Environment option:
-- Provider or local type:
-- Production excluded:
-- POS DB excluded:
-- Secret recorded:
-- schema.sql:
-- analytics_views.sql:
-- seed_mock_data.sql:
-- Row count smoke test:
-- Analytics view smoke test:
-- Issues:
-- Go / No-Go:
-- Next action:
+- Date: 2026-06-12
+- Environment option: Local PostgreSQL
+- Provider or local type: PostgreSQL Windows service
+- Production excluded: Yes
+- POS DB excluded: Yes
+- Secret recorded: No
+- dev database created: No
+- schema.sql: Not executed.
+- analytics_views.sql: Not executed.
+- seed_mock_data.sql: Not executed.
+- Row count smoke test: Not executed.
+- Analytics view smoke test: Not executed.
+- Issues: Local PostgreSQL connection was blocked by authentication/password requirement before the dev database could be created. No password or connection details were entered or recorded.
+- Go / No-Go: No-Go for completed dry-run.
+- Next action: Run the dry-run manually with a confirmed local/dev credential path, or adjust the local dev authentication setup without recording secrets.
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
