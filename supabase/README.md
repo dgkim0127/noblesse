@@ -1,34 +1,40 @@
 # Supabase / PostgreSQL Scaffold
 
-This folder is a PostgreSQL/Supabase planning and migration scaffold for Noblesse Piercing.
+This folder contains PostgreSQL-compatible SQL scaffold files for Noblesse Piercing.
 
 It is not connected to the React frontend yet. Do not run these files against production without review.
 
-These SQL files are scaffold files for local/dev validation first. Review `docs/SUPABASE_MIGRATION_CHECKLIST.md` before applying them to any shared environment.
+Supabase is no longer required for the primary architecture. The current direction is PostgreSQL-only with a future backend API layer. Review `docs/POSTGRES_ONLY_ARCHITECTURE.md` and `docs/POSTGRES_DEV_DRY_RUN_RUNBOOK.md` before running these files in any dev database.
 
 ## Direction
 
-- PostgreSQL/Supabase is the required production business database for Noblesse.
+- PostgreSQL is the required production business database for Noblesse.
+- Supabase is optional and historical for this plan.
 - Firebase may remain for Hosting and optionally Storage.
 - The frontend must not use privileged server keys.
 - Browser-side price calculation is display-only.
 - Production Request Quote must use Edge Function, API, or trusted RPC validation.
 - Firebase Hosting remains separate and should use hosting target `noblesse` only.
+- Supabase-specific RLS and `auth.uid()` assumptions are not final for the PostgreSQL-only architecture.
+- Production PostgreSQL migration requires a backend API and revised security model.
 
 ## Recommended Execution Order
 
 Before SQL execution, complete the static review documented in `supabase/STATIC_REVIEW_REPORT.md`.
 
-For a manual dev Supabase SQL Editor run, follow `docs/DEV_SUPABASE_SQL_EDITOR_RUNBOOK.md`. The short copy order is also available in `supabase/SQL_EDITOR_COPY_ORDER.md`.
+For the primary PostgreSQL-only dry-run, follow `docs/POSTGRES_DEV_DRY_RUN_RUNBOOK.md`.
+
+For historical Supabase compatibility review, `docs/DEV_SUPABASE_SQL_EDITOR_RUNBOOK.md` and `supabase/SQL_EDITOR_COPY_ORDER.md` remain available but are no longer the primary path.
 
 1. `schema.sql`
-2. `rls_policies.sql`
-3. `analytics_views.sql`
-4. `seed_mock_data.sql` only for local/dev
+2. `analytics_views.sql`
+3. `seed_mock_data.sql` only for local/dev
+
+`rls_policies.sql` is Supabase-specific because it depends on `auth.uid()`. In a plain PostgreSQL dry-run, exclude it from the primary sequence and replace access control with backend API authorization planning.
 
 Production execution requires separate review and an approved migration strategy. The seed file must not be used in production.
 
-The 21C dry-run was not executed because a non-production Supabase connection was not available without entering or recording secrets. The next runner should use a separate dev project or local Supabase, keep secrets out of this repo, and record only execution results in `supabase/VALIDATION_NOTES.md`.
+The 21C dry-run was not executed because a non-production Supabase connection was not available without entering or recording secrets. The next runner should use a dev PostgreSQL database, keep secrets out of this repo, and record only execution results in `supabase/VALIDATION_NOTES.md`.
 
 `schema.sql` includes draft `terms_versions` and `buyer_agreements` tables for future Buyer Access Request consent persistence.
 
@@ -52,11 +58,11 @@ Before production registration is enabled, required consent and active agreement
 
 ## Local Review
 
-Use pgAdmin4, Supabase SQL editor, or another PostgreSQL client to inspect tables and views.
+Use pgAdmin4, psql, a provider SQL console, or another PostgreSQL client to inspect tables and views.
 
 Do not run the seed file against production. The seed file is only for development verification.
 
-For validation, use local Supabase or a separate dev Supabase project that can be reset safely. Run the SQL files in the recommended order, then confirm RLS behavior and analytics view output.
+For validation, use local PostgreSQL or a separate dev PostgreSQL provider database that can be reset safely. Run the SQL files in the PostgreSQL-only order, then confirm analytics view output.
 
 Do not treat SQL Editor execution with privileged bypass credentials as proof that RLS behavior works. Policy creation can be checked in SQL Editor, but buyer/admin behavior requires a separate Auth-context smoke test.
 

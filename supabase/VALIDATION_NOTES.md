@@ -91,19 +91,26 @@ Do not paste secrets, service keys, or production connection details into this f
 ## Next Manual Dev Run
 
 - Date:
-- Environment:
+- Environment: PostgreSQL dev database
 - Dev project confirmed:
 - Production excluded:
 - schema.sql:
-- rls_policies.sql:
+- rls_policies.sql: Supabase-specific; not part of the primary PostgreSQL-only dry-run.
 - analytics_views.sql:
 - seed_mock_data.sql:
 - Row count smoke test:
 - Analytics view smoke test:
-- RLS policy creation check:
-- Auth-context RLS smoke test:
+- PostgreSQL authorization model check:
 - Go / No-Go:
 - Issues:
 - Next action:
 
 Do not record Supabase URLs, anon keys, service role keys, database passwords, connection strings, or production project details in this file.
+
+## PostgreSQL-only Follow-up
+
+- Supabase dry-run remains not executed.
+- The next dry-run should target a reset-safe PostgreSQL dev database.
+- Use `docs/POSTGRES_DEV_DRY_RUN_RUNBOOK.md`.
+- Exclude Supabase-specific `rls_policies.sql` from the primary PostgreSQL-only dry-run unless a separate Supabase compatibility review is explicitly needed.
+- Keep secrets and provider connection details out of this file.

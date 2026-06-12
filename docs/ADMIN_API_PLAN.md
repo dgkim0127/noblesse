@@ -12,10 +12,15 @@ The current admin screens are mock preview only. They must not write directly fr
 - Browser-side price, subtotal, confirmed total, and status values can be manipulated.
 - Admin role must be verified server-side.
 - Price changes, buyer approval, Request Quote review, and Admin Quote state changes need a trusted layer.
-- PostgreSQL/Supabase should remain the production business source of truth.
-- `docs/SUPABASE_MIGRATION_CHECKLIST.md` must pass before production admin API/RPC work starts.
-- 21B static SQL review must pass before local/dev SQL dry-run and before API/RPC implementation planning moves into build work.
-- Schema, RLS, analytics views, and seed validation must be completed in local/dev first.
+- PostgreSQL should remain the production business source of truth.
+- Backend API/RPC is required regardless of PostgreSQL provider.
+- Supabase RPC is not assumed.
+- Server API must own database credentials.
+- Frontend must never receive `DATABASE_URL`.
+- Admin role validation must happen server-side.
+- `docs/POSTGRES_DEV_DRY_RUN_RUNBOOK.md` should pass before production admin API work starts.
+- 21B static SQL review must pass before local/dev SQL dry-run and before API implementation planning moves into build work.
+- Schema, analytics views, and seed validation must be completed in local/dev first.
 - `audit_logs` is required before production admin writes.
 
 ## Future Trusted Operations
@@ -146,6 +151,7 @@ Validation:
 - confirmed totals are recalculated server-side
 - operation is transaction-safe
 - inquiry status and quote rows are committed together
+- PostgreSQL transaction inserts `admin_quotes` and `admin_quote_items` and updates inquiry status atomically
 
 Result:
 
@@ -194,10 +200,10 @@ Result:
 
 - no privileged key in frontend
 - no database connection string in frontend
-- RLS remains active
-- admin writes go through API/RPC only
+- Supabase RLS is not assumed in the PostgreSQL-only plan
+- admin writes go through API only
 - audit_logs table is needed before real admin operations
-- admin API/RPC should not be implemented against production until schema/RLS/views pass the migration checklist
+- admin API should not be implemented against production until schema/views pass the PostgreSQL dev dry-run and the backend security model is reviewed
 
 ## Future Table Suggestion
 

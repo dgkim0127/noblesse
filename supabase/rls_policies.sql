@@ -1,5 +1,7 @@
 -- Noblesse Piercing Supabase RLS policy draft.
--- Review and harden before production. This file does not connect the app to Supabase.
+-- Historical/optional for PostgreSQL-only architecture: this file depends on Supabase auth.uid().
+-- Plain PostgreSQL production should use backend API authorization plus database roles or a revised PostgreSQL security design.
+-- Review and harden before any Supabase-specific production use. This file does not connect the app to Supabase.
 -- Client-side price values are never trusted.
 -- Request Quote creation should eventually use a trusted RPC, Edge Function, or API transaction.
 

@@ -1,4 +1,4 @@
--- Development-only seed data for Noblesse Piercing PostgreSQL/Supabase.
+-- Development-only seed data for Noblesse Piercing PostgreSQL.
 -- Do not run this file against production.
 
 insert into public.users (auth_uid, email, role, status)

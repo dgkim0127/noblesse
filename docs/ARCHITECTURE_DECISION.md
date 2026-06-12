@@ -71,18 +71,18 @@ Firebase-only means using:
 - Firestore document shape must be carefully denormalized for every report.
 - Price validation still requires trusted Cloud Functions; client-side totals are not enough.
 
-## Option B: PostgreSQL / Supabase
+## Option B: PostgreSQL
 
 ### Description
 
-PostgreSQL / Supabase means using:
+PostgreSQL means using:
 
 - PostgreSQL as the main operational database
-- Supabase Auth or external auth
-- Supabase Storage or Firebase Storage for product images
+- External auth or a future backend-owned auth integration
+- Firebase Storage or another CDN-backed image storage option
 - pgAdmin4 for database inspection and local operation
 - SQL views or materialized views for analytics
-- API, Edge Functions, or server-side services for trusted writes
+- Backend API or server-side services for trusted writes
 
 ### Pros
 
@@ -96,7 +96,7 @@ PostgreSQL / Supabase means using:
 ### Cons
 
 - More setup than Firebase
-- Requires API/RLS/Edge Functions
+- Requires backend API and a clear security model
 - Direct client database writes are dangerous if not protected
 - Needs stricter schema design before production
 - Storage/auth integration must be planned carefully
@@ -118,8 +118,8 @@ Hybrid means using:
 
 - React frontend
 - Firebase Storage for images, if desired
-- Firebase Auth or Supabase Auth
-- PostgreSQL/Supabase for business data
+- Firebase Auth or another auth provider
+- PostgreSQL for business data
 - pgAdmin4 for database management
 - Server-side validation for Request Quote and admin quote confirmation
 
@@ -143,7 +143,7 @@ Hybrid means using:
 Recommended path:
 
 - 1st version can keep the current React UI and mock structure.
-- For real production business data, use PostgreSQL/Supabase if analytics and wholesale reporting are important.
+- For real production business data, use PostgreSQL if analytics and wholesale reporting are important.
 - Firebase may still be used for Storage/Hosting if desired.
 - Do not rely on client-side price calculation.
 - Add server-side validation before storing final Inquiry and quote data.
@@ -152,15 +152,16 @@ Recommended path:
 
 ## Final Decision
 
-PostgreSQL/Supabase is the required production business database for Noblesse Piercing.
+PostgreSQL is the required production business database for Noblesse Piercing.
 
 - Firebase may remain for Hosting and optionally Storage.
 - Firestore is not the long-term source of truth for business transactions.
 - Product, Buyer, price, Inquiry, Inquiry Item, Admin Quote, and Analytics data belong in PostgreSQL.
-- Supabase can be used as managed PostgreSQL.
+- Supabase is not required for the primary plan.
+- The PostgreSQL provider is undecided.
 - pgAdmin4 is a PostgreSQL management tool, not a database.
 - Browser-side price calculation is never trusted.
-- Server-side validation or trusted database RPC must validate price, MOQ, Buyer status, market, discount, and totals.
+- Server-side validation must validate price, MOQ, Buyer status, market, discount, and totals.
 
 ## Final Direction
 
@@ -170,7 +171,7 @@ The strongest long-term architecture for Noblesse is:
 React website
 -> Auth provider
 -> API / server-side validation
--> PostgreSQL or Supabase business data
+-> PostgreSQL business data
 -> Storage/CDN for image files
 -> SQL views for admin analytics
 ```
@@ -183,7 +184,7 @@ Current `src/services` uses mock data.
 
 Future service responsibilities:
 
-- `productService` can call a Supabase/PostgreSQL-backed API.
+- `productService` can call a PostgreSQL-backed API.
 - `pricingService` must not expose protected prices to `guest` or `pending` users.
 - `inquiryService.submitRequestQuote()` should call a trusted endpoint.
 
@@ -196,3 +197,14 @@ Trusted Request Quote creation should:
 - insert `inquiries` and `inquiry_items` in a transaction
 
 Do not execute SQL directly from React components. Do not put database connection strings or privileged server keys in frontend code.
+
+## 22A PostgreSQL-only Update
+
+Noblesse no longer requires Supabase as the primary backend platform.
+
+- Firebase Hosting remains the frontend hosting path.
+- PostgreSQL remains required for production business data.
+- Supabase-specific Auth/RLS/SQL Editor workflows are historical unless Supabase is later selected only as a managed PostgreSQL provider.
+- A backend API is mandatory before real frontend writes.
+- Direct browser database access is prohibited.
+- POS/APK files and existing POS hosting must remain separate.

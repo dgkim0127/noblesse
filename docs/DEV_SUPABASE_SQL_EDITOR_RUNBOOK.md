@@ -1,5 +1,7 @@
 # Dev Supabase SQL Editor Runbook
 
+> Deprecated / historical note: this dev Supabase SQL Editor flow is no longer the primary dry-run path. Noblesse is moving to a PostgreSQL-only plan. Use `docs/POSTGRES_ONLY_ARCHITECTURE.md` for the architecture decision and `docs/POSTGRES_DEV_DRY_RUN_RUNBOOK.md` for the primary dev database dry-run path.
+
 This runbook explains how to manually validate the Noblesse SQL scaffold in a non-production Supabase environment.
 
 Use this only for a separate dev Supabase project or a local Supabase database. The maintainer runs SQL directly in the Supabase SQL Editor and records only the result summary in `supabase/VALIDATION_NOTES.md`.

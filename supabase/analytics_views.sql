@@ -1,5 +1,6 @@
--- Noblesse Piercing analytics views for PostgreSQL/Supabase.
+-- Noblesse Piercing analytics views for PostgreSQL.
 -- These views aggregate Request Quote and admin quote workflow data.
+-- They are PostgreSQL-compatible and do not require Supabase-specific features.
 
 create or replace view public.v_top_requested_products_30d as
 select

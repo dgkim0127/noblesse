@@ -1,6 +1,6 @@
 # PostgreSQL Schema Plan
 
-This document defines a draft PostgreSQL/Supabase schema for the Noblesse Piercing B2B catalog and Request Quote workflow.
+This document defines a draft PostgreSQL schema for the Noblesse Piercing B2B catalog and Request Quote workflow.
 
 It is a planning document only. Version 1 remains mock-first and does not add runtime database connection code.
 
@@ -15,33 +15,37 @@ It is a planning document only. Version 1 remains mock-first and does not add ru
 ## Production Direction
 
 - PostgreSQL is mandatory for production business data.
-- Supabase can be used as managed PostgreSQL.
+- Supabase is no longer required for the primary plan.
+- The PostgreSQL provider is undecided.
 - pgAdmin4 can be used to inspect and manage PostgreSQL data.
 - Firebase may remain for Hosting and optionally Storage.
-- Client-side writes must be limited by RLS or routed through Edge Functions/API.
+- Client-side writes must be routed through a backend API.
 - Request Quote creation should be server-validated.
 - Browser-side price values are display-only and must not be trusted.
+- Supabase RLS and `auth.uid()` policies are draft/historical if plain PostgreSQL is used.
 
 ## 21A Migration Validation Reference
 
-Before any production migration, validate the scaffold with `docs/SUPABASE_MIGRATION_CHECKLIST.md`.
+Before any production migration, validate the scaffold with `docs/POSTGRES_DEV_DRY_RUN_RUNBOOK.md`.
+
+Historical Supabase validation notes remain in `docs/SUPABASE_MIGRATION_CHECKLIST.md`, but they are no longer the primary plan.
 
 Required SQL validation order:
 
 1. `supabase/schema.sql`
-2. `supabase/rls_policies.sql`
-3. `supabase/analytics_views.sql`
-4. `supabase/seed_mock_data.sql`
+2. `supabase/analytics_views.sql`
+3. `supabase/seed_mock_data.sql`
 
 Rules:
 
 - Complete the static review in `supabase/STATIC_REVIEW_REPORT.md` before running SQL in local/dev.
-- Validate in local Supabase or a separate dev Supabase project first.
+- Validate in a reset-safe PostgreSQL dev database first.
 - Do not apply this scaffold to production until the checklist passes.
 - `seed_mock_data.sql` is local/dev only.
 - Add an `audit_logs` table before real admin operations.
-- Trusted API/RPC is required before admin writes, buyer approval, product price changes, and Admin Quote creation.
+- Trusted backend API is required before admin writes, buyer approval, product price changes, and Admin Quote creation.
 - Frontend code must not hold database connection strings or privileged keys.
+- Production migration remains prohibited until the backend API and security model are finalized.
 
 ## Column Naming Map
 
@@ -62,7 +66,8 @@ The SQL schema should stay snake_case. API/RPC responses can translate names at 
 - `users.auth_uid` must store the Supabase Auth UID as text.
 - `public.is_admin()` reads `users.role = 'admin'`.
 - Approved buyer price access requires `users.role = 'buyer'`, `users.status = 'approved'`, and `buyers.assigned_market`.
-- These helpers must be smoke-tested in local/dev Supabase before production use.
+- These helpers are historical/draft if plain PostgreSQL is used.
+- In PostgreSQL-only architecture, authorization must be handled by the backend API plus database roles or a revised PostgreSQL security design.
 
 ## Tables
 
@@ -601,7 +606,7 @@ Only the first three are required checkbox consent targets. `marketing_updates` 
 
 - Active `terms_versions` can be readable so registration can display current agreement text.
 - Only admins or trusted internal tools should create new terms versions.
-- Production registration should validate active version keys through a trusted API/RPC before writing consent history.
+- Production registration should validate active version keys through a trusted backend API before writing consent history.
 
 ### Production Notes
 
@@ -655,7 +660,7 @@ Future registration should write one row per checkbox agreement target:
 
 - Buyers may read their own agreement history.
 - Admins may read agreement history for approval and audit workflows.
-- Browser direct insert should stay disabled until a trusted registration API/RPC validates active versions, required acceptance, identity, IP handling, and user agent handling.
+- Browser direct insert should stay disabled until a trusted registration API validates active versions, required acceptance, identity, IP handling, and user agent handling.
 
 ### Analytics Use
 
@@ -670,7 +675,7 @@ Future registration should write one row per checkbox agreement target:
 ### Production Notes
 
 - Version 1 does not persist agreements.
-- Future registration should store agreement snapshots through a trusted API/RPC.
+- Future registration should store agreement snapshots through a trusted backend API.
 - Browser-provided consent values must be validated server-side.
 - IP address and user agent collection should be handled by the server/API layer, not directly trusted from the browser.
 - Pending Buyer application storage before a `buyers` row exists should be finalized during API design.

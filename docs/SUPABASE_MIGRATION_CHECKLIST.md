@@ -1,5 +1,7 @@
 # Supabase Migration Checklist
 
+> Deprecated / historical note: this Supabase-specific checklist is no longer the primary architecture plan. The PostgreSQL-only plan in `docs/POSTGRES_ONLY_ARCHITECTURE.md` replaces it as the main direction. Keep this file only as a reference for prior Supabase/RLS planning.
+
 This checklist defines the validation work required before Noblesse applies the PostgreSQL/Supabase scaffold to any production business database.
 
 ## 1. Purpose

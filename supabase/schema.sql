@@ -1,5 +1,6 @@
--- Noblesse Piercing PostgreSQL/Supabase schema draft.
+-- Noblesse Piercing PostgreSQL schema draft.
 -- This file is a planning and migration scaffold. Review before production use.
+-- Supabase-specific usage is optional/historical; PostgreSQL-only architecture requires a backend API before real writes.
 -- Browser-side price calculation is display-only and must never be trusted.
 
 create extension if not exists pgcrypto;

@@ -79,3 +79,9 @@ A. Ready for local/dev SQL dry-run
 ## 21C Follow-up
 
 21C dry-run was attempted later, but no non-production Supabase/dev connection was available in the current session without entering a secret. No SQL was executed. See `supabase/VALIDATION_NOTES.md`.
+
+## 22A PostgreSQL-only Follow-up
+
+The static review remains useful as a SQL scaffold review, but the primary architecture direction has changed to PostgreSQL-only. Supabase-specific RLS and `auth.uid()` assumptions need separate re-review if plain PostgreSQL is used.
+
+For the next dry-run, use a reset-safe PostgreSQL dev database and follow `docs/POSTGRES_DEV_DRY_RUN_RUNBOOK.md`. Do not treat Supabase policy review as the final PostgreSQL security model.
