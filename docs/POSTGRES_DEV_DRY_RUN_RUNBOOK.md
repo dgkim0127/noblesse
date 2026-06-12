@@ -10,6 +10,10 @@ Before running SQL, complete the local environment check in `docs/POSTGRES_LOCAL
 
 Do not run SQL until the dev environment choice is confirmed.
 
+Before dry-run, also complete `docs/POSTGRES_CLIENT_PATH_CHECK.md`.
+
+Do not run SQL until a `psql` or pgAdmin4 client path is confirmed.
+
 ## Environment Options
 
 - Local PostgreSQL
@@ -48,18 +52,19 @@ Notes:
 The maintainer should run this manually:
 
 1. Confirm `docs/POSTGRES_LOCAL_ENV_CHECK.md` has been reviewed.
-2. Choose a dev PostgreSQL environment.
-3. Create an empty dev database.
-4. Open a SQL client:
+2. Confirm `docs/POSTGRES_CLIENT_PATH_CHECK.md` has been reviewed.
+3. Choose a dev PostgreSQL environment.
+4. Create an empty dev database.
+5. Open a SQL client:
    - pgAdmin4
    - psql
    - provider SQL console
-5. Run the full contents of `supabase/schema.sql`.
-6. If step 5 succeeds, run the full contents of `supabase/analytics_views.sql`.
-7. If step 6 succeeds, run the full contents of `supabase/seed_mock_data.sql`.
-8. Run the row count smoke test.
-9. Run the analytics view smoke test.
-10. Record the result in `supabase/VALIDATION_NOTES.md`.
+6. Run the full contents of `supabase/schema.sql`.
+7. If step 6 succeeds, run the full contents of `supabase/analytics_views.sql`.
+8. If step 7 succeeds, run the full contents of `supabase/seed_mock_data.sql`.
+9. Run the row count smoke test.
+10. Run the analytics view smoke test.
+11. Record the result in `supabase/VALIDATION_NOTES.md`.
 
 Important:
 

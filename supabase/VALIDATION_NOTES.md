@@ -145,3 +145,16 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - SQL executed: No
 
 Do not record database password, host, port, username, connection string, or provider secrets in this section.
+
+## PostgreSQL Client Path Check
+
+- Date: 2026-06-12
+- psql.exe: Found at `C:\Program Files\PostgreSQL\17\bin\psql.exe`
+- psql version: `psql (PostgreSQL) 17.10`
+- pgAdmin4.exe: Found at `C:\Program Files\PostgreSQL\17\pgAdmin 4\runtime\pgAdmin4.exe`
+- Recommended client: Use psql full path for next dry-run.
+- DB connection opened: No
+- SQL executed: No
+- Secret recorded: No
+
+Do not record database password, host, port, username, connection string, or provider secrets in this section.

@@ -52,6 +52,12 @@ Before SQL dry-run, confirm one safe SQL client path:
 
 Do not proceed to SQL execution until the client path is confirmed and the target database is clearly local/dev.
 
+## 22D Client Path Check
+
+Before running SQL, review `docs/POSTGRES_CLIENT_PATH_CHECK.md`.
+
+22D confirmed local PostgreSQL client tool paths without opening a database connection. SQL execution remains blocked until the target dev database is confirmed and the maintainer is ready to run the dry-run manually.
+
 Fallback:
 
 - If local client access is inconvenient, use a Neon dev branch.
