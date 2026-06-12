@@ -24,6 +24,7 @@ The current admin screens are mock preview only. They must not write directly fr
 - `audit_logs` is now scaffolded in `schema.sql` and is required before production admin writes.
 - Provider/auth choice must be finalized before implementation.
 - `docs/BACKEND_IMPLEMENTATION_READINESS.md` tracks the pre-implementation provider, auth, route, and API framework checklist.
+- `docs/BACKEND_STACK_DECISION_GATE.md` must pass before admin route code or admin write operations are implemented.
 - If Firebase Auth is selected, the backend must verify Firebase Auth ID tokens.
 - Admin role must still be loaded from PostgreSQL server-side.
 

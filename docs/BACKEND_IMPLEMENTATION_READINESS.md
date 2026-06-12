@@ -19,6 +19,12 @@ Recommended v1 candidate:
 
 This recommendation is provisional. Cost, region, backup, monitoring, and operator comfort must be confirmed before production implementation.
 
+Backend stack decision gate is documented in `docs/BACKEND_STACK_DECISION_GATE.md`.
+
+Implementation must not start until gate items are confirmed.
+
+Default stack candidate remains Cloud Run + Firebase Auth + Cloud SQL primary / Neon fallback.
+
 ## Decision Status
 
 | Area | Current Status | Decision Needed Before Implementation |

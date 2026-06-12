@@ -329,6 +329,18 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 24C Backend Stack Decision Gate Follow-up
+
+- Date: 2026-06-12
+- Change: Added `docs/BACKEND_STACK_DECISION_GATE.md`.
+- PostgreSQL audit dry-run status: Passed for local PostgreSQL with `audit_logs`.
+- Next blocking item: Backend stack gate approval before implementation.
+- SQL execution required in 24C: No.
+- Implementation status: Documentation only. No backend API, Auth connection, DB connection, SQL execution, migration, dependency, provider resource, Firebase configuration change, or deploy action was added.
+- Next action: Confirm Cloud Run, Firebase Auth, PostgreSQL provider, admin bootstrap, secret storage, and `/api/**` rewrite strategy before code implementation.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## PostgreSQL Local Environment Check
 
 - Date: 2026-06-12
