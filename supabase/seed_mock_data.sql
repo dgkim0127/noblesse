@@ -1,5 +1,8 @@
 -- Development-only seed data for Noblesse Piercing PostgreSQL.
 -- Do not run this file against production.
+-- Ensure UTF-8 seed text is interpreted correctly in Windows psql sessions.
+
+set client_encoding = 'UTF8';
 
 insert into public.users (auth_uid, email, role, status)
 values

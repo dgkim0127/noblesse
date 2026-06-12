@@ -67,6 +67,8 @@ For validation, use local PostgreSQL or a separate dev PostgreSQL provider datab
 
 Do not treat Supabase policy creation as the PostgreSQL-only security model. Plain PostgreSQL production access control must be handled by backend API authorization plus a reviewed database role strategy.
 
+For Windows `psql` dry-runs, force UTF-8 client encoding before running seed data and enable stop-on-error. Use `\set ON_ERROR_STOP on` in an interactive session or `-v ON_ERROR_STOP=1` on the command line. If a seed file fails mid-run and creates a partial seed state, retry in a clean dev database such as `noblesse_dev_retry`.
+
 ## Security Boundary
 
 - Do not expose database credentials to the frontend.

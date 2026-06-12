@@ -85,3 +85,9 @@ A. Ready for local/dev SQL dry-run
 The static review remains useful as a SQL scaffold review, but the primary architecture direction has changed to PostgreSQL-only. Supabase-specific RLS and `auth.uid()` assumptions need separate re-review if plain PostgreSQL is used.
 
 For the next dry-run, use a reset-safe PostgreSQL dev database and follow `docs/POSTGRES_DEV_DRY_RUN_RUNBOOK.md`. Do not treat Supabase policy review as the final PostgreSQL security model.
+
+## 22G PostgreSQL Dry-run Follow-up
+
+The first user-executed PostgreSQL-only dry-run created schema objects and analytics views successfully, but seed execution failed because Windows `psql` client encoding could not interpret UTF-8 Korean seed text. The seed file now sets UTF-8 client encoding before inserting development seed data.
+
+Future `psql` dry-runs should enable stop-on-error to avoid partial seed state. If partial seed occurs, retry in a clean dev database.

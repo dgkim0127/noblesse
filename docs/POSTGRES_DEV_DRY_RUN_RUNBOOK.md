@@ -59,18 +59,33 @@ The maintainer should run this manually:
    - pgAdmin4
    - psql
    - provider SQL console
-6. Run the full contents of `supabase/schema.sql`.
-7. If step 6 succeeds, run the full contents of `supabase/analytics_views.sql`.
-8. If step 7 succeeds, run the full contents of `supabase/seed_mock_data.sql`.
-9. Run the row count smoke test.
-10. Run the analytics view smoke test.
-11. Record the result in `supabase/VALIDATION_NOTES.md`.
+6. If using `psql`, enable stop-on-error before running any SQL file.
+7. Run the full contents of `supabase/schema.sql`.
+8. If step 7 succeeds, run the full contents of `supabase/analytics_views.sql`.
+9. If step 8 succeeds, run the full contents of `supabase/seed_mock_data.sql`.
+10. Run the row count smoke test.
+11. Run the analytics view smoke test.
+12. Record the result in `supabase/VALIDATION_NOTES.md`.
 
 Important:
 
+- For interactive `psql`, run `\set ON_ERROR_STOP on` before executing files.
+- For command-line `psql`, pass `-v ON_ERROR_STOP=1`.
 - If one step fails, do not continue to the next SQL file.
+- Partial seed state is not a pass. If a seed file fails mid-run, rerun in a clean dev database.
 - Record only the error category or message summary.
 - Do not record secrets, connection strings, host, port, username, or password.
+
+## Clean Retry Policy
+
+If a dry-run creates a partial seed state, the next attempt must use a clean dev database.
+
+Recommended retry path:
+
+- Create a fresh dev database name such as `noblesse_dev_retry`.
+- Or drop/recreate only a dev database after the maintainer explicitly confirms it is safe.
+
+Never drop a production database, a POS database, or any database that may contain operating data. If an existing database is found and its purpose is unclear, stop and ask the maintainer to confirm the retry target.
 
 ## Smoke Tests
 

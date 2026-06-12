@@ -139,19 +139,43 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 
 - Date: 2026-06-12
 - Environment option: Local PostgreSQL
-- Provider or local type: User-executed local PostgreSQL dry-run
-- Production excluded: User stated production DB was not used.
-- POS DB excluded: User stated POS DB was not used.
-- Secret recorded: No password, username, host, port, connection string, or `DATABASE_URL` was provided or recorded.
-- schema.sql: Result not recorded. The 22G intake message did not include the actual 22F execution result.
-- analytics_views.sql: Result not recorded. The 22G intake message did not include the actual 22F execution result.
-- seed_mock_data.sql: Result not recorded. The 22G intake message did not include the actual 22F execution result.
-- Row count smoke test: Result not recorded. No table counts were provided.
-- Analytics view smoke test: Result not recorded. No view success/failure or row-return summary was provided.
-- SQL changes made: None.
-- Issues: The intake request contained a placeholder instead of concrete 22F dry-run output, so this file cannot mark the dry-run as passed.
-- Go / No-Go: No-Go for verified dry-run completion until concrete SQL execution results, row counts, and analytics view smoke-test summaries are provided.
-- Next action: Provide the 22F dry-run summary without secrets, including each SQL file success/failure, row count results, analytics view smoke-test results, issues, and final Go / No-Go recommendation.
+- Provider or local type: PostgreSQL Windows service
+- Production excluded: Yes
+- POS DB excluded: Yes
+- Secret recorded: No
+- dev database target: `noblesse_dev`
+- dev database created: Yes
+- schema.sql: Success. Extension, function, tables, triggers, and indexes were created. `DROP TRIGGER` notices for missing existing triggers were expected and non-blocking.
+- analytics_views.sql: Success. Seven analytics views were created.
+- seed_mock_data.sql: Failed. Windows `psql` client encoding `UHC` could not interpret UTF-8 Korean seed text, and `psql` continued after the error, leaving a partial seed state.
+- Row count smoke test:
+  - `users`: 2
+  - `buyers`: 1
+  - `products`: 5
+  - `product_prices`: 9
+  - `inquiries`: 1
+  - `inquiry_items`: 2
+  - `admin_quotes`: 1
+  - `admin_quote_items`: 2
+  - `terms_versions`: 0
+  - `buyer_agreements`: 0
+- Row count judgment:
+  - `products`: Pass
+  - `inquiries`: Pass
+  - `terms_versions`: Fail
+  - `buyer_agreements`: Fail
+- Analytics view smoke test:
+  - `v_top_requested_products_30d`: Success, rows returned
+  - `v_top_requested_products_by_market`: Success, rows returned
+  - `v_buyer_inquiry_summary`: Success, rows returned
+  - `v_category_inquiry_summary`: Success, rows returned
+  - `v_quote_conversion_monthly`: Success, rows returned
+  - `v_popular_option_combinations`: Success, rows returned
+  - `v_monthly_inquiry_trend`: Success, rows returned
+- SQL changes made: Added a UTF-8 client encoding guard to `seed_mock_data.sql`.
+- Issues: Seed failed on Windows client encoding before agreement seed rows completed. Partial seed state is not accepted as a passing dry-run.
+- Go / No-Go: No-Go.
+- Next action: Rerun in a clean dev database with `ON_ERROR_STOP` enabled. Recommended retry database: `noblesse_dev_retry`.
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
