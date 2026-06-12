@@ -306,6 +306,17 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 24A Backend Provider/Auth Decision Follow-up
+
+- Date: 2026-06-12
+- Change: Added `docs/BACKEND_PROVIDER_AUTH_DECISION.md`.
+- Current default candidate: Firebase Hosting + Cloud Run API + PostgreSQL provider + Firebase Auth identity.
+- Implementation status: Documentation only. No backend API, auth integration, DB connection, dependency, SQL execution, or migration was added.
+- Production readiness: Not ready for implementation until API hosting, auth provider, and PostgreSQL production provider are confirmed.
+- Next action: Choose API hosting, auth provider, and PostgreSQL production provider before backend implementation planning.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## PostgreSQL Local Environment Check
 
 - Date: 2026-06-12

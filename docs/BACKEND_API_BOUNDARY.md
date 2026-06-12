@@ -11,6 +11,8 @@ The React frontend must not connect directly to PostgreSQL. Database credentials
 - Frontend mock preview
 - Admin mock preview
 - PostgreSQL scaffold local dry-run passed with `audit_logs`
+- Provider/auth decision is documented in `docs/BACKEND_PROVIDER_AUTH_DECISION.md`
+- Candidate default: Cloud Run + Firebase Auth + PostgreSQL provider
 - No production DB connection
 - No backend implementation yet
 

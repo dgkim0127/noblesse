@@ -22,6 +22,9 @@ The current admin screens are mock preview only. They must not write directly fr
 - 21B static SQL review must pass before local/dev SQL dry-run and before API implementation planning moves into build work.
 - Schema, analytics views, and seed validation must be completed in local/dev first.
 - `audit_logs` is now scaffolded in `schema.sql` and is required before production admin writes.
+- Provider/auth choice must be finalized before implementation.
+- If Firebase Auth is selected, the backend must verify Firebase Auth ID tokens.
+- Admin role must still be loaded from PostgreSQL server-side.
 
 ## Future Trusted Operations
 
@@ -204,6 +207,7 @@ Result:
 - admin writes go through API only
 - no frontend write to `audit_logs`
 - `audit_logs` table is scaffolded and must be written by trusted backend operations
+- Firebase Auth identity alone must not grant admin access.
 - admin API should not be implemented against production until schema/views pass the PostgreSQL dev dry-run and the backend security model is reviewed
 
 ## Audit Log Table

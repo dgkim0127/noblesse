@@ -54,9 +54,11 @@
 - Admin mock preview
 - SQL scaffold exists
 - PostgreSQL-only local clean retry dry-run passed for schema, analytics views, seed data, and `audit_logs`
+- Backend provider/auth decision document created
+- Proposed v1 candidate is Firebase Hosting + Cloud Run API + PostgreSQL + Firebase Auth
 - No production DB connection
 - No backend API yet
-- Next architecture step: backend API provider/auth design before real frontend writes
+- Final provider choice is still pending before implementation
 
 ## SQL Scaffold Location
 
