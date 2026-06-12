@@ -292,6 +292,8 @@ See `docs/BACKEND_STACK_DECISION_GATE.md` for the final implementation gate.
 
 See `docs/BACKEND_HUMAN_DECISION_RECORD.md` for the human/operator decision checklist.
 
+See `docs/BACKEND_PHASE1_SCAFFOLD_PLAN.md` for the plan-only Phase 1 scaffold structure before code is added.
+
 This is still documentation only. Provider resources, backend code, database connections, and Firebase rewrites must wait for the backend scaffold plan.
 
 ## Not Implemented In This Step

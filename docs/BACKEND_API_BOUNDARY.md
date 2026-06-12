@@ -48,6 +48,8 @@ Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECI
 
 25B confirms Phase 1 as the first candidate scope after a separate scaffold plan: health check, catalog product reads, product detail read, and buyer profile read.
 
+26A documents the Phase 1 scaffold plan in `docs/BACKEND_PHASE1_SCAFFOLD_PLAN.md`. It covers health/catalog/buyer-me only; write APIs remain future phases.
+
 ### `GET /api/catalog/products`
 
 - Returns public visible product metadata.

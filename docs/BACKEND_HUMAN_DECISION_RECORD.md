@@ -235,6 +235,10 @@ Implementation is still blocked until provider resources, secret storage, and lo
 
 This is not approval to create Cloud Run, Cloud SQL, Firebase Auth integration, or production migration.
 
+Backend Phase 1 scaffold planning is documented in `docs/BACKEND_PHASE1_SCAFFOLD_PLAN.md`.
+
+Human decisions are recorded, but implementation still waits for scaffold plan approval.
+
 Until then:
 
 - No backend code

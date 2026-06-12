@@ -27,7 +27,9 @@ Next step is a backend scaffold plan, not implementation.
 
 Selected implementation candidate is Cloud Run + Firebase Auth email/password first + Cloud SQL primary / Neon fallback + Express + `pg` direct + raw SQL files first.
 
-Provider resources are still not created. After scaffold-plan approval, the recommended first implementation scope is Phase 1 only: health check, catalog product reads, product detail read, and buyer profile read.
+Phase 1 scaffold plan is documented in `docs/BACKEND_PHASE1_SCAFFOLD_PLAN.md`.
+
+Provider resources are still not created. After scaffold-plan approval, the next implementation should be limited to Phase 1 only: health check, catalog product reads, product detail read, and buyer profile read.
 
 ## Decision Status
 
