@@ -10,7 +10,9 @@ This document does not create resources, implement code, connect to a database, 
 
 Human/operator choices are recorded in `docs/BACKEND_HUMAN_DECISION_RECORD.md`.
 
-Implementation must not start while any required human decision remains unchecked.
+The human decision record has selected the provisional stack for planning: Cloud Run + Firebase Auth + Cloud SQL + Express + `pg` direct + raw SQL files first.
+
+Implementation is still blocked until provider resources, secret storage, and local API scaffold planning are completed.
 
 ## Default Stack Candidate
 
@@ -27,10 +29,10 @@ Implementation must not start while any required human decision remains unchecke
 | Area | Candidate | Status | Gate Before Implementation |
 | --- | --- | --- | --- |
 | Frontend hosting | Firebase Hosting | Already used | Keep hosting target `noblesse` |
-| API hosting | Cloud Run | Provisional default | Confirm Google Cloud billing, IAM, and region |
-| Auth | Firebase Auth | Provisional default | Confirm login method and admin bootstrap |
+| API hosting | Cloud Run | Selected candidate | Confirm Google Cloud billing, IAM, and region |
+| Auth | Firebase Auth email/password first | Selected candidate | Confirm admin bootstrap execution details |
 | Business auth | PostgreSQL `users` / `buyers` | Required | Confirm backend lookup strategy |
-| PostgreSQL primary | Cloud SQL | Provisional primary | Confirm cost, region, backup, and connection model |
+| PostgreSQL primary | Cloud SQL | Selected candidate | Confirm cost, region, backup, and connection model |
 | PostgreSQL fallback | Neon | Fallback | Confirm pooling, region, backup, and cost |
 | Audit | `audit_logs` | Scaffolded | Backend must write audit logs transactionally |
 
@@ -119,7 +121,8 @@ Decision:
 - This document does not create resources.
 - This document does not implement code.
 - Human/operator approval is required before backend implementation starts.
-- Unresolved checkboxes in `docs/BACKEND_HUMAN_DECISION_RECORD.md` block backend implementation.
+- Human/operator choices are now recorded in `docs/BACKEND_HUMAN_DECISION_RECORD.md`.
+- Resource creation and route code are still blocked until the backend scaffold plan is reviewed.
 
 ## Admin Bootstrap Decision Needed
 

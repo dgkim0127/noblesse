@@ -59,10 +59,10 @@
 - Backend stack decision gate created
 - Backend human decision record created
 - Proposed v1 candidate is Firebase Hosting + Cloud Run API + PostgreSQL + Firebase Auth
-- API/Auth/DB provider choices are still provisional
+- Human backend choices recorded: Cloud Run, Firebase Auth email/password first, Cloud SQL primary, Neon fallback, Express, `pg` direct, and raw SQL files first
 - No production DB connection
 - No backend API yet
-- Final provider choice is still pending before implementation
+- Production migration remains blocked until backend scaffold plan and provider resource plan are reviewed
 
 ## SQL Scaffold Location
 
@@ -74,7 +74,7 @@
 - Audit logs are required before real admin writes.
 - Production DB migration must not run before provider confirmation.
 - Production migration must wait for provider and stack gate approval.
-- Production implementation remains blocked until human choices are confirmed in `docs/BACKEND_HUMAN_DECISION_RECORD.md`.
+- Production implementation remains blocked until the backend scaffold plan and provider resource plan are reviewed.
 
 ## Non-goals
 

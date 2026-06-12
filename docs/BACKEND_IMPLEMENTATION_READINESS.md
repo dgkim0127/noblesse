@@ -21,24 +21,24 @@ This recommendation is provisional. Cost, region, backup, monitoring, and operat
 
 Backend stack decision gate is documented in `docs/BACKEND_STACK_DECISION_GATE.md`.
 
-Human/operator choices are tracked in `docs/BACKEND_HUMAN_DECISION_RECORD.md`.
+Human/operator choices are recorded in `docs/BACKEND_HUMAN_DECISION_RECORD.md`.
 
-Implementation must not start until gate items are confirmed.
+Next step is a backend scaffold plan, not implementation.
 
-Default stack candidate remains Cloud Run + Firebase Auth + Cloud SQL primary / Neon fallback.
+Selected implementation candidate is Cloud Run + Firebase Auth email/password first + Cloud SQL primary / Neon fallback + Express + `pg` direct + raw SQL files first.
 
-After approval, the recommended first implementation scope is Phase 1 only: health check, catalog product reads, product detail read, and buyer profile read.
+Provider resources are still not created. After scaffold-plan approval, the recommended first implementation scope is Phase 1 only: health check, catalog product reads, product detail read, and buyer profile read.
 
 ## Decision Status
 
 | Area | Current Status | Decision Needed Before Implementation |
 | --- | --- | --- |
-| API hosting | Cloud Run candidate | Confirm Google Cloud setup, cost, and region |
-| Auth | Firebase Auth candidate | Confirm login method and admin strategy |
-| PostgreSQL provider | Cloud SQL or Neon | Choose one provider |
+| API hosting | Cloud Run selected candidate | Confirm Google Cloud setup, cost, and region |
+| Auth | Firebase Auth email/password first selected | Confirm admin strategy execution details |
+| PostgreSQL provider | Cloud SQL selected, Neon fallback | Confirm Cloud SQL provider resource plan |
 | Storage | Firebase Storage optional | Decide later for images and files |
-| Deployment | Firebase Hosting existing | Decide `/api/**` rewrite strategy |
-| Secrets | Server-side only | Confirm secret storage method |
+| Deployment | Firebase Hosting existing, `/api/**` rewrite selected | Plan rewrite after backend scaffold is approved |
+| Secrets | Google Secret Manager selected | Plan secret creation without recording secret values |
 
 ## PostgreSQL Provider Decision: Cloud SQL vs Neon
 

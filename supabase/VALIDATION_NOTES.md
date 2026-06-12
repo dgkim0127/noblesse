@@ -353,6 +353,19 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 25B Backend Human Decisions Selected Follow-up
+
+- Date: 2026-06-12
+- Change: Updated `docs/BACKEND_HUMAN_DECISION_RECORD.md` with selected human/operator choices.
+- Selected stack: Cloud Run + Firebase Auth email/password first + Cloud SQL primary + Neon fallback + Express + `pg` direct + raw SQL files first.
+- Initial API phase: Phase 1 only.
+- DB dry-run status: Complete for local PostgreSQL with `audit_logs`.
+- SQL execution required in 25B: No.
+- Implementation status: Documentation only. No backend API, Auth connection, DB connection, SQL execution, migration, dependency, provider resource, Firebase rewrite change, Firebase configuration change, or deploy action was added.
+- Next action: Create a backend scaffold plan before implementation.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## PostgreSQL Local Environment Check
 
 - Date: 2026-06-12

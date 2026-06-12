@@ -19,6 +19,7 @@ The React frontend must not connect directly to PostgreSQL. Database credentials
 - No production DB connection
 - No backend implementation yet
 - No backend routes are implemented yet
+- Phase 1 route implementation candidate is confirmed, but route code is not implemented yet.
 
 ## Required Principles
 
@@ -44,6 +45,8 @@ The React frontend must not connect directly to PostgreSQL. Database credentials
 These are candidate endpoint boundaries only. They are not implemented in this step.
 
 Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECISION_GATE.md` must pass and `docs/BACKEND_HUMAN_DECISION_RECORD.md` must be approved before route code is written.
+
+25B confirms Phase 1 as the first candidate scope after a separate scaffold plan: health check, catalog product reads, product detail read, and buyer profile read.
 
 ### `GET /api/catalog/products`
 

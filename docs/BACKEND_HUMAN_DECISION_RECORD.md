@@ -26,7 +26,8 @@ Proposed default:
 
 Status:
 
-- Not final until human/operator approves.
+- Human/operator choices are recorded for planning in 25B.
+- This is not implementation permission.
 - No implementation in this step.
 - No provider resource creation in this step.
 - No DB credential handling in this step.
@@ -37,7 +38,7 @@ Status:
 
 Choose one:
 
-- [ ] Cloud SQL
+- [x] Cloud SQL
 - [ ] Neon
 - [ ] Other: ______
 
@@ -51,16 +52,16 @@ Decision criteria:
 - Operational comfort
 - Future migration/rollback expectations
 
-Current recommendation:
+Decision note:
 
-- Cloud SQL if Google Cloud operations are acceptable
-- Neon if simpler managed PostgreSQL operations are preferred
+- Cloud SQL is selected as the primary production PostgreSQL candidate because the default API candidate is Cloud Run.
+- Neon remains a fallback if Cloud SQL cost/setup becomes too heavy before implementation.
 
 ### 2. Firebase Auth Login Methods
 
 Choose one:
 
-- [ ] Email/password only
+- [x] Email/password only
 - [ ] Google login only
 - [ ] Email/password + Google login
 
@@ -72,20 +73,20 @@ Decision criteria:
 - Password reset support
 - Support burden
 
-Current recommendation:
+Decision note:
 
-- Email/password first
-- Google login can be added later if needed
+- Email/password first keeps buyer onboarding simple.
+- Google login can be added later if needed.
 
 ### 3. Admin Bootstrap Method
 
 Choose one:
 
-- [ ] Manual SQL insert during production migration
+- [x] Manual SQL insert during production migration
 - [ ] One-time backend bootstrap endpoint, then disabled
 - [ ] Firebase UID allowlist during initial setup
 
-Current recommendation:
+Decision note:
 
 - Manual controlled insert during initial production migration
 - No public admin signup
@@ -95,11 +96,11 @@ Current recommendation:
 
 Choose one:
 
-- [ ] Express
+- [x] Express
 - [ ] Fastify
 - [ ] Other: ______
 
-Current recommendation:
+Decision note:
 
 - Express for MVP clarity
 
@@ -114,12 +115,12 @@ Reason:
 
 Choose one:
 
-- [ ] `pg` direct
+- [x] `pg` direct
 - [ ] Prisma
 - [ ] Drizzle
 - [ ] Other: ______
 
-Current recommendation:
+Decision note:
 
 - `pg` direct for first backend scaffold
 
@@ -133,10 +134,10 @@ Reason:
 
 Choose one:
 
-- [ ] Raw SQL files first
+- [x] Raw SQL files first
 - [ ] Migration tool before implementation
 
-Current recommendation:
+Decision note:
 
 - Raw SQL files first
 - Migration tool later after API shape stabilizes
@@ -150,11 +151,11 @@ Important:
 
 Choose one:
 
-- [ ] Firebase Hosting `/api/**` rewrite to Cloud Run
+- [x] Firebase Hosting `/api/**` rewrite to Cloud Run
 - [ ] Separate API domain with CORS
 - [ ] Other: ______
 
-Current recommendation:
+Decision note:
 
 - Firebase Hosting `/api/**` rewrite to Cloud Run
 
@@ -163,19 +164,20 @@ Reason:
 - Keeps frontend and API under one site boundary
 - Avoids unnecessary CORS complexity for first version
 - Keeps existing Noblesse Hosting strategy
+- Firebase config change is not made in this step.
 
 ### 8. Secret Storage Method
 
 Choose one later:
 
-- [ ] Google Secret Manager
+- [x] Google Secret Manager
 - [ ] Cloud Run environment variables
 - [ ] Other: ______
 
-Current recommendation:
+Decision note:
 
 - Google Secret Manager preferred for production
-- Cloud Run environment variables may be acceptable for early controlled staging only
+- No secrets are added in this step.
 
 Important:
 
@@ -185,21 +187,53 @@ Important:
 - No secrets in docs
 - No secrets in Codex prompt/output
 
+### 9. Initial API Phase
+
+- [x] Phase 1 only
+
+Phase 1:
+
+- `GET /api/health`
+- `GET /api/catalog/products`
+- `GET /api/catalog/products/:productCode`
+- `GET /api/buyer/me`
+
+Do not start:
+
+- Request Quote write
+- Admin approval write
+- Admin Quote write
+- Price update write
+
+### 10. Rollback Plan Owner
+
+- [x] Operator / maintainer
+
+Decision note:
+
+- Rollback ownership must be confirmed again before production deployment.
+
 ## Implementation Approval Gate
 
-Backend implementation may start only after all are selected:
+Human choices are recorded for planning.
 
-- PostgreSQL provider selected
-- Auth login method selected
-- Admin bootstrap method selected
-- API framework selected
-- DB library selected
-- Migration strategy selected
-- API rewrite strategy selected
-- Secret storage approach selected
-- Production migration approach selected
-- Initial API phase selected
-- Rollback plan owner selected
+Selected items:
+
+- [x] PostgreSQL provider selected: Cloud SQL
+- [x] Auth login method selected: Email/password first
+- [x] Admin bootstrap method selected: Manual SQL insert during production migration
+- [x] API framework selected: Express
+- [x] DB library selected: `pg` direct
+- [x] Migration strategy selected: Raw SQL files first
+- [x] API rewrite strategy selected: Firebase Hosting `/api/**` rewrite to Cloud Run
+- [x] Secret storage approach selected: Google Secret Manager for production
+- [x] Production migration approach selected: Separate reviewed production migration using raw SQL files first
+- [x] Initial API phase selected: Phase 1 only
+- [x] Rollback plan owner selected: Operator / maintainer
+
+Implementation is still blocked until provider resources, secret storage, and local API scaffold plan are created.
+
+This is not approval to create Cloud Run, Cloud SQL, Firebase Auth integration, or production migration.
 
 Until then:
 

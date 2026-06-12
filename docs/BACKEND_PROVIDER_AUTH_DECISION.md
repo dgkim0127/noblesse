@@ -275,11 +275,16 @@ This step is documentation only. Do not implement provider/auth code yet.
 
 ## Current Recommendation
 
-Use this as the default candidate until final implementation planning changes it:
+Use this as the selected candidate for the first backend scaffold plan:
 
 - API hosting: Cloud Run behind Firebase Hosting rewrite
 - Auth: Firebase Auth identity plus PostgreSQL business authorization
-- PostgreSQL: Cloud SQL if staying inside Google Cloud, or Neon if a simpler managed PostgreSQL workflow is preferred
+- Login method: Email/password first
+- PostgreSQL: Cloud SQL primary
+- Fallback PostgreSQL provider: Neon
+- API framework: Express
+- DB library: `pg` direct
+- Migration strategy: Raw SQL files first
 
 See `docs/BACKEND_IMPLEMENTATION_READINESS.md` for the pre-implementation checklist, route priority, and Cloud SQL versus Neon readiness notes.
 
@@ -287,7 +292,7 @@ See `docs/BACKEND_STACK_DECISION_GATE.md` for the final implementation gate.
 
 See `docs/BACKEND_HUMAN_DECISION_RECORD.md` for the human/operator decision checklist.
 
-This recommendation remains provisional. Provider and auth choices must be confirmed before backend code, provider resources, or database connections are added.
+This is still documentation only. Provider resources, backend code, database connections, and Firebase rewrites must wait for the backend scaffold plan.
 
 ## Not Implemented In This Step
 
