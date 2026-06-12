@@ -4,6 +4,12 @@ This document compares safe dev database options for the Noblesse PostgreSQL sch
 
 The goal is to choose a reset-safe PostgreSQL environment before running the SQL scaffold. Do not use production, the POS database, or operating data.
 
+## 22C Local Environment Check
+
+Before choosing a dry-run path on this Windows PC, review `docs/POSTGRES_LOCAL_ENV_CHECK.md`.
+
+That document records which tools were found locally without opening a database connection or recording secrets.
+
 ## Option A. Local PostgreSQL
 
 Description:
@@ -95,6 +101,7 @@ Cons:
 - If minimal installation is preferred, start with a Neon dev branch.
 - If fully local and reset-safe testing is preferred, use Docker PostgreSQL.
 - If a future Cloud Run API is likely, consider Cloud SQL later after the schema and API boundary are clearer.
+- If a local PostgreSQL service already exists and a safe SQL client is available, local PostgreSQL is the simplest dry-run path.
 
 ## Safety Notes
 

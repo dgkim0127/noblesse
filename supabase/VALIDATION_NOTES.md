@@ -133,3 +133,15 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 - Next action:
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
+## PostgreSQL Local Environment Check
+
+- Date: 2026-06-12
+- psql: Not found in PATH.
+- Docker: Not found in PATH.
+- pgAdmin4: Not found in PATH.
+- PostgreSQL service: Found and running (`postgresql-x64-17`).
+- Recommended path: Use local PostgreSQL for dry-run after confirming a safe SQL client path.
+- SQL executed: No
+
+Do not record database password, host, port, username, connection string, or provider secrets in this section.

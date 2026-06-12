@@ -6,6 +6,10 @@ This runbook describes how to validate the SQL scaffold in a dev PostgreSQL data
 
 It replaces the Supabase SQL Editor path as the primary dry-run plan. The goal is to prove schema, seed data, and analytics views in a reset-safe PostgreSQL environment before any production migration or backend API implementation.
 
+Before running SQL, complete the local environment check in `docs/POSTGRES_LOCAL_ENV_CHECK.md`.
+
+Do not run SQL until the dev environment choice is confirmed.
+
 ## Environment Options
 
 - Local PostgreSQL
@@ -43,18 +47,19 @@ Notes:
 
 The maintainer should run this manually:
 
-1. Choose a dev PostgreSQL environment.
-2. Create an empty dev database.
-3. Open a SQL client:
+1. Confirm `docs/POSTGRES_LOCAL_ENV_CHECK.md` has been reviewed.
+2. Choose a dev PostgreSQL environment.
+3. Create an empty dev database.
+4. Open a SQL client:
    - pgAdmin4
    - psql
    - provider SQL console
-4. Run the full contents of `supabase/schema.sql`.
-5. If step 4 succeeds, run the full contents of `supabase/analytics_views.sql`.
-6. If step 5 succeeds, run the full contents of `supabase/seed_mock_data.sql`.
-7. Run the row count smoke test.
-8. Run the analytics view smoke test.
-9. Record the result in `supabase/VALIDATION_NOTES.md`.
+5. Run the full contents of `supabase/schema.sql`.
+6. If step 5 succeeds, run the full contents of `supabase/analytics_views.sql`.
+7. If step 6 succeeds, run the full contents of `supabase/seed_mock_data.sql`.
+8. Run the row count smoke test.
+9. Run the analytics view smoke test.
+10. Record the result in `supabase/VALIDATION_NOTES.md`.
 
 Important:
 
