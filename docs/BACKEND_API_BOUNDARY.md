@@ -14,6 +14,7 @@ The React frontend must not connect directly to PostgreSQL. Database credentials
 - Provider/auth decision is documented in `docs/BACKEND_PROVIDER_AUTH_DECISION.md`
 - Route priority and implementation readiness are tracked in `docs/BACKEND_IMPLEMENTATION_READINESS.md`
 - Stack decision gate must pass before writing route code.
+- Human/operator approval is tracked in `docs/BACKEND_HUMAN_DECISION_RECORD.md`
 - Candidate default: Cloud Run + Firebase Auth + PostgreSQL provider
 - No production DB connection
 - No backend implementation yet
@@ -42,7 +43,7 @@ The React frontend must not connect directly to PostgreSQL. Database credentials
 
 These are candidate endpoint boundaries only. They are not implemented in this step.
 
-Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECISION_GATE.md` must pass before route code is written.
+Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECISION_GATE.md` must pass and `docs/BACKEND_HUMAN_DECISION_RECORD.md` must be approved before route code is written.
 
 ### `GET /api/catalog/products`
 

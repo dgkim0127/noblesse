@@ -57,6 +57,7 @@
 - Backend provider/auth decision document created
 - Backend implementation readiness document created
 - Backend stack decision gate created
+- Backend human decision record created
 - Proposed v1 candidate is Firebase Hosting + Cloud Run API + PostgreSQL + Firebase Auth
 - API/Auth/DB provider choices are still provisional
 - No production DB connection
@@ -73,6 +74,7 @@
 - Audit logs are required before real admin writes.
 - Production DB migration must not run before provider confirmation.
 - Production migration must wait for provider and stack gate approval.
+- Production implementation remains blocked until human choices are confirmed in `docs/BACKEND_HUMAN_DECISION_RECORD.md`.
 
 ## Non-goals
 

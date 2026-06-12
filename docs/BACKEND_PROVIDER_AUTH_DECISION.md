@@ -285,6 +285,8 @@ See `docs/BACKEND_IMPLEMENTATION_READINESS.md` for the pre-implementation checkl
 
 See `docs/BACKEND_STACK_DECISION_GATE.md` for the final implementation gate.
 
+See `docs/BACKEND_HUMAN_DECISION_RECORD.md` for the human/operator decision checklist.
+
 This recommendation remains provisional. Provider and auth choices must be confirmed before backend code, provider resources, or database connections are added.
 
 ## Not Implemented In This Step

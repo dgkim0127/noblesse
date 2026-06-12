@@ -8,6 +8,10 @@ It records the current default stack candidate and the operator checks required 
 
 This document does not create resources, implement code, connect to a database, run SQL, add dependencies, or change Firebase configuration.
 
+Human/operator choices are recorded in `docs/BACKEND_HUMAN_DECISION_RECORD.md`.
+
+Implementation must not start while any required human decision remains unchecked.
+
 ## Default Stack Candidate
 
 - Frontend hosting: Firebase Hosting
@@ -115,6 +119,7 @@ Decision:
 - This document does not create resources.
 - This document does not implement code.
 - Human/operator approval is required before backend implementation starts.
+- Unresolved checkboxes in `docs/BACKEND_HUMAN_DECISION_RECORD.md` block backend implementation.
 
 ## Admin Bootstrap Decision Needed
 

@@ -21,9 +21,13 @@ This recommendation is provisional. Cost, region, backup, monitoring, and operat
 
 Backend stack decision gate is documented in `docs/BACKEND_STACK_DECISION_GATE.md`.
 
+Human/operator choices are tracked in `docs/BACKEND_HUMAN_DECISION_RECORD.md`.
+
 Implementation must not start until gate items are confirmed.
 
 Default stack candidate remains Cloud Run + Firebase Auth + Cloud SQL primary / Neon fallback.
+
+After approval, the recommended first implementation scope is Phase 1 only: health check, catalog product reads, product detail read, and buyer profile read.
 
 ## Decision Status
 
