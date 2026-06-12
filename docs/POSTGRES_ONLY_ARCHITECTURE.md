@@ -56,6 +56,14 @@
 - No production DB connection
 - No backend API yet
 
+## SQL Scaffold Location
+
+- The folder name may still be `supabase`, but the SQL files are treated as PostgreSQL-compatible scaffold files.
+- Supabase is optional/historical.
+- PostgreSQL-only primary dry-run excludes `supabase/rls_policies.sql`.
+- Backend API is mandatory before frontend writes.
+- Direct React-to-PostgreSQL access is prohibited.
+
 ## Non-goals
 
 - No Supabase client

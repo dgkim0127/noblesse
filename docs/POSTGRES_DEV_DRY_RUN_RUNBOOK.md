@@ -15,6 +15,8 @@ It replaces the Supabase SQL Editor path as the primary dry-run plan. The goal i
 - Railway/Render dev PostgreSQL
 - Cloud SQL dev instance
 
+See `docs/POSTGRES_DEV_ENV_OPTIONS.md` for a comparison of dev environment options and their tradeoffs.
+
 ## Safety
 
 - Do not use a production DB.
@@ -36,6 +38,29 @@ Notes:
 - `supabase/rls_policies.sql` uses Supabase `auth.uid()` helpers, so it is excluded from the primary PostgreSQL-only dry-run.
 - If Supabase compatibility is being reviewed separately, run `rls_policies.sql` only in a dev Supabase project and record that result separately.
 - In plain PostgreSQL, backend API authorization is the primary security layer.
+
+## Manual Execution Guide
+
+The maintainer should run this manually:
+
+1. Choose a dev PostgreSQL environment.
+2. Create an empty dev database.
+3. Open a SQL client:
+   - pgAdmin4
+   - psql
+   - provider SQL console
+4. Run the full contents of `supabase/schema.sql`.
+5. If step 4 succeeds, run the full contents of `supabase/analytics_views.sql`.
+6. If step 5 succeeds, run the full contents of `supabase/seed_mock_data.sql`.
+7. Run the row count smoke test.
+8. Run the analytics view smoke test.
+9. Record the result in `supabase/VALIDATION_NOTES.md`.
+
+Important:
+
+- If one step fails, do not continue to the next SQL file.
+- Record only the error category or message summary.
+- Do not record secrets, connection strings, host, port, username, or password.
 
 ## Smoke Tests
 

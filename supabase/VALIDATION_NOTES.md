@@ -114,3 +114,22 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 - Use `docs/POSTGRES_DEV_DRY_RUN_RUNBOOK.md`.
 - Exclude Supabase-specific `rls_policies.sql` from the primary PostgreSQL-only dry-run unless a separate Supabase compatibility review is explicitly needed.
 - Keep secrets and provider connection details out of this file.
+
+## PostgreSQL-only Dev Dry-run
+
+- Date:
+- Environment option:
+- Provider or local type:
+- Production excluded:
+- POS DB excluded:
+- Secret recorded:
+- schema.sql:
+- analytics_views.sql:
+- seed_mock_data.sql:
+- Row count smoke test:
+- Analytics view smoke test:
+- Issues:
+- Go / No-Go:
+- Next action:
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.

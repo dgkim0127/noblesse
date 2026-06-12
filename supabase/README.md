@@ -13,10 +13,11 @@ Supabase is no longer required for the primary architecture. The current directi
 - Firebase may remain for Hosting and optionally Storage.
 - The frontend must not use privileged server keys.
 - Browser-side price calculation is display-only.
-- Production Request Quote must use Edge Function, API, or trusted RPC validation.
+- Production Request Quote must use backend API validation.
 - Firebase Hosting remains separate and should use hosting target `noblesse` only.
 - Supabase-specific RLS and `auth.uid()` assumptions are not final for the PostgreSQL-only architecture.
 - Production PostgreSQL migration requires a backend API and revised security model.
+- The folder name may still be `supabase`, but these files are now treated as PostgreSQL-compatible scaffold files.
 
 ## Recommended Execution Order
 
@@ -54,7 +55,7 @@ The 21C dry-run was not executed because a non-production Supabase connection wa
 
 The seed file is for local development only. Do not run development seed data against production.
 
-Before production registration is enabled, required consent and active agreement versions must be validated through a trusted registration API/RPC. Browser direct writes to `buyer_agreements` are intentionally not part of the first-version frontend.
+Before production registration is enabled, required consent and active agreement versions must be validated through a trusted registration API. Browser direct writes to `buyer_agreements` are intentionally not part of the first-version frontend.
 
 ## Local Review
 
@@ -64,16 +65,16 @@ Do not run the seed file against production. The seed file is only for developme
 
 For validation, use local PostgreSQL or a separate dev PostgreSQL provider database that can be reset safely. Run the SQL files in the PostgreSQL-only order, then confirm analytics view output.
 
-Do not treat SQL Editor execution with privileged bypass credentials as proof that RLS behavior works. Policy creation can be checked in SQL Editor, but buyer/admin behavior requires a separate Auth-context smoke test.
+Do not treat Supabase policy creation as the PostgreSQL-only security model. Plain PostgreSQL production access control must be handled by backend API authorization plus a reviewed database role strategy.
 
 ## Security Boundary
 
-- Do not expose service role credentials to the frontend.
-- Do not add service role values to `.env.example`.
+- Do not expose database credentials to the frontend.
+- Do not add privileged server values to `.env.example`.
 - Do not connect browser code directly for admin writes.
-- Future public client usage may use an anon key, but admin write operations must go through trusted API/RPC.
+- Admin write operations must go through trusted backend API.
 - Request Quote and Admin Quote totals must be recalculated server-side.
-- See `docs/SUPABASE_MIGRATION_CHECKLIST.md` for Go / No-Go criteria.
+- See `docs/POSTGRES_DEV_DRY_RUN_RUNBOOK.md` for the current dry-run path.
 - Do not start production migration until the checklist and `supabase/VALIDATION_NOTES.md` show a passing local/dev dry-run.
 
 ## Validation Expectations
