@@ -53,8 +53,10 @@
 - Frontend mock preview
 - Admin mock preview
 - SQL scaffold exists
+- PostgreSQL-only local clean retry dry-run passed for schema, analytics views, and seed data
 - No production DB connection
 - No backend API yet
+- Next architecture step: backend API boundary and `audit_logs` planning before real frontend writes
 
 ## SQL Scaffold Location
 

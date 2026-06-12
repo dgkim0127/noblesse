@@ -179,6 +179,50 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## PostgreSQL-only Clean Retry Dry-run Result
+
+- Date: 2026-06-12
+- Environment option: Local PostgreSQL
+- Provider or local type: PostgreSQL Windows service
+- Production excluded: Yes
+- POS DB excluded: Yes
+- Secret recorded: No
+- dev database target: `noblesse_dev_retry`
+- dev database created: Yes
+- ON_ERROR_STOP: Enabled
+- schema.sql: Success
+- analytics_views.sql: Success
+- seed_mock_data.sql: Success
+- rls_policies.sql: Intentionally not executed for PostgreSQL-only dry-run because it depends on Supabase `auth.uid()`.
+- Row count smoke test:
+  - `users`: 2
+  - `buyers`: 1
+  - `products`: 5
+  - `product_prices`: 9
+  - `inquiries`: 1
+  - `inquiry_items`: 2
+  - `admin_quotes`: 1
+  - `admin_quote_items`: 2
+  - `terms_versions`: 5
+  - `buyer_agreements`: 4
+- Row count judgment:
+  - `products`: Pass
+  - `terms_versions`: Pass
+  - `buyer_agreements`: Pass
+  - `inquiries`: Pass
+- Analytics view smoke test:
+  - `v_top_requested_products_30d`: Success, rows returned
+  - `v_top_requested_products_by_market`: Success, rows returned
+  - `v_buyer_inquiry_summary`: Success, rows returned
+  - `v_category_inquiry_summary`: Success, rows returned
+  - `v_quote_conversion_monthly`: Success, rows returned
+  - `v_popular_option_combinations`: Success, rows returned
+  - `v_monthly_inquiry_trend`: Success, rows returned
+- Go / No-Go: Go for PostgreSQL-only local dry-run.
+- Next action: Move to backend API design and `audit_logs` planning before any real frontend writes.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## PostgreSQL Local Environment Check
 
 - Date: 2026-06-12

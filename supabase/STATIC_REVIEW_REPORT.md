@@ -91,3 +91,9 @@ For the next dry-run, use a reset-safe PostgreSQL dev database and follow `docs/
 The first user-executed PostgreSQL-only dry-run created schema objects and analytics views successfully, but seed execution failed because Windows `psql` client encoding could not interpret UTF-8 Korean seed text. The seed file now sets UTF-8 client encoding before inserting development seed data.
 
 Future `psql` dry-runs should enable stop-on-error to avoid partial seed state. If partial seed occurs, retry in a clean dev database.
+
+## 22I PostgreSQL Clean Retry Result
+
+The PostgreSQL-only clean retry dry-run passed in local PostgreSQL. `schema.sql`, `analytics_views.sql`, and `seed_mock_data.sql` executed successfully, and the row count and analytics view smoke tests passed.
+
+`rls_policies.sql` remains excluded from the PostgreSQL-only dry-run because it depends on Supabase-specific `auth.uid()` behavior. Production readiness still requires backend API design, `audit_logs`, server-side validation, and no frontend database credentials.
