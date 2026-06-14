@@ -33,6 +33,8 @@ Provider resources are still not created. The 26B local Phase 1 scaffold now exi
 
 Next step is local test and route QA for the scaffold. Provider resource creation, Firebase rewrite changes, production DB creation, and sensitive write APIs remain blocked.
 
+26C status: Phase 1 route contract and mock QA are completed for the current scaffold. Next validation should focus on local route QA without provider resources.
+
 ## Decision Status
 
 | Area | Current Status | Decision Needed Before Implementation |
@@ -195,6 +197,7 @@ Each phase needs planned tests and validation before implementation. Admin write
 - Local backend scaffold exists under `backend/`.
 - Backend dependencies are isolated to `backend/package.json`.
 - Phase 1 route tests exist and use mocks only.
+- Phase 1 route contract exists in `docs/BACKEND_PHASE1_ROUTE_CONTRACT.md`.
 - No provider resources are created.
 - No production DB connection is configured.
 - No Firebase Auth integration is configured.

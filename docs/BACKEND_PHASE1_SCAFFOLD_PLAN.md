@@ -284,3 +284,9 @@ Validation:
 - Backend tests do not connect to Firebase Auth.
 - Phase 1 remains read-only.
 - Write APIs remain future phases.
+
+## 26C Route Contract And Mock QA
+
+- Phase 1 route contract is documented in `docs/BACKEND_PHASE1_ROUTE_CONTRACT.md`.
+- Mock QA now covers `x-request-id`, invalid product code validation, unknown product not found behavior, protected price stripping, missing token, and invalid token behavior.
+- No production DB, Firebase Auth project, Cloud Run, Cloud SQL/Neon, Firebase rewrite, SQL execution, or deploy action is added.

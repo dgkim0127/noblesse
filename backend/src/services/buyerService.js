@@ -8,20 +8,14 @@ export function createBuyerService() {
       }
 
       return {
-        user: {
-          id: viewer.userId,
-          email: viewer.email,
-          role: viewer.role,
-          status: viewer.status
-        },
-        buyer: viewer.buyerId
-          ? {
-              id: viewer.buyerId,
-              companyName: viewer.companyName,
-              assignedMarket: viewer.assignedMarket,
-              currency: viewer.currency
-            }
-          : null
+        userId: viewer.userId,
+        email: viewer.email,
+        role: viewer.role,
+        status: viewer.status,
+        buyerId: viewer.buyerId || null,
+        companyName: viewer.companyName || null,
+        assignedMarket: viewer.assignedMarket || null,
+        currency: viewer.currency || null
       };
     }
   };

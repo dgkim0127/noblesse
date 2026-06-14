@@ -135,6 +135,18 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 26C Backend Phase 1 Route Contract And Mock QA Follow-up
+
+- Date: 2026-06-14
+- Change: Added `docs/BACKEND_PHASE1_ROUTE_CONTRACT.md` and strengthened backend mock tests.
+- Scope: Route contract and mock QA only for Phase 1 read/auth routes.
+- DB dry-run status: Unchanged; local PostgreSQL dry-run remains complete with `audit_logs`.
+- SQL execution required in 26C: No.
+- Implementation status: No production DB connection, Auth provider connection, Cloud Run service, Cloud SQL/Neon resource, Firebase rewrite change, Firebase configuration change, SQL execution, migration, frontend API integration, or deploy action was added.
+- Next action: Run local route QA before any provider resource or rewrite work.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## 26B Backend Phase 1 Scaffold Follow-up
 
 - Date: 2026-06-14
