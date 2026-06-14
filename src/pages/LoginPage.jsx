@@ -25,13 +25,13 @@ export function LoginPage() {
   return <main className="content auth-page">
     <section className="account-panel auth-panel">
       <LogIn size={25} />
-      <p className="eyebrow">회원 로그인</p>
-      <h1>Noblesse 회원 전용 접근</h1>
+      <p className="eyebrow">거래처 로그인</p>
+      <h1>Noblesse 거래처 전용 접근</h1>
       <div className="brand-mini">
         <strong>{brandKoreanName}</strong>
         <span>{brandLanguageLabel}</span>
       </div>
-      <p>확인된 회원은 회원가, 문의 리스트, 견적 문의 기능을 사용할 수 있습니다.</p>
+      <p>확인된 거래처는 회원가, 문의 리스트, 견적 문의 기능을 사용할 수 있습니다. 견적 문의는 최종 주문이 아닙니다.</p>
       <form className="auth-form" onSubmit={loginAsApprovedBuyer}>
         <label>이메일<input autoComplete="email" name="email" placeholder="member@example.com" type="email" /></label>
         <label>비밀번호<input autoComplete="current-password" name="password" placeholder="비밀번호" type="password" /></label>
@@ -39,7 +39,7 @@ export function LoginPage() {
       </form>
       <div className="auth-links">
         <button className="text-action" type="button" onClick={browseAsGuest}>비회원으로 둘러보기</button>
-        <Link to={toLocalePath('/register')}>회원 신청 <ArrowRight size={15} /></Link>
+        <Link to={toLocalePath('/register')}>거래처 문의 <ArrowRight size={15} /></Link>
       </div>
     </section>
   </main>

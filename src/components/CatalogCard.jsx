@@ -6,16 +6,16 @@ import { getLocalizedProductAlt, getLocalizedProductName, useLocalePath } from '
 
 const cardCopy = {
   kr: {
-    add: '문의 리스트에 담기',
-    locked: '회원 확인 후 가격 보기',
-    lockedButton: '회원 확인 필요',
+    add: '제품 문의하기',
+    locked: '거래 조건은 문의 후 안내',
+    lockedButton: '거래처 문의 필요',
     minQty: 'MOQ',
     memberPrice: '회원가',
   },
   en: {
-    add: 'Add to Inquiry List',
-    locked: 'Price after member review',
-    lockedButton: 'Member review needed',
+    add: 'Ask about this product',
+    locked: 'Trade terms after inquiry',
+    lockedButton: 'Trade inquiry needed',
     minQty: 'Minimum qty',
     memberPrice: 'Approved pricing',
   },

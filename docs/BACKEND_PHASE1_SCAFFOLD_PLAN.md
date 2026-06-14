@@ -297,3 +297,10 @@ Validation:
 - `/api/health` is confirmed as the safe runtime smoke route without DB or Firebase credentials.
 - Catalog and buyer runtime QA remain future work for a local DB/Firebase Auth setup step.
 - No provider resources, Firebase rewrite, SQL execution, or deploy action is added.
+
+## 28A Catalog-first Priority
+
+- Catalog-first MVP is the current launch priority.
+- The backend scaffold is preserved, but it is not the immediate launch blocker.
+- Current launch QA should focus on catalog browsing, product detail clarity, inquiry CTAs, and manual trade follow-up.
+- Backend/Auth/DB automation remains a later phase.

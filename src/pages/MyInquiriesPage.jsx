@@ -21,7 +21,7 @@ export function MyInquiriesPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const filteredInquiries = useMemo(() => statusFilter === 'all' ? inquiries : inquiries.filter((item) => item.status === statusFilter), [inquiries, statusFilter])
 
-  if (!isApproved) return <main className="content"><div className="approval-page"><FileText size={25} /><h1>{viewerState === 'pending' ? '회원 확인 중입니다.' : '견적 내역은 회원 확인 후 볼 수 있습니다.'}</h1><p>{viewerState === 'pending' ? '제출한 회원 정보가 검토 중입니다.' : '견적 문의 내역을 보려면 회원 신청을 진행해주세요.'}</p></div></main>
+  if (!isApproved) return <main className="content"><div className="approval-page"><FileText size={25} /><h1>{viewerState === 'pending' ? '거래처 정보 확인 중입니다.' : '견적 내역은 거래처 확인 후 볼 수 있습니다.'}</h1><p>{viewerState === 'pending' ? '제출한 거래처 정보가 검토 중입니다.' : '견적 문의 내역을 보려면 거래처 문의를 진행해주세요.'}</p></div></main>
 
   const selected = inquiries.find((item) => item.inquiryId === inquiryId)
   if (selected) return <main className="content">

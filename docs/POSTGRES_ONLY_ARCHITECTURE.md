@@ -81,6 +81,8 @@
 - Direct React-to-PostgreSQL access remains prohibited during and after scaffold planning.
 - Direct React-to-PostgreSQL access remains prohibited after the local backend scaffold.
 - Direct React-to-PostgreSQL access remains prohibited during frontend API client planning.
+- 28A priority update: PostgreSQL/backend automation remains a later phase while the catalog-first MVP is refined.
+- The current MVP can operate as a catalog/inquiry site without a production DB.
 
 ## Non-goals
 

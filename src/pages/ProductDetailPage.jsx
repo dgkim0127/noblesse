@@ -14,7 +14,7 @@ const normalizeQuantity = (rawQuantity, moq) => {
 
 const detailCopy = {
   kr: {
-    add: '문의 리스트에 담기',
+    add: '이 제품 문의하기',
     back: '상품 목록으로',
     categoryProducts: '같은 카테고리 상품',
     categoryView: '카테고리 보기',
@@ -27,9 +27,9 @@ const detailCopy = {
     fallbackMoq: (moq) => `공개 기준 ${moq}+ pcs`,
     infoCategory: '관련 상품',
     leadTime: '리드타임',
-    lockPending: '현재 회원 확인 중입니다. 상품 정보는 확인 가능하며, 확인 후 문의 기능이 열립니다.',
-    lockTitle: '회원 확인 후 가격 보기',
-    lockGuest: '회원 확인 후 가격, 옵션 선택, 견적 문의 기능을 사용할 수 있습니다.',
+    lockPending: '현재 거래처 정보 확인 중입니다. 상품 정보는 확인 가능하며, 담당자 확인 후 문의 기능을 안내드립니다.',
+    lockTitle: '거래 조건은 문의 후 안내',
+    lockGuest: '제품 정보, 소재, 옵션, MOQ를 확인한 뒤 거래처 문의를 남겨주세요.',
     material: '재질',
     memberPrice: '회원가',
     moq: 'MOQ',
@@ -40,9 +40,9 @@ const detailCopy = {
     quantityNote: (moq) => `수량은 MOQ 단위로 조정됩니다: ${moq} pcs.`,
     quoteGuide: '견적 안내',
     quoteGuideText: '현재 단계는 최종 확정이 아닙니다. Noblesse가 재고, 리드타임, 최종 견적을 확인한 뒤 안내합니다.',
-    quoteNote: '컬러, 사이즈, 수량 선택 후 견적 문의를 보내면 Noblesse가 재고와 최종 견적을 확인합니다.',
+    quoteNote: '컬러, 사이즈, 수량 선택 후 제품 문의를 보내면 Noblesse가 재고와 최종 견적을 확인합니다. 견적 문의는 최종 주문이 아닙니다.',
     region: (market) => `${market} 지역`,
-    requestAccess: '회원 신청',
+    requestAccess: '거래 조건 문의',
     reviewStatus: '확인 상태 보기',
     size: '사이즈',
     sizeGuide: '사이즈 안내',

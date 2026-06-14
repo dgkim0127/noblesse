@@ -25,7 +25,7 @@ function QuoteLine({ row, currency }) {
 function AccessNotice({ viewerState }) {
   const isPending = viewerState === 'pending'
   const { toLocalePath } = useLocalePath()
-  return <main className="content"><div className="approval-page"><LockKeyhole size={25} /><h1>{isPending ? '회원 확인 중입니다.' : '견적 문의는 회원 확인 후 이용할 수 있습니다.'}</h1><p>{isPending ? '견적 문의는 확인 후 가능하며 가격과 합계는 그 전까지 숨겨집니다.' : '로그인하거나 회원 신청 후 견적을 보내주세요.'}</p><Link to={toLocalePath('/account')}>회원 상태 보기</Link></div></main>
+  return <main className="content"><div className="approval-page"><LockKeyhole size={25} /><h1>{isPending ? '거래처 정보 확인 중입니다.' : '견적 문의는 거래처 확인 후 이용할 수 있습니다.'}</h1><p>{isPending ? '견적 문의는 담당자 확인 후 가능하며 가격과 합계는 그 전까지 숨겨집니다.' : '로그인하거나 거래처 문의 후 제품 견적을 남겨주세요.'}</p><Link to={toLocalePath('/account')}>확인 상태 보기</Link></div></main>
 }
 
 export function RequestQuotePage() {
@@ -45,7 +45,7 @@ export function RequestQuotePage() {
     <div className="page-title"><div><p>견적 문의</p><h1>견적 내용을 확인해주세요</h1></div></div>
     <section className="quote-panel">
       <Send size={24} />
-      <h2>Noblesse에 견적 문의 보내기</h2>
+      <h2>Noblesse에 거래 조건과 견적 문의 보내기</h2>
       <div className="quote-section">
         <p>현재 단계는 최종 거래 확정 단계가 아닙니다. 관리자가 재고, 단가, 납기, 배송 조건을 확인한 뒤 최종 견적을 안내합니다.</p>
         <p>This is not a final order. Our team will review product availability, price, lead time, and shipping conditions before sending a final quotation.</p>

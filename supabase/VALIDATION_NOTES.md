@@ -135,6 +135,16 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 28A Catalog-first MVP Direction
+
+- Date: 2026-06-15
+- Change: Adopted catalog-first MVP direction for Noblesse.
+- Current launch priority: domestic and international B2B catalog browsing, product detail clarity, inquiry CTA, and manual trade/order inquiry follow-up.
+- Backend/API/DB automation status: Deferred; existing scaffold and plans remain preserved.
+- SQL execution required in 28A: No.
+- DB dry-run status: Unchanged.
+- Secret recorded: No.
+
 ## 27B Frontend API Client Wrapper Follow-up
 
 - Date: 2026-06-15

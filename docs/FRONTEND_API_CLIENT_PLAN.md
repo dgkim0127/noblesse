@@ -234,3 +234,10 @@ Rules:
 - Mock fallback remains the active frontend data path.
 - `VITE_API_BASE_URL` is still not added.
 - Firebase Hosting rewrite is still not added.
+
+## 28A Catalog-first Deferral
+
+- Frontend API integration is deferred until catalog-first MVP QA is complete.
+- Mock fallback remains the primary data path for the current catalog MVP.
+- The current priority is product catalog clarity, domestic/international B2B inquiry copy, and manual follow-up flow.
+- No additional API wiring is required for the current launch priority.

@@ -6,7 +6,7 @@ import { useLocalePath } from '../utils/locale'
 
 const featureLabels = [
   ['canViewProducts', '상품 탐색'],
-  ['canViewPrices', '회원가'],
+  ['canViewPrices', '회원가/거래 조건'],
   ['canUseInquiryList', '문의 리스트'],
   ['canRequestQuote', '견적 문의'],
   ['canViewMyInquiries', '견적 내역'],
@@ -34,7 +34,7 @@ export function AccountPage() {
     ['역할', buyer.role || '저장된 역할 없음'],
     ['회원 상태', buyer.status || '저장된 상태 없음'],
     ['할인율', `${buyer.discountRate ?? 0}%`],
-    ['최소 문의 금액', minimumRequestAmount],
+    ['문의 기준 금액', minimumRequestAmount],
   ]
 
   const logoutMock = () => {
@@ -43,11 +43,11 @@ export function AccountPage() {
   }
 
   return <main className="content">
-    <div className="page-title"><div><p>회원 프로필</p><h1>회원 확인 상태</h1></div><span>{viewerState}</span></div>
+    <div className="page-title"><div><p>거래처 프로필</p><h1>거래처 확인 상태</h1></div><span>{viewerState}</span></div>
     <section className="account-panel account-overview">
-      {isGuest && <div className="account-status-card"><UserRound size={25} /><h2>비회원으로 둘러보는 중입니다.</h2><p>가격, 문의 리스트, 견적 문의 기능은 회원 확인 후 사용할 수 있습니다.</p><div className="account-actions"><Link className="primary-action" to={toLocalePath('/register')}>회원 신청</Link><Link className="secondary-action" to={toLocalePath('/login')}>로그인</Link><Link className="secondary-action" to={toLocalePath('/products')}>상품 목록 보기</Link></div></div>}
-      {isPending && <div className="account-status-card"><Clock3 size={25} /><h2>회원 확인 중입니다.</h2><p>{buyer.companyName} 정보를 Noblesse가 확인 중입니다. 가격과 문의 기능은 확인 후 열립니다.</p><div className="account-actions"><Link className="primary-action" to={toLocalePath('/products')}>상품 목록 보기</Link><Link className="secondary-action" to={toLocalePath('/approval-pending')}>확인 상태 보기</Link><a className="secondary-action" href="mailto:contact@noblesse.example">Noblesse 문의</a></div></div>}
-      {isApproved && <div className="account-status-card"><BadgeCheck size={25} /><h2>회원가 이용 가능</h2><p>{buyer.companyName}은 {buyer.assignedMarket} 지역 가격과 문의 리스트 / 견적 문의 기능을 사용할 수 있습니다.</p><strong>{buyer.discountRate}% 회원 할인 / 최소 문의 금액 {formatMoney(buyer.minOrderAmount, buyer.currency)}</strong><div className="account-actions"><Link className="primary-action" to={toLocalePath('/products')}>상품 목록</Link><Link className="secondary-action" to={toLocalePath('/inquiry-list')}>문의 리스트</Link><Link className="secondary-action" to={toLocalePath('/my-inquiries')}>견적 내역</Link></div></div>}
+      {isGuest && <div className="account-status-card"><UserRound size={25} /><h2>비회원으로 둘러보는 중입니다.</h2><p>제품 카탈로그는 볼 수 있으며, 회원가와 거래 조건은 거래처 확인 후 안내됩니다.</p><div className="account-actions"><Link className="primary-action" to={toLocalePath('/register')}>거래처 문의</Link><Link className="secondary-action" to={toLocalePath('/login')}>로그인</Link><Link className="secondary-action" to={toLocalePath('/products')}>상품 목록 보기</Link></div></div>}
+      {isPending && <div className="account-status-card"><Clock3 size={25} /><h2>거래처 정보 확인 중입니다.</h2><p>{buyer.companyName} 정보를 Noblesse가 확인 중입니다. 회원가, 거래 조건, 문의 기능은 담당자 확인 후 안내됩니다.</p><div className="account-actions"><Link className="primary-action" to={toLocalePath('/products')}>상품 목록 보기</Link><Link className="secondary-action" to={toLocalePath('/approval-pending')}>확인 상태 보기</Link><a className="secondary-action" href="mailto:contact@noblesse.example">Noblesse 문의</a></div></div>}
+      {isApproved && <div className="account-status-card"><BadgeCheck size={25} /><h2>거래 조건 안내 가능</h2><p>{buyer.companyName}은 {buyer.assignedMarket} 지역 회원가와 문의 리스트 / 견적 문의 기능을 사용할 수 있습니다. 견적 문의는 최종 주문이 아닙니다.</p><strong>{buyer.discountRate}% 회원 조건 / 문의 기준 금액 {formatMoney(buyer.minOrderAmount, buyer.currency)}</strong><div className="account-actions"><Link className="primary-action" to={toLocalePath('/products')}>상품 목록</Link><Link className="secondary-action" to={toLocalePath('/inquiry-list')}>문의 리스트</Link><Link className="secondary-action" to={toLocalePath('/my-inquiries')}>견적 내역</Link></div></div>}
       {isAdmin && <div className="account-status-card"><ShieldCheck size={25} /><h2>관리자 미리보기</h2><p>관리자 화면은 이후 단계에서 구현합니다. 현재는 고객 화면과 권한 상태만 확인합니다.</p><div className="account-actions"><Link className="primary-action" to={toLocalePath('/products')}>상품 목록</Link><Link className="secondary-action" to={toLocalePath('/my-inquiries')}>견적 내역</Link></div></div>}
     </section>
     <section className="account-panel">
