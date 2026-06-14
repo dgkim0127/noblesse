@@ -135,6 +135,20 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 26D Backend Local Runtime QA Follow-up
+
+- Date: 2026-06-14
+- Change: Added `docs/BACKEND_LOCAL_RUNTIME_QA.md`.
+- Scope: Local runtime smoke only.
+- Backend tests: Passed with mocks only.
+- `/api/health`: Runtime smoke passed without DB or Firebase credentials.
+- Catalog runtime: Expected limitation without `DATABASE_URL`; DB-backed route runtime QA remains a later local DB step.
+- DB dry-run status: Unchanged; local PostgreSQL dry-run remains complete with `audit_logs`.
+- SQL execution required in 26D: No.
+- Implementation status: No production DB connection, Auth provider connection, Cloud Run service, Cloud SQL/Neon resource, Firebase rewrite change, Firebase configuration change, SQL execution, migration, frontend API integration, or deploy action was added.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## 26C Backend Phase 1 Route Contract And Mock QA Follow-up
 
 - Date: 2026-06-14

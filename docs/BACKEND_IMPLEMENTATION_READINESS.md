@@ -35,6 +35,8 @@ Next step is local test and route QA for the scaffold. Provider resource creatio
 
 26C status: Phase 1 route contract and mock QA are completed for the current scaffold. Next validation should focus on local route QA without provider resources.
 
+26D status: Local runtime smoke QA is completed for `/api/health` and documented in `docs/BACKEND_LOCAL_RUNTIME_QA.md`. Next step should be local DB-backed read QA or a frontend API client plan, not provider deployment.
+
 ## Decision Status
 
 | Area | Current Status | Decision Needed Before Implementation |
@@ -198,6 +200,7 @@ Each phase needs planned tests and validation before implementation. Admin write
 - Backend dependencies are isolated to `backend/package.json`.
 - Phase 1 route tests exist and use mocks only.
 - Phase 1 route contract exists in `docs/BACKEND_PHASE1_ROUTE_CONTRACT.md`.
+- Local runtime QA exists in `docs/BACKEND_LOCAL_RUNTIME_QA.md`.
 - No provider resources are created.
 - No production DB connection is configured.
 - No Firebase Auth integration is configured.

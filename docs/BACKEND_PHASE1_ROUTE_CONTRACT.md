@@ -163,3 +163,9 @@ Rules:
 - No price update
 - No production DB
 - No Firebase rewrite
+
+## 26D Runtime QA Note
+
+- Local `/api/health` runtime smoke passed without DB or Firebase credentials.
+- DB-backed catalog runtime QA waits for a later local DB environment step.
+- Without `DATABASE_URL`, catalog runtime returns an expected limitation response instead of a successful product list.

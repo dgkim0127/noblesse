@@ -290,3 +290,10 @@ Validation:
 - Phase 1 route contract is documented in `docs/BACKEND_PHASE1_ROUTE_CONTRACT.md`.
 - Mock QA now covers `x-request-id`, invalid product code validation, unknown product not found behavior, protected price stripping, missing token, and invalid token behavior.
 - No production DB, Firebase Auth project, Cloud Run, Cloud SQL/Neon, Firebase rewrite, SQL execution, or deploy action is added.
+
+## 26D Local Runtime QA
+
+- Local runtime QA is documented in `docs/BACKEND_LOCAL_RUNTIME_QA.md`.
+- `/api/health` is confirmed as the safe runtime smoke route without DB or Firebase credentials.
+- Catalog and buyer runtime QA remain future work for a local DB/Firebase Auth setup step.
+- No provider resources, Firebase rewrite, SQL execution, or deploy action is added.
