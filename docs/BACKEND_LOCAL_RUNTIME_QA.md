@@ -88,3 +88,10 @@ Catalog runtime limitation:
 - The next safe planning step is `docs/FRONTEND_API_CLIENT_PLAN.md`.
 - DB-backed catalog runtime QA remains a separate local DB environment step.
 - Frontend integration is still not implemented.
+
+## 27B Follow-up
+
+- Frontend API wrapper files now exist.
+- The wrapper is tested with mock fetch only.
+- The wrapper is not connected to the local runtime backend or production backend.
+- DB-backed catalog runtime QA remains a separate local DB environment step.

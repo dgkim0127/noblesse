@@ -175,3 +175,9 @@ Rules:
 - Frontend API client planning is documented in `docs/FRONTEND_API_CLIENT_PLAN.md`.
 - Frontend integration is not implemented yet.
 - Route contracts remain the backend source for future frontend adapter work.
+
+## 27B Frontend Wrapper Note
+
+- Frontend API wrapper files exist for contract alignment only.
+- Backend route contract remains the source of truth.
+- UI screens are not connected to the wrapper yet.

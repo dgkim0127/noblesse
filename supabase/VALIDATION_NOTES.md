@@ -135,6 +135,18 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 27B Frontend API Client Wrapper Follow-up
+
+- Date: 2026-06-15
+- Change: Added `src/api` frontend API wrapper modules and `tests/apiClient.test.mjs`.
+- Scope: Wrapper and mock-fetch tests only.
+- DB dry-run status: Unchanged; local PostgreSQL dry-run remains complete with `audit_logs`.
+- SQL execution required in 27B: No.
+- Implementation status: No UI integration, env var, backend change, DB connection, Auth provider connection, Firebase rewrite, SQL execution, migration, or deploy action was added.
+- Next action: Review wrapper behavior before connecting any UI screen to the API path.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## 27A Frontend API Client Plan Follow-up
 
 - Date: 2026-06-15

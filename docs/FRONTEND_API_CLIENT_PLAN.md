@@ -221,3 +221,16 @@ Rules:
 - No Firebase Auth connection.
 - No Firebase Hosting rewrite.
 - No deploy.
+
+## 27B API Client Wrapper Status
+
+- API client wrapper files are created under `src/api/`.
+- `src/api/client.js` supports injected `baseUrl` and injected `fetchImpl`.
+- Default base URL remains `/api`.
+- `src/api/catalogApi.js` and `src/api/buyerApi.js` are created.
+- `src/api/errors.js` normalizes backend error shape and request IDs.
+- `tests/apiClient.test.mjs` covers wrapper behavior with mock fetch only.
+- UI integration is still not implemented.
+- Mock fallback remains the active frontend data path.
+- `VITE_API_BASE_URL` is still not added.
+- Firebase Hosting rewrite is still not added.
