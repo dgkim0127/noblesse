@@ -2,11 +2,11 @@
 
 ## Purpose
 
-This document defines the planned structure for the Phase 1 backend scaffold before any backend code is created.
+This document defines the planned structure for the Phase 1 backend scaffold and records the local scaffold created in 26B.
 
 It documents the candidate Express + `pg` direct + Firebase Auth verification structure, route boundaries, module boundaries, environment boundary, and test plan.
 
-This is a plan only. It does not create a backend folder, install dependencies, connect Auth, connect to PostgreSQL, run SQL, create Cloud Run, create Cloud SQL, change Firebase configuration, add rewrites, or deploy.
+The 26B update creates a local-only backend scaffold. It does not connect Auth, connect to PostgreSQL, run SQL, create Cloud Run, create Cloud SQL, change Firebase configuration, add rewrites, or deploy.
 
 ## Phase 1 Scope
 
@@ -70,11 +70,15 @@ backend/
     buyerMe.test.js
 ```
 
-Notes:
+26B scaffold status:
 
-- This structure is documentation only in this step.
-- Do not create the `backend/` directory until implementation is explicitly approved.
-- Do not add backend package dependencies in this step.
+- `backend/` directory created.
+- Phase 1 route skeletons created.
+- Backend-only `package.json` created.
+- Backend dependencies are isolated under `backend/`.
+- Node built-in test runner tests are created.
+- No root package dependency is added.
+- No production DB, Auth provider, Cloud Run, Cloud SQL, Firebase rewrite, or deploy action is added.
 
 ## Environment Variable Plan
 
@@ -248,3 +252,35 @@ Future only:
 - Deploy only `hosting:noblesse` when frontend rewrite changes.
 - Backend deployment must be separate and controlled.
 - No Firebase rewrite in this step.
+
+## 26B Local Scaffold Result
+
+Created local scaffold files:
+
+- `backend/src/app.js`
+- `backend/src/server.js`
+- `backend/src/config/env.js`
+- `backend/src/db/pool.js`
+- `backend/src/db/queries/catalogQueries.js`
+- `backend/src/db/queries/buyerQueries.js`
+- `backend/src/auth/firebaseAuth.js`
+- `backend/src/auth/requireUser.js`
+- `backend/src/middleware/errorHandler.js`
+- `backend/src/middleware/requestId.js`
+- `backend/src/routes/healthRoutes.js`
+- `backend/src/routes/catalogRoutes.js`
+- `backend/src/routes/buyerRoutes.js`
+- `backend/src/services/catalogService.js`
+- `backend/src/services/buyerService.js`
+- `backend/src/utils/errors.js`
+- `backend/tests/health.test.js`
+- `backend/tests/catalog.test.js`
+- `backend/tests/buyerMe.test.js`
+
+Validation:
+
+- Backend tests use mocks only.
+- Backend tests do not connect to PostgreSQL.
+- Backend tests do not connect to Firebase Auth.
+- Phase 1 remains read-only.
+- Write APIs remain future phases.

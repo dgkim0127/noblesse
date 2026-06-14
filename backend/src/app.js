@@ -1,0 +1,59 @@
+import cors from "cors";
+import express from "express";
+import { getEnv } from "./config/env.js";
+import { createFirebaseTokenVerifier } from "./auth/firebaseAuth.js";
+import { createPostgresViewerLoader, createRequireUser } from "./auth/requireUser.js";
+import { createPool } from "./db/pool.js";
+import * as catalogQueries from "./db/queries/catalogQueries.js";
+import * as buyerQueries from "./db/queries/buyerQueries.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import { requestId } from "./middleware/requestId.js";
+import { createBuyerRoutes } from "./routes/buyerRoutes.js";
+import { createCatalogRoutes } from "./routes/catalogRoutes.js";
+import { createHealthRoutes } from "./routes/healthRoutes.js";
+import { createBuyerService } from "./services/buyerService.js";
+import { createCatalogService } from "./services/catalogService.js";
+
+function buildCorsOptions(env) {
+  if (!env.allowedOrigins.length) {
+    return { origin: true };
+  }
+  return { origin: env.allowedOrigins };
+}
+
+export function createApp(options = {}) {
+  const env = options.env || getEnv();
+  const pool = options.pool ?? createPool(env);
+  const services = {
+    catalog:
+      options.services?.catalog ||
+      createCatalogService({
+        pool,
+        queries: options.queries?.catalog || catalogQueries
+      }),
+    buyer: options.services?.buyer || createBuyerService()
+  };
+
+  const verifier = options.auth?.verifier || createFirebaseTokenVerifier(env);
+  const loadViewer =
+    options.auth?.loadViewer ||
+    createPostgresViewerLoader({
+      pool,
+      queries: options.queries?.buyer || buyerQueries
+    });
+  const requireUser = options.auth?.requireUser || createRequireUser({ verifier, loadViewer });
+
+  const app = express();
+
+  app.use(requestId);
+  app.use(cors(buildCorsOptions(env)));
+  app.use(express.json({ limit: "1mb" }));
+
+  app.use("/api/health", createHealthRoutes());
+  app.use("/api/catalog", createCatalogRoutes({ catalogService: services.catalog }));
+  app.use("/api/buyer", createBuyerRoutes({ buyerService: services.buyer, requireUser }));
+
+  app.use(errorHandler);
+
+  return app;
+}

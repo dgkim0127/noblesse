@@ -29,7 +29,9 @@ Selected implementation candidate is Cloud Run + Firebase Auth email/password fi
 
 Phase 1 scaffold plan is documented in `docs/BACKEND_PHASE1_SCAFFOLD_PLAN.md`.
 
-Provider resources are still not created. After scaffold-plan approval, the next implementation should be limited to Phase 1 only: health check, catalog product reads, product detail read, and buyer profile read.
+Provider resources are still not created. The 26B local Phase 1 scaffold now exists and is limited to health check, catalog product reads, product detail read, and buyer profile read.
+
+Next step is local test and route QA for the scaffold. Provider resource creation, Firebase rewrite changes, production DB creation, and sensitive write APIs remain blocked.
 
 ## Decision Status
 
@@ -177,7 +179,7 @@ Each phase needs planned tests and validation before implementation. Admin write
 
 ## Not Implemented In This Step
 
-- No backend API code
+- No production backend API deployment
 - No Firebase Auth connection
 - No Cloud Run setup
 - No Cloud SQL or Neon resource creation
@@ -187,6 +189,15 @@ Each phase needs planned tests and validation before implementation. Admin write
 - No migration execution
 - No Firebase configuration change
 - No deploy action
+
+## 26B Scaffold Status
+
+- Local backend scaffold exists under `backend/`.
+- Backend dependencies are isolated to `backend/package.json`.
+- Phase 1 route tests exist and use mocks only.
+- No provider resources are created.
+- No production DB connection is configured.
+- No Firebase Auth integration is configured.
 
 ## Next Step Recommendation
 

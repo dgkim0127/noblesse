@@ -17,9 +17,9 @@ The React frontend must not connect directly to PostgreSQL. Database credentials
 - Human/operator approval is tracked in `docs/BACKEND_HUMAN_DECISION_RECORD.md`
 - Candidate default: Cloud Run + Firebase Auth + PostgreSQL provider
 - No production DB connection
-- No backend implementation yet
-- No backend routes are implemented yet
-- Phase 1 route implementation candidate is confirmed, but route code is not implemented yet.
+- 26B local backend scaffold exists for Phase 1 only
+- Phase 1 route skeletons exist for health, catalog products, catalog product detail, and buyer profile
+- No production backend deployment yet
 
 ## Required Principles
 
@@ -49,6 +49,8 @@ Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECI
 25B confirms Phase 1 as the first candidate scope after a separate scaffold plan: health check, catalog product reads, product detail read, and buyer profile read.
 
 26A documents the Phase 1 scaffold plan in `docs/BACKEND_PHASE1_SCAFFOLD_PLAN.md`. It covers health/catalog/buyer-me only; write APIs remain future phases.
+
+26B creates the local scaffold for those Phase 1 routes. Route code remains limited to read-only boundaries and mockable Auth/DB dependencies.
 
 ### `GET /api/catalog/products`
 
@@ -164,8 +166,8 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 
 ## Not Implemented In This Step
 
-- No backend server
-- No auth provider
-- No DB connection
-- No API route code
+- No production backend server
+- No real auth provider connection
+- No production DB connection
+- No write API route code
 - No production migration

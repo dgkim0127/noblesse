@@ -58,11 +58,12 @@
 - Backend implementation readiness document created
 - Backend stack decision gate created
 - Backend human decision record created
-- Backend Phase 1 scaffold planning started
+- Backend Phase 1 scaffold planning completed
+- Backend Phase 1 local scaffold created
 - Proposed v1 candidate is Firebase Hosting + Cloud Run API + PostgreSQL + Firebase Auth
 - Human backend choices recorded: Cloud Run, Firebase Auth email/password first, Cloud SQL primary, Neon fallback, Express, `pg` direct, and raw SQL files first
 - No production DB connection
-- No backend API yet
+- No production backend API deployment yet
 - Production migration remains blocked until backend scaffold plan and provider resource plan are reviewed
 
 ## SQL Scaffold Location
@@ -77,6 +78,7 @@
 - Production migration must wait for provider and stack gate approval.
 - Production implementation remains blocked until the backend scaffold plan and provider resource plan are reviewed.
 - Direct React-to-PostgreSQL access remains prohibited during and after scaffold planning.
+- Direct React-to-PostgreSQL access remains prohibited after the local backend scaffold.
 
 ## Non-goals
 

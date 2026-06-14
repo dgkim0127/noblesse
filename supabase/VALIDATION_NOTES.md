@@ -135,6 +135,18 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 26B Backend Phase 1 Scaffold Follow-up
+
+- Date: 2026-06-14
+- Change: Created local backend Phase 1 scaffold under `backend/`.
+- Scope: `GET /api/health`, `GET /api/catalog/products`, `GET /api/catalog/products/:productCode`, and `GET /api/buyer/me`.
+- DB dry-run status: Unchanged; local PostgreSQL dry-run remains complete with `audit_logs`.
+- SQL execution required in 26B: No.
+- Implementation status: Local scaffold only. No production DB connection, Auth provider connection, Cloud Run service, Cloud SQL/Neon resource, Firebase rewrite change, Firebase configuration change, SQL execution, migration, or deploy action was added.
+- Next action: Run local route QA for the Phase 1 scaffold before any provider resource or rewrite work.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## PostgreSQL-only 22F Manual Dry-run Result Intake
 
 - Date: 2026-06-12
