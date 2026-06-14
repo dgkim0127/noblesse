@@ -60,6 +60,7 @@
 - Backend human decision record created
 - Backend Phase 1 scaffold planning completed
 - Backend Phase 1 local scaffold created
+- Frontend API integration planning started
 - Proposed v1 candidate is Firebase Hosting + Cloud Run API + PostgreSQL + Firebase Auth
 - Human backend choices recorded: Cloud Run, Firebase Auth email/password first, Cloud SQL primary, Neon fallback, Express, `pg` direct, and raw SQL files first
 - No production DB connection
@@ -79,6 +80,7 @@
 - Production implementation remains blocked until the backend scaffold plan and provider resource plan are reviewed.
 - Direct React-to-PostgreSQL access remains prohibited during and after scaffold planning.
 - Direct React-to-PostgreSQL access remains prohibited after the local backend scaffold.
+- Direct React-to-PostgreSQL access remains prohibited during frontend API client planning.
 
 ## Non-goals
 

@@ -54,6 +54,8 @@ Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECI
 
 26C documents the Phase 1 route contract in `docs/BACKEND_PHASE1_ROUTE_CONTRACT.md` and adds mock QA for request IDs, validation, auth errors, and protected price exclusion. Write APIs remain future phases.
 
+27A documents the future frontend API client strategy in `docs/FRONTEND_API_CLIENT_PLAN.md`. The frontend must use the backend API boundary only and must never connect directly to PostgreSQL.
+
 ### `GET /api/catalog/products`
 
 - Returns public visible product metadata.

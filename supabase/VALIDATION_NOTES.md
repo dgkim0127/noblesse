@@ -135,6 +135,18 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 27A Frontend API Client Plan Follow-up
+
+- Date: 2026-06-15
+- Change: Added `docs/FRONTEND_API_CLIENT_PLAN.md`.
+- Scope: Documentation only for future frontend API client strategy.
+- DB dry-run status: Unchanged; local PostgreSQL dry-run remains complete with `audit_logs`.
+- SQL execution required in 27A: No.
+- Implementation status: No frontend API client code, env var, fetch call, backend change, DB connection, Auth provider connection, Firebase rewrite, SQL execution, migration, or deploy action was added.
+- Next action: Review the frontend API client plan before adding any frontend API wrapper or local API base URL.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## 26D Backend Local Runtime QA Follow-up
 
 - Date: 2026-06-14

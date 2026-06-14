@@ -82,3 +82,9 @@ Catalog runtime limitation:
 - Provider resources are still not created.
 - Firebase Hosting rewrite is still not added.
 - Deploy is still not run.
+
+## 27A Follow-up
+
+- The next safe planning step is `docs/FRONTEND_API_CLIENT_PLAN.md`.
+- DB-backed catalog runtime QA remains a separate local DB environment step.
+- Frontend integration is still not implemented.
