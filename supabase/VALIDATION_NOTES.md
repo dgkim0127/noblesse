@@ -135,6 +135,20 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 29C Catalog Contact Production QA Follow-up
+
+- Date: 2026-06-15
+- Change: Deployed the Catalog MVP contact-channel update to Firebase Hosting target `noblesse` only and recorded production contact QA.
+- Deploy scope: `hosting:noblesse` only.
+- Contact channel: `dgkim0127@gmail.com`.
+- SQL execution required in 29C: No.
+- DB dry-run status: Unchanged.
+- Backend/API/Auth/DB connection status: Not changed.
+- Firebase rewrite status: Not added.
+- Firestore rules deployed: No.
+- Storage rules deployed: No.
+- Production contact QA report: `docs/CATALOG_MVP_CONTACT_PRODUCTION_QA_REPORT.md`.
+
 ## 28A Catalog-first MVP Direction
 
 - Date: 2026-06-15

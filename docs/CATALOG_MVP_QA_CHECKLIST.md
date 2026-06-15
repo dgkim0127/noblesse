@@ -52,6 +52,7 @@
 - No fake contact destination is used.
 - Inquiry CTA still leads to `/register` or valid email contact.
 - Contact channel must be rechecked after production deploy.
+- Contact production QA report: `docs/CATALOG_MVP_CONTACT_PRODUCTION_QA_REPORT.md`
 
 ## Technical Checks
 
@@ -64,6 +65,7 @@
 
 - Local browser QA report: `docs/CATALOG_MVP_BROWSER_QA_REPORT.md`
 - Production browser QA report: `docs/CATALOG_MVP_PRODUCTION_QA_REPORT.md`
+- Contact production QA report: `docs/CATALOG_MVP_CONTACT_PRODUCTION_QA_REPORT.md`
 - Local browser QA is required before deployment.
 - Production browser QA is required after Noblesse Hosting deploy.
 - Desktop and mobile widths should be checked on KR/EN/JP/CN key catalog and inquiry routes.
