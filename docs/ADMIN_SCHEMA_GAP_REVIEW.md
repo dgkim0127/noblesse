@@ -214,6 +214,12 @@ Cons:
 6. Require `audit_logs` for admin writes.
 7. Keep Admin Quote deferred.
 
+## 31C Read-only API Contract
+
+- The Admin read-only API contract is documented in `docs/ADMIN_READ_ONLY_API_CONTRACT.md`.
+- The contract uses the current schema and avoids status writes.
+- Status write APIs remain blocked until status mapping/migration and status event/audit strategy are decided.
+
 ## Go / No-Go
 
 - Admin read-only planning: Go

@@ -685,3 +685,16 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Next action: Plan Admin read-only API/UI against the current schema, then resolve status write strategy before any admin write implementation.
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
+## 31C Admin Read-only API Contract Follow-up
+
+- Date: 2026-06-15
+- Change: Added `docs/ADMIN_READ_ONLY_API_CONTRACT.md`.
+- Scope: Documentation only for Admin Phase 1 read-only API contracts.
+- SQL execution required in 31C: No.
+- DB dry-run status: Unchanged.
+- SQL files changed in 31C: No.
+- Backend/API/Auth/DB change: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 31C: No.
+- Conclusion: Admin read-only route contract is documented. Admin write APIs remain blocked.

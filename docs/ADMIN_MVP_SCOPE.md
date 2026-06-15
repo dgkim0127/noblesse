@@ -281,3 +281,9 @@ Rules:
 - The current schema is enough for Admin read-only planning against existing inquiry, buyer, product, and quote tables.
 - Inquiry status writes are blocked until the status mapping/migration choice and status event/audit strategy are decided.
 - No SQL or backend implementation change is made by the 31B review.
+
+## 31C Read-only API Contract
+
+- Admin read-only API contract is documented in `docs/ADMIN_READ_ONLY_API_CONTRACT.md`.
+- Phase 1 Admin API planning is read-only only: dashboard, inquiries, inquiry detail, buyers, and products.
+- Admin writes remain blocked until status mapping, transaction handling, and audit strategy are resolved.

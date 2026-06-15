@@ -39,6 +39,8 @@ Next step is local test and route QA for the scaffold. Provider resource creatio
 
 31A status: Admin MVP scope is documented in `docs/ADMIN_MVP_SCOPE.md`. Real admin implementation remains blocked until backend/auth/DB readiness is complete. Existing admin preview screens are not real admin security.
 
+31C status: Admin read-only API contract planning is documented in `docs/ADMIN_READ_ONLY_API_CONTRACT.md`. Implementation still requires backend/auth/DB readiness and must stay read-only until status write strategy is approved.
+
 ## Decision Status
 
 | Area | Current Status | Decision Needed Before Implementation |

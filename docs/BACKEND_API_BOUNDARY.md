@@ -60,6 +60,8 @@ Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECI
 
 31B documents the Admin schema gap review in `docs/ADMIN_SCHEMA_GAP_REVIEW.md`. Admin read-only APIs may use the current schema, but Admin write APIs require status mapping/migration decisions, `audit_logs`, status event strategy, and transaction handling before implementation.
 
+31C documents the Admin read-only API contract in `docs/ADMIN_READ_ONLY_API_CONTRACT.md`. Admin write APIs remain blocked and are not part of the read-only contract.
+
 ### `GET /api/catalog/products`
 
 - Returns public visible product metadata.
