@@ -78,3 +78,10 @@ Important:
 - "견적 문의" is allowed.
 - Avoid any wording that feels like instant order/payment completion.
 - A quote request is not a final order.
+
+## Locale Copy Alignment
+
+- KR, EN, JP, and CN visible copy should all describe Noblesse as a catalog/inquiry site for domestic and international B2B buyers.
+- Header, footer, product card, product detail, and registration CTA copy should point to catalog browsing, product inquiry, trade inquiry, and manual follow-up.
+- During the current MVP, "member price" language should be softened as "trade terms" where possible.
+- JP/CN copy should avoid implying a global member-only site when the intended audience is domestic/international B2B trade inquiry.

@@ -145,6 +145,15 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - DB dry-run status: Unchanged.
 - Secret recorded: No.
 
+## 28B Catalog-first Locale Copy Follow-up
+
+- Date: 2026-06-15
+- Change: Cleaned KR/EN/JP/CN visible copy toward catalog browsing, product inquiry, trade inquiry, and manual follow-up.
+- Scope: Frontend visible copy and catalog MVP documentation only.
+- SQL execution required in 28B: No.
+- DB dry-run status: Unchanged.
+- Secret recorded: No.
+
 ## 27B Frontend API Client Wrapper Follow-up
 
 - Date: 2026-06-15

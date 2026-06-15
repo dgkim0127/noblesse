@@ -19,6 +19,13 @@
 - Inquiry is not positioned as a final order.
 - Contact/manual follow-up is clear.
 
+## Locale Copy Checks
+
+- KR/EN/JP/CN header, footer, and CTA copy are checked.
+- No locale implies instant purchase, payment, or cart behavior.
+- JP/CN copy does not remain global-member-only when the intended audience is domestic/international B2B trade inquiry.
+- Member price wording is softened toward trade terms where possible during the current MVP.
+
 ## Product Checks
 
 - Product code is visible.

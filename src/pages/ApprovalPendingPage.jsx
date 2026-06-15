@@ -19,9 +19,9 @@ export function ApprovalPendingPage() {
       {isApproved ? <BadgeCheck size={25} /> : isGuest ? <UserRound size={25} /> : <Clock3 size={25} />}
       <p className="eyebrow">거래처 확인</p>
       <h1>{isApproved ? '거래 조건 안내가 가능한 계정입니다.' : isGuest ? '거래처 문의를 진행해주세요' : '거래처 정보 확인 중입니다.'}</h1>
-      {isPending && <p>제출한 거래처 정보를 담당자가 확인 중입니다. 확인 후 회원가, 거래 조건, 견적 문의 가능 여부를 안내드립니다.</p>}
-      {isApproved && <p>{buyer.companyName} 계정은 회원가, 문의 리스트, 견적 문의 기능을 사용할 수 있습니다. 견적 문의는 최종 주문이 아닙니다.</p>}
-      {isGuest && <p>거래처 문의 후 확인이 완료되면 회원가와 문의 기능 안내가 가능합니다.</p>}
+      {isPending && <p>제출한 거래처 정보를 담당자가 확인 중입니다. 확인 후 거래 조건과 견적 문의 가능 여부를 안내드립니다.</p>}
+      {isApproved && <p>{buyer.companyName} 계정은 거래 조건, 문의 리스트, 견적 문의 기능을 사용할 수 있습니다. 견적 문의는 최종 주문이 아닙니다.</p>}
+      {isGuest && <p>거래처 문의 후 확인이 완료되면 거래 조건과 문의 기능 안내가 가능합니다.</p>}
       <div className="approval-steps">
         {approvalSteps.map((step) => <span key={step}>{step}</span>)}
       </div>

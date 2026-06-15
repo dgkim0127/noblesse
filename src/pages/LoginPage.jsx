@@ -31,7 +31,7 @@ export function LoginPage() {
         <strong>{brandKoreanName}</strong>
         <span>{brandLanguageLabel}</span>
       </div>
-      <p>확인된 거래처는 회원가, 문의 리스트, 견적 문의 기능을 사용할 수 있습니다. 견적 문의는 최종 주문이 아닙니다.</p>
+      <p>확인된 거래처는 거래 조건, 문의 리스트, 견적 문의 기능을 사용할 수 있습니다. 견적 문의는 최종 주문이 아닙니다.</p>
       <form className="auth-form" onSubmit={loginAsApprovedBuyer}>
         <label>이메일<input autoComplete="email" name="email" placeholder="member@example.com" type="email" /></label>
         <label>비밀번호<input autoComplete="current-password" name="password" placeholder="비밀번호" type="password" /></label>
