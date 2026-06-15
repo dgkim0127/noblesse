@@ -21,7 +21,7 @@ export function AdminShell() {
         <Gauge size={24} />
         <div>
           <strong>귀족 Admin</strong>
-          <span>Noblesse Piercing Admin Preview</span>
+          <span>Noblesse Admin Preview</span>
         </div>
       </div>
       <span className="admin-preview-badge">Mock Preview</span>

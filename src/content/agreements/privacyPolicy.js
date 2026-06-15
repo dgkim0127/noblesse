@@ -2,7 +2,7 @@ export const privacyPolicy = {
   key: 'privacy_policy',
   version: 'privacy-policy-v1.0',
   titleKo: '귀족 개인정보 처리방침',
-  titleEn: 'Noblesse Piercing Privacy Policy',
+  titleEn: 'Noblesse Privacy Policy',
   required: false,
   sections: [
     {

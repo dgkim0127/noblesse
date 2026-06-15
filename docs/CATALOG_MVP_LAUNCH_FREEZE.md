@@ -7,6 +7,7 @@
 - Contact-channel production QA: Go.
 - Real-device QA was recorded in 30B at `docs/CATALOG_MVP_REAL_DEVICE_QA_REPORT.md`; the current entry is pending actual user-provided phone/browser results.
 - Mobile overflow fix and local preview QA were completed in 30B; see `docs/CATALOG_MVP_MOBILE_OVERFLOW_QA_REPORT.md`.
+- Samsung Galaxy S24 Ultra UI follow-up fixes are recorded in `docs/CATALOG_MVP_S24_ULTRA_UI_QA_REPORT.md`; these fixes are not deployed in this step.
 - Primary contact email: `dgkim0127@gmail.com`
 - Current positioning: domestic and international B2B catalog / order inquiry site.
 - Current operating model: manual follow-up by Noblesse.

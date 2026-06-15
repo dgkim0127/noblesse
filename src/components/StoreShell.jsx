@@ -195,6 +195,33 @@ const shellCopy = {
   },
 }
 
+const shellCompactViewerLabels = {
+  kr: {
+    guest: '비회원',
+    pending: '확인 중',
+    approved: '거래 조건 / JP',
+    admin: '관리자',
+  },
+  en: {
+    guest: 'Guest',
+    pending: 'Review',
+    approved: 'Trade terms / JP',
+    admin: 'Admin',
+  },
+  jp: {
+    guest: 'ゲスト',
+    pending: '確認中',
+    approved: '取引条件 / JP',
+    admin: '管理者',
+  },
+  cn: {
+    guest: '访客',
+    pending: '确认中',
+    approved: '交易条件 / JP',
+    admin: '管理',
+  },
+}
+
 const readSearchHistory = () => {
   if (typeof window === 'undefined') return []
 
@@ -219,11 +246,28 @@ function AnimatedBrandName({ ariaHidden = false, text }) {
 }
 
 function LanguageSwitch({ countryLabels, isCompact = false, languageSwitch, locale, toLanguagePath }) {
+  const [isOpen, setIsOpen] = useState(false)
   const activeIndex = supportedLocales.indexOf(locale)
   const activeCountry = countryLabels[locale]
+  const switchClassName = `language-switch compact ${isCompact ? 'is-dropdown' : ''} ${isOpen ? 'is-open' : ''}`.trim()
 
-  return <div className={`language-switch compact ${isCompact ? 'is-dropdown' : ''}`} style={{ '--language-index': activeIndex }} aria-label={languageSwitch}>
-    <button className="language-dropdown-trigger" type="button" aria-label={`${languageSwitch}: ${activeCountry}`}>
+  const closeMenu = () => setIsOpen(false)
+
+  return <div
+    className={switchClassName}
+    style={{ '--language-index': activeIndex }}
+    aria-label={languageSwitch}
+    onBlur={(event) => {
+      if (!event.currentTarget.contains(event.relatedTarget)) closeMenu()
+    }}
+  >
+    <button
+      className="language-dropdown-trigger"
+      type="button"
+      aria-expanded={isCompact ? isOpen : undefined}
+      aria-label={`${languageSwitch}: ${activeCountry}`}
+      onClick={() => setIsOpen((current) => !current)}
+    >
       <span className={`flag-icon flag-${locale}`} aria-hidden="true" />
       <ChevronDown size={13} />
     </button>
@@ -232,6 +276,7 @@ function LanguageSwitch({ countryLabels, isCompact = false, languageSwitch, loca
       aria-label={countryLabels[item]}
       className={locale === item ? 'active' : ''}
       key={item}
+      onClick={closeMenu}
       title={countryLabels[item]}
       to={toLanguagePath(item)}
     >
@@ -267,8 +312,10 @@ export function StoreShell() {
   const [isHeaderCompact, setIsHeaderCompact] = useState(false)
   const [navIndicator, setNavIndicator] = useState({ left: 0, ready: false, width: 0 })
   const { buyerAccess, inquiryItems, isAdmin, isApproved, isGuest, isPending, setViewerState, viewerState } = useCommerce()
-  const { locale, localeMeta, toLanguagePath, toLocalePath } = useLocalePath()
+  const { locale, toLanguagePath, toLocalePath } = useLocalePath()
   const copy = shellCopy[locale] ?? shellCopy.kr
+  const compactViewerLabels = shellCompactViewerLabels[locale] ?? copy.viewerLabels
+  const headerBrandName = locale === 'kr' ? '귀족' : 'Noblesse'
 
   useEffect(() => {
     const nav = navRef.current
@@ -389,9 +436,7 @@ export function StoreShell() {
     setIsCompactSearchOpen((current) => !current)
     setIsSearchOpen(false)
   }
-  const brandHomeLabel = localeMeta.brandName === 'Noblesse Piercing'
-    ? 'Noblesse Piercing home'
-    : `${localeMeta.brandName} Noblesse Piercing home`
+  const brandHomeLabel = locale === 'kr' ? '귀족 Noblesse home' : 'Noblesse home'
 
   return <div className={`site-shell ${isHeaderCompact ? 'has-compact-header' : ''}`}>
     <div className="top-marquee" aria-label="Noblesse material notice">
@@ -404,11 +449,11 @@ export function StoreShell() {
       <div className="header-main">
         <Link className="brand" to={toLocalePath('/')} aria-label={brandHomeLabel}>
           <img className="brand-logo" src={noblesseLogo} alt="" aria-hidden="true" width="48" height="48" />
-          <AnimatedBrandName ariaHidden text={localeMeta.brandName} />
+          <AnimatedBrandName ariaHidden text={headerBrandName} />
         </Link>
 
         <Link className="compact-brand-title" to={toLocalePath('/')} aria-label={brandHomeLabel}>
-          <AnimatedBrandName ariaHidden text={localeMeta.brandName} />
+          <AnimatedBrandName ariaHidden text={headerBrandName} />
         </Link>
 
         <div className="header-search-wrap top-search" ref={searchRef}>
@@ -547,11 +592,17 @@ export function StoreShell() {
       </div>
 
       <div className="preview-bar">
-        <span>{copy.viewerLabels[viewerState]}</span>
-        {['guest', 'pending', 'approved', 'admin'].map((state) => <button className={viewerState === state ? 'active' : ''} key={state} type="button" onClick={() => setViewerState(state)}>{copy.viewerLabels[state]}</button>)}
+        <span>
+          <span className="viewer-label-full">{copy.viewerLabels[viewerState]}</span>
+          <span className="viewer-label-compact">{compactViewerLabels[viewerState]}</span>
+        </span>
+        {['guest', 'pending', 'approved', 'admin'].map((state) => <button className={viewerState === state ? 'active' : ''} key={state} type="button" onClick={() => setViewerState(state)}>
+          <span className="viewer-label-full">{copy.viewerLabels[state]}</span>
+          <span className="viewer-label-compact">{compactViewerLabels[state]}</span>
+        </button>)}
       </div>
     </header>
     <Outlet />
-    <footer className="site-footer"><strong>Noblesse Piercing</strong><span>{copy.footer}</span><Heart size={15} /></footer>
+    <footer className="site-footer"><strong>Noblesse</strong><span>{copy.footer}</span><Heart size={15} /></footer>
   </div>
 }

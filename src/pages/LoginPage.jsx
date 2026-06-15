@@ -4,7 +4,7 @@ import { useCommerce } from '../commerce/commerceStore'
 import { useLocalePath } from '../utils/locale'
 
 const brandKoreanName = '귀족'
-const brandLanguageLabel = '피어싱 / Piercing / ピアス / 冲孔'
+const brandLanguageLabel = '귀족 / Noblesse'
 
 export function LoginPage() {
   const navigate = useNavigate()

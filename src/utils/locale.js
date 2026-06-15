@@ -8,25 +8,25 @@ export const localeMeta = {
     code: 'KR',
     flag: '🇰🇷',
     brandName: '귀족',
-    languageLabel: '피어싱 / Piercing / ピアス / 冲孔',
+    languageLabel: '귀족 / Noblesse',
   },
   en: {
     code: 'EN',
     flag: '🇺🇸',
-    brandName: 'Noblesse Piercing',
-    languageLabel: 'Piercing / 피어싱 / ピアス / 冲孔',
+    brandName: 'Noblesse',
+    languageLabel: 'Noblesse / 귀족',
   },
   jp: {
     code: 'JP',
     flag: '🇯🇵',
-    brandName: '貴族ピアス',
-    languageLabel: 'ピアス / Piercing / 피어싱 / 冲孔',
+    brandName: 'Noblesse',
+    languageLabel: 'Noblesse / 귀족',
   },
   cn: {
     code: 'CN',
     flag: '🇨🇳',
-    brandName: '高贵的穿孔',
-    languageLabel: '冲孔 / Piercing / 피어싱 / ピアス',
+    brandName: 'Noblesse',
+    languageLabel: 'Noblesse / 귀족',
   },
 }
 

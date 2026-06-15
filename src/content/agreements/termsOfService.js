@@ -2,20 +2,20 @@ export const termsOfService = {
   key: 'terms_of_service',
   version: 'terms-v1.0',
   titleKo: '귀족 이용약관',
-  titleEn: 'Noblesse Piercing Terms of Service',
+  titleEn: 'Noblesse Terms of Service',
   required: true,
   sections: [
     {
       headingKo: '제1조 목적',
       headingEn: 'Article 1. Purpose',
-      bodyKo: '이 약관은 귀족이 운영하는 Noblesse Piercing 웹사이트를 통해 제공하는 피어싱 도매 카탈로그, 회원가입, 도매 회원 승인, 회원가 열람, Inquiry List, Request Quote, My Inquiries 및 Admin Quote 관련 서비스 이용 조건을 정합니다.',
-      bodyEn: 'These terms define the service conditions for the Noblesse Piercing wholesale piercing catalog, membership request, buyer approval, approved buyer pricing, Inquiry List, Request Quote, My Inquiries, and Admin Quote services.',
+      bodyKo: '이 약관은 귀족이 운영하는 Noblesse 웹사이트를 통해 제공하는 피어싱 도매 카탈로그, 회원가입, 도매 회원 승인, 회원가 열람, Inquiry List, Request Quote, My Inquiries 및 Admin Quote 관련 서비스 이용 조건을 정합니다.',
+      bodyEn: 'These terms define the service conditions for the Noblesse wholesale piercing catalog, membership request, buyer approval, approved buyer pricing, Inquiry List, Request Quote, My Inquiries, and Admin Quote services.',
     },
     {
       headingKo: '제2조 정의',
       headingEn: 'Article 2. Definitions',
-      bodyKo: '사이트는 귀족이 운영하는 Noblesse Piercing 웹사이트를 의미합니다. 이용자는 사이트를 방문하거나 이용하는 사람을 의미합니다. 비회원은 로그인하지 않은 방문자입니다. 회원은 도매 회원가입 신청을 제출했거나 서비스를 이용하는 사업자 또는 담당자를 의미합니다. 승인 도매 회원은 귀족이 회원가와 견적 기능 접근을 허용한 회원입니다.',
-      bodyEn: 'The site means the Noblesse Piercing website. A user means a visitor or user of the site. A guest means a visitor without sign-in. A member means a business or contact person requesting or using membership access. An approved wholesale member means a member granted pricing and quote access by Noblesse.',
+      bodyKo: '사이트는 귀족이 운영하는 Noblesse 웹사이트를 의미합니다. 이용자는 사이트를 방문하거나 이용하는 사람을 의미합니다. 비회원은 로그인하지 않은 방문자입니다. 회원은 도매 회원가입 신청을 제출했거나 서비스를 이용하는 사업자 또는 담당자를 의미합니다. 승인 도매 회원은 귀족이 회원가와 견적 기능 접근을 허용한 회원입니다.',
+      bodyEn: 'The site means the Noblesse website. A user means a visitor or user of the site. A guest means a visitor without sign-in. A member means a business or contact person requesting or using membership access. An approved wholesale member means a member granted pricing and quote access by Noblesse.',
     },
     {
       headingKo: '제3조 핵심 용어',

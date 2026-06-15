@@ -44,14 +44,14 @@ const homeCopy = {
     supportNote: 'Email, KakaoTalk, WhatsApp 상담 채널을 준비 중입니다.',
     supportSmall: '담당자 확인 후 견적과 거래 조건을 안내드립니다.',
     companyTitle: '회사 정보',
-    companyNote: 'Noblesse Piercing',
+    companyNote: 'Noblesse',
     companySmall: '국내·해외 B2B 피어싱 카탈로그 / 거래처 문의 지원',
     brandNoteTitle: '국내·해외 거래처를 위한 구성',
     brandNoteText: '큰 상품 이미지, 소재와 옵션, MOQ, 거래 문의 흐름을 제공합니다.',
   },
   en: {
     eyebrow: 'Domestic & global B2B catalog',
-    title: 'Noblesse Piercing',
+    title: 'Noblesse',
     lead: 'A Noblesse piercing catalog for domestic and international B2B buyers.',
     note: 'Review product details, MOQ, materials, and options, then send a trade inquiry.',
     viewCatalog: 'View Catalog',
@@ -86,15 +86,15 @@ const homeCopy = {
     supportNote: 'Email, KakaoTalk, and WhatsApp support channels are being prepared.',
     supportSmall: 'Our team follows up with quotation and trade terms after review.',
     companyTitle: 'Company Info',
-    companyNote: 'Noblesse Piercing',
+    companyNote: 'Noblesse',
     companySmall: 'Domestic and global B2B piercing catalog / Trade inquiry support',
     brandNoteTitle: 'Built For B2B Trade Inquiries',
     brandNoteText: 'Large product images, material and option details, MOQ, and a clear inquiry flow.',
   },
   jp: {
     eyebrow: '国内・海外B2Bカタログ',
-    title: '貴族ピアス',
-    lead: '国内・海外B2B取引先向けのNoblesseピアスカタログです。',
+    title: 'Noblesse',
+    lead: '国内・海外B2B取引先向けのNoblesseカタログです。',
     note: '商品情報、最小数量、素材、オプションを確認し、取引先お問い合わせを送信してください。',
     viewCatalog: '商品を見る',
     access: '取引先お問い合わせ',
@@ -119,7 +119,7 @@ const homeCopy = {
     exportTitle: '輸出ベスト',
     exportNote: '輸出相談に適したおすすめスタイルです。',
     viewAll: 'すべて見る',
-    campaignTitle: '貴族ピアス シグネチャー',
+    campaignTitle: 'Noblesse Signature',
     campaignNote: '国内・海外の取引先お問い合わせに合わせたピアススタイルです。',
     campaignCta: '取引条件を問い合わせる',
     recentTitle: '最近見た商品',
@@ -128,15 +128,15 @@ const homeCopy = {
     supportNote: 'Email、KakaoTalk、WhatsAppの相談チャネルを準備中です。',
     supportSmall: '担当者確認後、見積と取引条件をご案内します。',
     companyTitle: '会社情報',
-    companyNote: 'Noblesse Piercing',
+    companyNote: 'Noblesse',
     companySmall: '国内・海外B2Bピアスカタログ / 取引先お問い合わせサポート',
     brandNoteTitle: '国内・海外取引先向け構成',
     brandNoteText: '大きな商品画像、素材とオプション、最小数量、わかりやすいお問い合わせフローを提供します。',
   },
   cn: {
     eyebrow: '国内外B2B商品目录',
-    title: '高贵的穿孔',
-    lead: '面向国内外B2B买家的 Noblesse 穿孔商品目录。',
+    title: 'Noblesse',
+    lead: '面向国内外B2B买家的 Noblesse 商品目录。',
     note: '查看商品信息、最小数量、材质和选项后，请提交贸易咨询。',
     viewCatalog: '查看商品',
     access: '贸易咨询',
@@ -161,7 +161,7 @@ const homeCopy = {
     exportTitle: '出口热选',
     exportNote: '适合出口咨询的推荐款式。',
     viewAll: '查看全部',
-    campaignTitle: '高贵的穿孔 Signature',
+    campaignTitle: 'Noblesse Signature',
     campaignNote: '为国内外贸易咨询精选的穿孔风格。',
     campaignCta: '咨询交易条件',
     recentTitle: '最近浏览',
@@ -170,7 +170,7 @@ const homeCopy = {
     supportNote: 'Email、KakaoTalk、WhatsApp 咨询渠道正在准备中。',
     supportSmall: '工作人员确认后，将提供报价和交易条件。',
     companyTitle: '公司信息',
-    companyNote: 'Noblesse Piercing',
+    companyNote: 'Noblesse',
     companySmall: '国内外B2B穿孔商品目录 / 贸易咨询支持',
     brandNoteTitle: '面向国内外B2B买家设计',
     brandNoteText: '提供大图商品展示、材质和选项、最小数量以及清晰的咨询流程。',
@@ -215,9 +215,9 @@ const collectionCopy = {
     cn: '光泽清晰的高端锆石款式。',
   },
   'export-best-items': {
-    kr: '수출 상담에 적합한 Noblesse Piercing 핵심 상품입니다.',
-    en: 'Core Noblesse Piercing items for export sourcing.',
-    jp: '輸出相談に適したNoblesse Piercingの中心商品です。',
+    kr: '수출 상담에 적합한 Noblesse 핵심 상품입니다.',
+    en: 'Core Noblesse items for export sourcing.',
+    jp: '輸出相談に適したNoblesseの中心商品です。',
     cn: '适合出口采购咨询的核心商品。',
   },
   'new-arrivals': {
@@ -344,7 +344,7 @@ function getCollectionTitle(collection, locale) {
 }
 
 const latinScrambleCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-const globalScrambleCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789가나다라마바사아자차카타파하ピアス貴族高贵穿孔'
+const globalScrambleCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789Noblesse귀족'
 
 const lastScrambleTextByKey = new Map()
 
@@ -527,7 +527,7 @@ export function HomePage() {
           <Link className="secondary-action" to={toLocalePath(heroCta.to)}><ScrambleText persistKey="hero-secondary-cta">{heroCta.label}</ScrambleText></Link>
         </div>
       </div>
-      <div className="hero-art home-hero-art hero-carousel" aria-label="Noblesse Piercing banner carousel">
+      <div className="hero-art home-hero-art hero-carousel" aria-label="Noblesse banner carousel">
         <div className="hero-carousel-track" style={{ transform: `translateX(-${activeHeroBanner * 100}%)` }}>
           {heroBanners.map((banner, index) => {
             const bannerTitle = getLocalizedValue(banner.title, locale)

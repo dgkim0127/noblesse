@@ -2,14 +2,14 @@ export const buyerTerms = {
   key: 'buyer_terms',
   version: 'buyer-terms-v1.0',
   titleKo: '귀족 도매 회원 및 견적 이용 조건',
-  titleEn: 'Noblesse Piercing B2B Member and Quote Terms',
+  titleEn: 'Noblesse B2B Member and Quote Terms',
   required: true,
   sections: [
     {
       headingKo: '제1조 목적',
       headingEn: 'Article 1. Purpose Of B2B Member Terms',
       bodyKo: '이 문서는 귀족이 승인 도매 회원에게 제공하는 회원가, 시장별 가격, MOQ, Inquiry List, Request Quote 및 Admin Quote 운영 기준을 설명합니다.',
-      bodyEn: 'This document describes the B2B member standards for approved buyer pricing, regional pricing, MOQ, Inquiry List, Request Quote, and Admin Quote provided by Noblesse Piercing to approved wholesale members.',
+      bodyEn: 'This document describes the B2B member standards for approved buyer pricing, regional pricing, MOQ, Inquiry List, Request Quote, and Admin Quote provided by Noblesse to approved wholesale members.',
     },
     {
       headingKo: '제2조 도매 회원 승인 기준',

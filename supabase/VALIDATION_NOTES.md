@@ -135,6 +135,20 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 30B S24 Ultra UI Follow-up
+
+- Date: 2026-06-15
+- Change: Documented and applied mobile UI follow-up fixes for Samsung Galaxy S24 Ultra.
+- Scope: Catalog-first MVP visible UI only.
+- Fixed areas: viewer/status label wrapping, mobile language switch, EN/JP/CN header brand labeling, and compact search panel readability.
+- SQL execution required in 30B: No.
+- DB dry-run status: Unchanged.
+- Backend/API/Auth/DB change: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action: No.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## 30B Catalog MVP Real Device QA Follow-up
 
 - Date: 2026-06-15
