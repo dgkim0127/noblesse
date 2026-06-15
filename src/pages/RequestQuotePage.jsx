@@ -1,4 +1,4 @@
-﻿import { LockKeyhole, Send } from 'lucide-react'
+import { LockKeyhole, Mail, Send } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
@@ -25,7 +25,18 @@ function QuoteLine({ row, currency }) {
 function AccessNotice({ viewerState }) {
   const isPending = viewerState === 'pending'
   const { toLocalePath } = useLocalePath()
-  return <main className="content"><div className="approval-page"><LockKeyhole size={25} /><h1>{isPending ? '거래처 정보 확인 중입니다.' : '견적 문의는 거래처 확인 후 이용할 수 있습니다.'}</h1><p>{isPending ? '견적 문의는 담당자 확인 후 가능하며 가격과 합계는 그 전까지 숨겨집니다.' : '로그인하거나 거래처 문의 후 제품 견적을 남겨주세요.'}</p><Link to={toLocalePath('/account')}>확인 상태 보기</Link></div></main>
+  return <main className="content">
+    <div className="approval-page">
+      <LockKeyhole size={25} />
+      <h1>{isPending ? '거래처 정보 확인 중입니다.' : '견적 문의는 거래처 확인 후 이용할 수 있습니다.'}</h1>
+      <p>{isPending ? '견적 문의는 담당자 확인 후 가능하며 가격과 합계는 그 전까지 숨겨집니다.' : '로그인하거나 거래처 문의 후 제품 견적을 남겨주세요.'}</p>
+      <p>거래 조건 확인이 급한 경우 이메일로도 문의할 수 있습니다.</p>
+      <div className="account-actions">
+        <Link to={toLocalePath('/account')}>확인 상태 보기</Link>
+        <a className="secondary-action" href="mailto:dgkim0127@gmail.com"><Mail size={15} />이메일 문의</a>
+      </div>
+    </div>
+  </main>
 }
 
 export function RequestQuotePage() {

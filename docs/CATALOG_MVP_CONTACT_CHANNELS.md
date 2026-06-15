@@ -7,16 +7,19 @@
 
 ## Current Required Channels
 
-- Primary email: TBD
+- Primary email: `dgkim0127@gmail.com`
 - Optional phone: TBD
 - Optional Kakao/WhatsApp/Instagram: TBD
 
 ## Current Status
 
-- Replace placeholder email before next production deploy.
+- This is the current MVP manual follow-up email.
+- Replace with a domain/business email later if available.
+- Recheck this contact channel before the next production deploy.
 - Do not use `contact@noblesse.example` in user-facing UI.
+- Do not use fake `.example` contact addresses.
 - Manual follow-up remains the current operating model.
-- Until a real contact channel is confirmed, user-facing inquiry CTAs should guide buyers to `/register`.
+- Core user-facing inquiry CTAs should still guide buyers to `/register`; email is a secondary manual channel.
 
 ## Copy Rules
 

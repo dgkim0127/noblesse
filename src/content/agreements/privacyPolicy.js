@@ -86,8 +86,8 @@ export const privacyPolicy = {
     {
       headingKo: '제14조 개인정보 보호책임자',
       headingEn: 'Article 14. Privacy Officer',
-      bodyKo: '개인정보 보호책임자와 문의 채널은 운영 전 확정 예정입니다. 실제 담당자명, 직책, 연락처는 운영 전 반드시 확정해야 합니다.',
-      bodyEn: 'Privacy officer and contact channel: to be confirmed before operation. Actual name, title, and contact details must be finalized before operation.',
+      bodyKo: '개인정보 보호책임자는 운영 전 최종 확정 예정입니다. 문의 채널은 dgkim0127@gmail.com입니다. 실제 담당자명, 직책, 연락처는 운영 전 최종 검토가 필요합니다.',
+      bodyEn: 'Privacy officer: to be finalized before operation. Contact channel: dgkim0127@gmail.com. Actual name, title, and contact details require final review before operation.',
     },
     {
       headingKo: '제15조 권익침해 구제',

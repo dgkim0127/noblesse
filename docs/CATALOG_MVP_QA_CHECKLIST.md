@@ -44,9 +44,14 @@
 
 ## Contact Channel Checks
 
+- Primary contact email is visible where intended.
+- `mailto:dgkim0127@gmail.com` works where used.
 - No placeholder email appears in user-facing UI.
+- No `.example` placeholder email remains in user-facing UI.
 - Inquiry CTA leads to a real channel or an intentionally manual path.
 - No fake contact destination is used.
+- Inquiry CTA still leads to `/register` or valid email contact.
+- Contact channel must be rechecked after production deploy.
 
 ## Technical Checks
 

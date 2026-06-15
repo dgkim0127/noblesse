@@ -190,6 +190,15 @@ const registerCopy = {
   },
 }
 
+const primaryContactEmail = 'dgkim0127@gmail.com'
+
+const contactEmailNotes = {
+  kr: `급한 거래 문의는 {email} 으로도 남겨주세요.`,
+  en: `For urgent trade inquiries, you can also email {email}.`,
+  jp: `お急ぎの取引先お問い合わせは {email} でも受け付けています。`,
+  cn: `如需紧急贸易咨询，也可以发送邮件至 {email}。`,
+}
+
 const fieldGroups = {
   buyer: [
     ['email', 'email'],
@@ -256,6 +265,8 @@ export function RegisterPage() {
   const { setViewerState } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const t = registerCopy[locale] ?? registerCopy.kr
+  const contactNote = contactEmailNotes[locale] ?? contactEmailNotes.kr
+  const [contactNoteBefore, contactNoteAfter = ''] = contactNote.split('{email}')
   const [agreements, setAgreements] = useState(getInitialAgreements)
   const agreementSummaries = getAgreementSummaryForRegister()
   const privacyPolicy = getAgreementDocument('privacy_policy')
@@ -294,6 +305,7 @@ export function RegisterPage() {
       <div className="buyer-access-intro">
         <p>{t.intro}</p>
         <p className="approval-helper">{t.helper}</p>
+        <p className="approval-helper">{contactNoteBefore}<a href={`mailto:${primaryContactEmail}`}>{primaryContactEmail}</a>{contactNoteAfter}</p>
       </div>
       <aside className="buyer-access-notice" aria-label={t.noticeTitle}>
         <strong>{t.noticeTitle}</strong>

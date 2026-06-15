@@ -77,6 +77,7 @@
 - Fixed: None during production QA.
 - Deferred: CN product names still use English mock product names because the current mock catalog does not include Chinese product-name fields.
 - Follow-up: Contact channel placeholder cleanup was completed in 29A; re-run contact-channel QA before the next production deploy.
+- Follow-up: Contact channel was set to `dgkim0127@gmail.com` in 29B; re-run contact-channel QA after the next production deploy.
 
 ## Go / No-Go
 

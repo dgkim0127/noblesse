@@ -184,7 +184,8 @@ It should include:
 Current placeholder privacy officer:
 
 - privacy officer: to be confirmed before operation
-- contact channel: to be confirmed before operation
+- contact channel: `dgkim0127@gmail.com`
+- privacy officer name/title: to be confirmed before operation
 
 Items requiring final review:
 

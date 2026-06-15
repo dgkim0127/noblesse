@@ -193,6 +193,18 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 29B Catalog MVP Primary Contact Email Follow-up
+
+- Date: 2026-06-15
+- Change: Set the Catalog MVP primary manual follow-up email to `dgkim0127@gmail.com`.
+- SQL execution required in 29B: No.
+- DB dry-run status: Unchanged.
+- API/Auth/DB connection status: Not added.
+- Secret recorded: No.
+- Deploy status: Not run.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## 27B Frontend API Client Wrapper Follow-up
 
 - Date: 2026-06-15
