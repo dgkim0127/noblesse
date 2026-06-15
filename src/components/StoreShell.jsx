@@ -245,6 +245,16 @@ function AnimatedBrandName({ ariaHidden = false, text }) {
   </span>
 }
 
+function AnimatedSearchPlaceholder({ text }) {
+  const characters = Array.from(text)
+
+  return <span className="search-placeholder-animated" aria-hidden="true" key={text}>
+    {characters.map((char, index) => <span className="search-placeholder-char" key={`${text}-${index}-${char}`} style={{ '--char-index': index }}>
+      {char === ' ' ? '\u00A0' : char}
+    </span>)}
+  </span>
+}
+
 function LanguageSwitch({ countryLabels, isCompact = false, languageSwitch, locale, toLanguagePath }) {
   const [isOpen, setIsOpen] = useState(false)
   const activeIndex = supportedLocales.indexOf(locale)
@@ -479,7 +489,7 @@ export function StoreShell() {
         </Link>
 
         <div className="header-search-wrap top-search" ref={searchRef}>
-          <form className="header-search" role="search" onSubmit={submitSearch}>
+          <form className={`header-search ${headerSearch ? 'has-search-value' : ''}`} role="search" onSubmit={submitSearch}>
             <input
               aria-label={copy.searchAria}
               autoComplete="off"
@@ -491,6 +501,7 @@ export function StoreShell() {
               type="search"
               value={headerSearch}
             />
+            {!headerSearch && <AnimatedSearchPlaceholder text={copy.searchPlaceholder} />}
             <button aria-label={copy.search} type="submit"><Search size={19} /></button>
           </form>
 
@@ -557,7 +568,7 @@ export function StoreShell() {
           <span className="compact-search-boundary-segment boundary-left" />
           <span className="compact-search-boundary-segment boundary-right" />
         </span>
-        <form className="compact-search-form" role="search" onSubmit={submitSearch}>
+        <form className={`compact-search-form ${headerSearch ? 'has-search-value' : ''}`} role="search" onSubmit={submitSearch}>
           <input
             aria-label={copy.searchAria}
             autoComplete="off"
@@ -570,6 +581,7 @@ export function StoreShell() {
             type="search"
             value={headerSearch}
           />
+          {!headerSearch && <AnimatedSearchPlaceholder text={copy.searchPlaceholder} />}
           <button aria-label={copy.search} type="submit"><Search size={24} /></button>
         </form>
 

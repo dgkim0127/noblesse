@@ -1058,6 +1058,7 @@ h6 {
 }
 
 .header-search {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1095,6 +1096,8 @@ h6 {
 }
 
 .header-search input {
+  position: relative;
+  z-index: 2;
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
@@ -1109,7 +1112,36 @@ h6 {
 }
 
 .header-search input::placeholder {
+  color: transparent;
+}
+
+.search-placeholder-animated {
+  position: absolute;
+  top: 50%;
+  right: 56px;
+  left: 18px;
+  z-index: 1;
+  display: block;
+  overflow: hidden;
   color: #8a8190;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.search-placeholder-char {
+  display: inline-block;
+  min-width: .28em;
+  opacity: 0;
+  transform: translateY(7px);
+  animation: search-placeholder-letter-in 520ms cubic-bezier(.18, .9, .22, 1) both;
+  animation-delay: calc(var(--char-index) * 18ms);
+  will-change: opacity, transform;
+}
+
+.header-search:focus-within .search-placeholder-char,
+.compact-search-form:focus-within .search-placeholder-char {
+  animation-duration: 380ms;
 }
 
 .header-search button {
@@ -1367,6 +1399,7 @@ h6 {
 }
 
 .compact-search-form {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 44px;
   align-items: center;
@@ -1376,6 +1409,8 @@ h6 {
 }
 
 .compact-search-form input {
+  position: relative;
+  z-index: 2;
   min-width: 0;
   border: 0;
   outline: 0;
@@ -1386,7 +1421,15 @@ h6 {
 }
 
 .compact-search-form input::placeholder {
+  color: transparent;
+}
+
+.compact-search-form .search-placeholder-animated {
+  right: 44px;
+  left: 0;
   color: #b8afba;
+  font-size: 18px;
+  line-height: 1.2;
 }
 
 .compact-search-form button {
@@ -1515,6 +1558,23 @@ h6 {
   to {
     opacity: 1;
     transform: translateY(0) scaleY(1);
+  }
+}
+
+@keyframes search-placeholder-letter-in {
+  0% {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  58% {
+    opacity: .72;
+    transform: translateY(-1px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
