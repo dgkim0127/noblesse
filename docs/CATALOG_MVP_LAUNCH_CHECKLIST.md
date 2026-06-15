@@ -14,6 +14,7 @@
 - S24 Ultra UI follow-up report: `docs/CATALOG_MVP_S24_ULTRA_UI_QA_REPORT.md`
 - S24 Ultra production QA report: `docs/CATALOG_MVP_S24_ULTRA_PRODUCTION_QA_REPORT.md`
 - Locale brand QA report: `docs/CATALOG_MVP_LOCALE_BRAND_QA_REPORT.md`
+- Search and brand production QA report: `docs/CATALOG_MVP_SEARCH_BRAND_PRODUCTION_QA_REPORT.md`
 
 ## Final Manual Checks Before Sharing Link
 
@@ -35,6 +36,10 @@
 - Confirm compact header search panel is readable after scroll.
 - Confirm locale header brand labels follow the 30D brand rule: KR `귀족`, EN `Noblesse`, JP `貴族`, CN `贵族`, without category wording.
 - Confirm 30D locale brand production QA is recorded in `docs/CATALOG_MVP_LOCALE_BRAND_QA_REPORT.md`.
+- Confirm search placeholder animation is visible in top search and compact search.
+- Confirm typing in search hides the animated placeholder.
+- Confirm search placeholder has no mobile overflow.
+- Confirm search and brand production QA is recorded in `docs/CATALOG_MVP_SEARCH_BRAND_PRODUCTION_QA_REPORT.md`.
 - Confirm product code/material/color/size/MOQ is visible.
 - Record the real-device result in `docs/CATALOG_MVP_REAL_DEVICE_QA_REPORT.md` before external sharing.
 

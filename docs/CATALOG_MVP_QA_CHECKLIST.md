@@ -69,6 +69,7 @@
 - Mobile overflow QA report: `docs/CATALOG_MVP_MOBILE_OVERFLOW_QA_REPORT.md`
 - S24 Ultra UI follow-up report: `docs/CATALOG_MVP_S24_ULTRA_UI_QA_REPORT.md`
 - S24 Ultra production QA report: `docs/CATALOG_MVP_S24_ULTRA_PRODUCTION_QA_REPORT.md`
+- Search and brand production QA report: `docs/CATALOG_MVP_SEARCH_BRAND_PRODUCTION_QA_REPORT.md`
 - Launch freeze: `docs/CATALOG_MVP_LAUNCH_FREEZE.md`
 - Launch checklist: `docs/CATALOG_MVP_LAUNCH_CHECKLIST.md`
 - Local browser QA is required before deployment.
@@ -86,3 +87,8 @@
 - Language switch/dropdown stays inside the mobile viewport.
 - Compact header search panel is readable after scroll.
 - EN/JP/CN header brand label does not include piercing-category wording.
+- Locale brand labels follow: KR `귀족`, EN `Noblesse`, JP `貴族`, CN `贵族`.
+- Top search placeholder animates by character.
+- Compact search placeholder animates by character.
+- Typing in search hides the animated placeholder.
+- Search placeholder does not block input or overflow on mobile.

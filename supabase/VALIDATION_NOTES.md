@@ -149,6 +149,21 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Storage rules deploy: No.
 - Result: Locale brand production QA Go. KR `귀족`, EN `Noblesse`, JP `貴族`, CN `贵族`.
 
+## 30D Search Placeholder And Brand Production QA Follow-up
+
+- Date: 2026-06-15
+- Change: Search placeholder character animation and final KR/EN/JP/CN brand rule were deployed to Noblesse Hosting and verified on the production URL.
+- QA report: `docs/CATALOG_MVP_SEARCH_BRAND_PRODUCTION_QA_REPORT.md`
+- Production URL: `https://noblesse.web.app`
+- SQL execution required in 30D: No.
+- DB dry-run status: Unchanged.
+- Backend/API/Auth/DB change: No.
+- Firebase `/api` rewrite change: No.
+- Deploy scope: `hosting:noblesse` only.
+- Firestore rules deploy: No.
+- Storage rules deploy: No.
+- Result: Search/brand production QA Go.
+
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
 ## 30C S24 Ultra Production QA Follow-up

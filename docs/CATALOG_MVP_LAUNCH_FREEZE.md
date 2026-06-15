@@ -28,6 +28,9 @@
 - No `/api` rewrite.
 - No backend/API/Auth/DB dependency for current MVP.
 - Public catalog behavior should not regress while admin planning proceeds.
+- Brand locale rule is frozen as KR `귀족`, EN `Noblesse`, JP `貴族`, CN `贵族`.
+- Search placeholder character animation is part of the current catalog UI.
+- Brand/search UI changes require search/brand production QA rerun.
 
 ## Do Not Change Without Separate Approval
 
