@@ -845,6 +845,24 @@ h6 {
 
 .hero-actions .scramble-text {
   display: inline-grid;
+  min-width: 0;
+  width: auto !important;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.hero-actions .scramble-text-measure,
+.hero-actions .scramble-text-visual,
+.campaign-banner .secondary-action .scramble-text-measure,
+.campaign-banner .secondary-action .scramble-text-visual {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+
+.hero-actions .primary-action svg,
+.hero-actions .secondary-action svg {
+  flex: 0 0 auto;
 }
 
 .language-switch {
@@ -1859,6 +1877,8 @@ h6 {
   line-height: 1.25;
   text-align: center;
   white-space: normal;
+  overflow: hidden;
+  overflow-wrap: anywhere;
   cursor: pointer;
 }
 
@@ -2271,6 +2291,19 @@ h6 {
   position: relative;
   z-index: 1;
   display: block;
+  width: auto !important;
+  min-width: 0;
+  max-width: min(100%, 260px);
+  overflow: hidden;
+}
+
+.collection-card > .scramble-text .scramble-text-measure,
+.collection-card > .scramble-text .scramble-text-visual {
+  display: block;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
 }
 
 .collection-card small {
@@ -2291,7 +2324,7 @@ h6 {
 }
 
 .collection-card > .scramble-text:not(small):not(strong) {
-  max-width: 260px;
+  max-width: min(100%, 260px);
   margin-top: 14px;
   color: #726a7b;
   line-height: 1.55;
