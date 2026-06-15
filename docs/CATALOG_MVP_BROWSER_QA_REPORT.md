@@ -77,3 +77,8 @@ Deferred:
 ## Go / No-Go
 
 - Catalog MVP local browser QA: Go.
+
+## Production Follow-up
+
+- Production QA was completed after Noblesse Hosting deploy.
+- Report: `docs/CATALOG_MVP_PRODUCTION_QA_REPORT.md`

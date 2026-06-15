@@ -167,6 +167,20 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 28D Catalog MVP Production QA Follow-up
+
+- Date: 2026-06-15
+- Change: Deployed Catalog MVP changes to Noblesse Hosting target and completed production URL QA.
+- Production URL: `https://noblesse.web.app`
+- Scope: Firebase Hosting production visible copy and layout QA only.
+- SQL execution required in 28D: No.
+- DB dry-run status: Unchanged.
+- API/Auth/DB connection status: Not added.
+- Secret recorded: No.
+- Deploy scope: `hosting:noblesse` only.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## 27B Frontend API Client Wrapper Follow-up
 
 - Date: 2026-06-15
