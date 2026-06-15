@@ -6,6 +6,7 @@
 - Catalog MVP production QA: Go.
 - Contact-channel production QA: Go.
 - Real-device QA was recorded in 30B at `docs/CATALOG_MVP_REAL_DEVICE_QA_REPORT.md`; the current entry is pending actual user-provided phone/browser results.
+- Mobile overflow fix and local preview QA were completed in 30B; see `docs/CATALOG_MVP_MOBILE_OVERFLOW_QA_REPORT.md`.
 - Primary contact email: `dgkim0127@gmail.com`
 - Current positioning: domestic and international B2B catalog / order inquiry site.
 - Current operating model: manual follow-up by Noblesse.
@@ -33,6 +34,7 @@
 - Checkout/cart/payment wording.
 - Request Quote final-order disclaimer.
 - Product inquiry CTA wording.
+- Mobile layout or text wrapping; any change requires mobile overflow QA rerun.
 - POS/APK/Capacitor files.
 - Backend provider resources.
 - Production DB settings.

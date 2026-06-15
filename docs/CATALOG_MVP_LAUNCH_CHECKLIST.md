@@ -10,6 +10,7 @@
 - Production browser QA: `docs/CATALOG_MVP_PRODUCTION_QA_REPORT.md`
 - Contact production QA: `docs/CATALOG_MVP_CONTACT_PRODUCTION_QA_REPORT.md`
 - Real-device QA report: `docs/CATALOG_MVP_REAL_DEVICE_QA_REPORT.md`
+- Mobile overflow QA report: `docs/CATALOG_MVP_MOBILE_OVERFLOW_QA_REPORT.md`
 
 ## Final Manual Checks Before Sharing Link
 
@@ -22,6 +23,10 @@
 - Confirm no checkout/cart/payment/direct-buy wording.
 - Confirm inquiry is not final order.
 - Confirm mobile layout on phone.
+- Confirm no text overflow.
+- Confirm no horizontal scroll.
+- Confirm email wraps safely.
+- Confirm CTA buttons do not overflow.
 - Confirm product code/material/color/size/MOQ is visible.
 - Record the real-device result in `docs/CATALOG_MVP_REAL_DEVICE_QA_REPORT.md` before external sharing.
 

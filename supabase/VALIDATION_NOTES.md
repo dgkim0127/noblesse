@@ -146,6 +146,17 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase rewrite status: Not added.
 - Deploy action in 30B: No.
 
+## 30B Catalog MVP Mobile Overflow QA/Fix Follow-up
+
+- Date: 2026-06-15
+- Change: Added mobile overflow CSS safeguards and documented local preview mobile overflow QA.
+- QA report: `docs/CATALOG_MVP_MOBILE_OVERFLOW_QA_REPORT.md`.
+- SQL execution required in 30B: No.
+- DB dry-run status: Unchanged.
+- Backend/API/Auth/DB connection status: Not changed.
+- Firebase rewrite status: Not added.
+- Deploy action in 30B: No.
+
 ## 29C Catalog Contact Production QA Follow-up
 
 - Date: 2026-06-15

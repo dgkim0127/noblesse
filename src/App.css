@@ -17,10 +17,23 @@ body {
   box-sizing: border-box;
 }
 
+*,
+*::before,
+*::after {
+  min-width: 0;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   background: var(--noblesse-bg);
+  overflow-wrap: break-word;
+}
+
+img,
+video,
+svg {
+  max-width: 100%;
 }
 
 button,
@@ -38,6 +51,22 @@ a {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+p,
+li,
+dd,
+dt,
+span,
+small,
+strong,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: anywhere;
 }
 
 .site-shell {
@@ -780,6 +809,16 @@ a {
 
 .hero-copy > .scramble-text {
   display: grid;
+  width: auto !important;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.hero-copy > .scramble-text .scramble-text-measure,
+.hero-copy > .scramble-text .scramble-text-visual {
+  display: block;
+  max-width: 100%;
+  white-space: normal;
 }
 
 .hero-actions .scramble-text {
@@ -1607,27 +1646,33 @@ a {
 
 .preview-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-  overflow-x: auto;
+  overflow-x: visible;
   padding: 8px 0 10px;
   color: #746d83;
   font-size: 12px;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .preview-bar span {
-  flex: 0 0 auto;
+  flex: 1 1 100%;
   color: var(--noblesse-sub);
   font-weight: 700;
 }
 
 .preview-bar button {
+  flex: 1 1 118px;
+  min-width: 0;
   border: 1px solid #eee4df;
   border-radius: 14px;
   padding: 5px 10px;
   color: #746d83;
   background: #fff;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
   cursor: pointer;
 }
 
@@ -1648,6 +1693,7 @@ a {
 .hero-copy {
   align-self: center;
   width: min(590px, calc(100% - 40px));
+  max-width: 100%;
   margin-left: max(20px, calc((100vw - 1180px) / 2));
   padding: clamp(34px, 5vh, 52px) 0;
 }
@@ -1669,6 +1715,7 @@ a {
   font-size: clamp(42px, 5vw, 72px);
   font-weight: 400;
   line-height: 1.02;
+  overflow-wrap: anywhere;
 }
 
 .hero p {
@@ -1704,10 +1751,16 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   min-height: 44px;
+  max-width: 100%;
+  min-width: 0;
   border: 0;
   border-radius: 22px;
   padding: 0 20px;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
   cursor: pointer;
 }
 
@@ -2285,6 +2338,7 @@ a {
 }
 
 .catalog-body {
+  min-width: 0;
   padding-top: 13px;
 }
 
@@ -2300,6 +2354,7 @@ a {
   font-size: 15px;
   font-weight: 600;
   line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .approved-price,
@@ -2318,10 +2373,14 @@ a {
 .add-inquiry {
   width: 100%;
   min-height: 38px;
+  min-width: 0;
   border: 1px solid var(--noblesse-main);
   border-radius: 19px;
+  padding: 0 10px;
   color: var(--noblesse-sub);
   background: #fff7f8;
+  line-height: 1.25;
+  white-space: normal;
   cursor: pointer;
 }
 
@@ -2557,8 +2616,10 @@ a {
   margin: 10px 0;
   color: var(--noblesse-sub);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 42px;
+  font-size: clamp(32px, 5vw, 42px);
   font-weight: 400;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
 }
 
 .detail-copy > p {
@@ -2609,6 +2670,7 @@ a {
   color: var(--noblesse-sub);
   font-size: 14px;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .product-info-list dd small {
@@ -2765,6 +2827,7 @@ a {
 }
 
 .approval-lock,
+.approval-page,
 .empty,
 .account-panel,
 .quote-panel,
@@ -2780,6 +2843,28 @@ a {
   gap: 8px;
   margin: 20px 0;
   color: #766d7b;
+  min-width: 0;
+}
+
+.approval-page {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  color: #766d7b;
+}
+
+.approval-page h1,
+.approval-page p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.approval-page h1 {
+  color: var(--noblesse-sub);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(28px, 7vw, 42px);
+  font-weight: 400;
+  line-height: 1.12;
 }
 
 .inquiry-layout {
@@ -2940,6 +3025,7 @@ a {
 }
 
 .quote-section {
+  min-width: 0;
   border: 1px solid #f0e8e3;
   border-radius: 6px;
   padding: 14px;
@@ -2967,6 +3053,7 @@ a {
   margin: 0;
   color: var(--noblesse-sub);
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .quote-line,
@@ -3144,6 +3231,7 @@ a {
   gap: 14px;
   width: 100%;
   max-width: 620px;
+  min-width: 0;
 }
 
 .auth-panel.wide {
@@ -3154,8 +3242,10 @@ a {
   margin: 0;
   color: var(--noblesse-sub);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(32px, 4vw, 48px);
+  font-size: clamp(28px, 7vw, 48px);
   font-weight: 400;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
 }
 
 .auth-panel p {
@@ -3225,6 +3315,7 @@ a {
   color: #80788b;
   font-size: 13px;
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .auth-form {
@@ -3543,6 +3634,7 @@ a {
 .account-status-card {
   display: grid;
   gap: 10px;
+  min-width: 0;
   border: 1px solid #f0e8e3;
   border-radius: 10px;
   padding: 18px;
@@ -3799,12 +3891,13 @@ a {
     grid-column: 2;
     grid-row: 1;
     justify-content: flex-end;
+    flex-wrap: wrap;
     max-width: 100%;
-    overflow-x: auto;
+    overflow-x: visible;
     margin: 0;
     padding: 0;
     font-size: 12px;
-    white-space: nowrap;
+    white-space: normal;
   }
 
   .site-header.is-compact .header-actions,
@@ -3815,9 +3908,13 @@ a {
   }
 
   .header-actions a {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
+    min-width: 0;
     font-size: 12px;
     padding: 7px 8px;
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
   }
 
   .site-header.is-compact .header-actions a,
@@ -3865,7 +3962,8 @@ a {
   }
 
   .hero h1 {
-    font-size: 46px;
+    font-size: clamp(34px, 11vw, 46px);
+    line-height: 1.05;
   }
 
   .hero-actions {
@@ -4015,10 +4113,12 @@ a {
   }
 
   .detail-copy h1 {
-    font-size: 34px;
+    font-size: clamp(30px, 9vw, 34px);
   }
 
   .detail-copy .primary-action,
+  .detail-copy .secondary-action,
+  .approval-lock .primary-action,
   .approval-lock .secondary-action {
     width: 100%;
   }
@@ -4100,6 +4200,32 @@ a {
   .account-status-card,
   .form-section {
     padding: 14px;
+  }
+
+  .account-actions,
+  .auth-links,
+  .agreement-actions {
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .account-actions .primary-action,
+  .account-actions .secondary-action,
+  .account-actions a,
+  .auth-links a,
+  .agreement-actions .primary-action,
+  .agreement-actions .secondary-action {
+    flex: 1 1 150px;
+    max-width: 100%;
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .approval-helper a,
+  .account-actions a[href^="mailto:"],
+  .approval-lock a[href^="mailto:"] {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .buyer-feature-list li {
