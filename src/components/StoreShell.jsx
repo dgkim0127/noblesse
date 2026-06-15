@@ -309,6 +309,7 @@ export function StoreShell() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isCompactSearchOpen, setIsCompactSearchOpen] = useState(false)
   const [searchHistory, setSearchHistory] = useState(readSearchHistory)
+  const [isMarqueeCollapsed, setIsMarqueeCollapsed] = useState(false)
   const [isHeaderCompact, setIsHeaderCompact] = useState(false)
   const [navIndicator, setNavIndicator] = useState({ left: 0, ready: false, width: 0 })
   const { buyerAccess, inquiryItems, isAdmin, isApproved, isGuest, isPending, setViewerState, viewerState } = useCommerce()
@@ -350,8 +351,12 @@ export function StoreShell() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const compact = window.scrollY > 260
+      const scrollY = window.scrollY || document.documentElement.scrollTop || 0
+      const marqueeCollapsed = scrollY > 24
+      const compact = scrollY > 260
+      setIsMarqueeCollapsed(marqueeCollapsed)
       setIsHeaderCompact(compact)
+      document.documentElement.classList.toggle('noblesse-marquee-collapsed', marqueeCollapsed)
       document.documentElement.classList.toggle('noblesse-compact-header', compact)
     }
     handleScroll()
@@ -372,6 +377,7 @@ export function StoreShell() {
       document.removeEventListener('scroll', handleScroll)
       window.cancelAnimationFrame(animationFrame)
       window.clearInterval(interval)
+      document.documentElement.classList.remove('noblesse-marquee-collapsed')
       document.documentElement.classList.remove('noblesse-compact-header')
     }
   }, [])
@@ -437,16 +443,32 @@ export function StoreShell() {
     setIsSearchOpen(false)
   }
   const brandHomeLabel = locale === 'kr' ? '귀족 Noblesse home' : 'Noblesse home'
+  const topMarqueeStyle = isMarqueeCollapsed
+    ? { height: 0, maxHeight: 0, opacity: 0, pointerEvents: 'none', transform: 'translateY(-100%)' }
+    : undefined
+  const compactHeaderMainStyle = isHeaderCompact
+    ? {
+      height: 56,
+      minHeight: 56,
+      paddingTop: 0,
+      paddingBottom: 0,
+      gridTemplateRows: '56px',
+      alignContent: 'center',
+    }
+    : undefined
+  const compactHeaderCollapseStyle = isHeaderCompact
+    ? { display: 'none', height: 0, maxHeight: 0, padding: 0, overflow: 'hidden' }
+    : undefined
 
-  return <div className={`site-shell ${isHeaderCompact ? 'has-compact-header' : ''}`}>
-    <div className="top-marquee" aria-label="Noblesse material notice">
+  return <div className={`site-shell ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''}`.trim()}>
+    <div className={`top-marquee ${isMarqueeCollapsed ? 'is-collapsed' : ''}`} style={topMarqueeStyle} aria-label="Noblesse material notice">
       <div className="top-marquee-track" aria-hidden="true">
         {Array.from({ length: 4 }).map((_, index) => <span key={index}>{topMarqueeText}</span>)}
       </div>
     </div>
 
     <header className={`site-header ${isHeaderCompact ? 'is-compact' : ''}`}>
-      <div className="header-main">
+      <div className="header-main" style={compactHeaderMainStyle}>
         <Link className="brand" to={toLocalePath('/')} aria-label={brandHomeLabel}>
           <img className="brand-logo" src={noblesseLogo} alt="" aria-hidden="true" width="48" height="48" />
           <AnimatedBrandName ariaHidden text={headerBrandName} />
@@ -531,6 +553,10 @@ export function StoreShell() {
       </div>
 
       {isCompactSearchOpen && <div className="compact-search-panel" ref={compactSearchRef}>
+        <span className="compact-search-boundary" aria-hidden="true">
+          <span className="compact-search-boundary-segment boundary-left" />
+          <span className="compact-search-boundary-segment boundary-right" />
+        </span>
         <form className="compact-search-form" role="search" onSubmit={submitSearch}>
           <input
             aria-label={copy.searchAria}
@@ -574,7 +600,7 @@ export function StoreShell() {
         </div>
       </div>}
 
-      <div className="header-lower">
+      <div className="header-lower" style={compactHeaderCollapseStyle}>
         <nav className="header-nav" ref={navRef} aria-label={copy.mainNav}>
           <span
             aria-hidden="true"
@@ -591,7 +617,7 @@ export function StoreShell() {
         </nav>
       </div>
 
-      <div className="preview-bar">
+      <div className="preview-bar" style={compactHeaderCollapseStyle}>
         <span>
           <span className="viewer-label-full">{copy.viewerLabels[viewerState]}</span>
           <span className="viewer-label-compact">{compactViewerLabels[viewerState]}</span>
