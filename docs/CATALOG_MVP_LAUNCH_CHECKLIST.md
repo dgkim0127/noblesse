@@ -12,6 +12,7 @@
 - Real-device QA report: `docs/CATALOG_MVP_REAL_DEVICE_QA_REPORT.md`
 - Mobile overflow QA report: `docs/CATALOG_MVP_MOBILE_OVERFLOW_QA_REPORT.md`
 - S24 Ultra UI follow-up report: `docs/CATALOG_MVP_S24_ULTRA_UI_QA_REPORT.md`
+- S24 Ultra production QA report: `docs/CATALOG_MVP_S24_ULTRA_PRODUCTION_QA_REPORT.md`
 
 ## Final Manual Checks Before Sharing Link
 

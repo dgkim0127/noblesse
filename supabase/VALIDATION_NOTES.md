@@ -135,6 +135,20 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 30C S24 Ultra Production QA Follow-up
+
+- Date: 2026-06-15
+- Change: Deployed 30B mobile UI fixes to Noblesse Hosting and recorded production QA.
+- Deploy scope: `hosting:noblesse` only.
+- Production URL: `https://noblesse.web.app`
+- QA report: `docs/CATALOG_MVP_S24_ULTRA_PRODUCTION_QA_REPORT.md`
+- SQL execution required in 30C: No.
+- DB dry-run status: Unchanged.
+- Backend/API/Auth/DB change: No.
+- Firebase `/api` rewrite change: No.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## 30B S24 Ultra UI Follow-up
 
 - Date: 2026-06-15

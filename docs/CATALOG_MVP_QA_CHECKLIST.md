@@ -68,6 +68,7 @@
 - Contact production QA report: `docs/CATALOG_MVP_CONTACT_PRODUCTION_QA_REPORT.md`
 - Mobile overflow QA report: `docs/CATALOG_MVP_MOBILE_OVERFLOW_QA_REPORT.md`
 - S24 Ultra UI follow-up report: `docs/CATALOG_MVP_S24_ULTRA_UI_QA_REPORT.md`
+- S24 Ultra production QA report: `docs/CATALOG_MVP_S24_ULTRA_PRODUCTION_QA_REPORT.md`
 - Launch freeze: `docs/CATALOG_MVP_LAUNCH_FREEZE.md`
 - Launch checklist: `docs/CATALOG_MVP_LAUNCH_CHECKLIST.md`
 - Local browser QA is required before deployment.

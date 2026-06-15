@@ -8,6 +8,13 @@
 - No API/Auth/DB/backend/provider change.
 - No Firebase `/api` rewrite.
 
+## Production Follow-up
+
+- 30C deployed the 30B mobile UI fixes to Noblesse Hosting only.
+- Production recheck report: `docs/CATALOG_MVP_S24_ULTRA_PRODUCTION_QA_REPORT.md`
+- Production URL: `https://noblesse.web.app`
+- Production QA status: Go.
+
 ## Device
 
 - Device: Samsung Galaxy S24 Ultra
