@@ -1,0 +1,62 @@
+# Catalog MVP Launch Freeze
+
+## Launch Status
+
+- Production URL: `https://noblesse.web.app`
+- Catalog MVP production QA: Go.
+- Contact-channel production QA: Go.
+- Primary contact email: `dgkim0127@gmail.com`
+- Current positioning: domestic and international B2B catalog / order inquiry site.
+- Current operating model: manual follow-up by Noblesse.
+
+## What Is Frozen
+
+- Catalog-first MVP positioning.
+- Domestic/international B2B copy direction.
+- Inquiry is not final order disclaimer.
+- No checkout/cart/payment/direct-buy behavior.
+- Primary contact path:
+  - `/register`
+  - `mailto:dgkim0127@gmail.com` where intended.
+- Firebase Hosting target:
+  - `noblesse`
+- No `/api` rewrite.
+- No backend/API/Auth/DB dependency for current MVP.
+
+## Do Not Change Without Separate Approval
+
+- Firebase Hosting target.
+- `.firebaserc` target mapping.
+- `/api` rewrite.
+- Contact email.
+- Checkout/cart/payment wording.
+- Request Quote final-order disclaimer.
+- Product inquiry CTA wording.
+- POS/APK/Capacitor files.
+- Backend provider resources.
+- Production DB settings.
+
+## Current Deferred Items
+
+- Real product photos replacing mock/generated imagery.
+- Real SKU/product list finalization.
+- CN product names currently using English mock product names where no CN name exists.
+- Domain/business email replacement for `dgkim0127@gmail.com`.
+- Legal review for terms/privacy/contact policy.
+- Backend/API/Auth/DB automation.
+- Member pricing visibility.
+- Request Quote persistence.
+- Admin Quote workflow.
+- PostgreSQL-backed catalog.
+- `audit_logs`-backed admin writes.
+
+## Current Non-goals
+
+- Online checkout.
+- Cart.
+- Payment.
+- Instant purchase.
+- Production DB automation.
+- Firebase Auth login.
+- Cloud Run / Cloud SQL setup.
+- Admin Quote automation.

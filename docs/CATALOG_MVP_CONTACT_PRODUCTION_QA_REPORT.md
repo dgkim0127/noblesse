@@ -69,4 +69,5 @@
 ## Follow-up
 
 - Replace `dgkim0127@gmail.com` with a domain/business email later if available.
+- Contact channel is frozen for the current MVP as `dgkim0127@gmail.com` until replaced by a business/domain email.
 - Re-run contact-channel QA after any future production deploy that changes inquiry, account, approval, or register copy.

@@ -79,6 +79,7 @@
 - Follow-up: Contact channel placeholder cleanup was completed in 29A; re-run contact-channel QA before the next production deploy.
 - Follow-up: Contact channel was set to `dgkim0127@gmail.com` in 29B; re-run contact-channel QA after the next production deploy.
 - Follow-up completed in 29C: Contact-channel production QA was completed after deploying to `hosting[noblesse]`; see `docs/CATALOG_MVP_CONTACT_PRODUCTION_QA_REPORT.md`.
+- Follow-up completed in 30A: Launch freeze and launch checklist were documented; see `docs/CATALOG_MVP_LAUNCH_FREEZE.md` and `docs/CATALOG_MVP_LAUNCH_CHECKLIST.md`.
 
 ## Go / No-Go
 

@@ -14,7 +14,9 @@
 ## Current Status
 
 - This is the current MVP manual follow-up email.
+- Current MVP contact is frozen as `dgkim0127@gmail.com`.
 - Replace with a domain/business email later if available.
+- Replacement requires a contact-channel QA rerun.
 - Recheck this contact channel before the next production deploy.
 - Do not use `contact@noblesse.example` in user-facing UI.
 - Do not use fake `.example` contact addresses.
