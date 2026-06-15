@@ -135,6 +135,17 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 30B Catalog MVP Real Device QA Follow-up
+
+- Date: 2026-06-15
+- Change: Added `docs/CATALOG_MVP_REAL_DEVICE_QA_REPORT.md`.
+- Real-device QA result details: Not provided in the 30B request.
+- SQL execution required in 30B: No.
+- DB dry-run status: Unchanged.
+- Backend/API/Auth/DB connection status: Not changed.
+- Firebase rewrite status: Not added.
+- Deploy action in 30B: No.
+
 ## 29C Catalog Contact Production QA Follow-up
 
 - Date: 2026-06-15
