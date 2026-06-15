@@ -313,10 +313,10 @@ export function StoreShell() {
   const [isHeaderCompact, setIsHeaderCompact] = useState(false)
   const [navIndicator, setNavIndicator] = useState({ left: 0, ready: false, width: 0 })
   const { buyerAccess, inquiryItems, isAdmin, isApproved, isGuest, isPending, setViewerState, viewerState } = useCommerce()
-  const { locale, toLanguagePath, toLocalePath } = useLocalePath()
+  const { locale, localeMeta, toLanguagePath, toLocalePath } = useLocalePath()
   const copy = shellCopy[locale] ?? shellCopy.kr
   const compactViewerLabels = shellCompactViewerLabels[locale] ?? copy.viewerLabels
-  const headerBrandName = locale === 'kr' ? '귀족' : 'Noblesse'
+  const headerBrandName = localeMeta?.brandName ?? '귀족'
 
   useEffect(() => {
     const nav = navRef.current
@@ -442,7 +442,7 @@ export function StoreShell() {
     setIsCompactSearchOpen((current) => !current)
     setIsSearchOpen(false)
   }
-  const brandHomeLabel = locale === 'kr' ? '귀족 Noblesse home' : 'Noblesse home'
+  const brandHomeLabel = `${headerBrandName} home`
   const topMarqueeStyle = isMarqueeCollapsed
     ? { height: 0, maxHeight: 0, opacity: 0, pointerEvents: 'none', transform: 'translateY(-100%)' }
     : undefined
@@ -461,7 +461,7 @@ export function StoreShell() {
     : undefined
 
   return <div className={`site-shell ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''}`.trim()}>
-    <div className={`top-marquee ${isMarqueeCollapsed ? 'is-collapsed' : ''}`} style={topMarqueeStyle} aria-label="Noblesse material notice">
+    <div className={`top-marquee ${isMarqueeCollapsed ? 'is-collapsed' : ''}`} style={topMarqueeStyle} aria-label={`${headerBrandName} material notice`}>
       <div className="top-marquee-track" aria-hidden="true">
         {Array.from({ length: 4 }).map((_, index) => <span key={index}>{topMarqueeText}</span>)}
       </div>
@@ -629,6 +629,6 @@ export function StoreShell() {
       </div>
     </header>
     <Outlet />
-    <footer className="site-footer"><strong>Noblesse</strong><span>{copy.footer}</span><Heart size={15} /></footer>
+    <footer className="site-footer"><strong>{headerBrandName}</strong><span>{copy.footer}</span><Heart size={15} /></footer>
   </div>
 }

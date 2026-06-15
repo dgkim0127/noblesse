@@ -39,7 +39,9 @@
 - viewer/status label: Go. Compact mobile labels are used and buttons fit inside the viewport.
 - language switch: Go. Dropdown opens by tap, is visible, and stays inside the mobile viewport.
 - compact search panel: Go. Panel opens after scroll, stays inside the viewport, and popular/recent search sections are readable.
-- brand label: Go. KR header/H1 shows `귀족`; EN/JP/CN header/H1 show `Noblesse`.
+- brand label: 30C result was Go with KR `귀족` and EN/JP/CN `Noblesse`.
+- 30D follow-up changes the locale brand rule to KR `귀족`, EN `Noblesse`, JP `貴族`, CN `贵族`; recheck is tracked separately.
+- 30D production recheck is recorded in `docs/CATALOG_MVP_LOCALE_BRAND_QA_REPORT.md`.
 - contact email wrapping: Go. `dgkim0127@gmail.com` is visible on `/register` and fits inside the mobile viewport.
 - horizontal overflow: Go. Checked routes had no document-level horizontal overflow.
 - forbidden checkout/cart/payment wording: Go. No forbidden visible wording found in checked production routes.

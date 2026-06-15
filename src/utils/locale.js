@@ -19,14 +19,14 @@ export const localeMeta = {
   jp: {
     code: 'JP',
     flag: '🇯🇵',
-    brandName: 'Noblesse',
-    languageLabel: 'Noblesse / 귀족',
+    brandName: '貴族',
+    languageLabel: '貴族 / Noblesse',
   },
   cn: {
     code: 'CN',
     flag: '🇨🇳',
-    brandName: 'Noblesse',
-    languageLabel: 'Noblesse / 귀족',
+    brandName: '贵族',
+    languageLabel: '贵族 / Noblesse',
   },
 }
 

@@ -8,6 +8,12 @@
 - No backend/API/DB/Auth connection.
 - No `/api` rewrite.
 
+## 30D Locale Brand Follow-up
+
+- JP/CN locale brand labels were updated after the S24 Ultra production QA.
+- Current locale brand rule: KR `귀족`, EN `Noblesse`, JP `貴族`, CN `贵族`.
+- Production verification is recorded in `docs/CATALOG_MVP_LOCALE_BRAND_QA_REPORT.md`.
+
 ## Deploy Command
 
 - `firebase.cmd deploy --only hosting:noblesse --project pors-piercing-pos`

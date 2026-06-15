@@ -35,7 +35,8 @@
 - Kept full viewer labels on wider screens while using shorter labels on mobile.
 - Made the compact language switch explicitly tappable with an open state.
 - Improved compact language dropdown spacing, background, and z-index.
-- Changed header/logo/footer brand display to `귀족` for KR and `Noblesse` for non-KR locales.
+- Changed header/logo/footer brand display to `귀족` for KR and `Noblesse` for non-KR locales during 30C.
+- 30D follow-up updates locale brand labels to KR `귀족`, EN `Noblesse`, JP `貴族`, CN `贵族`.
 - Removed brand-like `Noblesse Piercing`, `貴族ピアス`, and `高贵的穿孔` from prominent home brand surfaces.
 - Kept piercing-category wording where it describes catalog products or categories.
 - Constrained the compact search panel to the mobile viewport with internal scrolling.
@@ -67,7 +68,7 @@
 - Routes checked across mobile widths: `/`, `/products/NB-001`, `/register`, `/en`, `/en/products/NB-001`, `/en/register`, `/jp`, `/jp/products/NB-001`, `/jp/register`, `/cn`, `/cn/products/NB-001`, `/cn/register`.
 - Result: no document-level horizontal overflow found.
 - Result: no forbidden checkout/cart/payment/direct-buy visible wording found.
-- Result: EN/JP/CN home header and H1 brand labels show `Noblesse`.
+- Result after 30D follow-up: EN home header and H1 brand labels show `Noblesse`; JP shows `貴族`; CN shows `贵族`.
 - Result: compact search panel fits inside the mobile viewport.
 - Result: compact language dropdown fits inside the mobile viewport and opens by tap.
 

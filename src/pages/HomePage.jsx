@@ -35,6 +35,7 @@ const homeCopy = {
     exportTitle: '수출 베스트',
     exportNote: '소싱 정보가 명확한 수출 추천 스타일입니다.',
     viewAll: '전체 보기',
+    campaignEyebrow: '귀족 시그니처',
     campaignTitle: '귀족 시그니처',
     campaignNote: '국내·해외 거래처 문의에 맞춘 피어싱 스타일입니다.',
     campaignCta: '거래 조건 문의',
@@ -77,6 +78,7 @@ const homeCopy = {
     exportTitle: 'Export Best Items',
     exportNote: 'Export-ready styles with clear sourcing information.',
     viewAll: 'View All',
+    campaignEyebrow: 'Noblesse Signature',
     campaignTitle: 'Noblesse Signature',
     campaignNote: 'Curated piercing styles for domestic and international trade inquiries.',
     campaignCta: 'Ask About Trade Terms',
@@ -93,8 +95,8 @@ const homeCopy = {
   },
   jp: {
     eyebrow: '国内・海外B2Bカタログ',
-    title: 'Noblesse',
-    lead: '国内・海外B2B取引先向けのNoblesseカタログです。',
+    title: '貴族',
+    lead: '国内・海外B2B取引先向けの貴族カタログです。',
     note: '商品情報、最小数量、素材、オプションを確認し、取引先お問い合わせを送信してください。',
     viewCatalog: '商品を見る',
     access: '取引先お問い合わせ',
@@ -113,13 +115,14 @@ const homeCopy = {
     browseProducts: '商品を見る',
     stylesLabel: 'スタイル',
     featuredTitle: 'おすすめピアス',
-    featuredNote: 'Noblesseカタログに適したベストセレクションです。',
+    featuredNote: '貴族カタログに適したベストセレクションです。',
     newTitle: '新商品',
     newNote: '次のセレクションに向けた新しいピアスです。',
     exportTitle: '輸出ベスト',
     exportNote: '輸出相談に適したおすすめスタイルです。',
     viewAll: 'すべて見る',
-    campaignTitle: 'Noblesse Signature',
+    campaignEyebrow: '貴族 Signature',
+    campaignTitle: '貴族 Signature',
     campaignNote: '国内・海外の取引先お問い合わせに合わせたピアススタイルです。',
     campaignCta: '取引条件を問い合わせる',
     recentTitle: '最近見た商品',
@@ -128,15 +131,15 @@ const homeCopy = {
     supportNote: 'Email、KakaoTalk、WhatsAppの相談チャネルを準備中です。',
     supportSmall: '担当者確認後、見積と取引条件をご案内します。',
     companyTitle: '会社情報',
-    companyNote: 'Noblesse',
+    companyNote: '貴族',
     companySmall: '国内・海外B2Bピアスカタログ / 取引先お問い合わせサポート',
     brandNoteTitle: '国内・海外取引先向け構成',
     brandNoteText: '大きな商品画像、素材とオプション、最小数量、わかりやすいお問い合わせフローを提供します。',
   },
   cn: {
     eyebrow: '国内外B2B商品目录',
-    title: 'Noblesse',
-    lead: '面向国内外B2B买家的 Noblesse 商品目录。',
+    title: '贵族',
+    lead: '面向国内外B2B买家的贵族商品目录。',
     note: '查看商品信息、最小数量、材质和选项后，请提交贸易咨询。',
     viewCatalog: '查看商品',
     access: '贸易咨询',
@@ -155,13 +158,14 @@ const homeCopy = {
     browseProducts: '浏览商品',
     stylesLabel: '款式',
     featuredTitle: '推荐穿孔',
-    featuredNote: '适合 Noblesse 目录的精选款式。',
+    featuredNote: '适合贵族目录的精选款式。',
     newTitle: '新品上架',
     newNote: '为下一轮选品准备的新款穿孔。',
     exportTitle: '出口热选',
     exportNote: '适合出口咨询的推荐款式。',
     viewAll: '查看全部',
-    campaignTitle: 'Noblesse Signature',
+    campaignEyebrow: '贵族 Signature',
+    campaignTitle: '贵族 Signature',
     campaignNote: '为国内外贸易咨询精选的穿孔风格。',
     campaignCta: '咨询交易条件',
     recentTitle: '最近浏览',
@@ -170,7 +174,7 @@ const homeCopy = {
     supportNote: 'Email、KakaoTalk、WhatsApp 咨询渠道正在准备中。',
     supportSmall: '工作人员确认后，将提供报价和交易条件。',
     companyTitle: '公司信息',
-    companyNote: 'Noblesse',
+    companyNote: '贵族',
     companySmall: '国内外B2B穿孔商品目录 / 贸易咨询支持',
     brandNoteTitle: '面向国内外B2B买家设计',
     brandNoteText: '提供大图商品展示、材质和选项、最小数量以及清晰的咨询流程。',
@@ -249,8 +253,8 @@ const heroBanners = [
     eyebrow: {
       kr: '노블레스 추천',
       en: 'Noblesse Picks',
-      jp: 'Noblesseセレクト',
-      cn: 'Noblesse精选',
+      jp: '貴族セレクト',
+      cn: '贵族精选',
     },
     text: {
       kr: '거래처 문의에 적합한 티타늄 라블렛 추천 라인',
@@ -344,7 +348,7 @@ function getCollectionTitle(collection, locale) {
 }
 
 const latinScrambleCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-const globalScrambleCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789Noblesse귀족'
+const globalScrambleCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789Noblesse귀족貴族贵族'
 
 const lastScrambleTextByKey = new Map()
 
@@ -527,7 +531,7 @@ export function HomePage() {
           <Link className="secondary-action" to={toLocalePath(heroCta.to)}><ScrambleText persistKey="hero-secondary-cta">{heroCta.label}</ScrambleText></Link>
         </div>
       </div>
-      <div className="hero-art home-hero-art hero-carousel" aria-label="Noblesse banner carousel">
+      <div className="hero-art home-hero-art hero-carousel" aria-label={`${copy.title} banner carousel`}>
         <div className="hero-carousel-track" style={{ transform: `translateX(-${activeHeroBanner * 100}%)` }}>
           {heroBanners.map((banner, index) => {
             const bannerTitle = getLocalizedValue(banner.title, locale)
@@ -608,7 +612,7 @@ export function HomePage() {
 
     <section className="campaign-banner">
       <div>
-        <ScrambleText as="p" className="eyebrow" persistKey="campaign-eyebrow">Noblesse Signature</ScrambleText>
+        <ScrambleText as="p" className="eyebrow" persistKey="campaign-eyebrow">{copy.campaignEyebrow}</ScrambleText>
         <ScrambleText as="h2" persistKey="campaign-title">{copy.campaignTitle}</ScrambleText>
         <ScrambleText persistKey="campaign-note">{copy.campaignNote}</ScrambleText>
       </div>

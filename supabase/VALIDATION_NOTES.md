@@ -135,6 +135,22 @@ Do not record Supabase URLs, anon keys, service role keys, database passwords, c
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 30D Locale Brand Production Follow-up
+
+- Date: 2026-06-15
+- Change: JP/CN visible brand labels and accessibility labels were corrected for the Catalog MVP.
+- Production URL: `https://noblesse.web.app`
+- Deploy target: Firebase Hosting `noblesse` only.
+- SQL execution required in 30D: No.
+- DB dry-run status: Unchanged.
+- Backend/API/Auth/DB change: No.
+- Firebase `/api` rewrite change: No.
+- Firestore rules deploy: No.
+- Storage rules deploy: No.
+- Result: Locale brand production QA Go. KR `귀족`, EN `Noblesse`, JP `貴族`, CN `贵族`.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## 30C S24 Ultra Production QA Follow-up
 
 - Date: 2026-06-15
