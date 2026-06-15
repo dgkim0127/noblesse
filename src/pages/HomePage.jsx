@@ -65,7 +65,7 @@ const homeCopy = {
     buyerStripGuestNote: 'Trade terms and quotations are guided after staff review.',
     buyerStripApprovedNote: 'Assigned-market trade terms are ready.',
     quickTitle: 'Quick Categories',
-    quickNote: 'Start from piercing styles members search for most often.',
+    quickNote: 'Start from piercing styles B2B buyers search for most often.',
     collectionsTitle: 'Featured Collections',
     collectionsNote: 'Curated brand selections for market-specific sourcing.',
     browseProducts: 'Browse Products',
@@ -192,13 +192,13 @@ const quickCategories = [
 const collectionCopy = {
   'japan-buyer-picks': {
     kr: '일본 지역 취향에 맞춘 정제된 셀렉션입니다.',
-    en: 'A refined selection for Japan-area members.',
+    en: 'A refined selection for Japan-area buyers.',
     jp: '日本地域の好みに合わせたセレクションです。',
     cn: '适合日本地区偏好的精选系列。',
   },
   'us-buyer-picks': {
     kr: '미국 지역을 위한 깔끔한 스타일과 회전율 높은 피어싱입니다.',
-    en: 'Clean, easy-to-select piercing styles for US-area members.',
+    en: 'Clean, easy-to-select piercing styles for US-area buyers.',
     jp: '米国地域に向けたクリーンで回転率の高いスタイルです。',
     cn: '适合美国地区的简洁高周转款式。',
   },
@@ -254,9 +254,9 @@ const heroBanners = [
     },
     text: {
       kr: '거래처 문의에 적합한 티타늄 라블렛 추천 라인',
-      en: 'Recommended titanium labret styles for members.',
-      jp: '会員向けのチタンラブレット推薦ライン。',
-      cn: '为会员准备的钛钢唇钉推荐系列。',
+      en: 'Recommended titanium labret styles for trade inquiries.',
+      jp: '取引先お問い合わせに適したチタンラブレット推薦ライン。',
+      cn: '适合贸易咨询的钛钢唇钉推荐系列。',
     },
     to: '/products?material=Titanium',
     image: 'https://images.unsplash.com/photo-1518049362265-d5b2a6467637?auto=format&fit=crop&crop=entropy&w=1400&h=760&q=82',
@@ -316,10 +316,10 @@ const heroBanners = [
       cn: '出口热选单品',
     },
     eyebrow: {
-      kr: '글로벌 셀렉션',
-      en: 'Global Selection',
-      jp: 'グローバルセレクション',
-      cn: '全球精选',
+      kr: 'B2B 셀렉션',
+      en: 'B2B Selection',
+      jp: 'B2Bセレクション',
+      cn: 'B2B精选',
     },
     text: {
       kr: '해외 지역용 수출 추천 베스트 아이템',

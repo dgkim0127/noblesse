@@ -51,7 +51,7 @@ export function RequestQuotePage() {
         <p>This is not a final order. Our team will review product availability, price, lead time, and shipping conditions before sending a final quotation.</p>
       </div>
       <div className="quote-section">
-        <h3>회원 정보</h3>
+        <h3>거래처 정보</h3>
         <dl><dt>회사명</dt><dd>{buyer.companyName}</dd><dt>담당자</dt><dd>{buyer.contactName}</dd><dt>지역</dt><dd>{buyer.assignedMarket}</dd><dt>통화</dt><dd>{buyer.currency}</dd></dl>
       </div>
       <div className="quote-section">

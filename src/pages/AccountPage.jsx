@@ -26,13 +26,13 @@ export function AccountPage() {
   const profileRows = [
     ['현재 미리보기 상태', viewerState],
     ['회사명', buyer.companyName || '등록 전'],
-    ['담당자명', buyer.contactName || '게스트 회원'],
+    ['담당자명', buyer.contactName || '게스트'],
     ['국가', buyer.country || '선택 전'],
     ['선호 언어', buyer.preferredLanguage || '선택 전'],
     ['담당 지역', buyer.assignedMarket || '배정 전'],
     ['통화', buyer.currency || '배정 전'],
     ['역할', buyer.role || '저장된 역할 없음'],
-    ['회원 상태', buyer.status || '저장된 상태 없음'],
+    ['거래처 상태', buyer.status || '저장된 상태 없음'],
     ['할인율', `${buyer.discountRate ?? 0}%`],
     ['문의 기준 금액', minimumRequestAmount],
   ]
@@ -55,7 +55,7 @@ export function AccountPage() {
       <FeatureList buyerAccess={buyerAccess} />
     </section>
     <section className="account-panel">
-      <h2>회원 프로필 필드</h2>
+      <h2>거래처 프로필 필드</h2>
       <dl>{profileRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
       <button className="text-action logout-action" type="button" onClick={logoutMock}><LogOut size={15} />목업 로그아웃</button>
     </section>

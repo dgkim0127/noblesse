@@ -88,6 +88,7 @@ export const getLocalizedProductName = (product, locale) => {
 export const getLocalizedProductDescription = (product, locale) => {
   if (locale === 'kr') return product.descriptionKo ?? product.descriptionEn ?? product.descriptionJa
   if (locale === 'jp') return product.descriptionJa ?? product.descriptionEn ?? product.descriptionKo
+  if (locale === 'cn') return product.descriptionCn ?? product.descriptionEn ?? product.descriptionKo ?? product.descriptionJa
   return product.descriptionEn ?? product.descriptionKo ?? product.descriptionJa
 }
 

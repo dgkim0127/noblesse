@@ -48,3 +48,9 @@
 - No Firebase rewrite
 - No deploy unless separately approved
 - No backend dependency required for current catalog MVP
+
+## Browser QA
+
+- Local browser QA report: `docs/CATALOG_MVP_BROWSER_QA_REPORT.md`
+- Local browser QA is required before deployment.
+- Desktop and mobile widths should be checked on KR/EN/JP/CN key catalog and inquiry routes.

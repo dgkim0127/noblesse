@@ -154,6 +154,19 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - DB dry-run status: Unchanged.
 - Secret recorded: No.
 
+## 28C Catalog MVP Browser QA Follow-up
+
+- Date: 2026-06-15
+- Change: Completed local browser QA for the catalog-first MVP routes and added `docs/CATALOG_MVP_BROWSER_QA_REPORT.md`.
+- Scope: Frontend visible copy and layout QA only.
+- SQL execution required in 28C: No.
+- DB dry-run status: Unchanged.
+- API/Auth/DB connection status: Not added.
+- Secret recorded: No.
+- Deploy status: Not run.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## 27B Frontend API Client Wrapper Follow-up
 
 - Date: 2026-06-15
