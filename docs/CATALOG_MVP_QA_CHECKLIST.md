@@ -42,6 +42,12 @@
 - Buyer/trade information wording is clear.
 - Manual review by Noblesse is clear.
 
+## Contact Channel Checks
+
+- No placeholder email appears in user-facing UI.
+- Inquiry CTA leads to a real channel or an intentionally manual path.
+- No fake contact destination is used.
+
 ## Technical Checks
 
 - `npm run build`

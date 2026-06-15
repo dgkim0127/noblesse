@@ -3,7 +3,7 @@ import { mockInquiries, mockProductPrices, mockProducts, mockUsers } from '../da
 const blockedBuyer = {
   ...mockUsers.approved,
   uid: 'mock-blocked-buyer',
-  email: 'blocked@example.us',
+  email: '',
   companyName: 'LA Piercing Supply',
   contactName: 'Mina Clarke',
   country: 'US',

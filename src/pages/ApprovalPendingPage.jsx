@@ -1,4 +1,4 @@
-import { BadgeCheck, Clock3, Mail, UserRound } from 'lucide-react'
+import { BadgeCheck, Clock3, UserRound } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { useLocalePath } from '../utils/locale'
@@ -32,7 +32,7 @@ export function ApprovalPendingPage() {
       <div className="account-actions">
         <Link className="primary-action" to={toLocalePath('/products')}>상품 목록 보기</Link>
         <Link className="secondary-action" to={toLocalePath('/account')}>마이페이지로 이동</Link>
-        <a className="secondary-action" href="mailto:contact@noblesse.example"><Mail size={15} />Noblesse 문의</a>
+        <Link className="secondary-action" to={toLocalePath('/register')}>거래처 문의 남기기</Link>
         {isApproved && <Link className="secondary-action" to={toLocalePath('/inquiry-list')}>문의 리스트</Link>}
         {isGuest && <Link className="secondary-action" to={toLocalePath('/register')}>거래처 문의</Link>}
       </div>

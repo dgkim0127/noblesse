@@ -181,6 +181,18 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
+## 29A Catalog MVP Contact Placeholder Follow-up
+
+- Date: 2026-06-15
+- Change: Cleaned user-facing placeholder contact paths and documented Catalog MVP contact channel status.
+- SQL execution required in 29A: No.
+- DB dry-run status: Unchanged.
+- API/Auth/DB connection status: Not added.
+- Secret recorded: No.
+- Deploy status: Not run.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
 ## 27B Frontend API Client Wrapper Follow-up
 
 - Date: 2026-06-15
