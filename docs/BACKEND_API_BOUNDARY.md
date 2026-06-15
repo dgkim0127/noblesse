@@ -56,6 +56,8 @@ Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECI
 
 27A documents the future frontend API client strategy in `docs/FRONTEND_API_CLIENT_PLAN.md`. The frontend must use the backend API boundary only and must never connect directly to PostgreSQL.
 
+31A documents Admin MVP scope in `docs/ADMIN_MVP_SCOPE.md`. Admin APIs require backend authentication, PostgreSQL role checks, server-side validation, and `audit_logs` for sensitive writes. Existing admin preview screens are not real admin security.
+
 ### `GET /api/catalog/products`
 
 - Returns public visible product metadata.

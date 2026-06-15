@@ -37,6 +37,8 @@ Next step is local test and route QA for the scaffold. Provider resource creatio
 
 26D status: Local runtime smoke QA is completed for `/api/health` and documented in `docs/BACKEND_LOCAL_RUNTIME_QA.md`. Next step should be local DB-backed read QA or a frontend API client plan, not provider deployment.
 
+31A status: Admin MVP scope is documented in `docs/ADMIN_MVP_SCOPE.md`. Real admin implementation remains blocked until backend/auth/DB readiness is complete. Existing admin preview screens are not real admin security.
+
 ## Decision Status
 
 | Area | Current Status | Decision Needed Before Implementation |

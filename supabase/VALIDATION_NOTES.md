@@ -147,6 +147,17 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Backend/API/Auth/DB change: No.
 - Firebase `/api` rewrite change: No.
 
+## 31A Admin MVP Scope Planning Follow-up
+
+- Date: 2026-06-15
+- Change: Added `docs/ADMIN_MVP_SCOPE.md` and documented Admin MVP route/function/data/API/auth boundaries.
+- Scope: Documentation only.
+- SQL execution required in 31A: No.
+- DB dry-run status: Unchanged.
+- Backend/API/Auth/DB change: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 31A: No.
+
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
 
 ## 30B S24 Ultra UI Follow-up

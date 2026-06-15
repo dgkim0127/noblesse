@@ -9,6 +9,7 @@
 - Mobile overflow fix and local preview QA were completed in 30B; see `docs/CATALOG_MVP_MOBILE_OVERFLOW_QA_REPORT.md`.
 - Samsung Galaxy S24 Ultra UI follow-up fixes are recorded in `docs/CATALOG_MVP_S24_ULTRA_UI_QA_REPORT.md`.
 - Samsung Galaxy S24 Ultra production recheck after Noblesse Hosting deploy is recorded in `docs/CATALOG_MVP_S24_ULTRA_PRODUCTION_QA_REPORT.md` with status Go.
+- Admin automation is now entering planning only; see `docs/ADMIN_MVP_SCOPE.md`.
 - Primary contact email: `dgkim0127@gmail.com`
 - Current positioning: domestic and international B2B catalog / order inquiry site.
 - Current operating model: manual follow-up by Noblesse.
@@ -26,6 +27,7 @@
   - `noblesse`
 - No `/api` rewrite.
 - No backend/API/Auth/DB dependency for current MVP.
+- Public catalog behavior should not regress while admin planning proceeds.
 
 ## Do Not Change Without Separate Approval
 
@@ -52,6 +54,7 @@
 - Member pricing visibility.
 - Request Quote persistence.
 - Admin Quote workflow.
+- Real operations admin implementation.
 - PostgreSQL-backed catalog.
 - `audit_logs`-backed admin writes.
 
