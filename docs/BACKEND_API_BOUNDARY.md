@@ -58,6 +58,8 @@ Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECI
 
 31A documents Admin MVP scope in `docs/ADMIN_MVP_SCOPE.md`. Admin APIs require backend authentication, PostgreSQL role checks, server-side validation, and `audit_logs` for sensitive writes. Existing admin preview screens are not real admin security.
 
+31B documents the Admin schema gap review in `docs/ADMIN_SCHEMA_GAP_REVIEW.md`. Admin read-only APIs may use the current schema, but Admin write APIs require status mapping/migration decisions, `audit_logs`, status event strategy, and transaction handling before implementation.
+
 ### `GET /api/catalog/products`
 
 - Returns public visible product metadata.

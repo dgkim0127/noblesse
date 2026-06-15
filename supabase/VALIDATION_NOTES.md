@@ -641,3 +641,16 @@ Do not record database password, host, port, username, connection string, or pro
 - Next action: Run the dry-run in a local terminal or pgAdmin4 session where the user enters the PostgreSQL password directly, without recording it in chat, docs, GitHub, or config files.
 
 Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.
+
+## 31B Admin Schema Gap Review Follow-up
+
+- Date: 2026-06-15
+- Change: Added `docs/ADMIN_SCHEMA_GAP_REVIEW.md`.
+- DB dry-run status: Unchanged from prior local PostgreSQL validation.
+- SQL execution required in 31B: No.
+- SQL files changed in 31B: No.
+- Implementation status: Documentation only. No backend API, Auth connection, DB connection, SQL execution, migration, dependency, Firebase rewrite change, Firebase configuration change, or deploy action was added.
+- Conclusion: Admin read-only planning is Go against the current schema. Admin status writes are No-Go until status mapping/migration and status event/audit strategy are decided.
+- Next action: Plan Admin read-only API/UI against the current schema, then resolve status write strategy before any admin write implementation.
+
+Do not record `DATABASE_URL`, password, host, port, username, or other connection details. Record only success/failure, row count pass/fail, and a short issue summary.

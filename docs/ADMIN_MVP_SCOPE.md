@@ -274,3 +274,10 @@ Rules:
 - No DB connection is added in this step.
 - No Firebase Hosting rewrite is added in this step.
 - No deploy is run in this step.
+
+## 31B Schema Gap Review
+
+- Admin schema fit/gap review is documented in `docs/ADMIN_SCHEMA_GAP_REVIEW.md`.
+- The current schema is enough for Admin read-only planning against existing inquiry, buyer, product, and quote tables.
+- Inquiry status writes are blocked until the status mapping/migration choice and status event/audit strategy are decided.
+- No SQL or backend implementation change is made by the 31B review.

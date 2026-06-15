@@ -47,6 +47,18 @@ Rules:
 - Frontend code must not hold database connection strings or privileged keys.
 - Production migration remains prohibited until the backend API and security model are finalized.
 
+## 31B Admin Schema Gap Review
+
+Admin schema fit/gap review is documented in `docs/ADMIN_SCHEMA_GAP_REVIEW.md`.
+
+Current conclusion:
+
+- Admin read-only planning can use the current schema without SQL changes.
+- Inquiry status writes require a decision between display mapping and status migration.
+- `inquiry_status_events` or an equivalent event history strategy should be added before or alongside real status writes.
+- `audit_logs` remains required for admin writes.
+- No schema change is made in 31B.
+
 ## Column Naming Map
 
 SQL uses snake_case while the React/mock layer uses camelCase. Keep this mapping stable:
