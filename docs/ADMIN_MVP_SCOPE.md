@@ -293,3 +293,11 @@ Rules:
 - Backend scaffold planning for Admin read-only APIs is documented in `docs/ADMIN_READ_ONLY_BACKEND_SCAFFOLD_PLAN.md`.
 - The plan covers future route, service, query, auth, validation, pagination, and mock test structure.
 - Admin writes remain blocked.
+
+## 32A Full Editable Admin Direction
+
+- Admin direction changed from read-only-first planning to a full editable operations admin target.
+- Read-only remains the first safe implementation layer.
+- Full editable scope is documented in `docs/ADMIN_FULL_EDITABLE_SCOPE.md`.
+- Write API candidates and safety gates are documented separately in `docs/ADMIN_WRITE_API_CANDIDATES.md` and `docs/ADMIN_WRITE_SAFETY_GATES.md`.
+- No source, SQL, backend, Auth, DB, Firebase rewrite, or deploy change is made by 32A.

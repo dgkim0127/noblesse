@@ -414,3 +414,10 @@ Blocked until later:
 - No Firebase Auth integration is added by this plan.
 - No Firebase `/api` rewrite is added by this plan.
 - No deploy is run by this plan.
+
+## 32A Full Editable Admin Follow-up
+
+- This read-only scaffold plan is still useful as the first implementation layer.
+- Full editable target scope now exists in `docs/ADMIN_FULL_EDITABLE_SCOPE.md`.
+- The full editable target does not unlock writes.
+- Any write scaffold must wait for `docs/ADMIN_WRITE_SAFETY_GATES.md` and a schema/status strategy decision.

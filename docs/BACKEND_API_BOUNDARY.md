@@ -183,3 +183,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - No production DB connection
 - No write API route code
 - No production migration
+
+## 32A Admin Full Editable Planning
+
+- Admin full editable target is documented in `docs/ADMIN_FULL_EDITABLE_SCOPE.md`.
+- Future write candidates are documented in `docs/ADMIN_WRITE_API_CANDIDATES.md`.
+- Admin write APIs require `docs/ADMIN_WRITE_SAFETY_GATES.md` before implementation.
+- No backend route, frontend admin route, SQL, Auth, DB, Firebase rewrite, or deploy change is made by 32A.

@@ -234,3 +234,10 @@ Cons:
 - No backend/API/Auth implementation was added.
 - No Firebase configuration was changed.
 - No deploy was run.
+
+## 32A Full Editable Admin Follow-up
+
+- Full editable admin requires additional write safety review before implementation.
+- Status writes remain blocked until status strategy is decided.
+- `docs/ADMIN_FULL_EDITABLE_SCOPE.md` defines the target operations scope.
+- `docs/ADMIN_WRITE_SAFETY_GATES.md` defines the minimum requirements before any write API is implemented.

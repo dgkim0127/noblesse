@@ -711,3 +711,17 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase `/api` rewrite change: No.
 - Deploy action in 31D: No.
 - Conclusion: Admin read-only backend scaffold planning is documented. Admin route implementation and admin write APIs remain blocked.
+
+## 32A Admin Full Editable Scope Follow-up
+
+- Date: 2026-06-16
+- Change: Added full editable Admin scope, write API candidates, and write safety gates.
+- Scope: Documentation only.
+- SQL execution required in 32A: No.
+- DB dry-run status: Unchanged.
+- SQL files changed in 32A: No.
+- Backend/API/Auth/DB implementation: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 32A: No.
+- Register/member signup source changes: Out of scope for 32A and not staged by this documentation commit.
+- Conclusion: Admin read-only remains the safe first layer, but the target Admin direction is now full editable operations. Admin write implementation remains No-Go until safety gates and schema/status strategy are approved.

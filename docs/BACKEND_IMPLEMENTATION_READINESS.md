@@ -221,3 +221,10 @@ Before implementation starts:
 4. Confirm where server-side secrets will live.
 5. Confirm `/api/**` rewrite strategy.
 6. Create a backend implementation plan with tests before writing code.
+
+## 32A Admin Full Editable Planning
+
+- Admin full editable planning has started and is documented in `docs/ADMIN_FULL_EDITABLE_SCOPE.md`.
+- Write candidates are documented in `docs/ADMIN_WRITE_API_CANDIDATES.md`.
+- Implementation remains blocked until write safety gates and schema/status strategy are approved.
+- 32A is documentation-only and does not add backend routes, frontend admin routes, SQL, Auth, DB, Firebase rewrite, dependencies, or deploy changes.

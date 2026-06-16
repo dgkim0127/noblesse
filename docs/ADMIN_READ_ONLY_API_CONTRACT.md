@@ -511,3 +511,10 @@ No real DB/Firebase test in first scaffold.
 - No DB connection is opened by this contract.
 - No Firebase Auth integration is added by this contract.
 - No deploy is run by this contract.
+
+## 32A Full Editable Admin Follow-up
+
+- This read-only contract remains valid as the baseline Admin API layer.
+- Full editable target scope is documented separately in `docs/ADMIN_FULL_EDITABLE_SCOPE.md`.
+- Write APIs are not part of this read-only contract.
+- Write candidates must satisfy `docs/ADMIN_WRITE_SAFETY_GATES.md` before implementation.
