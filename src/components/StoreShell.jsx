@@ -25,7 +25,7 @@ const shellCopy = {
     recentSearches: '최근 검색어',
     recommendedHeading: '추천 검색어 기반 상품',
     recommendedSearches: ['티타늄 라블렛', '14K 골드 피어싱', '큐빅 바벨'],
-    register: '거래처 문의',
+    register: '회원 가입',
     requestQuote: '견적 문의',
     search: '검색',
     searchAria: '상품 검색',
@@ -234,7 +234,7 @@ const loginModalCopy = {
     submit: '로그인',
     autoLogin: '자동 로그인',
     guest: '비회원으로 둘러보기',
-    register: '회원가입',
+    register: '회원 가입',
     close: '로그인 팝업 닫기',
   },
   en: {

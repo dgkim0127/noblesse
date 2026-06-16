@@ -1,4 +1,3 @@
-import { FileText } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
@@ -42,6 +41,7 @@ const registerCopy = {
     memoPlaceholder: '운영 중인 스토어, 주요 시장, 관심 있는 피어싱 라인이나 예상 문의 수량을 알려주세요.',
     approvalTitle: '담당자 확인 안내',
     approvalBody: '거래처 정보는 담당자가 직접 확인합니다. 확인 전까지 가격과 견적 문의 기능은 잠겨 있습니다.',
+    orderDisclaimer: '견적 문의는 최종 주문이 아니며, 담당자 확인 후 거래 조건을 안내드립니다.',
     agreementsEyebrow: '약관',
     agreementsTitle: '약관 및 개인정보 동의',
     agreementsIntro: '거래처 문의에는 필수 약관 3개 동의가 필요합니다. 마케팅 안내 수신은 선택입니다.',
@@ -86,6 +86,7 @@ const registerCopy = {
     memoPlaceholder: 'Tell us about your store, market, preferred piercing line, or expected inquiry quantity.',
     approvalTitle: 'Manual Review Notice',
     approvalBody: 'Trade information is reviewed manually. Prices and quote inquiry features remain locked until review is complete.',
+    orderDisclaimer: 'Quote inquiries are not final orders. Noblesse confirms trade terms after review.',
     agreementsEyebrow: 'AGREEMENTS',
     agreementsTitle: 'Terms and privacy consent',
     agreementsIntro: 'Membership request requires acceptance of three required agreement items. Product and catalog updates are optional.',
@@ -130,6 +131,7 @@ const registerCopy = {
     memoPlaceholder: '運営中のストア、主な市場、関心のあるピアスラインや想定数量を入力してください。',
     approvalTitle: '担当者確認のご案内',
     approvalBody: '取引先情報は担当者が確認します。確認前は取引条件と見積相談機能は利用できません。',
+    orderDisclaimer: '見積相談は最終注文ではありません。担当者確認後に取引条件をご案内します。',
     agreementsEyebrow: '規約',
     agreementsTitle: '規約および個人情報同意',
     agreementsIntro: '取引先お問い合わせには3つの必須同意が必要です。マーケティング案内の受信は任意です。',
@@ -174,6 +176,7 @@ const registerCopy = {
     memoPlaceholder: '请填写您的店铺、主要市场、感兴趣的穿孔产品线或预计咨询数量。',
     approvalTitle: '工作人员确认说明',
     approvalBody: '贸易信息将由工作人员确认。确认前，交易条件和报价咨询功能将保持锁定。',
+    orderDisclaimer: '报价咨询不是最终订单。工作人员确认后会说明交易条件。',
     agreementsEyebrow: '条款',
     agreementsTitle: '条款及个人信息同意',
     agreementsIntro: '提交贸易咨询需要同意3项必选条款。营销及新品通知为可选项。',
@@ -219,6 +222,89 @@ const fieldGroups = {
   ],
 }
 
+const ageAgreementSummary = {
+  key: 'age_confirmed',
+  version: 'age-v1.0',
+  required: true,
+  titleKo: '14세 이상입니다',
+  titleEn: 'I am at least 14 years old',
+  sections: [],
+}
+
+const profileFieldsByLocale = {
+  kr: [
+    ['아이디', 'loginId', 'text', '아이디'],
+    ['비밀번호', 'password', 'password', '비밀번호'],
+    ['업체명', 'companyName', 'text', '업체명 또는 상호'],
+    ['담당자명', 'contactName', 'text', '담당자명'],
+    ['연락처', 'contact', 'text', '이메일 또는 전화번호'],
+    ['국가/지역', 'country', 'text', '예: KR, JP, US'],
+  ],
+  en: [
+    ['ID', 'loginId', 'text', 'ID'],
+    ['Password', 'password', 'password', 'Password'],
+    ['Company', 'companyName', 'text', 'Company or shop name'],
+    ['Contact name', 'contactName', 'text', 'Contact name'],
+    ['Contact', 'contact', 'text', 'Email or phone'],
+    ['Country / Region', 'country', 'text', 'e.g. KR, JP, US'],
+  ],
+  jp: [
+    ['ID', 'loginId', 'text', 'ID'],
+    ['パスワード', 'password', 'password', 'パスワード'],
+    ['会社名', 'companyName', 'text', '会社名または店舗名'],
+    ['担当者名', 'contactName', 'text', '担当者名'],
+    ['連絡先', 'contact', 'text', 'メールまたは電話番号'],
+    ['国 / 地域', 'country', 'text', '例: KR, JP, US'],
+  ],
+  cn: [
+    ['ID', 'loginId', 'text', 'ID'],
+    ['密码', 'password', 'password', '密码'],
+    ['公司名称', 'companyName', 'text', '公司或店铺名称'],
+    ['联系人', 'contactName', 'text', '联系人'],
+    ['联系方式', 'contact', 'text', '邮箱或电话'],
+    ['国家 / 地区', 'country', 'text', '例如: KR, JP, US'],
+  ],
+}
+
+const registerStepCopy = {
+  kr: {
+    continue: '동의하고 정보 입력하기',
+    infoTitle: '정보 입력',
+    memoTitle: '문의 내용',
+    memoLabel: '문의 내용',
+    memoPlaceholder: '관심 제품, 예상 수량, 판매 지역 등 필요한 내용만 간단히 적어주세요.',
+    backToAgreements: '동의 항목 다시 보기',
+    requiredOnly: '필수 항목에만',
+  },
+  en: {
+    continue: 'Agree and enter information',
+    infoTitle: 'Information',
+    memoTitle: 'Inquiry memo',
+    memoLabel: 'Inquiry memo',
+    memoPlaceholder: 'Briefly add products, quantity, market, or trade notes.',
+    backToAgreements: 'Back to agreements',
+    requiredOnly: 'Required items only',
+  },
+  jp: {
+    continue: '同意して情報を入力',
+    infoTitle: '情報入力',
+    memoTitle: 'お問い合わせ内容',
+    memoLabel: 'お問い合わせ内容',
+    memoPlaceholder: '気になる商品、数量、販売地域などを簡単に入力してください。',
+    backToAgreements: '同意項目に戻る',
+    requiredOnly: '必須項目のみ',
+  },
+  cn: {
+    continue: '同意后填写信息',
+    infoTitle: '填写信息',
+    memoTitle: '咨询内容',
+    memoLabel: '咨询内容',
+    memoPlaceholder: '请简单填写感兴趣的产品、预计数量、销售地区等。',
+    backToAgreements: '返回同意项目',
+    requiredOnly: '仅必填项目',
+  },
+}
+
 function FieldGroup({ title, children }) {
   return <fieldset className="form-section">
     <legend>{title}</legend>
@@ -253,10 +339,10 @@ function AgreementRow({ agreement, checked, locale, onChange, t }) {
         <em className="agreement-version">version: {agreement.version}</em>
       </span>
     </label>
-    <details className="agreement-details">
+    {agreement.sections.length > 0 && <details className="agreement-details">
       <summary>{t.viewDetails}</summary>
       <AgreementDocument document={agreement} locale={locale} />
-    </details>
+    </details>}
   </div>
 }
 
@@ -268,17 +354,31 @@ export function RegisterPage() {
   const contactNote = contactEmailNotes[locale] ?? contactEmailNotes.kr
   const [contactNoteBefore, contactNoteAfter = ''] = contactNote.split('{email}')
   const [agreements, setAgreements] = useState(getInitialAgreements)
+  const [registerStep, setRegisterStep] = useState('agreements')
   const agreementSummaries = getAgreementSummaryForRegister()
+  const registerAgreementSummaries = [ageAgreementSummary, ...agreementSummaries]
   const privacyPolicy = getAgreementDocument('privacy_policy')
-  const requiredAccepted = areRequiredAgreementsAccepted(agreements)
-  const allAccepted = agreementSummaries.every((agreement) => agreements[agreement.key] === true)
+  const requiredAccepted = agreements.age_confirmed === true && areRequiredAgreementsAccepted(agreements)
+  const requiredAgreementKeys = registerAgreementSummaries.filter((agreement) => agreement.required).map((agreement) => agreement.key)
+  const requiredAllAccepted = requiredAgreementKeys.every((key) => agreements[key] === true)
+  const profileFields = profileFieldsByLocale[locale] ?? profileFieldsByLocale.kr
+  const stepCopy = registerStepCopy[locale] ?? registerStepCopy.kr
+  const pageTitle = locale === 'kr' ? '회원 가입' : t.title
 
   const setAgreement = (name, checked) => {
     setAgreements((current) => ({ ...current, [name]: checked }))
   }
 
-  const setAllAgreements = (checked) => {
-    setAgreements(Object.fromEntries(agreementSummaries.map((agreement) => [agreement.key, checked])))
+  const setRequiredAgreements = (checked) => {
+    setAgreements((current) => ({
+      ...current,
+      ...Object.fromEntries(requiredAgreementKeys.map((key) => [key, checked])),
+    }))
+  }
+
+  const continueToProfile = (event) => {
+    event.preventDefault()
+    if (requiredAccepted) setRegisterStep('profile')
   }
 
   const submitRequest = (event) => {
@@ -299,56 +399,19 @@ export function RegisterPage() {
 
   return <main className="content auth-page">
     <section className="account-panel auth-panel wide">
-      <FileText size={25} />
-      <p className="eyebrow">{t.eyebrow}</p>
-      <h1>{t.title}</h1>
-      <div className="buyer-access-intro">
-        <p>{t.intro}</p>
-        <p className="approval-helper">{t.helper}</p>
-        <p className="approval-helper">{contactNoteBefore}<a href={`mailto:${primaryContactEmail}`}>{primaryContactEmail}</a>{contactNoteAfter}</p>
-      </div>
-      <aside className="buyer-access-notice" aria-label={t.noticeTitle}>
-        <strong>{t.noticeTitle}</strong>
-        <ul>
-          {t.noticeItems.map((item) => <li key={item}>{item}</li>)}
-        </ul>
-      </aside>
-      <form className="auth-form" onSubmit={submitRequest}>
-        <FieldGroup title={t.groups.buyer}>
-          {fieldGroups.buyer.map(renderField)}
-        </FieldGroup>
-        <FieldGroup title={t.groups.contact}>
-          {fieldGroups.contact.map(renderField)}
-        </FieldGroup>
-        <FieldGroup title={t.groups.business}>
-          {fieldGroups.business.map(renderField)}
-        </FieldGroup>
-        <fieldset className="form-section">
-          <legend>{t.groups.memo}</legend>
-          <label>{t.fields.requestMemo}<textarea name="requestMemo" placeholder={t.memoPlaceholder} /></label>
-        </fieldset>
-        <div className="approval-note">
-          <strong>{t.approvalTitle}</strong>
-          <span>{t.approvalBody}</span>
-        </div>
+      <h1>{pageTitle}</h1>
+      {registerStep === 'profile' && <p className="approval-helper">{contactNoteBefore}<a href={`mailto:${primaryContactEmail}`}>{primaryContactEmail}</a>{contactNoteAfter}</p>}
+      {registerStep === 'agreements' ? <form className="auth-form" onSubmit={continueToProfile}>
+        <section className="agreement-section" aria-label={t.agreementsTitle}>
+          <label className="agreement-required-all">
+            <input checked={requiredAllAccepted} data-testid="agreement-all" onChange={(event) => setRequiredAgreements(event.target.checked)} type="checkbox" />
+            <span>
+              <strong>{t.allAgree}</strong>
+              <small>{stepCopy.requiredOnly}</small>
+            </span>
+          </label>
 
-        <section className="agreement-section" aria-labelledby="agreement-title">
-          <div className="agreement-summary">
-            <div>
-              <p className="eyebrow">{t.agreementsEyebrow}</p>
-              <h2 id="agreement-title">{t.agreementsTitle}</h2>
-              <span>{t.agreementsIntro}</span>
-            </div>
-            <label className="agreement-card agreement-row agreement-all">
-              <input checked={allAccepted} data-testid="agreement-all" onChange={(event) => setAllAgreements(event.target.checked)} type="checkbox" />
-              <span>
-                <strong>{t.allAgree}</strong>
-                <small>{t.allAgreeSub}</small>
-              </span>
-            </label>
-          </div>
-
-          {agreementSummaries.map((agreement) => <AgreementRow
+          {registerAgreementSummaries.map((agreement) => <AgreementRow
             agreement={agreement}
             checked={agreements[agreement.key] === true}
             key={agreement.key}
@@ -369,10 +432,33 @@ export function RegisterPage() {
         </section>
 
         <div className="account-actions agreement-actions">
-          <button className="primary-action" data-testid="request-buyer-access-submit" disabled={!requiredAccepted} type="submit">{t.submit}</button>
+          <button className="primary-action" disabled={!requiredAccepted} type="submit">{stepCopy.continue}</button>
           <Link className="secondary-action" to={toLocalePath('/login')}>{t.back}</Link>
         </div>
-      </form>
+      </form> : <form className="auth-form" onSubmit={submitRequest}>
+        <fieldset className="form-section">
+          <legend>{stepCopy.infoTitle}</legend>
+          <div className="register-grid">
+            {profileFields.map(([label, name, type, placeholder]) => <label key={name}>
+              {label}
+              <input autoComplete="off" name={name} placeholder={placeholder} required type={type} />
+            </label>)}
+          </div>
+        </fieldset>
+        <fieldset className="form-section">
+          <legend>{stepCopy.memoTitle}</legend>
+          <label>{stepCopy.memoLabel}<textarea name="requestMemo" placeholder={stepCopy.memoPlaceholder} /></label>
+        </fieldset>
+        <div className="approval-note">
+          <strong>{t.approvalTitle}</strong>
+          <span>{t.approvalBody}</span>
+          <span>{t.orderDisclaimer}</span>
+        </div>
+        <div className="account-actions agreement-actions">
+          <button className="secondary-action" onClick={() => setRegisterStep('agreements')} type="button">{stepCopy.backToAgreements}</button>
+          <button className="primary-action" data-testid="request-buyer-access-submit" type="submit">{t.submit}</button>
+        </div>
+      </form>}
     </section>
   </main>
 }

@@ -134,6 +134,7 @@ Purpose:
 
 Collected items:
 
+- login ID
 - email
 - password
 - company name

@@ -4015,6 +4015,39 @@ h6 {
   line-height: 1.6;
 }
 
+.agreement-required-all {
+  display: grid;
+  width: fit-content;
+  justify-self: end;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 9px;
+  color: var(--noblesse-sub);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.agreement-required-all input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--noblesse-main);
+}
+
+.agreement-required-all span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.agreement-required-all small {
+  color: #8a8190;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .agreement-all {
   align-items: center;
   padding: 14px;
