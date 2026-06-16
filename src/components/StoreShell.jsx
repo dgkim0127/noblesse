@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, Clock3, Heart, Search, ShieldCheck, UserRound } from 'lucide-react'
+import { ChevronDown, Clock3, Heart, Search, ShieldCheck, UserRound, X } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import noblesseLogo from '../assets/noblesse-logo.png'
 import { useCommerce } from '../commerce/commerceStore'
@@ -222,6 +222,61 @@ const shellCompactViewerLabels = {
   },
 }
 
+const loginModalCopy = {
+  kr: {
+    title: '거래처 로그인',
+    heading: '거래 조건 확인하기',
+    description: '확인된 거래처는 거래 조건, 문의 리스트, 견적 문의 기능을 사용할 수 있습니다. 견적 문의는 최종 주문이 아닙니다.',
+    email: '이메일',
+    password: '비밀번호',
+    emailPlaceholder: '이메일',
+    passwordPlaceholder: '비밀번호',
+    submit: '로그인',
+    guest: '비회원으로 둘러보기',
+    register: '거래처 문의',
+    close: '로그인 팝업 닫기',
+  },
+  en: {
+    title: 'Trade login',
+    heading: 'Check trade access',
+    description: 'Approved buyers can use trade terms, Inquiry List, and Request Quote. A quote request is not a final order.',
+    email: 'Email',
+    password: 'Password',
+    emailPlaceholder: 'Email',
+    passwordPlaceholder: 'Password',
+    submit: 'Login',
+    guest: 'Browse as guest',
+    register: 'Trade inquiry',
+    close: 'Close login popup',
+  },
+  jp: {
+    title: '取引先ログイン',
+    heading: '取引条件を確認',
+    description: '確認済みの取引先は取引条件、お問い合わせリスト、見積もり依頼を利用できます。見積もり依頼は最終注文ではありません。',
+    email: 'メール',
+    password: 'パスワード',
+    emailPlaceholder: 'メール',
+    passwordPlaceholder: 'パスワード',
+    submit: 'ログイン',
+    guest: 'ゲストで見る',
+    register: '取引先お問い合わせ',
+    close: 'ログインポップアップを閉じる',
+  },
+  cn: {
+    title: '贸易登录',
+    heading: '查看贸易条件',
+    description: '已确认的贸易客户可使用贸易条件、咨询列表和报价咨询。报价咨询不是最终订单。',
+    email: '邮箱',
+    password: '密码',
+    emailPlaceholder: '邮箱',
+    passwordPlaceholder: '密码',
+    submit: '登录',
+    guest: '以访客浏览',
+    register: '贸易咨询',
+    close: '关闭登录弹窗',
+  },
+}
+
 const readSearchHistory = () => {
   if (typeof window === 'undefined') return []
 
@@ -295,7 +350,13 @@ function LanguageSwitch({ countryLabels, isCompact = false, languageSwitch, loca
   </div>
 }
 
-function IconAction({ children, label, to, className = '' }) {
+function IconAction({ children, label, onClick, to, className = '' }) {
+  if (onClick) {
+    return <button aria-label={label} className={`icon-action ${className}`} title={label} type="button" onClick={onClick}>
+      {children}
+    </button>
+  }
+
   return <NavLink aria-label={label} className={`icon-action ${className}`} title={label} to={to}>
     {children}
   </NavLink>
@@ -323,10 +384,13 @@ export function StoreShell() {
   const [searchHistory, setSearchHistory] = useState(readSearchHistory)
   const [isMarqueeCollapsed, setIsMarqueeCollapsed] = useState(false)
   const [isHeaderCompact, setIsHeaderCompact] = useState(false)
+  const [isPreviewBarHidden, setIsPreviewBarHidden] = useState(false)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [navIndicator, setNavIndicator] = useState({ left: 0, ready: false, width: 0 })
   const { buyerAccess, inquiryItems, isAdmin, isApproved, isGuest, isPending, setViewerState, viewerState } = useCommerce()
   const { locale, localeMeta, toLanguagePath, toLocalePath } = useLocalePath()
   const copy = shellCopy[locale] ?? shellCopy.kr
+  const loginCopy = loginModalCopy[locale] ?? loginModalCopy.kr
   const compactViewerLabels = shellCompactViewerLabels[locale] ?? copy.viewerLabels
   const headerBrandName = localeMeta?.brandName ?? '귀족'
   const isCompactSearchOpen = compactSearchPhase === 'open'
@@ -413,6 +477,17 @@ export function StoreShell() {
   }, [])
 
   useEffect(() => {
+    if (!isLoginModalOpen) return undefined
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setIsLoginModalOpen(false)
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isLoginModalOpen])
+
+  useEffect(() => {
     if (!isCompactSearchOpen) return
     window.requestAnimationFrame(() => {
       window.setTimeout(() => compactSearchInputRef.current?.focus(), 0)
@@ -485,6 +560,33 @@ export function StoreShell() {
     else openCompactSearch()
     setIsSearchOpen(false)
   }
+
+  const openLoginModal = () => {
+    setIsSearchOpen(false)
+    closeCompactSearch()
+    setIsLoginModalOpen(true)
+  }
+
+  const closeLoginModal = () => setIsLoginModalOpen(false)
+
+  const loginAsApprovedBuyer = (event) => {
+    event.preventDefault()
+    setViewerState('approved')
+    closeLoginModal()
+    navigate(toLocalePath('/account'))
+  }
+
+  const browseAsGuest = () => {
+    setViewerState('guest')
+    closeLoginModal()
+    navigate(toLocalePath('/products'))
+  }
+
+  const goToRegisterFromLogin = () => {
+    closeLoginModal()
+    navigate(toLocalePath('/register'))
+  }
+
   const brandHomeLabel = `${headerBrandName} home`
   const topMarqueeStyle = isMarqueeCollapsed
     ? { height: 0, maxHeight: 0, opacity: 0, pointerEvents: 'none', transform: 'translateY(-100%)' }
@@ -577,7 +679,7 @@ export function StoreShell() {
         </div>
 
         <nav className="header-actions" aria-label={copy.memberNav}>
-          {isGuest && <IconAction label={copy.login} to={toLocalePath('/login')}><UserRound size={18} /></IconAction>}
+          {isGuest && <IconAction label={copy.login} onClick={openLoginModal}><UserRound size={18} /></IconAction>}
           {isPending && <>
             <IconAction label={copy.pending} to={toLocalePath('/approval-pending')}><Clock3 size={18} /></IconAction>
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
@@ -664,7 +766,7 @@ export function StoreShell() {
         </nav>
       </div>
 
-      <div className="preview-bar" style={compactHeaderCollapseStyle}>
+      {!isPreviewBarHidden && <div className="preview-bar" style={compactHeaderCollapseStyle}>
         <span>
           <span className="viewer-label-full">{copy.viewerLabels[viewerState]}</span>
           <span className="viewer-label-compact">{compactViewerLabels[viewerState]}</span>
@@ -673,8 +775,49 @@ export function StoreShell() {
           <span className="viewer-label-full">{copy.viewerLabels[state]}</span>
           <span className="viewer-label-compact">{compactViewerLabels[state]}</span>
         </button>)}
-      </div>
+      </div>}
     </header>
+    {isLoginModalOpen && <div className="login-modal-overlay" role="presentation" onMouseDown={closeLoginModal}>
+      <section
+        aria-labelledby="login-modal-title"
+        aria-modal="true"
+        className="login-modal"
+        role="dialog"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <button className="login-modal-close" type="button" aria-label={loginCopy.close} onClick={closeLoginModal}>
+          <X size={18} />
+        </button>
+        <UserRound className="login-modal-icon" size={25} />
+        <p className="eyebrow">{loginCopy.title}</p>
+        <h2 id="login-modal-title">{loginCopy.heading}</h2>
+        <div className="brand-mini">
+          <strong>{headerBrandName}</strong>
+          <span>Noblesse B2B Catalog</span>
+        </div>
+        <p>{loginCopy.description}</p>
+        <form className="auth-form" onSubmit={loginAsApprovedBuyer}>
+          <label>{loginCopy.email}<input autoComplete="email" name="email" placeholder={loginCopy.emailPlaceholder} type="email" /></label>
+          <label>{loginCopy.password}<input autoComplete="current-password" name="password" placeholder={loginCopy.passwordPlaceholder} type="password" /></label>
+          <button className="primary-action" type="submit">{loginCopy.submit}</button>
+        </form>
+        <div className="auth-links">
+          <button className="text-action" type="button" onClick={browseAsGuest}>{loginCopy.guest}</button>
+          <button className="text-action login-register-action" type="button" onClick={goToRegisterFromLogin}>{loginCopy.register}</button>
+        </div>
+      </section>
+    </div>}
+    <button
+      className={`preview-bar-hide ${isPreviewBarHidden ? 'is-hidden-state' : ''}`}
+      type="button"
+      aria-label={isPreviewBarHidden ? 'Show mock preview bar' : 'Hide mock preview bar'}
+      title={isPreviewBarHidden ? 'Show mock preview bar' : 'Hide mock preview bar'}
+      onClick={() => setIsPreviewBarHidden((current) => !current)}
+    >
+      <span className="preview-hide-full">{isPreviewBarHidden ? '미리보기 보이기' : '미리보기 숨기기'}</span>
+      <span className="preview-hide-compact">{isPreviewBarHidden ? '보이기' : '숨기기'}</span>
+      <span aria-hidden="true">{isPreviewBarHidden ? '+' : '×'}</span>
+    </button>
     <Outlet />
     <footer className="site-footer"><strong>{headerBrandName}</strong><span>{copy.footer}</span><Heart size={15} /></footer>
   </div>

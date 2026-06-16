@@ -578,10 +578,13 @@ export function HomePage() {
         </div>
       </div>
       <div className="quick-category-grid">
-        {quickCategories.map((category) => {
+        {quickCategories.map((category, index) => {
           const label = getLocalizedValue(category.labels, locale)
           return <Link className="quick-category-card" key={category.key} to={toLocalePath(`/products${category.query}`)}>
-            <ScrambleText persistKey={`quick-symbol-${category.key}`}>{label.slice(0, 1)}</ScrambleText>
+            <span className="quick-category-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            <span className="quick-category-symbol" aria-hidden="true">
+              <ScrambleText persistKey={`quick-symbol-${category.key}`}>{label.slice(0, 1)}</ScrambleText>
+            </span>
             <ScrambleText as="strong" persistKey={`quick-label-${category.key}`}>{label}</ScrambleText>
           </Link>
         })}
