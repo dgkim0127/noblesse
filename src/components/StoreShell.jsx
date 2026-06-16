@@ -222,6 +222,29 @@ const shellCompactViewerLabels = {
   },
 }
 
+const sideMemberLabels = {
+  kr: {
+    inquiryList: '견적 리스트',
+    my: 'MY',
+    myInquiries: '내 견적 요청',
+  },
+  en: {
+    inquiryList: 'Inquiry List',
+    my: 'MY',
+    myInquiries: 'My Inquiries',
+  },
+  jp: {
+    inquiryList: '見積リスト',
+    my: 'MY',
+    myInquiries: '見積依頼',
+  },
+  cn: {
+    inquiryList: '报价清单',
+    my: 'MY',
+    myInquiries: '我的报价',
+  },
+}
+
 const loginModalCopy = {
   kr: {
     title: '거래처 로그인',
@@ -402,6 +425,7 @@ export function StoreShell() {
   const copy = shellCopy[locale] ?? shellCopy.kr
   const loginCopy = loginModalCopy[locale] ?? loginModalCopy.kr
   const compactViewerLabels = shellCompactViewerLabels[locale] ?? copy.viewerLabels
+  const sideCopy = sideMemberLabels[locale] ?? sideMemberLabels.kr
   const headerBrandName = localeMeta?.brandName ?? '귀족'
   const isCompactSearchOpen = compactSearchPhase === 'open'
   const isCompactSearchClosing = compactSearchPhase === 'closing'
@@ -745,7 +769,13 @@ export function StoreShell() {
         </div>
 
         <nav className="header-actions" aria-label={copy.memberNav}>
-          {isGuest && <IconAction label={copy.login} onClick={openLoginModal}><UserRound size={18} /></IconAction>}
+          {isHomeImageRoute && <>
+            <button className="header-login-text-action" type="button" onClick={openLoginModal}>{copy.login}</button>
+            <IconAction className="header-side-icon" label={sideCopy.myInquiries} to={toLocalePath('/my-inquiries')}><Clock3 size={17} /></IconAction>
+            <IconAction className="header-side-icon" label={sideCopy.inquiryList} to={toLocalePath('/inquiry-list')}><InquiryListIcon /></IconAction>
+            <IconAction className="header-my-action" label={copy.account} to={toLocalePath('/account')}>{sideCopy.my}</IconAction>
+          </>}
+          {isGuest && !isHomeImageRoute && <IconAction label={copy.login} onClick={openLoginModal}><UserRound size={18} /></IconAction>}
           {isPending && <>
             <IconAction label={copy.pending} to={toLocalePath('/approval-pending')}><Clock3 size={18} /></IconAction>
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
