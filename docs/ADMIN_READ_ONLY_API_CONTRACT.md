@@ -496,6 +496,13 @@ Test cases:
 
 No real DB/Firebase test in first scaffold.
 
+## 31D Backend Scaffold Plan
+
+- Admin read-only backend scaffold planning is documented in `docs/ADMIN_READ_ONLY_BACKEND_SCAFFOLD_PLAN.md`.
+- The scaffold plan remains read-only and covers future route, service, query, auth, validation, pagination, and mock test structure.
+- Backend implementation is not started by the scaffold plan.
+- Admin write APIs remain blocked.
+
 ## Non-Implementation Confirmation
 
 - No backend route is implemented by this contract.

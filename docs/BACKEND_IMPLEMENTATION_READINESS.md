@@ -41,6 +41,8 @@ Next step is local test and route QA for the scaffold. Provider resource creatio
 
 31C status: Admin read-only API contract planning is documented in `docs/ADMIN_READ_ONLY_API_CONTRACT.md`. Implementation still requires backend/auth/DB readiness and must stay read-only until status write strategy is approved.
 
+31D status: Admin read-only backend scaffold planning is documented in `docs/ADMIN_READ_ONLY_BACKEND_SCAFFOLD_PLAN.md`. Implementation still needs explicit approval and must begin with mock auth/mock DB tests only.
+
 ## Decision Status
 
 | Area | Current Status | Decision Needed Before Implementation |

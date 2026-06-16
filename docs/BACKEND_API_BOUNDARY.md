@@ -62,6 +62,8 @@ Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECI
 
 31C documents the Admin read-only API contract in `docs/ADMIN_READ_ONLY_API_CONTRACT.md`. Admin write APIs remain blocked and are not part of the read-only contract.
 
+31D documents the Admin read-only backend scaffold plan in `docs/ADMIN_READ_ONLY_BACKEND_SCAFFOLD_PLAN.md`. It plans future `/api/admin` route, service, query, auth, validation, pagination, and mock test structure only. `/api/admin` write routes remain blocked.
+
 ### `GET /api/catalog/products`
 
 - Returns public visible product metadata.

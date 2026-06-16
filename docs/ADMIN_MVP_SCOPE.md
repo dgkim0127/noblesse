@@ -287,3 +287,9 @@ Rules:
 - Admin read-only API contract is documented in `docs/ADMIN_READ_ONLY_API_CONTRACT.md`.
 - Phase 1 Admin API planning is read-only only: dashboard, inquiries, inquiry detail, buyers, and products.
 - Admin writes remain blocked until status mapping, transaction handling, and audit strategy are resolved.
+
+## 31D Backend Scaffold Plan
+
+- Backend scaffold planning for Admin read-only APIs is documented in `docs/ADMIN_READ_ONLY_BACKEND_SCAFFOLD_PLAN.md`.
+- The plan covers future route, service, query, auth, validation, pagination, and mock test structure.
+- Admin writes remain blocked.

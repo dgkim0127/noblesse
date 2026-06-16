@@ -698,3 +698,16 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase `/api` rewrite change: No.
 - Deploy action in 31C: No.
 - Conclusion: Admin read-only route contract is documented. Admin write APIs remain blocked.
+
+## 31D Admin Read-only Backend Scaffold Plan Follow-up
+
+- Date: 2026-06-16
+- Change: Added `docs/ADMIN_READ_ONLY_BACKEND_SCAFFOLD_PLAN.md`.
+- Scope: Documentation only for future Admin read-only backend scaffold structure.
+- SQL execution required in 31D: No.
+- DB dry-run status: Unchanged.
+- SQL files changed in 31D: No.
+- Backend/API/Auth/DB implementation: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 31D: No.
+- Conclusion: Admin read-only backend scaffold planning is documented. Admin route implementation and admin write APIs remain blocked.
