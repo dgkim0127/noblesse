@@ -315,9 +315,11 @@ export function StoreShell() {
   const searchRef = useRef(null)
   const compactSearchRef = useRef(null)
   const compactSearchInputRef = useRef(null)
+  const compactSearchCloseTimerRef = useRef(null)
+  const compactSearchVisibleRef = useRef(false)
   const [headerSearch, setHeaderSearch] = useState('')
   const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [isCompactSearchOpen, setIsCompactSearchOpen] = useState(false)
+  const [compactSearchPhase, setCompactSearchPhase] = useState('closed')
   const [searchHistory, setSearchHistory] = useState(readSearchHistory)
   const [isMarqueeCollapsed, setIsMarqueeCollapsed] = useState(false)
   const [isHeaderCompact, setIsHeaderCompact] = useState(false)
@@ -327,6 +329,8 @@ export function StoreShell() {
   const copy = shellCopy[locale] ?? shellCopy.kr
   const compactViewerLabels = shellCompactViewerLabels[locale] ?? copy.viewerLabels
   const headerBrandName = localeMeta?.brandName ?? '귀족'
+  const isCompactSearchOpen = compactSearchPhase === 'open'
+  const isCompactSearchClosing = compactSearchPhase === 'closing'
 
   useEffect(() => {
     const nav = navRef.current
@@ -393,8 +397,20 @@ export function StoreShell() {
   }, [])
 
   useEffect(() => {
-    if (!isHeaderCompact) setIsCompactSearchOpen(false)
-  }, [isHeaderCompact])
+    if (!isHeaderCompact && !isCompactSearchClosing) {
+      if (compactSearchCloseTimerRef.current) window.clearTimeout(compactSearchCloseTimerRef.current)
+      compactSearchCloseTimerRef.current = null
+      setCompactSearchPhase('closed')
+    }
+  }, [isCompactSearchClosing, isHeaderCompact])
+
+  useEffect(() => {
+    compactSearchVisibleRef.current = isCompactSearchOpen || isCompactSearchClosing
+  }, [isCompactSearchClosing, isCompactSearchOpen])
+
+  useEffect(() => () => {
+    if (compactSearchCloseTimerRef.current) window.clearTimeout(compactSearchCloseTimerRef.current)
+  }, [])
 
   useEffect(() => {
     if (!isCompactSearchOpen) return
@@ -407,7 +423,7 @@ export function StoreShell() {
     const handleOutsideClick = (event) => {
       if (!searchRef.current?.contains(event.target)) setIsSearchOpen(false)
       if (!compactSearchRef.current?.contains(event.target) && !event.target.closest?.('.compact-search-action')) {
-        setIsCompactSearchOpen(false)
+        closeCompactSearch()
       }
     }
 
@@ -427,7 +443,7 @@ export function StoreShell() {
     saveSearchHistory(query)
     setHeaderSearch(query)
     setIsSearchOpen(false)
-    setIsCompactSearchOpen(false)
+    closeCompactSearch()
     const target = query ? `/products?q=${encodeURIComponent(query)}` : '/products'
     navigate(toLocalePath(target))
   }
@@ -448,8 +464,25 @@ export function StoreShell() {
     window.localStorage.removeItem(searchHistoryKey)
   }
 
+  const openCompactSearch = () => {
+    if (compactSearchCloseTimerRef.current) window.clearTimeout(compactSearchCloseTimerRef.current)
+    compactSearchCloseTimerRef.current = null
+    setCompactSearchPhase('open')
+  }
+
+  const closeCompactSearch = () => {
+    if (!compactSearchVisibleRef.current && !isCompactSearchOpen && !isCompactSearchClosing) return
+    if (compactSearchCloseTimerRef.current) window.clearTimeout(compactSearchCloseTimerRef.current)
+    setCompactSearchPhase('closing')
+    compactSearchCloseTimerRef.current = window.setTimeout(() => {
+      setCompactSearchPhase('closed')
+      compactSearchCloseTimerRef.current = null
+    }, 460)
+  }
+
   const toggleCompactSearch = () => {
-    setIsCompactSearchOpen((current) => !current)
+    if (isCompactSearchOpen || isCompactSearchClosing) closeCompactSearch()
+    else openCompactSearch()
     setIsSearchOpen(false)
   }
   const brandHomeLabel = `${headerBrandName} home`
@@ -470,7 +503,9 @@ export function StoreShell() {
     ? { display: 'none', height: 0, maxHeight: 0, padding: 0, overflow: 'hidden' }
     : undefined
 
-  return <div className={`site-shell ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''}`.trim()}>
+  const shouldRenderCompactSearch = isCompactSearchOpen || isCompactSearchClosing
+
+  return <div className={`site-shell ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''}`.trim()}>
     <div className={`top-marquee ${isMarqueeCollapsed ? 'is-collapsed' : ''}`} style={topMarqueeStyle} aria-label={`${headerBrandName} material notice`}>
       <div className="top-marquee-track" aria-hidden="true">
         {Array.from({ length: 4 }).map((_, index) => <span key={index}>{topMarqueeText}</span>)}
@@ -563,7 +598,7 @@ export function StoreShell() {
         </nav>
       </div>
 
-      {isCompactSearchOpen && <div className="compact-search-panel" ref={compactSearchRef}>
+      {shouldRenderCompactSearch && <div className={`compact-search-panel ${isCompactSearchClosing ? 'is-closing' : ''}`.trim()} ref={compactSearchRef}>
         <span className="compact-search-boundary" aria-hidden="true">
           <span className="compact-search-boundary-segment boundary-left" />
           <span className="compact-search-boundary-segment boundary-right" />

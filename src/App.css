@@ -1366,6 +1366,12 @@ h6 {
   animation: compact-search-open 260ms cubic-bezier(.22, .8, .24, 1) both;
 }
 
+.compact-search-panel.is-closing {
+  pointer-events: none;
+  overflow: hidden;
+  animation: compact-search-close 420ms cubic-bezier(.32, 0, .2, 1) both;
+}
+
 .compact-search-boundary {
   display: block;
   position: absolute;
@@ -1386,6 +1392,10 @@ h6 {
   transform: scaleX(1);
   will-change: opacity, transform;
   animation: compact-search-boundary-enter 300ms 80ms cubic-bezier(.22, .8, .24, 1) both;
+}
+
+.compact-search-panel.is-closing .compact-search-boundary-segment {
+  animation: compact-search-boundary-exit 380ms cubic-bezier(.32, 0, .2, 1) both;
 }
 
 .compact-search-boundary-segment.boundary-left {
@@ -1561,6 +1571,20 @@ h6 {
   }
 }
 
+@keyframes compact-search-close {
+  from {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    transform-origin: top;
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scaleY(.96);
+    transform-origin: top;
+  }
+}
+
 @keyframes search-placeholder-letter-in {
   0% {
     opacity: 0;
@@ -1587,6 +1611,18 @@ h6 {
   to {
     opacity: 1;
     transform: scaleX(1);
+  }
+}
+
+@keyframes compact-search-boundary-exit {
+  from {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scaleX(0);
   }
 }
 
