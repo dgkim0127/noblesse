@@ -91,3 +91,9 @@ Requires:
 - Inquiry `admin_memo` may be the first real write later because the current schema already has the field.
 - Inquiry status remains blocked until status/event strategy is approved.
 - Product price and quote writes remain later high-risk phases.
+
+## 32C Write API Contract
+
+- Admin write API contract is documented in `docs/ADMIN_WRITE_API_CONTRACT.md`.
+- Inquiry `admin_memo` is the first write contract candidate.
+- Contract documentation does not unlock implementation.

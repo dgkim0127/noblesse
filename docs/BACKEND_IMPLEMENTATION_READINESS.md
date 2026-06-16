@@ -234,3 +234,9 @@ Before implementation starts:
 - Admin write schema impact review is documented in `docs/ADMIN_WRITE_SCHEMA_IMPACT_REVIEW.md`.
 - Implementation still requires explicit approval, Auth, DB, transaction helper, and audit design.
 - Inquiry `admin_memo` is the recommended first write candidate later, but no write implementation is approved yet.
+
+## 32C Admin Write API Contract
+
+- Admin write API contract planning is documented in `docs/ADMIN_WRITE_API_CONTRACT.md`.
+- First implementation candidate would be inquiry `admin_memo` only after explicit approval.
+- Backend/Auth/DB/transaction/audit readiness is still required before any write route is implemented.

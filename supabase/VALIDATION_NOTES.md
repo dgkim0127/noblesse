@@ -739,3 +739,17 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Deploy action in 32B: No.
 - Register/member signup source changes: Out of scope for 32B and not staged by this documentation commit.
 - Conclusion: Admin write planning remains Go, but write implementation is No-Go. Option C, adding `admin_status` while preserving current `inquiries.status`, is recommended for future status writes unless later rejected. Inquiry `admin_memo` is the recommended first write candidate after Auth, DB, transaction, and audit gates are approved.
+
+## 32C Admin Write API Contract Follow-up
+
+- Date: 2026-06-16
+- Change: Added `docs/ADMIN_WRITE_API_CONTRACT.md`.
+- Scope: Documentation only for future Admin write request/response/error contracts, transaction/audit requirements, and mock test planning.
+- SQL execution required in 32C: No.
+- DB dry-run status: Unchanged.
+- SQL files changed in 32C: No.
+- Backend/API/Auth/DB implementation: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 32C: No.
+- Register/member signup source changes: Out of scope for 32C and not staged by this documentation commit.
+- Conclusion: Admin write API contract planning is Go, but write implementation remains No-Go. Inquiry `admin_memo` is the first write contract candidate after explicit approval and safety gates.

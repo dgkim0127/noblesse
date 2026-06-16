@@ -285,3 +285,9 @@ Recommended:
 - Option C, adding `admin_status` while preserving current `inquiries.status`, is recommended for future status writes unless later rejected.
 - `inquiry_status_events` is recommended before real inquiry status writes.
 - This does not unlock write implementation.
+
+## 32C Write API Contract
+
+- Admin write API contract exists in `docs/ADMIN_WRITE_API_CONTRACT.md`.
+- Full editable target remains blocked until safety gates are approved.
+- The first candidate contract is inquiry `admin_memo`, not status, price, or quote writes.

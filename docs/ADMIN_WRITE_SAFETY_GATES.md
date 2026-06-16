@@ -82,3 +82,9 @@
 - 32B recommends `inquiry_status_events` and likely `admin_status` for write-safe inquiry operations.
 - Any write implementation remains No-Go until the status/event strategy, transaction helper, Auth, DB, and audit path are approved.
 - Inquiry `admin_memo` may be the first write candidate later, but it still requires the same Auth, transaction, and `audit_logs` gates.
+
+## 32C Write API Contract Follow-up
+
+- Write contracts are documented in `docs/ADMIN_WRITE_API_CONTRACT.md`.
+- The contracts describe future request/response/error boundaries only.
+- They do not unlock implementation or relax any safety gate.

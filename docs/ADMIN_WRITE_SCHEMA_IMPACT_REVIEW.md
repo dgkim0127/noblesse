@@ -423,3 +423,9 @@ Recommendation:
 | Categories | Partially | validation/audit/public QA | Later |
 | Banners/catalog files | Partially | storage/upload policy/audit | Later |
 | Terms/agreements | High risk | legal review/versioning/audit | No-Go |
+
+## 32C Write API Contract Follow-up
+
+- Admin write API contract is documented in `docs/ADMIN_WRITE_API_CONTRACT.md`.
+- Option C remains recommended and the future status write contract assumes `admin_status`.
+- Inquiry status writes remain blocked until schema migration/dry-run and `inquiry_status_events` are approved.
