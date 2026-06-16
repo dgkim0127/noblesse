@@ -241,3 +241,9 @@ Cons:
 - Status writes remain blocked until status strategy is decided.
 - `docs/ADMIN_FULL_EDITABLE_SCOPE.md` defines the target operations scope.
 - `docs/ADMIN_WRITE_SAFETY_GATES.md` defines the minimum requirements before any write API is implemented.
+
+## 32B Write Schema Impact Review
+
+- Full editable schema impact review is documented in `docs/ADMIN_WRITE_SCHEMA_IMPACT_REVIEW.md`.
+- The 32B review supersedes the simple read-only gap review for write planning.
+- Read-only schema planning remains valid, but write implementation remains blocked.

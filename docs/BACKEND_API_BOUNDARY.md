@@ -190,3 +190,9 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Future write candidates are documented in `docs/ADMIN_WRITE_API_CANDIDATES.md`.
 - Admin write APIs require `docs/ADMIN_WRITE_SAFETY_GATES.md` before implementation.
 - No backend route, frontend admin route, SQL, Auth, DB, Firebase rewrite, or deploy change is made by 32A.
+
+## 32B Admin Write Schema Impact
+
+- Admin write API boundaries are still planning only.
+- First write candidate is inquiry `admin_memo`, but implementation remains blocked.
+- Inquiry status writes remain blocked until `admin_status`/status strategy and `inquiry_status_events` are approved.

@@ -228,3 +228,9 @@ Before implementation starts:
 - Write candidates are documented in `docs/ADMIN_WRITE_API_CANDIDATES.md`.
 - Implementation remains blocked until write safety gates and schema/status strategy are approved.
 - 32A is documentation-only and does not add backend routes, frontend admin routes, SQL, Auth, DB, Firebase rewrite, dependencies, or deploy changes.
+
+## 32B Admin Write Schema Impact
+
+- Admin write schema impact review is documented in `docs/ADMIN_WRITE_SCHEMA_IMPACT_REVIEW.md`.
+- Implementation still requires explicit approval, Auth, DB, transaction helper, and audit design.
+- Inquiry `admin_memo` is the recommended first write candidate later, but no write implementation is approved yet.

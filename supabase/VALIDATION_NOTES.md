@@ -725,3 +725,17 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Deploy action in 32A: No.
 - Register/member signup source changes: Out of scope for 32A and not staged by this documentation commit.
 - Conclusion: Admin read-only remains the safe first layer, but the target Admin direction is now full editable operations. Admin write implementation remains No-Go until safety gates and schema/status strategy are approved.
+
+## 32B Admin Write Schema Impact Review Follow-up
+
+- Date: 2026-06-16
+- Change: Added `docs/ADMIN_WRITE_SCHEMA_IMPACT_REVIEW.md`.
+- Scope: Documentation only for current schema fit/gap, inquiry status strategy, `inquiry_status_events`, and first write candidate planning.
+- SQL execution required in 32B: No.
+- DB dry-run status: Unchanged.
+- SQL files changed in 32B: No.
+- Backend/API/Auth/DB implementation: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 32B: No.
+- Register/member signup source changes: Out of scope for 32B and not staged by this documentation commit.
+- Conclusion: Admin write planning remains Go, but write implementation is No-Go. Option C, adding `admin_status` while preserving current `inquiries.status`, is recommended for future status writes unless later rejected. Inquiry `admin_memo` is the recommended first write candidate after Auth, DB, transaction, and audit gates are approved.

@@ -76,3 +76,9 @@
 - Admin write planning: Go
 - Admin write implementation: No-Go
 - Production admin rollout: No-Go
+
+## 32B Schema Impact Follow-up
+
+- 32B recommends `inquiry_status_events` and likely `admin_status` for write-safe inquiry operations.
+- Any write implementation remains No-Go until the status/event strategy, transaction helper, Auth, DB, and audit path are approved.
+- Inquiry `admin_memo` may be the first write candidate later, but it still requires the same Auth, transaction, and `audit_logs` gates.

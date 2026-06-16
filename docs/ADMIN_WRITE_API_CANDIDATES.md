@@ -84,3 +84,10 @@ Requires:
 - public admin signup
 - frontend-only admin writes
 - direct React-to-PostgreSQL writes
+
+## 32B Schema Impact Follow-up
+
+- Early write candidates remain candidates only.
+- Inquiry `admin_memo` may be the first real write later because the current schema already has the field.
+- Inquiry status remains blocked until status/event strategy is approved.
+- Product price and quote writes remain later high-risk phases.

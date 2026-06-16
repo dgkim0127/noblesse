@@ -278,3 +278,10 @@ Recommended:
 
 - First real write should be inquiry status/memo only.
 - Product price and quote writes must be later.
+
+## 32B Write Schema Impact Review
+
+- Admin write schema impact review is documented in `docs/ADMIN_WRITE_SCHEMA_IMPACT_REVIEW.md`.
+- Option C, adding `admin_status` while preserving current `inquiries.status`, is recommended for future status writes unless later rejected.
+- `inquiry_status_events` is recommended before real inquiry status writes.
+- This does not unlock write implementation.
