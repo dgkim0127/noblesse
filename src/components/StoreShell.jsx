@@ -382,6 +382,7 @@ export function StoreShell() {
   const compactSearchInputRef = useRef(null)
   const compactSearchCloseTimerRef = useRef(null)
   const compactSearchVisibleRef = useRef(false)
+  const loginModalCloseTimerRef = useRef(null)
   const [headerSearch, setHeaderSearch] = useState('')
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [compactSearchPhase, setCompactSearchPhase] = useState('closed')
@@ -390,6 +391,8 @@ export function StoreShell() {
   const [isHeaderCompact, setIsHeaderCompact] = useState(false)
   const [isPreviewBarHidden, setIsPreviewBarHidden] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [isLoginModalClosing, setIsLoginModalClosing] = useState(false)
+  const [loginModalOrigin, setLoginModalOrigin] = useState({ x: 0, y: 0 })
   const [isAutoLoginEnabled, setIsAutoLoginEnabled] = useState(true)
   const [navIndicator, setNavIndicator] = useState({ left: 0, ready: false, width: 0 })
   const { buyerAccess, inquiryItems, isAdmin, isApproved, isGuest, isPending, setViewerState, viewerState } = useCommerce()
@@ -400,6 +403,8 @@ export function StoreShell() {
   const headerBrandName = localeMeta?.brandName ?? '귀족'
   const isCompactSearchOpen = compactSearchPhase === 'open'
   const isCompactSearchClosing = compactSearchPhase === 'closing'
+  const normalizedPathname = location.pathname.replace(/\/+$/, '') || '/'
+  const isHomeImageRoute = normalizedPathname === '/' || supportedLocales.some((item) => normalizedPathname === `/${item}`)
 
   useEffect(() => {
     const nav = navRef.current
@@ -479,13 +484,14 @@ export function StoreShell() {
 
   useEffect(() => () => {
     if (compactSearchCloseTimerRef.current) window.clearTimeout(compactSearchCloseTimerRef.current)
+    if (loginModalCloseTimerRef.current) window.clearTimeout(loginModalCloseTimerRef.current)
   }, [])
 
   useEffect(() => {
     if (!isLoginModalOpen) return undefined
 
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape') setIsLoginModalOpen(false)
+      if (event.key === 'Escape') closeLoginModal()
     }
 
     document.addEventListener('keydown', handleKeyDown)
@@ -566,13 +572,34 @@ export function StoreShell() {
     setIsSearchOpen(false)
   }
 
-  const openLoginModal = () => {
+  const openLoginModal = (event) => {
+    if (loginModalCloseTimerRef.current) window.clearTimeout(loginModalCloseTimerRef.current)
+    loginModalCloseTimerRef.current = null
+    setIsLoginModalClosing(false)
+    const rect = event?.currentTarget?.getBoundingClientRect?.()
+    if (rect) {
+      setLoginModalOrigin({
+        x: Math.round(rect.left + rect.width / 2),
+        y: Math.round(rect.top + rect.height / 2),
+      })
+    } else {
+      setLoginModalOrigin({ x: Math.round(window.innerWidth / 2), y: Math.round(window.innerHeight / 2) })
+    }
     setIsSearchOpen(false)
     closeCompactSearch()
     setIsLoginModalOpen(true)
   }
 
-  const closeLoginModal = () => setIsLoginModalOpen(false)
+  const closeLoginModal = () => {
+    if (!isLoginModalOpen || isLoginModalClosing) return
+    if (loginModalCloseTimerRef.current) window.clearTimeout(loginModalCloseTimerRef.current)
+    setIsLoginModalClosing(true)
+    loginModalCloseTimerRef.current = window.setTimeout(() => {
+      setIsLoginModalOpen(false)
+      setIsLoginModalClosing(false)
+      loginModalCloseTimerRef.current = null
+    }, 340)
+  }
 
   const loginAsApprovedBuyer = (event) => {
     event.preventDefault()
@@ -612,7 +639,7 @@ export function StoreShell() {
 
   const shouldRenderCompactSearch = isCompactSearchOpen || isCompactSearchClosing
 
-  return <div className={`site-shell ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''}`.trim()}>
+  return <div className={`site-shell ${isHomeImageRoute ? 'home-image-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''}`.trim()}>
     <div className={`top-marquee ${isMarqueeCollapsed ? 'is-collapsed' : ''}`} style={topMarqueeStyle} aria-label={`${headerBrandName} material notice`}>
       <div className="top-marquee-track" aria-hidden="true">
         {Array.from({ length: 4 }).map((_, index) => <span key={index}>{topMarqueeText}</span>)}
@@ -782,7 +809,15 @@ export function StoreShell() {
         </button>)}
       </div>}
     </header>
-    {isLoginModalOpen && <div className="login-modal-overlay" role="presentation" onMouseDown={closeLoginModal}>
+    {isLoginModalOpen && <div
+      className={`login-modal-overlay ${isLoginModalClosing ? 'is-closing' : ''}`.trim()}
+      role="presentation"
+      style={{
+        '--login-origin-x': `${loginModalOrigin.x}px`,
+        '--login-origin-y': `${loginModalOrigin.y}px`,
+      }}
+      onMouseDown={closeLoginModal}
+    >
       <section
         aria-labelledby="login-modal-title"
         aria-modal="true"

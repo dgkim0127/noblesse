@@ -73,6 +73,10 @@ h6 {
   min-height: 100vh;
 }
 
+.site-shell.home-image-shell:not(.has-compact-header) {
+  background: #f5f2f0;
+}
+
 .site-shell.has-compact-header {
   padding-top: 52px;
 }
@@ -133,6 +137,108 @@ h6 {
   background: rgb(255 253 249 / 94%);
   backdrop-filter: blur(16px);
   transition: box-shadow 240ms ease, background 240ms ease, transform 260ms cubic-bezier(.22, .8, .24, 1);
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .top-marquee {
+  position: relative;
+  z-index: 42;
+  color: #615a69;
+  background: #fffdf9;
+  text-shadow: none;
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .site-header {
+  position: relative;
+  top: auto;
+  right: 0;
+  left: 0;
+  z-index: 43;
+  border-bottom: 0;
+  background: #fffdf9;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .site-header::before {
+  display: none;
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .header-main {
+  width: min(1540px, calc(100% - 40px));
+  grid-template-columns: minmax(260px, 340px) minmax(180px, 1fr) minmax(220px, auto);
+  min-height: 94px;
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .brand {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .top-search {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  width: min(300px, 100%);
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .header-actions {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .header-lower,
+.site-shell.home-image-shell:not(.has-compact-header) .preview-bar {
+  background: transparent;
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .header-lower {
+  border: 0;
+  padding-bottom: 0;
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .preview-bar {
+  display: none;
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .header-search {
+  border: 0;
+  border-bottom: 1px solid rgb(42 35 79 / 28%);
+  border-radius: 0;
+  padding-right: 0;
+  padding-left: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .brand,
+.site-shell.home-image-shell:not(.has-compact-header) .compact-brand-title,
+.site-shell.home-image-shell:not(.has-compact-header) .header-actions a,
+.site-shell.home-image-shell:not(.has-compact-header) .icon-action,
+.site-shell.home-image-shell:not(.has-compact-header) .header-nav a,
+.site-shell.home-image-shell:not(.has-compact-header) .preview-bar > span {
+  color: #201936;
+  text-shadow: none;
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .brand-logo {
+  background: transparent;
+  box-shadow: none;
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .brand .brand-name-window {
+  color: var(--noblesse-sub);
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .preview-bar button {
+  border-color: rgb(255 255 255 / 58%);
+  background: rgb(255 253 249 / 48%);
+  backdrop-filter: blur(12px);
+}
+
+.site-shell.home-image-shell:not(.has-compact-header) .preview-bar button.active {
+  border-color: rgb(255 143 169 / 78%);
+  background: rgb(255 143 169 / 16%);
 }
 
 .site-header.is-compact,
@@ -1922,7 +2028,9 @@ h6 {
 @media (prefers-reduced-motion: reduce) {
   .locale-transition-frame,
   .locale-transition-frame :where(h1, h2, h3, p, li, a, button, label, legend, summary, strong, small, em, dt, dd),
-  .register-locale-motion :where(h1, .agreement-required-all, .agreement-row, .privacy-policy-detail, .agreement-warning, .form-section, .approval-note, .agreement-actions) {
+  .register-locale-motion :where(h1, .agreement-required-all, .agreement-row, .privacy-policy-detail, .agreement-warning, .form-section, .approval-note, .agreement-actions),
+  .login-modal-overlay,
+  .login-modal {
     animation: none;
   }
 }
@@ -2274,6 +2382,181 @@ h6 {
   color: var(--noblesse-sub);
   background: transparent;
   backdrop-filter: none;
+}
+
+.home-image-hero-test {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: calc(100dvh - 154px);
+  min-height: 610px;
+  margin: 0 auto;
+  padding: 0 24px;
+  overflow: hidden;
+  background: #fffdf9;
+}
+
+.home-image-hero-test::before {
+  display: none;
+}
+
+.home-image-hero-test .hero-art {
+  position: relative;
+  z-index: 1;
+  width: min(560px, calc(100vw - 48px));
+  height: 100%;
+  margin: 0 auto;
+  align-self: stretch;
+  background: #fffdf9;
+}
+
+.home-image-hero-test .hero-carousel,
+.home-image-hero-test .hero-carousel-track,
+.home-image-hero-test .hero-banner-slide,
+.home-image-hero-test .hero-banner-slide img {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+}
+
+.home-image-hero-test .hero-banner-slide {
+  flex: 0 0 100%;
+}
+
+.home-image-hero-test .hero-banner-slide::after {
+  display: none;
+}
+
+.home-image-hero-test .hero-banner-slide img {
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(1.03) saturate(1.02) contrast(1);
+}
+
+.home-image-hero-test .hero-copy {
+  display: none;
+}
+
+.home-image-hero-test .eyebrow {
+  color: var(--noblesse-sub);
+  letter-spacing: 1px;
+}
+
+.home-image-hero-test h1 {
+  font-size: clamp(42px, 4.6vw, 64px);
+  line-height: 0.98;
+}
+
+.home-image-hero-test .hero-copy > span,
+.home-image-hero-test .hero-copy > small {
+  max-width: 420px;
+  color: #322a43;
+  text-shadow: 0 1px 14px rgb(255 255 255 / 72%);
+}
+
+.home-image-hero-test .hero-actions {
+  margin-top: 20px;
+}
+
+.lookbook-side-menu {
+  display: none;
+}
+
+.lookbook-side-menu > span {
+  display: block;
+  margin-bottom: 22px;
+  color: #8a8190;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.lookbook-side-menu nav {
+  display: grid;
+  gap: 10px;
+}
+
+.lookbook-side-menu a {
+  width: fit-content;
+  color: #201936;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+
+.lookbook-side-menu a:hover,
+.lookbook-side-menu a:focus-visible {
+  color: var(--noblesse-main);
+}
+
+.image-hero-rail {
+  position: absolute;
+  z-index: 5;
+  top: clamp(132px, 16vh, 168px);
+  left: max(22px, calc((100vw - 1180px) / 2));
+  display: grid;
+  gap: 12px;
+  width: min(160px, 28vw);
+  border-left: 1px solid rgb(42 35 79 / 24%);
+  padding-left: 14px;
+  color: #181426;
+  text-shadow: 0 1px 14px rgb(255 255 255 / 62%);
+}
+
+.image-hero-rail-kicker {
+  color: rgb(42 35 79 / 72%);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.image-hero-rail nav {
+  display: grid;
+  gap: 9px;
+}
+
+.image-hero-rail a,
+.image-hero-toplinks a {
+  color: #1f1a2d;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  text-transform: none;
+  text-shadow: 0 1px 16px rgb(255 255 255 / 70%);
+}
+
+.image-hero-rail a:hover,
+.image-hero-toplinks a:hover {
+  color: var(--noblesse-main);
+}
+
+.image-hero-toplinks {
+  position: absolute;
+  z-index: 5;
+  top: clamp(136px, 16vh, 172px);
+  right: max(24px, calc((100vw - 1180px) / 2));
+  display: none;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 18px;
+}
+
+.home-image-hero-test .hero-banner-copy {
+  display: none;
+}
+
+.home-image-hero-test .hero-carousel-dots {
+  z-index: 6;
+  right: 50%;
+  bottom: 26px;
+  transform: translateX(50%);
+}
+
+.quick-category-section {
+  display: none;
 }
 
 .home-hero-art {
@@ -3765,6 +4048,7 @@ h6 {
   padding: 22px;
   background: rgb(42 35 79 / 22%);
   backdrop-filter: blur(10px);
+  animation: login-overlay-from-icon 280ms ease both;
 }
 
 .login-modal {
@@ -3783,6 +4067,90 @@ h6 {
     radial-gradient(circle at 88% 8%, rgb(255 143 169 / 18%), transparent 30%),
     linear-gradient(145deg, #fff, #fff8fa 58%, #fffdf9);
   box-shadow: 0 24px 70px rgb(42 35 79 / 22%);
+  animation: login-modal-from-icon 460ms cubic-bezier(.16, 1, .3, 1) both;
+  will-change: transform, opacity, filter;
+}
+
+.login-modal-overlay.is-closing {
+  animation: login-overlay-to-icon 340ms ease both;
+  pointer-events: none;
+}
+
+.login-modal-overlay.is-closing .login-modal {
+  animation: login-modal-to-icon 340ms cubic-bezier(.7, 0, .84, 0) both;
+}
+
+@keyframes login-overlay-from-icon {
+  from {
+    background: rgb(42 35 79 / 0%);
+    backdrop-filter: blur(0);
+  }
+
+  to {
+    background: rgb(42 35 79 / 22%);
+    backdrop-filter: blur(10px);
+  }
+}
+
+@keyframes login-overlay-to-icon {
+  from {
+    background: rgb(42 35 79 / 22%);
+    backdrop-filter: blur(10px);
+  }
+
+  to {
+    background: rgb(42 35 79 / 0%);
+    backdrop-filter: blur(0);
+  }
+}
+
+@keyframes login-modal-from-icon {
+  0% {
+    opacity: 0;
+    filter: blur(7px);
+    transform:
+      translate(
+        calc(var(--login-origin-x, 50vw) - 50vw),
+        calc(var(--login-origin-y, 50vh) - 50vh)
+      )
+      scale(.14);
+    border-radius: 999px;
+  }
+
+  62% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(0, 0) scale(1.025);
+    border-radius: 18px;
+  }
+
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(0, 0) scale(1);
+    border-radius: 12px;
+  }
+}
+
+@keyframes login-modal-to-icon {
+  0% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(0, 0) scale(1);
+    border-radius: 12px;
+  }
+
+  100% {
+    opacity: 0;
+    filter: blur(7px);
+    transform:
+      translate(
+        calc(var(--login-origin-x, 50vw) - 50vw),
+        calc(var(--login-origin-y, 50vh) - 50vh)
+      )
+      scale(.14);
+    border-radius: 999px;
+  }
 }
 
 .login-modal h2 {
@@ -3979,6 +4347,8 @@ h6 {
 
 .register-grid .field-country {
   grid-column: span 6;
+  position: relative;
+  z-index: 300;
 }
 
 .register-grid .field-company,
@@ -4018,6 +4388,84 @@ h6 {
   padding: 10px 12px;
 }
 
+.register-country-combo {
+  position: relative;
+  z-index: 400;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.register-country-combo.is-open {
+  z-index: 900;
+}
+
+.register-country-combo input {
+  grid-column: 1 / -1;
+  padding-right: 42px;
+}
+
+.register-country-combo > button {
+  position: absolute;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--noblesse-sub);
+  background: transparent;
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.register-country-combo.is-open > button {
+  transform: rotate(180deg);
+  background: #fff1f5;
+}
+
+.register-country-menu {
+  position: absolute;
+  z-index: 1000;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  display: grid;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #f0dfe5;
+  border-radius: 12px;
+  padding: 6px;
+  background: #fffdf9;
+  box-shadow: 0 18px 36px rgb(42 35 79 / 14%);
+  animation: country-menu-drop 180ms ease both;
+}
+
+.register-country-menu button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 11px;
+  color: var(--noblesse-sub);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.register-country-menu button:hover {
+  background: #fff3f6;
+}
+
+@keyframes country-menu-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .field-label-with-help {
   display: grid;
   gap: 3px;
@@ -4031,10 +4479,19 @@ h6 {
   line-height: 1.45;
 }
 
+.password-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
 .password-rule-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  justify-content: flex-end;
+  gap: 4px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -4046,8 +4503,8 @@ h6 {
   gap: 4px;
   border: 1px solid currentcolor;
   border-radius: 999px;
-  padding: 4px 8px;
-  font-size: 11px;
+  padding: 3px 7px;
+  font-size: 10px;
   font-weight: 800;
   line-height: 1;
 }
@@ -4064,12 +4521,12 @@ h6 {
 
 .password-rule-list span {
   display: inline-grid;
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   place-items: center;
   border-radius: 999px;
   color: #fff;
-  font-size: 10px;
+  font-size: 9px;
 }
 
 .password-rule-list li.invalid span {
@@ -4078,6 +4535,122 @@ h6 {
 
 .password-rule-list li.valid span {
   background: #24855b;
+}
+
+.password-input-control {
+  position: relative;
+  display: block;
+}
+
+.password-input-control input {
+  padding-right: 46px;
+}
+
+.password-input-control .password-actual-input {
+  color: transparent;
+  caret-color: var(--noblesse-sub);
+}
+
+.password-input-control .password-actual-input::placeholder {
+  color: #948b97;
+}
+
+.password-visual-text {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  right: 46px;
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--noblesse-sub);
+  pointer-events: none;
+  transform: translateY(-50%);
+  white-space: pre;
+}
+
+.password-visual-char {
+  display: inline-block;
+  animation: password-character-change 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.password-visual-text.is-hidden .password-visual-char {
+  letter-spacing: 1px;
+}
+
+@keyframes password-character-change {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.92);
+  }
+
+  65% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.password-input-control button {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 9px;
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  margin: auto 0;
+  place-items: center;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
+  color: #6f6578;
+  background: transparent;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.password-input-control button svg {
+  display: block;
+  animation: password-eye-change 180ms ease both;
+}
+
+.password-input-control button:active {
+  transform: scale(0.94);
+}
+
+@keyframes password-eye-change {
+  from {
+    opacity: 0;
+    transform: scale(0.72) rotate(-8deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.password-input-control button:hover {
+  color: var(--noblesse-sub);
+  background: #fff1f5;
+}
+
+.auth-form input.password-confirm-input.invalid {
+  border-color: #d84d64;
+  box-shadow: 0 0 0 3px rgb(216 77 100 / 12%);
+}
+
+.auth-form input.password-confirm-input.valid {
+  border-color: #24855b;
+  box-shadow: 0 0 0 3px rgb(36 133 91 / 12%);
 }
 
 .auth-form textarea {
@@ -4133,6 +4706,20 @@ h6 {
   border-color: rgb(255 143 169 / 62%);
   color: var(--noblesse-sub);
   background: #fff8fa;
+}
+
+.duplicate-status {
+  color: #d84d64;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.duplicate-status.valid {
+  color: #24855b;
+}
+
+.duplicate-status.invalid {
+  color: #d84d64;
 }
 
 .register-id-row button:disabled {
@@ -5001,6 +5588,74 @@ h6 {
     width: 80px;
   }
 
+  .home-image-hero-test {
+    display: flex;
+    width: 100%;
+    height: calc(100dvh - 132px);
+    min-height: 560px;
+    padding: 0 14px;
+  }
+
+  .home-image-hero-test .hero-copy {
+    left: 18px;
+    right: 18px;
+    bottom: 58px;
+    width: auto;
+    padding: 0;
+  }
+
+  .lookbook-side-menu {
+    display: none;
+  }
+
+  .lookbook-side-menu > span {
+    flex: 0 0 auto;
+    margin: 0;
+    color: rgb(255 253 249 / 82%);
+    text-shadow: 0 1px 12px rgb(0 0 0 / 36%);
+  }
+
+  .lookbook-side-menu nav {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .lookbook-side-menu nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lookbook-side-menu a {
+    flex: 0 0 auto;
+    border: 1px solid rgb(255 255 255 / 34%);
+    border-radius: 999px;
+    padding: 7px 10px;
+    color: #fff;
+    background: rgb(17 14 28 / 18%);
+    text-shadow: 0 1px 12px rgb(0 0 0 / 32%);
+    backdrop-filter: blur(6px);
+  }
+
+  .home-image-hero-test .hero-art,
+  .home-image-hero-test .hero-carousel,
+  .home-image-hero-test .hero-banner-slide,
+  .home-image-hero-test .hero-banner-slide img {
+    height: 100%;
+    min-height: 100%;
+  }
+
+  .home-image-hero-test .hero-art {
+    width: min(430px, calc(100vw - 28px));
+    margin: 0 auto;
+  }
+
+  .home-image-hero-test .hero-carousel-dots {
+    right: 50%;
+    bottom: 22px;
+    transform: translateX(50%);
+  }
+
   .section-wrap,
   .content {
     padding: 36px 0;
@@ -5201,6 +5856,15 @@ h6 {
 
   .register-email-row select {
     grid-column: 1 / -1;
+  }
+
+  .password-label-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .password-rule-list {
+    justify-content: flex-start;
   }
 
   .account-status-card,

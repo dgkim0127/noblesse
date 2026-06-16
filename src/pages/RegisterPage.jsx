@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import {
@@ -193,15 +194,6 @@ const registerCopy = {
   },
 }
 
-const primaryContactEmail = 'dgkim0127@gmail.com'
-
-const contactEmailNotes = {
-  kr: `급한 거래 문의는 {email} 으로도 남겨주세요.`,
-  en: `For urgent trade inquiries, you can also email {email}.`,
-  jp: `お急ぎの取引先お問い合わせは {email} でも受け付けています。`,
-  cn: `如需紧急贸易咨询，也可以发送邮件至 {email}。`,
-}
-
 const fieldGroups = {
   buyer: [
     ['email', 'email'],
@@ -234,7 +226,6 @@ const ageAgreementSummary = {
 const profileFieldsByLocale = {
   kr: [
     ['이름', 'name', 'text', '이름', 'field-name'],
-    ['성별', 'gender', 'select', '성별', 'field-gender'],
     ['국가', 'country', 'country', '국가 검색 또는 선택', 'field-country'],
     ['업체명', 'companyName', 'text', '업체명', 'field-company'],
     ['주소', 'address', 'text', '주소', 'field-address'],
@@ -247,7 +238,6 @@ const profileFieldsByLocale = {
   ],
   en: [
     ['Name', 'name', 'text', 'Name', 'field-name'],
-    ['Gender', 'gender', 'select', 'Gender', 'field-gender'],
     ['Country', 'country', 'country', 'Search or select country', 'field-country'],
     ['Company', 'companyName', 'text', 'Company', 'field-company'],
     ['Address', 'address', 'text', 'Address', 'field-address'],
@@ -260,7 +250,6 @@ const profileFieldsByLocale = {
   ],
   jp: [
     ['お名前', 'name', 'text', 'お名前', 'field-name'],
-    ['性別', 'gender', 'select', '性別', 'field-gender'],
     ['国', 'country', 'country', '国を検索または選択', 'field-country'],
     ['会社名', 'companyName', 'text', '会社名', 'field-company'],
     ['住所', 'address', 'text', '住所', 'field-address'],
@@ -273,7 +262,6 @@ const profileFieldsByLocale = {
   ],
   cn: [
     ['姓名', 'name', 'text', '姓名', 'field-name'],
-    ['性别', 'gender', 'select', '性别', 'field-gender'],
     ['国家', 'country', 'country', '搜索或选择国家', 'field-country'],
     ['公司名称', 'companyName', 'text', '公司名称', 'field-company'],
     ['地址', 'address', 'text', '地址', 'field-address'],
@@ -291,7 +279,10 @@ const registerStepCopy = {
     continue: '동의하기',
     submit: '가입하기',
     duplicateCheck: '중복확인',
-    duplicatePending: '실제 중복확인은 담당자 확인 단계에서 진행됩니다.',
+    duplicateEmpty: '아이디를 입력해주세요.',
+    duplicateShort: '아이디는 4자 이상 입력해주세요.',
+    duplicateUnavailable: '이미 사용 중인 아이디입니다.',
+    duplicateAvailable: '사용 가능한 아이디입니다.',
     infoTitle: '정보 입력',
     memoTitle: '문의 내용',
     memoLabel: '문의 내용',
@@ -303,7 +294,10 @@ const registerStepCopy = {
     continue: 'Agree',
     submit: 'Sign Up',
     duplicateCheck: 'Check ID',
-    duplicatePending: 'Live ID duplication check will be handled during manual review.',
+    duplicateEmpty: 'Please enter an ID.',
+    duplicateShort: 'Use at least 4 characters.',
+    duplicateUnavailable: 'This ID is already in use.',
+    duplicateAvailable: 'This ID is available.',
     infoTitle: 'Information',
     memoTitle: 'Inquiry memo',
     memoLabel: 'Inquiry memo',
@@ -315,7 +309,10 @@ const registerStepCopy = {
     continue: '同意する',
     submit: '登録する',
     duplicateCheck: '重複確認',
-    duplicatePending: '実際のID重複確認は担当者確認の段階で行います。',
+    duplicateEmpty: 'IDを入力してください。',
+    duplicateShort: 'IDは4文字以上で入力してください。',
+    duplicateUnavailable: 'このIDはすでに使用されています。',
+    duplicateAvailable: '使用できるIDです。',
     infoTitle: '情報入力',
     memoTitle: 'お問い合わせ内容',
     memoLabel: 'お問い合わせ内容',
@@ -327,7 +324,10 @@ const registerStepCopy = {
     continue: '同意',
     submit: '注册',
     duplicateCheck: '检查ID',
-    duplicatePending: '实际ID重复检查将在人工确认阶段进行。',
+    duplicateEmpty: '请输入ID。',
+    duplicateShort: 'ID至少需要4个字符。',
+    duplicateUnavailable: '该ID已被使用。',
+    duplicateAvailable: '该ID可以使用。',
     infoTitle: '填写信息',
     memoTitle: '咨询内容',
     memoLabel: '咨询内容',
@@ -342,13 +342,6 @@ const countryOptionsByLocale = {
   en: ['Korea', 'Japan', 'China', 'United States', 'Canada', 'Taiwan', 'Hong Kong', 'Singapore', 'Thailand', 'Vietnam', 'Philippines', 'Indonesia', 'Malaysia', 'Australia', 'United Kingdom', 'France', 'Germany', 'Other'],
   jp: ['韓国', '日本', '中国', 'アメリカ', 'カナダ', '台湾', '香港', 'シンガポール', 'タイ', 'ベトナム', 'フィリピン', 'インドネシア', 'マレーシア', 'オーストラリア', 'イギリス', 'フランス', 'ドイツ', 'その他'],
   cn: ['韩国', '日本', '中国', '美国', '加拿大', '台湾', '香港', '新加坡', '泰国', '越南', '菲律宾', '印度尼西亚', '马来西亚', '澳大利亚', '英国', '法国', '德国', '其他'],
-}
-
-const genderOptionsByLocale = {
-  kr: ['여성', '남성', '선택 안 함'],
-  en: ['Female', 'Male', 'Prefer not to say'],
-  jp: ['女性', '男性', '回答しない'],
-  cn: ['女性', '男性', '不选择'],
 }
 
 const profileHelperCopy = {
@@ -416,6 +409,25 @@ const passwordRuleLabelsByLocale = {
     length: '至少8个字符',
     number: '包含数字',
     symbol: '包含特殊符号',
+  },
+}
+
+const passwordToggleLabelsByLocale = {
+  kr: {
+    show: '비밀번호 보기',
+    hide: '비밀번호 숨기기',
+  },
+  en: {
+    show: 'Show password',
+    hide: 'Hide password',
+  },
+  jp: {
+    show: 'パスワードを表示',
+    hide: 'パスワードを非表示',
+  },
+  cn: {
+    show: '显示密码',
+    hide: '隐藏密码',
   },
 }
 
@@ -715,13 +727,18 @@ export function RegisterPage() {
   const { setViewerState } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const t = registerCopy[locale] ?? registerCopy.kr
-  const contactNote = contactEmailNotes[locale] ?? contactEmailNotes.kr
-  const [contactNoteBefore, contactNoteAfter = ''] = contactNote.split('{email}')
   const [agreements, setAgreements] = useState(getInitialAgreements)
   const [registerStep, setRegisterStep] = useState('agreements')
   const [selectedCountry, setSelectedCountry] = useState('')
+  const [countryQuery, setCountryQuery] = useState('')
+  const [countryOpen, setCountryOpen] = useState(false)
   const [emailDomain, setEmailDomain] = useState('')
   const [passwordValue, setPasswordValue] = useState('')
+  const [passwordConfirmValue, setPasswordConfirmValue] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
+  const [loginIdValue, setLoginIdValue] = useState('')
+  const [duplicateStatus, setDuplicateStatus] = useState(null)
   const agreementSummaries = getAgreementSummaryForRegister()
   const registerAgreementSummaries = [ageAgreementSummary, ...agreementSummaries]
   const privacyPolicy = getAgreementDocument('privacy_policy')
@@ -732,13 +749,16 @@ export function RegisterPage() {
   const stepCopy = registerStepCopy[locale] ?? registerStepCopy.kr
   const countryOptions = countryOptionsByLocale[locale] ?? countryOptionsByLocale.kr
   const emailDomains = emailDomainsByLocale[locale] ?? emailDomainsByLocale.kr
-  const genderOptions = genderOptionsByLocale[locale] ?? genderOptionsByLocale.kr
   const profileHelpers = profileHelperCopy[locale] ?? profileHelperCopy.kr
   const passwordMismatch = passwordMismatchCopy[locale] ?? passwordMismatchCopy.kr
   const passwordRuleLabels = passwordRuleLabelsByLocale[locale] ?? passwordRuleLabelsByLocale.kr
+  const passwordToggleLabels = passwordToggleLabelsByLocale[locale] ?? passwordToggleLabelsByLocale.kr
   const countryOtherValue = countryOptions[countryOptions.length - 1]
   const customEmailDomainValue = emailDomains[emailDomains.length - 1]
   const pageTitle = signupTitleByLocale[locale] ?? signupTitleByLocale.kr
+  const filteredCountryOptions = countryOptions.filter((option) => option.toLowerCase().includes(countryQuery.trim().toLowerCase()))
+  const duplicateStatusClass = duplicateStatus?.type === 'available' ? 'valid' : duplicateStatus ? 'invalid' : ''
+  const passwordConfirmStatus = passwordConfirmValue ? (passwordValue === passwordConfirmValue ? 'valid' : 'invalid') : ''
   const passwordRules = [
     ['length', passwordValue.length >= 8],
     ['number', /\d/.test(passwordValue)],
@@ -759,6 +779,42 @@ export function RegisterPage() {
   const continueToProfile = (event) => {
     event.preventDefault()
     if (requiredAccepted) setRegisterStep('profile')
+  }
+
+  const checkDuplicateId = () => {
+    const normalizedId = loginIdValue.trim().toLowerCase()
+    const reservedIds = ['admin', 'noblesse', 'test', 'guest', 'buyer']
+
+    if (!normalizedId) {
+      setDuplicateStatus({ type: 'empty', message: stepCopy.duplicateEmpty })
+      return
+    }
+
+    if (normalizedId.length < 4) {
+      setDuplicateStatus({ type: 'short', message: stepCopy.duplicateShort })
+      return
+    }
+
+    if (reservedIds.includes(normalizedId)) {
+      setDuplicateStatus({ type: 'unavailable', message: stepCopy.duplicateUnavailable })
+      return
+    }
+
+    setDuplicateStatus({ type: 'available', message: stepCopy.duplicateAvailable })
+  }
+
+  const renderPasswordVisual = (value, visible, keyPrefix) => {
+    if (!value) return null
+
+    return <span className={`password-visual-text ${visible ? 'is-visible' : 'is-hidden'}`} aria-hidden="true">
+      {Array.from(value).map((character, index) => <span
+        className="password-visual-char"
+        key={`${keyPrefix}-${visible ? 'visible' : 'hidden'}-${index}-${character}`}
+        style={{ animationDelay: `${index * 28}ms` }}
+      >
+        {visible ? character : '•'}
+      </span>)}
+    </span>
   }
 
   const submitRequest = (event) => {
@@ -786,18 +842,38 @@ export function RegisterPage() {
     if (type === 'country') {
       return <label className={fieldClass} key={name}>
         {label}
-        <input
-          autoComplete="country-name"
-          list={`country-options-${locale}`}
-          name={name}
-          onChange={(event) => setSelectedCountry(event.target.value)}
-          placeholder={placeholder}
-          required
-          type="text"
-        />
-        <datalist id={`country-options-${locale}`}>
-          {countryOptions.map((option) => <option key={option} value={option} />)}
-        </datalist>
+        <span className={`register-country-combo ${countryOpen ? 'is-open' : ''}`}>
+          <input
+            autoComplete="country-name"
+            name={name}
+            onBlur={() => window.setTimeout(() => setCountryOpen(false), 120)}
+            onChange={(event) => {
+              setCountryQuery(event.target.value)
+              setSelectedCountry(event.target.value)
+              setCountryOpen(true)
+            }}
+            onFocus={() => setCountryOpen(true)}
+            placeholder={placeholder}
+            required
+            type="text"
+            value={countryQuery}
+          />
+          <button aria-label="Open country list" onMouseDown={(event) => event.preventDefault()} onClick={() => setCountryOpen((current) => !current)} type="button">▾</button>
+          {countryOpen && <span className="register-country-menu">
+            {(filteredCountryOptions.length > 0 ? filteredCountryOptions : countryOptions).map((option) => <button
+              key={option}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                setCountryQuery(option)
+                setSelectedCountry(option)
+                setCountryOpen(false)
+              }}
+              type="button"
+            >
+              {option}
+            </button>)}
+          </span>}
+        </span>
         {selectedCountry === countryOtherValue && <input
           className="register-inline-extra"
           name="countryOther"
@@ -822,19 +898,21 @@ export function RegisterPage() {
       return <label className={`register-id-field ${fieldClass}`.trim()} key={name}>
         {label}
         <span className="register-id-row">
-          <input autoComplete="username" name={name} placeholder={placeholder} required type="text" />
-          <button disabled title={stepCopy.duplicatePending} type="button">{stepCopy.duplicateCheck}</button>
+          <input
+            autoComplete="username"
+            name={name}
+            onChange={(event) => {
+              setLoginIdValue(event.target.value)
+              setDuplicateStatus(null)
+            }}
+            placeholder={placeholder}
+            required
+            type="text"
+            value={loginIdValue}
+          />
+          <button onClick={checkDuplicateId} type="button">{stepCopy.duplicateCheck}</button>
         </span>
-      </label>
-    }
-
-    if (type === 'select') {
-      return <label className={fieldClass} key={name}>
-        {label}
-        <select defaultValue="" name={name} required>
-          <option disabled value="">{placeholder}</option>
-          {genderOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-        </select>
+        {duplicateStatus && <small className={`duplicate-status ${duplicateStatusClass}`}>{duplicateStatus.message}</small>}
       </label>
     }
 
@@ -869,23 +947,76 @@ export function RegisterPage() {
         }
       : {}
 
+    if (name === 'password') {
+      return <label className={fieldClass} key={name}>
+        <span className="password-label-row">
+          <span>{label}</span>
+          <ul className="password-rule-list" aria-live="polite">
+            {passwordRules.map(([rule, passed]) => <li className={passed ? 'valid' : 'invalid'} key={rule}>
+              <span aria-hidden="true">{passed ? '✓' : '!'}</span>
+              {passwordRuleLabels[rule]}
+            </li>)}
+          </ul>
+        </span>
+        <span className="password-input-control">
+          <input
+            autoComplete={autoComplete}
+            className="password-actual-input"
+            name={name}
+            placeholder={placeholder}
+            required
+            type={showPassword ? 'text' : 'password'}
+            value={passwordValue}
+            {...passwordProps}
+          />
+          {renderPasswordVisual(passwordValue, showPassword, 'password')}
+          <button
+            aria-label={showPassword ? passwordToggleLabels.hide : passwordToggleLabels.show}
+            onClick={() => setShowPassword((current) => !current)}
+            type="button"
+          >
+            {showPassword ? <EyeOff aria-hidden="true" size={18} /> : <Eye aria-hidden="true" size={18} />}
+          </button>
+        </span>
+      </label>
+    }
+
+    if (name === 'passwordConfirm') {
+      return <label className={fieldClass} key={name}>
+        {label}
+        <span className="password-input-control">
+          <input
+            autoComplete="new-password"
+            className={passwordConfirmStatus ? `password-actual-input password-confirm-input ${passwordConfirmStatus}` : 'password-actual-input password-confirm-input'}
+            name={name}
+            onChange={(event) => setPasswordConfirmValue(event.target.value)}
+            placeholder={placeholder}
+            required
+            type={showPasswordConfirm ? 'text' : 'password'}
+            value={passwordConfirmValue}
+          />
+          {renderPasswordVisual(passwordConfirmValue, showPasswordConfirm, 'password-confirm')}
+          <button
+            aria-label={showPasswordConfirm ? passwordToggleLabels.hide : passwordToggleLabels.show}
+            onClick={() => setShowPasswordConfirm((current) => !current)}
+            type="button"
+          >
+            {showPasswordConfirm ? <EyeOff aria-hidden="true" size={18} /> : <Eye aria-hidden="true" size={18} />}
+          </button>
+        </span>
+      </label>
+    }
+
     return <label className={fieldClass} key={name}>
       {label}
       <input autoComplete={autoComplete} name={name} placeholder={placeholder} required type={type} {...passwordProps} />
-      {name === 'password' && <ul className="password-rule-list" aria-live="polite">
-        {passwordRules.map(([rule, passed]) => <li className={passed ? 'valid' : 'invalid'} key={rule}>
-          <span aria-hidden="true">{passed ? '✓' : '!'}</span>
-          {passwordRuleLabels[rule]}
-        </li>)}
-      </ul>}
-      {helperKey && name !== 'password' && <small className="field-helper">{profileHelpers[helperKey]}</small>}
+      {helperKey && <small className="field-helper">{profileHelpers[helperKey]}</small>}
     </label>
   }
 
   return <main className="content auth-page">
     <section className="account-panel auth-panel wide register-locale-motion" key={`register-${locale}-${registerStep}`}>
       <h1>{pageTitle}</h1>
-      {registerStep === 'profile' && <p className="approval-helper">{contactNoteBefore}<a href={`mailto:${primaryContactEmail}`}>{primaryContactEmail}</a>{contactNoteAfter}</p>}
       {registerStep === 'agreements' ? <form className="auth-form" onSubmit={continueToProfile}>
         <section className="agreement-section" aria-label={t.agreementsTitle}>
           <label className="agreement-required-all">

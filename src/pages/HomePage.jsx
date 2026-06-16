@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { ArrowRight, BadgeCheck, Gem, Globe2, Headphones, Mail, MessageCircle, Sparkles } from 'lucide-react'
+import { BadgeCheck, Globe2, Headphones, Mail, MessageCircle, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { CatalogCard } from '../components/CatalogCard'
 import { useCommerce } from '../commerce/commerceStore'
@@ -263,7 +263,7 @@ const heroBanners = [
       cn: '适合贸易咨询的钛钢唇钉推荐系列。',
     },
     to: '/products?material=Titanium',
-    image: 'https://images.unsplash.com/photo-1518049362265-d5b2a6467637?auto=format&fit=crop&crop=entropy&w=1400&h=760&q=82',
+    image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&crop=faces&w=900&h=1300&q=84',
   },
   {
     key: 'premium-cubic',
@@ -286,7 +286,7 @@ const heroBanners = [
       cn: '以锆石与欧泊细节为中心的穿孔饰品选择。',
     },
     to: '/products?collection=premium-cubic-line',
-    image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&crop=entropy&w=1400&h=760&q=82',
+    image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&crop=faces&w=900&h=1300&q=84',
   },
   {
     key: 'gold-tiny',
@@ -309,7 +309,7 @@ const heroBanners = [
       cn: '精致小巧的14K金穿孔饰品目录。',
     },
     to: '/products?material=14K%20Gold',
-    image: 'https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?auto=format&fit=crop&crop=entropy&w=1400&h=760&q=82',
+    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&crop=faces&w=900&h=1300&q=84',
   },
   {
     key: 'export-best',
@@ -332,7 +332,7 @@ const heroBanners = [
       cn: '适合海外地区采购的出口推荐单品。',
     },
     to: '/products?collection=export-best-items',
-    image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&crop=entropy&w=1400&h=760&q=82',
+    image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&crop=faces&w=900&h=1300&q=82',
   },
 ]
 
@@ -503,14 +503,6 @@ export function HomePage() {
   const featuredProducts = products.filter((product) => product.isBest).slice(0, 8)
   const newProducts = products.filter((product) => product.isNew).slice(0, 8)
   const exportProducts = products.filter((product) => product.collectionIds.includes('export-best-items')).slice(0, 8)
-  const heroCta = isApproved
-    ? { label: copy.approved, to: '/inquiry-list' }
-    : viewerState === 'pending'
-      ? { label: copy.pending, to: '/approval-pending' }
-      : viewerState === 'admin'
-        ? { label: copy.admin, to: '/account' }
-        : { label: copy.access, to: '/register' }
-
   useEffect(() => {
     const timer = window.setInterval(() => {
       setActiveHeroBanner((current) => (current + 1) % heroBanners.length)
@@ -520,31 +512,14 @@ export function HomePage() {
   }, [])
 
   return <main>
-    <section className="hero home-hero">
-      <div className="hero-copy">
-        <ScrambleText as="p" className="eyebrow" persistKey="hero-eyebrow">{copy.eyebrow}</ScrambleText>
-        <ScrambleText as="h1" persistKey="hero-title">{copy.title}</ScrambleText>
-        <ScrambleText persistKey="hero-lead">{copy.lead}</ScrambleText>
-        <ScrambleText as="small" persistKey="hero-note">{copy.note}</ScrambleText>
-        <div className="hero-actions">
-          <Link className="primary-action" to={toLocalePath('/products')}><ScrambleText persistKey="hero-primary-cta">{copy.viewCatalog}</ScrambleText> <ArrowRight size={17} /></Link>
-          <Link className="secondary-action" to={toLocalePath(heroCta.to)}><ScrambleText persistKey="hero-secondary-cta">{heroCta.label}</ScrambleText></Link>
-        </div>
-      </div>
-      <div className="hero-art home-hero-art hero-carousel" aria-label={`${copy.title} banner carousel`}>
+    <section className="hero home-hero home-image-hero-test">
+      <div className="hero-art home-hero-art hero-carousel" aria-label="model piercing image carousel">
         <div className="hero-carousel-track" style={{ transform: `translateX(-${activeHeroBanner * 100}%)` }}>
           {heroBanners.map((banner, index) => {
             const bannerTitle = getLocalizedValue(banner.title, locale)
-            const bannerEyebrow = getLocalizedValue(banner.eyebrow, locale)
-            const bannerText = getLocalizedValue(banner.text, locale)
 
             return <Link className="hero-banner-slide" key={banner.key} to={toLocalePath(banner.to)}>
               <img alt={bannerTitle} height="700" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} width="1100" />
-              <span className="hero-banner-copy">
-                <ScrambleText as="small" persistKey={`hero-banner-eyebrow-${index}`}>{bannerEyebrow}</ScrambleText>
-                <ScrambleText as="strong" persistKey={`hero-banner-title-${index}`}>{bannerTitle}</ScrambleText>
-                <ScrambleText as="em" persistKey={`hero-banner-text-${index}`}>{bannerText}</ScrambleText>
-              </span>
             </Link>
           })}
         </div>
@@ -567,28 +542,6 @@ export function HomePage() {
         <span>{isApproved ? `${buyer.assignedMarket} ${copy.buyerStripApprovedNote}` : copy.buyerStripGuestNote}</span>
       </div>
       <Globe2 size={19} />
-    </section>
-
-    <section className="section-wrap quick-category-section">
-      <div className="section-title">
-        <div>
-          <Gem size={18} />
-          <ScrambleText as="h2" persistKey="quick-title">{copy.quickTitle}</ScrambleText>
-          <ScrambleText as="p" persistKey="quick-note">{copy.quickNote}</ScrambleText>
-        </div>
-      </div>
-      <div className="quick-category-grid">
-        {quickCategories.map((category, index) => {
-          const label = getLocalizedValue(category.labels, locale)
-          return <Link className="quick-category-card" key={category.key} to={toLocalePath(`/products${category.query}`)}>
-            <span className="quick-category-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-            <span className="quick-category-symbol" aria-hidden="true">
-              <ScrambleText persistKey={`quick-symbol-${category.key}`}>{label.slice(0, 1)}</ScrambleText>
-            </span>
-            <ScrambleText as="strong" persistKey={`quick-label-${category.key}`}>{label}</ScrambleText>
-          </Link>
-        })}
-      </div>
     </section>
 
     <section className="section-wrap collections-section">
