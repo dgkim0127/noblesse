@@ -233,42 +233,65 @@ const ageAgreementSummary = {
 
 const profileFieldsByLocale = {
   kr: [
-    ['아이디', 'loginId', 'text', '아이디'],
-    ['비밀번호', 'password', 'password', '비밀번호'],
-    ['업체명', 'companyName', 'text', '업체명 또는 상호'],
-    ['담당자명', 'contactName', 'text', '담당자명'],
-    ['연락처', 'contact', 'text', '이메일 또는 전화번호'],
-    ['국가/지역', 'country', 'text', '예: KR, JP, US'],
+    ['이름', 'name', 'text', '이름', 'field-name'],
+    ['성별', 'gender', 'select', '성별', 'field-gender'],
+    ['국가', 'country', 'country', '국가 검색 또는 선택', 'field-country'],
+    ['업체명', 'companyName', 'text', '업체명', 'field-company'],
+    ['주소', 'address', 'text', '주소', 'field-address'],
+    ['첨부파일', 'attachment', 'file', '', 'field-attachment', 'attachment'],
+    ['아이디', 'loginId', 'id', '아이디', 'field-id'],
+    ['비밀번호', 'password', 'password', '비밀번호', 'field-password', 'password'],
+    ['비밀번호 확인', 'passwordConfirm', 'password', '비밀번호 확인', 'field-password-confirm'],
+    ['이메일', 'email', 'emailComposite', '이메일 아이디', 'field-email'],
+    ['전화번호', 'phone', 'tel', '전화번호', 'field-phone'],
   ],
   en: [
-    ['ID', 'loginId', 'text', 'ID'],
-    ['Password', 'password', 'password', 'Password'],
-    ['Company', 'companyName', 'text', 'Company or shop name'],
-    ['Contact name', 'contactName', 'text', 'Contact name'],
-    ['Contact', 'contact', 'text', 'Email or phone'],
-    ['Country / Region', 'country', 'text', 'e.g. KR, JP, US'],
+    ['Name', 'name', 'text', 'Name', 'field-name'],
+    ['Gender', 'gender', 'select', 'Gender', 'field-gender'],
+    ['Country', 'country', 'country', 'Search or select country', 'field-country'],
+    ['Company', 'companyName', 'text', 'Company', 'field-company'],
+    ['Address', 'address', 'text', 'Address', 'field-address'],
+    ['Attachment', 'attachment', 'file', '', 'field-attachment', 'attachment'],
+    ['ID', 'loginId', 'id', 'ID', 'field-id'],
+    ['Password', 'password', 'password', 'Password', 'field-password', 'password'],
+    ['Confirm password', 'passwordConfirm', 'password', 'Confirm password', 'field-password-confirm'],
+    ['Email', 'email', 'emailComposite', 'Email ID', 'field-email'],
+    ['Phone', 'phone', 'tel', 'Phone number', 'field-phone'],
   ],
   jp: [
-    ['ID', 'loginId', 'text', 'ID'],
-    ['パスワード', 'password', 'password', 'パスワード'],
-    ['会社名', 'companyName', 'text', '会社名または店舗名'],
-    ['担当者名', 'contactName', 'text', '担当者名'],
-    ['連絡先', 'contact', 'text', 'メールまたは電話番号'],
-    ['国 / 地域', 'country', 'text', '例: KR, JP, US'],
+    ['お名前', 'name', 'text', 'お名前', 'field-name'],
+    ['性別', 'gender', 'select', '性別', 'field-gender'],
+    ['国', 'country', 'country', '国を検索または選択', 'field-country'],
+    ['会社名', 'companyName', 'text', '会社名', 'field-company'],
+    ['住所', 'address', 'text', '住所', 'field-address'],
+    ['添付ファイル', 'attachment', 'file', '', 'field-attachment', 'attachment'],
+    ['ID', 'loginId', 'id', 'ID', 'field-id'],
+    ['パスワード', 'password', 'password', 'パスワード', 'field-password', 'password'],
+    ['パスワード確認', 'passwordConfirm', 'password', 'パスワード確認', 'field-password-confirm'],
+    ['メール', 'email', 'emailComposite', 'メールID', 'field-email'],
+    ['電話番号', 'phone', 'tel', '電話番号', 'field-phone'],
   ],
   cn: [
-    ['ID', 'loginId', 'text', 'ID'],
-    ['密码', 'password', 'password', '密码'],
-    ['公司名称', 'companyName', 'text', '公司或店铺名称'],
-    ['联系人', 'contactName', 'text', '联系人'],
-    ['联系方式', 'contact', 'text', '邮箱或电话'],
-    ['国家 / 地区', 'country', 'text', '例如: KR, JP, US'],
+    ['姓名', 'name', 'text', '姓名', 'field-name'],
+    ['性别', 'gender', 'select', '性别', 'field-gender'],
+    ['国家', 'country', 'country', '搜索或选择国家', 'field-country'],
+    ['公司名称', 'companyName', 'text', '公司名称', 'field-company'],
+    ['地址', 'address', 'text', '地址', 'field-address'],
+    ['附件', 'attachment', 'file', '', 'field-attachment', 'attachment'],
+    ['ID', 'loginId', 'id', 'ID', 'field-id'],
+    ['密码', 'password', 'password', '密码', 'field-password', 'password'],
+    ['确认密码', 'passwordConfirm', 'password', '确认密码', 'field-password-confirm'],
+    ['邮箱', 'email', 'emailComposite', '邮箱ID', 'field-email'],
+    ['电话号码', 'phone', 'tel', '电话号码', 'field-phone'],
   ],
 }
 
 const registerStepCopy = {
   kr: {
-    continue: '동의하고 정보 입력하기',
+    continue: '동의하기',
+    submit: '가입하기',
+    duplicateCheck: '중복확인',
+    duplicatePending: '실제 중복확인은 담당자 확인 단계에서 진행됩니다.',
     infoTitle: '정보 입력',
     memoTitle: '문의 내용',
     memoLabel: '문의 내용',
@@ -277,7 +300,10 @@ const registerStepCopy = {
     requiredOnly: '필수 항목에만',
   },
   en: {
-    continue: 'Agree and enter information',
+    continue: 'Agree',
+    submit: 'Sign Up',
+    duplicateCheck: 'Check ID',
+    duplicatePending: 'Live ID duplication check will be handled during manual review.',
     infoTitle: 'Information',
     memoTitle: 'Inquiry memo',
     memoLabel: 'Inquiry memo',
@@ -286,7 +312,10 @@ const registerStepCopy = {
     requiredOnly: 'Required items only',
   },
   jp: {
-    continue: '同意して情報を入力',
+    continue: '同意する',
+    submit: '登録する',
+    duplicateCheck: '重複確認',
+    duplicatePending: '実際のID重複確認は担当者確認の段階で行います。',
     infoTitle: '情報入力',
     memoTitle: 'お問い合わせ内容',
     memoLabel: 'お問い合わせ内容',
@@ -295,13 +324,98 @@ const registerStepCopy = {
     requiredOnly: '必須項目のみ',
   },
   cn: {
-    continue: '同意后填写信息',
+    continue: '同意',
+    submit: '注册',
+    duplicateCheck: '检查ID',
+    duplicatePending: '实际ID重复检查将在人工确认阶段进行。',
     infoTitle: '填写信息',
     memoTitle: '咨询内容',
     memoLabel: '咨询内容',
     memoPlaceholder: '请简单填写感兴趣的产品、预计数量、销售地区等。',
     backToAgreements: '返回同意项目',
     requiredOnly: '仅必填项目',
+  },
+}
+
+const countryOptionsByLocale = {
+  kr: ['한국', '일본', '중국', '미국', '캐나다', '대만', '홍콩', '싱가포르', '태국', '베트남', '필리핀', '인도네시아', '말레이시아', '호주', '영국', '프랑스', '독일', '기타'],
+  en: ['Korea', 'Japan', 'China', 'United States', 'Canada', 'Taiwan', 'Hong Kong', 'Singapore', 'Thailand', 'Vietnam', 'Philippines', 'Indonesia', 'Malaysia', 'Australia', 'United Kingdom', 'France', 'Germany', 'Other'],
+  jp: ['韓国', '日本', '中国', 'アメリカ', 'カナダ', '台湾', '香港', 'シンガポール', 'タイ', 'ベトナム', 'フィリピン', 'インドネシア', 'マレーシア', 'オーストラリア', 'イギリス', 'フランス', 'ドイツ', 'その他'],
+  cn: ['韩国', '日本', '中国', '美国', '加拿大', '台湾', '香港', '新加坡', '泰国', '越南', '菲律宾', '印度尼西亚', '马来西亚', '澳大利亚', '英国', '法国', '德国', '其他'],
+}
+
+const genderOptionsByLocale = {
+  kr: ['여성', '남성', '선택 안 함'],
+  en: ['Female', 'Male', 'Prefer not to say'],
+  jp: ['女性', '男性', '回答しない'],
+  cn: ['女性', '男性', '不选择'],
+}
+
+const profileHelperCopy = {
+  kr: {
+    attachment: '사업자등록증 또는 회사 사진. 현재는 서버 저장 없이 담당자 확인 안내용입니다.',
+    password: '8자 이상, 숫자와 특수기호를 포함해주세요.',
+    countryOther: '국가 직접 입력',
+    emailDomain: '선택',
+    customEmailDomain: '직접 입력',
+  },
+  en: {
+    attachment: 'Business registration or company photo. For now this is only for manual review guidance and is not uploaded to a server.',
+    password: 'Use 8+ characters including a number and a special character.',
+    countryOther: 'Enter country',
+    emailDomain: 'Select',
+    customEmailDomain: 'Custom domain',
+  },
+  jp: {
+    attachment: '事業者登録証または会社写真。現時点ではサーバー保存せず、担当者確認案内用です。',
+    password: '8文字以上、数字と記号を含めてください。',
+    countryOther: '国を直接入力',
+    emailDomain: '選択',
+    customEmailDomain: '直接入力',
+  },
+  cn: {
+    attachment: '营业执照或公司照片。目前不会上传到服务器，仅用于人工确认说明。',
+    password: '请使用8位以上，并包含数字和特殊符号。',
+    countryOther: '直接输入国家',
+    emailDomain: '选择',
+    customEmailDomain: '自定义域名',
+  },
+}
+
+const emailDomainsByLocale = {
+  kr: ['naver.com', 'nate.com', 'daum.net', 'gmail.com', 'hanmail.net', 'kakao.com', '직접 입력'],
+  en: ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'icloud.com', 'Custom'],
+  jp: ['gmail.com', 'yahoo.co.jp', 'docomo.ne.jp', 'ezweb.ne.jp', 'softbank.ne.jp', '直接入力'],
+  cn: ['gmail.com', 'qq.com', '163.com', '126.com', 'outlook.com', '自定义'],
+}
+
+const passwordMismatchCopy = {
+  kr: '비밀번호가 일치하지 않습니다.',
+  en: 'Passwords do not match.',
+  jp: 'パスワードが一致しません。',
+  cn: '两次输入的密码不一致。',
+}
+
+const passwordRuleLabelsByLocale = {
+  kr: {
+    length: '8자 이상',
+    number: '숫자 포함',
+    symbol: '특수기호 포함',
+  },
+  en: {
+    length: 'At least 8 characters',
+    number: 'Includes a number',
+    symbol: 'Includes a special character',
+  },
+  jp: {
+    length: '8文字以上',
+    number: '数字を含む',
+    symbol: '記号を含む',
+  },
+  cn: {
+    length: '至少8个字符',
+    number: '包含数字',
+    symbol: '包含特殊符号',
   },
 }
 
@@ -344,10 +458,10 @@ const agreementLabelsByLocale = {
 }
 
 const agreementMetaCopy = {
-  kr: { required: '[필수]', optional: '[선택]', details: '자세히 보기' },
-  en: { required: '[Required]', optional: '[Optional]', details: 'View details' },
-  jp: { required: '[必須]', optional: '[任意]', details: '詳細を見る' },
-  cn: { required: '[必填]', optional: '[可选]', details: '查看详情' },
+  kr: { required: '[필수]', optional: '[선택]', details: '자세히 보기', accept: '동의하기', accepted: '동의 완료' },
+  en: { required: '[Required]', optional: '[Optional]', details: 'View details', accept: 'Agree', accepted: 'Agreed' },
+  jp: { required: '[必須]', optional: '[任意]', details: '詳細を見る', accept: '同意する', accepted: '同意済み' },
+  cn: { required: '[必填]', optional: '[可选]', details: '查看详情', accept: '同意', accepted: '已同意' },
 }
 
 const localizedAgreementSections = {
@@ -583,6 +697,14 @@ function AgreementRow({ agreement, checked, locale, onChange, t }) {
       {agreement.sections.length > 0 && <details className="agreement-details agreement-inline-details">
         <summary>{metaCopy.details}</summary>
         <AgreementDocument document={agreement} locale={locale} />
+        <button
+          className="agreement-detail-accept"
+          disabled={checked}
+          onClick={() => onChange(agreement.key, true)}
+          type="button"
+        >
+          {checked ? metaCopy.accepted : metaCopy.accept}
+        </button>
       </details>}
     </div>
   </div>
@@ -597,6 +719,9 @@ export function RegisterPage() {
   const [contactNoteBefore, contactNoteAfter = ''] = contactNote.split('{email}')
   const [agreements, setAgreements] = useState(getInitialAgreements)
   const [registerStep, setRegisterStep] = useState('agreements')
+  const [selectedCountry, setSelectedCountry] = useState('')
+  const [emailDomain, setEmailDomain] = useState('')
+  const [passwordValue, setPasswordValue] = useState('')
   const agreementSummaries = getAgreementSummaryForRegister()
   const registerAgreementSummaries = [ageAgreementSummary, ...agreementSummaries]
   const privacyPolicy = getAgreementDocument('privacy_policy')
@@ -605,7 +730,20 @@ export function RegisterPage() {
   const requiredAllAccepted = requiredAgreementKeys.every((key) => agreements[key] === true)
   const profileFields = profileFieldsByLocale[locale] ?? profileFieldsByLocale.kr
   const stepCopy = registerStepCopy[locale] ?? registerStepCopy.kr
+  const countryOptions = countryOptionsByLocale[locale] ?? countryOptionsByLocale.kr
+  const emailDomains = emailDomainsByLocale[locale] ?? emailDomainsByLocale.kr
+  const genderOptions = genderOptionsByLocale[locale] ?? genderOptionsByLocale.kr
+  const profileHelpers = profileHelperCopy[locale] ?? profileHelperCopy.kr
+  const passwordMismatch = passwordMismatchCopy[locale] ?? passwordMismatchCopy.kr
+  const passwordRuleLabels = passwordRuleLabelsByLocale[locale] ?? passwordRuleLabelsByLocale.kr
+  const countryOtherValue = countryOptions[countryOptions.length - 1]
+  const customEmailDomainValue = emailDomains[emailDomains.length - 1]
   const pageTitle = signupTitleByLocale[locale] ?? signupTitleByLocale.kr
+  const passwordRules = [
+    ['length', passwordValue.length >= 8],
+    ['number', /\d/.test(passwordValue)],
+    ['symbol', /[^A-Za-z0-9]/.test(passwordValue)],
+  ]
 
   const setAgreement = (name, checked) => {
     setAgreements((current) => ({ ...current, [name]: checked }))
@@ -627,6 +765,16 @@ export function RegisterPage() {
     event.preventDefault()
     if (!requiredAccepted) return
 
+    const passwordInput = event.currentTarget.elements.password
+    const passwordConfirmInput = event.currentTarget.elements.passwordConfirm
+    passwordConfirmInput.setCustomValidity('')
+
+    if (passwordInput.value !== passwordConfirmInput.value) {
+      passwordConfirmInput.setCustomValidity(passwordMismatch)
+      passwordConfirmInput.reportValidity()
+      return
+    }
+
     const agreementSnapshot = buildAgreementSnapshot(agreements)
     void agreementSnapshot
 
@@ -634,10 +782,105 @@ export function RegisterPage() {
     navigate(toLocalePath('/approval-pending'))
   }
 
-  const renderField = ([name, type]) => <label key={name}>
-    {t.fields[name]}
-    <input autoComplete="off" name={name} placeholder={t.fields[name]} type={type} />
-  </label>
+  const renderProfileField = ([label, name, type, placeholder, fieldClass = '', helperKey]) => {
+    if (type === 'country') {
+      return <label className={fieldClass} key={name}>
+        {label}
+        <input
+          autoComplete="country-name"
+          list={`country-options-${locale}`}
+          name={name}
+          onChange={(event) => setSelectedCountry(event.target.value)}
+          placeholder={placeholder}
+          required
+          type="text"
+        />
+        <datalist id={`country-options-${locale}`}>
+          {countryOptions.map((option) => <option key={option} value={option} />)}
+        </datalist>
+        {selectedCountry === countryOtherValue && <input
+          className="register-inline-extra"
+          name="countryOther"
+          placeholder={profileHelpers.countryOther}
+          required
+          type="text"
+        />}
+      </label>
+    }
+
+    if (type === 'file') {
+      return <label className={`full-span ${fieldClass}`.trim()} key={name}>
+        <span className="field-label-with-help">
+          {label}
+          {helperKey && <small>{profileHelpers[helperKey]}</small>}
+        </span>
+        <input name={name} type="file" />
+      </label>
+    }
+
+    if (type === 'id') {
+      return <label className={`register-id-field ${fieldClass}`.trim()} key={name}>
+        {label}
+        <span className="register-id-row">
+          <input autoComplete="username" name={name} placeholder={placeholder} required type="text" />
+          <button disabled title={stepCopy.duplicatePending} type="button">{stepCopy.duplicateCheck}</button>
+        </span>
+      </label>
+    }
+
+    if (type === 'select') {
+      return <label className={fieldClass} key={name}>
+        {label}
+        <select defaultValue="" name={name} required>
+          <option disabled value="">{placeholder}</option>
+          {genderOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+        </select>
+      </label>
+    }
+
+    if (type === 'emailComposite') {
+      return <label className={fieldClass} key={name}>
+        {label}
+        <span className="register-email-row">
+          <input autoComplete="email" name="emailLocal" placeholder={placeholder} required type="text" />
+          <span aria-hidden="true">@</span>
+          <select defaultValue="" name="emailDomain" onChange={(event) => setEmailDomain(event.target.value)} required>
+            <option disabled value="">{profileHelpers.emailDomain}</option>
+            {emailDomains.map((domain) => <option key={domain} value={domain}>{domain}</option>)}
+          </select>
+        </span>
+        {emailDomain === customEmailDomainValue && <input
+          className="register-inline-extra"
+          name="emailCustomDomain"
+          placeholder={profileHelpers.customEmailDomain}
+          required
+          type="text"
+        />}
+      </label>
+    }
+
+    const autoComplete = name === 'password' ? 'new-password' : 'off'
+    const passwordProps = name === 'password'
+      ? {
+          minLength: 8,
+          onChange: (event) => setPasswordValue(event.target.value),
+          pattern: '^(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$',
+          title: profileHelpers.password,
+        }
+      : {}
+
+    return <label className={fieldClass} key={name}>
+      {label}
+      <input autoComplete={autoComplete} name={name} placeholder={placeholder} required type={type} {...passwordProps} />
+      {name === 'password' && <ul className="password-rule-list" aria-live="polite">
+        {passwordRules.map(([rule, passed]) => <li className={passed ? 'valid' : 'invalid'} key={rule}>
+          <span aria-hidden="true">{passed ? '✓' : '!'}</span>
+          {passwordRuleLabels[rule]}
+        </li>)}
+      </ul>}
+      {helperKey && name !== 'password' && <small className="field-helper">{profileHelpers[helperKey]}</small>}
+    </label>
+  }
 
   return <main className="content auth-page">
     <section className="account-panel auth-panel wide register-locale-motion" key={`register-${locale}-${registerStep}`}>
@@ -675,16 +918,12 @@ export function RegisterPage() {
 
         <div className="account-actions agreement-actions">
           <button className="primary-action" disabled={!requiredAccepted} type="submit">{stepCopy.continue}</button>
-          <Link className="secondary-action" to={toLocalePath('/login')}>{t.back}</Link>
         </div>
       </form> : <form className="auth-form" onSubmit={submitRequest}>
         <fieldset className="form-section">
           <legend>{stepCopy.infoTitle}</legend>
           <div className="register-grid">
-            {profileFields.map(([label, name, type, placeholder]) => <label key={name}>
-              {label}
-              <input autoComplete="off" name={name} placeholder={placeholder} required type={type} />
-            </label>)}
+            {profileFields.map(renderProfileField)}
           </div>
         </fieldset>
         <fieldset className="form-section">
@@ -697,8 +936,7 @@ export function RegisterPage() {
           <span>{t.orderDisclaimer}</span>
         </div>
         <div className="account-actions agreement-actions">
-          <button className="secondary-action" onClick={() => setRegisterStep('agreements')} type="button">{stepCopy.backToAgreements}</button>
-          <button className="primary-action" data-testid="request-buyer-access-submit" type="submit">{t.submit}</button>
+          <button className="primary-action" data-testid="request-buyer-access-submit" type="submit">{stepCopy.submit}</button>
         </div>
       </form>}
     </section>

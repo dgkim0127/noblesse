@@ -14,8 +14,8 @@ export const privacyPolicy = {
     {
       headingKo: '제2조 처리하는 개인정보 항목',
       headingEn: 'Article 2. Personal Information Items',
-      bodyKo: '처리 항목은 로그인 ID, 이메일, 비밀번호, 회사명, 담당자명, 국가, 선호 언어, 전화번호, 메신저 종류, 메신저 ID, 판매 채널, 사업자 정보, 요청 메모, 서비스 이용 기록, 접속 로그, 쿠키, Inquiry List 기록, Request Quote 기록, My Inquiries 기록, 회원 상태, assignedMarket, currency, discountRate, minOrderAmount입니다.',
-      bodyEn: 'Processed items include login ID, email, password, company name, contact name, country, preferred language, phone, messenger type, messenger ID, sales channel, business information, request memo, service usage records, access logs, cookies, Inquiry List records, Request Quote records, My Inquiries records, review status, assignedMarket, currency, discountRate, and minOrderAmount.',
+      bodyKo: '처리 항목은 로그인 ID, 이메일, 비밀번호, 이름, 성별, 회사명, 주소, 국가, 선호 언어, 전화번호, 첨부파일 선택 정보, 메신저 종류, 메신저 ID, 판매 채널, 사업자 정보, 요청 메모, 서비스 이용 기록, 접속 로그, 쿠키, Inquiry List 기록, Request Quote 기록, My Inquiries 기록, 회원 상태, assignedMarket, currency, discountRate, minOrderAmount입니다. 첨부파일 서버 저장과 실제 업로드 처리는 운영 전 별도 검토가 필요합니다.',
+      bodyEn: 'Processed items include login ID, email, password, name, gender, company name, address, country, preferred language, phone, selected attachment information, messenger type, messenger ID, sales channel, business information, request memo, service usage records, access logs, cookies, Inquiry List records, Request Quote records, My Inquiries records, review status, assignedMarket, currency, discountRate, and minOrderAmount. Server-side attachment storage and real upload handling require separate review before operation.',
     },
     {
       headingKo: '제3조 수집 방법',

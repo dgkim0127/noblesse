@@ -3959,7 +3959,7 @@ h6 {
 .register-grid {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(12, minmax(0, 1fr));
 }
 
 .auth-form label {
@@ -3969,7 +3969,37 @@ h6 {
   font-size: 13px;
 }
 
+.register-grid label {
+  grid-column: span 6;
+}
+
+.register-grid .field-name {
+  grid-column: span 6;
+}
+
+.register-grid .field-country {
+  grid-column: span 6;
+}
+
+.register-grid .field-company,
+.register-grid .field-address,
+.register-grid .field-attachment {
+  grid-column: span 4;
+}
+
+.register-grid .field-id,
+.register-grid .field-email,
+.register-grid .field-phone {
+  grid-column: 1 / -1;
+}
+
+.register-grid .field-password,
+.register-grid .field-password-confirm {
+  grid-column: span 6;
+}
+
 .auth-form input,
+.auth-form select,
 .auth-form textarea {
   width: 100%;
   min-width: 0;
@@ -3980,6 +4010,76 @@ h6 {
   background: var(--noblesse-bg);
 }
 
+.auth-form select {
+  appearance: none;
+}
+
+.auth-form input[type="file"] {
+  padding: 10px 12px;
+}
+
+.field-label-with-help {
+  display: grid;
+  gap: 3px;
+}
+
+.field-label-with-help small,
+.field-helper {
+  color: #8d8492;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.password-rule-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.password-rule-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.password-rule-list li.invalid {
+  color: #d84d64;
+  background: #fff3f5;
+}
+
+.password-rule-list li.valid {
+  color: #24855b;
+  background: #eefbf5;
+}
+
+.password-rule-list span {
+  display: inline-grid;
+  width: 14px;
+  height: 14px;
+  place-items: center;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 10px;
+}
+
+.password-rule-list li.invalid span {
+  background: #d84d64;
+}
+
+.password-rule-list li.valid span {
+  background: #24855b;
+}
+
 .auth-form textarea {
   min-height: 110px;
   resize: vertical;
@@ -3987,6 +4087,57 @@ h6 {
 
 .full-span {
   grid-column: 1 / -1;
+}
+
+.register-id-field {
+  grid-column: 1 / -1;
+}
+
+.register-id-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.register-email-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(132px, 0.8fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.register-email-row > span {
+  color: var(--noblesse-sub);
+  font-weight: 900;
+}
+
+.register-inline-extra {
+  margin-top: 6px;
+}
+
+.register-id-row button {
+  min-height: 43px;
+  border: 1px solid #ded3dc;
+  border-radius: 999px;
+  padding: 0 14px;
+  color: #665d72;
+  background: #faf7f8;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.register-id-row button:hover {
+  border-color: rgb(255 143 169 / 62%);
+  color: var(--noblesse-sub);
+  background: #fff8fa;
+}
+
+.register-id-row button:disabled {
+  opacity: .72;
+  cursor: not-allowed;
 }
 
 .text-action {
@@ -4124,6 +4275,25 @@ h6 {
 
 .agreement-inline-details[open] .agreement-scroll {
   max-width: 100%;
+}
+
+.agreement-detail-accept {
+  justify-self: end;
+  width: fit-content;
+  border: 1px solid rgb(249 156 175 / 42%);
+  border-radius: 999px;
+  padding: 9px 18px;
+  color: #fff;
+  background: var(--noblesse-sub);
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.agreement-detail-accept:disabled {
+  color: #8a8190;
+  background: #f7f1ee;
+  cursor: default;
 }
 
 .agreement-row small {
@@ -5009,6 +5179,28 @@ h6 {
   .register-grid {
     grid-template-columns: 1fr;
     gap: 5px;
+  }
+
+  .register-grid label,
+  .register-grid .field-name,
+  .register-grid .field-country,
+  .register-grid .field-company,
+  .register-grid .field-address,
+  .register-grid .field-attachment,
+  .register-grid .field-id,
+  .register-grid .field-password,
+  .register-grid .field-password-confirm,
+  .register-grid .field-email,
+  .register-grid .field-phone {
+    grid-column: 1 / -1;
+  }
+
+  .register-email-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .register-email-row select {
+    grid-column: 1 / -1;
   }
 
   .account-status-card,

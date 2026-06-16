@@ -137,16 +137,24 @@ Collected items:
 - login ID
 - email
 - password
+- name
+- gender
 - company name
-- contact name
+- address
 - country
 - preferred language
 - phone
+- selected attachment information
 - messenger type
 - messenger ID
 - sales channel
 - business information
 - request memo
+
+Attachment note:
+
+- Real server-side upload and storage are not implemented in the current Catalog MVP.
+- Attachment handling must be reviewed again before operation.
 
 Retention:
 
