@@ -88,3 +88,10 @@ Expected blocked routes:
 - The next planning step is documented in `docs/ADMIN_MEMO_LOCAL_DRY_RUN_PLAN.md`.
 - 32G does not change the mock-only skeleton.
 - The mock skeleton remains separate from any future local DB dry-run implementation.
+
+## 32H Local Query Path Follow-up
+
+- 32H extends the memo skeleton with a local-only transaction-capable query path.
+- Fake pool tests verify memo transaction behavior and `audit_logs` insert behavior.
+- Route-level memo tests remain mock dependency tests and still pass.
+- Real DB/Auth integration, local PostgreSQL dry-run, production rollout, Firebase `/api` rewrite, and deploy remain blocked.

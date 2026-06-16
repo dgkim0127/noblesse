@@ -265,3 +265,10 @@ Before implementation starts:
 - Admin memo local dry-run planning is documented in `docs/ADMIN_MEMO_LOCAL_DRY_RUN_PLAN.md`.
 - Real implementation still requires explicit approval and must be local-only first.
 - Production DB/Auth, Cloud resources, SQL execution, Firebase `/api` rewrite, and deploy remain blocked.
+
+## 32H Admin Memo Local Query Path
+
+- Admin `admin_memo` local-only query path exists for a future local PostgreSQL dry-run.
+- Fake-pool tests cover transaction, `audit_logs`, rollback, release, not-found, and parameterized query behavior.
+- Next step is explicit local PostgreSQL dry-run only if approved.
+- Production DB/Auth, Cloud resources, SQL execution by Codex, Firebase `/api` rewrite, and deploy remain blocked.

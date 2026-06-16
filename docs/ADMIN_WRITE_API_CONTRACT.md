@@ -600,3 +600,11 @@ No real Firebase/DB tests in first write scaffold.
 - `admin_memo` remains the first future real-write candidate, but it is not implemented yet.
 - Real implementation still requires explicit approval, local-only DB setup, transaction handling, and `audit_logs`.
 - Production DB/Auth, Firebase `/api` rewrite, and deploy remain blocked.
+
+## 32H Admin Memo Local Query Path Follow-up
+
+- The inquiry memo contract now has a local-only backend query path for `updateInquiryMemo`.
+- The query path uses a transaction and writes `audit_logs` in the same transaction.
+- Fake-pool tests cover transaction, audit insert, rollback/release, not-found handling, and parameterized queries.
+- Real DB dry-run still requires separate explicit approval.
+- Status, quote, buyer, product, price, and delete writes remain out of scope.

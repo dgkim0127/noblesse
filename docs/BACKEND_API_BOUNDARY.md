@@ -229,3 +229,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - A local dry-run does not imply production Firebase Hosting `/api` rewrite.
 - Production frontend still does not call the admin API.
 - Direct React-to-PostgreSQL access remains prohibited.
+
+## 32H Admin Memo Local Query Path
+
+- Backend now has a local-only admin memo query path for future dry-run.
+- Firebase Hosting `/api` rewrite remains absent.
+- Production frontend still does not call this admin API.
+- Direct React-to-PostgreSQL access remains prohibited.

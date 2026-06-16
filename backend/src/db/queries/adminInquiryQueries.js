@@ -4,6 +4,13 @@ function assertPool(pool) {
   }
 }
 
+function assertTransactionPool(pool) {
+  assertPool(pool);
+  if (typeof pool.connect !== "function") {
+    throw new Error("PostgreSQL pool must support transactions for admin inquiry memo updates.");
+  }
+}
+
 function mapInquiry(row) {
   return {
     id: row.id,
@@ -21,6 +28,34 @@ function mapInquiry(row) {
     estimatedTotal: row.estimated_total,
     createdAt: row.created_at,
     updatedAt: row.updated_at
+  };
+}
+
+function mapMemoInquiry(row) {
+  return {
+    id: row.id,
+    inquiryNumber: row.inquiry_number,
+    adminMemo: row.admin_memo,
+    updatedAt: row.updated_at
+  };
+}
+
+function createMemoSnapshot(row) {
+  return {
+    id: row.id,
+    inquiryNumber: row.inquiry_number,
+    adminMemo: row.admin_memo,
+    updatedAt: row.updated_at
+  };
+}
+
+function getAdminActor(adminViewer = {}) {
+  return {
+    userId: adminViewer.userId || adminViewer.id || null,
+    role: adminViewer.role || "admin",
+    requestId: adminViewer.requestId || null,
+    ipAddress: adminViewer.ipAddress || null,
+    userAgent: adminViewer.userAgent || null
   };
 }
 
@@ -121,9 +156,97 @@ export function createAdminInquiryQueries(pool) {
       };
     },
 
-    async updateInquiryMemo() {
-      assertPool(pool);
-      throw new Error("Real admin memo writes are not implemented in the mock-only skeleton.");
+    async updateInquiryMemo(inquiryId, adminMemo, adminViewer = {}) {
+      assertTransactionPool(pool);
+      const client = await pool.connect();
+      const actor = getAdminActor(adminViewer);
+
+      try {
+        await client.query("begin");
+        const existingResult = await client.query(
+          `
+            select
+              id,
+              inquiry_number,
+              admin_memo,
+              updated_at
+            from public.inquiries
+            where id = $1
+            for update
+          `,
+          [inquiryId]
+        );
+
+        const existingRow = existingResult.rows[0];
+        if (!existingRow) {
+          await client.query("rollback");
+          return null;
+        }
+
+        const beforeSnapshot = createMemoSnapshot(existingRow);
+        const updateResult = await client.query(
+          `
+            update public.inquiries
+            set admin_memo = $2,
+                updated_at = now()
+            where id = $1
+            returning
+              id,
+              inquiry_number,
+              admin_memo,
+              updated_at
+          `,
+          [inquiryId, adminMemo]
+        );
+        const updatedRow = updateResult.rows[0];
+        const afterSnapshot = createMemoSnapshot(updatedRow);
+
+        const auditResult = await client.query(
+          `
+            insert into public.audit_logs (
+              actor_user_id,
+              actor_role,
+              action,
+              target_table,
+              target_id,
+              before_snapshot,
+              after_snapshot,
+              request_id,
+              ip_address,
+              user_agent
+            )
+            values ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8, $9, $10)
+            returning id
+          `,
+          [
+            actor.userId,
+            actor.role,
+            "admin.inquiry.memo.update",
+            "inquiries",
+            inquiryId,
+            beforeSnapshot,
+            afterSnapshot,
+            actor.requestId,
+            actor.ipAddress,
+            actor.userAgent
+          ]
+        );
+
+        await client.query("commit");
+        return {
+          inquiry: mapMemoInquiry(updatedRow),
+          auditLogId: auditResult.rows[0].id
+        };
+      } catch (error) {
+        try {
+          await client.query("rollback");
+        } catch {
+          // Preserve the original query error instead of masking it with rollback failure.
+        }
+        throw error;
+      } finally {
+        client.release();
+      }
     }
   };
 }

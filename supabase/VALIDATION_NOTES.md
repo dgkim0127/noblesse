@@ -809,3 +809,19 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Deploy action in 32G: No.
 - Frontend Register/member signup source changes: Out of scope for 32G and not staged by this documentation commit.
 - Conclusion: Planning for local-only `admin_memo` dry-run is Go. Real implementation, production DB/Auth, SQL execution, and deploy remain No-Go.
+
+## 32H Admin Memo Local Query Path Follow-up
+
+- Date: 2026-06-16
+- Change: Added local-only transaction-capable `updateInquiryMemo` query path and fake-pool transaction tests.
+- Scope: Backend query/test support for a future local PostgreSQL dry-run.
+- SQL execution required in 32H: No.
+- DB dry-run status: Unchanged.
+- SQL files changed in 32H: No.
+- Real DB/Auth connection in 32H: No.
+- `DATABASE_URL` used in 32H: No.
+- psql executed in 32H: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 32H: No.
+- Frontend source changes: Out of scope for 32H and not staged by this backend commit.
+- Conclusion: Local-only `admin_memo` transaction query path is ready for a separately approved local PostgreSQL dry-run. Production DB/Auth, SQL execution, and deploy remain No-Go.

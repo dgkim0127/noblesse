@@ -226,3 +226,16 @@ Next recommended step:
 
 - 32H: implement local-only `admin_memo` write path behind explicit local DB dry-run approval
 - or 32H-alt: clean remaining Register/frontend source changes first if user wants a clean tree
+
+## 32H Implementation Follow-up
+
+- Local-only transaction-capable query path has been implemented for `updateInquiryMemo`.
+- Fake pool tests verify transaction start, `select ... for update`, memo update, `audit_logs` insert, commit, rollback, release, not-found handling, and parameterized query usage.
+- Route-level memo tests still use injected mock dependencies.
+- No real PostgreSQL connection was opened in 32H.
+- No local or production DB dry-run was executed in 32H.
+- No SQL file, schema, migration, Firebase Auth, Firebase `/api` rewrite, or deploy change was made.
+
+Next recommended step:
+
+- Run an explicitly approved local PostgreSQL dry-run only after the operator confirms the local DB environment and secret handling rules.
