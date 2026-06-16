@@ -389,6 +389,7 @@ export function StoreShell() {
   const [compactSearchPhase, setCompactSearchPhase] = useState('closed')
   const [searchHistory, setSearchHistory] = useState(readSearchHistory)
   const [isMarqueeCollapsed, setIsMarqueeCollapsed] = useState(false)
+  const [isSideLayout, setIsSideLayout] = useState(false)
   const [isHeaderCompact, setIsHeaderCompact] = useState(false)
   const [isPreviewBarHidden, setIsPreviewBarHidden] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
@@ -442,10 +443,13 @@ export function StoreShell() {
     const handleScroll = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop || 0
       const marqueeCollapsed = scrollY > 24
-      const compact = scrollY > 260
+      const sideLayout = scrollY > 150
+      const compact = scrollY > 520
       setIsMarqueeCollapsed(marqueeCollapsed)
+      setIsSideLayout(sideLayout)
       setIsHeaderCompact(compact)
       document.documentElement.classList.toggle('noblesse-marquee-collapsed', marqueeCollapsed)
+      document.documentElement.classList.toggle('noblesse-side-layout', sideLayout)
       document.documentElement.classList.toggle('noblesse-compact-header', compact)
     }
     handleScroll()
@@ -467,7 +471,30 @@ export function StoreShell() {
       window.cancelAnimationFrame(animationFrame)
       window.clearInterval(interval)
       document.documentElement.classList.remove('noblesse-marquee-collapsed')
+      document.documentElement.classList.remove('noblesse-side-layout')
       document.documentElement.classList.remove('noblesse-compact-header')
+    }
+  }, [])
+
+  useEffect(() => {
+    let wheelLock = false
+
+    const handleFirstWheel = (event) => {
+      if (window.scrollY > 2 || Math.abs(event.deltaY) < 8 || wheelLock) return
+
+      const marqueeHeight = document.querySelector('.top-marquee')?.getBoundingClientRect().height || 30
+      wheelLock = true
+      event.preventDefault()
+      window.scrollTo({ top: Math.ceil(marqueeHeight), behavior: 'smooth' })
+      window.setTimeout(() => {
+        wheelLock = false
+      }, 420)
+    }
+
+    window.addEventListener('wheel', handleFirstWheel, { passive: false })
+
+    return () => {
+      window.removeEventListener('wheel', handleFirstWheel)
     }
   }, [])
 
@@ -645,7 +672,7 @@ export function StoreShell() {
 
   const shouldRenderCompactSearch = isCompactSearchOpen || isCompactSearchClosing
 
-  return <div className={`site-shell ${isHomeImageRoute ? 'home-image-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''}`.trim()}>
+  return <div className={`site-shell ${isHomeImageRoute ? 'home-image-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isSideLayout ? 'has-side-layout' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''} ${isPreviewBarHidden ? 'has-preview-hidden' : 'has-preview-visible'}`.trim()}>
     <div className={`top-marquee ${isMarqueeCollapsed ? 'is-collapsed' : ''}`} style={topMarqueeStyle} aria-label={`${headerBrandName} material notice`}>
       <div className="top-marquee-track" aria-hidden="true">
         {Array.from({ length: 4 }).map((_, index) => <span key={index}>{topMarqueeText}</span>)}
