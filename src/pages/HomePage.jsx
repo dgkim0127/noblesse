@@ -263,7 +263,7 @@ const heroBanners = [
       cn: '适合贸易咨询的钛钢唇钉推荐系列。',
     },
     to: '/products?material=Titanium',
-    image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&crop=faces&w=900&h=1300&q=84',
+    image: 'https://images.unsplash.com/photo-1671644730555-916aa8d8157f?auto=format&fit=crop&crop=faces&w=900&h=1350&q=86',
   },
   {
     key: 'premium-cubic',
@@ -286,7 +286,7 @@ const heroBanners = [
       cn: '以锆石与欧泊细节为中心的穿孔饰品选择。',
     },
     to: '/products?collection=premium-cubic-line',
-    image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&crop=faces&w=900&h=1300&q=84',
+    image: 'https://images.unsplash.com/photo-1722410180651-efd51636f260?auto=format&fit=crop&crop=faces&w=900&h=1350&q=86',
   },
   {
     key: 'gold-tiny',
@@ -309,7 +309,7 @@ const heroBanners = [
       cn: '精致小巧的14K金穿孔饰品目录。',
     },
     to: '/products?material=14K%20Gold',
-    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&crop=faces&w=900&h=1300&q=84',
+    image: 'https://images.unsplash.com/photo-1671644730555-916aa8d8157f?auto=format&fit=crop&crop=entropy&w=900&h=1350&q=82',
   },
   {
     key: 'export-best',
@@ -332,7 +332,7 @@ const heroBanners = [
       cn: '适合海外地区采购的出口推荐单品。',
     },
     to: '/products?collection=export-best-items',
-    image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&crop=faces&w=900&h=1300&q=82',
+    image: 'https://images.unsplash.com/photo-1722410180651-efd51636f260?auto=format&fit=crop&crop=entropy&w=900&h=1350&q=82',
   },
 ]
 
@@ -512,18 +512,18 @@ export function HomePage() {
   }, [])
 
   return <main>
-    <section className="hero home-hero home-image-hero-test">
-      <div className="hero-art home-hero-art hero-carousel" aria-label="model piercing image carousel">
-        <div className="hero-carousel-track" style={{ transform: `translateX(-${activeHeroBanner * 100}%)` }}>
+    <section className="home-main-portrait-section">
+      <div className="home-main-portrait-frame" aria-label="model piercing image carousel">
+        <div className="home-main-portrait-track" style={{ transform: `translateX(-${activeHeroBanner * 100}%)` }}>
           {heroBanners.map((banner, index) => {
             const bannerTitle = getLocalizedValue(banner.title, locale)
 
-            return <Link className="hero-banner-slide" key={banner.key} to={toLocalePath(banner.to)}>
-              <img alt={bannerTitle} height="700" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} width="1100" />
+            return <Link className="home-main-portrait-slide" key={banner.key} to={toLocalePath(banner.to)}>
+              <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} width="800" />
             </Link>
           })}
         </div>
-        <div className="hero-carousel-dots" aria-label="배너 선택">
+        <div className="home-main-portrait-dots" aria-label="배너 선택">
           {heroBanners.map((banner, index) => <button
             aria-label={`${getLocalizedValue(banner.title, locale)} 배너 보기`}
             className={activeHeroBanner === index ? 'active' : ''}
