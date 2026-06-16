@@ -305,6 +305,212 @@ const registerStepCopy = {
   },
 }
 
+const signupTitleByLocale = {
+  kr: '회원 가입',
+  en: 'Sign Up',
+  jp: '会員登録',
+  cn: '会员注册',
+}
+
+const agreementLabelsByLocale = {
+  kr: {
+    age_confirmed: '14세 이상입니다',
+    terms_of_service: '귀족 이용약관',
+    buyer_terms: '귀족 도매 회원 및 견적 이용 조건',
+    privacy_collection_use: '개인정보 수집·이용 동의',
+    marketing_updates: '신상품 및 카탈로그 안내 수신 동의',
+  },
+  en: {
+    age_confirmed: 'I am at least 14 years old',
+    terms_of_service: 'Noblesse Terms of Service',
+    buyer_terms: 'Wholesale Member and Quote Terms',
+    privacy_collection_use: 'Personal Information Collection and Use Consent',
+    marketing_updates: 'New Product and Catalog Updates Consent',
+  },
+  jp: {
+    age_confirmed: '14歳以上です',
+    terms_of_service: '貴族利用規約',
+    buyer_terms: '貴族卸会員および見積利用条件',
+    privacy_collection_use: '個人情報の収集・利用同意',
+    marketing_updates: '新商品およびカタログ案内の受信同意',
+  },
+  cn: {
+    age_confirmed: '已满14岁',
+    terms_of_service: '贵族使用条款',
+    buyer_terms: '贵族批发会员及报价使用条件',
+    privacy_collection_use: '个人信息收集及使用同意',
+    marketing_updates: '新品及目录通知接收同意',
+  },
+}
+
+const agreementMetaCopy = {
+  kr: { required: '[필수]', optional: '[선택]', details: '자세히 보기' },
+  en: { required: '[Required]', optional: '[Optional]', details: 'View details' },
+  jp: { required: '[必須]', optional: '[任意]', details: '詳細を見る' },
+  cn: { required: '[必填]', optional: '[可选]', details: '查看详情' },
+}
+
+const localizedAgreementSections = {
+  terms_of_service: {
+    kr: [
+      ['제1조 목적', '본 약관은 귀족이 운영하는 Noblesse 웹사이트에서 제공하는 국내·해외 B2B 피어싱 카탈로그, 회원 가입, 거래처 확인, 상품 정보 열람, 견적 문의 및 관련 안내 서비스의 이용 조건과 절차를 정합니다.'],
+      ['제2조 용어의 정의', ['이용자는 사이트에 접속하거나 서비스를 이용하는 모든 방문자와 회원을 의미합니다.', '회원은 회원 가입 절차를 통해 정보를 제출하고 귀족의 카탈로그 및 문의 서비스를 이용하는 개인 또는 사업자 담당자를 의미합니다.', '승인 회원은 귀족이 거래 가능 여부를 확인한 뒤 회원가, MOQ, 견적 문의 등 일부 기능 접근을 허용한 회원을 의미합니다.', '견적 문의는 상품, 옵션, 수량, 메모를 기준으로 거래 검토를 요청하는 절차이며 최종 주문이나 결제가 아닙니다.']],
+      ['제3조 약관의 효력 및 변경', ['본 약관은 회원 가입 화면 또는 사이트 내 연결 화면을 통해 게시되며, 회원이 약관에 동의하고 가입 절차를 진행하면 효력이 발생합니다.', '귀족은 운영 정책, 서비스 구조, 관련 법령, 보안 기준 또는 거래 절차 변경에 따라 약관을 개정할 수 있습니다.', '중요한 변경이 있는 경우 사이트 공지, 회원 화면, 이메일 등 합리적인 방법으로 안내할 수 있습니다.']],
+      ['제4조 서비스의 제공', ['귀족은 상품 이미지, 상품명, 상품 코드, 소재, 컬러, 사이즈, MOQ, 카테고리, 컬렉션, 카탈로그 안내, 회원 상태 안내, 견적 문의 관련 기능을 제공할 수 있습니다.', '서비스는 B2B 거래 검토를 돕기 위한 카탈로그 및 문의 기능이며, 온라인 결제나 즉시 주문 확정을 목적으로 하지 않습니다.']],
+      ['제5조 회원 가입 및 정보 제출', ['회원은 아이디, 비밀번호, 업체명, 담당자명, 연락처, 국가/지역, 판매 채널, 관심 상품, 문의 내용 등 거래 확인에 필요한 정보를 제출할 수 있습니다.', '회원은 가입 과정에서 사실과 다른 정보, 타인의 정보, 확인이 어려운 정보를 제출해서는 안 됩니다.', '제출 정보가 부정확하거나 추가 확인이 필요한 경우 회원가 안내, 거래 조건 안내, 견적 문의 이용이 보류될 수 있습니다.']],
+      ['제6조 계정 및 비밀번호 관리', ['아이디와 비밀번호 관리 책임은 회원에게 있습니다.', '회원은 계정을 제3자에게 양도, 대여, 공유하거나 타인의 계정을 사용해서는 안 됩니다.', '회원의 관리 소홀로 발생한 손해 또는 거래상 불이익에 대해서 귀족은 책임을 지지 않을 수 있습니다.']],
+      ['제7조 거래처 확인 및 이용 제한', ['귀족은 업체 정보, 연락처, 판매 지역, 판매 채널, 거래 적합성, 공급 정책 등을 기준으로 거래처 확인을 진행할 수 있습니다.', '허위 정보, 부정 이용, 무단 가격 공유, 비정상 접근, 서비스 방해 행위가 확인되는 경우 이용을 제한하거나 회원 상태를 보류·차단할 수 있습니다.']],
+      ['제8조 상품 정보 및 이미지', ['사이트에 표시되는 상품 이미지와 설명은 거래 검토를 위한 카탈로그 정보입니다.', '색상, 광택, 소재 질감, 크기, 포장 상태는 촬영 환경, 디스플레이 환경, 생산 시점에 따라 실제 상품과 차이가 있을 수 있습니다.', '상품 구성, 옵션, MOQ, 수출 가능 여부는 공급 상황에 따라 변경될 수 있습니다.']],
+      ['제9조 가격 및 거래 조건', ['회원가, 시장별 가격, MOQ, 재고, 납기, 배송 조건, 수출 조건은 승인 회원 또는 담당자 확인 후 안내될 수 있습니다.', '사이트에 표시되는 정보 또는 문의 단계의 참고 가격은 최종 확정 조건이 아니며, 최종 조건은 귀족 담당자 확인 후 별도로 안내됩니다.']],
+      ['제10조 견적 문의의 성격', ['견적 문의는 회원이 관심 상품과 수량을 기준으로 귀족에 검토를 요청하는 절차입니다.', '견적 문의 접수만으로 주문, 계약, 결제, 배송 의무가 발생하지 않습니다.', '최종 가격, 가능 수량, 생산 가능 여부, 납기, 배송 조건은 담당자 확인 후 안내됩니다.']],
+      ['제11조 회원의 의무', ['회원은 관련 법령, 본 약관, 사이트 안내, 거래상 신의성실 원칙을 준수해야 합니다.', '회원은 상품 정보, 회원가, 견적 내용, 내부 거래 조건을 귀족의 사전 동의 없이 외부에 공개하거나 상업적으로 이용해서는 안 됩니다.']],
+      ['제12조 금지 행위', ['허위 정보 제출, 타인 정보 도용, 비정상적인 접근, 사이트 정보 무단 수집, 이미지와 설명의 무단 복제, 회원가 무단 공유, 시스템 오용, 서비스 운영 방해 행위는 금지됩니다.', '위 행위가 확인될 경우 귀족은 사전 안내 없이 서비스 이용 제한, 회원 상태 변경, 문의 처리 보류 등의 조치를 할 수 있습니다.']],
+      ['제13조 서비스 변경 및 중단', ['귀족은 상품 공급, 재고, 생산 조건, 카탈로그 개편, 시스템 점검, 보안 이슈, 운영상 필요에 따라 서비스 전부 또는 일부를 변경하거나 일시 중단할 수 있습니다.', '서비스 변경 또는 중단이 예상되는 경우 가능한 범위에서 사이트 또는 연락 채널을 통해 안내합니다.']],
+      ['제14조 책임의 제한', ['귀족은 고의 또는 중대한 과실이 없는 한 회원이 입력한 정보 오류, 연락 불가, 외부 환경, 통신 장애, 제3자 행위로 인한 손해에 대해 책임을 지지 않을 수 있습니다.', '사이트의 카탈로그 정보는 거래 검토를 위한 참고 자료이며, 최종 거래 조건은 별도 확인 절차를 통해 확정됩니다.']],
+      ['제15조 개인정보 보호', '귀족은 회원 가입, 거래처 확인, 문의 응대, 견적 안내에 필요한 개인정보를 관련 동의 및 개인정보 처리방침에 따라 처리합니다.'],
+      ['제16조 문의 및 고지', '회원 가입, 약관, 개인정보, 카탈로그, 견적 문의와 관련한 문의는 사이트 안내 또는 지정 이메일 연락처를 통해 접수할 수 있습니다.'],
+    ],
+    en: [
+      ['Service Purpose', 'Noblesse provides a B2B piercing catalog, sign-up, buyer review, and quote inquiry features for domestic and international buyers.'],
+      ['Sign Up and Submitted Information', 'Members may submit ID, password, company name, contact name, contact details, and country or region information. Submitted information is used for buyer review and inquiry support.'],
+      ['Account Management', 'Members are responsible for keeping account and contact information accurate and must not use another person’s information or unverifiable details.'],
+      ['Product Information', 'Product images, materials, colors, sizes, MOQ, and catalog descriptions are reference information for trade review and may differ depending on photography, display, and inventory conditions.'],
+      ['Pricing and Trade Terms', 'Member pricing, market pricing, stock, lead time, shipping conditions, and MOQ may be guided after approval and manual review. Screen information is not a final trade condition.'],
+      ['Quote Inquiry', 'A quote inquiry is not a final order. It is a request for Noblesse to review selected products, options, and quantities for trade discussion.'],
+      ['Prohibited Conduct', 'False information, unauthorized price sharing, unauthorized copying of site information, system misuse, account sharing, or conduct that interferes with trade review may be restricted.'],
+      ['Service Changes', 'Product information, catalog structure, price display, and inquiry procedures may change based on operational needs.'],
+      ['Service Restrictions', 'Noblesse may temporarily limit or suspend parts of the service for operation, security, system maintenance, supply condition changes, or misuse prevention.'],
+      ['Limitation of Responsibility', 'Site information supports B2B trade review. Final pricing and trade terms are separately confirmed by Noblesse after review.'],
+      ['Contact Channel', 'Sign-up, catalog, quote inquiry, and privacy-related inquiries may be received through site guidance or the designated email contact.'],
+    ],
+    jp: [
+      ['サービスの目的', '貴族は国内外のB2Bバイヤー向けに、ピアスカタログ、会員登録、会員確認、見積お問い合わせ機能を提供します。'],
+      ['会員登録および情報提出', '会員はID、パスワード、会社名、担当者名、連絡先、国・地域など必要な情報を提出できます。提出情報は取引先確認とお問い合わせ対応に使用されます。'],
+      ['アカウント管理', '会員は提出したアカウント情報と連絡先を正確に維持する必要があり、他人の情報や確認困難な情報を使用することはできません。'],
+      ['商品情報', 'サイトの商品画像、素材、色、サイズ、MOQ、カタログ説明は取引検討のための参考情報であり、撮影環境や在庫状況により差が生じる場合があります。'],
+      ['価格および取引条件', '会員価格、市場別価格、在庫、納期、配送条件、MOQは承認および担当者確認後に案内される場合があり、画面表示が最終条件を意味するものではありません。'],
+      ['見積お問い合わせ', '見積お問い合わせは最終注文ではありません。選択した商品、オプション、数量をもとに貴族へ取引確認を依頼する手続きです。'],
+      ['禁止行為', '虚偽情報の提出、無断での価格共有、サイト情報の無断複製、システムの不正利用、他人のアカウント使用、取引確認を妨げる行為は制限される場合があります。'],
+      ['サービス変更', '商品情報、カタログ構成、価格表示、問い合わせ手順は運営状況により変更される場合があります。'],
+      ['サービス制限', '貴族は運営、セキュリティ、システム点検、供給条件の変更、不正利用防止のため、サービスの一部を一時的に制限または停止する場合があります。'],
+      ['責任の制限', 'サイトの情報はB2B取引検討を補助する資料であり、最終価格および取引条件は担当者確認後に別途案内されます。'],
+      ['お問い合わせ窓口', '会員登録、カタログ、見積お問い合わせ、個人情報に関する問い合わせは、サイト内案内または指定メール連絡先で受け付けます。'],
+    ],
+    cn: [
+      ['服务目的', '贵族为国内外B2B买家提供穿孔饰品目录、会员注册、会员审核和报价咨询功能。'],
+      ['会员注册及信息提交', '会员可以提交ID、密码、公司名称、联系人、联系方式、国家或地区等必要信息。提交的信息将用于买家审核和咨询回复。'],
+      ['账户管理', '会员应保持账户信息和联系方式准确，不得使用他人信息或难以确认的信息。'],
+      ['商品信息', '网站中的商品图片、材质、颜色、尺寸、MOQ和目录说明为交易审核参考信息，可能因拍摄环境、显示设备或库存情况而有所不同。'],
+      ['价格及交易条件', '会员价格、市场价格、库存、交期、配送条件和MOQ可在审核及负责人确认后说明，页面显示内容并不代表最终交易条件。'],
+      ['报价咨询', '报价咨询不是最终订单，而是根据所选商品、选项和数量向贵族请求交易确认的流程。'],
+      ['禁止行为', '提交虚假信息、未经授权共享价格、擅自复制网站信息、滥用系统、使用他人账户或妨碍交易审核的行为可能受到限制。'],
+      ['服务变更', '商品信息、目录结构、价格显示方式和咨询流程可能根据运营情况调整。'],
+      ['服务限制', '贵族可因运营、安全、系统维护、供应条件变化或防止不当使用，临时限制或暂停部分服务。'],
+      ['责任限制', '网站信息用于辅助B2B交易审核，最终价格和交易条件将由贵族确认后另行说明。'],
+      ['联系渠道', '会员注册、目录、报价咨询及个人信息相关问题可通过网站说明或指定邮箱联系。'],
+    ],
+  },
+  buyer_terms: {
+    kr: [
+      ['제1조 목적', '본 조건은 귀족 도매 회원의 확인 기준, 회원가 열람, MOQ, 견적 문의, 거래 조건 안내와 관련한 세부 이용 기준을 정합니다.'],
+      ['제2조 도매 회원 확인', ['귀족은 업체명, 담당자명, 연락처, 국가/지역, 판매 채널, 사업 형태, 관심 상품, 기존 거래 가능성 등을 기준으로 도매 회원 여부를 확인합니다.', '확인은 자동 승인이 아니며 담당자 검토 후 진행됩니다.']],
+      ['제3조 회원 상태', ['회원 상태는 비회원, 확인 중, 승인 회원, 관리자 등으로 구분될 수 있습니다.', '확인 중인 회원은 상품 카탈로그를 볼 수 있으나 회원가, 견적 문의, 거래 조건 안내는 제한될 수 있습니다.']],
+      ['제4조 회원가 및 시장별 가격', ['회원가와 시장별 가격은 승인 회원에게만 안내될 수 있습니다.', '가격은 통화, 국가, 시장, 공급 조건, 수출 가능 여부, 원자재 가격, 생산 상황에 따라 달라질 수 있습니다.']],
+      ['제5조 MOQ 및 옵션', ['MOQ는 상품, 소재, 컬러, 사이즈, 생산 조건, 시장별 공급 정책에 따라 달라질 수 있습니다.', '사이트에 표시되는 MOQ는 검토 기준이며 실제 견적 과정에서 조정될 수 있습니다.']],
+      ['제6조 견적 문의', ['견적 문의는 선택한 상품과 수량에 대한 검토 요청입니다.', '견적 문의는 최종 주문, 결제, 계약 체결을 의미하지 않으며, 귀족 담당자의 확인 후 별도 안내됩니다.']],
+      ['제7조 정보 정확성', ['회원은 거래처 확인에 필요한 정보를 정확하게 제출해야 합니다.', '허위 정보, 누락 정보, 연락 불가, 확인이 어려운 정보가 있는 경우 승인 또는 견적 안내가 지연될 수 있습니다.']],
+      ['제8조 가격 정보 보호', ['회원가, 시장별 가격, 견적 내용, 공급 조건은 승인 회원의 거래 검토를 위한 정보입니다.', '귀족의 사전 동의 없이 가격 정보나 견적 내용을 외부에 공유하거나 공개해서는 안 됩니다.']],
+      ['제9조 거래 가능성', '귀족은 상품 공급 상황, 생산 가능 여부, 수출 가능 여부, 거래 지역, 물류 조건, 내부 운영 정책에 따라 거래 가능 여부를 판단할 수 있습니다.'],
+      ['제10조 승인 취소 및 제한', '부정확한 정보, 무단 가격 공유, 서비스 오용, 거래 질서 저해 행위가 확인되는 경우 귀족은 회원 상태를 보류하거나 승인 취소 및 이용 제한을 할 수 있습니다.'],
+    ],
+    en: [
+      ['Buyer Review', 'Wholesale member access is reviewed based on company information, sales channel, country or region, contact details, and trading fit.'],
+      ['Member Price and Terms', 'Member pricing, MOQ, market pricing, and trade terms may be provided only to approved members.'],
+      ['Nature of Quote Request', 'A quote request is a review request for selected products and quantities, not a final transaction.'],
+      ['Information Accuracy', 'Review may be delayed if submitted information is inaccurate or difficult to verify.'],
+    ],
+    jp: [
+      ['卸会員確認', '卸会員の確認は会社情報、販売チャネル、国・地域、連絡先、取引適合性を基準に行われます。'],
+      ['会員価格と取引条件', '会員価格、MOQ、市場別価格、取引条件は承認された会員にのみ案内される場合があります。'],
+      ['見積依頼の性格', '選択した商品と数量に対する確認依頼であり、最終取引の確定ではありません。'],
+      ['情報の正確性', '提出情報が不正確または確認困難な場合、案内が保留されることがあります。'],
+    ],
+    cn: [
+      ['批发会员审核', '批发会员资格将根据公司信息、销售渠道、国家或地区、联系方式和交易适合性进行确认。'],
+      ['会员价格和交易条件', '会员价格、MOQ、市场价格和交易条件仅可向已审核会员提供。'],
+      ['报价请求性质', '报价请求是对所选商品和数量的确认请求，并非最终交易确认。'],
+      ['信息准确性', '如提交信息不准确或难以确认，审核和处理可能会延后。'],
+    ],
+  },
+  privacy_collection_use: {
+    kr: [
+      ['[필수] 개인정보 수집·이용 동의', {
+        type: 'table',
+        columns: ['목적', '항목', '보유기간'],
+        rows: [
+          ['회원 가입 및 본인 식별', '아이디, 비밀번호, 담당자명, 연락처', '회원 탈퇴 또는 목적 달성 시까지'],
+          ['거래처 확인 및 회원 상태 안내', '업체명, 국가/지역, 판매 채널, 관심 상품, 문의 내용', '회원 탈퇴 또는 거래처 확인 목적 달성 시까지'],
+          ['견적 문의 응대 및 거래 조건 안내', '연락처, 문의 상품, 수량, 요청 메모, 담당자 응대 기록', '문의 처리 완료 후 내부 기록 보존 기간까지'],
+          ['부정 이용 방지 및 서비스 안정성 확보', '접속 기록, 이용 기록, 회원 상태 변경 기록', '관련 법령 또는 내부 보안 기준에 따른 기간'],
+        ],
+      }],
+      ['[선택] 추가 연락 정보 수집·이용', {
+        type: 'table',
+        columns: ['목적', '항목', '보유기간'],
+        rows: [
+          ['빠른 거래 문의 응대', '전화번호, 메신저 종류, 메신저 ID', '회원 탈퇴 또는 수신 거부 시까지'],
+          ['시장별 맞춤 안내', '국가/지역, 선호 언어, 판매 채널', '회원 탈퇴 또는 목적 달성 시까지'],
+        ],
+      }],
+      ['동의 거부 권리', ['회원은 개인정보 수집·이용에 동의하지 않을 권리가 있습니다.', '다만 필수 항목에 동의하지 않는 경우 회원 가입, 거래처 확인, 견적 문의 처리가 제한될 수 있습니다.', '선택 항목에 동의하지 않아도 회원 가입 신청은 가능합니다.']],
+      ['처리 및 보관 원칙', ['수집한 개인정보는 회원 가입 검토, 거래처 확인, 문의 응대, 기록 관리, 부정 이용 방지 목적 범위 내에서 처리합니다.', '목적 달성 후에는 관련 법령이나 분쟁 대응을 위해 필요한 경우를 제외하고 지체 없이 파기하거나 분리 보관합니다.']],
+    ],
+    en: [
+      ['Purpose', 'Personal information is collected and used for sign-up review, buyer verification, inquiry support, quote guidance, record management, and misuse prevention.'],
+      ['Collected Items', 'ID, password, company name, contact name, contact details, country or region, and inquiry memo may be collected.'],
+      ['Retention Period', 'Information may be retained until withdrawal, completion of processing purpose, or the end of legally required retention.'],
+      ['Refusal of Consent', 'If required privacy consent is refused, sign-up and quote inquiry processing may be limited.'],
+    ],
+    jp: [
+      ['収集目的', '会員登録確認、取引先確認、お問い合わせ対応、見積案内、記録管理、不正利用防止のため個人情報を収集・利用します。'],
+      ['収集項目', 'ID、パスワード、会社名、担当者名、連絡先、国・地域、お問い合わせ内容などを収集する場合があります。'],
+      ['保有期間', '会員登録の撤回、処理目的の達成、または法令上必要な保管期間が終了するまで保有される場合があります。'],
+      ['同意拒否', '必須の個人情報収集・利用に同意しない場合、会員登録および見積お問い合わせの処理が制限されることがあります。'],
+    ],
+    cn: [
+      ['收集目的', '为会员注册审核、买家确认、咨询回复、报价说明、记录管理及防止不当使用而收集和使用个人信息。'],
+      ['收集项目', '可能收集ID、密码、公司名称、联系人、联系方式、国家或地区、咨询内容等信息。'],
+      ['保存期限', '信息可能保存至会员撤回、处理目的达成或相关法规要求的保存期限结束。'],
+      ['拒绝同意', '如不同意必需的个人信息收集及使用，会员注册和报价咨询处理可能受到限制。'],
+    ],
+  },
+  marketing_updates: {
+    kr: [
+      ['수신 목적', '귀족은 신상품, 신규 카탈로그, 컬렉션, 이벤트, 시즌별 추천 상품, 시장별 입고 안내, 회원 공지 발송을 위해 마케팅 수신 동의를 요청합니다.'],
+      ['수신 항목', '수신 정보에는 이메일, 연락처, 선호 언어, 국가/지역, 관심 상품, 판매 채널, 문의 이력에 기반한 추천 정보가 포함될 수 있습니다.'],
+      ['수신 채널', '안내는 이메일, 전화, 메신저, 사이트 내 안내 또는 회원이 제출한 연락 채널을 통해 발송될 수 있습니다.'],
+      ['선택 동의', '마케팅 수신 동의는 선택 항목이며, 동의하지 않아도 회원 가입 및 필수 거래처 확인 신청은 가능합니다.'],
+      ['수신 거부', '회원은 언제든지 이메일 회신, 지정 연락처 또는 사이트 안내를 통해 마케팅 수신 거부를 요청할 수 있습니다.'],
+      ['보유 기간', '마케팅 수신 동의 정보는 동의 철회, 회원 탈퇴 또는 발송 목적 달성 시까지 보유될 수 있습니다.'],
+    ],
+    en: [
+      ['Purpose', 'Used to send updates about new products, catalogs, collections, events, member notices, and recommended products.'],
+      ['Channels', 'Updates may be sent by email, messenger, phone, or submitted contact channels.'],
+      ['Optional Consent', 'Sign-up remains available without this consent, and opt-out can be requested at any time.'],
+    ],
+    jp: [
+      ['受信目的', '新商品、カタログ、コレクション、イベント、会員案内、おすすめ商品情報を送信するために使用します。'],
+      ['受信チャネル', 'メール、メッセンジャー、電話、または提出された連絡先に案内が送信される場合があります。'],
+      ['任意同意', '同意しなくても会員登録申請は可能で、いつでも受信拒否を申請できます。'],
+    ],
+    cn: [
+      ['接收目的', '用于发送新品、目录、系列、活动、会员通知和推荐商品信息。'],
+      ['接收渠道', '通知可能通过邮箱、即时通讯、电话或提交的联系方式发送。'],
+      ['可选同意', '不同意也可以申请会员注册，并可随时申请取消接收。'],
+    ],
+  },
+}
+
 function FieldGroup({ title, children }) {
   return <fieldset className="form-section">
     <legend>{title}</legend>
@@ -314,6 +520,40 @@ function FieldGroup({ title, children }) {
 
 function AgreementDocument({ document, locale }) {
   const useEnglish = locale !== 'kr'
+  const localizedSections = localizedAgreementSections[document.key]?.[locale]
+  const renderAgreementBody = (body) => {
+    if (Array.isArray(body)) {
+      return body.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
+    }
+
+    if (body?.type === 'table') {
+      return <div className="agreement-table-wrap">
+        <table className="agreement-table">
+          <thead>
+            <tr>
+              {body.columns.map((column) => <th key={column}>{column}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {body.rows.map((row) => <tr key={row.join('-')}>
+              {row.map((cell) => <td key={cell}>{cell}</td>)}
+            </tr>)}
+          </tbody>
+        </table>
+      </div>
+    }
+
+    return <p>{body}</p>
+  }
+
+  if (localizedSections) {
+    return <div className="agreement-scroll">
+      {localizedSections.map(([heading, body]) => <section key={`${document.key}-${locale}-${heading}`} className="agreement-copy-section">
+        <h4>{heading}</h4>
+        {renderAgreementBody(body)}
+      </section>)}
+    </div>
+  }
 
   return <div className="agreement-scroll">
     {document.sections.map((section) => <section key={`${document.key}-${section.headingEn}`} className="agreement-copy-section">
@@ -328,21 +568,23 @@ function AgreementDocument({ document, locale }) {
 }
 
 function AgreementRow({ agreement, checked, locale, onChange, t }) {
-  const labelPrefix = agreement.required ? t.required : t.optional
+  const metaCopy = agreementMetaCopy[locale] ?? agreementMetaCopy.kr
+  const labelPrefix = agreement.required ? metaCopy.required : metaCopy.optional
+  const agreementLabel = agreementLabelsByLocale[locale]?.[agreement.key] ?? agreementLabelsByLocale.kr[agreement.key] ?? agreement.titleKo
 
   return <div className={`agreement-card agreement-row ${agreement.required ? 'required' : 'optional'}`}>
-    <label>
-      <input checked={checked} data-agreement-key={agreement.key} onChange={(event) => onChange(agreement.key, event.target.checked)} type="checkbox" />
-      <span>
-        <strong>{labelPrefix} {locale === 'kr' ? agreement.titleKo : agreement.titleEn}</strong>
-        <small>{locale === 'kr' ? agreement.titleEn : agreement.titleKo}</small>
-        <em className="agreement-version">version: {agreement.version}</em>
-      </span>
-    </label>
-    {agreement.sections.length > 0 && <details className="agreement-details">
-      <summary>{t.viewDetails}</summary>
-      <AgreementDocument document={agreement} locale={locale} />
-    </details>}
+    <div className="agreement-row-main">
+      <label>
+        <input checked={checked} data-agreement-key={agreement.key} onChange={(event) => onChange(agreement.key, event.target.checked)} type="checkbox" />
+        <span>
+          <strong>{labelPrefix} {agreementLabel}</strong>
+        </span>
+      </label>
+      {agreement.sections.length > 0 && <details className="agreement-details agreement-inline-details">
+        <summary>{metaCopy.details}</summary>
+        <AgreementDocument document={agreement} locale={locale} />
+      </details>}
+    </div>
   </div>
 }
 
@@ -363,7 +605,7 @@ export function RegisterPage() {
   const requiredAllAccepted = requiredAgreementKeys.every((key) => agreements[key] === true)
   const profileFields = profileFieldsByLocale[locale] ?? profileFieldsByLocale.kr
   const stepCopy = registerStepCopy[locale] ?? registerStepCopy.kr
-  const pageTitle = locale === 'kr' ? '회원 가입' : t.title
+  const pageTitle = signupTitleByLocale[locale] ?? signupTitleByLocale.kr
 
   const setAgreement = (name, checked) => {
     setAgreements((current) => ({ ...current, [name]: checked }))
@@ -398,7 +640,7 @@ export function RegisterPage() {
   </label>
 
   return <main className="content auth-page">
-    <section className="account-panel auth-panel wide">
+    <section className="account-panel auth-panel wide register-locale-motion" key={`register-${locale}-${registerStep}`}>
       <h1>{pageTitle}</h1>
       {registerStep === 'profile' && <p className="approval-helper">{contactNoteBefore}<a href={`mailto:${primaryContactEmail}`}>{primaryContactEmail}</a>{contactNoteAfter}</p>}
       {registerStep === 'agreements' ? <form className="auth-form" onSubmit={continueToProfile}>

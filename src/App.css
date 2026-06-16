@@ -1829,6 +1829,104 @@ h6 {
   }
 }
 
+@keyframes locale-content-in {
+  from {
+    opacity: 0.84;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes locale-word-in {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(9px);
+  }
+
+  60% {
+    opacity: 0.82;
+    filter: blur(1px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+.locale-transition-frame {
+  animation: locale-content-in 240ms cubic-bezier(.22, .8, .24, 1) both;
+}
+
+.locale-transition-frame :where(h1, h2, h3, p, li, a, button, label, legend, summary, strong, small, em, dt, dd) {
+  animation: locale-word-in 420ms cubic-bezier(.22, .8, .24, 1) both;
+}
+
+.locale-transition-frame :where(h1, h2, h3) {
+  animation-duration: 520ms;
+}
+
+.locale-transition-frame :where(p, li, a, button, label, summary, small, em, dt, dd) {
+  animation-delay: 35ms;
+}
+
+.register-locale-motion :where(h1, .agreement-required-all, .agreement-row, .privacy-policy-detail, .agreement-warning, .form-section, .approval-note, .agreement-actions) {
+  animation: register-copy-change 520ms cubic-bezier(.22, .8, .24, 1) both;
+}
+
+.register-locale-motion .agreement-row:nth-of-type(2) {
+  animation-delay: 35ms;
+}
+
+.register-locale-motion .agreement-row:nth-of-type(3) {
+  animation-delay: 70ms;
+}
+
+.register-locale-motion .agreement-row:nth-of-type(4) {
+  animation-delay: 105ms;
+}
+
+.register-locale-motion .agreement-row:nth-of-type(5) {
+  animation-delay: 140ms;
+}
+
+.register-locale-motion .agreement-actions {
+  animation-delay: 160ms;
+}
+
+@keyframes register-copy-change {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translateY(12px);
+  }
+
+  58% {
+    opacity: 0.78;
+    filter: blur(1px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .locale-transition-frame,
+  .locale-transition-frame :where(h1, h2, h3, p, li, a, button, label, legend, summary, strong, small, em, dt, dd),
+  .register-locale-motion :where(h1, .agreement-required-all, .agreement-row, .privacy-policy-detail, .agreement-warning, .form-section, .approval-note, .agreement-actions) {
+    animation: none;
+  }
+}
+
 .header-nav {
   position: relative;
   display: flex;
@@ -3955,7 +4053,7 @@ h6 {
 .agreement-row {
   display: grid;
   gap: 10px;
-  padding: 13px;
+  padding: 12px 13px;
 }
 
 .agreement-row.required {
@@ -3966,10 +4064,17 @@ h6 {
   border-color: #ebe5e1;
 }
 
+.agreement-row-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
 .agreement-row label,
 .agreement-all {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   color: var(--noblesse-sub);
   cursor: pointer;
@@ -3991,6 +4096,34 @@ h6 {
 .agreement-row strong {
   color: var(--noblesse-sub);
   font-size: 14px;
+}
+
+.agreement-inline-details {
+  min-width: 0;
+  background: transparent;
+}
+
+.agreement-inline-details summary {
+  padding: 0;
+  color: var(--noblesse-sub);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.agreement-inline-details[open] {
+  display: grid;
+  min-width: 0;
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.agreement-inline-details[open] summary {
+  width: fit-content;
+  margin-bottom: 10px;
+}
+
+.agreement-inline-details[open] .agreement-scroll {
+  max-width: 100%;
 }
 
 .agreement-row small {
@@ -4113,6 +4246,36 @@ h6 {
   color: #746b7e;
   font-size: 12px;
   line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.agreement-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.agreement-table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  color: #2a234f;
+  background: #fffdf9;
+}
+
+.agreement-table th,
+.agreement-table td {
+  border: 1px solid #e7ddd7;
+  padding: 11px 12px;
+  vertical-align: top;
+  font-size: 12px;
+  line-height: 1.55;
+  text-align: left;
+}
+
+.agreement-table th {
+  color: #2a234f;
+  font-weight: 900;
+  background: #fff6f7;
 }
 
 .agreement-details ul {

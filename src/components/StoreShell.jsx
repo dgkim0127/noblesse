@@ -71,7 +71,7 @@ const shellCopy = {
     recentSearches: 'Recent searches',
     recommendedHeading: 'Recommended search products',
     recommendedSearches: ['Titanium labret', '14K gold piercing', 'Cubic barbell'],
-    register: 'Trade inquiry',
+    register: 'Sign up',
     requestQuote: 'Quote inquiry',
     search: 'Search',
     searchAria: 'Product search',
@@ -117,7 +117,7 @@ const shellCopy = {
     recentSearches: '最近の検索',
     recommendedHeading: 'おすすめ検索の商品',
     recommendedSearches: ['チタンラブレット', '14Kゴールドピアス', 'キュービックバーベル'],
-    register: '取引先お問い合わせ',
+    register: '会員登録',
     requestQuote: '見積相談',
     search: '検索',
     searchAria: '商品検索',
@@ -163,7 +163,7 @@ const shellCopy = {
     recentSearches: '最近搜索',
     recommendedHeading: '推荐搜索商品',
     recommendedSearches: ['钛钢唇钉', '14K金穿孔饰品', '锆石杠铃'],
-    register: '贸易咨询',
+    register: '会员注册',
     requestQuote: '报价咨询',
     search: '搜索',
     searchAria: '商品搜索',
@@ -826,7 +826,9 @@ export function StoreShell() {
       <span className="preview-hide-compact">{isPreviewBarHidden ? '보이기' : '숨기기'}</span>
       <span aria-hidden="true">{isPreviewBarHidden ? '+' : '×'}</span>
     </button>
-    <Outlet />
+    <div className="locale-transition-frame" key={`locale-content-${locale}`}>
+      <Outlet />
+    </div>
     <footer className="site-footer"><strong>{headerBrandName}</strong><span>{copy.footer}</span><Heart size={15} /></footer>
   </div>
 }
