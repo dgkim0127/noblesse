@@ -94,3 +94,10 @@
 - Mock-only backend skeleton scope is documented in `docs/ADMIN_BACKEND_SKELETON_APPROVAL_PLAN.md`.
 - Mock-only skeleton does not satisfy real write safety gates.
 - Real implementation remains No-Go until Auth, DB, transaction, audit, schema/status strategy, and rollout gates are approved.
+
+## 32G Admin Memo Local Dry-run Plan Follow-up
+
+- Local dry-run planning for the first `admin_memo` write candidate is documented in `docs/ADMIN_MEMO_LOCAL_DRY_RUN_PLAN.md`.
+- Even local dry-run requires transaction behavior and same-transaction `audit_logs`.
+- Production write gates remain unsatisfied.
+- No production DB/Auth, Firebase `/api` rewrite, or deploy is unlocked by this plan.

@@ -429,3 +429,9 @@ Recommendation:
 - Admin write API contract is documented in `docs/ADMIN_WRITE_API_CONTRACT.md`.
 - Option C remains recommended and the future status write contract assumes `admin_status`.
 - Inquiry status writes remain blocked until schema migration/dry-run and `inquiry_status_events` are approved.
+
+## 32G Admin Memo Local Dry-run Plan Follow-up
+
+- Local dry-run planning for `inquiries.admin_memo` is documented in `docs/ADMIN_MEMO_LOCAL_DRY_RUN_PLAN.md`.
+- The plan keeps `admin_memo` as the first future real-write candidate because it fits the current schema.
+- Status/admin_status writes remain blocked until status strategy, migration, and event/audit strategy are approved.

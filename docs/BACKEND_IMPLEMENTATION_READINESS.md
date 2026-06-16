@@ -259,3 +259,9 @@ Before implementation starts:
 - Admin mock backend route QA is documented in `docs/ADMIN_MOCK_BACKEND_ROUTE_QA_REPORT.md`.
 - The mock-only route/test coverage is Go.
 - Next real step must still avoid production DB/Auth, Cloud resources, SQL execution, Firebase `/api` rewrite, and deploy.
+
+## 32G Admin Memo Local Dry-run Plan
+
+- Admin memo local dry-run planning is documented in `docs/ADMIN_MEMO_LOCAL_DRY_RUN_PLAN.md`.
+- Real implementation still requires explicit approval and must be local-only first.
+- Production DB/Auth, Cloud resources, SQL execution, Firebase `/api` rewrite, and deploy remain blocked.

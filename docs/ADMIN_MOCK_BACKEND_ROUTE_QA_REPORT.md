@@ -82,3 +82,9 @@ Expected blocked routes:
 - Real admin write implementation: No-Go
 - Real DB/Auth integration: No-Go
 - Production rollout: No-Go
+
+## 32G Local Dry-run Planning Follow-up
+
+- The next planning step is documented in `docs/ADMIN_MEMO_LOCAL_DRY_RUN_PLAN.md`.
+- 32G does not change the mock-only skeleton.
+- The mock skeleton remains separate from any future local DB dry-run implementation.

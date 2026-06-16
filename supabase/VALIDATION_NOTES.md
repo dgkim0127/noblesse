@@ -795,3 +795,17 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Deploy action in 32F: No.
 - Frontend Register/member signup source changes: Out of scope for 32F and not staged by this documentation commit.
 - Conclusion: Mock-only Admin backend skeleton route/test QA is Go. Real DB/Auth integration, real writes, SQL, and deploy remain No-Go.
+
+## 32G Admin Memo Local Dry-run Plan Follow-up
+
+- Date: 2026-06-16
+- Change: Added `docs/ADMIN_MEMO_LOCAL_DRY_RUN_PLAN.md` and linked it from Admin/backend planning documents.
+- Scope: Documentation only for future local PostgreSQL dry-run planning of inquiry `admin_memo`.
+- SQL execution required in 32G: No.
+- DB dry-run status: Unchanged.
+- SQL files changed in 32G: No.
+- Real DB/Auth connection in 32G: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 32G: No.
+- Frontend Register/member signup source changes: Out of scope for 32G and not staged by this documentation commit.
+- Conclusion: Planning for local-only `admin_memo` dry-run is Go. Real implementation, production DB/Auth, SQL execution, and deploy remain No-Go.

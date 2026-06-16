@@ -593,3 +593,10 @@ No real Firebase/DB tests in first write scaffold.
 - 32F QA verifies that the mock-only memo skeleton route exists and is covered by tests.
 - The route remains a skeleton only; real memo writes remain blocked.
 - Status, quote, buyer, product, price, and delete writes remain out of scope.
+
+## 32G Admin Memo Local Dry-run Plan Follow-up
+
+- Admin memo local dry-run planning is documented in `docs/ADMIN_MEMO_LOCAL_DRY_RUN_PLAN.md`.
+- `admin_memo` remains the first future real-write candidate, but it is not implemented yet.
+- Real implementation still requires explicit approval, local-only DB setup, transaction handling, and `audit_logs`.
+- Production DB/Auth, Firebase `/api` rewrite, and deploy remain blocked.

@@ -222,3 +222,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - The skeleton exists only in the backend and is not exposed through Firebase Hosting.
 - Firebase Hosting `/api` rewrite remains absent.
 - Production frontend does not call the admin skeleton.
+
+## 32G Admin Memo Local Dry-run Plan
+
+- Future local memo dry-run planning is documented in `docs/ADMIN_MEMO_LOCAL_DRY_RUN_PLAN.md`.
+- A local dry-run does not imply production Firebase Hosting `/api` rewrite.
+- Production frontend still does not call the admin API.
+- Direct React-to-PostgreSQL access remains prohibited.
