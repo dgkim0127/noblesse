@@ -427,3 +427,10 @@ Blocked until later:
 - Full editable target now allows a mock-only memo skeleton as the first write-shaped route.
 - Real writes remain blocked.
 - The approved mock-only scope is documented in `docs/ADMIN_BACKEND_SKELETON_APPROVAL_PLAN.md`.
+
+## 32E Mock-only Backend Skeleton Follow-up
+
+- `/api/admin` mock skeleton is implemented in the backend.
+- Read route skeletons exist for dashboard, inquiries, inquiry detail, buyers, and products.
+- Inquiry memo route exists as a mock-only write-shaped skeleton.
+- Tests use mock auth and mock queries; no real Firebase Auth, DB connection, SQL execution, Firebase `/api` rewrite, or deploy was added.

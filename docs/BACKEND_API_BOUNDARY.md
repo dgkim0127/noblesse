@@ -208,3 +208,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Next code step may add `/api/admin` mock-only backend skeleton if explicitly approved.
 - Production `/api` rewrite remains absent.
 - Real DB/Auth integration and real admin writes remain blocked.
+
+## 32E Admin Mock-only Backend Skeleton
+
+- `/api/admin` mock-only skeleton exists in the backend for local/mock testing.
+- Production frontend does not call these routes.
+- Firebase Hosting still has no `/api` rewrite.
+- Real DB/Auth integration and real admin writes remain blocked.

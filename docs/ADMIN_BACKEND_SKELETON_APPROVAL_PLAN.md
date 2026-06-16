@@ -233,3 +233,18 @@ No-Go:
 Next recommended step:
 
 - 32E: implement mock-only admin backend skeleton with read routes and inquiry memo write skeleton.
+
+## 32E Mock-only Skeleton Implementation
+
+- 32E implemented the approved mock-only Admin backend skeleton under `backend/src`.
+- `/api/admin` is mounted in the backend app for local/mock testing only.
+- Implemented read route skeletons:
+  - `GET /api/admin/dashboard`
+  - `GET /api/admin/inquiries`
+  - `GET /api/admin/inquiries/:inquiryId`
+  - `GET /api/admin/buyers`
+  - `GET /api/admin/products`
+- Implemented first write-shaped mock skeleton:
+  - `PATCH /api/admin/inquiries/:inquiryId/memo`
+- Tests use injected mock auth and mock query/service dependencies only.
+- No real DB connection, Firebase Auth integration, SQL execution, SQL file change, Firebase `/api` rewrite, or deploy was added.

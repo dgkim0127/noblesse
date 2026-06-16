@@ -580,3 +580,10 @@ No real Firebase/DB tests in first write scaffold.
 - Backend skeleton approval plan is documented in `docs/ADMIN_BACKEND_SKELETON_APPROVAL_PLAN.md`.
 - The next code step may implement a mock-only inquiry memo skeleton, but no real write.
 - Real DB/Auth integration, SQL changes, Firebase `/api` rewrite, and deploy remain blocked.
+
+## 32E Mock-only Memo Skeleton Follow-up
+
+- A backend mock-only skeleton now exists for `PATCH /api/admin/inquiries/:inquiryId/memo`.
+- The route validates admin auth, UUID, unknown fields, and `adminMemo` through injected mock dependencies in tests.
+- Real inquiry memo writes remain blocked until real Auth, DB, transaction, and `audit_logs` implementation are approved.
+- No SQL change, DB execution, Firebase rewrite, or deploy was added in 32E.

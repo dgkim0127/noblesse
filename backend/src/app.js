@@ -2,15 +2,25 @@ import cors from "cors";
 import express from "express";
 import { getEnv } from "./config/env.js";
 import { createFirebaseTokenVerifier } from "./auth/firebaseAuth.js";
+import { createRequireAdmin } from "./auth/requireAdmin.js";
 import { createPostgresViewerLoader, createRequireUser } from "./auth/requireUser.js";
 import { createPool } from "./db/pool.js";
+import { createAdminBuyerQueries } from "./db/queries/adminBuyerQueries.js";
+import { createAdminDashboardQueries } from "./db/queries/adminDashboardQueries.js";
+import { createAdminInquiryQueries } from "./db/queries/adminInquiryQueries.js";
+import { createAdminProductQueries } from "./db/queries/adminProductQueries.js";
 import * as catalogQueries from "./db/queries/catalogQueries.js";
 import * as buyerQueries from "./db/queries/buyerQueries.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { requestId } from "./middleware/requestId.js";
+import { createAdminRoutes } from "./routes/adminRoutes.js";
 import { createBuyerRoutes } from "./routes/buyerRoutes.js";
 import { createCatalogRoutes } from "./routes/catalogRoutes.js";
 import { createHealthRoutes } from "./routes/healthRoutes.js";
+import { createAdminBuyerService } from "./services/adminBuyerService.js";
+import { createAdminDashboardService } from "./services/adminDashboardService.js";
+import { createAdminInquiryService } from "./services/adminInquiryService.js";
+import { createAdminProductService } from "./services/adminProductService.js";
 import { createBuyerService } from "./services/buyerService.js";
 import { createCatalogService } from "./services/catalogService.js";
 
@@ -31,7 +41,30 @@ export function createApp(options = {}) {
         pool,
         queries: options.queries?.catalog || catalogQueries
       }),
-    buyer: options.services?.buyer || createBuyerService()
+    buyer: options.services?.buyer || createBuyerService(),
+    admin: {
+      dashboard:
+        options.services?.admin?.dashboard ||
+        createAdminDashboardService({
+          queries:
+            options.queries?.admin?.dashboard || createAdminDashboardQueries(pool)
+        }),
+      inquiries:
+        options.services?.admin?.inquiries ||
+        createAdminInquiryService({
+          queries: options.queries?.admin?.inquiries || createAdminInquiryQueries(pool)
+        }),
+      buyers:
+        options.services?.admin?.buyers ||
+        createAdminBuyerService({
+          queries: options.queries?.admin?.buyers || createAdminBuyerQueries(pool)
+        }),
+      products:
+        options.services?.admin?.products ||
+        createAdminProductService({
+          queries: options.queries?.admin?.products || createAdminProductQueries(pool)
+        })
+    }
   };
 
   const verifier = options.auth?.verifier || createFirebaseTokenVerifier(env);
@@ -42,6 +75,25 @@ export function createApp(options = {}) {
       queries: options.queries?.buyer || buyerQueries
     });
   const requireUser = options.auth?.requireUser || createRequireUser({ verifier, loadViewer });
+  const loadAdminUserByAuthUid =
+    options.auth?.loadAdminUserByAuthUid ||
+    (async (authUid) => {
+      const user = await buyerQueries.getUserByAuthUid(pool, authUid);
+      if (!user) return null;
+      return {
+        userId: user.id,
+        authUid: user.auth_uid,
+        email: user.email,
+        role: user.role,
+        status: user.status
+      };
+    });
+  const requireAdmin =
+    options.auth?.requireAdmin ||
+    createRequireAdmin({
+      verifier: options.auth?.adminVerifier || verifier,
+      loadAdminUserByAuthUid
+    });
 
   const app = express();
 
@@ -52,6 +104,13 @@ export function createApp(options = {}) {
   app.use("/api/health", createHealthRoutes());
   app.use("/api/catalog", createCatalogRoutes({ catalogService: services.catalog }));
   app.use("/api/buyer", createBuyerRoutes({ buyerService: services.buyer, requireUser }));
+  app.use(
+    "/api/admin",
+    createAdminRoutes({
+      services: services.admin,
+      requireAdmin
+    })
+  );
 
   app.use(errorHandler);
 

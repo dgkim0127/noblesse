@@ -246,3 +246,10 @@ Before implementation starts:
 - Admin backend skeleton approval plan is documented in `docs/ADMIN_BACKEND_SKELETON_APPROVAL_PLAN.md`.
 - 32E may implement a mock-only skeleton if explicitly approved.
 - Real Auth, real DB, SQL, Firebase `/api` rewrite, and deploy remain blocked.
+
+## 32E Admin Mock-only Backend Skeleton
+
+- Admin mock-only backend skeleton now exists under `/api/admin`.
+- Local mock tests cover admin auth, read routes, inquiry detail validation, buyer/product filters, and the mock-only inquiry memo route.
+- Next step should be local route QA only.
+- Real Auth, real DB, SQL migration/execution, Firebase `/api` rewrite, and deploy remain blocked.
