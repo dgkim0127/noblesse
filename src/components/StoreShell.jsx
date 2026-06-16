@@ -378,6 +378,7 @@ export function StoreShell() {
   const location = useLocation()
   const navRef = useRef(null)
   const searchRef = useRef(null)
+  const headerSearchInputRef = useRef(null)
   const compactSearchRef = useRef(null)
   const compactSearchInputRef = useRef(null)
   const compactSearchCloseTimerRef = useRef(null)
@@ -539,6 +540,11 @@ export function StoreShell() {
     runHeaderSearch()
   }
 
+  const focusHeaderSearch = () => {
+    setIsSearchOpen(true)
+    headerSearchInputRef.current?.focus()
+  }
+
   const handleSearchKeyDown = (event) => {
     if (event.key !== 'Enter') return
     event.preventDefault()
@@ -660,6 +666,7 @@ export function StoreShell() {
         <div className="header-search-wrap top-search" ref={searchRef}>
           <form className={`header-search ${headerSearch ? 'has-search-value' : ''}`} role="search" onSubmit={submitSearch}>
             <input
+              ref={headerSearchInputRef}
               aria-label={copy.searchAria}
               autoComplete="off"
               name="siteSearch"
@@ -671,7 +678,7 @@ export function StoreShell() {
               value={headerSearch}
             />
             {!headerSearch && <AnimatedSearchPlaceholder text={copy.searchPlaceholder} />}
-            <button aria-label={copy.search} type="submit"><Search size={19} /></button>
+            <button aria-label={copy.search} type="button" onClick={focusHeaderSearch}><Search size={19} /></button>
           </form>
 
           {isSearchOpen && <div className="search-popover" role="dialog" aria-label={copy.searchDialog}>
