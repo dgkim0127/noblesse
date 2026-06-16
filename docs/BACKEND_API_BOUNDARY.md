@@ -202,3 +202,9 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Admin write API contract is documented in `docs/ADMIN_WRITE_API_CONTRACT.md`.
 - Write implementation remains blocked.
 - No backend route, frontend admin route, SQL, Auth, DB, Firebase rewrite, or deploy change is made by 32C.
+
+## 32D Admin Backend Skeleton Approval
+
+- Next code step may add `/api/admin` mock-only backend skeleton if explicitly approved.
+- Production `/api` rewrite remains absent.
+- Real DB/Auth integration and real admin writes remain blocked.

@@ -574,3 +574,9 @@ When implementation is approved later:
 - blocked until later approval
 
 No real Firebase/DB tests in first write scaffold.
+
+## 32D Backend Skeleton Approval Follow-up
+
+- Backend skeleton approval plan is documented in `docs/ADMIN_BACKEND_SKELETON_APPROVAL_PLAN.md`.
+- The next code step may implement a mock-only inquiry memo skeleton, but no real write.
+- Real DB/Auth integration, SQL changes, Firebase `/api` rewrite, and deploy remain blocked.

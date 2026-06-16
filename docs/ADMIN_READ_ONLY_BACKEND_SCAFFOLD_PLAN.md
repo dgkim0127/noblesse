@@ -421,3 +421,9 @@ Blocked until later:
 - Full editable target scope now exists in `docs/ADMIN_FULL_EDITABLE_SCOPE.md`.
 - The full editable target does not unlock writes.
 - Any write scaffold must wait for `docs/ADMIN_WRITE_SAFETY_GATES.md` and a schema/status strategy decision.
+
+## 32D Backend Skeleton Approval Follow-up
+
+- Full editable target now allows a mock-only memo skeleton as the first write-shaped route.
+- Real writes remain blocked.
+- The approved mock-only scope is documented in `docs/ADMIN_BACKEND_SKELETON_APPROVAL_PLAN.md`.

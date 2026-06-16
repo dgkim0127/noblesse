@@ -88,3 +88,9 @@
 - Write contracts are documented in `docs/ADMIN_WRITE_API_CONTRACT.md`.
 - The contracts describe future request/response/error boundaries only.
 - They do not unlock implementation or relax any safety gate.
+
+## 32D Backend Skeleton Approval Follow-up
+
+- Mock-only backend skeleton scope is documented in `docs/ADMIN_BACKEND_SKELETON_APPROVAL_PLAN.md`.
+- Mock-only skeleton does not satisfy real write safety gates.
+- Real implementation remains No-Go until Auth, DB, transaction, audit, schema/status strategy, and rollout gates are approved.

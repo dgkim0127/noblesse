@@ -240,3 +240,9 @@ Before implementation starts:
 - Admin write API contract planning is documented in `docs/ADMIN_WRITE_API_CONTRACT.md`.
 - First implementation candidate would be inquiry `admin_memo` only after explicit approval.
 - Backend/Auth/DB/transaction/audit readiness is still required before any write route is implemented.
+
+## 32D Admin Backend Skeleton Approval
+
+- Admin backend skeleton approval plan is documented in `docs/ADMIN_BACKEND_SKELETON_APPROVAL_PLAN.md`.
+- 32E may implement a mock-only skeleton if explicitly approved.
+- Real Auth, real DB, SQL, Firebase `/api` rewrite, and deploy remain blocked.
