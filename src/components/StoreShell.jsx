@@ -477,7 +477,7 @@ export function StoreShell() {
     compactSearchCloseTimerRef.current = window.setTimeout(() => {
       setCompactSearchPhase('closed')
       compactSearchCloseTimerRef.current = null
-    }, 460)
+    }, 1080)
   }
 
   const toggleCompactSearch = () => {

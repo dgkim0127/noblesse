@@ -1369,7 +1369,7 @@ h6 {
 .compact-search-panel.is-closing {
   pointer-events: none;
   overflow: hidden;
-  animation: compact-search-close 420ms cubic-bezier(.32, 0, .2, 1) both;
+  animation: compact-search-close 1040ms cubic-bezier(.65, 0, .35, 1) both;
 }
 
 .compact-search-boundary {
@@ -1395,7 +1395,7 @@ h6 {
 }
 
 .compact-search-panel.is-closing .compact-search-boundary-segment {
-  animation: compact-search-boundary-exit 380ms cubic-bezier(.32, 0, .2, 1) both;
+  animation: compact-search-boundary-exit 980ms cubic-bezier(.65, 0, .35, 1) both;
 }
 
 .compact-search-boundary-segment.boundary-left {
@@ -1415,7 +1415,36 @@ h6 {
   align-items: center;
   width: min(560px, calc(100vw - 48px));
   margin: 0 auto 30px;
-  border-bottom: 1px solid #2e2564;
+  border-bottom: 0;
+}
+
+.compact-search-form::before,
+.compact-search-form::after {
+  position: absolute;
+  bottom: 0;
+  z-index: 1;
+  width: 50%;
+  height: 1px;
+  background: #2e2564;
+  content: "";
+  pointer-events: none;
+  transform: scaleX(1);
+  will-change: opacity, transform;
+}
+
+.compact-search-form::before {
+  left: 0;
+  transform-origin: right center;
+}
+
+.compact-search-form::after {
+  right: 0;
+  transform-origin: left center;
+}
+
+.compact-search-panel.is-closing .compact-search-form::before,
+.compact-search-panel.is-closing .compact-search-form::after {
+  animation: compact-search-boundary-exit 980ms cubic-bezier(.65, 0, .35, 1) both;
 }
 
 .compact-search-form input {
@@ -1572,13 +1601,19 @@ h6 {
 }
 
 @keyframes compact-search-close {
-  from {
+  0% {
     opacity: 1;
     transform: translateY(0) scaleY(1);
     transform-origin: top;
   }
 
-  to {
+  80% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    transform-origin: top;
+  }
+
+  100% {
     opacity: 0;
     transform: translateY(-8px) scaleY(.96);
     transform-origin: top;
@@ -1615,12 +1650,17 @@ h6 {
 }
 
 @keyframes compact-search-boundary-exit {
-  from {
+  0% {
     opacity: 1;
     transform: scaleX(1);
   }
 
-  to {
+  88% {
+    opacity: 1;
+    transform: scaleX(.08);
+  }
+
+  100% {
     opacity: 0;
     transform: scaleX(0);
   }
