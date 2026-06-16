@@ -23,9 +23,9 @@ const viewerStateStorageKey = 'noblesse.viewerState'
 const viewerStates = new Set(['guest', 'pending', 'approved', 'admin'])
 
 const getInitialViewerState = () => {
-  if (typeof window === 'undefined') return 'approved'
+  if (typeof window === 'undefined') return 'guest'
   const savedState = window.localStorage.getItem(viewerStateStorageKey)
-  return viewerStates.has(savedState) ? savedState : 'approved'
+  return viewerStates.has(savedState) ? savedState : 'guest'
 }
 
 export function CommerceProvider({ children }) {
@@ -50,11 +50,13 @@ export function CommerceProvider({ children }) {
   const estimatedTotal = inquiryRows.reduce((sum, row) => sum + row.subtotal, 0)
   const totalQuantity = inquiryRows.reduce((sum, row) => sum + row.quantity, 0)
 
-  const setViewerState = useCallback((nextViewerState) => {
+  const setViewerState = useCallback((nextViewerState, options = {}) => {
+    const { persist = true } = options
     const safeState = viewerStates.has(nextViewerState) ? nextViewerState : 'guest'
     setViewerStateValue(safeState)
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem(viewerStateStorageKey, safeState)
+      if (persist) window.localStorage.setItem(viewerStateStorageKey, safeState)
+      else window.localStorage.removeItem(viewerStateStorageKey)
     }
   }, [])
 

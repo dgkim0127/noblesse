@@ -225,54 +225,58 @@ const shellCompactViewerLabels = {
 const loginModalCopy = {
   kr: {
     title: '거래처 로그인',
-    heading: '거래 조건 확인하기',
+    heading: 'LOGIN',
     description: '확인된 거래처는 거래 조건, 문의 리스트, 견적 문의 기능을 사용할 수 있습니다. 견적 문의는 최종 주문이 아닙니다.',
-    email: '이메일',
+    email: '아이디',
     password: '비밀번호',
-    emailPlaceholder: '이메일',
+    emailPlaceholder: '아이디',
     passwordPlaceholder: '비밀번호',
     submit: '로그인',
+    autoLogin: '자동 로그인',
     guest: '비회원으로 둘러보기',
-    register: '거래처 문의',
+    register: '회원가입',
     close: '로그인 팝업 닫기',
   },
   en: {
     title: 'Trade login',
-    heading: 'Check trade access',
+    heading: 'LOGIN',
     description: 'Approved buyers can use trade terms, Inquiry List, and Request Quote. A quote request is not a final order.',
-    email: 'Email',
+    email: 'ID',
     password: 'Password',
-    emailPlaceholder: 'Email',
+    emailPlaceholder: 'ID',
     passwordPlaceholder: 'Password',
     submit: 'Login',
+    autoLogin: 'Remember me',
     guest: 'Browse as guest',
-    register: 'Trade inquiry',
+    register: 'Sign up',
     close: 'Close login popup',
   },
   jp: {
     title: '取引先ログイン',
-    heading: '取引条件を確認',
+    heading: 'LOGIN',
     description: '確認済みの取引先は取引条件、お問い合わせリスト、見積もり依頼を利用できます。見積もり依頼は最終注文ではありません。',
-    email: 'メール',
+    email: 'ID',
     password: 'パスワード',
-    emailPlaceholder: 'メール',
+    emailPlaceholder: 'ID',
     passwordPlaceholder: 'パスワード',
     submit: 'ログイン',
+    autoLogin: '自動ログイン',
     guest: 'ゲストで見る',
-    register: '取引先お問い合わせ',
+    register: '会員登録',
     close: 'ログインポップアップを閉じる',
   },
   cn: {
     title: '贸易登录',
-    heading: '查看贸易条件',
+    heading: 'LOGIN',
     description: '已确认的贸易客户可使用贸易条件、咨询列表和报价咨询。报价咨询不是最终订单。',
-    email: '邮箱',
+    email: '账号',
     password: '密码',
-    emailPlaceholder: '邮箱',
+    emailPlaceholder: '账号',
     passwordPlaceholder: '密码',
     submit: '登录',
+    autoLogin: '自动登录',
     guest: '以访客浏览',
-    register: '贸易咨询',
+    register: '会员注册',
     close: '关闭登录弹窗',
   },
 }
@@ -386,6 +390,7 @@ export function StoreShell() {
   const [isHeaderCompact, setIsHeaderCompact] = useState(false)
   const [isPreviewBarHidden, setIsPreviewBarHidden] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [isAutoLoginEnabled, setIsAutoLoginEnabled] = useState(true)
   const [navIndicator, setNavIndicator] = useState({ left: 0, ready: false, width: 0 })
   const { buyerAccess, inquiryItems, isAdmin, isApproved, isGuest, isPending, setViewerState, viewerState } = useCommerce()
   const { locale, localeMeta, toLanguagePath, toLocalePath } = useLocalePath()
@@ -571,7 +576,7 @@ export function StoreShell() {
 
   const loginAsApprovedBuyer = (event) => {
     event.preventDefault()
-    setViewerState('approved')
+    setViewerState('approved', { persist: isAutoLoginEnabled })
     closeLoginModal()
     navigate(toLocalePath('/account'))
   }
@@ -788,21 +793,24 @@ export function StoreShell() {
         <button className="login-modal-close" type="button" aria-label={loginCopy.close} onClick={closeLoginModal}>
           <X size={18} />
         </button>
-        <UserRound className="login-modal-icon" size={25} />
-        <p className="eyebrow">{loginCopy.title}</p>
         <h2 id="login-modal-title">{loginCopy.heading}</h2>
-        <div className="brand-mini">
-          <strong>{headerBrandName}</strong>
-          <span>Noblesse B2B Catalog</span>
-        </div>
-        <p>{loginCopy.description}</p>
         <form className="auth-form" onSubmit={loginAsApprovedBuyer}>
-          <label>{loginCopy.email}<input autoComplete="email" name="email" placeholder={loginCopy.emailPlaceholder} type="email" /></label>
+          <div className="login-id-group">
+            <label>{loginCopy.email}<input autoComplete="username" name="username" placeholder={loginCopy.emailPlaceholder} type="text" /></label>
+            <label className="auto-login-check">
+              <input
+                checked={isAutoLoginEnabled}
+                name="autoLogin"
+                onChange={(event) => setIsAutoLoginEnabled(event.target.checked)}
+                type="checkbox"
+              />
+              <span>{loginCopy.autoLogin}</span>
+            </label>
+          </div>
           <label>{loginCopy.password}<input autoComplete="current-password" name="password" placeholder={loginCopy.passwordPlaceholder} type="password" /></label>
           <button className="primary-action" type="submit">{loginCopy.submit}</button>
         </form>
         <div className="auth-links">
-          <button className="text-action" type="button" onClick={browseAsGuest}>{loginCopy.guest}</button>
           <button className="text-action login-register-action" type="button" onClick={goToRegisterFromLogin}>{loginCopy.register}</button>
         </div>
       </section>
