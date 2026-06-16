@@ -253,3 +253,9 @@ Before implementation starts:
 - Local mock tests cover admin auth, read routes, inquiry detail validation, buyer/product filters, and the mock-only inquiry memo route.
 - Next step should be local route QA only.
 - Real Auth, real DB, SQL migration/execution, Firebase `/api` rewrite, and deploy remain blocked.
+
+## 32F Admin Mock Backend Route QA
+
+- Admin mock backend route QA is documented in `docs/ADMIN_MOCK_BACKEND_ROUTE_QA_REPORT.md`.
+- The mock-only route/test coverage is Go.
+- Next real step must still avoid production DB/Auth, Cloud resources, SQL execution, Firebase `/api` rewrite, and deploy.

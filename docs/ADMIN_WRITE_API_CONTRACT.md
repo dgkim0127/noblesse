@@ -587,3 +587,9 @@ No real Firebase/DB tests in first write scaffold.
 - The route validates admin auth, UUID, unknown fields, and `adminMemo` through injected mock dependencies in tests.
 - Real inquiry memo writes remain blocked until real Auth, DB, transaction, and `audit_logs` implementation are approved.
 - No SQL change, DB execution, Firebase rewrite, or deploy was added in 32E.
+
+## 32F Mock-only Memo QA Follow-up
+
+- 32F QA verifies that the mock-only memo skeleton route exists and is covered by tests.
+- The route remains a skeleton only; real memo writes remain blocked.
+- Status, quote, buyer, product, price, and delete writes remain out of scope.

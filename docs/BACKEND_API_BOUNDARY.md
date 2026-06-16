@@ -215,3 +215,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Production frontend does not call these routes.
 - Firebase Hosting still has no `/api` rewrite.
 - Real DB/Auth integration and real admin writes remain blocked.
+
+## 32F Admin Mock Route QA
+
+- `/api/admin` route QA is documented in `docs/ADMIN_MOCK_BACKEND_ROUTE_QA_REPORT.md`.
+- The skeleton exists only in the backend and is not exposed through Firebase Hosting.
+- Firebase Hosting `/api` rewrite remains absent.
+- Production frontend does not call the admin skeleton.

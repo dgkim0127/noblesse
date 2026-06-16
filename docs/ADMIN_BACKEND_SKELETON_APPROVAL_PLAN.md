@@ -248,3 +248,9 @@ Next recommended step:
   - `PATCH /api/admin/inquiries/:inquiryId/memo`
 - Tests use injected mock auth and mock query/service dependencies only.
 - No real DB connection, Firebase Auth integration, SQL execution, SQL file change, Firebase `/api` rewrite, or deploy was added.
+
+## 32F Mock Backend Route QA
+
+- 32F QA is documented in `docs/ADMIN_MOCK_BACKEND_ROUTE_QA_REPORT.md`.
+- The QA confirms mock-only route inventory, auth injection, validator coverage, memo skeleton coverage, and blocked route tests.
+- Real DB/Auth integration, SQL execution, Firebase `/api` rewrite, and deploy remain blocked.
