@@ -4,7 +4,7 @@ const { Pool } = pg;
 
 export function createPool(env) {
   if (!env.databaseUrl) {
-    if (env.isProduction) {
+    if (env.isProduction && !env.allowHealthOnlyStartup) {
       throw new Error("DATABASE_URL is required for the backend server in production.");
     }
     return null;

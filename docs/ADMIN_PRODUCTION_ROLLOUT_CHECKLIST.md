@@ -477,3 +477,14 @@ Required before 32K:
 - Firebase Auth backend integration: No-Go.
 - Firebase `/api` rewrite: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32K-6 Health-only Startup Follow-up
+
+- Health-only startup support: implemented.
+- Local backend tests include health-only production startup and admin no-token fail-closed checks.
+- Production runtime deployment: No-Go.
+- Production health URL: Missing.
+- Secret Manager integration: No-Go.
+- Firebase Auth backend integration: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- Production admin_memo write: No-Go.

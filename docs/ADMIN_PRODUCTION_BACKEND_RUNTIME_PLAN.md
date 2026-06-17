@@ -426,3 +426,12 @@ Next recommended step:
 - Candidate direction is health-only runtime smoke without DB/Auth secrets if explicitly approved, followed by staging-only runtime config before production writes.
 - Runtime deploy remains No-Go.
 - No Cloud Build, Cloud Run service, Secret Manager setup, Firebase rewrite, Firebase deploy, DB/Auth integration, SQL execution, or secret handling was performed in 32K-5.
+
+## 32K-6 Health-only Startup Follow-up
+
+- Health-only startup path is implemented locally with `ALLOW_HEALTH_ONLY_STARTUP=true`.
+- Default production config remains strict without the explicit flag.
+- `/api/health` can be used for future runtime smoke without DB/Auth secrets when the flag is enabled.
+- `/api/admin/dashboard` without token remains fail-closed with `UNAUTHORIZED`.
+- Cloud Run deploy was not executed.
+- Production runtime deployment remains No-Go.

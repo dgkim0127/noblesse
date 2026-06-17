@@ -1097,3 +1097,23 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32K-5: No.
 - Conclusion: Deploy values are documented as placeholder-only and pending/proposed, but production runtime deployment and admin_memo rollout remain No-Go.
+
+## 32K-6 Health-only Startup Implementation Follow-up
+
+- Date: 2026-06-18
+- Change: Added explicit `ALLOW_HEALTH_ONLY_STARTUP=true` support for backend health-only production startup.
+- Scope: Backend runtime startup behavior and mock tests only.
+- Health-only startup default: Disabled.
+- Production strict config without the flag: Preserved.
+- Local tests verify `/api/health` works without DB/Auth secrets when the flag is enabled.
+- Local tests verify admin no-token access remains fail-closed.
+- gcloud command executed in 32K-6: No.
+- Docker build/run in 32K-6: No.
+- Cloud Build execution in 32K-6: No.
+- Cloud Run deploy in 32K-6: No.
+- Firebase deploy or `/api` rewrite in 32K-6: No.
+- DB/Auth/SQL execution in 32K-6: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32K-6: No.
+- Conclusion: Health-only startup support is implemented for future runtime smoke, but production runtime deployment and admin_memo rollout remain No-Go.

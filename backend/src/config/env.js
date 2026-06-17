@@ -17,6 +17,7 @@ export function getEnv(source = process.env) {
     firebaseProjectId: source.FIREBASE_PROJECT_ID || "",
     firebaseClientEmail: source.FIREBASE_CLIENT_EMAIL || "",
     firebasePrivateKey: source.FIREBASE_PRIVATE_KEY || "",
+    allowHealthOnlyStartup: source.ALLOW_HEALTH_ONLY_STARTUP === "true",
     allowedOrigins: parseAllowedOrigins(source.ALLOWED_ORIGINS),
     logLevel: source.LOG_LEVEL || "info"
   };
@@ -24,6 +25,7 @@ export function getEnv(source = process.env) {
 
 export function assertProductionConfig(env) {
   if (!env.isProduction) return;
+  if (env.allowHealthOnlyStartup) return;
 
   const missing = [];
   if (!env.databaseUrl) missing.push("DATABASE_URL");

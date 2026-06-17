@@ -389,3 +389,12 @@ Before implementation starts:
 - Deploy values remain pending/proposed and placeholder-only.
 - Startup/health policy remains pending.
 - Production runtime deployment, DB/Auth/Secret integration, Firebase `/api` rewrite, and production admin_memo rollout remain blocked.
+
+## 32K-6 Health-only Startup Implementation
+
+- Backend health-only startup support is implemented with explicit `ALLOW_HEALTH_ONLY_STARTUP=true`.
+- Default production config remains strict without the explicit flag.
+- Backend tests verify `/api/health` works without DB/Auth secrets in health-only mode.
+- Backend tests verify admin no-token access remains fail-closed.
+- Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.
+- Deploy still requires approval.

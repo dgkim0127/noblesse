@@ -123,3 +123,14 @@ Recommended candidate:
 - Startup/health policy remains pending, with Option B and Option C as recommended candidates.
 - Production runtime deployment remains No-Go.
 - Production admin_memo rollout remains No-Go.
+
+## 32K-6 Health-only Startup Follow-up
+
+- `ALLOW_HEALTH_ONLY_STARTUP=true` candidate is implemented for backend runtime smoke.
+- Only the explicit flag allows production health-only startup without DB/Auth secrets.
+- Default production config remains strict when the flag is absent.
+- Health-only mode allows `/api/health` to respond without DB/Auth secrets.
+- Admin routes remain fail-closed without token and still return `UNAUTHORIZED`.
+- Production deploy remains No-Go.
+- Firebase `/api` rewrite remains No-Go.
+- Production admin_memo rollout remains No-Go.

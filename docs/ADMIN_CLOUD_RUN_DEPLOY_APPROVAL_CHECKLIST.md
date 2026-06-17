@@ -260,3 +260,11 @@ Allowed to remain dirty but must not be staged/committed.
 - Real project, service account, secret, DB URL, password, private key, and service account JSON values are not recorded.
 - Deploy remains No-Go.
 - Cloud Build, Cloud Run service creation, Secret Manager, Firebase Auth, Firebase `/api` rewrite, DB connection, and production admin_memo remain No-Go.
+
+## 32K-6 Health-only Startup Follow-up
+
+- `ALLOW_HEALTH_ONLY_STARTUP=true` exists for future runtime health smoke.
+- Health-only startup does not replace Secret Manager, Auth, DB, staging dry-run, or rollback gates.
+- Admin routes must remain fail-closed in this mode.
+- Deploy still requires approval.
+- Secret/Auth/DB gates remain No-Go.
