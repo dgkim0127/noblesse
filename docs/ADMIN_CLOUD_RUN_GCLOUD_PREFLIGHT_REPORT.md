@@ -117,3 +117,13 @@ No real values were recorded.
 - Cloud Build execution: No-Go.
 - Firebase `/api` rewrite: No-Go.
 - production admin_memo rollout: No-Go.
+
+## 32K-9 API Enablement Planning Follow-up
+
+- Required API enablement planning is documented in `docs/ADMIN_CLOUD_RUN_API_ENABLEMENT_PLAN.md`.
+- Required APIs remain Missing until separately approved and enabled.
+- API enablement executed in 32K-9: No.
+- Cloud Run deploy remains No-Go.
+- Cloud Build execution remains No-Go.
+- Firebase `/api` rewrite remains No-Go.
+- production admin_memo rollout remains No-Go.

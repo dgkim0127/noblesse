@@ -423,3 +423,10 @@ Before implementation starts:
 - Required Cloud Run deployment APIs were missing.
 - Implementation still requires explicit deploy approval, API readiness, and confirmed runtime values.
 - Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.
+
+## 32K-9 API Enablement Planning
+
+- API enablement planning is documented in `docs/ADMIN_CLOUD_RUN_API_ENABLEMENT_PLAN.md`.
+- No API enablement or deploy was performed.
+- Implementation still requires explicit API enablement approval, deploy approval, and confirmed runtime values.
+- Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.

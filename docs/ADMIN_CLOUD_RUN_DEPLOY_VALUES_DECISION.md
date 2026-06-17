@@ -160,3 +160,11 @@ Recommended candidate:
 - Required API readiness is missing for the Cloud Run deployment path.
 - Real deploy values remain pending/proposed only.
 - Deploy remains No-Go.
+
+## 32K-9 API Enablement Planning Follow-up
+
+- API enablement planning is documented in `docs/ADMIN_CLOUD_RUN_API_ENABLEMENT_PLAN.md`.
+- Required APIs remain Missing until separately approved.
+- Real account/project values are not recorded.
+- Real deploy values remain pending/proposed only.
+- Deploy remains No-Go.

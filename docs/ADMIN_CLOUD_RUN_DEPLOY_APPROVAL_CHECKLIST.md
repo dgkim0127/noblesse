@@ -293,3 +293,10 @@ Allowed to remain dirty but must not be staged/committed.
 - Required Cloud Run deployment APIs were missing.
 - Cloud Run deploy remains No-Go.
 - Cloud Build execution remains No-Go.
+
+## 32K-9 API Enablement Planning Follow-up
+
+- API enablement approval planning is documented in `docs/ADMIN_CLOUD_RUN_API_ENABLEMENT_PLAN.md`.
+- API enablement approval is required before deploy approval can proceed.
+- `gcloud services enable` was not executed.
+- Cloud Run deploy remains No-Go.

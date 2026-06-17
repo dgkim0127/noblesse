@@ -1180,3 +1180,22 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32K-8R3: No.
 - Conclusion: gcloud preflight retry is No-Go because required APIs are missing and deploy approval is still pending.
+
+## 32K-9 Cloud Run API Enablement Plan Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_CLOUD_RUN_API_ENABLEMENT_PLAN.md`.
+- Scope: Cloud Run API enablement planning only.
+- Required APIs remain Missing until separately approved.
+- `gcloud services enable` executed in 32K-9: No.
+- gcloud deploy/build command executed in 32K-9: No.
+- Docker build/run in 32K-9: No.
+- Cloud Build execution in 32K-9: No.
+- Cloud Run deploy in 32K-9: No.
+- Firebase deploy or `/api` rewrite in 32K-9: No.
+- Secret Manager creation in 32K-9: No.
+- DB/Auth/SQL execution in 32K-9: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32K-9: No.
+- Conclusion: API enablement planning is documented, but API enablement, deployment, and production admin_memo rollout remain No-Go.
