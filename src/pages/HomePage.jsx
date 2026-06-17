@@ -1,9 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Headphones, Mail, MessageCircle, Sparkles } from 'lucide-react'
+import { Headphones, Heart, Mail, MessageCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { CatalogCard } from '../components/CatalogCard'
 import { useCommerce } from '../commerce/commerceStore'
+import { formatMoney } from '../utils/commerce'
 import { useLocalePath } from '../utils/locale'
+import { getLocalizedProductAlt, getLocalizedProductName } from '../utils/locale'
 
 const homeCopy = {
   kr: {
@@ -550,20 +551,78 @@ function ScrambleText({ as: Tag = 'span', children, className = '', persistKey =
   </Tag>
 }
 
-function ProductSection({ products, sectionId, title, note, viewAllLabel }) {
-  const { toLocalePath } = useLocalePath()
+const homeSectionLimit = 15
+
+const fillHomeSectionProducts = (preferredProducts, allProducts) => {
+  const picked = []
+  const seen = new Set()
+
+  for (const product of [...preferredProducts, ...allProducts]) {
+    if (!product || seen.has(product.productId)) continue
+    picked.push(product)
+    seen.add(product.productId)
+    if (picked.length >= homeSectionLimit) break
+  }
+
+  return picked
+}
+
+function HomeProductCard({ product, index }) {
+  const { approvedPrice, buyer, getPrice, isApproved } = useCommerce()
+  const { locale, toLocalePath } = useLocalePath()
+  const productName = getLocalizedProductName(product, locale)
+  const productAlt = getLocalizedProductAlt(product, locale)
+  const price = getPrice(product.productId)
+  const imageSources = [
+    product.imageSet?.card,
+    product.imageSet?.detail,
+    product.imageSet?.zoom,
+  ].filter(Boolean)
+  const displayPrice = isApproved && price
+    ? formatMoney(approvedPrice(product.productId), buyer.currency)
+    : '승인 후 가격 확인 가능'
+  const statusLabel = product.isNew ? 'NEW' : product.isBest ? 'BEST' : 'B2B'
+
+  return <article className="home-product-card">
+    <Link className={`home-product-image tone-${product.tone}`} to={toLocalePath(`/products/${product.productId}`)} aria-label={productName}>
+      <button className="home-product-heart" type="button" aria-label={`${productName} 관심 상품`}>
+        <Heart size={15} />
+      </button>
+      <span className="home-product-status">{statusLabel}</span>
+      <span className="jewel-shape" />
+      <span className="home-product-image-cycle" style={{ '--cycle-delay': `${(index % 5) * 0.18}s` }}>
+        {imageSources.map((src, imageIndex) => <img
+          alt={imageIndex === 0 ? productAlt : ''}
+          aria-hidden={imageIndex === 0 ? undefined : 'true'}
+          key={`${product.productId}-${imageIndex}`}
+          loading="lazy"
+          src={src}
+          width="600"
+          height="900"
+          onError={(event) => { event.currentTarget.hidden = true }}
+        />)}
+      </span>
+    </Link>
+    <div className="home-product-info">
+      <Link to={toLocalePath(`/products/${product.productId}`)}>
+        <strong>{productName}</strong>
+        <small>{product.material}</small>
+      </Link>
+      <b>{displayPrice}</b>
+    </div>
+  </article>
+}
+
+function ProductSection({ products, sectionId, title }) {
   if (products.length === 0) return null
 
   return <section className="section-wrap product-feature-section" id={`home-${sectionId}`}>
-    <div className="section-title">
-      <div>
-        <Sparkles size={18} />
-        <ScrambleText as="h2" persistKey={`product-section-title-${sectionId}`}>{title}</ScrambleText>
-        <ScrambleText as="p" persistKey={`product-section-note-${sectionId}`}>{note}</ScrambleText>
-      </div>
-      <Link to={toLocalePath('/products')}><ScrambleText persistKey={`product-section-link-${sectionId}`}>{viewAllLabel}</ScrambleText></Link>
+    <div className="home-product-section-title">
+      <span aria-hidden="true">✧</span>
+      <ScrambleText as="h2" persistKey={`product-section-title-${sectionId}`}>{title}</ScrambleText>
+      <span aria-hidden="true">✧</span>
     </div>
-    <div className="catalog-grid">{products.map((product) => <CatalogCard key={product.productId} product={product} />)}</div>
+    <div className="home-product-grid">{products.slice(0, homeSectionLimit).map((product, index) => <HomeProductCard key={product.productId} product={product} index={index} />)}</div>
   </section>
 }
 
