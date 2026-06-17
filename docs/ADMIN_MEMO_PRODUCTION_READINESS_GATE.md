@@ -185,3 +185,9 @@ Still blocked:
 - Production backend runtime planning is documented in `docs/ADMIN_PRODUCTION_BACKEND_RUNTIME_PLAN.md`.
 - Runtime remains unimplemented.
 - Admin memo production rollout remains blocked until runtime, Auth, DB, secret, rewrite, rollback, and QA gates are satisfied.
+
+## 32J-3 Production DB Migration Plan Follow-up
+
+- Production DB and migration planning is documented in `docs/ADMIN_PRODUCTION_DB_MIGRATION_PLAN.md`.
+- Production DB readiness remains No-Go until provider, migration, backup, staging/clone, and DB role gates are approved.
+- Local dry-run proof still does not unlock production DB writes.

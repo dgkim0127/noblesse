@@ -334,3 +334,9 @@ Next recommended step:
 
 - 32J-3: Production DB and migration plan
 - or 32J-2A: backend Docker/runtime implementation plan if runtime plan needs more detail before DB planning
+
+## 32J-3 Production DB Migration Plan Follow-up
+
+- Production DB and migration planning is documented in `docs/ADMIN_PRODUCTION_DB_MIGRATION_PLAN.md`.
+- Runtime remains unimplemented.
+- Backend runtime deployment still waits for approved DB, secret, Auth, staging/clone, rewrite, and QA gates.

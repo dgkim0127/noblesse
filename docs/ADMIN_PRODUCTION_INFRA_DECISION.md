@@ -348,3 +348,9 @@ Important:
 - Production backend runtime planning is documented in `docs/ADMIN_PRODUCTION_BACKEND_RUNTIME_PLAN.md`.
 - 32J-2 refines the Cloud Run/equivalent runtime plan but does not deploy anything.
 - Dockerfile, Cloud Build, Cloud Run, Secret Manager, production DB/Auth, Firebase `/api` rewrite, and deploy remain unimplemented.
+
+## 32J-3 Production DB Migration Plan Follow-up
+
+- Production DB and migration planning is documented in `docs/ADMIN_PRODUCTION_DB_MIGRATION_PLAN.md`.
+- 32J-3 refines DB/provider/migration planning but does not create or connect a DB.
+- SQL execution, schema/migration file changes, production DB/Auth integration, Secret Manager, Firebase `/api` rewrite, and deploy remain blocked.

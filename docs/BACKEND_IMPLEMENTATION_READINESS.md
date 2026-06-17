@@ -298,3 +298,9 @@ Before implementation starts:
 - Production backend runtime planning is documented in `docs/ADMIN_PRODUCTION_BACKEND_RUNTIME_PLAN.md`.
 - Next implementation still requires separate approval.
 - No Dockerfile, Cloud Build, Cloud Run service, production DB/Auth integration, Secret Manager setup, Firebase `/api` rewrite, or deploy was added.
+
+## 32J-3 Production DB Migration Plan
+
+- Production DB and migration planning is documented in `docs/ADMIN_PRODUCTION_DB_MIGRATION_PLAN.md`.
+- No SQL execution, schema/migration file change, DB/Auth integration, Secret Manager setup, Firebase `/api` rewrite, or deploy was added.
+- Production admin memo rollout remains blocked.

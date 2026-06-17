@@ -885,3 +885,19 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source changes: Existing src changes were not staged or committed by 32J-2.
 - Conclusion: Production backend runtime is planned, but runtime implementation and production admin memo rollout remain No-Go.
+
+## 32J-3 Admin Production DB Migration Plan Follow-up
+
+- Date: 2026-06-17
+- Change: Added `docs/ADMIN_PRODUCTION_DB_MIGRATION_PLAN.md`.
+- Scope: Documentation only for production DB provider, migration, backup/restore, staging clone, and DB boundary planning.
+- SQL execution required in 32J-3: No.
+- DB/Auth integration in 32J-3: No.
+- SQL file change: No.
+- Schema/migration file created: No.
+- Production DB created or connected: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 32J-3: No.
+- Secret recorded in repo/docs: No.
+- Frontend source changes: Existing src changes were not staged or committed by 32J-3.
+- Conclusion: Production DB and migration planning is documented, but production DB readiness and admin memo rollout remain No-Go.

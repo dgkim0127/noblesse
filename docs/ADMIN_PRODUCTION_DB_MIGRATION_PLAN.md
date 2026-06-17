@@ -1,0 +1,348 @@
+# Admin Production DB Migration Plan
+
+## Purpose
+
+- Plan production PostgreSQL provider, schema migration, backup/restore, staging clone, and DB rollout boundaries before enabling admin_memo in production.
+- Convert 32J-1 and 32J-2 infrastructure decisions into a database-specific plan.
+- Keep production DB creation, DB connection, SQL execution, schema changes, migrations, Auth integration, rewrite, and deploy blocked.
+- This step is docs-only.
+
+## Current Decision Status
+
+- Production DB planning: Go
+- Production DB creation: No-Go
+- Production SQL execution: No-Go
+- Production DB/Auth integration: No-Go
+- Firebase Hosting /api rewrite: No-Go
+- Production admin_memo rollout: No-Go
+- Status/buyer/product/price/quote writes: No-Go
+
+## Inputs Reviewed
+
+- docs/ADMIN_PRODUCTION_INFRA_DECISION.md
+- docs/ADMIN_PRODUCTION_BACKEND_RUNTIME_PLAN.md
+- docs/ADMIN_MEMO_PRODUCTION_READINESS_GATE.md
+- docs/ADMIN_MEMO_LOCAL_DRY_RUN_REPORT.md
+- docs/ADMIN_WRITE_API_CONTRACT.md
+- docs/ADMIN_WRITE_SAFETY_GATES.md
+- supabase/schema.sql
+- supabase/VALIDATION_NOTES.md
+
+## Production DB Provider Options
+
+Options:
+
+- Cloud SQL PostgreSQL
+- Approved managed PostgreSQL fallback
+- Local PostgreSQL is not production
+- Frontend Supabase client is not allowed for admin writes
+
+Recommended direction:
+
+- Select one approved production PostgreSQL provider.
+- Prefer a provider that:
+  - supports secure backend runtime connectivity
+  - supports backup/restore
+  - supports least-privilege credential management
+  - can be accessed from Cloud Run or equivalent backend runtime
+  - can be managed without exposing connection string in frontend, GitHub, docs, or chat
+
+Current status:
+
+- provider not selected
+- production DB not created
+- no DB connection made in 32J-3
+
+No-Go:
+
+- do not create Cloud SQL
+- do not create Neon/Supabase production DB
+- do not connect to production DB
+- do not run SQL
+
+## Recommended DB Direction
+
+Recommended:
+
+- Use Cloud SQL PostgreSQL if Google Cloud operational path is preferred.
+- Use another approved managed PostgreSQL only if it satisfies:
+  - secure secret storage
+  - backend-only access
+  - backup/restore
+  - auditability
+  - staging clone support
+  - no frontend secret exposure
+
+Reason:
+
+- Admin writes need server-side transaction control.
+- Admin writes need same-transaction audit_logs.
+- Production DB must be reachable from backend runtime, not frontend.
+- Existing local dry-run only proves transaction path, not production readiness.
+
+Decision still required:
+
+- final provider
+- region
+- instance size/cost boundary
+- backup retention
+- network access model
+- migration process owner
+
+## Schema Migration Process
+
+Current:
+
+- supabase/schema.sql exists as schema scaffold/reference.
+- 32I proved admin_memo write against local DB.
+- Production schema migration process is not implemented.
+
+Required future process:
+
+1. Review current schema.
+2. Define migration format.
+3. Define migration execution owner.
+4. Define migration review process.
+5. Define rollback or restore approach.
+6. Apply schema to staging/clone first.
+7. Verify core tables:
+   - users
+   - buyers
+   - products
+   - categories
+   - product_prices
+   - inquiries
+   - inquiry_items
+   - audit_logs
+8. Verify admin_memo column exists.
+9. Verify audit_logs fields match backend query path.
+10. Only then allow production DB readiness testing.
+
+No-Go in 32J-3:
+
+- no migration file creation
+- no schema.sql modification
+- no SQL execution
+- no psql
+
+## Migration Ownership / Approval
+
+Required:
+
+- migration owner identified
+- reviewer identified
+- execution environment identified
+- rollback/restore owner identified
+- production approval gate documented
+
+Rules:
+
+- no ad-hoc production SQL
+- no unreviewed schema drift
+- no SQL copied from chat into production without review
+- no secret in migration files
+- no frontend direct DB access
+
+Current status:
+
+- planning only
+- not assigned in 32J-3
+
+## Backup / Restore Plan
+
+Required before production write:
+
+- automated backup enabled
+- manual backup before first production write rollout
+- restore procedure documented
+- restore tested in staging or disposable clone
+- audit_logs preservation policy
+- point-in-time recovery decision if provider supports it
+
+Rules:
+
+- do not enable production write without restore confidence
+- do not hard delete admin records in first phase
+- keep audit_logs append-only
+
+Current status:
+
+- planning only
+- not implemented
+
+## Staging / Production-like Clone Plan
+
+Required:
+
+- staging DB or disposable production-like clone
+- same schema as production target
+- seeded with safe non-sensitive sample data
+- admin_memo dry-run repeated against staging/clone
+- audit_logs verified
+- rollback behavior verified
+
+Rules:
+
+- no real customer data unless explicitly approved and sanitized
+- no production write before staging/clone verification
+- no secret recorded in docs/GitHub/chat
+
+Current status:
+
+- planning only
+- not created
+
+## Data Seed / Bootstrap Boundary
+
+Required future seed/bootstrap data:
+
+- one approved admin user
+- one buyer/trade account
+- one inquiry
+- audit_logs table available
+- products/categories only if needed for read QA
+
+Admin bootstrap:
+
+- handled separately in Auth/admin bootstrap plan
+- no public admin signup
+- no frontend-created admin role
+
+Rules:
+
+- seed data must not contain real secrets
+- seed data must not contain production customer data unless explicitly approved
+- admin bootstrap must be auditable
+
+Current status:
+
+- planning only
+- no seed inserted in 32J-3
+
+## DB Access / Network Boundary
+
+Production target:
+
+- backend runtime accesses DB
+- frontend never accesses DB directly
+- DB credentials stored in Secret Manager or equivalent
+- runtime service account has least-privilege secret access
+
+Network model decision required:
+
+- Cloud SQL connector or equivalent
+- private IP vs public IP with restrictions
+- allowed runtime identity
+- connection pool strategy
+- SSL/TLS requirements
+
+No-Go:
+
+- no DB access from browser
+- no DATABASE_URL in frontend
+- no broad public DB access
+- no raw connection string in Firebase config
+
+## DB Role / Permission Plan
+
+Future required DB roles:
+
+- application runtime role
+- migration/admin role
+- read-only inspection role if needed
+
+Application runtime role:
+
+- must be able to read/write only required application tables
+- should not be database superuser
+- should not own schema unless explicitly approved
+- should support transaction writes to inquiries and audit_logs
+
+Migration role:
+
+- may apply schema changes
+- should not be used by runtime
+
+Current status:
+
+- planning only
+- no DB role created
+
+## Production admin_memo DB Readiness
+
+Before production admin_memo write:
+
+- production DB provider selected
+- schema applied through approved process
+- audit_logs table verified
+- inquiries.admin_memo verified
+- backend transaction path verified against staging/clone
+- secret injected server-side only
+- Firebase admin auth verified
+- admin bootstrap complete
+- feature flag/disable path ready
+- rollback/restore tested
+
+Current status:
+
+- not ready
+
+Conclusion:
+
+- local dry-run was successful
+- production DB readiness remains No-Go
+
+## Decision Matrix
+
+| Gate | Recommended Direction | Current Status | 32J-3 Judgment |
+| --- | --- | --- | --- |
+| Production DB provider | Cloud SQL or approved managed PostgreSQL | Not selected | Plan only |
+| Schema migration process | Reviewed migration process | Not implemented | Plan only |
+| Backup/restore | Automated + manual backup before rollout | Not implemented | Plan only |
+| Staging clone | Required before production write | Not created | Plan only |
+| Runtime DB role | Least-privilege app role | Not created | Plan only |
+| Migration role | Separate migration/admin role | Not created | Plan only |
+| Production admin_memo write | First write candidate only | Local proof only | No-Go |
+| Status/buyer/product/price/quote writes | Later phases | Blocked | No-Go |
+
+## Recommended Next Phases
+
+### 32J-4
+
+Secret Manager plan:
+
+- secret names
+- access policy
+- local vs production separation
+- service account access
+- no secret values
+
+### 32J-5
+
+Firebase Auth admin verification plan:
+
+- Firebase Admin SDK runtime strategy
+- ID token verification
+- users.auth_uid mapping
+- admin bootstrap
+
+### 32J-6
+
+Admin bootstrap plan:
+
+- controlled first admin
+- disable/rollback
+- no public signup
+
+### 32J-7
+
+Staging or production-like admin_memo dry-run plan
+
+### 32J-8
+
+Firebase Hosting /api rewrite plan
+
+Important:
+
+- Do not jump directly to production DB creation.
+- Do not enable production write before runtime, secret, Auth, and staging/clone verification.
