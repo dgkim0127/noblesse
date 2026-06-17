@@ -176,3 +176,12 @@ Recommended candidate:
 - Project, region, service name, and runtime service account still require approval.
 - Real account/project values are not recorded.
 - Deploy remains No-Go.
+
+## 32K-11 Deploy Values Approval Follow-up
+
+- Deploy values approval candidate is documented in `docs/ADMIN_CLOUD_RUN_DEPLOY_VALUES_APPROVAL.md`.
+- Non-secret candidate service name is `noblesse-admin-backend`.
+- Region remains pending between `asia-northeast3` and `asia-northeast1`.
+- Runtime service account, ingress, unauthenticated access, secret strategy, and rollback owner remain pending.
+- Real project, account, service account, secret, DB URL, password, or private key values are not recorded.
+- Deploy remains No-Go.

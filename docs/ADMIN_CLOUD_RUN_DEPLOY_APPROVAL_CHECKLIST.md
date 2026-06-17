@@ -308,3 +308,12 @@ Allowed to remain dirty but must not be staged/committed.
 - Cloud Run deploy still requires separate approval.
 - Cloud Build execution remains No-Go.
 - Secret Manager secret creation remains No-Go.
+
+## 32K-11 Deploy Values Approval Follow-up
+
+- Required APIs: Go.
+- Deploy values approval document: `docs/ADMIN_CLOUD_RUN_DEPLOY_VALUES_APPROVAL.md`.
+- Deploy values approval is still pending/finalizing.
+- Cloud Run deploy remains No-Go.
+- Cloud Build execution remains No-Go.
+- Secret Manager secret creation remains No-Go.

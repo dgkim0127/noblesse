@@ -438,3 +438,11 @@ Before implementation starts:
 - No Cloud Run deploy, Cloud Build execution, Secret Manager secret creation, Firebase rewrite, DB/Auth integration, or SQL execution was performed.
 - Implementation still requires deploy approval and confirmed runtime values.
 - Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.
+
+## 32K-11 Cloud Run Deploy Values Approval
+
+- Deploy values approval planning is documented in `docs/ADMIN_CLOUD_RUN_DEPLOY_VALUES_APPROVAL.md`.
+- Implementation still requires explicit deploy approval.
+- The non-secret service name candidate is proposed, while region, runtime service account, ingress, public access boundary, secret strategy, and rollback owner remain pending.
+- No Cloud Run deploy, Cloud Build execution, Secret Manager secret creation, Firebase rewrite, DB/Auth integration, or SQL execution was performed.
+- Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.

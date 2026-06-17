@@ -542,3 +542,14 @@ Required before 32K:
 - Secret Manager secret creation: No-Go.
 - Firebase `/api` rewrite: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32K-11 Deploy Values Approval Follow-up
+
+- Required APIs: Go.
+- Deploy values approval: Pending.
+- Deploy values approval document: `docs/ADMIN_CLOUD_RUN_DEPLOY_VALUES_APPROVAL.md`.
+- Cloud Run deploy: No-Go.
+- Cloud Build execution: No-Go.
+- Secret Manager secret creation: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- Production admin_memo write: No-Go.

@@ -57,3 +57,12 @@
 - Firebase `/api` rewrite approval
 - staging/prod-like dry-run
 - production rollout checklist
+
+## 32K-11 Deploy Values Approval Follow-up
+
+- Deploy values approval document created: `docs/ADMIN_CLOUD_RUN_DEPLOY_VALUES_APPROVAL.md`.
+- No Cloud Run deploy was executed.
+- No Cloud Build execution occurred.
+- No Cloud Run service was created.
+- No Secret Manager secret was created.
+- No Firebase `/api` rewrite or Firebase deploy was performed.

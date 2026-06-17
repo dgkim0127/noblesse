@@ -1216,3 +1216,19 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32K-10: No.
 - Conclusion: Required APIs are enabled, but deployment, Secret Manager setup, Firebase rewrite, and production admin_memo rollout remain No-Go.
+
+## 32K-11 Cloud Run Deploy Values Approval Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_CLOUD_RUN_DEPLOY_VALUES_APPROVAL.md`.
+- Scope: Cloud Run deploy values approval document only.
+- Cloud Run deploy in 32K-11: No.
+- Cloud Build execution in 32K-11: No.
+- Cloud Run service creation in 32K-11: No.
+- Secret Manager secret creation in 32K-11: No.
+- Firebase deploy or `/api` rewrite in 32K-11: No.
+- DB/Auth/SQL execution in 32K-11: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32K-11: No.
+- Conclusion: Deploy values approval candidates are documented, but deployment, Secret Manager setup, Firebase rewrite, and production admin_memo rollout remain No-Go.
