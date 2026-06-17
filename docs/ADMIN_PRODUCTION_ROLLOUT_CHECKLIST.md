@@ -488,3 +488,15 @@ Required before 32K:
 - Firebase Auth backend integration: No-Go.
 - Firebase `/api` rewrite: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32K-7 Health-only Entrypoint Smoke Follow-up
+
+- Local Node smoke: Go.
+- Health-only entrypoint smoke: Go.
+- Health-only smoke report: `docs/ADMIN_BACKEND_HEALTH_ONLY_ENTRYPOINT_SMOKE_REPORT.md`.
+- Local Docker smoke: No-Go until Docker is available.
+- Production runtime deploy: No-Go.
+- Secret Manager integration: No-Go.
+- Firebase Auth backend integration: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- Production admin_memo write: No-Go.

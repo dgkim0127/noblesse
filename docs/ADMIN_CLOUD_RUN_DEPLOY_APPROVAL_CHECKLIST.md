@@ -268,3 +268,11 @@ Allowed to remain dirty but must not be staged/committed.
 - Admin routes must remain fail-closed in this mode.
 - Deploy still requires approval.
 - Secret/Auth/DB gates remain No-Go.
+
+## 32K-7 Health-only Entrypoint Smoke Follow-up
+
+- Health-only entrypoint smoke completed locally through the actual `npm start` path.
+- The smoke result is documented in `docs/ADMIN_BACKEND_HEALTH_ONLY_ENTRYPOINT_SMOKE_REPORT.md`.
+- `/api/health` passed without DB/Auth secrets when `ALLOW_HEALTH_ONLY_STARTUP=true`.
+- Admin no-token access remained fail-closed with `UNAUTHORIZED`.
+- Cloud Run deploy still requires separate approval.

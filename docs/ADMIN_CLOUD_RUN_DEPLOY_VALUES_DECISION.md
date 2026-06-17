@@ -134,3 +134,12 @@ Recommended candidate:
 - Production deploy remains No-Go.
 - Firebase `/api` rewrite remains No-Go.
 - Production admin_memo rollout remains No-Go.
+
+## 32K-7 Health-only Entrypoint Smoke Follow-up
+
+- Health-only entrypoint smoke is documented in `docs/ADMIN_BACKEND_HEALTH_ONLY_ENTRYPOINT_SMOKE_REPORT.md`.
+- Actual `npm start` path was verified locally with `NODE_ENV=production` and `ALLOW_HEALTH_ONLY_STARTUP=true`.
+- `/api/health` returned 200 without DB/Auth secrets.
+- `/api/admin/dashboard` without token returned `UNAUTHORIZED`.
+- Deploy remains No-Go.
+- Firebase `/api` rewrite remains No-Go.

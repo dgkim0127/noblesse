@@ -1117,3 +1117,24 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32K-6: No.
 - Conclusion: Health-only startup support is implemented for future runtime smoke, but production runtime deployment and admin_memo rollout remain No-Go.
+
+## 32K-7 Health-only Entrypoint Smoke Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_BACKEND_HEALTH_ONLY_ENTRYPOINT_SMOKE_REPORT.md`.
+- Scope: Local health-only backend entrypoint smoke only.
+- Actual `npm start` path verified: Yes.
+- Health-only flag used: Yes.
+- `/api/health` result: Pass.
+- Admin no-token fail-closed result: Pass.
+- Server cleanup result: Pass.
+- gcloud command executed in 32K-7: No.
+- Docker build/run in 32K-7: No.
+- Cloud Build execution in 32K-7: No.
+- Cloud Run deploy in 32K-7: No.
+- Firebase deploy or `/api` rewrite in 32K-7: No.
+- DB/Auth/SQL execution in 32K-7: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32K-7: No.
+- Conclusion: Health-only entrypoint smoke is Go, but production runtime deployment and admin_memo rollout remain No-Go.

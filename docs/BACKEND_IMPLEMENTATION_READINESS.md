@@ -398,3 +398,11 @@ Before implementation starts:
 - Backend tests verify admin no-token access remains fail-closed.
 - Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.
 - Deploy still requires approval.
+
+## 32K-7 Health-only Entrypoint Smoke
+
+- Health-only entrypoint smoke is documented in `docs/ADMIN_BACKEND_HEALTH_ONLY_ENTRYPOINT_SMOKE_REPORT.md`.
+- Actual `npm start` path was verified locally with production health-only env.
+- `/api/health` passed without DB/Auth secrets.
+- Admin no-token access remained fail-closed.
+- Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.

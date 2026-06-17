@@ -368,3 +368,11 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Firebase Hosting `/api` rewrite remains absent.
 - Production frontend still does not call the admin API.
 - Frontend direct PostgreSQL access remains prohibited.
+
+## 32K-7 Health-only Entrypoint Smoke
+
+- Health-only entrypoint smoke does not change API endpoints, write scope, auth boundary, or production gate.
+- The smoke only verifies local backend startup and no-token admin failure behavior.
+- Firebase Hosting `/api` rewrite remains absent.
+- Production frontend still does not call the admin API.
+- Frontend direct PostgreSQL access remains prohibited.

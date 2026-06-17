@@ -435,3 +435,12 @@ Next recommended step:
 - `/api/admin/dashboard` without token remains fail-closed with `UNAUTHORIZED`.
 - Cloud Run deploy was not executed.
 - Production runtime deployment remains No-Go.
+
+## 32K-7 Health-only Entrypoint Smoke Follow-up
+
+- Actual backend entrypoint smoke passed in health-only mode through `npm start`.
+- The smoke result is documented in `docs/ADMIN_BACKEND_HEALTH_ONLY_ENTRYPOINT_SMOKE_REPORT.md`.
+- `/api/health` returned 200 without DB/Auth secrets.
+- `/api/admin/dashboard` without token returned `UNAUTHORIZED`.
+- Container smoke remains optional/No-Go until Docker is available.
+- Production runtime deployment remains No-Go.
