@@ -608,3 +608,11 @@ No real Firebase/DB tests in first write scaffold.
 - Fake-pool tests cover transaction, audit insert, rollback/release, not-found handling, and parameterized queries.
 - Real DB dry-run still requires separate explicit approval.
 - Status, quote, buyer, product, price, and delete writes remain out of scope.
+
+## 32I Admin Memo Local Dry-run Follow-up
+
+- The admin memo local dry-run result is documented in `docs/ADMIN_MEMO_LOCAL_DRY_RUN_REPORT.md`.
+- Local dry-run result: Go for `admin_memo` only.
+- Production write rollout remains blocked.
+- Status, quote, buyer, product, price, and delete writes remain out of scope.
+- Frontend source changes were not staged or committed by 32I.

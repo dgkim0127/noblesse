@@ -272,3 +272,11 @@ Before implementation starts:
 - Fake-pool tests cover transaction, `audit_logs`, rollback, release, not-found, and parameterized query behavior.
 - Next step is explicit local PostgreSQL dry-run only if approved.
 - Production DB/Auth, Cloud resources, SQL execution by Codex, Firebase `/api` rewrite, and deploy remain blocked.
+
+## 32I Admin Memo Local Dry-run
+
+- Local PostgreSQL `admin_memo` dry-run is documented in `docs/ADMIN_MEMO_LOCAL_DRY_RUN_REPORT.md`.
+- The local-only transaction path updated one inquiry memo and inserted one `audit_logs` row.
+- This confirms local query readiness for `admin_memo` only.
+- Production Auth/DB decisions, Cloud resources, secret storage, Firebase `/api` rewrite, and deployment are still required before rollout.
+- Existing frontend source changes were not staged or committed by 32I.

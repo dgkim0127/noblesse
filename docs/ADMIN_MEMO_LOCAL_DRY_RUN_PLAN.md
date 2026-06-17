@@ -239,3 +239,11 @@ Next recommended step:
 Next recommended step:
 
 - Run an explicitly approved local PostgreSQL dry-run only after the operator confirms the local DB environment and secret handling rules.
+
+## 32I Local Dry-run Follow-up
+
+- Local PostgreSQL `admin_memo` dry-run result is documented in `docs/ADMIN_MEMO_LOCAL_DRY_RUN_REPORT.md`.
+- The dry-run used the backend `updateInquiryMemo` query path, updated one local inquiry memo, and inserted one `audit_logs` row.
+- Connection string, password, username, host, port, and exact database name were not recorded.
+- Existing frontend source changes were not staged or committed by 32I.
+- Production DB/Auth, Firebase `/api` rewrite, SQL file changes, and deploy remain No-Go.

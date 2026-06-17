@@ -236,3 +236,11 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Firebase Hosting `/api` rewrite remains absent.
 - Production frontend still does not call this admin API.
 - Direct React-to-PostgreSQL access remains prohibited.
+
+## 32I Admin Memo Local Dry-run
+
+- Local PostgreSQL `admin_memo` dry-run is documented in `docs/ADMIN_MEMO_LOCAL_DRY_RUN_REPORT.md`.
+- The local dry-run does not imply Firebase Hosting `/api` rewrite.
+- Production frontend still does not call the admin API.
+- Direct React-to-PostgreSQL access remains prohibited.
+- Existing frontend source changes were not staged or committed by 32I.
