@@ -272,3 +272,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - DB planning does not change the API boundary.
 - Frontend direct PostgreSQL access remains prohibited.
 - Production frontend still does not call the admin API.
+
+## 32J-4 Production Secret Manager Plan
+
+- Production secret management planning is documented in `docs/ADMIN_PRODUCTION_SECRET_MANAGER_PLAN.md`.
+- Secret planning does not change the API boundary.
+- Frontend direct DB access remains prohibited.
+- Production frontend still does not call the admin API.

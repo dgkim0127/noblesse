@@ -304,3 +304,9 @@ Before implementation starts:
 - Production DB and migration planning is documented in `docs/ADMIN_PRODUCTION_DB_MIGRATION_PLAN.md`.
 - No SQL execution, schema/migration file change, DB/Auth integration, Secret Manager setup, Firebase `/api` rewrite, or deploy was added.
 - Production admin memo rollout remains blocked.
+
+## 32J-4 Production Secret Manager Plan
+
+- Production secret management planning is documented in `docs/ADMIN_PRODUCTION_SECRET_MANAGER_PLAN.md`.
+- No secret creation, secret value recording, runtime injection, IAM change, DB/Auth integration, Firebase `/api` rewrite, or deploy was added.
+- Production admin memo rollout remains blocked.

@@ -191,3 +191,9 @@ Still blocked:
 - Production DB and migration planning is documented in `docs/ADMIN_PRODUCTION_DB_MIGRATION_PLAN.md`.
 - Production DB readiness remains No-Go until provider, migration, backup, staging/clone, and DB role gates are approved.
 - Local dry-run proof still does not unlock production DB writes.
+
+## 32J-4 Production Secret Manager Plan Follow-up
+
+- Production secret management planning is documented in `docs/ADMIN_PRODUCTION_SECRET_MANAGER_PLAN.md`.
+- The production secret gate remains unsatisfied until approved secret storage and runtime access are implemented.
+- No secret creation, IAM grant, runtime injection, DB/Auth integration, rewrite, or deploy was performed.

@@ -340,3 +340,9 @@ Next recommended step:
 - Production DB and migration planning is documented in `docs/ADMIN_PRODUCTION_DB_MIGRATION_PLAN.md`.
 - Runtime remains unimplemented.
 - Backend runtime deployment still waits for approved DB, secret, Auth, staging/clone, rewrite, and QA gates.
+
+## 32J-4 Production Secret Manager Plan Follow-up
+
+- Production secret management planning is documented in `docs/ADMIN_PRODUCTION_SECRET_MANAGER_PLAN.md`.
+- Runtime remains unimplemented.
+- No secret was created, injected, or granted to a runtime service account in 32J-4.

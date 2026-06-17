@@ -354,3 +354,9 @@ Important:
 - Production DB and migration planning is documented in `docs/ADMIN_PRODUCTION_DB_MIGRATION_PLAN.md`.
 - 32J-3 refines DB/provider/migration planning but does not create or connect a DB.
 - SQL execution, schema/migration file changes, production DB/Auth integration, Secret Manager, Firebase `/api` rewrite, and deploy remain blocked.
+
+## 32J-4 Production Secret Manager Plan Follow-up
+
+- Production secret management planning is documented in `docs/ADMIN_PRODUCTION_SECRET_MANAGER_PLAN.md`.
+- 32J-4 refines secret storage, naming, access, separation, rotation, and no-leak checks but does not create secrets.
+- Secret Manager provisioning, IAM changes, runtime injection, production DB/Auth integration, Firebase `/api` rewrite, and deploy remain blocked.

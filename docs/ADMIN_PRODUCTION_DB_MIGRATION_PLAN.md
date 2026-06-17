@@ -346,3 +346,10 @@ Important:
 
 - Do not jump directly to production DB creation.
 - Do not enable production write before runtime, secret, Auth, and staging/clone verification.
+
+## 32J-4 Production Secret Manager Plan Follow-up
+
+- Production secret management planning is documented in `docs/ADMIN_PRODUCTION_SECRET_MANAGER_PLAN.md`.
+- DB readiness requires Secret Manager or equivalent storage for DATABASE_URL.
+- No secret was created in 32J-4.
+- Production DB readiness remains No-Go.

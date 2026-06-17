@@ -901,3 +901,18 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source changes: Existing src changes were not staged or committed by 32J-3.
 - Conclusion: Production DB and migration planning is documented, but production DB readiness and admin memo rollout remain No-Go.
+
+## 32J-4 Admin Production Secret Manager Plan Follow-up
+
+- Date: 2026-06-17
+- Change: Added `docs/ADMIN_PRODUCTION_SECRET_MANAGER_PLAN.md`.
+- Scope: Documentation only for production secret storage, naming, runtime injection planning, access policy, environment separation, rotation, and no-leak checks.
+- Secret creation in 32J-4: No.
+- Secret value recorded in repo/docs: No.
+- SQL execution required in 32J-4: No.
+- DB/Auth integration in 32J-4: No.
+- SQL/schema/migration file change: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 32J-4: No.
+- Frontend source changes: Existing src changes were not staged or committed by 32J-4.
+- Conclusion: Production secret management is planned, but secret creation, runtime injection, production DB/Auth, and admin memo rollout remain No-Go.
