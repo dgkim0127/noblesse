@@ -107,3 +107,9 @@
 - 32I local dry-run satisfies only local transaction proof for `admin_memo`.
 - Production gates remain unsatisfied and are documented in `docs/ADMIN_MEMO_PRODUCTION_READINESS_GATE.md`.
 - Production write rollout remains No-Go until Auth, DB, secret storage, backend runtime, Firebase rewrite, rollback, and QA gates are satisfied.
+
+## 32J-1 Production Infrastructure Decision Follow-up
+
+- Production gates remain unsatisfied after `docs/ADMIN_PRODUCTION_INFRA_DECISION.md`.
+- 32J-1 is decision planning only.
+- `admin_memo` remains the only first write candidate, but production write rollout remains No-Go.

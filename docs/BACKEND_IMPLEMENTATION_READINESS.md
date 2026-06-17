@@ -286,3 +286,9 @@ Before implementation starts:
 - Production readiness gate is documented in `docs/ADMIN_MEMO_PRODUCTION_READINESS_GATE.md`.
 - Next implementation work must focus on backend runtime, Auth, DB, secret storage, Firebase rewrite, rollback, and QA decisions before production write rollout.
 - Local dry-run success does not make production deployment ready.
+
+## 32J-1 Production Infrastructure Decision
+
+- Production infrastructure decision planning is documented in `docs/ADMIN_PRODUCTION_INFRA_DECISION.md`.
+- Next implementation still requires separate approval.
+- Cloud/runtime, DB, Secret Manager, Firebase Auth, admin bootstrap, Firebase `/api` rewrite, and production QA remain unimplemented.

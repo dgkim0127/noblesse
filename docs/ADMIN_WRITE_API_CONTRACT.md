@@ -622,3 +622,9 @@ No real Firebase/DB tests in first write scaffold.
 - Admin memo production rollout remains blocked by `docs/ADMIN_MEMO_PRODUCTION_READINESS_GATE.md`.
 - The API contract is still not approval to enable production writes.
 - Auth, DB, secrets, backend runtime, Firebase rewrite, rollback, and QA gates remain required.
+
+## 32J-1 Production Infrastructure Decision Follow-up
+
+- Production infrastructure decision planning is documented in `docs/ADMIN_PRODUCTION_INFRA_DECISION.md`.
+- The `admin_memo` write contract remains production-blocked.
+- No runtime, Auth, DB, secret, rewrite, or deploy action is unlocked by this contract.

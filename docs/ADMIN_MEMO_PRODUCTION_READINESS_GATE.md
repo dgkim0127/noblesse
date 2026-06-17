@@ -173,3 +173,9 @@ Still blocked:
 - hard delete
 - payment/checkout/order routes
 - frontend direct DB write
+
+## 32J-1 Production Infrastructure Decision Follow-up
+
+- Production infrastructure direction is refined in `docs/ADMIN_PRODUCTION_INFRA_DECISION.md`.
+- 32J-1 is decision planning only and does not unlock production rollout.
+- Runtime, production DB, secret storage, Auth/admin verification, admin bootstrap, Firebase `/api` rewrite, rollback, and production QA remain required.

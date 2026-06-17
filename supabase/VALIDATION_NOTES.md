@@ -855,3 +855,17 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source changes: Existing src changes were not staged or committed by 32J-0.
 - Conclusion: Local `admin_memo` dry-run remains Go, but production admin memo rollout remains No-Go until backend runtime, Auth, DB, secret storage, Firebase rewrite, rollback, and QA gates are satisfied.
+
+## 32J-1 Admin Production Infrastructure Decision Follow-up
+
+- Date: 2026-06-17
+- Change: Added `docs/ADMIN_PRODUCTION_INFRA_DECISION.md`.
+- Scope: Documentation only for runtime/Auth/DB/secret/rewrite decision planning before production `admin_memo` rollout.
+- SQL execution required in 32J-1: No.
+- DB/Auth integration in 32J-1: No.
+- SQL file change: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 32J-1: No.
+- Secret recorded in repo/docs: No.
+- Frontend source changes: Existing src changes were not staged or committed by 32J-1.
+- Conclusion: Production infrastructure direction is planned, but production admin memo rollout remains No-Go.
