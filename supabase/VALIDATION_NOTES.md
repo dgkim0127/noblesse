@@ -1016,3 +1016,18 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source change in 32K-1: No.
 - Conclusion: Backend container artifact exists, but production runtime deployment and admin_memo rollout remain No-Go.
+
+## 32K-2 Backend Container Local Smoke Follow-up
+
+- Date: 2026-06-17
+- Change: Added `docs/ADMIN_BACKEND_CONTAINER_LOCAL_SMOKE_REPORT.md`.
+- Scope: Local Docker build/run smoke attempt for backend container artifact.
+- Docker available in current terminal: No.
+- Docker build/run in 32K-2: No.
+- Cloud Run/Cloud Build/gcloud in 32K-2: No.
+- Firebase deploy or `/api` rewrite in 32K-2: No.
+- DB/Auth/SQL execution in 32K-2: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- Frontend source change in 32K-2: No.
+- Conclusion: Local container smoke is No-Go until Docker CLI is available; production runtime deployment and admin_memo rollout remain No-Go.

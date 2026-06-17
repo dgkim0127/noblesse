@@ -346,3 +346,11 @@ Before implementation starts:
 - Backend runtime container artifacts were added in `backend/Dockerfile` and `backend/.dockerignore`.
 - Deployment still requires separate approval and a production runtime plan.
 - Production env, secret storage, Firebase Auth, DB connection, Cloud Run/Cloud Build, Firebase `/api` rewrite, and deploy are not wired.
+
+## 32K-2 Local Container Smoke
+
+- Local container smoke report is documented in `docs/ADMIN_BACKEND_CONTAINER_LOCAL_SMOKE_REPORT.md`.
+- Docker build/run was blocked because Docker CLI was unavailable in the current terminal session.
+- Backend tests passed and root build passed.
+- Cloud Run deploy still requires separate approval.
+- Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.

@@ -384,3 +384,11 @@ Next recommended step:
 - No Docker build, Docker run, Cloud Build, Cloud Run deploy, Secret Manager setup, Firebase rewrite, Firebase deploy, DB/Auth integration, or production runtime QA was run.
 - No secret value is baked into the image; production runtime configuration remains external and blocked until separate approval.
 - Runtime implementation remains a local artifact only.
+
+## 32K-2 Local Container Smoke Follow-up
+
+- Local container smoke result is documented in `docs/ADMIN_BACKEND_CONTAINER_LOCAL_SMOKE_REPORT.md`.
+- Docker build/run was blocked because Docker CLI was unavailable in the current terminal session.
+- Backend tests passed before the blocked smoke step.
+- Production runtime deployment remains No-Go.
+- No Cloud Run, Cloud Build, gcloud, Secret Manager, Firebase rewrite, Firebase deploy, DB/Auth integration, SQL execution, or secret handling was performed.

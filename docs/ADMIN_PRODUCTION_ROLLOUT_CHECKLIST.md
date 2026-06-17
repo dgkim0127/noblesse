@@ -418,3 +418,11 @@ Required before 32K:
 - Docker build/run: Not run.
 - Cloud Build/Cloud Run deploy: Not run.
 - Secret, Auth, DB, Firebase rewrite, and production rollout remain blocked.
+
+## 32K-2 Local Container Smoke Follow-up
+
+- Local container smoke: No-Go, Docker CLI unavailable in current terminal session.
+- Backend runtime deployment: No-Go.
+- Backend production health URL: Missing.
+- Firebase `/api` rewrite: No-Go.
+- Production admin_memo rollout remains blocked.
