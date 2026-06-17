@@ -2891,25 +2891,53 @@ h6 {
 }
 
 .home-showcase-grid {
-  display: grid;
-  grid-template-columns: .75fr 1.35fr 1.35fr .75fr;
-  gap: 6px;
+  --showcase-gap: 8px;
+  --showcase-card-width: clamp(280px, 28vw, 520px);
+  position: relative;
+  display: block;
   width: 100%;
-  height: min(72vh, 760px);
-  min-height: 520px;
-  overflow: hidden;
-  background: #fff;
+  height: calc(var(--showcase-card-width) * 1.5);
+  max-height: min(84vh, 860px);
+  min-height: 540px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: var(--noblesse-bg);
+  cursor: grab;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  user-select: none;
+}
+
+.home-showcase-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.home-showcase-grid.is-dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+}
+
+.home-showcase-track {
+  display: flex;
+  gap: var(--showcase-gap);
+  width: max-content;
+  height: 100%;
 }
 
 .home-showcase-panel {
   position: relative;
   display: block;
-  min-width: 0;
-  min-height: 0;
+  flex: 0 0 var(--showcase-card-width);
+  width: var(--showcase-card-width);
+  aspect-ratio: 2 / 3;
+  height: 100%;
   overflow: hidden;
   color: #fff;
   background: #efe8e4;
   text-decoration: none;
+  scroll-snap-align: start;
+  -webkit-user-drag: none;
 }
 
 .home-showcase-panel::after {
@@ -2930,6 +2958,8 @@ h6 {
   object-fit: cover;
   transform: scale(1.02);
   transition: transform 520ms cubic-bezier(.22, .8, .24, 1), filter 520ms ease;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 .home-showcase-panel:hover img {
@@ -3020,24 +3050,15 @@ h6 {
 
 @media (max-width: 980px) {
   .home-showcase-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    height: auto;
-    min-height: 0;
-  }
-
-  .home-showcase-panel {
-    aspect-ratio: 4 / 5;
+    --showcase-card-width: clamp(240px, 48vw, 390px);
+    min-height: 460px;
   }
 }
 
 @media (max-width: 640px) {
   .home-showcase-grid {
-    grid-template-columns: 1fr;
-    gap: 4px;
-  }
-
-  .home-showcase-panel {
-    aspect-ratio: 4 / 5;
+    --showcase-card-width: min(82vw, 340px);
+    min-height: 430px;
   }
 
   .home-showcase-label {

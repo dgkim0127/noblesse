@@ -346,6 +346,56 @@ const homeShowcaseCategories = [
   { label: '큐빅 피어싱', to: '/products?q=cubic' },
 ]
 
+const homeShowcasePanels = [
+  ...heroBanners,
+  {
+    ...heroBanners[1],
+    key: 'silver-daily',
+    title: {
+      kr: '실버 데일리 피어싱',
+      en: 'Silver Daily Piercing',
+      jp: 'シルバーデイリーピアス',
+      cn: '银色日常穿孔饰品',
+    },
+    eyebrow: {
+      kr: 'SILVER',
+      en: 'SILVER',
+      jp: 'SILVER',
+      cn: 'SILVER',
+    },
+    text: {
+      kr: '데일리 카탈로그에 어울리는 실버 피어싱 셀렉션',
+      en: 'Silver piercing selection for daily catalog styling.',
+      jp: 'デイリーカタログに合うシルバーピアスセレクション。',
+      cn: '适合日常目录搭配的银色穿孔饰品精选。',
+    },
+    to: '/products?material=Silver%20925',
+  },
+  {
+    ...heroBanners[2],
+    key: 'ring-fit',
+    title: {
+      kr: '링 피어싱 라인',
+      en: 'Ring Piercing Line',
+      jp: 'リングピアスライン',
+      cn: '环形穿孔系列',
+    },
+    eyebrow: {
+      kr: 'RING',
+      en: 'RING',
+      jp: 'RING',
+      cn: 'RING',
+    },
+    text: {
+      kr: '착용 이미지 중심으로 확인하는 링 피어싱 라인',
+      en: 'Ring piercing line focused on worn-image styling.',
+      jp: '着用イメージ中心で確認するリングピアスライン。',
+      cn: '以佩戴图为中心查看的环形穿孔系列。',
+    },
+    to: '/products?q=ring',
+  },
+]
+
 function getLocalizedValue(values, locale) {
   return values[locale] ?? values.en ?? values.kr
 }
@@ -506,32 +556,136 @@ function ProductSection({ products, sectionId, title, note, viewAllLabel }) {
 }
 
 export function HomePage() {
-  const [activeHeroBanner, setActiveHeroBanner] = useState(0)
+  const showcaseScrollerRef = useRef(null)
+  const showcaseDragRef = useRef({
+    didDrag: false,
+    isDragging: false,
+    scrollLeft: 0,
+    startX: 0,
+  })
+  const [isShowcaseDragging, setIsShowcaseDragging] = useState(false)
   const { buyer, isApproved, products, viewerState } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const copy = homeCopy[locale] ?? homeCopy.kr
   const featuredProducts = products.filter((product) => product.isBest).slice(0, 8)
   const newProducts = products.filter((product) => product.isNew).slice(0, 8)
   const exportProducts = products.filter((product) => product.collectionIds.includes('export-best-items')).slice(0, 8)
+  const showcaseLoopPanels = [...homeShowcasePanels, ...homeShowcasePanels]
+
+  const getShowcaseStep = () => {
+    const scroller = showcaseScrollerRef.current
+    const firstPanel = scroller?.querySelector('.home-showcase-panel')
+    const track = scroller?.querySelector('.home-showcase-track')
+
+    if (!scroller || !firstPanel || !track) return 0
+
+    const gap = Number.parseFloat(window.getComputedStyle(track).gap) || 0
+    return firstPanel.getBoundingClientRect().width + gap
+  }
+
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setActiveHeroBanner((current) => (current + 1) % heroBanners.length)
-    }, 4200)
+      const scroller = showcaseScrollerRef.current
+      const step = getShowcaseStep()
+
+      if (!scroller || !step || showcaseDragRef.current.isDragging) return
+
+      const loopWidth = step * homeShowcasePanels.length
+
+      if (scroller.scrollLeft >= loopWidth - step / 2) {
+        scroller.scrollLeft -= loopWidth
+      }
+
+      const target = scroller.scrollLeft + step * 2
+      scroller.scrollTo({ behavior: 'smooth', left: target })
+
+      if (target >= loopWidth) {
+        window.setTimeout(() => {
+          if (!showcaseDragRef.current.isDragging && scroller.scrollLeft >= loopWidth) {
+            scroller.scrollLeft -= loopWidth
+          }
+        }, 900)
+      }
+    }, 4000)
 
     return () => window.clearInterval(timer)
   }, [])
 
+  const handleShowcasePointerDown = (event) => {
+    if (event.button !== undefined && event.button !== 0) return
+
+    const scroller = showcaseScrollerRef.current
+    if (!scroller) return
+
+    showcaseDragRef.current = {
+      didDrag: false,
+      isDragging: true,
+      scrollLeft: scroller.scrollLeft,
+      startX: event.clientX,
+    }
+    setIsShowcaseDragging(true)
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+  }
+
+  const handleShowcasePointerMove = (event) => {
+    const drag = showcaseDragRef.current
+    const scroller = showcaseScrollerRef.current
+
+    if (!drag.isDragging || !scroller) return
+
+    const deltaX = event.clientX - drag.startX
+    if (Math.abs(deltaX) > 4) drag.didDrag = true
+
+    scroller.scrollLeft = drag.scrollLeft - deltaX
+    event.preventDefault()
+  }
+
+  const handleShowcasePointerEnd = (event) => {
+    if (!showcaseDragRef.current.isDragging) return
+
+    showcaseDragRef.current.isDragging = false
+    setIsShowcaseDragging(false)
+    event.currentTarget.releasePointerCapture?.(event.pointerId)
+
+    const scroller = showcaseScrollerRef.current
+    const step = getShowcaseStep()
+    const loopWidth = step * homeShowcasePanels.length
+
+    if (scroller && step && scroller.scrollLeft >= loopWidth) {
+      scroller.scrollLeft -= loopWidth
+    }
+  }
+
+  const handleShowcaseClick = (event) => {
+    if (!showcaseDragRef.current.didDrag) return
+
+    event.preventDefault()
+    event.stopPropagation()
+    showcaseDragRef.current.didDrag = false
+  }
+
   return <main>
     <section className="home-main-portrait-section home-showcase-section">
-      <div className="home-showcase-grid" aria-label="Noblesse piercing image showcase">
-        {heroBanners.map((banner, index) => {
+      <div
+        aria-label="Noblesse piercing image showcase"
+        className={`home-showcase-grid${isShowcaseDragging ? ' is-dragging' : ''}`}
+        onPointerCancel={handleShowcasePointerEnd}
+        onPointerDown={handleShowcasePointerDown}
+        onPointerLeave={handleShowcasePointerEnd}
+        onPointerMove={handleShowcasePointerMove}
+        onPointerUp={handleShowcasePointerEnd}
+        ref={showcaseScrollerRef}
+      >
+        <div className="home-showcase-track">
+        {showcaseLoopPanels.map((banner, index) => {
           const bannerTitle = getLocalizedValue(banner.title, locale)
           const bannerEyebrow = getLocalizedValue(banner.eyebrow, locale)
           const bannerText = getLocalizedValue(banner.text, locale)
+          const label = ['NEW', 'HOT', 'CELEB', 'BEST', 'SILVER', 'RING'][index % homeShowcasePanels.length]
 
-          return <Link className="home-showcase-panel" key={banner.key} to={toLocalePath(banner.to)}>
+          return <Link className="home-showcase-panel" key={`${banner.key}-${index}`} onClick={handleShowcaseClick} to={toLocalePath(banner.to)}>
             <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} width="900" />
-            <span className="home-showcase-label">{index === 0 ? 'NEW' : index === 1 ? 'HOT' : index === 2 ? 'CELEB' : 'BEST'}</span>
+            <span className="home-showcase-label">{label}</span>
             <span className="home-showcase-copy">
               <strong>{bannerTitle}</strong>
               <small>{bannerEyebrow}</small>
@@ -539,31 +693,12 @@ export function HomePage() {
             </span>
           </Link>
         })}
+        </div>
       </div>
       <div className="home-showcase-categories" aria-label="피어싱 카테고리">
         {homeShowcaseCategories.map((category) => <Link key={category.label} to={toLocalePath(category.to)}>
           {category.label}
         </Link>)}
-      </div>
-      <div className="home-main-portrait-frame" aria-label="model piercing image carousel">
-        <div className="home-main-portrait-track" style={{ transform: `translateX(-${activeHeroBanner * 100}%)` }}>
-          {heroBanners.map((banner, index) => {
-            const bannerTitle = getLocalizedValue(banner.title, locale)
-
-            return <Link className="home-main-portrait-slide" key={banner.key} to={toLocalePath(banner.to)}>
-              <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} width="800" />
-            </Link>
-          })}
-        </div>
-        <div className="home-main-portrait-dots" aria-label="배너 선택">
-          {heroBanners.map((banner, index) => <button
-            aria-label={`${getLocalizedValue(banner.title, locale)} 배너 보기`}
-            className={activeHeroBanner === index ? 'active' : ''}
-            key={banner.key}
-            onClick={() => setActiveHeroBanner(index)}
-            type="button"
-          />)}
-        </div>
       </div>
     </section>
 
