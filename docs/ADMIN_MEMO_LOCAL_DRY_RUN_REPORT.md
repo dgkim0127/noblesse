@@ -54,3 +54,9 @@
 - Production write rollout: No-Go
 - Status write: No-Go
 - Buyer/product/price/quote writes: No-Go
+
+## 32J-0 Production Readiness Gate
+
+- Production readiness gate is documented in `docs/ADMIN_MEMO_PRODUCTION_READINESS_GATE.md`.
+- Local dry-run success does not unlock production write.
+- Production rollout remains blocked until Auth, DB, secrets, backend hosting, Firebase rewrite, admin bootstrap, rollback, and QA gates are satisfied.

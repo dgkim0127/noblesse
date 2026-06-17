@@ -244,3 +244,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Production frontend still does not call the admin API.
 - Direct React-to-PostgreSQL access remains prohibited.
 - Existing frontend source changes were not staged or committed by 32I.
+
+## 32J-0 Admin Memo Production Readiness Gate
+
+- Production readiness gate is documented in `docs/ADMIN_MEMO_PRODUCTION_READINESS_GATE.md`.
+- Firebase Hosting `/api` rewrite remains absent.
+- Production frontend still does not call the admin API.
+- Admin memo production rollout remains blocked.

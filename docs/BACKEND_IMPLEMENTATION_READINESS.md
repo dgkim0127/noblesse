@@ -280,3 +280,9 @@ Before implementation starts:
 - This confirms local query readiness for `admin_memo` only.
 - Production Auth/DB decisions, Cloud resources, secret storage, Firebase `/api` rewrite, and deployment are still required before rollout.
 - Existing frontend source changes were not staged or committed by 32I.
+
+## 32J-0 Admin Memo Production Readiness Gate
+
+- Production readiness gate is documented in `docs/ADMIN_MEMO_PRODUCTION_READINESS_GATE.md`.
+- Next implementation work must focus on backend runtime, Auth, DB, secret storage, Firebase rewrite, rollback, and QA decisions before production write rollout.
+- Local dry-run success does not make production deployment ready.
