@@ -127,3 +127,13 @@ No real values were recorded.
 - Cloud Build execution remains No-Go.
 - Firebase `/api` rewrite remains No-Go.
 - production admin_memo rollout remains No-Go.
+
+## 32K-10 API Enablement Follow-up
+
+- Required API enablement result is documented in `docs/ADMIN_CLOUD_RUN_API_ENABLEMENT_REPORT.md`.
+- Required APIs are now Enabled.
+- Real project/account values were not recorded.
+- Cloud Run deploy remains No-Go.
+- Cloud Build execution remains No-Go.
+- Firebase `/api` rewrite remains No-Go.
+- production admin_memo rollout remains No-Go.

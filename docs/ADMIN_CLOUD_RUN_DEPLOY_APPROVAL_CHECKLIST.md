@@ -300,3 +300,11 @@ Allowed to remain dirty but must not be staged/committed.
 - API enablement approval is required before deploy approval can proceed.
 - `gcloud services enable` was not executed.
 - Cloud Run deploy remains No-Go.
+
+## 32K-10 API Enablement Follow-up
+
+- API enablement gate is completed and documented in `docs/ADMIN_CLOUD_RUN_API_ENABLEMENT_REPORT.md`.
+- Required APIs are now Enabled.
+- Cloud Run deploy still requires separate approval.
+- Cloud Build execution remains No-Go.
+- Secret Manager secret creation remains No-Go.

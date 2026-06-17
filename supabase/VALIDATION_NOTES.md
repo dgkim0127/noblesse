@@ -1199,3 +1199,20 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32K-9: No.
 - Conclusion: API enablement planning is documented, but API enablement, deployment, and production admin_memo rollout remain No-Go.
+
+## 32K-10 Cloud Run API Enablement Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_CLOUD_RUN_API_ENABLEMENT_REPORT.md`.
+- Scope: Cloud Run required API enablement only.
+- Required APIs enabled: Yes.
+- Cloud Run deploy in 32K-10: No.
+- Cloud Build execution in 32K-10: No.
+- Cloud Run service creation in 32K-10: No.
+- Secret Manager secret creation in 32K-10: No.
+- Firebase deploy or `/api` rewrite in 32K-10: No.
+- DB/Auth/SQL execution in 32K-10: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32K-10: No.
+- Conclusion: Required APIs are enabled, but deployment, Secret Manager setup, Firebase rewrite, and production admin_memo rollout remain No-Go.

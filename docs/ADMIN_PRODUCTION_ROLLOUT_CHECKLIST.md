@@ -532,3 +532,13 @@ Required before 32K:
 - Cloud Build execution: No-Go.
 - Firebase `/api` rewrite: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32K-10 API Enablement Follow-up
+
+- Health-only entrypoint smoke: Go.
+- Required API enablement: Go.
+- Cloud Run deploy: No-Go.
+- Cloud Build execution: No-Go.
+- Secret Manager secret creation: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- Production admin_memo write: No-Go.

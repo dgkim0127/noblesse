@@ -97,3 +97,14 @@ No-Go:
 - Firebase `/api` rewrite
 - DB/Auth/SQL
 - production admin_memo write
+
+## 32K-10 API Enablement Follow-up
+
+- API enablement was executed after explicit user approval.
+- Enablement result is documented in `docs/ADMIN_CLOUD_RUN_API_ENABLEMENT_REPORT.md`.
+- Required APIs are now Enabled.
+- Cloud Run deploy remains No-Go.
+- Cloud Build execution remains No-Go.
+- Secret Manager secret creation remains No-Go.
+- Firebase `/api` rewrite remains No-Go.
+- production admin_memo rollout remains No-Go.

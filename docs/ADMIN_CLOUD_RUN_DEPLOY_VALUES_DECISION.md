@@ -168,3 +168,11 @@ Recommended candidate:
 - Real account/project values are not recorded.
 - Real deploy values remain pending/proposed only.
 - Deploy remains No-Go.
+
+## 32K-10 API Enablement Follow-up
+
+- API enablement result is documented in `docs/ADMIN_CLOUD_RUN_API_ENABLEMENT_REPORT.md`.
+- API enablement does not finalize deploy values.
+- Project, region, service name, and runtime service account still require approval.
+- Real account/project values are not recorded.
+- Deploy remains No-Go.

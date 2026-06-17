@@ -430,3 +430,11 @@ Before implementation starts:
 - No API enablement or deploy was performed.
 - Implementation still requires explicit API enablement approval, deploy approval, and confirmed runtime values.
 - Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.
+
+## 32K-10 API Enablement
+
+- API enablement result is documented in `docs/ADMIN_CLOUD_RUN_API_ENABLEMENT_REPORT.md`.
+- Required APIs are now Enabled.
+- No Cloud Run deploy, Cloud Build execution, Secret Manager secret creation, Firebase rewrite, DB/Auth integration, or SQL execution was performed.
+- Implementation still requires deploy approval and confirmed runtime values.
+- Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.
