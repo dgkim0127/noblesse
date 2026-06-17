@@ -365,3 +365,9 @@ Important:
 - Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
 - Future bootstrap must use an approved migration/DB execution path and must not create a public admin signup path.
 - No admin user, DB insert/update, SQL execution, migration file, bootstrap script, Firebase Auth integration, rewrite, or deploy was added in 32J-6.
+
+## 32J-7 Admin Staging Memo Dry-run Plan Follow-up
+
+- Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
+- A staging/prod-like clone remains required before production admin_memo write rollout.
+- No staging DB, clone, SQL execution, schema/migration change, production DB connection, rewrite, or deploy was added in 32J-7.

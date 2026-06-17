@@ -951,3 +951,19 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source changes: Existing src changes were not staged or committed by 32J-6.
 - Conclusion: Admin bootstrap is planned, but admin user creation and production admin memo rollout remain No-Go.
+
+## 32J-7 Admin Staging Memo Dry-run Plan Follow-up
+
+- Date: 2026-06-17
+- Change: Added `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
+- Scope: Documentation only for staging/prod-like admin_memo dry-run architecture, staging DB/secret requirements, safe admin bootstrap, safe sample data, Auth strategy, audit verification, rollback validation, and promotion gates.
+- Staging DB creation in 32J-7: No.
+- Production-like clone creation in 32J-7: No.
+- SQL execution required in 32J-7: No.
+- DB/Auth integration in 32J-7: No.
+- Secret creation in 32J-7: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 32J-7: No.
+- Secret recorded in repo/docs: No.
+- Frontend source changes: Existing src changes were not staged or committed by 32J-7.
+- Conclusion: Staging/prod-like dry-run is planned, but staging execution and production admin memo rollout remain No-Go.

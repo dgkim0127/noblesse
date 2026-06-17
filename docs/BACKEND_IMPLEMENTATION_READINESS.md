@@ -322,3 +322,9 @@ Before implementation starts:
 - Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
 - No admin account, bootstrap script, protected bootstrap route, DB write, Firebase Auth integration, package change, Firebase `/api` rewrite, or deploy was added.
 - Production admin memo rollout remains blocked until bootstrap, Auth, DB, secret, runtime, rewrite, rollback, and QA gates are approved.
+
+## 32J-7 Admin Staging Memo Dry-run Plan
+
+- Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
+- No staging DB, production-like clone, Auth integration, runtime implementation, secret creation, SQL execution, Firebase `/api` rewrite, or deploy was added.
+- Production admin memo rollout remains blocked.

@@ -293,3 +293,9 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Bootstrap planning does not change the API boundary and does not authorize a public bootstrap endpoint.
 - The frontend still must not assign admin role/status or write directly to PostgreSQL.
 - No backend route, DB write, Firebase Auth integration, `/api` rewrite, or deploy was added.
+
+## 32J-7 Admin Staging Memo Dry-run Plan
+
+- Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
+- Staging planning does not change the API boundary.
+- Firebase Hosting `/api` rewrite remains absent and the production frontend still does not call the admin API.

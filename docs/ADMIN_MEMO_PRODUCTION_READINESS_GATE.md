@@ -209,3 +209,9 @@ Still blocked:
 - Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
 - The admin bootstrap gate remains unsatisfied until first admin creation is controlled, reviewed, auditable, and reversible.
 - Production admin_memo rollout remains No-Go until bootstrap, Auth, DB, secret, runtime, rewrite, rollback, and QA gates are satisfied.
+
+## 32J-7 Admin Staging Memo Dry-run Plan Follow-up
+
+- Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
+- Staging/prod-like dry-run remains required before production rollout.
+- Production admin_memo rollout remains No-Go until staging dry-run and all Auth, DB, secret, runtime, bootstrap, rewrite, rollback, and QA gates pass.

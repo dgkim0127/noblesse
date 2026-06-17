@@ -368,3 +368,9 @@ Important:
 
 - Do not implement bootstrap before DB, secret, Auth, and runtime plans are approved.
 - Do not enable production admin_memo write before bootstrap is complete and QA passes.
+
+## 32J-7 Admin Staging Memo Dry-run Plan Follow-up
+
+- Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
+- Staging bootstrap remains planning only and was not executed.
+- No staging DB, admin user, secret, Auth integration, SQL execution, rewrite, or deploy was added in 32J-7.

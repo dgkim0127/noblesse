@@ -640,3 +640,9 @@ No real Firebase/DB tests in first write scaffold.
 - Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
 - Production `admin_memo` write requires a completed and reversible admin bootstrap path before rollout.
 - No admin account creation, bootstrap script, route implementation, DB write, Auth integration, rewrite, or deploy was added in 32J-6.
+
+## 32J-7 Admin Staging Memo Dry-run Plan Follow-up
+
+- Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
+- Production `admin_memo` write remains blocked until staging dry-run and all production gates pass.
+- Status, buyer, product, price, and quote writes remain out of scope.

@@ -352,3 +352,9 @@ Important:
 - Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
 - Future bootstrap must not expose secrets and must use the approved secret/runtime path later.
 - No secret creation, secret value recording, runtime injection, bootstrap script, DB write, Firebase Auth integration, rewrite, or deploy was added in 32J-6.
+
+## 32J-7 Admin Staging Memo Dry-run Plan Follow-up
+
+- Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
+- Staging secret must be separate from production secret and must not be written to docs/GitHub/chat/frontend.
+- No Secret Manager secret, secret value, runtime injection, DB connection, rewrite, or deploy was added in 32J-7.

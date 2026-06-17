@@ -402,3 +402,9 @@ Important:
 - Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
 - Bootstrap remains No-Go until the first admin creation path is reviewed and approved.
 - No admin user, bootstrap script, protected endpoint, DB write, Firebase Auth integration, credential, rewrite, or deploy was created in 32J-6.
+
+## 32J-7 Admin Staging Memo Dry-run Plan Follow-up
+
+- Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
+- Staging dry-run requires an approved auth strategy before it can replace mock-only validation.
+- Firebase Auth remains unimplemented.

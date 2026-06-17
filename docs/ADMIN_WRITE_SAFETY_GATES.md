@@ -125,3 +125,9 @@
 - Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
 - The bootstrap gate remains unsatisfied until first admin creation, no-public-signup guardrails, rollback/disable, and audit requirements are approved.
 - Production writes remain blocked.
+
+## 32J-7 Admin Staging Memo Dry-run Plan Follow-up
+
+- Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
+- Staging dry-run is required before production write rollout.
+- Staging success still does not unlock status, buyer, product, price, or quote writes.

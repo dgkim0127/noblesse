@@ -358,3 +358,9 @@ Next recommended step:
 - Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
 - Backend runtime still waits for approved admin bootstrap, Auth, DB, secret, rollback, and QA gates.
 - No bootstrap route, script, runtime config, Firebase Auth integration, DB connection, rewrite, or deploy was added in 32J-6.
+
+## 32J-7 Admin Staging Memo Dry-run Plan Follow-up
+
+- Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
+- Staging dry-run requires runtime health and auth failure/success checks before production promotion.
+- Runtime remains unimplemented.
