@@ -3,7 +3,6 @@ import { BadgeCheck, Globe2, Headphones, Mail, MessageCircle, Sparkles } from 'l
 import { Link } from 'react-router-dom'
 import { CatalogCard } from '../components/CatalogCard'
 import { useCommerce } from '../commerce/commerceStore'
-import { mockCollections } from '../data/catalog'
 import { useLocalePath } from '../utils/locale'
 
 const homeCopy = {
@@ -336,6 +335,17 @@ const heroBanners = [
   },
 ]
 
+const homeShowcaseCategories = [
+  { label: '써지컬 피어싱', to: '/products?material=Surgical%20Steel' },
+  { label: '바벨형 피어싱', to: '/products?q=barbell' },
+  { label: '925실버 피어싱', to: '/products?material=Silver%20925' },
+  { label: '14K 피어싱', to: '/products?material=14K%20Gold' },
+  { label: '피어싱 세트', to: '/products?q=set' },
+  { label: '얇은 피어싱', to: '/products?q=tiny' },
+  { label: '링 피어싱', to: '/products?q=ring' },
+  { label: '큐빅 피어싱', to: '/products?q=cubic' },
+]
+
 function getLocalizedValue(values, locale) {
   return values[locale] ?? values.en ?? values.kr
 }
@@ -512,7 +522,29 @@ export function HomePage() {
   }, [])
 
   return <main>
-    <section className="home-main-portrait-section">
+    <section className="home-main-portrait-section home-showcase-section">
+      <div className="home-showcase-grid" aria-label="Noblesse piercing image showcase">
+        {heroBanners.map((banner, index) => {
+          const bannerTitle = getLocalizedValue(banner.title, locale)
+          const bannerEyebrow = getLocalizedValue(banner.eyebrow, locale)
+          const bannerText = getLocalizedValue(banner.text, locale)
+
+          return <Link className="home-showcase-panel" key={banner.key} to={toLocalePath(banner.to)}>
+            <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} width="900" />
+            <span className="home-showcase-label">{index === 0 ? 'NEW' : index === 1 ? 'HOT' : index === 2 ? 'CELEB' : 'BEST'}</span>
+            <span className="home-showcase-copy">
+              <strong>{bannerTitle}</strong>
+              <small>{bannerEyebrow}</small>
+              <em>{bannerText}</em>
+            </span>
+          </Link>
+        })}
+      </div>
+      <div className="home-showcase-categories" aria-label="피어싱 카테고리">
+        {homeShowcaseCategories.map((category) => <Link key={category.label} to={toLocalePath(category.to)}>
+          {category.label}
+        </Link>)}
+      </div>
       <div className="home-main-portrait-frame" aria-label="model piercing image carousel">
         <div className="home-main-portrait-track" style={{ transform: `translateX(-${activeHeroBanner * 100}%)` }}>
           {heroBanners.map((banner, index) => {
@@ -542,24 +574,6 @@ export function HomePage() {
         <span>{isApproved ? `${buyer.assignedMarket} ${copy.buyerStripApprovedNote}` : copy.buyerStripGuestNote}</span>
       </div>
       <Globe2 size={19} />
-    </section>
-
-    <section className="section-wrap collections-section">
-      <div className="section-title">
-        <div>
-          <Sparkles size={18} />
-          <ScrambleText as="h2" persistKey="collections-title">{copy.collectionsTitle}</ScrambleText>
-          <ScrambleText as="p" persistKey="collections-note">{copy.collectionsNote}</ScrambleText>
-        </div>
-        <Link to={toLocalePath('/products')}><ScrambleText persistKey="collections-link">{copy.browseProducts}</ScrambleText></Link>
-      </div>
-      <div className="collection-grid">
-        {mockCollections.map((collection) => <Link className="collection-card" key={collection.collectionId} to={toLocalePath(`/products?collection=${collection.collectionId}`)}>
-          <ScrambleText as="small" persistKey={`collection-count-${collection.collectionId}`}>{`${collection.productIds.length} ${copy.stylesLabel}`}</ScrambleText>
-          <ScrambleText as="strong" persistKey={`collection-title-${collection.collectionId}`}>{getCollectionTitle(collection, locale)}</ScrambleText>
-          <ScrambleText persistKey={`collection-note-${collection.collectionId}`}>{getLocalizedValue(collectionCopy[collection.collectionId], locale)}</ScrambleText>
-        </Link>)}
-      </div>
     </section>
 
     <ProductSection products={featuredProducts} sectionId="featured" title={copy.featuredTitle} note={copy.featuredNote} viewAllLabel={copy.viewAll} />

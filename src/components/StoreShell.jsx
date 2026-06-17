@@ -225,21 +225,25 @@ const shellCompactViewerLabels = {
 const sideMemberLabels = {
   kr: {
     inquiryList: '견적 리스트',
+    loginRequired: '로그인 후 확인 가능합니다.',
     my: 'MY',
     myInquiries: '내 견적 요청',
   },
   en: {
     inquiryList: 'Inquiry List',
+    loginRequired: 'Please log in to view this page.',
     my: 'MY',
     myInquiries: 'My Inquiries',
   },
   jp: {
     inquiryList: '見積リスト',
+    loginRequired: 'ログイン後に確認できます。',
     my: 'MY',
     myInquiries: '見積依頼',
   },
   cn: {
     inquiryList: '报价清单',
+    loginRequired: '登录后可查看。',
     my: 'MY',
     myInquiries: '我的报价',
   },
@@ -418,6 +422,7 @@ export function StoreShell() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [isLoginModalClosing, setIsLoginModalClosing] = useState(false)
   const [loginModalOrigin, setLoginModalOrigin] = useState({ x: 0, y: 0 })
+  const [loginModalNotice, setLoginModalNotice] = useState('')
   const [isAutoLoginEnabled, setIsAutoLoginEnabled] = useState(true)
   const [navIndicator, setNavIndicator] = useState({ left: 0, ready: false, width: 0 })
   const { buyerAccess, inquiryItems, isAdmin, isApproved, isGuest, isPending, setViewerState, viewerState } = useCommerce()
@@ -629,10 +634,11 @@ export function StoreShell() {
     setIsSearchOpen(false)
   }
 
-  const openLoginModal = (event) => {
+  const openLoginModal = (event, notice = '') => {
     if (loginModalCloseTimerRef.current) window.clearTimeout(loginModalCloseTimerRef.current)
     loginModalCloseTimerRef.current = null
     setIsLoginModalClosing(false)
+    setLoginModalNotice(notice)
     const rect = event?.currentTarget?.getBoundingClientRect?.()
     if (rect) {
       setLoginModalOrigin({
@@ -645,6 +651,10 @@ export function StoreShell() {
     setIsSearchOpen(false)
     closeCompactSearch()
     setIsLoginModalOpen(true)
+  }
+
+  const openLoginRequiredModal = (event) => {
+    openLoginModal(event, sideCopy.loginRequired)
   }
 
   const closeLoginModal = () => {
@@ -770,10 +780,18 @@ export function StoreShell() {
 
         <nav className="header-actions" aria-label={copy.memberNav}>
           {isHomeImageRoute && <>
-            <button className="header-login-text-action" type="button" onClick={openLoginModal}>{copy.login}</button>
-            <IconAction className="header-side-icon" label={sideCopy.myInquiries} to={toLocalePath('/my-inquiries')}><Clock3 size={17} /></IconAction>
-            <IconAction className="header-side-icon" label={sideCopy.inquiryList} to={toLocalePath('/inquiry-list')}><InquiryListIcon /></IconAction>
-            <IconAction className="header-my-action" label={copy.account} to={toLocalePath('/account')}>{sideCopy.my}</IconAction>
+            <IconAction className="header-login-icon-action" label={copy.login} onClick={openLoginModal}><UserRound size={17} /></IconAction>
+            {isGuest
+              ? <>
+                <IconAction className="header-side-icon" label={sideCopy.myInquiries} onClick={openLoginRequiredModal}><Clock3 size={17} /></IconAction>
+                <IconAction className="header-side-icon" label={sideCopy.inquiryList} onClick={openLoginRequiredModal}><InquiryListIcon /></IconAction>
+                <IconAction className="header-my-action" label={copy.account} onClick={openLoginRequiredModal}>{sideCopy.my}</IconAction>
+              </>
+              : <>
+                <IconAction className="header-side-icon" label={sideCopy.myInquiries} to={toLocalePath('/my-inquiries')}><Clock3 size={17} /></IconAction>
+                <IconAction className="header-side-icon" label={sideCopy.inquiryList} to={toLocalePath('/inquiry-list')}><InquiryListIcon /></IconAction>
+                <IconAction className="header-my-action" label={copy.account} to={toLocalePath('/account')}>{sideCopy.my}</IconAction>
+              </>}
           </>}
           {isGuest && !isHomeImageRoute && <IconAction label={copy.login} onClick={openLoginModal}><UserRound size={18} /></IconAction>}
           {isPending && <>
@@ -893,6 +911,7 @@ export function StoreShell() {
           <X size={18} />
         </button>
         <h2 id="login-modal-title">{loginCopy.heading}</h2>
+        {loginModalNotice && <p className="login-modal-notice" role="status">{loginModalNotice}</p>}
         <form className="auth-form" onSubmit={loginAsApprovedBuyer}>
           <div className="login-id-group">
             <label>{loginCopy.email}<input autoComplete="username" name="username" placeholder={loginCopy.emailPlaceholder} type="text" /></label>
