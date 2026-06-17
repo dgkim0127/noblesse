@@ -652,3 +652,9 @@ No real Firebase/DB tests in first write scaffold.
 - Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
 - Rewrite planning does not unlock production write routes.
 - `admin_memo` production write remains blocked.
+
+## 32J-9 Admin Production Rollout Checklist Follow-up
+
+- Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
+- Write contract remains blocked until the rollout checklist passes.
+- Status, buyer, product, price, quote, and hard-delete writes remain out of scope.

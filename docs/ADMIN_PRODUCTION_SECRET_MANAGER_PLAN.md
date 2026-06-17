@@ -364,3 +364,9 @@ Important:
 - Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
 - Rewrite must not be added until backend runtime receives secrets through the approved server-side path.
 - No secret creation, runtime injection, Firebase config change, rewrite, or deploy was added in 32J-8.
+
+## 32J-9 Admin Production Rollout Checklist Follow-up
+
+- Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
+- The secret management gate remains No-Go in the rollout checklist.
+- No secret creation, IAM change, runtime injection, Firebase config change, rewrite, or deploy was added in 32J-9.

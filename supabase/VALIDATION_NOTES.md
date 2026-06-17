@@ -985,3 +985,20 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - POS/default site touched: No.
 - Frontend source changes: Existing src changes were not staged or committed by 32J-8.
 - Conclusion: Firebase `/api` rewrite is planned, but config change, deploy, backend connection, and production admin memo rollout remain No-Go.
+
+## 32J-9 Admin Production Rollout Checklist Follow-up
+
+- Date: 2026-06-17
+- Change: Added `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
+- Scope: Documentation only for consolidating runtime, DB, secret, Auth, bootstrap, staging dry-run, Firebase rewrite, production QA, rollback/disable, rollout sequence, approval table, and 32K implementation boundary.
+- Production rollout in 32J-9: No.
+- Firebase config change in 32J-9: No.
+- Firebase `/api` rewrite added in 32J-9: No.
+- Firebase deploy in 32J-9: No.
+- DB/Auth integration in 32J-9: No.
+- SQL execution required in 32J-9: No.
+- SQL/schema/migration file change: No.
+- Secret creation in 32J-9: No.
+- Secret recorded in repo/docs: No.
+- Frontend source changes: Existing src changes were not staged or committed by 32J-9.
+- Conclusion: Production rollout checklist is complete, but production admin_memo rollout remains No-Go.

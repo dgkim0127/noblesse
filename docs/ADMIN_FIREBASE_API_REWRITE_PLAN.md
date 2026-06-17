@@ -344,3 +344,8 @@ Important:
 - Do not deploy broad Firebase targets.
 - Do not touch POS/default site.
 
+## 32J-9 Admin Production Rollout Checklist Follow-up
+
+- Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
+- Firebase `/api` rewrite remains No-Go until the rollout checklist passes.
+- No Firebase config change, rewrite, deploy, backend URL connection, DB/Auth integration, or POS/default site change was added in 32J-9.

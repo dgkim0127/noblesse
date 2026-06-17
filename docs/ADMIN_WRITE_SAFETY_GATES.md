@@ -137,3 +137,9 @@
 - Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
 - Rewrite is a routing gate only; it does not satisfy Auth, DB, audit, rollback, or write safety gates.
 - Production writes remain blocked.
+
+## 32J-9 Admin Production Rollout Checklist Follow-up
+
+- Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
+- All production write gates remain blocked.
+- Local and staging proof are not substitutes for production rollout approval.

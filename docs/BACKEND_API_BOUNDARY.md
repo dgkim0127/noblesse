@@ -306,3 +306,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Rewrite planning does not change the current API boundary.
 - `/api` rewrite remains absent, and the production frontend still does not call the admin API.
 - Future rewrite must still rely on backend Auth/DB checks and must not allow frontend direct DB access.
+
+## 32J-9 Admin Production Rollout Checklist
+
+- Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
+- The rollout checklist does not change the API boundary.
+- `/api` rewrite remains absent, and the production frontend still does not call the admin API.
+- Frontend direct PostgreSQL access remains prohibited.

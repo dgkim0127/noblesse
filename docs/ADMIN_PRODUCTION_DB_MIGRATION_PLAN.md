@@ -377,3 +377,9 @@ Important:
 - Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
 - Rewrite must not be added before production DB and staging/prod-like dry-run gates are satisfied.
 - No DB connection, SQL execution, schema/migration change, Firebase config change, rewrite, or deploy was added in 32J-8.
+
+## 32J-9 Admin Production Rollout Checklist Follow-up
+
+- Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
+- The production DB/migration gate remains No-Go in the rollout checklist.
+- No DB creation/connection, SQL execution, schema/migration change, rewrite, or deploy was added in 32J-9.

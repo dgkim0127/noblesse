@@ -221,3 +221,9 @@ Still blocked:
 - Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
 - The rewrite gate remains unsatisfied until backend runtime URL, Auth, DB, secret, bootstrap, staging dry-run, rollback, and QA gates pass.
 - Production admin_memo rollout remains No-Go.
+
+## 32J-9 Admin Production Rollout Checklist Follow-up
+
+- Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
+- The checklist consolidates runtime, DB, secret, Auth, bootstrap, staging dry-run, rewrite, QA, and rollback gates.
+- Production admin_memo rollout remains No-Go.

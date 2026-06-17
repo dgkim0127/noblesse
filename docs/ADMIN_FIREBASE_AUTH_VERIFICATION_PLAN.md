@@ -414,3 +414,9 @@ Important:
 - Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
 - Rewrite does not replace server-side Firebase ID token verification.
 - Auth remains unimplemented and rewrite remains No-Go.
+
+## 32J-9 Admin Production Rollout Checklist Follow-up
+
+- Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
+- The Auth/admin authorization gate remains No-Go in the rollout checklist.
+- No Firebase Auth integration, credential, backend URL connection, rewrite, or deploy was added in 32J-9.

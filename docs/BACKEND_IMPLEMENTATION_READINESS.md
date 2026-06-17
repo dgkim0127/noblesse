@@ -334,3 +334,9 @@ Before implementation starts:
 - Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
 - No firebase.json change, `.firebaserc` change, Firebase deploy, backend runtime URL connection, DB/Auth integration, SQL execution, package change, or source change was added.
 - Production admin memo rollout remains blocked.
+
+## 32J-9 Admin Production Rollout Checklist
+
+- Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
+- Implementation still requires separate approval.
+- No runtime, DB, secret, Auth, bootstrap, staging dry-run, Firebase config change, rewrite, deploy, package change, SQL execution, or source change was added.

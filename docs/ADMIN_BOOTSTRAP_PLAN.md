@@ -380,3 +380,9 @@ Important:
 - Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
 - Future rewrite must not be added before admin bootstrap is completed and reversible.
 - Bootstrap remains planning only.
+
+## 32J-9 Admin Production Rollout Checklist Follow-up
+
+- Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
+- The bootstrap gate remains No-Go in the rollout checklist.
+- No admin user, bootstrap script, protected endpoint, DB write, rewrite, or deploy was added in 32J-9.

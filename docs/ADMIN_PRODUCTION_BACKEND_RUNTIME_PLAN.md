@@ -370,3 +370,9 @@ Next recommended step:
 - Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
 - Backend URL must belong to an approved production runtime before rewrite is added.
 - Runtime remains unimplemented and no backend URL was connected in 32J-8.
+
+## 32J-9 Admin Production Rollout Checklist Follow-up
+
+- Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
+- The backend runtime gate remains No-Go in the rollout checklist.
+- No runtime implementation, Cloud Run service, Cloud Build action, backend URL connection, rewrite, or deploy was added in 32J-9.

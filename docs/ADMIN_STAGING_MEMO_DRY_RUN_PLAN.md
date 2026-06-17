@@ -362,3 +362,9 @@ Important:
 - Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
 - Staging/prod-like dry-run remains required before a production rewrite can support admin_memo rollout.
 - No Firebase config change, rewrite, deploy, backend runtime connection, DB/Auth integration, or secret creation was added in 32J-8.
+
+## 32J-9 Admin Production Rollout Checklist Follow-up
+
+- Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
+- Staging dry-run is required before production rollout and remains not executed.
+- Production admin_memo rollout remains No-Go.

@@ -384,3 +384,9 @@ Important:
 - Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
 - Production rollout remains blocked until backend runtime URL, Auth, DB, secret, bootstrap, staging dry-run, rewrite, rollback, and QA gates are approved.
 - No Firebase config change, rewrite, deploy, Cloud Run connection, or POS/default site change was added in 32J-8.
+
+## 32J-9 Admin Production Rollout Checklist Follow-up
+
+- Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
+- Production rollout remains blocked because every production gate is currently No-Go.
+- No implementation, Cloud action, DB/Auth/Secret integration, Firebase config change, rewrite, or deploy was added in 32J-9.
