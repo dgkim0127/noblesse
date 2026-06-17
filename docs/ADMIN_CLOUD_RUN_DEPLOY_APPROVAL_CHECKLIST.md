@@ -253,3 +253,10 @@ No-Go.
 Frontend source dirty:
 
 Allowed to remain dirty but must not be staged/committed.
+
+## 32K-5 Deploy Values Decision Follow-up
+
+- Cloud Run deploy values decision is documented in `docs/ADMIN_CLOUD_RUN_DEPLOY_VALUES_DECISION.md`.
+- Real project, service account, secret, DB URL, password, private key, and service account JSON values are not recorded.
+- Deploy remains No-Go.
+- Cloud Build, Cloud Run service creation, Secret Manager, Firebase Auth, Firebase `/api` rewrite, DB connection, and production admin_memo remain No-Go.

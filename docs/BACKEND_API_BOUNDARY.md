@@ -352,3 +352,11 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Firebase Hosting `/api` rewrite remains absent.
 - Production frontend still does not call the admin API.
 - Frontend direct PostgreSQL access remains prohibited.
+
+## 32K-5 Cloud Run Deploy Values Decision
+
+- 32K-5 does not change API endpoints, write scope, auth boundary, or production gate.
+- It only documents deploy value decisions in `docs/ADMIN_CLOUD_RUN_DEPLOY_VALUES_DECISION.md`.
+- Firebase Hosting `/api` rewrite remains absent.
+- Production frontend still does not call the admin API.
+- Frontend direct PostgreSQL access remains prohibited.

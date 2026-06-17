@@ -291,3 +291,10 @@ Allowed to remain dirty but must not be staged/committed.
 - 32K-4 does not execute Cloud Run deploy.
 - 32K-4 does not create Cloud Build, Cloud Run service, secrets, DB/Auth integration, or Firebase rewrite.
 - Production runtime deployment, Firebase `/api` rewrite, and production admin_memo rollout remain No-Go.
+
+## 32K-5 Deploy Values Decision Follow-up
+
+- Cloud Run deploy values decision is documented in `docs/ADMIN_CLOUD_RUN_DEPLOY_VALUES_DECISION.md`.
+- Source path/build method candidate remains `backend` with existing `backend/Dockerfile` via Cloud Build.
+- Buildpacks remain fallback/alternative only.
+- Actual deploy remains No-Go.

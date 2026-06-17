@@ -418,3 +418,11 @@ Next recommended step:
 - Deploy requires confirmed project, region, service name, runtime service account, secret strategy, Auth strategy, staging dry-run plan, rollback plan, and POS/default site protection.
 - Cloud Run runtime contract checks must be verified before deploy approval.
 - No Cloud Build, Cloud Run service, Secret Manager setup, Firebase rewrite, Firebase deploy, DB/Auth integration, SQL execution, or secret handling was performed in 32K-4.
+
+## 32K-5 Cloud Run Deploy Values Decision Follow-up
+
+- Cloud Run deploy values decision is documented in `docs/ADMIN_CLOUD_RUN_DEPLOY_VALUES_DECISION.md`.
+- Startup/health policy remains pending.
+- Candidate direction is health-only runtime smoke without DB/Auth secrets if explicitly approved, followed by staging-only runtime config before production writes.
+- Runtime deploy remains No-Go.
+- No Cloud Build, Cloud Run service, Secret Manager setup, Firebase rewrite, Firebase deploy, DB/Auth integration, SQL execution, or secret handling was performed in 32K-5.

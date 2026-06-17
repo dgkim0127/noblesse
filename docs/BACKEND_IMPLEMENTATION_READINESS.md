@@ -381,3 +381,11 @@ Before implementation starts:
 - Docker Desktop remains optional for this planning path.
 - Cloud Run deploy approval checklist is now required before any deploy attempt.
 - Production write remains gated by runtime, Auth, DB, Secret Manager, Firebase rewrite, staging dry-run, rollback, and QA approval.
+
+## 32K-5 Cloud Run Deploy Values Decision
+
+- Cloud Run deploy values decision is documented in `docs/ADMIN_CLOUD_RUN_DEPLOY_VALUES_DECISION.md`.
+- Implementation still requires explicit approval.
+- Deploy values remain pending/proposed and placeholder-only.
+- Startup/health policy remains pending.
+- Production runtime deployment, DB/Auth/Secret integration, Firebase `/api` rewrite, and production admin_memo rollout remain blocked.

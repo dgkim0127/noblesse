@@ -1081,3 +1081,19 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32K-4: No.
 - Conclusion: Deploy approval checklist is documented, but production runtime deployment and admin_memo rollout remain No-Go.
+
+## 32K-5 Cloud Run Deploy Values Decision Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_CLOUD_RUN_DEPLOY_VALUES_DECISION.md`.
+- Scope: Cloud Run deploy values decision only.
+- gcloud command executed in 32K-5: No.
+- Docker build/run in 32K-5: No.
+- Cloud Build execution in 32K-5: No.
+- Cloud Run deploy in 32K-5: No.
+- Firebase deploy or `/api` rewrite in 32K-5: No.
+- DB/Auth/SQL execution in 32K-5: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32K-5: No.
+- Conclusion: Deploy values are documented as placeholder-only and pending/proposed, but production runtime deployment and admin_memo rollout remain No-Go.

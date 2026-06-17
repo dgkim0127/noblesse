@@ -467,3 +467,13 @@ Required before 32K:
 - Firebase Auth backend integration: No-Go.
 - Firebase `/api` rewrite: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32K-5 Cloud Run Deploy Values Decision Follow-up
+
+- Cloud Run deploy values decision is documented in `docs/ADMIN_CLOUD_RUN_DEPLOY_VALUES_DECISION.md`.
+- Runtime gate remains No-Go.
+- Actual project, region, service name, runtime service account, secret strategy, startup policy, ingress policy, and rollback owner still require approval.
+- Secret Manager integration: No-Go.
+- Firebase Auth backend integration: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- Production admin_memo write: No-Go.
