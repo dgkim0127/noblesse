@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { BadgeCheck, Globe2, Headphones, Mail, MessageCircle, Sparkles } from 'lucide-react'
+import { Headphones, Mail, MessageCircle, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { CatalogCard } from '../components/CatalogCard'
 import { useCommerce } from '../commerce/commerceStore'
@@ -335,15 +335,25 @@ const heroBanners = [
   },
 ]
 
-const homeShowcaseCategories = [
-  { label: '써지컬 피어싱', to: '/products?material=Surgical%20Steel' },
-  { label: '바벨형 피어싱', to: '/products?q=barbell' },
-  { label: '925실버 피어싱', to: '/products?material=Silver%20925' },
-  { label: '14K 피어싱', to: '/products?material=14K%20Gold' },
-  { label: '피어싱 세트', to: '/products?q=set' },
-  { label: '얇은 피어싱', to: '/products?q=tiny' },
-  { label: '링 피어싱', to: '/products?q=ring' },
-  { label: '큐빅 피어싱', to: '/products?q=cubic' },
+const homeSectionNav = [
+  { id: 'new-arrival', label: '신상품' },
+  { id: 'weekly-pick', label: '주간 추천' },
+  { id: 'buyer-selection', label: '바이어 셀렉션' },
+  { id: 'piercing-catalog', label: '피어싱 카탈로그' },
+  { id: 'premium-jewelry', label: '프리미엄 주얼리' },
+]
+
+const homeCategoryChips = [
+  { label: '🦴 써지컬 피어싱', to: '/products?material=Surgical%20Steel' },
+  { label: '━ 바벨형 피어싱', to: '/products?q=barbell' },
+  { label: '🧷 925실버 피어싱', to: '/products?material=Silver%20925' },
+  { label: '🪄 14K 피어싱', to: '/products?material=14K%20Gold' },
+  { label: '🧚‍♀️ 피어싱 세트', to: '/products?q=set' },
+  { label: '🌺 얇은 피어싱', to: '/products?q=tiny' },
+  { label: '🪩 링 피어싱', to: '/products?q=ring' },
+  { label: '🌙 큐빅 피어싱', to: '/products?q=cubic' },
+  { label: '🎀 리본 아이템', to: '/products?q=ribbon' },
+  { label: '🦋 나비 아이템', to: '/products?q=butterfly' },
 ]
 
 const homeShowcasePanels = [
@@ -544,7 +554,7 @@ function ProductSection({ products, sectionId, title, note, viewAllLabel }) {
   const { toLocalePath } = useLocalePath()
   if (products.length === 0) return null
 
-  return <section className="section-wrap product-feature-section">
+  return <section className="section-wrap product-feature-section" id={`home-${sectionId}`}>
     <div className="section-title">
       <div>
         <Sparkles size={18} />
@@ -559,6 +569,8 @@ function ProductSection({ products, sectionId, title, note, viewAllLabel }) {
 
 export function HomePage() {
   const showcaseScrollerRef = useRef(null)
+  const sectionNavAnchorRef = useRef(null)
+  const sectionNavTriggerRef = useRef(null)
   const showcaseDragRef = useRef({
     didDrag: false,
     isDragging: false,
@@ -566,13 +578,31 @@ export function HomePage() {
     startX: 0,
   })
   const [isShowcaseDragging, setIsShowcaseDragging] = useState(false)
-  const { buyer, isApproved, products, viewerState } = useCommerce()
+  const [isSectionNavFixed, setIsSectionNavFixed] = useState(false)
+  const [activeHomeSection, setActiveHomeSection] = useState(homeSectionNav[0].id)
+  const { isApproved, products } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const copy = homeCopy[locale] ?? homeCopy.kr
-  const featuredProducts = products.filter((product) => product.isBest).slice(0, 8)
-  const newProducts = products.filter((product) => product.isNew).slice(0, 8)
-  const exportProducts = products.filter((product) => product.collectionIds.includes('export-best-items')).slice(0, 8)
+  const newProducts = products.filter((product) => product.isNew).slice(0, 5)
+  const weeklyProducts = products.filter((product) => product.isBest).slice(0, 5)
+  const buyerSelectionProducts = products
+    .filter((product) => product.collectionIds.some((id) => ['japan-buyer-picks', 'us-buyer-picks', 'export-best-items'].includes(id)))
+    .slice(0, 5)
+  const piercingCatalogProducts = products
+    .filter((product) => ['piercing', 'barbell', 'labret', 'nose-piercing', 'belly-ring'].includes(product.categoryId))
+    .slice(0, 5)
+  const premiumJewelryProducts = products
+    .filter((product) => product.material.includes('Silver') || product.material.includes('14K') || product.collectionIds.includes('premium-cubic-line'))
+    .slice(0, 5)
   const showcaseLoopPanels = [...homeShowcasePanels, ...homeShowcasePanels]
+
+  const scrollToHomeSection = (sectionId) => {
+    setActiveHomeSection(sectionId)
+    document.getElementById(`home-${sectionId}`)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  }
 
   const getShowcaseStep = () => {
     const scroller = showcaseScrollerRef.current
@@ -585,7 +615,22 @@ export function HomePage() {
     return firstPanel.getBoundingClientRect().width + gap
   }
 
+  const alignShowcaseGapToCenter = () => {
+    const scroller = showcaseScrollerRef.current
+    const firstPanel = scroller?.querySelector('.home-showcase-panel')
+    const step = getShowcaseStep()
+
+    if (!scroller || !firstPanel || !step) return
+
+    const panelWidth = firstPanel.getBoundingClientRect().width
+    const gapOffset = panelWidth + (step - panelWidth) / 2 - scroller.clientWidth / 2
+    scroller.scrollLeft = Math.max(0, gapOffset)
+  }
+
   useEffect(() => {
+    alignShowcaseGapToCenter()
+    window.addEventListener('resize', alignShowcaseGapToCenter)
+
     const timer = window.setInterval(() => {
       const scroller = showcaseScrollerRef.current
       const step = getShowcaseStep()
@@ -610,7 +655,49 @@ export function HomePage() {
       }
     }, 4000)
 
-    return () => window.clearInterval(timer)
+    return () => {
+      window.clearInterval(timer)
+      window.removeEventListener('resize', alignShowcaseGapToCenter)
+    }
+  }, [])
+
+  useLayoutEffect(() => {
+    const fixedTop = () => (window.matchMedia('(max-width: 760px)').matches ? 74 : 18)
+
+    const updateSectionNavPosition = () => {
+      const anchor = sectionNavAnchorRef.current
+      if (!anchor) return
+
+      if (sectionNavTriggerRef.current === null) {
+        sectionNavTriggerRef.current = anchor.getBoundingClientRect().top + window.scrollY - fixedTop()
+      }
+
+      setIsSectionNavFixed(window.scrollY >= sectionNavTriggerRef.current)
+
+      const activeOffset = fixedTop() + 120
+      const currentSection = homeSectionNav.reduce((current, item) => {
+        const section = document.getElementById(`home-${item.id}`)
+        if (!section) return current
+
+        return section.getBoundingClientRect().top <= activeOffset ? item.id : current
+      }, homeSectionNav[0].id)
+
+      setActiveHomeSection(currentSection)
+    }
+
+    const resetSectionNavTrigger = () => {
+      sectionNavTriggerRef.current = null
+      updateSectionNavPosition()
+    }
+
+    updateSectionNavPosition()
+    window.addEventListener('scroll', updateSectionNavPosition, { passive: true })
+    window.addEventListener('resize', resetSectionNavTrigger)
+
+    return () => {
+      window.removeEventListener('scroll', updateSectionNavPosition)
+      window.removeEventListener('resize', resetSectionNavTrigger)
+    }
   }, [])
 
   const handleShowcasePointerDown = (event) => {
@@ -698,24 +785,30 @@ export function HomePage() {
         </div>
       </div>
       <div className="home-showcase-categories" aria-label="피어싱 카테고리">
-        {homeShowcaseCategories.map((category) => <Link key={category.label} to={toLocalePath(category.to)}>
+        {homeCategoryChips.map((category) => <Link key={category.label} to={toLocalePath(category.to)}>
           {category.label}
         </Link>)}
       </div>
     </section>
 
-    <section className="buyer-strip">
-      <BadgeCheck size={19} />
-      <div>
-        <strong>{isApproved ? copy.buyerStripApproved : viewerState === 'pending' ? copy.buyerStripPending : copy.buyerStripGuest}</strong>{' '}
-        <span>{isApproved ? `${buyer.assignedMarket} ${copy.buyerStripApprovedNote}` : copy.buyerStripGuestNote}</span>
+    <div className={`home-section-nav-anchor${isSectionNavFixed ? ' is-fixed' : ''}`} ref={sectionNavAnchorRef}>
+      <div className="home-section-nav" aria-label="홈 제품 섹션 이동">
+        {homeSectionNav.map((item) => <button key={item.id} className={activeHomeSection === item.id ? 'is-active' : undefined} type="button" onClick={() => scrollToHomeSection(item.id)}>
+          {item.label}
+        </button>)}
       </div>
-      <Globe2 size={19} />
-    </section>
+    </div>
+    {isSectionNavFixed ? <div className="home-section-nav-fixed" aria-label="고정 제품 섹션 이동">
+      {homeSectionNav.map((item) => <button key={item.id} className={activeHomeSection === item.id ? 'is-active' : undefined} type="button" onClick={() => scrollToHomeSection(item.id)}>
+        {item.label}
+      </button>)}
+    </div> : null}
 
-    <ProductSection products={featuredProducts} sectionId="featured" title={copy.featuredTitle} note={copy.featuredNote} viewAllLabel={copy.viewAll} />
-    <ProductSection products={newProducts} sectionId="new" title={copy.newTitle} note={copy.newNote} viewAllLabel={copy.viewAll} />
-    <ProductSection products={exportProducts} sectionId="export" title={copy.exportTitle} note={copy.exportNote} viewAllLabel={copy.viewAll} />
+    <ProductSection products={newProducts} sectionId="new-arrival" title="신상품" note="새롭게 입고된 도매 카탈로그 제품입니다." viewAllLabel={copy.viewAll} />
+    <ProductSection products={weeklyProducts} sectionId="weekly-pick" title="주간 추천" note="이번 주 거래처 문의에 추천할 만한 제품입니다." viewAllLabel={copy.viewAll} />
+    <ProductSection products={buyerSelectionProducts} sectionId="buyer-selection" title="바이어 셀렉션" note="국내·해외 바이어 상담에 맞춰 고른 제품입니다." viewAllLabel={copy.viewAll} />
+    <ProductSection products={piercingCatalogProducts} sectionId="piercing-catalog" title="피어싱 카탈로그" note="기본 피어싱 제품군을 빠르게 확인하세요." viewAllLabel={copy.viewAll} />
+    <ProductSection products={premiumJewelryProducts} sectionId="premium-jewelry" title="프리미엄 주얼리" note="실버, 14K, 큐빅 중심의 고급 라인입니다." viewAllLabel={copy.viewAll} />
 
     <section className="campaign-banner">
       <div>
