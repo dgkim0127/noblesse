@@ -372,3 +372,12 @@ Before implementation starts:
 - Local Docker smoke is optional but recommended when Docker CLI becomes available.
 - Production write remains gated by runtime, Auth, DB, Secret Manager, Firebase rewrite, staging dry-run, rollback, and QA approval.
 - Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, Cloud Build, Cloud Run deploy, and production admin_memo rollout are still not wired.
+
+## 32K-4 Cloud Run Deploy Approval Checklist
+
+- Cloud Run deploy approval requirements are documented in `docs/ADMIN_CLOUD_RUN_DEPLOY_APPROVAL_CHECKLIST.md`.
+- 32K-4 does not change implementation readiness.
+- Backend runtime deploy remains gated.
+- Docker Desktop remains optional for this planning path.
+- Cloud Run deploy approval checklist is now required before any deploy attempt.
+- Production write remains gated by runtime, Auth, DB, Secret Manager, Firebase rewrite, staging dry-run, rollback, and QA approval.

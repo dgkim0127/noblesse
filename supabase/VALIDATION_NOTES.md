@@ -1065,3 +1065,19 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32K-3: No.
 - Conclusion: Cloud Run source deploy with the existing `backend/Dockerfile` is the recommended future path after separate approval, local Docker smoke is optional rather than blocking, and production admin_memo remains No-Go.
+
+## 32K-4 Cloud Run Deploy Approval Checklist Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_CLOUD_RUN_DEPLOY_APPROVAL_CHECKLIST.md`.
+- Scope: Cloud Run deploy approval checklist and placeholder runtime spec only.
+- gcloud command executed in 32K-4: No.
+- Docker build/run in 32K-4: No.
+- Cloud Build execution in 32K-4: No.
+- Cloud Run deploy in 32K-4: No.
+- Firebase deploy or `/api` rewrite in 32K-4: No.
+- DB/Auth/SQL execution in 32K-4: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32K-4: No.
+- Conclusion: Deploy approval checklist is documented, but production runtime deployment and admin_memo rollout remain No-Go.

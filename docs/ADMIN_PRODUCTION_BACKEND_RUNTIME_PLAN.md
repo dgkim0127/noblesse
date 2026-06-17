@@ -410,3 +410,11 @@ Next recommended step:
 - Buildpacks remain a fallback option only, not the current primary path.
 - Actual Cloud Run deployment remains No-Go.
 - No Cloud Build, Cloud Run service, Secret Manager setup, Firebase rewrite, Firebase deploy, DB/Auth integration, SQL execution, or secret handling was performed in 32K-3.
+
+## 32K-4 Cloud Run Deploy Approval Checklist Follow-up
+
+- Cloud Run pre-deploy checklist and placeholder runtime deploy spec are documented in `docs/ADMIN_CLOUD_RUN_DEPLOY_APPROVAL_CHECKLIST.md`.
+- Runtime deploy remains No-Go.
+- Deploy requires confirmed project, region, service name, runtime service account, secret strategy, Auth strategy, staging dry-run plan, rollback plan, and POS/default site protection.
+- Cloud Run runtime contract checks must be verified before deploy approval.
+- No Cloud Build, Cloud Run service, Secret Manager setup, Firebase rewrite, Firebase deploy, DB/Auth integration, SQL execution, or secret handling was performed in 32K-4.

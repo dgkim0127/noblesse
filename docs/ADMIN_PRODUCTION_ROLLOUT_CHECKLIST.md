@@ -454,3 +454,16 @@ Required before 32K:
 - Firebase `/api` rewrite: No-Go.
 - Production admin_memo write: No-Go.
 - No Cloud Build, Cloud Run service, Firebase deploy, DB/Auth/Secret connection, SQL execution, or frontend source staging was performed.
+
+## 32K-4 Cloud Run Deploy Approval Checklist Follow-up
+
+- Cloud Run deploy approval checklist is documented in `docs/ADMIN_CLOUD_RUN_DEPLOY_APPROVAL_CHECKLIST.md`.
+- Local Node smoke: Go.
+- Local Docker smoke: No-Go / optional.
+- Cloud Run source deploy plan: documented by 32K-3.
+- Cloud Run deploy approval checklist: documented by 32K-4.
+- Production runtime deploy: No-Go.
+- Secret Manager integration: No-Go.
+- Firebase Auth backend integration: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- Production admin_memo write: No-Go.

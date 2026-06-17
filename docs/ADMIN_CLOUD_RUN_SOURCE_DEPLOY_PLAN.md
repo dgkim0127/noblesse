@@ -284,3 +284,10 @@ No-Go until later gates pass.
 Frontend source dirty:
 
 Allowed to remain dirty but must not be staged/committed.
+
+## 32K-4 Deploy Approval Checklist Follow-up
+
+- Cloud Run deploy approval checklist and placeholder runtime spec are documented in `docs/ADMIN_CLOUD_RUN_DEPLOY_APPROVAL_CHECKLIST.md`.
+- 32K-4 does not execute Cloud Run deploy.
+- 32K-4 does not create Cloud Build, Cloud Run service, secrets, DB/Auth integration, or Firebase rewrite.
+- Production runtime deployment, Firebase `/api` rewrite, and production admin_memo rollout remain No-Go.
