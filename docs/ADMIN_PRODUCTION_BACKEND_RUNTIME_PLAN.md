@@ -400,3 +400,13 @@ Next recommended step:
 - `/api/admin/dashboard` without a token returned `UNAUTHORIZED`.
 - Docker container smoke remains No-Go until Docker is available.
 - Production runtime deployment remains No-Go.
+
+## 32K-3 Cloud Run Source Deploy Planning Follow-up
+
+- Cloud Run source deploy planning is documented in `docs/ADMIN_CLOUD_RUN_SOURCE_DEPLOY_PLAN.md`.
+- Local Docker smoke remains No-Go because Docker CLI is unavailable in the current terminal session.
+- Local Docker smoke is not an absolute blocker for 32K progression because Cloud Run source deploy can build remotely through Cloud Build after separate approval.
+- The recommended path is Cloud Run source deploy using the existing `backend/Dockerfile` via Cloud Build.
+- Buildpacks remain a fallback option only, not the current primary path.
+- Actual Cloud Run deployment remains No-Go.
+- No Cloud Build, Cloud Run service, Secret Manager setup, Firebase rewrite, Firebase deploy, DB/Auth integration, SQL execution, or secret handling was performed in 32K-3.

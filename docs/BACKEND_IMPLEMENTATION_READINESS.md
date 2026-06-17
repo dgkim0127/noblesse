@@ -362,3 +362,13 @@ Before implementation starts:
 - This does not replace Docker/container validation.
 - Cloud Run deploy still requires Docker/container validation and separate approval.
 - Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.
+
+## 32K-3 Cloud Run Source Deploy Planning
+
+- Cloud Run source deploy planning is documented in `docs/ADMIN_CLOUD_RUN_SOURCE_DEPLOY_PLAN.md`.
+- Docker Desktop is not mandatory if the Cloud Run source deploy path is approved.
+- Existing `backend/Dockerfile` remains the recommended build definition for now.
+- Buildpacks remain an alternative path, not the current primary path.
+- Local Docker smoke is optional but recommended when Docker CLI becomes available.
+- Production write remains gated by runtime, Auth, DB, Secret Manager, Firebase rewrite, staging dry-run, rollback, and QA approval.
+- Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, Cloud Build, Cloud Run deploy, and production admin_memo rollout are still not wired.

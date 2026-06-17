@@ -1048,3 +1048,20 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source change in 32K-2N: No.
 - Conclusion: Local Node backend smoke is Go, but local container smoke remains No-Go until Docker is available; production runtime deployment and admin_memo rollout remain No-Go.
+
+## 32K-3 Admin Cloud Run Source Deploy Plan Follow-up
+
+- Date: 2026-06-17
+- Change: Added `docs/ADMIN_CLOUD_RUN_SOURCE_DEPLOY_PLAN.md` and linked the 32K-3 decision from backend runtime/readiness/rollout/API boundary docs.
+- Scope: Source deploy planning only.
+- gcloud in 32K-3: No.
+- Docker build/run in 32K-3: No.
+- Cloud Build in 32K-3: No.
+- Cloud Run deploy in 32K-3: No.
+- Firebase deploy in 32K-3: No.
+- Firebase `/api` rewrite in 32K-3: No.
+- DB/Auth/SQL in 32K-3: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32K-3: No.
+- Conclusion: Cloud Run source deploy with the existing `backend/Dockerfile` is the recommended future path after separate approval, local Docker smoke is optional rather than blocking, and production admin_memo remains No-Go.

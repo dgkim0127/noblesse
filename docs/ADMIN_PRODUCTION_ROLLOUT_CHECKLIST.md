@@ -84,7 +84,13 @@ Required before production:
 Current status:
 
 - Planned only
-- Not implemented
+- `backend/Dockerfile` exists.
+- Local Node backend smoke: Go.
+- Local Docker smoke: No-Go / optional, because Docker CLI is unavailable in the current terminal session.
+- Cloud Run source deploy plan: documented by 32K-3 in `docs/ADMIN_CLOUD_RUN_SOURCE_DEPLOY_PLAN.md`.
+- Production runtime deploy: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- Production admin_memo write: No-Go.
 
 Rollout judgment:
 
@@ -348,7 +354,7 @@ No-Go:
 
 | Gate | Required Evidence | Current Status | Rollout Judgment |
 | --- | --- | --- | --- |
-| Runtime | container artifact plus backend health URL | Container artifact added; health URL missing | No-Go |
+| Runtime | container artifact plus backend health URL | Container artifact added; local Node smoke Go; local Docker smoke No-Go / optional; Cloud Run source deploy plan documented; production health URL missing | No-Go |
 | Production DB | provider + migrated schema | Missing | No-Go |
 | Secret | Secret Manager + runtime access | Missing | No-Go |
 | Auth | Firebase token + users role/status | Missing | No-Go |
@@ -435,3 +441,16 @@ Required before 32K:
 - Backend production health URL: Missing.
 - Firebase `/api` rewrite: No-Go.
 - Production admin_memo rollout remains blocked.
+
+## 32K-3 Cloud Run Source Deploy Plan Follow-up
+
+- Cloud Run source deploy planning is documented in `docs/ADMIN_CLOUD_RUN_SOURCE_DEPLOY_PLAN.md`.
+- Recommended build path: existing `backend/Dockerfile` via Cloud Build after separate approval.
+- Buildpacks are documented as an alternative, not the current recommendation.
+- Docker Desktop is not mandatory for 32K progression.
+- Local Node smoke: Go.
+- Local Docker smoke: No-Go / optional.
+- Production runtime deploy: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- Production admin_memo write: No-Go.
+- No Cloud Build, Cloud Run service, Firebase deploy, DB/Auth/Secret connection, SQL execution, or frontend source staging was performed.

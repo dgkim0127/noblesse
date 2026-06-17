@@ -335,3 +335,12 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Production frontend still does not call the admin API.
 - Frontend direct PostgreSQL access remains prohibited.
 - Container smoke remains a separate requirement before production runtime rollout.
+
+## 32K-3 Cloud Run Source Deploy Planning
+
+- Cloud Run source deploy planning does not change the API boundary.
+- 32K-3 does not change write scope, auth boundary, endpoint behavior, or API contracts.
+- Firebase Hosting `/api` rewrite remains absent.
+- Production frontend still does not call the admin API.
+- Production deploy and production admin_memo write remain No-Go.
+- Frontend direct PostgreSQL access remains prohibited.
