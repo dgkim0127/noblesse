@@ -113,3 +113,9 @@
 - Production gates remain unsatisfied after `docs/ADMIN_PRODUCTION_INFRA_DECISION.md`.
 - 32J-1 is decision planning only.
 - `admin_memo` remains the only first write candidate, but production write rollout remains No-Go.
+
+## 32J-5 Admin Firebase Auth Verification Plan Follow-up
+
+- Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
+- 32J-5 is auth planning only.
+- The production auth gate remains unsatisfied until real token verification, PostgreSQL mapping, bootstrap, and QA are implemented.

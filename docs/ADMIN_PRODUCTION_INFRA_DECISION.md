@@ -360,3 +360,9 @@ Important:
 - Production secret management planning is documented in `docs/ADMIN_PRODUCTION_SECRET_MANAGER_PLAN.md`.
 - 32J-4 refines secret storage, naming, access, separation, rotation, and no-leak checks but does not create secrets.
 - Secret Manager provisioning, IAM changes, runtime injection, production DB/Auth integration, Firebase `/api` rewrite, and deploy remain blocked.
+
+## 32J-5 Admin Firebase Auth Verification Plan Follow-up
+
+- Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
+- 32J-5 refines ID token verification, PostgreSQL admin mapping, credential strategy, and auth QA planning but does not connect Firebase Auth.
+- Firebase Admin SDK wiring, credentials, admin bootstrap, production DB/Auth integration, Firebase `/api` rewrite, and deploy remain blocked.

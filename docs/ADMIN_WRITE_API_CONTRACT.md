@@ -628,3 +628,9 @@ No real Firebase/DB tests in first write scaffold.
 - Production infrastructure decision planning is documented in `docs/ADMIN_PRODUCTION_INFRA_DECISION.md`.
 - The `admin_memo` write contract remains production-blocked.
 - No runtime, Auth, DB, secret, rewrite, or deploy action is unlocked by this contract.
+
+## 32J-5 Admin Firebase Auth Verification Plan Follow-up
+
+- Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
+- The `admin_memo` write contract requires Firebase ID token verification and PostgreSQL users.role/status checks before production.
+- This remains a contract only and does not unlock implementation.

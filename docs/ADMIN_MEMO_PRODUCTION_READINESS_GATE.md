@@ -197,3 +197,9 @@ Still blocked:
 - Production secret management planning is documented in `docs/ADMIN_PRODUCTION_SECRET_MANAGER_PLAN.md`.
 - The production secret gate remains unsatisfied until approved secret storage and runtime access are implemented.
 - No secret creation, IAM grant, runtime injection, DB/Auth integration, rewrite, or deploy was performed.
+
+## 32J-5 Admin Firebase Auth Verification Plan Follow-up
+
+- Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
+- The admin auth gate remains unsatisfied until Firebase ID token verification and PostgreSQL admin mapping are implemented.
+- Admin bootstrap, runtime credentials, Auth QA, DB/Auth integration, rewrite, and deploy remain blocked.

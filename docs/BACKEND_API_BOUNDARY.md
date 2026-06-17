@@ -279,3 +279,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Secret planning does not change the API boundary.
 - Frontend direct DB access remains prohibited.
 - Production frontend still does not call the admin API.
+
+## 32J-5 Admin Firebase Auth Verification Plan
+
+- Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
+- Auth planning does not change the API boundary.
+- Firebase Hosting `/api` rewrite remains absent.
+- Production frontend still does not call the admin API.

@@ -346,3 +346,9 @@ Next recommended step:
 - Production secret management planning is documented in `docs/ADMIN_PRODUCTION_SECRET_MANAGER_PLAN.md`.
 - Runtime remains unimplemented.
 - No secret was created, injected, or granted to a runtime service account in 32J-4.
+
+## 32J-5 Admin Firebase Auth Verification Plan Follow-up
+
+- Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
+- Runtime remains unimplemented.
+- Production admin auth still requires approved runtime credentials, DB mapping, admin bootstrap, and QA.

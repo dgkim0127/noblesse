@@ -353,3 +353,9 @@ Important:
 - DB readiness requires Secret Manager or equivalent storage for DATABASE_URL.
 - No secret was created in 32J-4.
 - Production DB readiness remains No-Go.
+
+## 32J-5 Admin Firebase Auth Verification Plan Follow-up
+
+- Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
+- Production admin auth requires users.auth_uid mapping and admin bootstrap before DB write rollout.
+- Production DB write readiness remains No-Go until Auth, secret, runtime, staging, and rollback gates are satisfied.

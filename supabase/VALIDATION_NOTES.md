@@ -916,3 +916,20 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Deploy action in 32J-4: No.
 - Frontend source changes: Existing src changes were not staged or committed by 32J-4.
 - Conclusion: Production secret management is planned, but secret creation, runtime injection, production DB/Auth, and admin memo rollout remain No-Go.
+
+## 32J-5 Admin Firebase Auth Verification Plan Follow-up
+
+- Date: 2026-06-17
+- Change: Added `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
+- Scope: Documentation only for Firebase Auth admin verification, PostgreSQL users.auth_uid mapping, runtime credential strategy, frontend auth boundary, admin bootstrap boundary, and Auth QA planning.
+- Firebase Auth integration in 32J-5: No.
+- Firebase Admin SDK dependency added in 32J-5: No.
+- Service account credential created in 32J-5: No.
+- Secret recorded in repo/docs: No.
+- SQL execution required in 32J-5: No.
+- DB/Auth integration in 32J-5: No.
+- SQL/schema/migration file change: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 32J-5: No.
+- Frontend source changes: Existing src changes were not staged or committed by 32J-5.
+- Conclusion: Admin Firebase Auth verification is planned, but real Auth integration and production admin memo rollout remain No-Go.

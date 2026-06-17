@@ -340,3 +340,9 @@ Important:
 
 - Do not create secrets before backend runtime and DB provider decisions are approved.
 - Do not enable production write before secret, Auth, DB, runtime, and staging gates are satisfied.
+
+## 32J-5 Admin Firebase Auth Verification Plan Follow-up
+
+- Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
+- Firebase Admin runtime credential strategy is planned.
+- No Firebase credential, service account JSON, Secret Manager secret, or runtime injection was created in 32J-5.

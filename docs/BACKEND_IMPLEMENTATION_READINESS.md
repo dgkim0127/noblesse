@@ -310,3 +310,9 @@ Before implementation starts:
 - Production secret management planning is documented in `docs/ADMIN_PRODUCTION_SECRET_MANAGER_PLAN.md`.
 - No secret creation, secret value recording, runtime injection, IAM change, DB/Auth integration, Firebase `/api` rewrite, or deploy was added.
 - Production admin memo rollout remains blocked.
+
+## 32J-5 Admin Firebase Auth Verification Plan
+
+- Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
+- No Firebase Auth integration, Firebase Admin SDK installation, credential creation, package change, DB/Auth integration, Firebase `/api` rewrite, or deploy was added.
+- Production admin memo rollout remains blocked.
