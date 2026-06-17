@@ -1138,3 +1138,24 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32K-7: No.
 - Conclusion: Health-only entrypoint smoke is Go, but production runtime deployment and admin_memo rollout remain No-Go.
+
+## 32K-8 gcloud Preflight Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_CLOUD_RUN_GCLOUD_PREFLIGHT_REPORT.md`.
+- Scope: Read-only gcloud / Cloud Run deploy preflight only.
+- gcloud CLI available: No.
+- Active account value recorded: No.
+- Project value recorded: No.
+- Required API readiness: Unknown.
+- gcloud deploy/build/enable command executed in 32K-8: No.
+- Docker build/run in 32K-8: No.
+- Cloud Build execution in 32K-8: No.
+- Cloud Run deploy in 32K-8: No.
+- Firebase deploy or `/api` rewrite in 32K-8: No.
+- Secret Manager creation in 32K-8: No.
+- DB/Auth/SQL execution in 32K-8: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32K-8: No.
+- Conclusion: gcloud preflight is No-Go until gcloud is available and approved values are confirmed.

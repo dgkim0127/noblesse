@@ -276,3 +276,11 @@ Allowed to remain dirty but must not be staged/committed.
 - `/api/health` passed without DB/Auth secrets when `ALLOW_HEALTH_ONLY_STARTUP=true`.
 - Admin no-token access remained fail-closed with `UNAUTHORIZED`.
 - Cloud Run deploy still requires separate approval.
+
+## 32K-8 gcloud Preflight Follow-up
+
+- Read-only gcloud preflight is documented in `docs/ADMIN_CLOUD_RUN_GCLOUD_PREFLIGHT_REPORT.md`.
+- gcloud CLI was unavailable in the current terminal session.
+- Real account, project, service account, secret, DB URL, password, and private key values were not recorded.
+- Cloud Run deploy remains No-Go.
+- Cloud Build execution remains No-Go.

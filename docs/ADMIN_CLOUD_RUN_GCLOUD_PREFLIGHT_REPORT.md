@@ -1,0 +1,75 @@
+# Admin Cloud Run gcloud Preflight Report
+
+## Scope
+
+- Read-only gcloud / Cloud Run deploy preflight.
+- No Cloud Run deploy.
+- No Cloud Build.
+- No API enablement.
+- No Secret Manager creation.
+- No Firebase deploy.
+- No Firebase `/api` rewrite.
+- No DB/Auth/SQL.
+- No secret recorded.
+- Frontend source dirty not staged.
+
+## Current Status
+
+- health-only entrypoint smoke: Go.
+- Docker local smoke: No-Go / optional.
+- Cloud Run deploy: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- production admin_memo rollout: No-Go.
+
+## gcloud CLI Check
+
+- gcloud CLI available: No.
+- gcloud version checked: No.
+- command source: unavailable.
+- real account/project values recorded: No.
+
+## Auth / Project Check
+
+- active gcloud account present: Unknown.
+- active project configured: Unknown.
+- real account email recorded: No.
+- real project id recorded: No.
+
+## Required API Readiness
+
+- run.googleapis.com: Unknown / gcloud unavailable.
+- cloudbuild.googleapis.com: Unknown / gcloud unavailable.
+- artifactregistry.googleapis.com: Unknown / gcloud unavailable.
+- secretmanager.googleapis.com: Unknown / gcloud unavailable.
+
+Do not run `gcloud services enable` in this step.
+
+## Deploy Readiness Judgment
+
+- project approval: Pending.
+- region approval: Pending.
+- service name approval: Pending.
+- runtime service account approval: Pending.
+- Secret Manager strategy: Pending.
+- startup/health policy: health-only implemented locally.
+- Cloud Run deploy: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- production admin_memo write: No-Go.
+
+## Blockers
+
+- gcloud missing.
+- active account status unknown.
+- active project status unknown.
+- required API status unknown.
+- approval missing.
+
+No real values were recorded.
+
+## Go / No-Go
+
+- gcloud preflight: No-Go.
+- Cloud Run deploy: No-Go.
+- Cloud Build execution: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- production admin_memo rollout: No-Go.

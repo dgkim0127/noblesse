@@ -500,3 +500,13 @@ Required before 32K:
 - Firebase Auth backend integration: No-Go.
 - Firebase `/api` rewrite: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32K-8 gcloud Preflight Follow-up
+
+- Health-only entrypoint smoke: Go.
+- gcloud preflight: No-Go because gcloud CLI is unavailable in the current terminal session.
+- Required API readiness: Unknown.
+- Cloud Run deploy: No-Go.
+- Cloud Build execution: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- Production admin_memo write: No-Go.

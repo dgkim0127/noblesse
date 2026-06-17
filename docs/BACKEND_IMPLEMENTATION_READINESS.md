@@ -406,3 +406,11 @@ Before implementation starts:
 - `/api/health` passed without DB/Auth secrets.
 - Admin no-token access remained fail-closed.
 - Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.
+
+## 32K-8 gcloud Preflight
+
+- Read-only gcloud preflight is documented in `docs/ADMIN_CLOUD_RUN_GCLOUD_PREFLIGHT_REPORT.md`.
+- gcloud CLI was unavailable in the current terminal session.
+- Account, project, and required API readiness remain unknown.
+- Implementation still requires explicit deploy approval and confirmed runtime values.
+- Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.

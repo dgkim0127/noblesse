@@ -143,3 +143,11 @@ Recommended candidate:
 - `/api/admin/dashboard` without token returned `UNAUTHORIZED`.
 - Deploy remains No-Go.
 - Firebase `/api` rewrite remains No-Go.
+
+## 32K-8 gcloud Preflight Follow-up
+
+- gcloud preflight is documented in `docs/ADMIN_CLOUD_RUN_GCLOUD_PREFLIGHT_REPORT.md`.
+- gcloud CLI was unavailable, so account, project, and API readiness are unknown.
+- Real gcloud account/project values are not recorded.
+- Real deploy values remain pending/proposed only.
+- Deploy remains No-Go.
