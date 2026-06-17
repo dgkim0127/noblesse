@@ -131,3 +131,9 @@
 - Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
 - Staging dry-run is required before production write rollout.
 - Staging success still does not unlock status, buyer, product, price, or quote writes.
+
+## 32J-8 Admin Firebase API Rewrite Plan Follow-up
+
+- Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
+- Rewrite is a routing gate only; it does not satisfy Auth, DB, audit, rollback, or write safety gates.
+- Production writes remain blocked.

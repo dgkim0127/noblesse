@@ -646,3 +646,9 @@ No real Firebase/DB tests in first write scaffold.
 - Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
 - Production `admin_memo` write remains blocked until staging dry-run and all production gates pass.
 - Status, buyer, product, price, and quote writes remain out of scope.
+
+## 32J-8 Admin Firebase API Rewrite Plan Follow-up
+
+- Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
+- Rewrite planning does not unlock production write routes.
+- `admin_memo` production write remains blocked.

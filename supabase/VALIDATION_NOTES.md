@@ -967,3 +967,21 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source changes: Existing src changes were not staged or committed by 32J-7.
 - Conclusion: Staging/prod-like dry-run is planned, but staging execution and production admin memo rollout remain No-Go.
+
+## 32J-8 Admin Firebase API Rewrite Plan Follow-up
+
+- Date: 2026-06-17
+- Change: Added `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
+- Scope: Documentation only for future Firebase Hosting `/api/**` rewrite architecture, Noblesse hosting target protection, backend URL readiness, rollback, QA, and POS/default site protection.
+- firebase.json change in 32J-8: No.
+- `.firebaserc` change in 32J-8: No.
+- Firebase `/api` rewrite added in 32J-8: No.
+- Firebase deploy in 32J-8: No.
+- Cloud Run/backend URL connection in 32J-8: No.
+- DB/Auth integration in 32J-8: No.
+- SQL execution required in 32J-8: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- POS/default site touched: No.
+- Frontend source changes: Existing src changes were not staged or committed by 32J-8.
+- Conclusion: Firebase `/api` rewrite is planned, but config change, deploy, backend connection, and production admin memo rollout remain No-Go.

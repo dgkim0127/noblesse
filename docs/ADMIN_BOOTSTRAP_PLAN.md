@@ -374,3 +374,9 @@ Important:
 - Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
 - Staging bootstrap remains planning only and was not executed.
 - No staging DB, admin user, secret, Auth integration, SQL execution, rewrite, or deploy was added in 32J-7.
+
+## 32J-8 Admin Firebase API Rewrite Plan Follow-up
+
+- Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
+- Future rewrite must not be added before admin bootstrap is completed and reversible.
+- Bootstrap remains planning only.

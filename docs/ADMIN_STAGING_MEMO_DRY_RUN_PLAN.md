@@ -357,3 +357,8 @@ Important:
 - Do not implement staging dry-run before Auth/DB/Secret/Runtime decisions are approved.
 - Do not skip staging and jump to production.
 
+## 32J-8 Admin Firebase API Rewrite Plan Follow-up
+
+- Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
+- Staging/prod-like dry-run remains required before a production rewrite can support admin_memo rollout.
+- No Firebase config change, rewrite, deploy, backend runtime connection, DB/Auth integration, or secret creation was added in 32J-8.

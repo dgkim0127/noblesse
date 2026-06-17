@@ -299,3 +299,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
 - Staging planning does not change the API boundary.
 - Firebase Hosting `/api` rewrite remains absent and the production frontend still does not call the admin API.
+
+## 32J-8 Admin Firebase API Rewrite Plan
+
+- Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
+- Rewrite planning does not change the current API boundary.
+- `/api` rewrite remains absent, and the production frontend still does not call the admin API.
+- Future rewrite must still rely on backend Auth/DB checks and must not allow frontend direct DB access.

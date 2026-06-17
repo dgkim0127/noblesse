@@ -371,3 +371,9 @@ Important:
 - Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
 - A staging/prod-like clone remains required before production admin_memo write rollout.
 - No staging DB, clone, SQL execution, schema/migration change, production DB connection, rewrite, or deploy was added in 32J-7.
+
+## 32J-8 Admin Firebase API Rewrite Plan Follow-up
+
+- Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
+- Rewrite must not be added before production DB and staging/prod-like dry-run gates are satisfied.
+- No DB connection, SQL execution, schema/migration change, Firebase config change, rewrite, or deploy was added in 32J-8.

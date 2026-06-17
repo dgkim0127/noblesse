@@ -358,3 +358,9 @@ Important:
 - Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
 - Staging secret must be separate from production secret and must not be written to docs/GitHub/chat/frontend.
 - No Secret Manager secret, secret value, runtime injection, DB connection, rewrite, or deploy was added in 32J-7.
+
+## 32J-8 Admin Firebase API Rewrite Plan Follow-up
+
+- Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
+- Rewrite must not be added until backend runtime receives secrets through the approved server-side path.
+- No secret creation, runtime injection, Firebase config change, rewrite, or deploy was added in 32J-8.

@@ -408,3 +408,9 @@ Important:
 - Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
 - Staging dry-run requires an approved auth strategy before it can replace mock-only validation.
 - Firebase Auth remains unimplemented.
+
+## 32J-8 Admin Firebase API Rewrite Plan Follow-up
+
+- Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
+- Rewrite does not replace server-side Firebase ID token verification.
+- Auth remains unimplemented and rewrite remains No-Go.

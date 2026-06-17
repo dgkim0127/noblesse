@@ -364,3 +364,9 @@ Next recommended step:
 - Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
 - Staging dry-run requires runtime health and auth failure/success checks before production promotion.
 - Runtime remains unimplemented.
+
+## 32J-8 Admin Firebase API Rewrite Plan Follow-up
+
+- Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
+- Backend URL must belong to an approved production runtime before rewrite is added.
+- Runtime remains unimplemented and no backend URL was connected in 32J-8.

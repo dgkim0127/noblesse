@@ -378,3 +378,9 @@ Important:
 - Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
 - Production rollout remains blocked until staging/prod-like dry-run, Auth, DB, secret, runtime, bootstrap, rewrite, rollback, and QA gates are approved.
 - No staging DB, production-like clone, Auth integration, Secret Manager secret, rewrite, or deploy was added in 32J-7.
+
+## 32J-8 Admin Firebase API Rewrite Plan Follow-up
+
+- Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
+- Production rollout remains blocked until backend runtime URL, Auth, DB, secret, bootstrap, staging dry-run, rewrite, rollback, and QA gates are approved.
+- No Firebase config change, rewrite, deploy, Cloud Run connection, or POS/default site change was added in 32J-8.

@@ -328,3 +328,9 @@ Before implementation starts:
 - Staging or production-like admin_memo dry-run planning is documented in `docs/ADMIN_STAGING_MEMO_DRY_RUN_PLAN.md`.
 - No staging DB, production-like clone, Auth integration, runtime implementation, secret creation, SQL execution, Firebase `/api` rewrite, or deploy was added.
 - Production admin memo rollout remains blocked.
+
+## 32J-8 Admin Firebase API Rewrite Plan
+
+- Firebase Hosting `/api/**` rewrite planning is documented in `docs/ADMIN_FIREBASE_API_REWRITE_PLAN.md`.
+- No firebase.json change, `.firebaserc` change, Firebase deploy, backend runtime URL connection, DB/Auth integration, SQL execution, package change, or source change was added.
+- Production admin memo rollout remains blocked.
