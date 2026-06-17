@@ -340,3 +340,9 @@ Before implementation starts:
 - Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
 - Implementation still requires separate approval.
 - No runtime, DB, secret, Auth, bootstrap, staging dry-run, Firebase config change, rewrite, deploy, package change, SQL execution, or source change was added.
+
+## 32K-1 Backend Runtime Container Artifact
+
+- Backend runtime container artifacts were added in `backend/Dockerfile` and `backend/.dockerignore`.
+- Deployment still requires separate approval and a production runtime plan.
+- Production env, secret storage, Firebase Auth, DB connection, Cloud Run/Cloud Build, Firebase `/api` rewrite, and deploy are not wired.

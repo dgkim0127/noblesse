@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log
+.env
+.env.*
+*.log
+coverage
+.DS_Store
+.git
+.firebase
+dist
+build
+tmp
+*.local
+**/*.pem
+**/*.key
+**/*serviceAccount*.json
+**/*service-account*.json

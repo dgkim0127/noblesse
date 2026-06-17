@@ -313,3 +313,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - The rollout checklist does not change the API boundary.
 - `/api` rewrite remains absent, and the production frontend still does not call the admin API.
 - Frontend direct PostgreSQL access remains prohibited.
+
+## 32K-1 Backend Runtime Container Artifact
+
+- Backend runtime container artifacts do not change the current API boundary.
+- Firebase Hosting `/api` rewrite remains absent.
+- Production frontend still does not call the admin API.
+- Frontend direct PostgreSQL access remains prohibited.

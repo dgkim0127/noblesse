@@ -1002,3 +1002,17 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source changes: Existing src changes were not staged or committed by 32J-9.
 - Conclusion: Production rollout checklist is complete, but production admin_memo rollout remains No-Go.
+
+## 32K-1 Backend Runtime Container Artifact Follow-up
+
+- Date: 2026-06-17
+- Change: Added `backend/Dockerfile` and `backend/.dockerignore`.
+- Scope: Backend container artifact only.
+- Docker build/run in 32K-1: No.
+- Cloud Run/Cloud Build/gcloud in 32K-1: No.
+- Firebase deploy or `/api` rewrite in 32K-1: No.
+- DB/Auth/SQL execution in 32K-1: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- Frontend source change in 32K-1: No.
+- Conclusion: Backend container artifact exists, but production runtime deployment and admin_memo rollout remain No-Go.

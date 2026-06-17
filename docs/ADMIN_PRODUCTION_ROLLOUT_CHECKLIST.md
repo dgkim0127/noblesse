@@ -348,7 +348,7 @@ No-Go:
 
 | Gate | Required Evidence | Current Status | Rollout Judgment |
 | --- | --- | --- | --- |
-| Runtime | backend health URL | Missing | No-Go |
+| Runtime | container artifact plus backend health URL | Container artifact added; health URL missing | No-Go |
 | Production DB | provider + migrated schema | Missing | No-Go |
 | Secret | Secret Manager + runtime access | Missing | No-Go |
 | Auth | Firebase token + users role/status | Missing | No-Go |
@@ -410,3 +410,11 @@ Required before 32K:
 - rollback plan
 - POS/default site protection
 
+## 32K-1 Runtime Artifact Follow-up
+
+- Container artifact added: Yes, `backend/Dockerfile` and `backend/.dockerignore`.
+- Backend runtime deployment: No-Go.
+- Backend health URL: Missing.
+- Docker build/run: Not run.
+- Cloud Build/Cloud Run deploy: Not run.
+- Secret, Auth, DB, Firebase rewrite, and production rollout remain blocked.

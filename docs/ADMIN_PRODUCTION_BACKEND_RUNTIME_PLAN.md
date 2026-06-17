@@ -376,3 +376,11 @@ Next recommended step:
 - Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
 - The backend runtime gate remains No-Go in the rollout checklist.
 - No runtime implementation, Cloud Run service, Cloud Build action, backend URL connection, rewrite, or deploy was added in 32J-9.
+
+## 32K-1 Backend Container Artifact Follow-up
+
+- `backend/Dockerfile` and `backend/.dockerignore` were added as local backend runtime container artifacts.
+- The container artifact is backend-only and does not copy the frontend `dist` output.
+- No Docker build, Docker run, Cloud Build, Cloud Run deploy, Secret Manager setup, Firebase rewrite, Firebase deploy, DB/Auth integration, or production runtime QA was run.
+- No secret value is baked into the image; production runtime configuration remains external and blocked until separate approval.
+- Runtime implementation remains a local artifact only.
