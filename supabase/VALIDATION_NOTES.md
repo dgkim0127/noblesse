@@ -1031,3 +1031,20 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source change in 32K-2: No.
 - Conclusion: Local container smoke is No-Go until Docker CLI is available; production runtime deployment and admin_memo rollout remain No-Go.
+
+## 32K-2N Admin Backend Local Node Smoke Follow-up
+
+- Date: 2026-06-17
+- Change: Added `docs/ADMIN_BACKEND_LOCAL_NODE_SMOKE_REPORT.md`.
+- Scope: Local non-container Node backend smoke only.
+- Docker available in current terminal: No.
+- Docker build/run in 32K-2N: No.
+- Local Node `/api/health` smoke: Pass.
+- Local admin no-token boundary smoke: Pass.
+- Cloud Run/Cloud Build/gcloud in 32K-2N: No.
+- Firebase deploy or `/api` rewrite in 32K-2N: No.
+- DB/Auth/SQL execution in 32K-2N: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- Frontend source change in 32K-2N: No.
+- Conclusion: Local Node backend smoke is Go, but local container smoke remains No-Go until Docker is available; production runtime deployment and admin_memo rollout remain No-Go.

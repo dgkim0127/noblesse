@@ -392,3 +392,11 @@ Next recommended step:
 - Backend tests passed before the blocked smoke step.
 - Production runtime deployment remains No-Go.
 - No Cloud Run, Cloud Build, gcloud, Secret Manager, Firebase rewrite, Firebase deploy, DB/Auth integration, SQL execution, or secret handling was performed.
+
+## 32K-2N Local Node Smoke Follow-up
+
+- Local non-container Node backend smoke is documented in `docs/ADMIN_BACKEND_LOCAL_NODE_SMOKE_REPORT.md`.
+- `/api/health` passed on a local development server without DB or Firebase credentials.
+- `/api/admin/dashboard` without a token returned `UNAUTHORIZED`.
+- Docker container smoke remains No-Go until Docker is available.
+- Production runtime deployment remains No-Go.

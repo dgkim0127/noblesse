@@ -66,3 +66,10 @@
 - Production runtime deployment: No-Go
 - Firebase `/api` rewrite: No-Go
 - Production admin_memo rollout: No-Go
+
+## 32K-2N Local Node Smoke Follow-up
+
+- Docker CLI remains unavailable in the current Codex terminal session.
+- Non-container local Node smoke is documented separately in `docs/ADMIN_BACKEND_LOCAL_NODE_SMOKE_REPORT.md`.
+- The Node smoke verified `/api/health` and admin no-token boundary without DB, Firebase credentials, Cloud Run, Cloud Build, Firebase deploy, or Firebase `/api` rewrite.
+- Container smoke remains No-Go until Docker is available and a separate container smoke can run.

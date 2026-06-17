@@ -327,3 +327,11 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Firebase Hosting `/api` rewrite remains absent.
 - Production frontend still does not call the admin API.
 - Frontend direct PostgreSQL access remains prohibited.
+
+## 32K-2N Local Node Backend Smoke
+
+- Local Node smoke reporting does not change the current API boundary.
+- Firebase Hosting `/api` rewrite remains absent.
+- Production frontend still does not call the admin API.
+- Frontend direct PostgreSQL access remains prohibited.
+- Container smoke remains a separate requirement before production runtime rollout.

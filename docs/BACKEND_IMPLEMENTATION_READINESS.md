@@ -354,3 +354,11 @@ Before implementation starts:
 - Backend tests passed and root build passed.
 - Cloud Run deploy still requires separate approval.
 - Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.
+
+## 32K-2N Local Node Backend Smoke
+
+- Local non-container Node smoke is documented in `docs/ADMIN_BACKEND_LOCAL_NODE_SMOKE_REPORT.md`.
+- The local development server passed `/api/health` and admin no-token boundary checks without DB or Firebase credentials.
+- This does not replace Docker/container validation.
+- Cloud Run deploy still requires Docker/container validation and separate approval.
+- Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.

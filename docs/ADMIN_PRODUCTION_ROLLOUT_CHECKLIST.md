@@ -426,3 +426,12 @@ Required before 32K:
 - Backend production health URL: Missing.
 - Firebase `/api` rewrite: No-Go.
 - Production admin_memo rollout remains blocked.
+
+## 32K-2N Local Node Smoke Follow-up
+
+- Local Node backend smoke: Pass.
+- Local container smoke: No-Go until Docker is available.
+- Backend runtime deployment: No-Go.
+- Backend production health URL: Missing.
+- Firebase `/api` rewrite: No-Go.
+- Production admin_memo rollout remains blocked.
