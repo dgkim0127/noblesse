@@ -258,3 +258,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Firebase Hosting `/api` rewrite remains absent.
 - Production frontend still does not call the admin API.
 - Frontend direct PostgreSQL access remains prohibited.
+
+## 32J-2 Production Backend Runtime Plan
+
+- Production backend runtime planning is documented in `docs/ADMIN_PRODUCTION_BACKEND_RUNTIME_PLAN.md`.
+- Firebase Hosting `/api` rewrite remains absent.
+- Production frontend still does not call the admin API.
+- Backend runtime planning does not change the frontend/API boundary.

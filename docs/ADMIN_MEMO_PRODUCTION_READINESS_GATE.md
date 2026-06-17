@@ -179,3 +179,9 @@ Still blocked:
 - Production infrastructure direction is refined in `docs/ADMIN_PRODUCTION_INFRA_DECISION.md`.
 - 32J-1 is decision planning only and does not unlock production rollout.
 - Runtime, production DB, secret storage, Auth/admin verification, admin bootstrap, Firebase `/api` rewrite, rollback, and production QA remain required.
+
+## 32J-2 Production Backend Runtime Plan Follow-up
+
+- Production backend runtime planning is documented in `docs/ADMIN_PRODUCTION_BACKEND_RUNTIME_PLAN.md`.
+- Runtime remains unimplemented.
+- Admin memo production rollout remains blocked until runtime, Auth, DB, secret, rewrite, rollback, and QA gates are satisfied.

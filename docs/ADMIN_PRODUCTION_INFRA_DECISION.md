@@ -342,3 +342,9 @@ Important:
 - Noblesse remains a B2B catalog/inquiry site.
 - Terms/legal review remains separate.
 - No online order-completion flow is enabled by this document.
+
+## 32J-2 Production Backend Runtime Plan Follow-up
+
+- Production backend runtime planning is documented in `docs/ADMIN_PRODUCTION_BACKEND_RUNTIME_PLAN.md`.
+- 32J-2 refines the Cloud Run/equivalent runtime plan but does not deploy anything.
+- Dockerfile, Cloud Build, Cloud Run, Secret Manager, production DB/Auth, Firebase `/api` rewrite, and deploy remain unimplemented.

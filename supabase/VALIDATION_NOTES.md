@@ -869,3 +869,19 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source changes: Existing src changes were not staged or committed by 32J-1.
 - Conclusion: Production infrastructure direction is planned, but production admin memo rollout remains No-Go.
+
+## 32J-2 Admin Production Backend Runtime Plan Follow-up
+
+- Date: 2026-06-17
+- Change: Added `docs/ADMIN_PRODUCTION_BACKEND_RUNTIME_PLAN.md`.
+- Scope: Documentation only for future Cloud Run/equivalent runtime planning.
+- SQL execution required in 32J-2: No.
+- DB/Auth integration in 32J-2: No.
+- SQL file change: No.
+- Dockerfile/cloudbuild file created: No.
+- Cloud Run/Cloud Build action: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 32J-2: No.
+- Secret recorded in repo/docs: No.
+- Frontend source changes: Existing src changes were not staged or committed by 32J-2.
+- Conclusion: Production backend runtime is planned, but runtime implementation and production admin memo rollout remain No-Go.

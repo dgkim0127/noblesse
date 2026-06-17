@@ -292,3 +292,9 @@ Before implementation starts:
 - Production infrastructure decision planning is documented in `docs/ADMIN_PRODUCTION_INFRA_DECISION.md`.
 - Next implementation still requires separate approval.
 - Cloud/runtime, DB, Secret Manager, Firebase Auth, admin bootstrap, Firebase `/api` rewrite, and production QA remain unimplemented.
+
+## 32J-2 Production Backend Runtime Plan
+
+- Production backend runtime planning is documented in `docs/ADMIN_PRODUCTION_BACKEND_RUNTIME_PLAN.md`.
+- Next implementation still requires separate approval.
+- No Dockerfile, Cloud Build, Cloud Run service, production DB/Auth integration, Secret Manager setup, Firebase `/api` rewrite, or deploy was added.
