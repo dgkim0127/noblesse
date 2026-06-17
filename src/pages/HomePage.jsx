@@ -285,7 +285,7 @@ const heroBanners = [
       cn: '以锆石与欧泊细节为中心的穿孔饰品选择。',
     },
     to: '/products?collection=premium-cubic-line',
-    image: 'https://images.unsplash.com/photo-1722410180651-efd51636f260?auto=format&fit=crop&crop=faces&w=900&h=1350&q=86',
+    image: 'https://images.unsplash.com/photo-1602722872368-0cfc00f748ff?auto=format&fit=crop&crop=faces&w=900&h=1350&q=86',
   },
   {
     key: 'gold-tiny',
@@ -308,7 +308,7 @@ const heroBanners = [
       cn: '精致小巧的14K金穿孔饰品目录。',
     },
     to: '/products?material=14K%20Gold',
-    image: 'https://images.unsplash.com/photo-1671644730555-916aa8d8157f?auto=format&fit=crop&crop=entropy&w=900&h=1350&q=82',
+    image: 'https://images.unsplash.com/photo-1701777892740-88419a701472?auto=format&fit=crop&crop=entropy&w=900&h=1350&q=86',
   },
   {
     key: 'export-best',
@@ -331,7 +331,7 @@ const heroBanners = [
       cn: '适合海外地区采购的出口推荐单品。',
     },
     to: '/products?collection=export-best-items',
-    image: 'https://images.unsplash.com/photo-1722410180651-efd51636f260?auto=format&fit=crop&crop=entropy&w=900&h=1350&q=82',
+    image: 'https://images.unsplash.com/photo-1690126889953-a100f54b619e?auto=format&fit=crop&crop=faces&w=900&h=1350&q=86',
   },
 ]
 
@@ -369,6 +369,7 @@ const homeShowcasePanels = [
       jp: 'デイリーカタログに合うシルバーピアスセレクション。',
       cn: '适合日常目录搭配的银色穿孔饰品精选。',
     },
+    image: 'https://images.unsplash.com/photo-1722410180651-efd51636f260?auto=format&fit=crop&crop=faces&w=900&h=1350&q=86',
     to: '/products?material=Silver%20925',
   },
   {
@@ -392,6 +393,7 @@ const homeShowcasePanels = [
       jp: '着用イメージ中心で確認するリングピアスライン。',
       cn: '以佩戴图为中心查看的环形穿孔系列。',
     },
+    image: 'https://images.unsplash.com/photo-1653227907864-560dce4c252d?auto=format&fit=crop&crop=entropy&w=900&h=1350&q=86',
     to: '/products?q=ring',
   },
 ]
@@ -681,7 +683,7 @@ export function HomePage() {
           const bannerTitle = getLocalizedValue(banner.title, locale)
           const bannerEyebrow = getLocalizedValue(banner.eyebrow, locale)
           const bannerText = getLocalizedValue(banner.text, locale)
-          const label = ['NEW', 'HOT', 'CELEB', 'BEST', 'SILVER', 'RING'][index % homeShowcasePanels.length]
+          const label = ['NEW', 'HOT', 'TRADE', 'BEST', 'SILVER', 'RING'][index % homeShowcasePanels.length]
 
           return <Link className="home-showcase-panel" key={`${banner.key}-${index}`} onClick={handleShowcaseClick} to={toLocalePath(banner.to)}>
             <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} width="900" />

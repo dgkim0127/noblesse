@@ -863,7 +863,7 @@ export function StoreShell() {
         </div>
       </div>}
 
-      <div className="header-lower" style={compactHeaderCollapseStyle}>
+      {(buyerAccess.canRequestQuote || isPending) && <div className="header-lower" style={compactHeaderCollapseStyle}>
         <nav className="header-nav" ref={navRef} aria-label={copy.mainNav}>
           <span
             aria-hidden="true"
@@ -873,12 +873,10 @@ export function StoreShell() {
               width: `${navIndicator.width}px`,
             }}
           />
-          <NavLink end to={toLocalePath('/')}>{copy.home}</NavLink>
-          <NavLink to={toLocalePath('/products')}>{copy.productList}</NavLink>
           {buyerAccess.canRequestQuote && <NavLink to={toLocalePath('/request-quote')}>{copy.requestQuote}</NavLink>}
           {isPending && <NavLink to={toLocalePath('/approval-pending')}>{copy.pending}</NavLink>}
         </nav>
-      </div>
+      </div>}
 
       {!isPreviewBarHidden && <div className="preview-bar" style={compactHeaderCollapseStyle}>
         <span>

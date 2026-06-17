@@ -2979,7 +2979,7 @@ h6 {
   left: 30px;
   color: #fff;
   font-size: clamp(18px, 1.8vw, 28px);
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: .04em;
 }
 
@@ -3000,6 +3000,7 @@ h6 {
 .home-showcase-copy strong {
   color: #fff;
   font-size: clamp(24px, 2.7vw, 38px);
+  font-weight: 700;
   line-height: 1.08;
 }
 
@@ -3008,7 +3009,7 @@ h6 {
   color: rgb(255 255 255 / 88%);
   font-style: normal;
   font-size: clamp(13px, 1.2vw, 17px);
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.45;
 }
 
