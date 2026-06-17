@@ -73,3 +73,47 @@ No real values were recorded.
 - Cloud Build execution: No-Go.
 - Firebase `/api` rewrite: No-Go.
 - production admin_memo rollout: No-Go.
+
+## 32K-8R3 Retry
+
+### Scope
+
+- Read-only gcloud preflight retry.
+- No Cloud Run deploy.
+- No Cloud Build.
+- No API enablement.
+- No Secret Manager creation.
+- No Firebase deploy.
+- No Firebase `/api` rewrite.
+- No DB/Auth/SQL.
+- No secret recorded.
+- Frontend source dirty not staged.
+
+### gcloud CLI Check
+
+- gcloud CLI available: Yes.
+- command source: full-path.
+- gcloud version checked: Yes.
+- real account/project values recorded: No.
+
+### Auth / Project Check
+
+- active gcloud account present: Yes.
+- active project configured: Yes.
+- real account email recorded: No.
+- real project id recorded: No.
+
+### Required API Readiness
+
+- run.googleapis.com: Missing.
+- cloudbuild.googleapis.com: Missing.
+- artifactregistry.googleapis.com: Missing.
+- secretmanager.googleapis.com: Missing.
+
+### Go / No-Go
+
+- gcloud preflight: No-Go.
+- Cloud Run deploy: No-Go.
+- Cloud Build execution: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- production admin_memo rollout: No-Go.

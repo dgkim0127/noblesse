@@ -151,3 +151,12 @@ Recommended candidate:
 - Real gcloud account/project values are not recorded.
 - Real deploy values remain pending/proposed only.
 - Deploy remains No-Go.
+
+## 32K-8R3 gcloud Preflight Retry Follow-up
+
+- gcloud preflight retry is documented in `docs/ADMIN_CLOUD_RUN_GCLOUD_PREFLIGHT_REPORT.md`.
+- gcloud CLI was available by full path.
+- Active account and project were present, but real values were not recorded.
+- Required API readiness is missing for the Cloud Run deployment path.
+- Real deploy values remain pending/proposed only.
+- Deploy remains No-Go.

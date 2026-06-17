@@ -510,3 +510,15 @@ Required before 32K:
 - Cloud Build execution: No-Go.
 - Firebase `/api` rewrite: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32K-8R3 gcloud Preflight Retry Follow-up
+
+- Health-only entrypoint smoke: Go.
+- gcloud preflight retry: No-Go.
+- gcloud CLI: available by full path.
+- Active account/project: present, real values not recorded.
+- Required API readiness: Missing.
+- Cloud Run deploy: No-Go.
+- Cloud Build execution: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- Production admin_memo write: No-Go.

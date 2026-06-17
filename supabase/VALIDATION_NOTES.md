@@ -1159,3 +1159,24 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32K-8: No.
 - Conclusion: gcloud preflight is No-Go until gcloud is available and approved values are confirmed.
+
+## 32K-8R3 gcloud Preflight Retry Follow-up
+
+- Date: 2026-06-18
+- Change: Updated `docs/ADMIN_CLOUD_RUN_GCLOUD_PREFLIGHT_REPORT.md`.
+- Scope: Read-only gcloud preflight retry only.
+- gcloud CLI available: Yes, by full path.
+- Active account present: Yes, value not recorded.
+- Active project configured: Yes, value not recorded.
+- Required API readiness: Missing.
+- gcloud deploy/build/enable command executed in 32K-8R3: No.
+- Docker build/run in 32K-8R3: No.
+- Cloud Build execution in 32K-8R3: No.
+- Cloud Run deploy in 32K-8R3: No.
+- Firebase deploy or `/api` rewrite in 32K-8R3: No.
+- Secret Manager creation in 32K-8R3: No.
+- DB/Auth/SQL execution in 32K-8R3: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32K-8R3: No.
+- Conclusion: gcloud preflight retry is No-Go because required APIs are missing and deploy approval is still pending.

@@ -284,3 +284,12 @@ Allowed to remain dirty but must not be staged/committed.
 - Real account, project, service account, secret, DB URL, password, and private key values were not recorded.
 - Cloud Run deploy remains No-Go.
 - Cloud Build execution remains No-Go.
+
+## 32K-8R3 gcloud Preflight Retry Follow-up
+
+- Read-only gcloud preflight retry is documented in `docs/ADMIN_CLOUD_RUN_GCLOUD_PREFLIGHT_REPORT.md`.
+- gcloud CLI was available by full path in the current terminal session.
+- Active account and project were present, but real values were not recorded.
+- Required Cloud Run deployment APIs were missing.
+- Cloud Run deploy remains No-Go.
+- Cloud Build execution remains No-Go.

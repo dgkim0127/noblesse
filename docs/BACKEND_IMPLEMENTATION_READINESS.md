@@ -414,3 +414,12 @@ Before implementation starts:
 - Account, project, and required API readiness remain unknown.
 - Implementation still requires explicit deploy approval and confirmed runtime values.
 - Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.
+
+## 32K-8R3 gcloud Preflight Retry
+
+- Read-only gcloud preflight retry is documented in `docs/ADMIN_CLOUD_RUN_GCLOUD_PREFLIGHT_REPORT.md`.
+- gcloud CLI was available by full path.
+- Active account and project were present, but real values were not recorded.
+- Required Cloud Run deployment APIs were missing.
+- Implementation still requires explicit deploy approval, API readiness, and confirmed runtime values.
+- Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.
