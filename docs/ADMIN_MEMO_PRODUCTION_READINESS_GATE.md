@@ -203,3 +203,9 @@ Still blocked:
 - Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
 - The admin auth gate remains unsatisfied until Firebase ID token verification and PostgreSQL admin mapping are implemented.
 - Admin bootstrap, runtime credentials, Auth QA, DB/Auth integration, rewrite, and deploy remain blocked.
+
+## 32J-6 Admin Bootstrap Plan Follow-up
+
+- Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
+- The admin bootstrap gate remains unsatisfied until first admin creation is controlled, reviewed, auditable, and reversible.
+- Production admin_memo rollout remains No-Go until bootstrap, Auth, DB, secret, runtime, rewrite, rollback, and QA gates are satisfied.

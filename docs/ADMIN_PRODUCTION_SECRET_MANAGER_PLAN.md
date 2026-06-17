@@ -346,3 +346,9 @@ Important:
 - Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
 - Firebase Admin runtime credential strategy is planned.
 - No Firebase credential, service account JSON, Secret Manager secret, or runtime injection was created in 32J-5.
+
+## 32J-6 Admin Bootstrap Plan Follow-up
+
+- Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
+- Future bootstrap must not expose secrets and must use the approved secret/runtime path later.
+- No secret creation, secret value recording, runtime injection, bootstrap script, DB write, Firebase Auth integration, rewrite, or deploy was added in 32J-6.

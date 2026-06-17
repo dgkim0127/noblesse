@@ -316,3 +316,9 @@ Before implementation starts:
 - Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
 - No Firebase Auth integration, Firebase Admin SDK installation, credential creation, package change, DB/Auth integration, Firebase `/api` rewrite, or deploy was added.
 - Production admin memo rollout remains blocked.
+
+## 32J-6 Admin Bootstrap Plan
+
+- Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
+- No admin account, bootstrap script, protected bootstrap route, DB write, Firebase Auth integration, package change, Firebase `/api` rewrite, or deploy was added.
+- Production admin memo rollout remains blocked until bootstrap, Auth, DB, secret, runtime, rewrite, rollback, and QA gates are approved.

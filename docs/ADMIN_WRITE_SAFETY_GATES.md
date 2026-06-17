@@ -119,3 +119,9 @@
 - Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
 - 32J-5 is auth planning only.
 - The production auth gate remains unsatisfied until real token verification, PostgreSQL mapping, bootstrap, and QA are implemented.
+
+## 32J-6 Admin Bootstrap Plan Follow-up
+
+- Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
+- The bootstrap gate remains unsatisfied until first admin creation, no-public-signup guardrails, rollback/disable, and audit requirements are approved.
+- Production writes remain blocked.

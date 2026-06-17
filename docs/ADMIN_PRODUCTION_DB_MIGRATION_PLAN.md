@@ -359,3 +359,9 @@ Important:
 - Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
 - Production admin auth requires users.auth_uid mapping and admin bootstrap before DB write rollout.
 - Production DB write readiness remains No-Go until Auth, secret, runtime, staging, and rollback gates are satisfied.
+
+## 32J-6 Admin Bootstrap Plan Follow-up
+
+- Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
+- Future bootstrap must use an approved migration/DB execution path and must not create a public admin signup path.
+- No admin user, DB insert/update, SQL execution, migration file, bootstrap script, Firebase Auth integration, rewrite, or deploy was added in 32J-6.

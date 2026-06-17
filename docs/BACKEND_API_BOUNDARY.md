@@ -286,3 +286,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Auth planning does not change the API boundary.
 - Firebase Hosting `/api` rewrite remains absent.
 - Production frontend still does not call the admin API.
+
+## 32J-6 Admin Bootstrap Plan
+
+- Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
+- Bootstrap planning does not change the API boundary and does not authorize a public bootstrap endpoint.
+- The frontend still must not assign admin role/status or write directly to PostgreSQL.
+- No backend route, DB write, Firebase Auth integration, `/api` rewrite, or deploy was added.

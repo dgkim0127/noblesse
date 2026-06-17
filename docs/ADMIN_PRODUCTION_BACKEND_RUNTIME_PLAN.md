@@ -352,3 +352,9 @@ Next recommended step:
 - Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
 - Runtime remains unimplemented.
 - Production admin auth still requires approved runtime credentials, DB mapping, admin bootstrap, and QA.
+
+## 32J-6 Admin Bootstrap Plan Follow-up
+
+- Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
+- Backend runtime still waits for approved admin bootstrap, Auth, DB, secret, rollback, and QA gates.
+- No bootstrap route, script, runtime config, Firebase Auth integration, DB connection, rewrite, or deploy was added in 32J-6.

@@ -366,3 +366,9 @@ Important:
 - Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
 - 32J-5 refines ID token verification, PostgreSQL admin mapping, credential strategy, and auth QA planning but does not connect Firebase Auth.
 - Firebase Admin SDK wiring, credentials, admin bootstrap, production DB/Auth integration, Firebase `/api` rewrite, and deploy remain blocked.
+
+## 32J-6 Admin Bootstrap Plan Follow-up
+
+- Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
+- Production rollout remains blocked until the first admin creation, disable/rollback, Auth, DB, secret, runtime, rewrite, and QA gates are approved.
+- No admin account, bootstrap script, DB write, Firebase Auth integration, rewrite, or deploy was added in 32J-6.

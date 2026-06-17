@@ -396,3 +396,9 @@ Important:
 
 - Do not implement Firebase Auth before admin bootstrap and runtime credential strategy are approved.
 - Do not enable production admin_memo write before Auth/DB/Secret/Runtime gates are satisfied.
+
+## 32J-6 Admin Bootstrap Plan Follow-up
+
+- Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
+- Bootstrap remains No-Go until the first admin creation path is reviewed and approved.
+- No admin user, bootstrap script, protected endpoint, DB write, Firebase Auth integration, credential, rewrite, or deploy was created in 32J-6.

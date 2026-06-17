@@ -933,3 +933,21 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Deploy action in 32J-5: No.
 - Frontend source changes: Existing src changes were not staged or committed by 32J-5.
 - Conclusion: Admin Firebase Auth verification is planned, but real Auth integration and production admin memo rollout remain No-Go.
+
+## 32J-6 Admin Bootstrap Plan Follow-up
+
+- Date: 2026-06-17
+- Change: Added `docs/ADMIN_BOOTSTRAP_PLAN.md`.
+- Scope: Documentation only for first-admin bootstrap boundaries, controlled admin creation options, disable/rollback, audit, QA, and no-public-signup guardrails.
+- Admin user creation in 32J-6: No.
+- DB write in 32J-6: No.
+- Bootstrap script created in 32J-6: No.
+- Public admin signup added in 32J-6: No.
+- Firebase Auth integration in 32J-6: No.
+- SQL execution required in 32J-6: No.
+- SQL/schema/migration file change: No.
+- Firebase `/api` rewrite change: No.
+- Deploy action in 32J-6: No.
+- Secret recorded in repo/docs: No.
+- Frontend source changes: Existing src changes were not staged or committed by 32J-6.
+- Conclusion: Admin bootstrap is planned, but admin user creation and production admin memo rollout remain No-Go.

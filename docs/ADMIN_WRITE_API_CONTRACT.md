@@ -634,3 +634,9 @@ No real Firebase/DB tests in first write scaffold.
 - Firebase Auth admin verification planning is documented in `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`.
 - The `admin_memo` write contract requires Firebase ID token verification and PostgreSQL users.role/status checks before production.
 - This remains a contract only and does not unlock implementation.
+
+## 32J-6 Admin Bootstrap Plan Follow-up
+
+- Admin bootstrap planning is documented in `docs/ADMIN_BOOTSTRAP_PLAN.md`.
+- Production `admin_memo` write requires a completed and reversible admin bootstrap path before rollout.
+- No admin account creation, bootstrap script, route implementation, DB write, Auth integration, rewrite, or deploy was added in 32J-6.
