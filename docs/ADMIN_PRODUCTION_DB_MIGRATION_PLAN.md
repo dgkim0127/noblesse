@@ -421,3 +421,10 @@ Important:
 - Secret version addition: No.
 - Password and DB URL recorded: No.
 - Schema migration remains No-Go until secret recovery and a separate migration approval are completed.
+
+## 32L-8R Staging DB User Secret Recovery Follow-up
+
+- Recovery is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- First staging database URL secret version: Go.
+- Password and DB URL recorded: No.
+- Schema migration remains No-Go until a separate migration approval is completed.

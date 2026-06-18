@@ -61,3 +61,11 @@ Reason:
 - Secret version addition: No, blocked after user creation.
 - Password and DB URL recorded: No.
 - Recovery approval is required before any password reset/delete/recreate or secret version addition.
+
+## 32L-8R DB User Secret Recovery
+
+- Recovery result is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- Existing staging DB user password reset: Go.
+- First staging database URL secret version: Go.
+- Password and DB URL recorded: No.
+- Runtime Secret IAM, Cloud Run DB update, schema migration, Firebase rewrite, and production write remain No-Go.

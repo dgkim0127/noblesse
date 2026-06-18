@@ -398,11 +398,13 @@ Completed safe phases:
 
 First blocked approval gate:
 
-- `APPROVE_STAGING_DB_USER_SECRET_RECOVERY = NO`
+- `APPROVE_SCHEMA_MIGRATION_EXECUTION = NO`
+- `APPROVE_RUNTIME_SECRET_IAM = NO`
 
 Next approval needed:
 
-- Approve recovery for the already-created staging DB user before any secret version or migration.
+- Approve schema migration execution through a controlled staging path.
+- Approve runtime Secret Manager accessor IAM before Cloud Run can consume the staging secret.
 
 No-Go remains:
 
@@ -435,4 +437,12 @@ No-Go remains:
 - Staging DB user exists, but the first staging secret version was not added.
 - Password and DB URL were not recorded.
 - Recovery approval is required before any password reset/delete/recreate or secret version addition.
+- Schema migration, Runtime Secret IAM, Cloud Run DB update, Firebase Auth/rewrite, and production write remain blocked.
+
+## 32L-8R DB User Secret Recovery
+
+- Recovery result is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- Existing staging DB user password reset: Go.
+- First staging database URL secret version: Go.
+- Password and DB URL recorded: No.
 - Schema migration, Runtime Secret IAM, Cloud Run DB update, Firebase Auth/rewrite, and production write remain blocked.

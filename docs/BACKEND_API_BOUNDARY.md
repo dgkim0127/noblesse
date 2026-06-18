@@ -476,3 +476,11 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - No backend route, Cloud Run runtime secret binding, Firebase rewrite, or frontend API path changed.
 - Firebase Hosting `/api` rewrite remains absent.
 - Direct React-to-PostgreSQL access remains prohibited.
+
+## 32L-8R Staging DB User Secret Recovery
+
+- Recovery is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- This does not change the public API boundary.
+- Cloud Run has not been updated to consume the secret.
+- Firebase Hosting `/api` rewrite remains absent.
+- Direct React-to-PostgreSQL access remains prohibited.

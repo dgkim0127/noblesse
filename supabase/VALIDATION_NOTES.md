@@ -1491,3 +1491,25 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase deploy or `/api` rewrite: No.
 - Frontend source dirty staged in 32L-8: No.
 - Conclusion: Staging DB user creation is partial Go, but secret version handoff is blocked pending explicit recovery approval.
+
+## 32L-8R Staging DB User Secret Recovery Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_STAGING_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- Scope: Reset existing staging DB application user password and add first staging database URL secret version.
+- DB user existed before recovery: Yes.
+- Password reset executed: Yes.
+- Secret version count before: 0.
+- Secret version count after: 1.
+- First staging secret version added: Yes.
+- TEMP password/secret files removed: Yes.
+- Password recorded: No.
+- Raw DB URL recorded: No.
+- Secret value accessed/read: No.
+- DB connection/psql executed: No.
+- SQL/schema/migration file change: No.
+- Runtime Secret IAM grant: No.
+- Cloud Run update or deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Frontend source dirty staged in 32L-8R: No.
+- Conclusion: Staging DB user secret recovery is Go, but schema migration, Runtime Secret IAM, Cloud Run DB update, Firebase Auth/rewrite, and production write remain No-Go.

@@ -58,6 +58,14 @@
 - Do not reset or delete the DB user without separate recovery approval.
 - A recovery gate is required before the staging database URL secret version can be created.
 
+## 32L-8R Recovery Result
+
+- Recovery result is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- Existing staging DB user password reset: Go.
+- First staging secret version added: Go.
+- Password and DB URL recorded: No.
+- DB connection, psql, schema migration, Cloud Run DB update, Runtime Secret IAM, Firebase rewrite/deploy, and production write remain No-Go.
+
 ## Next Gate
 
 - `APPROVE_STAGING_DB_USER_SECRET_RECOVERY = YES`

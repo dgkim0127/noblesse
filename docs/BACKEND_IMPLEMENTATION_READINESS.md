@@ -509,3 +509,10 @@ Before implementation starts:
 - Password and DB URL were not recorded.
 - Backend DB readiness remains blocked until recovery approval creates a usable staging secret version.
 - DB connection, schema migration, Cloud Run DB update, Firebase Auth, Firebase `/api` rewrite, and production write remain blocked.
+
+## 32L-8R Staging DB User Secret Recovery
+
+- Recovery is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- First staging database URL secret version exists for future approved runtime use.
+- Password and DB URL were not recorded.
+- Backend DB readiness still requires schema migration approval, runtime Secret IAM, and Cloud Run DB secret/socket update before any DB-backed runtime smoke.

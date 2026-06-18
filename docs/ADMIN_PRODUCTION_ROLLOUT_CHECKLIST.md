@@ -639,3 +639,13 @@ Required before 32K:
 - Recovery approval required: Yes.
 - Cloud Run DB update: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32L-8R Staging DB User Secret Recovery Follow-up
+
+- Recovery report: `docs/ADMIN_STAGING_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- Existing staging DB user password reset: Go.
+- First staging secret version: Go.
+- Password and DB URL recorded: No.
+- Runtime Secret IAM: No-Go.
+- Cloud Run DB update: No-Go.
+- Production admin_memo write: No-Go.

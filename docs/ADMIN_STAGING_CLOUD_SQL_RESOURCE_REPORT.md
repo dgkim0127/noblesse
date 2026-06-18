@@ -85,3 +85,11 @@
 - Staging secret version count remains 0.
 - Password and DB URL recorded: No.
 - DB connection, psql, schema migration, Cloud Run DB update, Runtime Secret IAM, Firebase rewrite/deploy, and production write remain No-Go.
+
+## 32L-8R DB User Secret Recovery
+
+- Recovery result is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- Existing staging DB user password reset: Go.
+- First staging secret version added: Go.
+- Password and DB URL recorded: No.
+- DB connection, psql, schema migration, Cloud Run DB update, Runtime Secret IAM, Firebase rewrite/deploy, and production write remain No-Go.

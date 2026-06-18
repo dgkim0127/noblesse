@@ -386,3 +386,11 @@ Important:
 - The password and DB URL were not recorded.
 - Secret Manager version addition remains blocked pending recovery approval.
 - Production secrets remain No-Go.
+
+## 32L-8R Staging DB User Secret Recovery Follow-up
+
+- Recovery is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- First staging database URL secret version: Go.
+- Secret value was not read back or recorded.
+- Runtime Secret IAM remains No-Go.
+- Production secrets remain No-Go.
