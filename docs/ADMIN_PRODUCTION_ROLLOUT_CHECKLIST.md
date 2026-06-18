@@ -553,3 +553,13 @@ Required before 32K:
 - Secret Manager secret creation: No-Go.
 - Firebase `/api` rewrite: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32K-12 Health-only Deploy Approval Follow-up
+
+- Required APIs: Go.
+- Health-only deploy approval doc: documented in `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_DEPLOY_APPROVAL.md`.
+- Actual Cloud Run deploy: No-Go.
+- Cloud Build execution: No-Go.
+- Secret Manager secret creation: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- Production admin_memo write: No-Go.

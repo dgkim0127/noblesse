@@ -317,3 +317,11 @@ Allowed to remain dirty but must not be staged/committed.
 - Cloud Run deploy remains No-Go.
 - Cloud Build execution remains No-Go.
 - Secret Manager secret creation remains No-Go.
+
+## 32K-12 Health-only Deploy Approval Follow-up
+
+- Health-only first deploy approval document created: `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_DEPLOY_APPROVAL.md`.
+- Actual Cloud Run deploy remains No-Go.
+- Cloud Build execution remains No-Go.
+- Secret Manager secret creation remains No-Go.
+- Firebase `/api` rewrite remains No-Go.

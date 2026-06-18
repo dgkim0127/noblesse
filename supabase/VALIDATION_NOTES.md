@@ -1232,3 +1232,19 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32K-11: No.
 - Conclusion: Deploy values approval candidates are documented, but deployment, Secret Manager setup, Firebase rewrite, and production admin_memo rollout remain No-Go.
+
+## 32K-12 Health-only Cloud Run Deploy Approval Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_DEPLOY_APPROVAL.md`.
+- Scope: Health-only Cloud Run deploy approval document only.
+- Cloud Run deploy in 32K-12: No.
+- Cloud Build execution in 32K-12: No.
+- Cloud Run service creation in 32K-12: No.
+- Secret Manager secret creation in 32K-12: No.
+- Firebase deploy or `/api` rewrite in 32K-12: No.
+- DB/Auth/SQL execution in 32K-12: No.
+- SQL/schema/migration file change: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32K-12: No.
+- Conclusion: Health-only first deploy approval is documented, but actual deploy, Secret Manager setup, Firebase rewrite, and production admin_memo rollout remain No-Go.

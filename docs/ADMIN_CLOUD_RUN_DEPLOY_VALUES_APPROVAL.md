@@ -80,3 +80,12 @@ Before deploy:
 - no DB/Auth/SQL
 - no production admin_memo write
 - no status/buyer/product/price/quote writes
+
+## 32K-12 Health-only Deploy Approval Follow-up
+
+- First health-only deploy approval gate is documented in `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_DEPLOY_APPROVAL.md`.
+- First deploy remains pending explicit approval.
+- Region, public access/ingress, runtime service account, and rollback owner remain pending.
+- Cloud Run deploy remains No-Go.
+- Cloud Build execution remains No-Go.
+- Secret Manager secret creation remains No-Go.

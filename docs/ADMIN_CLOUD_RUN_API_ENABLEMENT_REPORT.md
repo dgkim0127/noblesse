@@ -66,3 +66,10 @@
 - No Cloud Run service was created.
 - No Secret Manager secret was created.
 - No Firebase `/api` rewrite or Firebase deploy was performed.
+
+## 32K-12 Health-only Deploy Approval Follow-up
+
+- Required APIs remain enabled.
+- First health-only deploy approval is documented in `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_DEPLOY_APPROVAL.md`.
+- Actual Cloud Run deploy still requires separate approval.
+- No Cloud Run deploy or Cloud Build execution occurred in 32K-12.

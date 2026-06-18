@@ -185,3 +185,11 @@ Recommended candidate:
 - Runtime service account, ingress, unauthenticated access, secret strategy, and rollback owner remain pending.
 - Real project, account, service account, secret, DB URL, password, or private key values are not recorded.
 - Deploy remains No-Go.
+
+## 32K-12 Health-only Deploy Approval Follow-up
+
+- Health-only first deploy approval is documented in `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_DEPLOY_APPROVAL.md`.
+- Recommended region candidate is `asia-northeast3`; `asia-northeast1` remains fallback.
+- Public access/ingress and runtime service account still require explicit approval.
+- The first deploy candidate remains no-secret and health-only.
+- Deploy remains No-Go.

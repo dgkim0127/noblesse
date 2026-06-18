@@ -446,3 +446,11 @@ Before implementation starts:
 - The non-secret service name candidate is proposed, while region, runtime service account, ingress, public access boundary, secret strategy, and rollback owner remain pending.
 - No Cloud Run deploy, Cloud Build execution, Secret Manager secret creation, Firebase rewrite, DB/Auth integration, or SQL execution was performed.
 - Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.
+
+## 32K-12 Health-only Deploy Approval
+
+- First health-only deploy approval is documented in `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_DEPLOY_APPROVAL.md`.
+- Implementation still requires explicit deploy approval.
+- The future first deploy candidate is health-only, no-secret, and does not connect DB/Auth/Secret Manager or Firebase `/api` rewrite.
+- No Cloud Run deploy, Cloud Build execution, Secret Manager secret creation, Firebase rewrite, DB/Auth integration, or SQL execution was performed.
+- Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.
