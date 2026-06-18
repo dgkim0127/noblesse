@@ -70,6 +70,8 @@ Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECI
 
 32L-3 enables Cloud SQL Admin API only and documents it in `docs/ADMIN_CLOUD_SQL_ADMIN_API_ENABLEMENT_REPORT.md`. This does not create a DB, add IAM, add a secret version, connect Cloud Run to DB, add Firebase `/api` rewrite, or allow frontend DB access.
 
+32L-4 adds backend-only Cloud SQL socket pool configuration support. This remains server-side only: no frontend DB access, no `DATABASE_URL` in frontend, no Firebase `/api` rewrite, and no production admin write.
+
 ### `GET /api/catalog/products`
 
 - Returns public visible product metadata.

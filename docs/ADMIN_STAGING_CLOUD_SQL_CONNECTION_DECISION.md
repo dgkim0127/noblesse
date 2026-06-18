@@ -11,9 +11,9 @@
 - health-only Cloud Run runtime: Go
 - staging Secret Manager container: exists, zero versions
 - Cloud SQL instance: not created
-- Cloud SQL Admin API: Missing
+- Cloud SQL Admin API: Enabled
 - runtime Cloud SQL IAM: not granted
-- DB pool socket support: not implemented
+- DB pool socket support: implemented in backend config only
 - production write: No-Go
 
 ## Read-only Preflight
@@ -31,6 +31,14 @@
 - actual Cloud SQL instance name, IP, or connection name recorded: No
 
 Only Cloud SQL Admin API enablement was executed in 32L-3. No DB creation, IAM change, deploy, or DB connection was executed.
+
+32L-4 implementation update:
+
+- Backend config now supports `DB_CONNECTION_MODE=tcp` and `DB_CONNECTION_MODE=cloudsql-socket`.
+- `CLOUD_SQL_INSTANCE_CONNECTION_NAME` is parsed as server-only config for socket mode.
+- Pool max, connection timeout, and idle timeout settings are parsed.
+- Socket-mode pool config is covered by backend tests only.
+- No actual Cloud SQL instance, DB connection, IAM, Secret Manager version, Cloud Run update, or Firebase rewrite was added.
 
 ## Connection Options Reviewed
 
@@ -106,20 +114,28 @@ Recommendation:
 Current backend shape:
 
 - `backend/src/config/env.js` reads server-only `DATABASE_URL`.
-- `backend/src/db/pool.js` creates `pg` Pool with `connectionString`.
+- `backend/src/config/env.js` reads server-only `DB_CONNECTION_MODE` and `CLOUD_SQL_INSTANCE_CONNECTION_NAME`.
+- `backend/src/db/pool.js` can build TCP or Cloud SQL Unix socket pool config.
 - Production mode currently applies SSL options to the connection-string pool.
 - Health-only startup can run without DB/Auth secrets.
 - `backend/package.json` already uses `pg`; no dependency change is required for this decision.
 
-Required before Option A implementation:
+Implemented in 32L-4:
 
-- explicit DB connection mode setting, such as `tcp` or `cloudsql-socket`
-- socket host/path handling without recording exact instance connection name in docs
-- TLS disabled or separated for socket mode
-- verifiable TLS policy for TCP mode
-- safe DB unavailable errors
+- explicit DB connection mode setting: `tcp` or `cloudsql-socket`
+- socket host/path config support without recording exact instance connection name in docs
+- TLS separated so socket mode does not set SSL
+- TCP mode keeps the existing production SSL behavior
 - pool max, idle timeout, and connection timeout settings
 - strict no-logging rule for secret values
+
+Still required before staging DB rollout:
+
+- actual staging Cloud SQL instance/database/user approval and creation
+- Cloud SQL client IAM approval
+- schema migration approval
+- Secret Manager version approval
+- Cloud Run DB secret/socket update approval
 
 This step does not implement those changes.
 
@@ -145,9 +161,7 @@ No tier, version, storage, price, project id, instance connection name, IP addre
 
 ## Why DB Creation Is Not Yet Approved
 
-- Backend pool socket-mode support is not implemented.
-- connection mode is not implemented.
-- current pool assumes `DATABASE_URL` and production TLS behavior.
+- Backend pool socket-mode support is implemented in config/tests only and has not been connected to real Cloud SQL.
 - runtime Cloud SQL IAM is not granted.
 - reset/backup/schema plan is not executed.
 - staging secret container intentionally has zero versions.
@@ -155,8 +169,8 @@ No tier, version, storage, price, project id, instance connection name, IP addre
 
 ## Approval Gates
 
-1. `APPROVE_CLOUD_SQL_ADMIN_API_ENABLEMENT = YES`
-2. `APPROVE_DB_POOL_SOCKET_SUPPORT = YES`
+1. `APPROVE_CLOUD_SQL_ADMIN_API_ENABLEMENT = YES` - completed in 32L-3
+2. `APPROVE_DB_POOL_SOCKET_SUPPORT = YES` - completed in 32L-4
 3. backend pool socket-mode implementation/test
 4. `APPROVE_STAGING_DB_CREATE = YES`
 5. staging Cloud SQL instance/database/user creation
@@ -179,7 +193,7 @@ Secret value addition is forbidden until the staging DB and DB user are ready.
 
 - Connection architecture decision: Go
 - Cloud SQL Admin API enablement: Go
-- backend socket implementation: No-Go
+- backend socket implementation: Go
 - staging DB creation: No-Go
 - IAM change: No-Go
 - migration: No-Go

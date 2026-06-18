@@ -1355,3 +1355,26 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32L-3: No.
 - Conclusion: Cloud SQL Admin API enablement is Go, but backend socket support, staging DB creation, IAM, migration, secret version addition, Cloud Run DB update, and production rollout remain No-Go.
+
+## 32L-4 Backend Cloud SQL Socket Pool Support Follow-up
+
+- Date: 2026-06-18
+- Change: Added backend DB pool socket-mode config support.
+- Scope: Backend config and tests only.
+- `DB_CONNECTION_MODE` supports `tcp` and `cloudsql-socket`.
+- `CLOUD_SQL_INSTANCE_CONNECTION_NAME` is server-only config for socket mode.
+- Pool max, connection timeout, and idle timeout config are parsed.
+- Production strict socket mode requires `CLOUD_SQL_INSTANCE_CONNECTION_NAME`.
+- Production health-only mode still starts without DB/Auth secrets.
+- Cloud SQL socket pool config tested: Yes, without DB connection.
+- Backend tests: 55 passed.
+- Cloud SQL instance/database/user creation: No.
+- Cloud SQL client IAM change: No.
+- DB/Auth/SQL execution: No.
+- SQL/schema/migration file change: No.
+- Secret Manager version added: No.
+- Cloud Run update or deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32L-4: No.
+- Conclusion: Backend socket config support is Go, but staging DB creation, IAM, migration, secret version addition, Cloud Run DB update, and production rollout remain No-Go.

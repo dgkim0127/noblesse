@@ -124,7 +124,7 @@ Current status:
 - Recommended staging path is Cloud Run native Cloud SQL connection with Unix socket.
 - 32L-3 enables Cloud SQL Admin API only and documents it in `docs/ADMIN_CLOUD_SQL_ADMIN_API_ENABLEMENT_REPORT.md`.
 - Existing Cloud SQL instances are present, but the Noblesse staging-named candidate is not present.
-- Backend pool socket support is not implemented.
+- 32L-4 implements backend DB pool socket-mode config support and tests it without DB connection.
 
 Rollout judgment:
 

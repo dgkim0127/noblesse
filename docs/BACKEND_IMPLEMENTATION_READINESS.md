@@ -49,6 +49,8 @@ Next step is local test and route QA for the scaffold. Provider resource creatio
 
 32L-3 status: Cloud SQL Admin API enablement is documented in `docs/ADMIN_CLOUD_SQL_ADMIN_API_ENABLEMENT_REPORT.md`. API enablement is complete, but backend pool socket support is still not implemented. Staging DB creation, IAM, migration, secret version addition, Cloud Run DB update, Firebase rewrite, and production write remain blocked.
 
+32L-4 status: Backend DB pool socket-mode support is implemented and tested without DB connection. Server-only config now supports `DB_CONNECTION_MODE=tcp`, `DB_CONNECTION_MODE=cloudsql-socket`, `CLOUD_SQL_INSTANCE_CONNECTION_NAME`, and pool timeout settings. Staging DB creation, IAM, migration, secret version addition, Cloud Run DB update, Firebase rewrite, and production write remain blocked.
+
 ## Decision Status
 
 | Area | Current Status | Decision Needed Before Implementation |

@@ -15,6 +15,7 @@
 - Secret Manager staging container: Created with no value/version
 - Cloud SQL Admin API: Enabled
 - Cloud SQL connection architecture: Option A recommended, documented
+- Backend DB pool socket support: Implemented in config/tests only
 - Firebase Auth backend integration: Not implemented
 - admin bootstrap: Not executed
 - staging admin_memo write: Not executed
@@ -200,9 +201,16 @@ Rollback impact:
 - No Cloud SQL instance/database/user was created.
 - No IAM, DB connection, SQL, migration, secret version, Cloud Run update, Firebase rewrite, or production write was performed.
 
+32L-4 result:
+
+- Backend DB config supports `DB_CONNECTION_MODE=tcp` and `DB_CONNECTION_MODE=cloudsql-socket`.
+- `CLOUD_SQL_INSTANCE_CONNECTION_NAME` is server-only config and is required for production strict socket mode.
+- Pool max, connection timeout, and idle timeout options are parsed and tested.
+- Cloud SQL socket pool config is tested without opening a DB connection.
+- No Cloud SQL instance/database/user, IAM, SQL, migration, secret version, Cloud Run update, Firebase rewrite, or production write was performed.
+
 Approval required:
 
-- `APPROVE_DB_POOL_SOCKET_SUPPORT = YES`
 - `APPROVE_STAGING_DB_CREATE = YES`
 - `APPROVE_SCHEMA_MIGRATION_EXECUTION = YES`
 

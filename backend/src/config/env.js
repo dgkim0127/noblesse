@@ -6,6 +6,25 @@ export function parseAllowedOrigins(value) {
     .filter(Boolean);
 }
 
+const allowedDbConnectionModes = new Set(["tcp", "cloudsql-socket"]);
+
+function parseDbConnectionMode(value) {
+  const mode = value || "tcp";
+  if (!allowedDbConnectionModes.has(mode)) {
+    throw new Error("Invalid DB_CONNECTION_MODE. Use tcp or cloudsql-socket.");
+  }
+  return mode;
+}
+
+function parsePositiveInteger(value, fallback, name) {
+  if (value === undefined || value === "") return fallback;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`Invalid ${name}. Use a positive integer.`);
+  }
+  return parsed;
+}
+
 export function getEnv(source = process.env) {
   const nodeEnv = source.NODE_ENV || "development";
 
@@ -14,6 +33,19 @@ export function getEnv(source = process.env) {
     isProduction: nodeEnv === "production",
     port: Number(source.PORT || 8080),
     databaseUrl: source.DATABASE_URL || "",
+    dbConnectionMode: parseDbConnectionMode(source.DB_CONNECTION_MODE),
+    cloudSqlInstanceConnectionName: source.CLOUD_SQL_INSTANCE_CONNECTION_NAME || "",
+    dbPoolMax: parsePositiveInteger(source.DB_POOL_MAX, 5, "DB_POOL_MAX"),
+    dbConnectionTimeoutMs: parsePositiveInteger(
+      source.DB_CONNECTION_TIMEOUT_MS,
+      5000,
+      "DB_CONNECTION_TIMEOUT_MS"
+    ),
+    dbIdleTimeoutMs: parsePositiveInteger(
+      source.DB_IDLE_TIMEOUT_MS,
+      30000,
+      "DB_IDLE_TIMEOUT_MS"
+    ),
     firebaseProjectId: source.FIREBASE_PROJECT_ID || "",
     firebaseClientEmail: source.FIREBASE_CLIENT_EMAIL || "",
     firebasePrivateKey: source.FIREBASE_PRIVATE_KEY || "",
@@ -29,6 +61,9 @@ export function assertProductionConfig(env) {
 
   const missing = [];
   if (!env.databaseUrl) missing.push("DATABASE_URL");
+  if (env.dbConnectionMode === "cloudsql-socket" && !env.cloudSqlInstanceConnectionName) {
+    missing.push("CLOUD_SQL_INSTANCE_CONNECTION_NAME");
+  }
   if (!env.firebaseProjectId) missing.push("FIREBASE_PROJECT_ID");
   if (!env.firebaseClientEmail) missing.push("FIREBASE_CLIENT_EMAIL");
   if (!env.firebasePrivateKey) missing.push("FIREBASE_PRIVATE_KEY");
