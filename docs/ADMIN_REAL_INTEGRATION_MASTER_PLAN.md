@@ -12,7 +12,7 @@
 - health-only Cloud Run runtime: Go
 - required APIs: Enabled
 - DB: Not connected
-- Secret Manager secret: Not created
+- Secret Manager staging container: Created with no value/version
 - Firebase Auth backend integration: Not implemented
 - admin bootstrap: Not executed
 - staging admin_memo write: Not executed
@@ -29,7 +29,7 @@ Allowed in 32L:
 
 Blocked in 32L:
 
-- Secret Manager secret creation
+- Secret Manager secret creation beyond the approved staging container
 - secret version addition
 - runtime secret IAM grant
 - staging DB creation
@@ -141,17 +141,27 @@ Decision constraints:
 
 ## Secret Manager / IAM Plan
 
+32L-1 result:
+
+- Staging secret container `noblesse-staging-database-url` is created.
+- Replication is automatic.
+- Labels are `app=noblesse`, `env=staging`, and `purpose=database-url`.
+- No secret value/version was added.
+- No IAM was changed.
+- No DB, Cloud Run, Firebase Auth, Firebase rewrite, or deploy change was made.
+- Result is documented in `docs/ADMIN_STAGING_SECRET_CONTAINER_REPORT.md`.
+
 Next cloud mutation candidate after approval:
 
-- create one staging secret container candidate: `noblesse-staging-database-url`
+- create or prepare the staging DB resource boundary before any secret value/version
 
 Approval required:
 
-- `APPROVE_SECRET_MANAGER_SECRET_CREATE = YES`
+- `APPROVE_STAGING_DB_CREATE = YES`
 
 Rules:
 
-- create only the secret container
+- keep the existing staging secret container value-less until the staging DB is approved
 - do not add a secret value/version
 - do not create production secret
 - do not grant runtime IAM yet
@@ -160,7 +170,7 @@ Rules:
 
 Expected resource/cost class:
 
-- small metadata-only secret container; no DB, no runtime traffic, no production data
+- existing metadata-only secret container; no DB, no runtime traffic, no production data
 
 Rollback impact:
 

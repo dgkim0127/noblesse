@@ -64,6 +64,8 @@ Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECI
 
 31D documents the Admin read-only backend scaffold plan in `docs/ADMIN_READ_ONLY_BACKEND_SCAFFOLD_PLAN.md`. It plans future `/api/admin` route, service, query, auth, validation, pagination, and mock test structure only. `/api/admin` write routes remain blocked.
 
+32L-1 creates the Noblesse staging Secret Manager container only and documents it in `docs/ADMIN_STAGING_SECRET_CONTAINER_REPORT.md`. This does not add a secret value, runtime IAM, DB connection, Cloud Run update, Firebase `/api` rewrite, or production frontend API call.
+
 ### `GET /api/catalog/products`
 
 - Returns public visible product metadata.

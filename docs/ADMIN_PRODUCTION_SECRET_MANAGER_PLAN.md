@@ -60,8 +60,9 @@ Forbidden in frontend:
 
 Current status:
 
-- inventory planning only
-- no secret created
+- inventory planning plus one approved staging metadata container
+- staging secret container `noblesse-staging-database-url` exists with no value/version
+- no production secret created
 - no value recorded
 
 ## Secret Naming Plan
@@ -83,12 +84,13 @@ Rules:
 
 Current status:
 
-- naming plan only
-- no secret created
+- staging name created as a value-less container: `noblesse-staging-database-url`
+- production name remains planning only
+- no secret value/version added
 
 No-Go:
 
-- do not create Secret Manager secrets in 32J-4
+- do not create additional Secret Manager secrets without explicit approval
 - do not add real secret values to docs
 - do not add real secret values to .env.example
 
@@ -108,14 +110,14 @@ Reason:
 
 Current status:
 
-- planning only
-- provider not provisioned
-- no secret created
+- planning plus one approved staging metadata container
+- provider container exists for staging DB URL only
+- no secret value/version created
 - no IAM modified
 
 No-Go:
 
-- do not run gcloud secrets commands in 32J-4
+- do not add secret versions without explicit approval
 - do not create secret versions
 - do not grant IAM access
 

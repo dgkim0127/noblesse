@@ -43,6 +43,8 @@ Next step is local test and route QA for the scaffold. Provider resource creatio
 
 31D status: Admin read-only backend scaffold planning is documented in `docs/ADMIN_READ_ONLY_BACKEND_SCAFFOLD_PLAN.md`. Implementation still needs explicit approval and must begin with mock auth/mock DB tests only.
 
+32L-1 status: Noblesse staging Secret Manager container `noblesse-staging-database-url` is created with automatic replication and staging labels only. No secret value/version, IAM grant, DB connection, Cloud Run update, Firebase rewrite, or deploy change was made. Next implementation readiness gate is staging DB resource approval before any secret version is added.
+
 ## Decision Status
 
 | Area | Current Status | Decision Needed Before Implementation |

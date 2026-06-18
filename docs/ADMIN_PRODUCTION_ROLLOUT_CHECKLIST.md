@@ -145,8 +145,10 @@ Required before production:
 
 Current status:
 
-- Planned only
-- No secret created
+- Planned with one approved staging metadata container
+- Staging secret container exists with no value/version
+- No production secret created
+- No secret value added
 - No IAM grant
 - No runtime injection
 
@@ -157,6 +159,7 @@ Rollout judgment:
 Evidence:
 
 - `docs/ADMIN_PRODUCTION_SECRET_MANAGER_PLAN.md`
+- `docs/ADMIN_STAGING_SECRET_CONTAINER_REPORT.md`
 
 ## Gate 4. Firebase Auth / Admin Authorization
 
