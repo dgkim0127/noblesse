@@ -120,6 +120,10 @@ Current status:
 - Provider not selected
 - DB not created
 - SQL not executed
+- 32L-2 documents staging Cloud SQL connection architecture in `docs/ADMIN_STAGING_CLOUD_SQL_CONNECTION_DECISION.md`.
+- Recommended staging path is Cloud Run native Cloud SQL connection with Unix socket.
+- Cloud SQL Admin API is missing and was not enabled.
+- Backend pool socket support is not implemented.
 
 Rollout judgment:
 
@@ -128,6 +132,7 @@ Rollout judgment:
 Evidence:
 
 - `docs/ADMIN_PRODUCTION_DB_MIGRATION_PLAN.md`
+- `docs/ADMIN_STAGING_CLOUD_SQL_CONNECTION_DECISION.md`
 
 ## Gate 3. Secret Management
 

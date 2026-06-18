@@ -13,6 +13,8 @@
 - required APIs: Enabled
 - DB: Not connected
 - Secret Manager staging container: Created with no value/version
+- Cloud SQL Admin API: Missing
+- Cloud SQL connection architecture: Option A recommended, documented
 - Firebase Auth backend integration: Not implemented
 - admin bootstrap: Not executed
 - staging admin_memo write: Not executed
@@ -179,8 +181,20 @@ Rollback impact:
 
 ## Staging DB Plan
 
+32L-2 result:
+
+- Staging Cloud SQL connection decision is documented in `docs/ADMIN_STAGING_CLOUD_SQL_CONNECTION_DECISION.md`.
+- Recommended path is Cloud Run native Cloud SQL connection with Unix socket.
+- Cloud SQL Admin API is currently missing and was not enabled.
+- Existing Cloud SQL instance status is unknown because Cloud SQL Admin API is missing.
+- Backend pool socket support is not implemented.
+- Staging secret container remains value-less with zero versions.
+- No DB, IAM, Cloud Run, Firebase, backend code, SQL, or package change was made.
+
 Approval required:
 
+- `APPROVE_CLOUD_SQL_ADMIN_API_ENABLEMENT = YES`
+- `APPROVE_DB_POOL_SOCKET_SUPPORT = YES`
 - `APPROVE_STAGING_DB_CREATE = YES`
 - `APPROVE_SCHEMA_MIGRATION_EXECUTION = YES`
 
@@ -189,6 +203,8 @@ Rules:
 - staging only
 - synthetic data only
 - no production customer data
+- Cloud Run native Cloud SQL socket connection is the preferred staging path
+- direct public TCP is not recommended for first staging rollout
 - no production DB
 - no schema migration before provider, reset, and backup/restore path are approved
 - runtime DB role must not be a superuser

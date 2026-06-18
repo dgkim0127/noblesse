@@ -45,6 +45,8 @@ Next step is local test and route QA for the scaffold. Provider resource creatio
 
 32L-1 status: Noblesse staging Secret Manager container `noblesse-staging-database-url` is created with automatic replication and staging labels only. No secret value/version, IAM grant, DB connection, Cloud Run update, Firebase rewrite, or deploy change was made. Next implementation readiness gate is staging DB resource approval before any secret version is added.
 
+32L-2 status: Staging Cloud SQL connection architecture is documented in `docs/ADMIN_STAGING_CLOUD_SQL_CONNECTION_DECISION.md`. Recommended path is Cloud Run native Cloud SQL connection with Unix socket. Cloud SQL Admin API is currently missing, backend pool socket support is not implemented, and staging DB creation remains blocked until API enablement and socket-mode support are separately approved.
+
 ## Decision Status
 
 | Area | Current Status | Decision Needed Before Implementation |

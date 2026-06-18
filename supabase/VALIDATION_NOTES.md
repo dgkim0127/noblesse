@@ -1312,3 +1312,24 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32L-1: No.
 - Conclusion: Staging secret container is ready, but staging DB creation, secret version addition, runtime IAM, and production rollout remain No-Go.
+
+## 32L-2 Staging Cloud SQL Connection Decision Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_STAGING_CLOUD_SQL_CONNECTION_DECISION.md`.
+- Scope: Read-only Cloud SQL preflight and connection architecture decision documentation.
+- Cloud SQL Admin API status: Missing.
+- Existing Cloud SQL instance status: Unknown because Cloud SQL Admin API is missing.
+- Recommended connection option: Cloud Run native Cloud SQL connection with Unix socket.
+- Backend pool socket support implemented: No.
+- Cloud SQL Admin API enablement: No.
+- Staging DB creation: No.
+- Cloud SQL client IAM change: No.
+- Secret Manager version added: No.
+- Cloud Run DB update or deploy: No.
+- DB/Auth/SQL execution: No.
+- SQL/schema/migration file change: No.
+- Firebase deploy or `/api` rewrite: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32L-2: No.
+- Conclusion: Connection architecture decision is Go, but API enablement, socket implementation, DB creation, IAM, migration, secret version addition, Cloud Run DB update, and production rollout remain No-Go.

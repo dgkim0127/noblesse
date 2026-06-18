@@ -57,6 +57,11 @@
 
 Recommended next gate:
 
-- `APPROVE_STAGING_DB_CREATE = YES`
+- `APPROVE_CLOUD_SQL_ADMIN_API_ENABLEMENT = YES`
 
-Do not add a secret version until the staging DB resource, reset path, migration path, and non-production data boundary are approved.
+32L-2 adds the connection decision gate before DB creation:
+
+- Use Cloud Run native Cloud SQL connection with Unix socket as the staging recommendation.
+- Keep the secret container value-less until Cloud SQL Admin API, backend socket support, staging DB creation, schema migration, and secret version addition are each separately approved.
+
+Do not add a secret version until the staging DB resource, DB user, reset path, migration path, and non-production data boundary are approved.

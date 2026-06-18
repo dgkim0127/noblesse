@@ -88,6 +88,12 @@ Current status:
 - production name remains planning only
 - no secret value/version added
 
+32L-2 update:
+
+- The staging secret container remains intentionally value-less.
+- Cloud SQL connection architecture was documented before DB creation.
+- Do not add a secret version until the staging DB and DB user exist and the value handoff is separately approved.
+
 No-Go:
 
 - do not create additional Secret Manager secrets without explicit approval

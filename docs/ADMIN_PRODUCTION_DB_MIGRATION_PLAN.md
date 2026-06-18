@@ -192,6 +192,16 @@ Current status:
 - planning only
 - not created
 
+32L-2 update:
+
+- Staging Cloud SQL connection decision is documented in `docs/ADMIN_STAGING_CLOUD_SQL_CONNECTION_DECISION.md`.
+- Recommended staging topology is Cloud Run native Cloud SQL connection with Unix socket.
+- Cloud SQL Admin API is currently missing and was not enabled.
+- Existing staging Cloud SQL instance status is unknown because the Cloud SQL Admin API is missing.
+- Backend pool socket-mode support is required before staging DB rollout.
+- Staging DB creation remains No-Go.
+- Schema migration execution remains No-Go.
+
 ## Data Seed / Bootstrap Boundary
 
 Required future seed/bootstrap data:

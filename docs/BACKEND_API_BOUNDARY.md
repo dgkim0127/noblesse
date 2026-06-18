@@ -66,6 +66,8 @@ Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECI
 
 32L-1 creates the Noblesse staging Secret Manager container only and documents it in `docs/ADMIN_STAGING_SECRET_CONTAINER_REPORT.md`. This does not add a secret value, runtime IAM, DB connection, Cloud Run update, Firebase `/api` rewrite, or production frontend API call.
 
+32L-2 documents the staging Cloud SQL connection decision in `docs/ADMIN_STAGING_CLOUD_SQL_CONNECTION_DECISION.md`. The recommended DB path remains backend-only through Cloud Run native Cloud SQL connection and Secret Manager. The frontend still must not receive DB credentials or call PostgreSQL directly.
+
 ### `GET /api/catalog/products`
 
 - Returns public visible product metadata.
