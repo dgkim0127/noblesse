@@ -454,3 +454,11 @@ Before implementation starts:
 - The future first deploy candidate is health-only, no-secret, and does not connect DB/Auth/Secret Manager or Firebase `/api` rewrite.
 - No Cloud Run deploy, Cloud Build execution, Secret Manager secret creation, Firebase rewrite, DB/Auth integration, or SQL execution was performed.
 - Production env, secret storage, Firebase Auth, DB connection, Firebase `/api` rewrite, and deploy are not wired.
+
+## 32K-13 Health-only Cloud Run Deploy
+
+- Health-only Cloud Run deploy result is documented in `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_DEPLOY_REPORT.md`.
+- Runtime health-only smoke is Go.
+- Cloud Build executed for the approved source deploy.
+- Secret Manager, production DB, Firebase Auth, and Firebase `/api` rewrite are still required before production integration.
+- Production admin_memo write remains No-Go.

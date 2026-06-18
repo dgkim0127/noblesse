@@ -89,3 +89,12 @@ Before deploy:
 - Cloud Run deploy remains No-Go.
 - Cloud Build execution remains No-Go.
 - Secret Manager secret creation remains No-Go.
+
+## 32K-13 Health-only Deploy Follow-up
+
+- Health-only deploy result is documented in `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_DEPLOY_REPORT.md`.
+- Region used: asia-northeast3.
+- Service name used: noblesse-admin-backend.
+- Cloud Build executed for the approved source deploy.
+- DB/Auth/Secret Manager/Firebase rewrite remain blocked.
+- Production admin_memo write remains No-Go.

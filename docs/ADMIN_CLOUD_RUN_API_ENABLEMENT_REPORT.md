@@ -73,3 +73,11 @@
 - First health-only deploy approval is documented in `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_DEPLOY_APPROVAL.md`.
 - Actual Cloud Run deploy still requires separate approval.
 - No Cloud Run deploy or Cloud Build execution occurred in 32K-12.
+
+## 32K-13 Health-only Deploy Follow-up
+
+- Enabled APIs were used only for the approved health-only Cloud Run deploy.
+- Cloud Build executed only for the approved source deploy.
+- No Secret Manager secret was created.
+- No Firebase `/api` rewrite or Firebase deploy was performed.
+- DB/Auth/SQL and production admin_memo remain No-Go.

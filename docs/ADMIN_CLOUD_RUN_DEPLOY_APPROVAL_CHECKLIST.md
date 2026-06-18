@@ -325,3 +325,13 @@ Allowed to remain dirty but must not be staged/committed.
 - Cloud Build execution remains No-Go.
 - Secret Manager secret creation remains No-Go.
 - Firebase `/api` rewrite remains No-Go.
+
+## 32K-13 Health-only Deploy Follow-up
+
+- Runtime health-only deployment gate: Go.
+- Result report: `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_DEPLOY_REPORT.md`.
+- Production deploy gate remains incomplete.
+- Secret Manager integration remains No-Go.
+- DB/Auth integration remains No-Go.
+- Firebase `/api` rewrite remains No-Go.
+- Production admin_memo write remains No-Go.

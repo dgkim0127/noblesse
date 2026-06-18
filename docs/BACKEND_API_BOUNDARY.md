@@ -418,3 +418,11 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Firebase Hosting `/api` rewrite remains absent.
 - Production frontend still does not call the admin API.
 - Frontend direct PostgreSQL access remains prohibited.
+
+## 32K-13 Health-only Cloud Run Deploy
+
+- A Cloud Run service exists for health-only runtime smoke.
+- Firebase Hosting `/api` rewrite remains absent.
+- Production frontend still does not call the backend.
+- The runtime is not connected to DB/Auth/Secret Manager.
+- Frontend direct PostgreSQL access remains prohibited.

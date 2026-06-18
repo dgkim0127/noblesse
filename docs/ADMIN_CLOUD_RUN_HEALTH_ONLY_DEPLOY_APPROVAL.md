@@ -147,3 +147,13 @@ Still blocked:
 - Firebase /api rewrite
 - production admin_memo write
 - status/buyer/product/price/quote writes
+
+## 32K-13 Health-only Deploy Result
+
+- Result report: `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_DEPLOY_REPORT.md`
+- Health-only Cloud Run runtime: Go
+- `/api/health` smoke: Go
+- Admin no-token fail-closed smoke: Go
+- Production backend integration: No-Go
+- Production admin write: No-Go
+- Firebase `/api` rewrite: No-Go

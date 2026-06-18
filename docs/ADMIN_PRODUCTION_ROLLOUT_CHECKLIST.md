@@ -563,3 +563,14 @@ Required before 32K:
 - Secret Manager secret creation: No-Go.
 - Firebase `/api` rewrite: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32K-13 Health-only Deploy Follow-up
+
+- Required APIs: Go.
+- health-only entrypoint smoke: Go.
+- health-only Cloud Run deploy: Go.
+- runtime health smoke: Go.
+- admin no-token fail-closed smoke: Go.
+- DB/Auth/Secret integration: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- production admin_memo write: No-Go.

@@ -444,3 +444,15 @@ Next recommended step:
 - `/api/admin/dashboard` without token returned `UNAUTHORIZED`.
 - Container smoke remains optional/No-Go until Docker is available.
 - Production runtime deployment remains No-Go.
+
+## 32K-13 Health-only Cloud Run Deploy Follow-up
+
+- Health-only Cloud Run deploy result is documented in `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_DEPLOY_REPORT.md`.
+- Cloud Run runtime health-only smoke: Go.
+- Cloud Build executed for approved source deploy using the existing backend/Dockerfile.
+- `/api/health` returned 200 on the runtime URL.
+- `/api/admin/dashboard` without token returned `UNAUTHORIZED`.
+- Runtime uses no DB, Firebase Admin credentials, or Secret Manager reference.
+- Firebase `/api` rewrite remains absent.
+- Production integration remains No-Go.
+- Production admin_memo write remains No-Go.
