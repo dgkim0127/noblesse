@@ -82,3 +82,13 @@ Recovery should inspect the image pull/runtime identity permission boundary and 
 - no Cloud Run app update.
 - no Firebase rewrite.
 - no production write.
+
+## 32L-14R IAM Fix Review Addendum
+
+- IAM fix review is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_IAM_FIX_REPORT.md`.
+- No IAM change was applied because no missing IAM role was confirmed.
+- Secret-level `roles/secretmanager.secretAccessor` and project-level `roles/cloudsql.client` were present for the runtime identity.
+- Sanitized app log evidence showed `Invalid database URL configuration.`
+- Updated classification: configuration mismatch / secret value validity issue.
+- No Job re-run, Job update, secret value access, DB connection, IAM change, Firebase rewrite, or production write happened.
+- Recommended next gate: `APPROVE_STAGING_DB_SECRET_VALUE_RECOVERY = YES`.

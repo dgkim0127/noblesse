@@ -1635,3 +1635,23 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase deploy or `/api` rewrite: No.
 - Frontend source dirty staged in 32L-13R: No.
 - Conclusion: Recovery diagnosis is complete; next gate is `APPROVE_MIGRATION_IAM_FIX = YES`.
+
+## 32L-14R Staging Schema Migration IAM Fix Review Follow-up
+
+- Date: 2026-06-19
+- Change: Added `docs/ADMIN_STAGING_SCHEMA_MIGRATION_IAM_FIX_REPORT.md`.
+- Scope: Minimal IAM fix review after the failed staging schema migration execution.
+- IAM change applied: No.
+- Principal changed: None.
+- Role granted: None.
+- SecretAccessor present: Yes.
+- Cloud SQL Client IAM present: Yes.
+- Sanitized app log signal: invalid database URL configuration.
+- Secret value accessed/read: No.
+- DB connection/psql executed: No.
+- Migration Job rerun: No.
+- Migration Job update/redeploy: No.
+- Cloud Run app update/deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Frontend source dirty staged in 32L-14R: No.
+- Conclusion: No minimal IAM gap was confirmed; next gate is `APPROVE_STAGING_DB_SECRET_VALUE_RECOVERY = YES`.
