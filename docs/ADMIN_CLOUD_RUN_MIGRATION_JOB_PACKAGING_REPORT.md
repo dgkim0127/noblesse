@@ -84,3 +84,10 @@ Reason:
 - Migration runner start/commit logs were not present.
 - Secret value, DB URL, password, private key, and raw SQL leaks were not detected in app logs.
 - Staging schema migration remains No-Go pending recovery approval.
+
+## 32L-13R Recovery Diagnosis
+
+- Recovery diagnosis is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_RECOVERY_DIAGNOSIS.md`.
+- Packaging config was rechecked and the expected service account, Cloud SQL attachment, secret reference, env, command, args, task count, retry count, and timeout were present.
+- Failure category is IAM/permission before migration runner start.
+- Job was not modified or re-executed.

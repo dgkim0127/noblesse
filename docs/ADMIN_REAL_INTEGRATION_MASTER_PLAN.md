@@ -481,3 +481,10 @@ No-Go remains:
 - The approved migration job was executed once, but it did not complete successfully.
 - No retry/re-execution, local psql, manual SQL, Cloud Run app update, Firebase rewrite, or production write was performed.
 - Recovery approval is required before any further migration attempt.
+
+## 32L-13R Recovery Diagnosis
+
+- Recovery diagnosis is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_RECOVERY_DIAGNOSIS.md`.
+- Failure category is IAM/permission before migration runner start.
+- Job config appears structurally correct, but the execution did not reach Node or the migration runner.
+- Next gate is `APPROVE_MIGRATION_IAM_FIX = YES`.

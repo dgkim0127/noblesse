@@ -468,3 +468,10 @@ Important:
 - Migration committed: No.
 - Schema migration is No-Go pending recovery.
 - Production migration and production write remain No-Go.
+
+## 32L-13R Recovery Diagnosis Follow-up
+
+- Recovery diagnosis: `docs/ADMIN_STAGING_SCHEMA_MIGRATION_RECOVERY_DIAGNOSIS.md`.
+- Failure category: B. IAM/permission issue before migration runner start.
+- No re-execution, IAM change, DB connection, SQL execution, or secret value access happened.
+- Production migration and production write remain No-Go.

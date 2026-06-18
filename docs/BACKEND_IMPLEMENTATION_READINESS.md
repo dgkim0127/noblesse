@@ -551,3 +551,10 @@ Before implementation starts:
 - One approved execution was attempted, but it did not complete successfully.
 - The migration runner start/commit logs were not present, so staging schema migration is No-Go.
 - Backend readiness now requires a recovery approval before any DB read smoke, Cloud Run app DB update, Firebase `/api` rewrite, or production write.
+
+## 32L-13R Recovery Diagnosis
+
+- Recovery diagnosis is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_RECOVERY_DIAGNOSIS.md`.
+- The failure is classified as IAM/permission before migration runner start.
+- No backend source, tests, schema SQL, package files, Cloud Run Job, IAM, secret, or DB resource was changed.
+- Backend readiness remains blocked until the IAM fix gate is approved and completed.

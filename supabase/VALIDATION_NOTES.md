@@ -1615,3 +1615,23 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase deploy or `/api` rewrite: No.
 - Frontend source dirty staged in 32L-13: No.
 - Conclusion: Staging schema migration is No-Go pending recovery approval.
+
+## 32L-13R Staging Schema Migration Recovery Diagnosis Follow-up
+
+- Date: 2026-06-19
+- Change: Added `docs/ADMIN_STAGING_SCHEMA_MIGRATION_RECOVERY_DIAGNOSIS.md`.
+- Scope: Read-only diagnosis of failed Cloud Run staging schema migration Job execution.
+- Failure category: B. IAM/permission issue before migration runner start.
+- Job configuration rechecked: expected command/env/secret reference/Cloud SQL attachment present.
+- SecretAccessor present: Yes.
+- Cloud SQL Client IAM present: Yes.
+- Secret version count: 1.
+- Secret value accessed/read: No.
+- DB connection/psql executed: No.
+- SQL/schema/migration execution: No.
+- Job re-execution: No.
+- Job update/redeploy: No.
+- IAM change: No.
+- Firebase deploy or `/api` rewrite: No.
+- Frontend source dirty staged in 32L-13R: No.
+- Conclusion: Recovery diagnosis is complete; next gate is `APPROVE_MIGRATION_IAM_FIX = YES`.

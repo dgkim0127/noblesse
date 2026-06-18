@@ -520,3 +520,11 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - This did not add a Firebase Hosting `/api` rewrite.
 - Production frontend still does not call admin APIs or PostgreSQL.
 - Staging schema migration remains No-Go pending recovery.
+
+## 32L-13R Recovery Diagnosis
+
+- Recovery diagnosis is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_RECOVERY_DIAGNOSIS.md`.
+- This did not add or change any API route.
+- This did not add a Firebase Hosting `/api` rewrite.
+- This did not connect the frontend to admin APIs or PostgreSQL.
+- Staging schema migration remains No-Go pending IAM fix approval.

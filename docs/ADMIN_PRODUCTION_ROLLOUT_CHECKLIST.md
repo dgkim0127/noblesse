@@ -700,3 +700,13 @@ Required before 32K:
 - Secret/DB URL leak detected: No.
 - Recovery gate required before another attempt.
 - Cloud Run app DB update, Firebase rewrite/deploy, and production admin_memo write remain No-Go.
+
+## 32L-13R Recovery Diagnosis Follow-up
+
+- Recovery diagnosis report: `docs/ADMIN_STAGING_SCHEMA_MIGRATION_RECOVERY_DIAGNOSIS.md`.
+- Failure category: B. IAM/permission issue.
+- Recommended next gate: `APPROVE_MIGRATION_IAM_FIX = YES`.
+- Job re-execution: No.
+- Job update: No.
+- IAM change: No.
+- Production admin_memo write remains No-Go.

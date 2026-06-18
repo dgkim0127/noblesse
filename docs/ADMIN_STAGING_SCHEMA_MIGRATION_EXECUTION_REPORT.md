@@ -78,3 +78,12 @@ Reason:
 
 - The job execution was created, but it did not complete successfully and the migration runner start/commit logs were not present.
 - Recovery should inspect and fix the permission/IAM boundary without re-running the migration until explicitly approved.
+
+## 32L-13R Recovery Diagnosis
+
+- Read-only recovery diagnosis is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_RECOVERY_DIAGNOSIS.md`.
+- Failure category: B. IAM/permission issue before migration runner start.
+- Sanitized reason: image pull/container-start permission signal.
+- Job config was rechecked and expected command/env/secret reference/Cloud SQL attachment were present.
+- No re-execution, Job update, IAM change, secret value access, DB connection, SQL execution, Firebase rewrite, or production write happened in 32L-13R.
+- Next recommended gate: `APPROVE_MIGRATION_IAM_FIX = YES`.

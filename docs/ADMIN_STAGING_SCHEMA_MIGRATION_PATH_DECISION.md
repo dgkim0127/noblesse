@@ -212,3 +212,14 @@ Recommended sequence:
 ## Next Gate After 32L-13
 
 - `APPROVE_STAGING_SCHEMA_MIGRATION_RECOVERY = YES`
+
+## 32L-13R Recovery Diagnosis
+
+- Recovery diagnosis is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_RECOVERY_DIAGNOSIS.md`.
+- Failure category: B. IAM/permission issue before migration runner start.
+- Migration runner start/commit logs remain absent.
+- No re-execution, Job update, IAM change, secret value access, DB connection, SQL execution, Firebase rewrite, or production write happened.
+
+## Next Gate After 32L-13R
+
+- `APPROVE_MIGRATION_IAM_FIX = YES`
