@@ -474,3 +474,10 @@ No-Go remains:
 - A staging migration job resource was created for future execution.
 - The job was not executed and schema migration was not executed.
 - Cloud Run app DB update, Firebase Auth/rewrite, and production write remain blocked.
+
+## 32L-13 Migration Job Execution
+
+- Migration job execution result is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_EXECUTION_REPORT.md`.
+- The approved migration job was executed once, but it did not complete successfully.
+- No retry/re-execution, local psql, manual SQL, Cloud Run app update, Firebase rewrite, or production write was performed.
+- Recovery approval is required before any further migration attempt.

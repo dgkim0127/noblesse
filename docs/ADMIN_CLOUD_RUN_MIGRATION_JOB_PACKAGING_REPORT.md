@@ -75,3 +75,12 @@
 Reason:
 
 - The job must be explicitly executed only after user approval.
+
+## 32L-13 Migration Job Execution
+
+- Migration job execution result is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_EXECUTION_REPORT.md`.
+- One execution was created and no retry/re-execution was attempted by Codex.
+- The execution did not complete successfully.
+- Migration runner start/commit logs were not present.
+- Secret value, DB URL, password, private key, and raw SQL leaks were not detected in app logs.
+- Staging schema migration remains No-Go pending recovery approval.

@@ -199,3 +199,16 @@ Recommended sequence:
 
 - `APPROVE_CLOUD_RUN_MIGRATION_JOB_EXECUTION = YES`
 - `APPROVE_SCHEMA_MIGRATION_EXECUTION = YES`
+
+## 32L-13 Migration Job Execution
+
+- Migration job execution result is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_EXECUTION_REPORT.md`.
+- One execution was created.
+- Execution completed: No.
+- Execution succeeded: No.
+- Runner start/commit logs were not present, so schema migration is No-Go.
+- Cloud Run app DB update, Firebase rewrite, and production write remain No-Go.
+
+## Next Gate After 32L-13
+
+- `APPROVE_STAGING_SCHEMA_MIGRATION_RECOVERY = YES`

@@ -512,3 +512,11 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - The job is an internal staging migration path and does not create a public migration endpoint.
 - The job was not executed.
 - Firebase Hosting `/api` rewrite remains absent, and production frontend still does not call admin APIs or PostgreSQL.
+
+## 32L-13 Migration Job Execution
+
+- Migration job execution is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_EXECUTION_REPORT.md`.
+- This did not add a public migration endpoint.
+- This did not add a Firebase Hosting `/api` rewrite.
+- Production frontend still does not call admin APIs or PostgreSQL.
+- Staging schema migration remains No-Go pending recovery.

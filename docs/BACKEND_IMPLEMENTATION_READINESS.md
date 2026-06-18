@@ -544,3 +544,10 @@ Before implementation starts:
 - A staging migration job resource exists for future approved execution.
 - The job was not executed and schema migration was not executed.
 - Backend readiness still requires explicit migration execution approval, DB smoke verification, Cloud Run app DB update approval, and Firebase `/api` rewrite approval.
+
+## 32L-13 Migration Job Execution
+
+- Migration job execution is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_EXECUTION_REPORT.md`.
+- One approved execution was attempted, but it did not complete successfully.
+- The migration runner start/commit logs were not present, so staging schema migration is No-Go.
+- Backend readiness now requires a recovery approval before any DB read smoke, Cloud Run app DB update, Firebase `/api` rewrite, or production write.
