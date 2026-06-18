@@ -1424,3 +1424,29 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32L-5R: No.
 - Conclusion: Revised tier planning is Go, but staging DB creation remains No-Go until `APPROVE_STAGING_DB_CREATE_REVISED = YES`.
+
+## 32L-6 Staging Cloud SQL Resource Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`.
+- Scope: Approved Noblesse staging Cloud SQL instance/database creation only.
+- Instance name: `noblesse-staging-pg`.
+- Database name: `noblesse_staging`.
+- Region: `asia-northeast3`.
+- Database version: `POSTGRES_16`.
+- Tier: `db-g1-small`.
+- Instance create executed: Yes.
+- Database create executed: Yes.
+- Instance ready: Yes.
+- Database exists: Yes.
+- DB user/password created: No.
+- Password recorded: No.
+- DB connection/psql executed: No.
+- SQL/schema/migration file change: No.
+- Secret Manager version added: No; staging secret version count remains 0.
+- Cloud SQL client IAM change: No.
+- Cloud Run update or deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32L-6: No.
+- Conclusion: Staging instance/database resource creation is Go, but DB user/password, schema migration, secret version addition, Cloud Run DB update, Firebase Auth/rewrite, and production write remain No-Go.

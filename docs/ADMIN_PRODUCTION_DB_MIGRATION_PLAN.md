@@ -401,3 +401,9 @@ Important:
 - Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
 - The production DB/migration gate remains No-Go in the rollout checklist.
 - No DB creation/connection, SQL execution, schema/migration change, rewrite, or deploy was added in 32J-9.
+
+## 32L-6 Staging Cloud SQL Resource Follow-up
+
+- Staging Cloud SQL instance/database creation is documented in `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`.
+- This is a staging resource gate only and does not approve production DB creation.
+- DB user/password, schema migration, Secret Manager version addition, Cloud Run DB update, Firebase rewrite, and production admin writes remain No-Go.

@@ -83,3 +83,14 @@ Approved revised candidate:
 - region: `asia-northeast3`
 - instance: `noblesse-staging-pg`
 - database: `noblesse_staging`
+
+## 32L-6 Result
+
+- Revised staging Cloud SQL resource creation is documented in `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`.
+- `noblesse-staging-pg` was created with the approved revised candidate.
+- `noblesse_staging` was created as the staging database.
+- DB user/password creation remains No-Go.
+- schema migration remains No-Go.
+- Secret Manager version addition remains No-Go.
+- Cloud SQL Client IAM remains No-Go.
+- Cloud Run DB update remains No-Go.

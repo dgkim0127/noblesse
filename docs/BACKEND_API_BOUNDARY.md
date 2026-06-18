@@ -454,3 +454,11 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Direct React-to-PostgreSQL access remains prohibited.
 - Firebase Auth provides identity, PostgreSQL provides role/status authorization, and Secret Manager provides DB credentials.
 - Firebase Hosting `/api` rewrite remains absent.
+
+## 32L-6 Staging Cloud SQL Resource
+
+- Staging Cloud SQL instance/database creation is documented in `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`.
+- This does not change the public API boundary.
+- Firebase Hosting `/api` rewrite remains absent.
+- Production frontend still does not call admin APIs.
+- Direct React-to-PostgreSQL access remains prohibited.

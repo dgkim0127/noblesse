@@ -489,3 +489,9 @@ Before implementation starts:
 - Secret Manager, staging PostgreSQL, and Firebase Auth are defined as required but separate integration roles.
 - Cloud SQL PostgreSQL is the recommended primary DB path after resource-boundary approval.
 - Actual Secret Manager creation, staging DB creation, Auth integration, Firebase rewrite, and production write remain blocked.
+
+## 32L-6 Staging Cloud SQL Resource
+
+- Staging Cloud SQL instance/database creation is documented in `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`.
+- Backend readiness now has a staging database resource available for later approved gates.
+- DB user/password, schema migration, Secret Manager version addition, Cloud SQL Client IAM, Cloud Run DB update, Firebase Auth, Firebase `/api` rewrite, and production write remain blocked.

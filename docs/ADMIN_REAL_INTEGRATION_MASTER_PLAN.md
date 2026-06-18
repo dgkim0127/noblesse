@@ -377,6 +377,7 @@ Still blocked:
 - `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_OPERATIONS_AUDIT.md`
 - `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_DEPLOY_REPORT.md`
 - `docs/ADMIN_PRODUCTION_SECRET_MANAGER_PLAN.md`
+- `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`
 - `docs/ADMIN_PRODUCTION_DB_MIGRATION_PLAN.md`
 - `docs/ADMIN_FIREBASE_AUTH_VERIFICATION_PLAN.md`
 - `docs/ADMIN_BOOTSTRAP_PLAN.md`
@@ -392,21 +393,24 @@ Completed safe phases:
 - Phase A read-only project/resource boundary audit
 - Phase B master integration plan
 - Phase C DB provider decision documentation
+- Phase D staging Secret Manager container creation with zero versions
+- Phase E staging Cloud SQL instance/database creation
 
 First blocked approval gate:
 
-- `APPROVE_SECRET_MANAGER_SECRET_CREATE = NO`
+- `APPROVE_CLOUD_SQL_CLIENT_IAM = NO`
+- `APPROVE_DB_USER_CREATE = NO`
 
 Next approval needed:
 
-- Decide whether to approve creation of the staging-only Secret Manager secret container candidate.
-- Reconfirm resource boundary before creating anything because the active project may share POS/default resources.
+- Approve Cloud SQL Client IAM only if the target runtime service account and scope are confirmed.
+- Approve DB user/password creation separately before any secret version or migration.
 
 No-Go remains:
 
-- Secret Manager mutation
-- staging DB creation
-- secret version addition
+- Secret Manager version addition
+- DB user/password creation
+- schema migration
 - IAM change
 - Cloud Run update
 - Firebase Auth code integration
@@ -414,3 +418,9 @@ No-Go remains:
 - staging write
 - Firebase rewrite/deploy
 - production write
+
+## 32L-6 Staging Cloud SQL Resource
+
+- Staging Cloud SQL resource creation result is documented in `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`.
+- The approved staging instance/database now exist for future integration gates.
+- DB user/password, schema migration, Secret Manager version addition, Cloud SQL Client IAM, Cloud Run DB update, Firebase Auth/rewrite, and production write remain blocked.

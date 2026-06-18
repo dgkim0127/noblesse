@@ -608,3 +608,14 @@ Required before 32K:
 - Recommended DB provider path is Cloud SQL PostgreSQL after resource-boundary approval.
 - Secret Manager, staging DB, Auth, rewrite, and production write remain No-Go.
 - Next approval gate is staging Secret Manager secret container creation.
+
+## 32L-6 Staging Cloud SQL Resource Follow-up
+
+- Staging Cloud SQL resource creation report: `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`.
+- Staging instance/database creation: Go.
+- DB user/password creation: No-Go.
+- Schema migration: No-Go.
+- Secret Manager version addition: No-Go.
+- Cloud Run DB update: No-Go.
+- Firebase Auth/rewrite: No-Go.
+- Production admin_memo write: No-Go.

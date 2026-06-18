@@ -217,7 +217,8 @@ Secret value addition is forbidden until the staging DB and DB user are ready.
 - Connection architecture decision: Go
 - Cloud SQL Admin API enablement: Go
 - backend socket implementation: Go
-- staging DB creation: No-Go, blocked by tier revision
+- staging DB creation: Go for approved staging instance/database only, documented in `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`
+- DB user/password creation: No-Go
 - IAM change: No-Go
 - migration: No-Go
 - secret version addition: No-Go
