@@ -495,3 +495,9 @@ Before implementation starts:
 - Staging Cloud SQL instance/database creation is documented in `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`.
 - Backend readiness now has a staging database resource available for later approved gates.
 - DB user/password, schema migration, Secret Manager version addition, Cloud SQL Client IAM, Cloud Run DB update, Firebase Auth, Firebase `/api` rewrite, and production write remain blocked.
+
+## 32L-7 Cloud SQL Client IAM
+
+- Cloud SQL Client IAM grant is documented in `docs/ADMIN_CLOUD_SQL_CLIENT_IAM_REPORT.md`.
+- The dedicated Noblesse runtime identity is prepared for future Cloud SQL socket access.
+- DB user/password, DB connection, schema migration, Secret Manager version addition, Cloud Run DB update, Firebase Auth, Firebase `/api` rewrite, and production write remain blocked.

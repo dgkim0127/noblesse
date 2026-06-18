@@ -462,3 +462,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Firebase Hosting `/api` rewrite remains absent.
 - Production frontend still does not call admin APIs.
 - Direct React-to-PostgreSQL access remains prohibited.
+
+## 32L-7 Cloud SQL Client IAM
+
+- Cloud SQL Client IAM grant is documented in `docs/ADMIN_CLOUD_SQL_CLIENT_IAM_REPORT.md`.
+- This does not connect the public frontend to the backend or database.
+- Firebase Hosting `/api` rewrite remains absent.
+- Direct React-to-PostgreSQL access remains prohibited.

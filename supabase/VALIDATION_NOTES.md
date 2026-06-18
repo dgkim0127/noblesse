@@ -1450,3 +1450,21 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32L-6: No.
 - Conclusion: Staging instance/database resource creation is Go, but DB user/password, schema migration, secret version addition, Cloud Run DB update, Firebase Auth/rewrite, and production write remain No-Go.
+
+## 32L-7 Cloud SQL Client IAM Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_CLOUD_SQL_CLIENT_IAM_REPORT.md`.
+- Scope: Granted Cloud SQL Client role to the dedicated Noblesse runtime identity only.
+- `roles/cloudsql.client` validation: Yes.
+- Broad owner/editor/admin role added: No.
+- Secret Manager role added: No.
+- DB user/password created: No.
+- DB connection/psql executed: No.
+- SQL/schema/migration file change: No.
+- Secret Manager version added: No; staging secret version count remains 0.
+- Cloud Run update or deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Raw project id, service account email, IAM policy, connection name, IP, password, and secret recorded: No.
+- Frontend source dirty staged in 32L-7: No.
+- Conclusion: Cloud SQL Client IAM is Go for the dedicated runtime identity, but DB user/password, schema migration, secret version addition, Cloud Run DB update, Firebase Auth/rewrite, and production write remain No-Go.

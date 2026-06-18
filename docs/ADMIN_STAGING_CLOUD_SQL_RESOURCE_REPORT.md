@@ -67,3 +67,13 @@
 - `APPROVE_DB_USER_CREATE = YES`
 - `APPROVE_SCHEMA_MIGRATION_EXECUTION = YES`
 - DB user/password and secret version still require separate approval.
+
+## 32L-7 Cloud SQL Client IAM
+
+- Cloud SQL Client IAM grant result is documented in `docs/ADMIN_CLOUD_SQL_CLIENT_IAM_REPORT.md`.
+- `roles/cloudsql.client` is present for the dedicated Noblesse runtime identity.
+- DB user/password creation remains No-Go.
+- schema migration remains No-Go.
+- Secret Manager version addition remains No-Go.
+- Cloud Run DB update remains No-Go.
+- Firebase Auth/rewrite remains No-Go.

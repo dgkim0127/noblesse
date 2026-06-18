@@ -619,3 +619,13 @@ Required before 32K:
 - Cloud Run DB update: No-Go.
 - Firebase Auth/rewrite: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32L-7 Cloud SQL Client IAM Follow-up
+
+- Cloud SQL Client IAM report: `docs/ADMIN_CLOUD_SQL_CLIENT_IAM_REPORT.md`.
+- `roles/cloudsql.client` grant: Go for dedicated runtime identity only.
+- Broad owner/editor/admin role grant: No.
+- Secret Manager role grant: No.
+- DB user/password creation: No-Go.
+- Cloud Run DB update: No-Go.
+- Production admin_memo write: No-Go.

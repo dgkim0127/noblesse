@@ -398,12 +398,10 @@ Completed safe phases:
 
 First blocked approval gate:
 
-- `APPROVE_CLOUD_SQL_CLIENT_IAM = NO`
 - `APPROVE_DB_USER_CREATE = NO`
 
 Next approval needed:
 
-- Approve Cloud SQL Client IAM only if the target runtime service account and scope are confirmed.
 - Approve DB user/password creation separately before any secret version or migration.
 
 No-Go remains:
@@ -424,3 +422,9 @@ No-Go remains:
 - Staging Cloud SQL resource creation result is documented in `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`.
 - The approved staging instance/database now exist for future integration gates.
 - DB user/password, schema migration, Secret Manager version addition, Cloud SQL Client IAM, Cloud Run DB update, Firebase Auth/rewrite, and production write remain blocked.
+
+## 32L-7 Cloud SQL Client IAM
+
+- Cloud SQL Client IAM grant result is documented in `docs/ADMIN_CLOUD_SQL_CLIENT_IAM_REPORT.md`.
+- The dedicated Noblesse runtime identity has `roles/cloudsql.client`.
+- DB user/password creation, schema migration, Secret Manager version addition, Cloud Run DB update, Firebase Auth/rewrite, and production write remain blocked.

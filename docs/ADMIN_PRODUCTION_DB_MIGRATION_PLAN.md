@@ -407,3 +407,9 @@ Important:
 - Staging Cloud SQL instance/database creation is documented in `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`.
 - This is a staging resource gate only and does not approve production DB creation.
 - DB user/password, schema migration, Secret Manager version addition, Cloud Run DB update, Firebase rewrite, and production admin writes remain No-Go.
+
+## 32L-7 Cloud SQL Client IAM Follow-up
+
+- Cloud SQL Client IAM grant is documented in `docs/ADMIN_CLOUD_SQL_CLIENT_IAM_REPORT.md`.
+- This prepares Cloud SQL socket access for the dedicated runtime identity only.
+- DB user/password, DB connection, schema migration, Secret Manager version addition, Cloud Run DB update, Firebase rewrite, and production admin writes remain No-Go.
