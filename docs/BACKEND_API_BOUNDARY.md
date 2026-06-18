@@ -491,3 +491,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Public migration endpoint is explicitly No-Go.
 - The frontend still does not call admin APIs or PostgreSQL directly.
 - Firebase Hosting `/api` rewrite remains absent.
+
+## 32L-10 Staging Schema Migration Runner
+
+- Backend migration runner exists for a future Cloud Run Job / one-off runner path.
+- No public migration endpoint was added.
+- No frontend API path, Firebase Hosting rewrite, or direct React-to-PostgreSQL access changed.
+- Migration execution remains blocked.

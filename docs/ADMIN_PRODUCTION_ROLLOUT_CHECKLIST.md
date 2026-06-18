@@ -658,3 +658,13 @@ Required before 32K:
 - Public migration endpoint: No-Go.
 - Migration execution: No-Go.
 - Next gate: `APPROVE_SCHEMA_MIGRATION_RUNNER_IMPLEMENTATION = YES`.
+
+## 32L-10 Staging Schema Migration Runner Follow-up
+
+- Migration runner implementation: Go.
+- Runner tests: Go.
+- Cloud Run Job packaging/execution: No-Go.
+- Secret value access: No-Go.
+- Runtime Secret IAM: No-Go.
+- Migration execution: No-Go.
+- Production admin_memo write: No-Go.

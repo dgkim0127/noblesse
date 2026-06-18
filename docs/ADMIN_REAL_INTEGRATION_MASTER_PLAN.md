@@ -453,3 +453,10 @@ No-Go remains:
 - Recommended path: Cloud Run Job / one-off migration runner.
 - Direct local Codex psql, direct secret value read, and public migration endpoints are No-Go.
 - Next gate is migration runner implementation, not migration execution.
+
+## 32L-10 Staging Schema Migration Runner
+
+- Migration runner implementation is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_PATH_DECISION.md`.
+- Backend runner and fake-pool tests were added.
+- Runner is transaction-managed and guarded by `ALLOW_STAGING_SCHEMA_MIGRATION_RUNNER=true`.
+- Cloud Run Job packaging/execution, secret access, DB connection, schema migration execution, Runtime Secret IAM, Cloud Run DB update, Firebase rewrite, and production write remain blocked.

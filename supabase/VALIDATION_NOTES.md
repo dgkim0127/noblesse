@@ -1531,3 +1531,24 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase deploy or `/api` rewrite: No.
 - Frontend source dirty staged in 32L-9: No.
 - Conclusion: Migration path decision is Go, but migration runner implementation and migration execution require separate approval gates.
+
+## 32L-10 Staging Schema Migration Runner Follow-up
+
+- Date: 2026-06-18
+- Change: Added backend staging schema migration runner and fake-pool tests.
+- Files:
+  - `backend/src/db/schemaMigrationRunner.js`
+  - `backend/src/scripts/runStagingSchemaMigration.js`
+  - `backend/tests/schemaMigrationRunner.test.js`
+- Runner transaction handling: begin, execute schema SQL, commit, rollback on failure.
+- Runner guard: `ALLOW_STAGING_SCHEMA_MIGRATION_RUNNER=true` is required.
+- Backend tests: 65 passed.
+- Secret value accessed/read: No.
+- DB connection/psql executed: No.
+- SQL/schema/migration execution: No.
+- Cloud Run Job created/executed: No.
+- Runtime Secret IAM grant: No.
+- Cloud Run update or deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Frontend source dirty staged in 32L-10: No.
+- Conclusion: Migration runner implementation is Go, but Cloud Run Job packaging/execution, Runtime Secret IAM, and schema migration execution require separate approval gates.

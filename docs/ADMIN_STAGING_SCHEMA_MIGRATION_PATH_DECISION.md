@@ -152,3 +152,27 @@ Recommended sequence:
 ## Next Gate
 
 - `APPROVE_SCHEMA_MIGRATION_RUNNER_IMPLEMENTATION = YES`
+
+## 32L-10 Runner Implementation
+
+- Schema migration runner implementation is added under the backend boundary.
+- Runner files:
+  - `backend/src/db/schemaMigrationRunner.js`
+  - `backend/src/scripts/runStagingSchemaMigration.js`
+  - `backend/tests/schemaMigrationRunner.test.js`
+- Runner manages the transaction:
+  - `BEGIN`
+  - execute approved schema SQL
+  - `COMMIT`
+  - `ROLLBACK` on failure
+- Runner rejects empty SQL and transaction-control SQL in the source file.
+- Runner returns/logs sanitized metadata only.
+- Script entrypoint refuses to run unless `ALLOW_STAGING_SCHEMA_MIGRATION_RUNNER=true`.
+- Tests use fake pool/client only.
+- No real DB connection, secret access, Cloud Run Job creation/execution, psql, SQL execution, or migration execution happened in 32L-10.
+
+## Next Gate After 32L-10
+
+- `APPROVE_RUNTIME_SECRET_IAM = YES`
+- `APPROVE_CLOUD_RUN_MIGRATION_JOB_PACKAGING = YES`
+- `APPROVE_CLOUD_RUN_MIGRATION_JOB_EXECUTION = YES`

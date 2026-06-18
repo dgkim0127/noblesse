@@ -523,3 +523,9 @@ Before implementation starts:
 - Recommended implementation path is a Cloud Run Job / one-off migration runner.
 - DB connection, SQL execution, secret access, Runtime Secret IAM, Cloud Run DB update, and Firebase `/api` rewrite remain blocked.
 - Next implementation gate is migration runner implementation, not migration execution.
+
+## 32L-10 Staging Schema Migration Runner
+
+- Backend schema migration runner and fake-pool tests were added.
+- Runner is transaction-managed and guarded by `ALLOW_STAGING_SCHEMA_MIGRATION_RUNNER=true`.
+- Actual DB connection, secret access, Cloud Run Job creation/execution, schema migration execution, Runtime Secret IAM, Cloud Run DB update, and Firebase `/api` rewrite remain blocked.

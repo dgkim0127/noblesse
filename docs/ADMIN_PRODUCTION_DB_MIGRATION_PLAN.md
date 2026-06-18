@@ -436,3 +436,10 @@ Important:
 - Local Codex psql and direct secret value read are not recommended.
 - Public migration endpoint is No-Go.
 - Migration execution remains No-Go until the migration runner and execution gates are approved.
+
+## 32L-10 Staging Schema Migration Runner Follow-up
+
+- Staging migration runner implementation is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_PATH_DECISION.md`.
+- Runner manages transaction begin/commit/rollback and sanitizes result/error output.
+- Tests use fake pool/client only.
+- No schema migration execution, DB connection, secret access, Cloud Run Job execution, or production migration happened in 32L-10.
