@@ -70,3 +70,13 @@ Reason:
 - `APPROVE_STAGING_DB_SECRET_VALUE_RECOVERY = YES`
 
 The next step should validate and repair the staging DB URL secret value through an approved secret recovery path, without printing or committing the value.
+
+## 32L-15R Secret Value Recovery
+
+- Secret value recovery diagnosis is documented in `docs/ADMIN_STAGING_DB_SECRET_VALUE_RECOVERY_REPORT.md`.
+- The Job points to `DATABASE_URL` and `noblesse-staging-database-url:latest`.
+- The approved staging secret was inspected without printing or recording the value.
+- The latest secret value was non-empty and parseable by Node URL parsing.
+- No new secret version was added.
+- No IAM change, DB connection, Job rerun, Job update, Firebase rewrite, or production write happened.
+- Next recommended gate: `APPROVE_STAGING_MIGRATION_JOB_RUNTIME_ENV_DIAGNOSTIC = YES`.

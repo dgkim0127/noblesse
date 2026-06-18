@@ -1655,3 +1655,26 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase deploy or `/api` rewrite: No.
 - Frontend source dirty staged in 32L-14R: No.
 - Conclusion: No minimal IAM gap was confirmed; next gate is `APPROVE_STAGING_DB_SECRET_VALUE_RECOVERY = YES`.
+
+## 32L-15R Staging DB URL Secret Value Recovery Follow-up
+
+- Date: 2026-06-19
+- Change: Added `docs/ADMIN_STAGING_DB_SECRET_VALUE_RECOVERY_REPORT.md`.
+- Scope: Fast staging DB URL secret/configuration diagnosis.
+- Secret inspected: `noblesse-staging-database-url` only.
+- Secret value printed/logged/recorded: No.
+- Secret latest value empty: No.
+- Length bucket: 81-200.
+- Scheme type: postgres.
+- Username/password/host/database path components present: Yes.
+- Placeholder present: No.
+- Node URL parse success: Yes.
+- Secret version added: No.
+- Existing version disabled/destroyed: No.
+- IAM change: No.
+- DB connection/psql executed: No.
+- Migration Job rerun: No.
+- Migration Job update/redeploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Frontend source dirty staged in 32L-15R: No.
+- Conclusion: No safe secret/config-only mutation was supported; next gate is `APPROVE_STAGING_MIGRATION_JOB_RUNTIME_ENV_DIAGNOSTIC = YES`.
