@@ -428,3 +428,11 @@ Important:
 - First staging database URL secret version: Go.
 - Password and DB URL recorded: No.
 - Schema migration remains No-Go until a separate migration approval is completed.
+
+## 32L-9 Staging Schema Migration Path Decision Follow-up
+
+- Staging migration path decision is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_PATH_DECISION.md`.
+- Recommended path: Cloud Run Job / one-off migration runner.
+- Local Codex psql and direct secret value read are not recommended.
+- Public migration endpoint is No-Go.
+- Migration execution remains No-Go until the migration runner and execution gates are approved.

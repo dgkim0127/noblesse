@@ -79,3 +79,11 @@ Recommended order:
 2. runtime secret accessor IAM
 3. Cloud Run DB secret/socket update
 4. staging DB read smoke
+
+## 32L-9 Migration Path Decision
+
+- Staging schema migration path decision is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_PATH_DECISION.md`.
+- Recommended path: Cloud Run Job / one-off migration runner.
+- Local Codex psql and direct secret value read are not recommended.
+- Public migration endpoint is No-Go.
+- DB connection, SQL execution, Runtime Secret IAM, Cloud Run DB update, Firebase rewrite, and production write remain No-Go.

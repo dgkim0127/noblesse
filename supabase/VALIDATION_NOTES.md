@@ -1513,3 +1513,21 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase deploy or `/api` rewrite: No.
 - Frontend source dirty staged in 32L-8R: No.
 - Conclusion: Staging DB user secret recovery is Go, but schema migration, Runtime Secret IAM, Cloud Run DB update, Firebase Auth/rewrite, and production write remain No-Go.
+
+## 32L-9 Staging Schema Migration Path Decision Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_STAGING_SCHEMA_MIGRATION_PATH_DECISION.md`.
+- Scope: Documentation only for staging schema migration execution path decision.
+- Migration source reviewed: `supabase/schema.sql`.
+- Recommended path: Cloud Run Job / one-off migration runner.
+- Local Codex psql path: Not recommended.
+- Public migration endpoint: No-Go.
+- Secret value accessed/read: No.
+- DB connection/psql executed: No.
+- SQL/schema/migration execution: No.
+- Runtime Secret IAM grant: No.
+- Cloud Run update or deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Frontend source dirty staged in 32L-9: No.
+- Conclusion: Migration path decision is Go, but migration runner implementation and migration execution require separate approval gates.

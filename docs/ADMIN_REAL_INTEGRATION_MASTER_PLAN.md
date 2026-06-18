@@ -446,3 +446,10 @@ No-Go remains:
 - First staging database URL secret version: Go.
 - Password and DB URL recorded: No.
 - Schema migration, Runtime Secret IAM, Cloud Run DB update, Firebase Auth/rewrite, and production write remain blocked.
+
+## 32L-9 Staging Schema Migration Path Decision
+
+- Migration execution path decision is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_PATH_DECISION.md`.
+- Recommended path: Cloud Run Job / one-off migration runner.
+- Direct local Codex psql, direct secret value read, and public migration endpoints are No-Go.
+- Next gate is migration runner implementation, not migration execution.

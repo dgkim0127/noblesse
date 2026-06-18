@@ -516,3 +516,10 @@ Before implementation starts:
 - First staging database URL secret version exists for future approved runtime use.
 - Password and DB URL were not recorded.
 - Backend DB readiness still requires schema migration approval, runtime Secret IAM, and Cloud Run DB secret/socket update before any DB-backed runtime smoke.
+
+## 32L-9 Staging Schema Migration Path Decision
+
+- Migration path decision is documented in `docs/ADMIN_STAGING_SCHEMA_MIGRATION_PATH_DECISION.md`.
+- Recommended implementation path is a Cloud Run Job / one-off migration runner.
+- DB connection, SQL execution, secret access, Runtime Secret IAM, Cloud Run DB update, and Firebase `/api` rewrite remain blocked.
+- Next implementation gate is migration runner implementation, not migration execution.

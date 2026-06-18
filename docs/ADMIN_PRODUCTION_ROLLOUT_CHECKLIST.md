@@ -649,3 +649,12 @@ Required before 32K:
 - Runtime Secret IAM: No-Go.
 - Cloud Run DB update: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32L-9 Staging Schema Migration Path Decision Follow-up
+
+- Migration path decision: `docs/ADMIN_STAGING_SCHEMA_MIGRATION_PATH_DECISION.md`.
+- Recommended path: Cloud Run Job / one-off migration runner.
+- Local Codex psql: No-Go.
+- Public migration endpoint: No-Go.
+- Migration execution: No-Go.
+- Next gate: `APPROVE_SCHEMA_MIGRATION_RUNNER_IMPLEMENTATION = YES`.
