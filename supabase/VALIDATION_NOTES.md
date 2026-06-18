@@ -1378,3 +1378,29 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32L-4: No.
 - Conclusion: Backend socket config support is Go, but staging DB creation, IAM, migration, secret version addition, Cloud Run DB update, and production rollout remain No-Go.
+
+## 32L-5 Staging Cloud SQL Resource Attempt Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`.
+- Scope: Approved Noblesse staging Cloud SQL instance/database creation attempt.
+- Instance name candidate: `noblesse-staging-pg`.
+- Database name candidate: `noblesse_staging`.
+- Region candidate: `asia-northeast3`.
+- Instance existed before: No.
+- Instance create executed: Yes.
+- Instance create result: Blocked by approved tier/machine type availability.
+- Instance exists after attempt: No.
+- Database create executed: No.
+- Database exists after attempt: No.
+- DB user/password created: No.
+- Password recorded: No.
+- DB/Auth/SQL execution: No.
+- SQL/schema/migration file change: No.
+- Secret Manager version added: No; staging secret version count remains 0.
+- Cloud SQL client IAM change: No.
+- Cloud Run update or deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32L-5: No.
+- Conclusion: Staging DB creation remains No-Go until a revised staging tier/version decision is approved.

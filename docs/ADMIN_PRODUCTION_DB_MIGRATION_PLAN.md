@@ -199,6 +199,10 @@ Current status:
 - Cloud SQL Admin API was enabled in 32L-3 and documented in `docs/ADMIN_CLOUD_SQL_ADMIN_API_ENABLEMENT_REPORT.md`.
 - Existing Cloud SQL instances are present in the configured project, but the Noblesse staging-named candidate is not present.
 - Backend pool socket-mode config support was implemented in 32L-4 without DB connection.
+- 32L-5 attempted the approved staging Cloud SQL creation and was blocked by approved tier/machine type availability.
+- Target staging instance was not created.
+- Staging database was not created.
+- A revised staging tier/version decision is required before retry.
 - Staging DB creation remains No-Go.
 - Schema migration execution remains No-Go.
 

@@ -72,6 +72,8 @@ Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECI
 
 32L-4 adds backend-only Cloud SQL socket pool configuration support. This remains server-side only: no frontend DB access, no `DATABASE_URL` in frontend, no Firebase `/api` rewrite, and no production admin write.
 
+32L-5 attempted staging Cloud SQL resource creation and was blocked before any usable DB resource was created. Backend API boundaries remain unchanged: no DB connection, no Cloud Run DB update, no Firebase `/api` rewrite, and no production admin write.
+
 ### `GET /api/catalog/products`
 
 - Returns public visible product metadata.

@@ -16,6 +16,7 @@
 - Cloud SQL Admin API: Enabled
 - Cloud SQL connection architecture: Option A recommended, documented
 - Backend DB pool socket support: Implemented in config/tests only
+- Staging Cloud SQL resource: Not created; approved tier revision required
 - Firebase Auth backend integration: Not implemented
 - admin bootstrap: Not executed
 - staging admin_memo write: Not executed
@@ -209,8 +210,17 @@ Rollback impact:
 - Cloud SQL socket pool config is tested without opening a DB connection.
 - No Cloud SQL instance/database/user, IAM, SQL, migration, secret version, Cloud Run update, Firebase rewrite, or production write was performed.
 
+32L-5 result:
+
+- Staging Cloud SQL resource attempt is documented in `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`.
+- Instance creation was attempted with the approved staging spec and blocked by approved tier/machine type availability.
+- Target staging instance does not exist after the attempt.
+- Staging database was not created.
+- No DB user/password, IAM, DB connection, SQL, migration, secret version, Cloud Run update, Firebase rewrite, or production write was performed.
+
 Approval required:
 
+- `APPROVE_STAGING_DB_TIER_REVISION = YES`
 - `APPROVE_STAGING_DB_CREATE = YES`
 - `APPROVE_SCHEMA_MIGRATION_EXECUTION = YES`
 
@@ -221,6 +231,7 @@ Rules:
 - no production customer data
 - Cloud Run native Cloud SQL socket connection is the preferred staging path
 - direct public TCP is not recommended for first staging rollout
+- approved tier/version must be revised before another staging DB create attempt
 - no production DB
 - no schema migration before provider, reset, and backup/restore path are approved
 - runtime DB role must not be a superuser

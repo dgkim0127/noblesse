@@ -10,7 +10,7 @@
 
 - health-only Cloud Run runtime: Go
 - staging Secret Manager container: exists, zero versions
-- Cloud SQL instance: not created
+- Cloud SQL instance: not created; 32L-5 create attempt blocked by approved tier/machine type availability
 - Cloud SQL Admin API: Enabled
 - runtime Cloud SQL IAM: not granted
 - DB pool socket support: implemented in backend config only
@@ -39,6 +39,15 @@ Only Cloud SQL Admin API enablement was executed in 32L-3. No DB creation, IAM c
 - Pool max, connection timeout, and idle timeout settings are parsed.
 - Socket-mode pool config is covered by backend tests only.
 - No actual Cloud SQL instance, DB connection, IAM, Secret Manager version, Cloud Run update, or Firebase rewrite was added.
+
+32L-5 resource attempt:
+
+- Staging Cloud SQL resource attempt is documented in `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`.
+- Instance creation was attempted with the approved staging spec and blocked by approved tier/machine type availability.
+- The target staging instance does not exist after the attempt.
+- The staging database was not created.
+- No DB user/password, IAM, schema migration, Secret Manager version, Cloud Run update, Firebase rewrite, or production write was performed.
+- Do not retry with a different tier or version until a revised staging spec is explicitly approved.
 
 ## Connection Options Reviewed
 
@@ -146,6 +155,7 @@ This step does not implement those changes.
 - region: `asia-northeast3`
 - instance name candidate: `noblesse-staging-pg`
 - database name candidate: `noblesse_staging`
+- approved tier candidate `db-f1-micro` was blocked in 32L-5
 - production DB: fully separate
 - data: synthetic only
 - high availability: disabled for initial staging candidate
@@ -162,6 +172,7 @@ No tier, version, storage, price, project id, instance connection name, IP addre
 ## Why DB Creation Is Not Yet Approved
 
 - Backend pool socket-mode support is implemented in config/tests only and has not been connected to real Cloud SQL.
+- approved staging tier requires revision before a new create attempt.
 - runtime Cloud SQL IAM is not granted.
 - reset/backup/schema plan is not executed.
 - staging secret container intentionally has zero versions.
@@ -172,20 +183,21 @@ No tier, version, storage, price, project id, instance connection name, IP addre
 1. `APPROVE_CLOUD_SQL_ADMIN_API_ENABLEMENT = YES` - completed in 32L-3
 2. `APPROVE_DB_POOL_SOCKET_SUPPORT = YES` - completed in 32L-4
 3. backend pool socket-mode implementation/test
-4. `APPROVE_STAGING_DB_CREATE = YES`
-5. staging Cloud SQL instance/database/user creation
-6. `APPROVE_CLOUD_SQL_CLIENT_IAM = YES`
-7. runtime service account Cloud SQL client IAM grant
-8. `APPROVE_SCHEMA_MIGRATION_EXECUTION = YES`
-9. staging schema application
-10. `APPROVE_SECRET_MANAGER_VERSION_ADD = YES`
-11. staging DB connection value added to the existing staging secret
-12. `APPROVE_RUNTIME_SECRET_IAM = YES`
-13. secret-specific accessor IAM grant
-14. `APPROVE_CLOUD_RUN_DB_SECRET_UPDATE = YES`
-15. Cloud Run socket connection and Secret Manager reference update
-16. staging DB read smoke
-17. Firebase Auth stage
+4. `APPROVE_STAGING_DB_TIER_REVISION = YES`
+5. `APPROVE_STAGING_DB_CREATE = YES`
+6. staging Cloud SQL instance/database/user creation
+7. `APPROVE_CLOUD_SQL_CLIENT_IAM = YES`
+8. runtime service account Cloud SQL client IAM grant
+9. `APPROVE_SCHEMA_MIGRATION_EXECUTION = YES`
+10. staging schema application
+11. `APPROVE_SECRET_MANAGER_VERSION_ADD = YES`
+12. staging DB connection value added to the existing staging secret
+13. `APPROVE_RUNTIME_SECRET_IAM = YES`
+14. secret-specific accessor IAM grant
+15. `APPROVE_CLOUD_RUN_DB_SECRET_UPDATE = YES`
+16. Cloud Run socket connection and Secret Manager reference update
+17. staging DB read smoke
+18. Firebase Auth stage
 
 Secret value addition is forbidden until the staging DB and DB user are ready.
 
@@ -194,7 +206,7 @@ Secret value addition is forbidden until the staging DB and DB user are ready.
 - Connection architecture decision: Go
 - Cloud SQL Admin API enablement: Go
 - backend socket implementation: Go
-- staging DB creation: No-Go
+- staging DB creation: No-Go, blocked by tier revision
 - IAM change: No-Go
 - migration: No-Go
 - secret version addition: No-Go

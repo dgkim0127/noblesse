@@ -125,6 +125,8 @@ Current status:
 - 32L-3 enables Cloud SQL Admin API only and documents it in `docs/ADMIN_CLOUD_SQL_ADMIN_API_ENABLEMENT_REPORT.md`.
 - Existing Cloud SQL instances are present, but the Noblesse staging-named candidate is not present.
 - 32L-4 implements backend DB pool socket-mode config support and tests it without DB connection.
+- 32L-5 attempted approved staging Cloud SQL resource creation and was blocked by approved tier/machine type availability.
+- Staging Cloud SQL instance/database were not created.
 
 Rollout judgment:
 
@@ -135,6 +137,7 @@ Evidence:
 - `docs/ADMIN_PRODUCTION_DB_MIGRATION_PLAN.md`
 - `docs/ADMIN_STAGING_CLOUD_SQL_CONNECTION_DECISION.md`
 - `docs/ADMIN_CLOUD_SQL_ADMIN_API_ENABLEMENT_REPORT.md`
+- `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`
 
 ## Gate 3. Secret Management
 
