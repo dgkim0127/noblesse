@@ -470,3 +470,10 @@ Before implementation starts:
 - Next implementation still requires explicit approval.
 - Secret Manager, production DB, Firebase Auth, and Firebase `/api` rewrite remain required before production integration.
 - Production admin_memo write remains No-Go.
+
+## 32L Admin Real Integration Master Plan
+
+- Admin real integration master plan is documented in `docs/ADMIN_REAL_INTEGRATION_MASTER_PLAN.md`.
+- Secret Manager, staging PostgreSQL, and Firebase Auth are defined as required but separate integration roles.
+- Cloud SQL PostgreSQL is the recommended primary DB path after resource-boundary approval.
+- Actual Secret Manager creation, staging DB creation, Auth integration, Firebase rewrite, and production write remain blocked.

@@ -434,3 +434,11 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Production frontend still does not call the backend.
 - The health-only runtime remains disconnected from DB/Auth/Secret Manager.
 - Frontend direct PostgreSQL access remains prohibited.
+
+## 32L Admin Real Integration Master Plan
+
+- Real admin integration planning is documented in `docs/ADMIN_REAL_INTEGRATION_MASTER_PLAN.md`.
+- The frontend still must call only the backend API after any future Firebase `/api` rewrite.
+- Direct React-to-PostgreSQL access remains prohibited.
+- Firebase Auth provides identity, PostgreSQL provides role/status authorization, and Secret Manager provides DB credentials.
+- Firebase Hosting `/api` rewrite remains absent.
