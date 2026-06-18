@@ -196,8 +196,8 @@ Current status:
 
 - Staging Cloud SQL connection decision is documented in `docs/ADMIN_STAGING_CLOUD_SQL_CONNECTION_DECISION.md`.
 - Recommended staging topology is Cloud Run native Cloud SQL connection with Unix socket.
-- Cloud SQL Admin API is currently missing and was not enabled.
-- Existing staging Cloud SQL instance status is unknown because the Cloud SQL Admin API is missing.
+- Cloud SQL Admin API was enabled in 32L-3 and documented in `docs/ADMIN_CLOUD_SQL_ADMIN_API_ENABLEMENT_REPORT.md`.
+- Existing Cloud SQL instances are present in the configured project, but the Noblesse staging-named candidate is not present.
 - Backend pool socket-mode support is required before staging DB rollout.
 - Staging DB creation remains No-Go.
 - Schema migration execution remains No-Go.

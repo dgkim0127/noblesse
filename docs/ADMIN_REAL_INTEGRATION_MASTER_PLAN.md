@@ -13,7 +13,7 @@
 - required APIs: Enabled
 - DB: Not connected
 - Secret Manager staging container: Created with no value/version
-- Cloud SQL Admin API: Missing
+- Cloud SQL Admin API: Enabled
 - Cloud SQL connection architecture: Option A recommended, documented
 - Firebase Auth backend integration: Not implemented
 - admin bootstrap: Not executed
@@ -191,9 +191,17 @@ Rollback impact:
 - Staging secret container remains value-less with zero versions.
 - No DB, IAM, Cloud Run, Firebase, backend code, SQL, or package change was made.
 
+32L-3 result:
+
+- Cloud SQL Admin API enablement is documented in `docs/ADMIN_CLOUD_SQL_ADMIN_API_ENABLEMENT_REPORT.md`.
+- Cloud SQL Admin API changed from Missing to Enabled.
+- Existing Cloud SQL instances are present in the configured project, but the Noblesse staging-named candidate is not present.
+- Raw instance names, IP addresses, connection names, project id, and account email are not recorded.
+- No Cloud SQL instance/database/user was created.
+- No IAM, DB connection, SQL, migration, secret version, Cloud Run update, Firebase rewrite, or production write was performed.
+
 Approval required:
 
-- `APPROVE_CLOUD_SQL_ADMIN_API_ENABLEMENT = YES`
 - `APPROVE_DB_POOL_SOCKET_SUPPORT = YES`
 - `APPROVE_STAGING_DB_CREATE = YES`
 - `APPROVE_SCHEMA_MIGRATION_EXECUTION = YES`

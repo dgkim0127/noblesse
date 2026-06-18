@@ -122,7 +122,8 @@ Current status:
 - SQL not executed
 - 32L-2 documents staging Cloud SQL connection architecture in `docs/ADMIN_STAGING_CLOUD_SQL_CONNECTION_DECISION.md`.
 - Recommended staging path is Cloud Run native Cloud SQL connection with Unix socket.
-- Cloud SQL Admin API is missing and was not enabled.
+- 32L-3 enables Cloud SQL Admin API only and documents it in `docs/ADMIN_CLOUD_SQL_ADMIN_API_ENABLEMENT_REPORT.md`.
+- Existing Cloud SQL instances are present, but the Noblesse staging-named candidate is not present.
 - Backend pool socket support is not implemented.
 
 Rollout judgment:
@@ -133,6 +134,7 @@ Evidence:
 
 - `docs/ADMIN_PRODUCTION_DB_MIGRATION_PLAN.md`
 - `docs/ADMIN_STAGING_CLOUD_SQL_CONNECTION_DECISION.md`
+- `docs/ADMIN_CLOUD_SQL_ADMIN_API_ENABLEMENT_REPORT.md`
 
 ## Gate 3. Secret Management
 

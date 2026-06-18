@@ -68,6 +68,8 @@ Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECI
 
 32L-2 documents the staging Cloud SQL connection decision in `docs/ADMIN_STAGING_CLOUD_SQL_CONNECTION_DECISION.md`. The recommended DB path remains backend-only through Cloud Run native Cloud SQL connection and Secret Manager. The frontend still must not receive DB credentials or call PostgreSQL directly.
 
+32L-3 enables Cloud SQL Admin API only and documents it in `docs/ADMIN_CLOUD_SQL_ADMIN_API_ENABLEMENT_REPORT.md`. This does not create a DB, add IAM, add a secret version, connect Cloud Run to DB, add Firebase `/api` rewrite, or allow frontend DB access.
+
 ### `GET /api/catalog/products`
 
 - Returns public visible product metadata.

@@ -1333,3 +1333,25 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32L-2: No.
 - Conclusion: Connection architecture decision is Go, but API enablement, socket implementation, DB creation, IAM, migration, secret version addition, Cloud Run DB update, and production rollout remain No-Go.
+
+## 32L-3 Cloud SQL Admin API Enablement Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_CLOUD_SQL_ADMIN_API_ENABLEMENT_REPORT.md`.
+- Scope: Cloud SQL Admin API enablement only.
+- Cloud SQL Admin API before: Missing.
+- Cloud SQL Admin API after: Enabled.
+- `gcloud services enable` executed: Yes, for `sqladmin.googleapis.com` only.
+- Cloud SQL instances present: Yes.
+- Noblesse staging-named instance present: No.
+- Raw instance names/IP/connection names recorded: No.
+- Cloud SQL instance/database/user creation: No.
+- Cloud SQL client IAM change: No.
+- DB/Auth/SQL execution: No.
+- SQL/schema/migration file change: No.
+- Secret Manager version added: No.
+- Cloud Run update or deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32L-3: No.
+- Conclusion: Cloud SQL Admin API enablement is Go, but backend socket support, staging DB creation, IAM, migration, secret version addition, Cloud Run DB update, and production rollout remain No-Go.

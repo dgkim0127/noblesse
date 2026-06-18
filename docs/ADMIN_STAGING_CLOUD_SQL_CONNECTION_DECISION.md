@@ -24,11 +24,13 @@
 - raw project/account values recorded: No
 - Cloud Run service exists in `asia-northeast3`: Yes
 - dedicated runtime identity assigned: Yes
-- Cloud SQL instances present: Unknown because Cloud SQL Admin API is missing
-- Noblesse staging-named instance present: Unknown because Cloud SQL Admin API is missing
+- Cloud SQL Admin API before 32L-3: Missing
+- Cloud SQL Admin API after 32L-3: Enabled
+- Cloud SQL instances present: Yes
+- Noblesse staging-named instance present: No
 - actual Cloud SQL instance name, IP, or connection name recorded: No
 
-No API enablement, DB creation, IAM change, deploy, or DB connection was executed.
+Only Cloud SQL Admin API enablement was executed in 32L-3. No DB creation, IAM change, deploy, or DB connection was executed.
 
 ## Connection Options Reviewed
 
@@ -143,7 +145,7 @@ No tier, version, storage, price, project id, instance connection name, IP addre
 
 ## Why DB Creation Is Not Yet Approved
 
-- Cloud SQL Admin API is missing.
+- Backend pool socket-mode support is not implemented.
 - connection mode is not implemented.
 - current pool assumes `DATABASE_URL` and production TLS behavior.
 - runtime Cloud SQL IAM is not granted.
@@ -176,7 +178,7 @@ Secret value addition is forbidden until the staging DB and DB user are ready.
 ## Go / No-Go
 
 - Connection architecture decision: Go
-- Cloud SQL Admin API enablement: No-Go
+- Cloud SQL Admin API enablement: Go
 - backend socket implementation: No-Go
 - staging DB creation: No-Go
 - IAM change: No-Go

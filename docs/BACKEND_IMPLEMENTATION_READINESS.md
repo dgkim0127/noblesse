@@ -47,6 +47,8 @@ Next step is local test and route QA for the scaffold. Provider resource creatio
 
 32L-2 status: Staging Cloud SQL connection architecture is documented in `docs/ADMIN_STAGING_CLOUD_SQL_CONNECTION_DECISION.md`. Recommended path is Cloud Run native Cloud SQL connection with Unix socket. Cloud SQL Admin API is currently missing, backend pool socket support is not implemented, and staging DB creation remains blocked until API enablement and socket-mode support are separately approved.
 
+32L-3 status: Cloud SQL Admin API enablement is documented in `docs/ADMIN_CLOUD_SQL_ADMIN_API_ENABLEMENT_REPORT.md`. API enablement is complete, but backend pool socket support is still not implemented. Staging DB creation, IAM, migration, secret version addition, Cloud Run DB update, Firebase rewrite, and production write remain blocked.
+
 ## Decision Status
 
 | Area | Current Status | Decision Needed Before Implementation |
