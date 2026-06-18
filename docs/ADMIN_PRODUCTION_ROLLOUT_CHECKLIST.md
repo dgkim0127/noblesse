@@ -127,6 +127,9 @@ Current status:
 - 32L-4 implements backend DB pool socket-mode config support and tests it without DB connection.
 - 32L-5 attempted approved staging Cloud SQL resource creation and was blocked by approved tier/machine type availability.
 - Staging Cloud SQL instance/database were not created.
+- 32L-5R documents revised staging tier candidates in `docs/ADMIN_STAGING_DB_TIER_REVISION_PLAN.md`.
+- Revised first candidate is `db-g1-small`; fallback is `db-custom-1-3840`.
+- No automatic tier/version substitution is allowed.
 
 Rollout judgment:
 
@@ -138,6 +141,7 @@ Evidence:
 - `docs/ADMIN_STAGING_CLOUD_SQL_CONNECTION_DECISION.md`
 - `docs/ADMIN_CLOUD_SQL_ADMIN_API_ENABLEMENT_REPORT.md`
 - `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`
+- `docs/ADMIN_STAGING_DB_TIER_REVISION_PLAN.md`
 
 ## Gate 3. Secret Management
 

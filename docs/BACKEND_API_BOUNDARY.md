@@ -74,6 +74,8 @@ Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECI
 
 32L-5 attempted staging Cloud SQL resource creation and was blocked before any usable DB resource was created. Backend API boundaries remain unchanged: no DB connection, no Cloud Run DB update, no Firebase `/api` rewrite, and no production admin write.
 
+32L-5R documents revised staging DB tier candidates only. It does not create a DB, connect backend APIs to DB, add a Firebase rewrite, or change frontend access boundaries.
+
 ### `GET /api/catalog/products`
 
 - Returns public visible product metadata.

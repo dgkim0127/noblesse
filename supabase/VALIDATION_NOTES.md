@@ -1404,3 +1404,23 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret recorded in repo/docs: No.
 - Frontend source dirty staged in 32L-5: No.
 - Conclusion: Staging DB creation remains No-Go until a revised staging tier/version decision is approved.
+
+## 32L-5R Staging DB Tier Revision Plan Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_STAGING_DB_TIER_REVISION_PLAN.md`.
+- Scope: Revised staging Cloud SQL tier/version approval documentation only.
+- First revised candidate: `db-g1-small`.
+- Fallback candidate: `db-custom-1-3840`.
+- N4 custom candidate: deferred.
+- Automatic tier/version substitution: No.
+- Cloud SQL instance/database/user creation: No.
+- DB/Auth/SQL execution: No.
+- SQL/schema/migration file change: No.
+- Secret Manager version added: No; staging secret version count remains 0.
+- Cloud SQL client IAM change: No.
+- Cloud Run update or deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Secret recorded in repo/docs: No.
+- Frontend source dirty staged in 32L-5R: No.
+- Conclusion: Revised tier planning is Go, but staging DB creation remains No-Go until `APPROVE_STAGING_DB_CREATE_REVISED = YES`.

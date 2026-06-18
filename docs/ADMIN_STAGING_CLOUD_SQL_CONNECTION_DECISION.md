@@ -49,6 +49,15 @@ Only Cloud SQL Admin API enablement was executed in 32L-3. No DB creation, IAM c
 - No DB user/password, IAM, schema migration, Secret Manager version, Cloud Run update, Firebase rewrite, or production write was performed.
 - Do not retry with a different tier or version until a revised staging spec is explicitly approved.
 
+32L-5R revision plan:
+
+- Revised tier plan is documented in `docs/ADMIN_STAGING_DB_TIER_REVISION_PLAN.md`.
+- First revised candidate is `db-g1-small`.
+- Fallback candidate is `db-custom-1-3840` if shared-core is blocked.
+- N4 custom candidate is deferred for later hardening.
+- No automatic tier/version substitution is allowed.
+- No Cloud SQL instance, database, user, IAM, Secret Manager version, Cloud Run update, Firebase rewrite, or production write was performed in 32L-5R.
+
 ## Connection Options Reviewed
 
 ### Option A - Cloud Run Native Cloud SQL Connection + Unix Socket
@@ -156,6 +165,8 @@ This step does not implement those changes.
 - instance name candidate: `noblesse-staging-pg`
 - database name candidate: `noblesse_staging`
 - approved tier candidate `db-f1-micro` was blocked in 32L-5
+- revised first candidate: `db-g1-small`
+- fallback candidate: `db-custom-1-3840`
 - production DB: fully separate
 - data: synthetic only
 - high availability: disabled for initial staging candidate
@@ -183,8 +194,8 @@ No tier, version, storage, price, project id, instance connection name, IP addre
 1. `APPROVE_CLOUD_SQL_ADMIN_API_ENABLEMENT = YES` - completed in 32L-3
 2. `APPROVE_DB_POOL_SOCKET_SUPPORT = YES` - completed in 32L-4
 3. backend pool socket-mode implementation/test
-4. `APPROVE_STAGING_DB_TIER_REVISION = YES`
-5. `APPROVE_STAGING_DB_CREATE = YES`
+4. `APPROVE_STAGING_DB_TIER_REVISION = YES` - completed in 32L-5R
+5. `APPROVE_STAGING_DB_CREATE_REVISED = YES`
 6. staging Cloud SQL instance/database/user creation
 7. `APPROVE_CLOUD_SQL_CLIENT_IAM = YES`
 8. runtime service account Cloud SQL client IAM grant

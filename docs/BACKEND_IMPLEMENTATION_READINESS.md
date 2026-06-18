@@ -53,6 +53,8 @@ Next step is local test and route QA for the scaffold. Provider resource creatio
 
 32L-5 status: Approved staging Cloud SQL resource creation was attempted and blocked by approved tier/machine type availability. The staging instance and database were not created. Next readiness gate is a revised staging tier/version approval before another DB create attempt.
 
+32L-5R status: Revised staging DB tier plan is documented in `docs/ADMIN_STAGING_DB_TIER_REVISION_PLAN.md`. First revised candidate is `db-g1-small`; fallback is `db-custom-1-3840`. Staging DB creation remains blocked until `APPROVE_STAGING_DB_CREATE_REVISED = YES`.
+
 ## Decision Status
 
 | Area | Current Status | Decision Needed Before Implementation |
