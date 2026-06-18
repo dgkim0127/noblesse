@@ -83,3 +83,12 @@
 - Health-only Cloud Run runtime: Go
 - Production backend integration: No-Go
 - Production admin write: No-Go
+
+## 32K-14 Operations Audit Follow-up
+
+- Read-only operations audit is documented in `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_OPERATIONS_AUDIT.md`.
+- Runtime remains health-only.
+- Service is recommended to be kept temporarily while the next backend integration phase is active.
+- Firebase `/api` rewrite remains No-Go.
+- DB/Auth/Secret integration remains No-Go.
+- Production admin_memo write remains No-Go.

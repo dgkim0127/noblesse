@@ -462,3 +462,11 @@ Before implementation starts:
 - Cloud Build executed for the approved source deploy.
 - Secret Manager, production DB, Firebase Auth, and Firebase `/api` rewrite are still required before production integration.
 - Production admin_memo write remains No-Go.
+
+## 32K-14 Health-only Operations Audit
+
+- Health-only runtime operational audit is documented in `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_OPERATIONS_AUDIT.md`.
+- Runtime service, IAM, env, smoke, and recent ERROR log checks are Go.
+- Next implementation still requires explicit approval.
+- Secret Manager, production DB, Firebase Auth, and Firebase `/api` rewrite remain required before production integration.
+- Production admin_memo write remains No-Go.

@@ -157,3 +157,12 @@ Still blocked:
 - Production backend integration: No-Go
 - Production admin write: No-Go
 - Firebase `/api` rewrite: No-Go
+
+## 32K-14 Operations Audit Follow-up
+
+- Operations audit result is documented in `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_OPERATIONS_AUDIT.md`.
+- Health-only runtime operational audit: Go.
+- Keep service temporarily: Recommended.
+- Production integration remains No-Go.
+- Production admin write remains No-Go.
+- Firebase `/api` rewrite remains No-Go.

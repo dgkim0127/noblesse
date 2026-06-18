@@ -574,3 +574,12 @@ Required before 32K:
 - DB/Auth/Secret integration: No-Go.
 - Firebase `/api` rewrite: No-Go.
 - production admin_memo write: No-Go.
+
+## 32K-14 Health-only Runtime Audit Follow-up
+
+- Runtime health-only gate audit: Go.
+- Operations audit report: `docs/ADMIN_CLOUD_RUN_HEALTH_ONLY_OPERATIONS_AUDIT.md`.
+- Keep service temporarily: Recommended.
+- DB/Auth/Secret integration: No-Go.
+- Firebase `/api` rewrite: No-Go.
+- production admin_memo write: No-Go.

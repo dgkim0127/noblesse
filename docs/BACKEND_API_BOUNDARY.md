@@ -426,3 +426,11 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - Production frontend still does not call the backend.
 - The runtime is not connected to DB/Auth/Secret Manager.
 - Frontend direct PostgreSQL access remains prohibited.
+
+## 32K-14 Health-only Operations Audit
+
+- Cloud Run URL remains separate from Firebase Hosting.
+- Firebase Hosting `/api` rewrite remains absent.
+- Production frontend still does not call the backend.
+- The health-only runtime remains disconnected from DB/Auth/Secret Manager.
+- Frontend direct PostgreSQL access remains prohibited.
