@@ -1,0 +1,19 @@
+FROM node:20-slim
+
+WORKDIR /app/backend
+
+ENV NODE_ENV=production
+
+COPY backend/package*.json ./
+RUN npm ci --omit=dev
+
+COPY backend/src ./src
+COPY supabase/schema.sql /app/supabase/schema.sql
+
+RUN test -f /app/supabase/schema.sql \
+  && test -r /app/supabase/schema.sql \
+  && test -s /app/supabase/schema.sql
+
+EXPOSE 8080
+
+CMD ["npm", "start"]
