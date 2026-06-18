@@ -467,3 +467,10 @@ No-Go remains:
 - The dedicated Noblesse runtime identity can access only the staging DB URL secret at secret-resource scope.
 - Secret value was not accessed/read, and secret version count remains 1.
 - Cloud Run DB update, Cloud Run Job execution, schema migration execution, Firebase Auth/rewrite, and production write remain blocked.
+
+## 32L-12 Cloud Run Migration Job Packaging
+
+- Cloud Run migration job packaging result is documented in `docs/ADMIN_CLOUD_RUN_MIGRATION_JOB_PACKAGING_REPORT.md`.
+- A staging migration job resource was created for future execution.
+- The job was not executed and schema migration was not executed.
+- Cloud Run app DB update, Firebase Auth/rewrite, and production write remain blocked.

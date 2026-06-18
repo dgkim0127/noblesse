@@ -505,3 +505,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - This does not add a Firebase Hosting `/api` rewrite.
 - This does not connect the production frontend to admin APIs or PostgreSQL.
 - Cloud Run DB update, migration execution, and production admin writes remain blocked.
+
+## 32L-12 Cloud Run Migration Job Packaging
+
+- Cloud Run migration job packaging is documented in `docs/ADMIN_CLOUD_RUN_MIGRATION_JOB_PACKAGING_REPORT.md`.
+- The job is an internal staging migration path and does not create a public migration endpoint.
+- The job was not executed.
+- Firebase Hosting `/api` rewrite remains absent, and production frontend still does not call admin APIs or PostgreSQL.

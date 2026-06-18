@@ -1572,3 +1572,23 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase deploy or `/api` rewrite: No.
 - Frontend source dirty staged in 32L-11: No.
 - Conclusion: Runtime Secret IAM is Go for the dedicated runtime identity, but Cloud Run DB update, Cloud Run Job packaging/execution, schema migration execution, and production write remain No-Go.
+
+## 32L-12 Cloud Run Migration Job Packaging Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_CLOUD_RUN_MIGRATION_JOB_PACKAGING_REPORT.md`.
+- Scope: Cloud Run Job resource packaging for future staging schema migration.
+- Job name: `noblesse-staging-schema-migration`.
+- Region: `asia-northeast3`.
+- Job existed before: No.
+- Job deploy/create executed: Yes.
+- Cloud Build executed: Yes.
+- Job exists after: Yes.
+- Job execution triggered: No.
+- Schema migration execution: No.
+- Secret value accessed/read: No.
+- DB connection/psql by operator: No.
+- Cloud Run app update/deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Frontend source dirty staged in 32L-12: No.
+- Conclusion: Migration Job packaging is Go, but Job execution, schema migration execution, Cloud Run app DB update, Firebase rewrite, and production write remain No-Go.

@@ -69,3 +69,10 @@ Reason:
 
 - migration runner code exists, and the future runtime identity can now read the staging DB secret.
 - Next step is to package/create a controlled migration job path, still without executing migration unless separately approved.
+
+## 32L-12 Migration Job Packaging
+
+- Cloud Run migration job packaging result is documented in `docs/ADMIN_CLOUD_RUN_MIGRATION_JOB_PACKAGING_REPORT.md`.
+- A staging schema migration job resource now exists for a future approved execution.
+- The job references the staging DB URL secret but the secret value was not accessed/read.
+- The job was not executed, schema migration was not executed, and Cloud Run app DB update remains No-Go.

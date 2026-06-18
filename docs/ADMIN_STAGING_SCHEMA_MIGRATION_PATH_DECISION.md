@@ -187,3 +187,15 @@ Recommended sequence:
 ## Next Gate After 32L-11
 
 - `APPROVE_CLOUD_RUN_MIGRATION_JOB_PACKAGING = YES`
+
+## 32L-12 Cloud Run Migration Job Packaging
+
+- Cloud Run migration job packaging result is documented in `docs/ADMIN_CLOUD_RUN_MIGRATION_JOB_PACKAGING_REPORT.md`.
+- The migration job resource exists and points to the guarded migration runner.
+- Job execution count remains 0 from this step.
+- Secret value access/read, DB connection by operator, schema migration execution, Cloud Run app DB update, Firebase rewrite, and production write remain No-Go.
+
+## Next Gate After 32L-12
+
+- `APPROVE_CLOUD_RUN_MIGRATION_JOB_EXECUTION = YES`
+- `APPROVE_SCHEMA_MIGRATION_EXECUTION = YES`

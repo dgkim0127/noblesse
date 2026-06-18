@@ -679,3 +679,14 @@ Required before 32K:
 - Cloud Run Job packaging/execution: No-Go.
 - Migration execution: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32L-12 Cloud Run Migration Job Packaging Follow-up
+
+- Migration Job packaging report: `docs/ADMIN_CLOUD_RUN_MIGRATION_JOB_PACKAGING_REPORT.md`.
+- Cloud Run Job resource creation: Go.
+- Cloud Build for job packaging: Go.
+- Job execution triggered: No.
+- Schema migration execution: No.
+- Cloud Run app DB update: No-Go.
+- Firebase rewrite/deploy: No-Go.
+- Production admin_memo write: No-Go.

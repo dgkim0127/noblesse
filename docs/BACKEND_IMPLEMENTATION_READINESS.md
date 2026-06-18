@@ -537,3 +537,10 @@ Before implementation starts:
 - Secret value was not accessed/read, and secret version count remains 1.
 - Backend runtime DB readiness still requires Cloud Run DB secret/socket update and controlled migration job packaging/execution approvals.
 - Firebase `/api` rewrite and production write remain blocked.
+
+## 32L-12 Cloud Run Migration Job Packaging
+
+- Cloud Run migration job packaging is documented in `docs/ADMIN_CLOUD_RUN_MIGRATION_JOB_PACKAGING_REPORT.md`.
+- A staging migration job resource exists for future approved execution.
+- The job was not executed and schema migration was not executed.
+- Backend readiness still requires explicit migration execution approval, DB smoke verification, Cloud Run app DB update approval, and Firebase `/api` rewrite approval.

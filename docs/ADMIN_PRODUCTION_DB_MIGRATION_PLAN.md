@@ -451,3 +451,11 @@ Important:
 - Secret value was not accessed/read.
 - Secret version count remains unchanged at 1.
 - Cloud Run Job packaging/execution and schema migration execution remain No-Go until separately approved.
+
+## 32L-12 Cloud Run Migration Job Packaging Follow-up
+
+- Cloud Run migration job packaging is documented in `docs/ADMIN_CLOUD_RUN_MIGRATION_JOB_PACKAGING_REPORT.md`.
+- The staging migration job resource exists and is configured for the guarded migration runner.
+- Job execution: No.
+- Schema migration execution: No.
+- Cloud Run app DB update and production migration remain No-Go.
