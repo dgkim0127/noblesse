@@ -498,3 +498,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - No public migration endpoint was added.
 - No frontend API path, Firebase Hosting rewrite, or direct React-to-PostgreSQL access changed.
 - Migration execution remains blocked.
+
+## 32L-11 Runtime Secret IAM
+
+- Runtime secret IAM grant is documented in `docs/ADMIN_RUNTIME_SECRET_IAM_REPORT.md`.
+- This does not add a Firebase Hosting `/api` rewrite.
+- This does not connect the production frontend to admin APIs or PostgreSQL.
+- Cloud Run DB update, migration execution, and production admin writes remain blocked.

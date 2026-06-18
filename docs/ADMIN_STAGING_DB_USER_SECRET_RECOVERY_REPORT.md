@@ -87,3 +87,11 @@ Recommended order:
 - Local Codex psql and direct secret value read are not recommended.
 - Public migration endpoint is No-Go.
 - DB connection, SQL execution, Runtime Secret IAM, Cloud Run DB update, Firebase rewrite, and production write remain No-Go.
+
+## 32L-11 Runtime Secret IAM
+
+- Runtime secret IAM grant result is documented in `docs/ADMIN_RUNTIME_SECRET_IAM_REPORT.md`.
+- The dedicated Noblesse runtime identity now has secret-level `roles/secretmanager.secretAccessor` on `noblesse-staging-database-url`.
+- Secret value was not accessed/read.
+- Secret version count remains 1.
+- Cloud Run DB update, Cloud Run Job execution, schema migration execution, Firebase Auth/rewrite, and production write remain No-Go.

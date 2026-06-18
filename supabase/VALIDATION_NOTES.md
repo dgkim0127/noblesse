@@ -1552,3 +1552,23 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase deploy or `/api` rewrite: No.
 - Frontend source dirty staged in 32L-10: No.
 - Conclusion: Migration runner implementation is Go, but Cloud Run Job packaging/execution, Runtime Secret IAM, and schema migration execution require separate approval gates.
+
+## 32L-11 Runtime Secret IAM Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_RUNTIME_SECRET_IAM_REPORT.md`.
+- Scope: Secret-level IAM grant for the dedicated Noblesse runtime identity on the staging DB URL secret only.
+- `roles/secretmanager.secretAccessor` validation: Yes.
+- Secret version count before: 1.
+- Secret version count after: 1.
+- Secret value accessed/read: No.
+- Project-wide Secret Manager role added: No.
+- Other secret IAM changed: No.
+- allUsers/allAuthenticatedUsers added: No.
+- Cloud Run update or deploy: No.
+- Cloud Run Job created/executed: No.
+- DB connection/psql executed: No.
+- SQL/schema/migration execution: No.
+- Firebase deploy or `/api` rewrite: No.
+- Frontend source dirty staged in 32L-11: No.
+- Conclusion: Runtime Secret IAM is Go for the dedicated runtime identity, but Cloud Run DB update, Cloud Run Job packaging/execution, schema migration execution, and production write remain No-Go.

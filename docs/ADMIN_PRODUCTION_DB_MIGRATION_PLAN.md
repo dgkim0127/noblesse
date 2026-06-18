@@ -443,3 +443,11 @@ Important:
 - Runner manages transaction begin/commit/rollback and sanitizes result/error output.
 - Tests use fake pool/client only.
 - No schema migration execution, DB connection, secret access, Cloud Run Job execution, or production migration happened in 32L-10.
+
+## 32L-11 Runtime Secret IAM Follow-up
+
+- Runtime secret IAM grant is documented in `docs/ADMIN_RUNTIME_SECRET_IAM_REPORT.md`.
+- The dedicated Noblesse runtime identity has secret-level access to the staging DB URL secret.
+- Secret value was not accessed/read.
+- Secret version count remains unchanged at 1.
+- Cloud Run Job packaging/execution and schema migration execution remain No-Go until separately approved.

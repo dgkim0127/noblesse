@@ -394,3 +394,11 @@ Important:
 - Secret value was not read back or recorded.
 - Runtime Secret IAM remains No-Go.
 - Production secrets remain No-Go.
+
+## 32L-11 Runtime Secret IAM Follow-up
+
+- Runtime secret IAM grant is documented in `docs/ADMIN_RUNTIME_SECRET_IAM_REPORT.md`.
+- Secret-level access was granted only for the staging DB URL secret and the dedicated Noblesse runtime identity.
+- Secret value was not accessed/read.
+- Secret version count remains 1.
+- Production secrets, Cloud Run DB update, migration execution, Firebase rewrite, and production write remain No-Go.

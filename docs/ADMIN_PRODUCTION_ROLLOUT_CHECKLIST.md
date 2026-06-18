@@ -668,3 +668,14 @@ Required before 32K:
 - Runtime Secret IAM: No-Go.
 - Migration execution: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32L-11 Runtime Secret IAM Follow-up
+
+- Runtime Secret IAM report: `docs/ADMIN_RUNTIME_SECRET_IAM_REPORT.md`.
+- Secret-level `roles/secretmanager.secretAccessor` grant: Go for the dedicated Noblesse runtime identity only.
+- Secret value access/read: No.
+- Secret version count changed: No.
+- Cloud Run DB update: No-Go.
+- Cloud Run Job packaging/execution: No-Go.
+- Migration execution: No-Go.
+- Production admin_memo write: No-Go.

@@ -176,3 +176,14 @@ Recommended sequence:
 - `APPROVE_RUNTIME_SECRET_IAM = YES`
 - `APPROVE_CLOUD_RUN_MIGRATION_JOB_PACKAGING = YES`
 - `APPROVE_CLOUD_RUN_MIGRATION_JOB_EXECUTION = YES`
+
+## 32L-11 Runtime Secret IAM
+
+- Runtime secret IAM grant result is documented in `docs/ADMIN_RUNTIME_SECRET_IAM_REPORT.md`.
+- The dedicated Noblesse runtime identity has secret-level `roles/secretmanager.secretAccessor` for the staging DB URL secret.
+- Secret value was not accessed/read, and secret version count remains unchanged at 1.
+- Cloud Run Job packaging/execution and schema migration execution remain No-Go until separately approved.
+
+## Next Gate After 32L-11
+
+- `APPROVE_CLOUD_RUN_MIGRATION_JOB_PACKAGING = YES`

@@ -460,3 +460,10 @@ No-Go remains:
 - Backend runner and fake-pool tests were added.
 - Runner is transaction-managed and guarded by `ALLOW_STAGING_SCHEMA_MIGRATION_RUNNER=true`.
 - Cloud Run Job packaging/execution, secret access, DB connection, schema migration execution, Runtime Secret IAM, Cloud Run DB update, Firebase rewrite, and production write remain blocked.
+
+## 32L-11 Runtime Secret IAM
+
+- Runtime secret IAM grant result is documented in `docs/ADMIN_RUNTIME_SECRET_IAM_REPORT.md`.
+- The dedicated Noblesse runtime identity can access only the staging DB URL secret at secret-resource scope.
+- Secret value was not accessed/read, and secret version count remains 1.
+- Cloud Run DB update, Cloud Run Job execution, schema migration execution, Firebase Auth/rewrite, and production write remain blocked.
