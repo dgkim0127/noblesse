@@ -77,3 +77,11 @@
 - Secret Manager version addition remains No-Go.
 - Cloud Run DB update remains No-Go.
 - Firebase Auth/rewrite remains No-Go.
+
+## 32L-8 DB User / Secret Handoff
+
+- Staging DB user and secret handoff result is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_REPORT.md`.
+- Staging DB user exists: Yes.
+- Staging secret version count remains 0.
+- Password and DB URL recorded: No.
+- DB connection, psql, schema migration, Cloud Run DB update, Runtime Secret IAM, Firebase rewrite/deploy, and production write remain No-Go.

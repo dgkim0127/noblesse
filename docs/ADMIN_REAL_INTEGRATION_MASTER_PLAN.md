@@ -398,11 +398,11 @@ Completed safe phases:
 
 First blocked approval gate:
 
-- `APPROVE_DB_USER_CREATE = NO`
+- `APPROVE_STAGING_DB_USER_SECRET_RECOVERY = NO`
 
 Next approval needed:
 
-- Approve DB user/password creation separately before any secret version or migration.
+- Approve recovery for the already-created staging DB user before any secret version or migration.
 
 No-Go remains:
 
@@ -428,3 +428,11 @@ No-Go remains:
 - Cloud SQL Client IAM grant result is documented in `docs/ADMIN_CLOUD_SQL_CLIENT_IAM_REPORT.md`.
 - The dedicated Noblesse runtime identity has `roles/cloudsql.client`.
 - DB user/password creation, schema migration, Secret Manager version addition, Cloud Run DB update, Firebase Auth/rewrite, and production write remain blocked.
+
+## 32L-8 DB User / Secret Handoff
+
+- Staging DB user and secret handoff result is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_REPORT.md`.
+- Staging DB user exists, but the first staging secret version was not added.
+- Password and DB URL were not recorded.
+- Recovery approval is required before any password reset/delete/recreate or secret version addition.
+- Schema migration, Runtime Secret IAM, Cloud Run DB update, Firebase Auth/rewrite, and production write remain blocked.

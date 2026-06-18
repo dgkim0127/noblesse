@@ -53,3 +53,11 @@
 Reason:
 
 - DB user/password is needed before a staging database URL secret version can exist.
+
+## 32L-8 DB User / Secret Handoff
+
+- Staging DB user and secret handoff result is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_REPORT.md`.
+- DB user creation: Yes.
+- Secret version addition: No, blocked after user creation.
+- Password and DB URL recorded: No.
+- Recovery approval is required before any password reset/delete/recreate or secret version addition.

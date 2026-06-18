@@ -1468,3 +1468,26 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Raw project id, service account email, IAM policy, connection name, IP, password, and secret recorded: No.
 - Frontend source dirty staged in 32L-7: No.
 - Conclusion: Cloud SQL Client IAM is Go for the dedicated runtime identity, but DB user/password, schema migration, secret version addition, Cloud Run DB update, Firebase Auth/rewrite, and production write remain No-Go.
+
+## 32L-8 Staging DB User / Secret Follow-up
+
+- Date: 2026-06-18
+- Change: Added `docs/ADMIN_STAGING_DB_USER_SECRET_REPORT.md`.
+- Scope: Staging DB application user creation and staging secret version handoff.
+- DB user existed before: No.
+- DB user create executed: Yes.
+- DB user exists after: Yes.
+- Secret version add executed: No.
+- Secret version count before: 0.
+- Secret version count after: 0.
+- TEMP password/secret files removed: Yes.
+- Password recorded: No.
+- Raw DB URL recorded: No.
+- Secret value accessed/read: No.
+- DB connection/psql executed: No.
+- SQL/schema/migration file change: No.
+- Runtime Secret IAM grant: No.
+- Cloud Run update or deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Frontend source dirty staged in 32L-8: No.
+- Conclusion: Staging DB user creation is partial Go, but secret version handoff is blocked pending explicit recovery approval.

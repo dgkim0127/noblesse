@@ -218,7 +218,8 @@ Secret value addition is forbidden until the staging DB and DB user are ready.
 - Cloud SQL Admin API enablement: Go
 - backend socket implementation: Go
 - staging DB creation: Go for approved staging instance/database only, documented in `docs/ADMIN_STAGING_CLOUD_SQL_RESOURCE_REPORT.md`
-- DB user/password creation: No-Go
+- DB user creation: partial Go, documented in `docs/ADMIN_STAGING_DB_USER_SECRET_REPORT.md`
+- DB password secret handoff: blocked pending recovery approval
 - Cloud SQL Client IAM: Go for dedicated runtime identity only, documented in `docs/ADMIN_CLOUD_SQL_CLIENT_IAM_REPORT.md`
 - migration: No-Go
 - secret version addition: No-Go

@@ -629,3 +629,13 @@ Required before 32K:
 - DB user/password creation: No-Go.
 - Cloud Run DB update: No-Go.
 - Production admin_memo write: No-Go.
+
+## 32L-8 Staging DB User / Secret Follow-up
+
+- Staging DB user and secret report: `docs/ADMIN_STAGING_DB_USER_SECRET_REPORT.md`.
+- Staging DB user creation: Yes.
+- First staging secret version: No.
+- Password and DB URL recorded: No.
+- Recovery approval required: Yes.
+- Cloud Run DB update: No-Go.
+- Production admin_memo write: No-Go.

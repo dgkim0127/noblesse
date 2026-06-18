@@ -469,3 +469,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - This does not connect the public frontend to the backend or database.
 - Firebase Hosting `/api` rewrite remains absent.
 - Direct React-to-PostgreSQL access remains prohibited.
+
+## 32L-8 Staging DB User / Secret Handoff
+
+- Staging DB user and secret handoff is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_REPORT.md`.
+- No backend route, Cloud Run runtime secret binding, Firebase rewrite, or frontend API path changed.
+- Firebase Hosting `/api` rewrite remains absent.
+- Direct React-to-PostgreSQL access remains prohibited.

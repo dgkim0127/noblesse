@@ -501,3 +501,11 @@ Before implementation starts:
 - Cloud SQL Client IAM grant is documented in `docs/ADMIN_CLOUD_SQL_CLIENT_IAM_REPORT.md`.
 - The dedicated Noblesse runtime identity is prepared for future Cloud SQL socket access.
 - DB user/password, DB connection, schema migration, Secret Manager version addition, Cloud Run DB update, Firebase Auth, Firebase `/api` rewrite, and production write remain blocked.
+
+## 32L-8 Staging DB User / Secret Handoff
+
+- Staging DB user and secret handoff is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_REPORT.md`.
+- Staging DB user exists, but no staging secret version exists yet.
+- Password and DB URL were not recorded.
+- Backend DB readiness remains blocked until recovery approval creates a usable staging secret version.
+- DB connection, schema migration, Cloud Run DB update, Firebase Auth, Firebase `/api` rewrite, and production write remain blocked.

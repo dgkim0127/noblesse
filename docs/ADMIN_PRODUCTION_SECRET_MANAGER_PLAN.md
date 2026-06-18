@@ -378,3 +378,11 @@ Important:
 - Production rollout checklist is documented in `docs/ADMIN_PRODUCTION_ROLLOUT_CHECKLIST.md`.
 - The secret management gate remains No-Go in the rollout checklist.
 - No secret creation, IAM change, runtime injection, Firebase config change, rewrite, or deploy was added in 32J-9.
+
+## 32L-8 Staging DB User / Secret Follow-up
+
+- Staging DB user and secret handoff is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_REPORT.md`.
+- The staging DB user exists, but no staging secret version was added.
+- The password and DB URL were not recorded.
+- Secret Manager version addition remains blocked pending recovery approval.
+- Production secrets remain No-Go.

@@ -413,3 +413,11 @@ Important:
 - Cloud SQL Client IAM grant is documented in `docs/ADMIN_CLOUD_SQL_CLIENT_IAM_REPORT.md`.
 - This prepares Cloud SQL socket access for the dedicated runtime identity only.
 - DB user/password, DB connection, schema migration, Secret Manager version addition, Cloud Run DB update, Firebase rewrite, and production admin writes remain No-Go.
+
+## 32L-8 Staging DB User / Secret Follow-up
+
+- Staging DB user and secret handoff is documented in `docs/ADMIN_STAGING_DB_USER_SECRET_REPORT.md`.
+- Staging DB user creation: Yes.
+- Secret version addition: No.
+- Password and DB URL recorded: No.
+- Schema migration remains No-Go until secret recovery and a separate migration approval are completed.
