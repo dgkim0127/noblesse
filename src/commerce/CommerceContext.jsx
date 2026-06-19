@@ -1,64 +1,114 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { createCatalogApi } from '../api/catalogApi'
+import { createApiClient } from '../api/client'
+import { getRuntimeConfig } from '../config/runtimeConfig'
 import {
   buildInquiryRows,
   buildInquirySnapshot,
+  guestProfile,
   getApprovedBuyerPrice,
   getDefaultOption,
-  getInquiries,
   getBuyerAccessFeatures,
   getPriceForBuyer,
-  getProducts,
-  getViewerProfile,
   isApprovedBuyer,
   isAdmin,
   isGuestViewer,
   isPendingBuyer,
   isSameInquiryItem,
   normalizeQuantity,
-} from '../services'
+} from './commerceUtils'
+import { adaptApiProducts } from '../services/apiProductAdapter'
 import { CommerceContext } from './commerceStore'
 
 const formatInquiryId = () => `INQ-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${String(Date.now()).slice(-3)}`
-const viewerStateStorageKey = 'noblesse.viewerState'
 const viewerStates = new Set(['guest', 'pending', 'approved', 'admin'])
 
-const getInitialViewerState = () => {
-  if (typeof window === 'undefined') return 'guest'
-  const savedState = window.localStorage.getItem(viewerStateStorageKey)
-  return viewerStates.has(savedState) ? savedState : 'guest'
-}
-
 export function CommerceProvider({ children }) {
-  const [viewerState, setViewerStateValue] = useState(getInitialViewerState)
-  const [products] = useState(() => getProducts())
+  const runtimeConfig = useMemo(() => getRuntimeConfig(), [])
+  const [viewerState, setViewerStateValue] = useState('guest')
+  const [products, setProducts] = useState([])
+  const [dataStatus, setDataStatus] = useState('loading')
+  const [dataError, setDataError] = useState(null)
   const [inquiryItems, setInquiryItems] = useState([])
-  const [inquiries, setInquiries] = useState(() => getInquiries())
-  const buyer = getViewerProfile(viewerState)
+  const [inquiries, setInquiries] = useState([])
+  const [mockProfiles, setMockProfiles] = useState({ guest: guestProfile })
+  const [productPrices, setProductPrices] = useState([])
+  const isMockMode = runtimeConfig.dataMode === 'mock' && runtimeConfig.isConfigured
+  const effectiveViewerState = isMockMode ? viewerState : 'guest'
+  const buyer = isMockMode ? (mockProfiles[effectiveViewerState] ?? mockProfiles.guest ?? guestProfile) : guestProfile
   const isApproved = isApprovedBuyer(buyer)
   const isPending = isPendingBuyer(buyer)
-  const isGuest = isGuestViewer(viewerState)
+  const isGuest = isGuestViewer(effectiveViewerState)
   const isAdminViewer = isAdmin(buyer)
-  const buyerAccess = getBuyerAccessFeatures(viewerState, buyer)
+  const buyerAccess = getBuyerAccessFeatures(effectiveViewerState, buyer)
 
-  const getPrice = useCallback((productId) => getPriceForBuyer(productId, buyer, isApproved), [buyer, isApproved])
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadInitialData() {
+      if (!runtimeConfig.isConfigured) {
+        if (!isMounted) return
+        setProducts([])
+        setInquiries([])
+        setDataStatus('error')
+        setDataError(runtimeConfig.errors.join(' '))
+        return
+      }
+
+      if (import.meta.env.DEV && runtimeConfig.dataMode === 'mock') {
+        const catalog = await import('../data/catalog')
+        if (!isMounted) return
+        setMockProfiles(catalog.mockUsers ?? { guest: guestProfile })
+        setProductPrices(catalog.mockProductPrices ?? [])
+        setProducts(catalog.mockProducts ?? [])
+        setInquiries(catalog.mockInquiries ?? [])
+        setDataStatus('ready')
+        setDataError(null)
+        return
+      }
+
+      try {
+        const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+        const catalogApi = createCatalogApi(apiClient)
+        const apiProducts = await catalogApi.getCatalogProducts()
+        if (!isMounted) return
+        setMockProfiles({ guest: guestProfile })
+        setProductPrices([])
+        setProducts(adaptApiProducts(apiProducts))
+        setInquiries([])
+        setDataStatus('ready')
+        setDataError(null)
+      } catch (error) {
+        if (!isMounted) return
+        setProducts([])
+        setInquiries([])
+        setDataStatus('error')
+        setDataError(error?.message || 'Catalog API is unavailable.')
+      }
+    }
+
+    loadInitialData()
+
+    return () => {
+      isMounted = false
+    }
+  }, [runtimeConfig])
+
+  const getPrice = useCallback((productId) => getPriceForBuyer(productPrices, productId, buyer, isApproved), [buyer, isApproved, productPrices])
 
   const approvedPrice = useCallback((productId) => (
-    getApprovedBuyerPrice(productId, buyer?.assignedMarket, buyer?.discountRate, isApproved)
-  ), [buyer?.assignedMarket, buyer?.discountRate, isApproved])
+    getApprovedBuyerPrice(productPrices, productId, buyer?.assignedMarket, buyer?.discountRate, isApproved)
+  ), [buyer?.assignedMarket, buyer?.discountRate, isApproved, productPrices])
 
-  const inquiryRows = useMemo(() => buildInquiryRows(inquiryItems, products, buyer, isApproved), [buyer, inquiryItems, isApproved, products])
+  const inquiryRows = useMemo(() => buildInquiryRows(inquiryItems, products, buyer, isApproved, productPrices), [buyer, inquiryItems, isApproved, productPrices, products])
   const estimatedTotal = inquiryRows.reduce((sum, row) => sum + row.subtotal, 0)
   const totalQuantity = inquiryRows.reduce((sum, row) => sum + row.quantity, 0)
 
-  const setViewerState = useCallback((nextViewerState, options = {}) => {
-    const { persist = true } = options
+  const setViewerState = useCallback((nextViewerState) => {
+    if (!isMockMode) return
     const safeState = viewerStates.has(nextViewerState) ? nextViewerState : 'guest'
     setViewerStateValue(safeState)
-    if (typeof window !== 'undefined') {
-      if (persist) window.localStorage.setItem(viewerStateStorageKey, safeState)
-      else window.localStorage.removeItem(viewerStateStorageKey)
-    }
-  }, [])
+  }, [isMockMode])
 
   const addInquiryItem = (productId, option = {}, rawQuantity) => {
     if (!isApproved) return
@@ -95,6 +145,7 @@ export function CommerceProvider({ children }) {
   }
 
   const submitRequestQuote = (requestMemo) => {
+    if (!isMockMode) return null
     if (!isApproved || inquiryRows.length === 0) return null
     const inquiry = buildInquirySnapshot({
       inquiryRows,
@@ -112,6 +163,9 @@ export function CommerceProvider({ children }) {
     approvedPrice,
     buyer,
     buyerAccess,
+    dataError,
+    dataMode: runtimeConfig.dataMode,
+    dataStatus,
     estimatedTotal,
     getPrice,
     inquiries,
@@ -127,6 +181,7 @@ export function CommerceProvider({ children }) {
     submitRequestQuote,
     totalQuantity,
     updateInquiryQuantity,
-    viewerState,
+    runtimeConfig,
+    viewerState: effectiveViewerState,
   }}>{children}</CommerceContext.Provider>
 }

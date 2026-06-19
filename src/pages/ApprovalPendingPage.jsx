@@ -11,8 +11,9 @@ const approvalSteps = [
 ]
 
 export function ApprovalPendingPage() {
-  const { buyer, isApproved, isGuest, isPending, setViewerState } = useCommerce()
+  const { buyer, dataMode, isApproved, isGuest, isPending, setViewerState } = useCommerce()
   const { toLocalePath } = useLocalePath()
+  const isMockMode = dataMode === 'mock'
 
   return <main className="content auth-page">
     <section className="account-panel auth-panel">
@@ -37,7 +38,7 @@ export function ApprovalPendingPage() {
         {isApproved && <Link className="secondary-action" to={toLocalePath('/inquiry-list')}>문의 리스트</Link>}
         {isGuest && <Link className="secondary-action" to={toLocalePath('/register')}>거래처 문의</Link>}
       </div>
-      {!isApproved && <button className="text-action preview-action" type="button" onClick={() => setViewerState('approved')}>개발 미리보기: 거래 조건 보기</button>}
+      {isMockMode && !isApproved && <button className="text-action preview-action" type="button" onClick={() => setViewerState('approved')}>개발 미리보기: 거래 조건 보기</button>}
     </section>
   </main>
 }

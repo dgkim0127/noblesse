@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
 import './App.css'
 import { CommerceProvider } from './commerce/CommerceContext'
@@ -5,16 +6,6 @@ import { AdminRoute } from './components/AdminRoute'
 import { AdminShell } from './components/AdminShell'
 import { StoreShell } from './components/StoreShell'
 import { AccountPage } from './pages/AccountPage'
-import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage'
-import { AdminBuyerDetailPage } from './pages/admin/AdminBuyerDetailPage'
-import { AdminBuyersPage } from './pages/admin/AdminBuyersPage'
-import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
-import { AdminInquiriesPage } from './pages/admin/AdminInquiriesPage'
-import { AdminInquiryDetailPage } from './pages/admin/AdminInquiryDetailPage'
-import { AdminPricesPage } from './pages/admin/AdminPricesPage'
-import { AdminProductsPage } from './pages/admin/AdminProductsPage'
-import { AdminQuotePage } from './pages/admin/AdminQuotePage'
-import { AdminQuotesPage } from './pages/admin/AdminQuotesPage'
 import { ApprovalPendingPage } from './pages/ApprovalPendingPage'
 import { HomePage } from './pages/HomePage'
 import { InquiryListPage } from './pages/InquiryListPage'
@@ -25,6 +16,35 @@ import { ProductsPage } from './pages/ProductsPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { RequestQuotePage } from './pages/RequestQuotePage'
 import { buildLocalizedPath, supportedLocales } from './utils/locale'
+
+const lazyNamed = (loader, exportName) => lazy(() => loader().then((module) => ({ default: module[exportName] })))
+
+function AdminPageFallback() {
+  return <div className="admin-page-loading">Loading admin view...</div>
+}
+
+function AdminUnavailablePage() {
+  return <section className="admin-card admin-access-card">
+    <p className="eyebrow">Admin API Required</p>
+    <h1>Admin is not connected yet</h1>
+    <p>Release mode requires server-side authentication, role checks, and admin API responses before this screen can be used.</p>
+  </section>
+}
+
+const AdminAnalyticsPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminAnalyticsPage'), 'AdminAnalyticsPage') : AdminUnavailablePage
+const AdminBuyerDetailPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminBuyerDetailPage'), 'AdminBuyerDetailPage') : AdminUnavailablePage
+const AdminBuyersPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminBuyersPage'), 'AdminBuyersPage') : AdminUnavailablePage
+const AdminDashboardPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminDashboardPage'), 'AdminDashboardPage') : AdminUnavailablePage
+const AdminInquiriesPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminInquiriesPage'), 'AdminInquiriesPage') : AdminUnavailablePage
+const AdminInquiryDetailPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminInquiryDetailPage'), 'AdminInquiryDetailPage') : AdminUnavailablePage
+const AdminPricesPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminPricesPage'), 'AdminPricesPage') : AdminUnavailablePage
+const AdminProductsPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminProductsPage'), 'AdminProductsPage') : AdminUnavailablePage
+const AdminQuotePage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminQuotePage'), 'AdminQuotePage') : AdminUnavailablePage
+const AdminQuotesPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminQuotesPage'), 'AdminQuotesPage') : AdminUnavailablePage
+
+function withAdminSuspense(element) {
+  return <Suspense fallback={<AdminPageFallback />}>{element}</Suspense>
+}
 
 function LegacyInquiryDetailRedirect() {
   const { locale, orderId } = useParams()
@@ -52,16 +72,16 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/approval-pending" element={<ApprovalPendingPage />} />
       <Route path="/admin" element={<AdminRoute><AdminShell /></AdminRoute>}>
-        <Route index element={<AdminDashboardPage />} />
-        <Route path="buyers" element={<AdminBuyersPage />} />
-        <Route path="buyers/:buyerId" element={<AdminBuyerDetailPage />} />
-        <Route path="products" element={<AdminProductsPage />} />
-        <Route path="prices" element={<AdminPricesPage />} />
-        <Route path="inquiries" element={<AdminInquiriesPage />} />
-        <Route path="inquiries/:inquiryId" element={<AdminInquiryDetailPage />} />
-        <Route path="quotes" element={<AdminQuotesPage />} />
-        <Route path="quotes/:inquiryId" element={<AdminQuotePage />} />
-        <Route path="analytics" element={<AdminAnalyticsPage />} />
+        <Route index element={withAdminSuspense(<AdminDashboardPage />)} />
+        <Route path="buyers" element={withAdminSuspense(<AdminBuyersPage />)} />
+        <Route path="buyers/:buyerId" element={withAdminSuspense(<AdminBuyerDetailPage />)} />
+        <Route path="products" element={withAdminSuspense(<AdminProductsPage />)} />
+        <Route path="prices" element={withAdminSuspense(<AdminPricesPage />)} />
+        <Route path="inquiries" element={withAdminSuspense(<AdminInquiriesPage />)} />
+        <Route path="inquiries/:inquiryId" element={withAdminSuspense(<AdminInquiryDetailPage />)} />
+        <Route path="quotes" element={withAdminSuspense(<AdminQuotesPage />)} />
+        <Route path="quotes/:inquiryId" element={withAdminSuspense(<AdminQuotePage />)} />
+        <Route path="analytics" element={withAdminSuspense(<AdminAnalyticsPage />)} />
       </Route>
       <Route path="/cart" element={<Navigate replace to="/inquiry-list" />} />
       <Route path="/order-request" element={<Navigate replace to="/request-quote" />} />
@@ -81,16 +101,16 @@ function App() {
       <Route path="register" element={<RegisterPage />} />
       <Route path="approval-pending" element={<ApprovalPendingPage />} />
       <Route path="admin" element={<AdminRoute><AdminShell /></AdminRoute>}>
-        <Route index element={<AdminDashboardPage />} />
-        <Route path="buyers" element={<AdminBuyersPage />} />
-        <Route path="buyers/:buyerId" element={<AdminBuyerDetailPage />} />
-        <Route path="products" element={<AdminProductsPage />} />
-        <Route path="prices" element={<AdminPricesPage />} />
-        <Route path="inquiries" element={<AdminInquiriesPage />} />
-        <Route path="inquiries/:inquiryId" element={<AdminInquiryDetailPage />} />
-        <Route path="quotes" element={<AdminQuotesPage />} />
-        <Route path="quotes/:inquiryId" element={<AdminQuotePage />} />
-        <Route path="analytics" element={<AdminAnalyticsPage />} />
+        <Route index element={withAdminSuspense(<AdminDashboardPage />)} />
+        <Route path="buyers" element={withAdminSuspense(<AdminBuyersPage />)} />
+        <Route path="buyers/:buyerId" element={withAdminSuspense(<AdminBuyerDetailPage />)} />
+        <Route path="products" element={withAdminSuspense(<AdminProductsPage />)} />
+        <Route path="prices" element={withAdminSuspense(<AdminPricesPage />)} />
+        <Route path="inquiries" element={withAdminSuspense(<AdminInquiriesPage />)} />
+        <Route path="inquiries/:inquiryId" element={withAdminSuspense(<AdminInquiryDetailPage />)} />
+        <Route path="quotes" element={withAdminSuspense(<AdminQuotesPage />)} />
+        <Route path="quotes/:inquiryId" element={withAdminSuspense(<AdminQuotePage />)} />
+        <Route path="analytics" element={withAdminSuspense(<AdminAnalyticsPage />)} />
       </Route>
       <Route path="cart" element={<Navigate replace to="../inquiry-list" />} />
       <Route path="order-request" element={<Navigate replace to="../request-quote" />} />

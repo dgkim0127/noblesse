@@ -3,7 +3,6 @@ import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CatalogCard } from '../components/CatalogCard'
 import { useCommerce } from '../commerce/commerceStore'
-import { mockCollections } from '../data/catalog'
 import { useLocalePath } from '../utils/locale'
 
 const productPageCopy = {
@@ -134,10 +133,39 @@ const filterLabelNames = {
   cn: { Category: '分类', Collection: '系列', Material: '材质', Color: '颜色', Tag: '标签', Search: '搜索词' },
 }
 
-const getCollectionLabel = (collection, locale) => {
-  if (locale === 'kr') return collection.titleKo
-  if (locale === 'jp') return collection.titleJa
-  return collection.titleEn
+const collectionLabels = {
+  kr: {
+    'japan-buyer-picks': '일본 셀렉션',
+    'us-buyer-picks': '미국 셀렉션',
+    'minimal-piercing-line': '미니멀 피어싱 라인',
+    'premium-cubic-line': '프리미엄 큐빅 라인',
+    'export-best-items': '수출 베스트 아이템',
+    'new-arrivals': '신상품',
+  },
+  en: {
+    'japan-buyer-picks': 'Japan Selection',
+    'us-buyer-picks': 'US Selection',
+    'minimal-piercing-line': 'Minimal Piercing Line',
+    'premium-cubic-line': 'Premium Cubic Line',
+    'export-best-items': 'Export Best Items',
+    'new-arrivals': 'New Arrivals',
+  },
+  jp: {
+    'japan-buyer-picks': '日本セレクション',
+    'us-buyer-picks': '米国セレクション',
+    'minimal-piercing-line': 'ミニマルピアスライン',
+    'premium-cubic-line': 'プレミアムキュービックライン',
+    'export-best-items': '輸出ベストアイテム',
+    'new-arrivals': '新商品',
+  },
+  cn: {
+    'japan-buyer-picks': '日本精选',
+    'us-buyer-picks': '美国精选',
+    'minimal-piercing-line': '极简穿孔系列',
+    'premium-cubic-line': '高级锆石系列',
+    'export-best-items': '出口精选',
+    'new-arrivals': '新品',
+  },
 }
 
 const formatCategoryLabel = (categoryId, locale) => categoryLabels[locale]?.[categoryId] ?? categoryLabels.en[categoryId] ?? categoryId.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')
@@ -150,7 +178,7 @@ export function ProductsPage() {
   const [gridMode, setGridMode] = useState('two')
   const { locale, toLocalePath } = useLocalePath()
   const copy = productPageCopy[locale] ?? productPageCopy.kr
-  const localeCollectionLabels = Object.fromEntries(mockCollections.map((collection) => [collection.collectionId, getCollectionLabel(collection, locale)]))
+  const localeCollectionLabels = collectionLabels[locale] ?? collectionLabels.en
 
   const q = searchParams.get('q') ?? ''
   const category = searchParams.get('category') ?? ''

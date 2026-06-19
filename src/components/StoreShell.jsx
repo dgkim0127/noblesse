@@ -49,7 +49,7 @@ const shellCopy = {
       { term: '체인 드롭 피어싱', trend: 'same' },
     ],
     viewerLabels: {
-      guest: '비회원 미리보기',
+      guest: '비회원',
       pending: '확인 중',
       approved: '거래 조건 안내 가능 / JP 지역',
       admin: '관리자 미리보기',
@@ -425,7 +425,20 @@ export function StoreShell() {
   const [loginModalNotice, setLoginModalNotice] = useState('')
   const [isAutoLoginEnabled, setIsAutoLoginEnabled] = useState(true)
   const [navIndicator, setNavIndicator] = useState({ left: 0, ready: false, width: 0 })
-  const { buyerAccess, inquiryItems, isAdmin, isApproved, isGuest, isPending, setViewerState, viewerState } = useCommerce()
+  const {
+    buyerAccess,
+    dataError,
+    dataMode,
+    dataStatus,
+    inquiryItems,
+    isAdmin,
+    isApproved,
+    isGuest,
+    isPending,
+    runtimeConfig,
+    setViewerState,
+    viewerState,
+  } = useCommerce()
   const { locale, localeMeta, toLanguagePath, toLocalePath } = useLocalePath()
   const copy = shellCopy[locale] ?? shellCopy.kr
   const loginCopy = loginModalCopy[locale] ?? loginModalCopy.kr
@@ -434,6 +447,7 @@ export function StoreShell() {
   const headerBrandName = localeMeta?.brandName ?? '귀족'
   const isCompactSearchOpen = compactSearchPhase === 'open'
   const isCompactSearchClosing = compactSearchPhase === 'closing'
+  const isMockMode = dataMode === 'mock'
   const normalizedPathname = location.pathname.replace(/\/+$/, '') || '/'
   const isHomeImageRoute = normalizedPathname === '/' || supportedLocales.some((item) => normalizedPathname === `/${item}`)
 
@@ -670,12 +684,21 @@ export function StoreShell() {
 
   const loginAsApprovedBuyer = (event) => {
     event.preventDefault()
+    if (!isMockMode) {
+      setLoginModalNotice('Staging API mode requires server-side authentication. Mock buyer login is disabled in release mode.')
+      return
+    }
     setViewerState('approved', { persist: isAutoLoginEnabled })
     closeLoginModal()
     navigate(toLocalePath('/account'))
   }
 
   const browseAsGuest = () => {
+    if (!isMockMode) {
+      closeLoginModal()
+      navigate(toLocalePath('/products'))
+      return
+    }
     setViewerState('guest')
     closeLoginModal()
     navigate(toLocalePath('/products'))
@@ -878,7 +901,7 @@ export function StoreShell() {
         </nav>
       </div>}
 
-      {!isPreviewBarHidden && <div className="preview-bar" style={compactHeaderCollapseStyle}>
+      {isMockMode && !isPreviewBarHidden && <div className="preview-bar" style={compactHeaderCollapseStyle}>
         <span>
           <span className="viewer-label-full">{copy.viewerLabels[viewerState]}</span>
           <span className="viewer-label-compact">{compactViewerLabels[viewerState]}</span>
@@ -931,7 +954,7 @@ export function StoreShell() {
         </div>
       </section>
     </div>}
-    <button
+    {isMockMode && <button
       className={`preview-bar-hide ${isPreviewBarHidden ? 'is-hidden-state' : ''}`}
       type="button"
       aria-label={isPreviewBarHidden ? 'Show mock preview bar' : 'Hide mock preview bar'}
@@ -941,9 +964,17 @@ export function StoreShell() {
       <span className="preview-hide-full">{isPreviewBarHidden ? '미리보기 보이기' : '미리보기 숨기기'}</span>
       <span className="preview-hide-compact">{isPreviewBarHidden ? '보이기' : '숨기기'}</span>
       <span aria-hidden="true">{isPreviewBarHidden ? '+' : '×'}</span>
-    </button>
+    </button>}
+    {dataStatus === 'error' && <main className="content runtime-config-error" role="alert">
+      <section>
+        <p>Runtime configuration</p>
+        <h1>Staging API connection required</h1>
+        <span>{dataError || 'The catalog API is not available.'}</span>
+        <small>Current mode: {runtimeConfig?.dataMode || dataMode}. Mock preview is only available in explicit development mode.</small>
+      </section>
+    </main>}
     <div className="locale-transition-frame" key={`locale-content-${locale}`}>
-      <Outlet />
+      {dataStatus === 'error' ? null : <Outlet />}
     </div>
     <footer className="site-footer"><strong>{headerBrandName}</strong><span>{copy.footer}</span><Heart size={15} /></footer>
   </div>

@@ -8,7 +8,7 @@ import {
   getAgreementDocument,
   getAgreementSummaryForRegister,
   getInitialAgreements,
-} from '../services'
+} from '../services/agreementService'
 import { useLocalePath } from '../utils/locale'
 
 const registerCopy = {

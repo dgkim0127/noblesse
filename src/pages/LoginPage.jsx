@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { ArrowRight, LogIn } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
@@ -8,17 +9,23 @@ const brandLanguageLabel = '귀족 / Noblesse'
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const { setViewerState } = useCommerce()
+  const { dataMode, setViewerState } = useCommerce()
   const { toLocalePath } = useLocalePath()
+  const isMockMode = dataMode === 'mock'
+  const [loginNotice, setLoginNotice] = useState('')
 
   const loginAsApprovedBuyer = (event) => {
     event.preventDefault()
+    if (!isMockMode) {
+      setLoginNotice('Release mode requires server-side authentication. Preview login is disabled.')
+      return
+    }
     setViewerState('approved')
     navigate(toLocalePath('/account'))
   }
 
   const browseAsGuest = () => {
-    setViewerState('guest')
+    if (isMockMode) setViewerState('guest')
     navigate(toLocalePath('/products'))
   }
 
@@ -35,6 +42,7 @@ export function LoginPage() {
       <form className="auth-form" onSubmit={loginAsApprovedBuyer}>
         <label>이메일<input autoComplete="email" name="email" placeholder="이메일" type="email" /></label>
         <label>비밀번호<input autoComplete="current-password" name="password" placeholder="비밀번호" type="password" /></label>
+        {loginNotice && <p className="auth-notice" role="status">{loginNotice}</p>}
         <button className="primary-action" type="submit">로그인</button>
       </form>
       <div className="auth-links">
