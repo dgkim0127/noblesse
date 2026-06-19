@@ -14,9 +14,19 @@ export function createFirebaseTokenVerifier(env) {
     };
   }
 
+  const app = getFirebaseAdminApp(env);
+
+  return {
+    verifyIdToken(token) {
+      return app.auth().verifyIdToken(token);
+    }
+  };
+}
+
+export function getFirebaseAdminApp(env) {
   const appName = "noblesse-backend";
   const existing = admin.apps.find((app) => app.name === appName);
-  const app =
+  return (
     existing ||
     admin.initializeApp(
       {
@@ -27,11 +37,23 @@ export function createFirebaseTokenVerifier(env) {
         })
       },
       appName
-    );
+    )
+  );
+}
 
+export function createFirebaseUserLookup(env) {
+  if (!env.firebaseProjectId || !env.firebaseClientEmail || !env.firebasePrivateKey) {
+    return {
+      async getUserByEmail() {
+        throw internalError("Firebase Admin credentials are not configured.");
+      }
+    };
+  }
+
+  const app = getFirebaseAdminApp(env);
   return {
-    verifyIdToken(token) {
-      return app.auth().verifyIdToken(token);
+    getUserByEmail(email) {
+      return app.auth().getUserByEmail(email);
     }
   };
 }
