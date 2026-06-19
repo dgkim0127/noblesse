@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "postgres:transform-sample": "node scripts/postgres/transformFirebaseSalesSample.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:staging-rc": "node scripts/stagingRcE2e.mjs"
   },
   "dependencies": {
     "firebase": "12.6.0",

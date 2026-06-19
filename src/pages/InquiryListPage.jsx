@@ -11,8 +11,11 @@ function AccessNotice({ viewerState }) {
 }
 
 export function InquiryListPage() {
-  const { buyer, estimatedTotal, inquiryRows, isApproved, removeInquiryItem, totalQuantity, updateInquiryQuantity, viewerState } = useCommerce()
+  const { authError, authStatus, buyer, dataError, dataStatus, estimatedTotal, inquiryRows, isApproved, removeInquiryItem, totalQuantity, updateInquiryQuantity, viewerState } = useCommerce()
   const { toLocalePath } = useLocalePath()
+  if (dataStatus === 'loading' || authStatus === 'checking') return <main className="content"><div className="approval-page"><h1>Loading trade access...</h1><p>Catalog and buyer permissions are being verified.</p></div></main>
+  if (dataStatus === 'error') return <main className="content"><div className="approval-page"><h1>Catalog API unavailable</h1><p>{dataError || 'Unable to load catalog data.'}</p></div></main>
+  if (authStatus === 'error') return <main className="content"><div className="approval-page"><h1>Buyer session unavailable</h1><p>{authError || 'Unable to verify buyer access.'}</p></div></main>
   if (!isApproved) return <AccessNotice viewerState={viewerState} />
   return <main className="content"><div className="page-title"><div><p>문의 리스트</p><h1>선택한 피어싱</h1></div><span>{inquiryRows.length}개 상품 / {totalQuantity} pcs</span></div><section className="inquiry-layout"><div className="inquiry-items">{inquiryRows.map((row) => {
     const option = { color: row.color, size: row.size }

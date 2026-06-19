@@ -1,63 +1,36 @@
-import { BarChart3, FileText, Handshake, Tags } from 'lucide-react'
-import { getAdminDashboardSummary } from '../../services'
-import { AdminLink, AdminMoney, AdminPageHeader, AdminPreviewNote, AdminStatus } from './AdminPageParts'
+import { FileText, Handshake, Tags } from 'lucide-react'
+import { AdminLink, AdminPageHeader, AdminStatus } from './AdminPageParts'
+import { AdminApiState, useAdminApiResource } from './adminApiPageUtils'
 
 export function AdminDashboardPage() {
-  const summary = getAdminDashboardSummary()
+  const { data, error, status } = useAdminApiResource((api, token) => api.getDashboard(token), [])
+  const loading = <AdminApiState error={error} status={status} />
+  if (loading) return loading
+
+  const inquiries = data?.inquiries || {}
+  const buyers = data?.buyers || {}
+  const products = data?.products || {}
 
   return <>
     <AdminPageHeader
       title="Admin Dashboard"
-      description="Review member access, Request Quote activity, price preview coverage, and analytics signals from mock data."
-      actions={<><AdminLink to="/admin/buyers">Review Buyers</AdminLink><AdminLink to="/admin/inquiries">View Inquiries</AdminLink><AdminLink to="/admin/prices">Manage Prices</AdminLink><AdminLink to="/admin/analytics">View Analytics</AdminLink><AdminLink to="/admin/quotes">View Quotes</AdminLink></>}
+      description="Live staging admin summary from server-side role-verified API."
+      actions={<><AdminLink to="/admin/inquiries">View Inquiries</AdminLink></>}
     />
-    <AdminPreviewNote><strong>Admin Preview</strong><span>Mock data only. Production actions require trusted API/RPC.</span></AdminPreviewNote>
 
     <section className="admin-grid compact">
-      <article className="admin-stat-card"><Handshake size={20} /><span>Pending Buyer Review</span><strong>{summary.pendingBuyers}</strong></article>
-      <article className="admin-stat-card"><Tags size={20} /><span>Active Price Markets</span><strong>{summary.activePriceMarkets}</strong></article>
-      <article className="admin-stat-card"><FileText size={20} /><span>Open Request Quotes</span><strong>{summary.openRequestQuotes}</strong></article>
-      <article className="admin-stat-card"><FileText size={20} /><span>Draft Admin Quotes</span><strong>{summary.draftAdminQuotes}</strong></article>
-      <article className="admin-stat-card"><BarChart3 size={20} /><span>Analytics Views Ready</span><strong>{summary.analyticsViewsReady}</strong></article>
-    </section>
-
-    <section className="admin-grid">
-      <article className="admin-stat-card"><Handshake size={20} /><span>Pending Buyers</span><strong>{summary.pendingBuyers}</strong></article>
-      <article className="admin-stat-card"><FileText size={20} /><span>Requested Inquiries</span><strong>{summary.requestedInquiries}</strong></article>
-      <article className="admin-stat-card"><Tags size={20} /><span>Quoted</span><strong>{summary.quotedInquiries}</strong></article>
-      <article className="admin-stat-card"><FileText size={20} /><span>Confirmed</span><strong>{summary.confirmedInquiries}</strong></article>
-      <article className="admin-stat-card"><BarChart3 size={20} /><span>Estimated Request Total</span><strong><AdminMoney value={summary.estimatedRequestTotal} currency="JPY" /></strong></article>
-    </section>
-
-    <section className="admin-layout two">
-      <article className="admin-card">
-        <h2>Top Requested Products</h2>
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead><tr><th>Product Code</th><th>Product Name</th><th>Quantity</th><th>Estimated Total</th></tr></thead>
-            <tbody>{summary.topRequestedProducts.map((item) => <tr key={item.productCode}><td>{item.productCode}</td><td>{item.productName}</td><td>{item.totalQuantity}</td><td><AdminMoney value={item.estimatedTotal} currency="JPY" /></td></tr>)}</tbody>
-          </table>
-        </div>
-      </article>
-
-      <article className="admin-card">
-        <h2>Recent Request Quote Preview</h2>
-        <div className="admin-list">
-          {summary.recentInquiries.map((inquiry) => <AdminLink className="admin-list-item" key={inquiry.inquiryId} to={`/admin/inquiries/${inquiry.inquiryId}`}>
-            <span>{inquiry.inquiryId}</span>
-            <strong>{inquiry.buyerCompanyName}</strong>
-            <AdminStatus status={inquiry.status} />
-          </AdminLink>)}
-        </div>
-      </article>
+      <article className="admin-stat-card"><Handshake size={20} /><span>Pending Buyers</span><strong>{buyers.pending ?? 0}</strong></article>
+      <article className="admin-stat-card"><FileText size={20} /><span>Requested Inquiries</span><strong>{inquiries.requested ?? 0}</strong></article>
+      <article className="admin-stat-card"><Tags size={20} /><span>Visible Products</span><strong>{products.visible ?? 0}</strong></article>
+      <article className="admin-stat-card"><FileText size={20} /><span>Manual Follow-up</span><strong>{data?.manualFollowUp?.count ?? 0}</strong></article>
     </section>
 
     <section className="admin-card">
-      <h2>Market Summary Preview</h2>
+      <h2>Inquiry Status</h2>
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th>Market</th><th>Buyer Count</th><th>Inquiry Count</th><th>Estimated Total</th></tr></thead>
-          <tbody>{summary.marketSummary.map((market) => <tr key={market.market}><td>{market.market}</td><td>{market.buyerCount}</td><td>{market.inquiryCount}</td><td><AdminMoney value={market.estimatedTotal} currency={market.currency} /></td></tr>)}</tbody>
+          <thead><tr><th>Status</th><th>Count</th></tr></thead>
+          <tbody>{['requested', 'checking', 'quoted', 'confirmed', 'cancelled'].map((item) => <tr key={item}><td><AdminStatus status={item} /></td><td>{inquiries[item] ?? 0}</td></tr>)}</tbody>
         </table>
       </div>
     </section>

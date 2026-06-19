@@ -42,6 +42,7 @@ export function CatalogCard({ product }) {
   const copy = cardCopy[locale] ?? cardCopy.kr
   const productName = getLocalizedProductName(product, locale)
   const productAlt = getLocalizedProductAlt(product, locale)
+  const canUseTradeTerms = isApproved && price
   return <article className="catalog-card">
     <Link className={`catalog-image tone-${product.tone}`} to={toLocalePath(`/products/${product.productId}`)} aria-label={productName}>
       <span className="jewel-shape" />
@@ -52,8 +53,8 @@ export function CatalogCard({ product }) {
       <small>{product.code}</small>
       <Link to={toLocalePath(`/products/${product.productId}`)}><h3>{productName}</h3></Link>
       <p>{product.material}</p>
-      {isApproved ? <div className="approved-price"><strong>{formatMoney(approvedPrice(product.productId), buyer.currency)}</strong><span>{copy.minQty} {price.moq} / {copy.memberPrice}</span></div> : <div className="locked-price"><LockKeyhole size={14} />{copy.locked}</div>}
+      {canUseTradeTerms ? <div className="approved-price"><strong>{formatMoney(approvedPrice(product.productId), buyer.currency)}</strong><span>{copy.minQty} {price.moq} / {copy.memberPrice}</span></div> : <div className="locked-price"><LockKeyhole size={14} />{copy.locked}</div>}
     </div>
-    <button className="add-inquiry" type="button" disabled={!isApproved} onClick={() => addInquiryItem(product.productId)}><Plus size={16} />{isApproved ? copy.add : copy.lockedButton}</button>
+    <button className="add-inquiry" type="button" disabled={!canUseTradeTerms} onClick={() => addInquiryItem(product.productId)}><Plus size={16} />{canUseTradeTerms ? copy.add : copy.lockedButton}</button>
   </article>
 }

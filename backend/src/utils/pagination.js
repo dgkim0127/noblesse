@@ -20,14 +20,23 @@ export function parsePagination(query = {}) {
   return {
     limit,
     offset,
+    dbLimit: limit + 1,
     nextCursor: null
   };
 }
 
-export function createPaginationMeta(pagination, requestId) {
+export function slicePageRows(rows = [], pagination) {
+  return rows.slice(0, pagination.limit);
+}
+
+export function createPaginationMeta(pagination, requestId, rowCount = 0) {
+  const hasMore = rowCount > pagination.limit;
+  const nextOffset = hasMore ? pagination.offset + pagination.limit : null;
   return {
     limit: pagination.limit,
-    nextCursor: pagination.nextCursor,
+    offset: pagination.offset,
+    nextCursor: nextOffset == null ? null : String(nextOffset),
+    nextOffset,
     requestId
   };
 }

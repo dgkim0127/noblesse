@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Headphones, Heart, Mail, MessageCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
@@ -16,7 +16,7 @@ const homeCopy = {
     access: '거래 문의하기',
     pending: '확인 상태 보기',
     approved: '문의 리스트',
-    admin: '관리자 미리보기',
+    admin: '관리자',
     buyerStripGuest: '국내·해외 거래처용 카탈로그',
     buyerStripPending: '거래처 정보 확인 중이에요',
     buyerStripApproved: '거래 조건 안내 가능',
@@ -59,7 +59,7 @@ const homeCopy = {
     access: 'Trade Inquiry',
     pending: 'Under Review',
     approved: 'Inquiry List',
-    admin: 'Admin Preview',
+    admin: 'Admin',
     buyerStripGuest: 'B2B catalog for domestic and global buyers',
     buyerStripPending: 'Trade profile under review',
     buyerStripApproved: 'Trade terms available',
@@ -102,7 +102,7 @@ const homeCopy = {
     access: '取引先お問い合わせ',
     pending: '確認状況を見る',
     approved: 'お問い合わせリスト',
-    admin: '管理者プレビュー',
+    admin: '管理者',
     buyerStripGuest: '国内・海外B2B取引先向けカタログ',
     buyerStripPending: '取引先情報を確認中です',
     buyerStripApproved: '取引条件案内可能',
@@ -145,7 +145,7 @@ const homeCopy = {
     access: '贸易咨询',
     pending: '查看确认状态',
     approved: '咨询清单',
-    admin: '管理员预览',
+    admin: '管理员',
     buyerStripGuest: '面向国内外B2B买家的商品目录',
     buyerStripPending: '贸易信息确认中',
     buyerStripApproved: '可提供交易条件',
@@ -181,7 +181,7 @@ const homeCopy = {
   },
 }
 
-const quickCategories = [
+const _quickCategories = [
   { key: 'new', query: '?tag=new', labels: { kr: '신상품', en: 'New', jp: '新商品', cn: '新品' } },
   { key: 'best', query: '?tag=best', labels: { kr: '베스트', en: 'Best', jp: 'ベスト', cn: '热选' } },
   { key: 'ring', query: '?category=piercing', labels: { kr: '링', en: 'Ring', jp: 'リング', cn: '环' } },
@@ -193,7 +193,7 @@ const quickCategories = [
   { key: 'steel', query: '?material=Surgical%20Steel', labels: { kr: '써지컬 스틸', en: 'Surgical Steel', jp: 'サージカルステンレス', cn: '医用钢' } },
 ]
 
-const collectionCopy = {
+const _collectionCopy = {
   'japan-buyer-picks': {
     kr: '일본 지역 취향에 맞춘 정제된 셀렉션입니다.',
     en: 'A refined selection for Japan-area buyers.',
@@ -413,7 +413,7 @@ function getLocalizedValue(values, locale) {
   return values[locale] ?? values.en ?? values.kr
 }
 
-function getCollectionTitle(collection, locale) {
+function _getCollectionTitle(collection, locale) {
   if (locale === 'kr') return collection.titleKo
   if (locale === 'jp') return collection.titleJa
   if (locale === 'cn') return collectionTitleCn[collection.collectionId] ?? collection.titleEn
@@ -553,7 +553,7 @@ function ScrambleText({ as: Tag = 'span', children, className = '', persistKey =
 
 const homeSectionLimit = 15
 
-const fillHomeSectionProducts = (preferredProducts, allProducts) => {
+const _fillHomeSectionProducts = (preferredProducts, allProducts) => {
   const picked = []
   const seen = new Set()
 
@@ -663,7 +663,7 @@ export function HomePage() {
     })
   }
 
-  const getShowcaseStep = () => {
+  const getShowcaseStep = useCallback(() => {
     const scroller = showcaseScrollerRef.current
     const firstPanel = scroller?.querySelector('.home-showcase-panel')
     const track = scroller?.querySelector('.home-showcase-track')
@@ -672,9 +672,9 @@ export function HomePage() {
 
     const gap = Number.parseFloat(window.getComputedStyle(track).gap) || 0
     return firstPanel.getBoundingClientRect().width + gap
-  }
+  }, [])
 
-  const alignShowcaseGapToCenter = () => {
+  const alignShowcaseGapToCenter = useCallback(() => {
     const scroller = showcaseScrollerRef.current
     const firstPanel = scroller?.querySelector('.home-showcase-panel')
     const step = getShowcaseStep()
@@ -684,7 +684,7 @@ export function HomePage() {
     const panelWidth = firstPanel.getBoundingClientRect().width
     const gapOffset = panelWidth + (step - panelWidth) / 2 - scroller.clientWidth / 2
     scroller.scrollLeft = Math.max(0, gapOffset)
-  }
+  }, [getShowcaseStep])
 
   useEffect(() => {
     alignShowcaseGapToCenter()
@@ -718,7 +718,7 @@ export function HomePage() {
       window.clearInterval(timer)
       window.removeEventListener('resize', alignShowcaseGapToCenter)
     }
-  }, [])
+  }, [alignShowcaseGapToCenter, getShowcaseStep])
 
   useLayoutEffect(() => {
     const fixedTop = () => (window.matchMedia('(max-width: 760px)').matches ? 74 : 18)

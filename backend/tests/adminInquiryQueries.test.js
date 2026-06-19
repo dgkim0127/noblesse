@@ -14,6 +14,7 @@ const adminViewer = {
 const existingInquiryRow = {
   id: inquiryId,
   inquiry_number: "INQ-001",
+  status: "requested",
   admin_memo: "Before memo",
   updated_at: "2026-06-16T00:00:00.000Z"
 };
@@ -21,6 +22,7 @@ const existingInquiryRow = {
 const updatedInquiryRow = {
   id: inquiryId,
   inquiry_number: "INQ-001",
+  status: "checking",
   admin_memo: "After memo",
   updated_at: "2026-06-16T00:01:00.000Z"
 };
@@ -106,6 +108,65 @@ test("updateInquiryMemo runs select/update/audit in a transaction and commits", 
     },
     auditLogId: "audit-1"
   });
+});
+
+test("getInquiryById loads inquiry items from inquiry_items", async () => {
+  const calls = [];
+  const pool = {
+    async query(sql, params = []) {
+      const text = String(sql).trim();
+      calls.push({ sql: text, params });
+      if (text.toLowerCase().includes("from public.inquiries")) {
+        return {
+          rows: [{
+            id: inquiryId,
+            inquiry_number: "INQ-001",
+            status: "requested",
+            market: "JP",
+            currency: "JPY",
+            request_memo: "",
+            admin_memo: "",
+            estimated_total: 22000,
+            created_at: "2026-06-16T00:00:00.000Z",
+            updated_at: "2026-06-16T00:00:00.000Z",
+            buyer_id: "buyer-1",
+            company_name: "Buyer Co",
+            contact_name: "Buyer",
+            email: "buyer@example.test",
+            country: "JP",
+            preferred_language: "jp",
+            assigned_market: "JP",
+            buyer_status: "approved"
+          }]
+        };
+      }
+      if (text.toLowerCase().includes("from public.inquiry_items")) {
+        return {
+          rows: [{
+            id: "item-1",
+            product_id: "product-1",
+            product_code: "NB-001",
+            product_name: "Product",
+            material: "Surgical Steel",
+            color: "Silver",
+            size: "6mm",
+            quantity: 20,
+            moq: 20,
+            price_snapshot: 1100,
+            subtotal: 22000
+          }]
+        };
+      }
+      throw new Error(`Unexpected query: ${text}`);
+    }
+  };
+
+  const detail = await createAdminInquiryQueries(pool).getInquiryById(inquiryId);
+
+  assert.equal(calls.length, 2);
+  assert.deepEqual(calls[1].params, [inquiryId]);
+  assert.equal(detail.items[0].productCode, "NB-001");
+  assert.equal(detail.items[0].subtotal, 22000);
 });
 
 test("updateInquiryMemo selects the inquiry row for update", async () => {
@@ -198,4 +259,54 @@ test("updateInquiryMemo requires a transaction-capable pool", async () => {
     () => queries.updateInquiryMemo(inquiryId, "After memo", adminViewer),
     /must support transactions/
   );
+});
+
+test("updateInquiryStatus runs select/update/audit in a transaction and commits", async () => {
+  const fake = createFakePool();
+  const queries = createAdminInquiryQueries(fake.pool);
+
+  const result = await queries.updateInquiryStatus(inquiryId, "checking", adminViewer);
+  const texts = queryTexts(fake.calls);
+
+  assert.deepEqual(
+    texts.map((text) => {
+      if (text.startsWith("select")) return "select";
+      if (text.startsWith("update public.inquiries")) return "update";
+      if (text.startsWith("insert into public.audit_logs")) return "audit";
+      return text;
+    }),
+    ["connect", "begin", "select", "update", "audit", "commit"]
+  );
+  assert.equal(result.inquiry.status, "checking");
+  assert.equal(result.auditLogId, "audit-1");
+  assert.equal(fake.releaseCount, 1);
+});
+
+test("updateInquiryStatus inserts audit_logs with status snapshots", async () => {
+  const fake = createFakePool();
+  const queries = createAdminInquiryQueries(fake.pool);
+
+  await queries.updateInquiryStatus(inquiryId, "checking", adminViewer);
+
+  const auditCall = fake.calls.find((call) => call.sql.toLowerCase().startsWith("insert into public.audit_logs"));
+  assert.equal(auditCall.params[0], adminViewer.userId);
+  assert.equal(auditCall.params[2], "admin.inquiry.status.update");
+  assert.equal(auditCall.params[3], "inquiries");
+  assert.equal(auditCall.params[4], inquiryId);
+  assert.equal(auditCall.params[5].status, "requested");
+  assert.equal(auditCall.params[6].status, "checking");
+  assert.equal(auditCall.params[7], adminViewer.requestId);
+});
+
+test("updateInquiryStatus rolls back and releases when inquiry is not found", async () => {
+  const fake = createFakePool({ selectRows: [] });
+  const queries = createAdminInquiryQueries(fake.pool);
+
+  const result = await queries.updateInquiryStatus(inquiryId, "checking", adminViewer);
+  const texts = queryTexts(fake.calls);
+
+  assert.equal(result, null);
+  assert.equal(texts.includes("rollback"), true);
+  assert.equal(texts.includes("commit"), false);
+  assert.equal(fake.releaseCount, 1);
 });

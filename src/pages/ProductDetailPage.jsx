@@ -192,7 +192,7 @@ function OptionButtons({ label, options, selected, onSelect }) {
 
 export function ProductDetailPage() {
   const { productId } = useParams()
-  const { addInquiryItem, approvedPrice, buyer, getPrice, isApproved, products, viewerState } = useCommerce()
+  const { addInquiryItem, approvedPrice, buyer, dataError, dataStatus, getPrice, isApproved, products, viewerState } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const product = products.find((item) => item.productId === productId)
   const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] ?? '')
@@ -200,6 +200,14 @@ export function ProductDetailPage() {
   const price = product ? getPrice(product.productId) : null
   const moq = price?.moq ?? product?.moqDefault ?? 1
   const [quantity, setQuantity] = useState(moq)
+
+  if (dataStatus === 'loading') {
+    return <main className="content"><div className="empty">Loading product details...</div></main>
+  }
+
+  if (dataStatus === 'error') {
+    return <main className="content"><div className="empty"><h1>Catalog API unavailable</h1><p>{dataError || 'Unable to load product details.'}</p></div></main>
+  }
 
   if (!product) return <main className="content"><div className="empty">Product not found.</div></main>
 
@@ -216,6 +224,7 @@ export function ProductDetailPage() {
   const fallbackMoqLabel = !isApproved && product.moqDefault ? copy.fallbackMoq(product.moqDefault) : ''
   const accessLink = viewerState === 'pending' ? '/approval-pending' : '/register'
   const accessLabel = viewerState === 'pending' ? copy.reviewStatus : copy.requestAccess
+  const canUseTradeTerms = isApproved && price
   const currentQuantity = normalizeQuantity(quantity, moq)
 
   const updateQuantity = (nextQuantity) => setQuantity(normalizeQuantity(nextQuantity, moq))
@@ -241,7 +250,7 @@ export function ProductDetailPage() {
           <div><dt>{copy.exportAvailable}</dt><dd>{product.isExportAvailable ? copy.exportYes : copy.exportNo}</dd></div>
         </dl>
 
-        {isApproved ? <>
+        {canUseTradeTerms ? <>
           <div className="detail-price">
             <small>{copy.memberPrice}</small>
             <strong>{formatMoney(approvedPrice(product.productId), buyer.currency)}</strong>

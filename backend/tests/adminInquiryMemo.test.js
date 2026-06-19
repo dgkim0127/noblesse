@@ -15,19 +15,32 @@ function createAppWithMemo({ approved = true } = {}) {
         inquiries: createAdminInquiryService({
           queries: {
             async updateInquiryMemo(id, adminMemo, adminViewer) {
-            if (id !== inquiryId) {
-              return null;
+              if (id !== inquiryId) {
+                return null;
+              }
+              return {
+                inquiry: {
+                  id,
+                  inquiryNumber: "INQ-001",
+                  adminMemo,
+                  updatedBy: adminViewer.userId
+                },
+                auditLogId: "audit-mock-1"
+              };
+            },
+            async updateInquiryStatus(id, status) {
+              if (id !== inquiryId) {
+                return null;
+              }
+              return {
+                inquiry: {
+                  id,
+                  inquiryNumber: "INQ-001",
+                  status
+                },
+                auditLogId: "audit-status-1"
+              };
             }
-            return {
-              inquiry: {
-                id,
-                inquiryNumber: "INQ-001",
-                adminMemo,
-                updatedBy: adminViewer.userId
-              },
-              auditLogId: "audit-mock-1"
-            };
-          }
           }
         }),
         buyers: {},
@@ -46,6 +59,17 @@ function createAppWithMemo({ approved = true } = {}) {
 
 function patchMemo(app, id, body, headers = {}) {
   return request(app, `/api/admin/inquiries/${id}/memo`, {
+    method: "PATCH",
+    headers: {
+      "content-type": "application/json",
+      ...headers
+    },
+    body: JSON.stringify(body)
+  });
+}
+
+function patchStatus(app, id, body, headers = {}) {
+  return request(app, `/api/admin/inquiries/${id}/status`, {
     method: "PATCH",
     headers: {
       "content-type": "application/json",
@@ -124,24 +148,63 @@ test("PATCH /api/admin/inquiries/:inquiryId/memo returns inquiry and auditLogId"
   assert.equal(response.body.meta.requestId, response.headers.get("x-request-id"));
 });
 
+test("PATCH /api/admin/inquiries/:inquiryId/status updates inquiry status", async () => {
+  const response = await patchStatus(
+    createAppWithMemo(),
+    inquiryId,
+    { status: "quoted" },
+    { authorization: "Bearer admin-token" }
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.data.inquiry.status, "quoted");
+  assert.equal(response.body.data.auditLogId, "audit-status-1");
+});
+
+test("PATCH /api/admin/inquiries/:inquiryId/status rejects invalid status", async () => {
+  const response = await patchStatus(
+    createAppWithMemo(),
+    inquiryId,
+    { status: "new" },
+    { authorization: "Bearer admin-token" }
+  );
+
+  assert.equal(response.status, 400);
+  assert.equal(response.body.error.code, "VALIDATION_ERROR");
+});
+
+test("PATCH /api/admin/inquiries/:inquiryId/status rejects unknown fields", async () => {
+  const response = await patchStatus(
+    createAppWithMemo(),
+    inquiryId,
+    { status: "checking", adminMemo: "No mass assignment" },
+    { authorization: "Bearer admin-token" }
+  );
+
+  assert.equal(response.status, 400);
+  assert.equal(response.body.error.code, "VALIDATION_ERROR");
+});
+
+test("PATCH /api/admin/inquiries/:inquiryId/status returns NOT_FOUND", async () => {
+  const response = await patchStatus(
+    createAppWithMemo(),
+    "22222222-2222-4222-8222-222222222222",
+    { status: "cancelled" },
+    { authorization: "Bearer admin-token" }
+  );
+
+  assert.equal(response.status, 404);
+  assert.equal(response.body.error.code, "NOT_FOUND");
+});
+
 test("blocked admin write routes are not implemented", async () => {
   const app = createAppWithMemo();
   const auth = { authorization: "Bearer admin-token" };
 
-  const statusResponse = await request(app, `/api/admin/inquiries/${inquiryId}/status`, {
-    method: "PATCH",
-    headers: auth
-  });
-  const quoteResponse = await request(app, "/api/admin/quotes", {
-    method: "POST",
-    headers: auth
-  });
   const deleteResponse = await request(app, `/api/admin/inquiries/${inquiryId}`, {
     method: "DELETE",
     headers: auth
   });
 
-  assert.equal(statusResponse.status, 404);
-  assert.equal(quoteResponse.status, 404);
   assert.equal(deleteResponse.status, 404);
 });

@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createCatalogApi } from '../api/catalogApi'
+import { createBuyerApi } from '../api/buyerApi'
 import { createApiClient } from '../api/client'
 import { getRuntimeConfig } from '../config/runtimeConfig'
+import { getCurrentUserIdToken, getUserIdToken, isAuthConfigured, registerWithCredentials, signInWithCredentials, signOutCurrentUser, subscribeAuthState } from '../services/authService'
 import {
   buildInquiryRows,
   buildInquirySnapshot,
@@ -10,18 +12,30 @@ import {
   getDefaultOption,
   getBuyerAccessFeatures,
   getPriceForBuyer,
+  getViewerStateFromProfile,
   isApprovedBuyer,
   isAdmin,
   isGuestViewer,
   isPendingBuyer,
   isSameInquiryItem,
+  normalizeBuyerProfile,
   normalizeQuantity,
 } from './commerceUtils'
 import { adaptApiProducts } from '../services/apiProductAdapter'
 import { CommerceContext } from './commerceStore'
+import { getInquiryKey } from './inquiryKeys'
 
 const formatInquiryId = () => `INQ-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${String(Date.now()).slice(-3)}`
 const viewerStates = new Set(['guest', 'pending', 'approved', 'admin'])
+
+function upsertInquiry(inquiries, nextInquiry) {
+  const nextKey = getInquiryKey(nextInquiry)
+  if (!nextKey) return inquiries
+  const found = inquiries.some((item) => getInquiryKey(item) === nextKey)
+  return found
+    ? inquiries.map((item) => getInquiryKey(item) === nextKey ? nextInquiry : item)
+    : [nextInquiry, ...inquiries]
+}
 
 export function CommerceProvider({ children }) {
   const runtimeConfig = useMemo(() => getRuntimeConfig(), [])
@@ -31,16 +45,25 @@ export function CommerceProvider({ children }) {
   const [dataError, setDataError] = useState(null)
   const [inquiryItems, setInquiryItems] = useState([])
   const [inquiries, setInquiries] = useState([])
+  const inquiriesRef = useRef([])
   const [mockProfiles, setMockProfiles] = useState({ guest: guestProfile })
+  const [apiProfile, setApiProfile] = useState(null)
+  const [authStatus, setAuthStatus] = useState('signed-out')
+  const [authError, setAuthError] = useState('')
   const [productPrices, setProductPrices] = useState([])
   const isMockMode = runtimeConfig.dataMode === 'mock' && runtimeConfig.isConfigured
-  const effectiveViewerState = isMockMode ? viewerState : 'guest'
-  const buyer = isMockMode ? (mockProfiles[effectiveViewerState] ?? mockProfiles.guest ?? guestProfile) : guestProfile
+  const normalizedApiProfile = normalizeBuyerProfile(apiProfile)
+  const effectiveViewerState = isMockMode ? viewerState : getViewerStateFromProfile(normalizedApiProfile)
+  const buyer = isMockMode ? (mockProfiles[effectiveViewerState] ?? mockProfiles.guest ?? guestProfile) : normalizedApiProfile
   const isApproved = isApprovedBuyer(buyer)
   const isPending = isPendingBuyer(buyer)
   const isGuest = isGuestViewer(effectiveViewerState)
   const isAdminViewer = isAdmin(buyer)
   const buyerAccess = getBuyerAccessFeatures(effectiveViewerState, buyer)
+
+  useEffect(() => {
+    inquiriesRef.current = inquiries
+  }, [inquiries])
 
   useEffect(() => {
     let isMounted = true
@@ -94,6 +117,65 @@ export function CommerceProvider({ children }) {
     }
   }, [runtimeConfig])
 
+  useEffect(() => {
+    if (isMockMode || !runtimeConfig.isConfigured) return undefined
+
+    if (!isAuthConfigured()) {
+      setApiProfile(null)
+      setAuthStatus('config-missing')
+      setAuthError('')
+      return undefined
+    }
+
+    const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+    const buyerApi = createBuyerApi(apiClient)
+    let isMounted = true
+
+    const unsubscribe = subscribeAuthState(async (user) => {
+      if (!isMounted) return
+      if (!user) {
+        setApiProfile(null)
+        setProductPrices([])
+        setInquiries([])
+        setAuthStatus('signed-out')
+        setAuthError('')
+        return
+      }
+
+      setAuthStatus('checking')
+      setAuthError('')
+
+      try {
+        const token = await getUserIdToken(user)
+        const profile = await buyerApi.getCurrentBuyerProfile(token)
+        const isApprovedProfile = profile?.role === 'buyer' && profile?.status === 'approved'
+        const [apiProductPrices, apiInquiries] = isApprovedProfile
+          ? await Promise.all([
+            buyerApi.getProductPrices(token),
+            buyerApi.getInquiries({}, token),
+          ])
+          : [[], { data: { inquiries: [] } }]
+        if (!isMounted) return
+        setApiProfile(profile)
+        setProductPrices(apiProductPrices)
+        setInquiries(apiInquiries.data?.inquiries || [])
+        setAuthStatus('authenticated')
+      } catch (error) {
+        if (!isMounted) return
+        setApiProfile(null)
+        setProductPrices([])
+        setInquiries([])
+        setAuthStatus('error')
+        setAuthError(error?.message || 'Unable to verify buyer profile.')
+      }
+    })
+
+    return () => {
+      isMounted = false
+      unsubscribe()
+    }
+  }, [isMockMode, runtimeConfig])
+
   const getPrice = useCallback((productId) => getPriceForBuyer(productPrices, productId, buyer, isApproved), [buyer, isApproved, productPrices])
 
   const approvedPrice = useCallback((productId) => (
@@ -109,6 +191,66 @@ export function CommerceProvider({ children }) {
     const safeState = viewerStates.has(nextViewerState) ? nextViewerState : 'guest'
     setViewerStateValue(safeState)
   }, [isMockMode])
+
+  const signIn = useCallback(async ({ identifier, password, remember = true } = {}) => {
+    if (isMockMode) {
+      setViewerState('approved')
+      return
+    }
+
+    setAuthStatus('checking')
+    setAuthError('')
+
+    try {
+      await signInWithCredentials(identifier, password, { remember })
+    } catch (error) {
+      setAuthStatus(isAuthConfigured() ? 'error' : 'config-missing')
+      setAuthError(error?.message || 'Unable to sign in.')
+      throw error
+    }
+  }, [isMockMode, setViewerState])
+
+  const registerBuyer = useCallback(async ({ email, password, profile, remember = true } = {}) => {
+    if (isMockMode) {
+      setViewerState('pending')
+      return { status: 'pending' }
+    }
+
+    setAuthStatus('checking')
+    setAuthError('')
+
+    try {
+      const credential = await registerWithCredentials(email, password, { remember })
+      const token = await getUserIdToken(credential.user, true)
+      const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+      const buyerApi = createBuyerApi(apiClient)
+      const result = await buyerApi.registerBuyer(profile, token)
+      const registeredProfile = result.data?.profile || null
+      setApiProfile(registeredProfile)
+      setProductPrices([])
+      setInquiries([])
+      setAuthStatus('authenticated')
+      return registeredProfile
+    } catch (error) {
+      setAuthStatus(isAuthConfigured() ? 'error' : 'config-missing')
+      setAuthError(error?.message || 'Unable to register buyer.')
+      throw error
+    }
+  }, [isMockMode, runtimeConfig.apiBaseUrl, setViewerState])
+
+  const signOut = useCallback(async () => {
+    if (isMockMode) {
+      setViewerState('guest')
+      return
+    }
+
+    await signOutCurrentUser()
+    setApiProfile(null)
+    setProductPrices([])
+    setInquiries([])
+    setAuthStatus(isAuthConfigured() ? 'signed-out' : 'config-missing')
+    setAuthError('')
+  }, [isMockMode, setViewerState])
 
   const addInquiryItem = (productId, option = {}, rawQuantity) => {
     if (!isApproved) return
@@ -144,8 +286,60 @@ export function CommerceProvider({ children }) {
     setInquiryItems((current) => current.filter((item) => !isSameInquiryItem(item, productId, selectedOption)))
   }
 
-  const submitRequestQuote = (requestMemo) => {
-    if (!isMockMode) return null
+  const refreshInquiries = useCallback(async (filters = {}) => {
+    if (isMockMode) {
+      return inquiriesRef.current.filter((item) => !filters.status || item.status === filters.status)
+    }
+    if (!isApproved) return []
+
+    const token = await getCurrentUserIdToken()
+    const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+    const buyerApi = createBuyerApi(apiClient)
+    const result = await buyerApi.getInquiries(filters, token)
+    const nextInquiries = result.data?.inquiries || []
+    setInquiries(nextInquiries)
+    return nextInquiries
+  }, [isApproved, isMockMode, runtimeConfig.apiBaseUrl])
+
+  const loadInquiry = useCallback(async (inquiryId) => {
+    if (isMockMode) {
+      return inquiriesRef.current.find((item) => getInquiryKey(item) === inquiryId) || null
+    }
+    if (!isApproved || !inquiryId) return null
+
+    const token = await getCurrentUserIdToken()
+    const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+    const buyerApi = createBuyerApi(apiClient)
+    const result = await buyerApi.getInquiry(inquiryId, token)
+    const inquiry = result.data?.inquiry || null
+    if (inquiry) {
+      setInquiries((current) => upsertInquiry(current, inquiry))
+    }
+    return inquiry
+  }, [isApproved, isMockMode, runtimeConfig.apiBaseUrl])
+
+  const submitRequestQuote = async (requestMemo) => {
+    if (!isMockMode) {
+      if (!isApproved || inquiryRows.length === 0) return null
+      const token = await getCurrentUserIdToken()
+      const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+      const buyerApi = createBuyerApi(apiClient)
+      const result = await buyerApi.createInquiry({
+        requestMemo,
+        items: inquiryRows.map((row) => ({
+          productCode: row.productCode,
+          color: row.color,
+          size: row.size,
+          quantity: row.quantity,
+        })),
+      }, token)
+      const inquiry = result.data?.inquiry
+      if (inquiry) {
+        setInquiries((current) => upsertInquiry(current, inquiry))
+        setInquiryItems([])
+      }
+      return inquiry || null
+    }
     if (!isApproved || inquiryRows.length === 0) return null
     const inquiry = buildInquirySnapshot({
       inquiryRows,
@@ -163,6 +357,8 @@ export function CommerceProvider({ children }) {
     approvedPrice,
     buyer,
     buyerAccess,
+    authError,
+    authStatus,
     dataError,
     dataMode: runtimeConfig.dataMode,
     dataStatus,
@@ -177,7 +373,12 @@ export function CommerceProvider({ children }) {
     isPending,
     products,
     removeInquiryItem,
+    registerBuyer,
+    loadInquiry,
+    refreshInquiries,
     setViewerState,
+    signIn,
+    signOut,
     submitRequestQuote,
     totalQuantity,
     updateInquiryQuantity,

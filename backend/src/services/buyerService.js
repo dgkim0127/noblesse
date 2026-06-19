@@ -14,8 +14,13 @@ export function createBuyerService() {
         status: viewer.status,
         buyerId: viewer.buyerId || null,
         companyName: viewer.companyName || null,
+        contactName: viewer.contactName || null,
+        country: viewer.country || null,
+        preferredLanguage: viewer.preferredLanguage || null,
         assignedMarket: viewer.assignedMarket || null,
-        currency: viewer.currency || null
+        currency: viewer.currency || null,
+        discountRate: Number(viewer.discountRate) || 0,
+        minOrderAmount: Number(viewer.minOrderAmount) || 0
       };
     }
   };

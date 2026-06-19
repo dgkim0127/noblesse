@@ -1,6 +1,7 @@
 import { LockKeyhole, Mail, Send } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { getInquiryRoutePath } from '../commerce/inquiryKeys'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatMoney } from '../utils/commerce'
 import { useLocalePath } from '../utils/locale'
@@ -28,8 +29,8 @@ function AccessNotice({ viewerState }) {
   return <main className="content">
     <div className="approval-page">
       <LockKeyhole size={25} />
-      <h1>{isPending ? '거래처 정보 확인 중입니다.' : '견적 문의는 거래처 확인 후 이용할 수 있습니다.'}</h1>
-      <p>{isPending ? '견적 문의는 담당자 확인 후 가능하며 가격과 합계는 그 전까지 숨겨집니다.' : '로그인하거나 거래처 문의 후 제품 견적을 남겨주세요.'}</p>
+      <h1>{isPending ? '거래처 정보 확인 중입니다.' : '견적 문의는 승인된 거래처만 이용할 수 있습니다.'}</h1>
+      <p>{isPending ? '담당자 확인 후 견적 문의 기능을 안내드립니다.' : '로그인하거나 거래처 문의를 먼저 진행해주세요.'}</p>
       <p>거래 조건 확인이 급한 경우 이메일로도 문의할 수 있습니다.</p>
       <div className="account-actions">
         <Link to={toLocalePath('/account')}>확인 상태 보기</Link>
@@ -41,15 +42,34 @@ function AccessNotice({ viewerState }) {
 
 export function RequestQuotePage() {
   const navigate = useNavigate()
-  const { buyer, estimatedTotal, inquiryRows, isApproved, submitRequestQuote, totalQuantity, viewerState } = useCommerce()
+  const { authError, authStatus, buyer, dataError, dataStatus, estimatedTotal, inquiryRows, isApproved, submitRequestQuote, totalQuantity, viewerState } = useCommerce()
   const { toLocalePath } = useLocalePath()
   const [memo, setMemo] = useState('')
+  const [submitStatus, setSubmitStatus] = useState('idle')
+  const [submitError, setSubmitError] = useState('')
+
+  if (dataStatus === 'loading' || authStatus === 'checking') return <main className="content"><div className="approval-page"><h1>Loading quote access...</h1><p>Catalog and buyer permissions are being verified.</p></div></main>
+  if (dataStatus === 'error') return <main className="content"><div className="approval-page"><h1>Catalog API unavailable</h1><p>{dataError || 'Unable to load quote data.'}</p></div></main>
+  if (authStatus === 'error') return <main className="content"><div className="approval-page"><h1>Buyer session unavailable</h1><p>{authError || 'Unable to verify buyer access.'}</p></div></main>
   if (!isApproved) return <AccessNotice viewerState={viewerState} />
   if (!inquiryRows.length) return <main className="content"><div className="approval-page"><h1>먼저 문의 리스트에 상품을 담아주세요.</h1><Link to={toLocalePath('/products')}>상품 목록 보기</Link></div></main>
 
-  const submit = () => {
-    const inquiry = submitRequestQuote(memo)
-    if (inquiry) navigate(toLocalePath(`/my-inquiries/${inquiry.inquiryId}`))
+  const submit = async () => {
+    if (submitStatus === 'submitting') return
+    setSubmitStatus('submitting')
+    setSubmitError('')
+    try {
+      const inquiry = await submitRequestQuote(memo)
+      if (inquiry) {
+        navigate(toLocalePath(getInquiryRoutePath(inquiry)))
+        return
+      }
+      setSubmitStatus('idle')
+      setSubmitError('견적 문의를 보낼 수 없습니다. 세션과 문의 상품을 확인해주세요.')
+    } catch (error) {
+      setSubmitStatus('idle')
+      setSubmitError(error?.message || '견적 문의를 보낼 수 없습니다.')
+    }
   }
 
   return <main className="content">
@@ -58,7 +78,7 @@ export function RequestQuotePage() {
       <Send size={24} />
       <h2>Noblesse에 거래 조건과 견적 문의 보내기</h2>
       <div className="quote-section">
-        <p>현재 단계는 최종 거래 확정 단계가 아닙니다. 관리자가 재고, 단가, 납기, 배송 조건을 확인한 뒤 최종 견적을 안내합니다.</p>
+        <p>현재 단계는 최종 거래 확정 단계가 아닙니다. 담당자가 재고, 가격, 납기, 배송 조건을 확인한 뒤 최종 견적을 안내합니다.</p>
         <p>This is not a final order. Our team will review product availability, price, lead time, and shipping conditions before sending a final quotation.</p>
       </div>
       <div className="quote-section">
@@ -71,7 +91,8 @@ export function RequestQuotePage() {
       </div>
       {inquiryRows.map((row) => <QuoteLine key={`${row.productId}-${row.color}-${row.size}`} row={row} currency={buyer.currency} />)}
       <textarea value={memo} onChange={(event) => setMemo(event.target.value)} placeholder="요청 메모" />
-      <button className="primary-action" type="button" onClick={submit}>견적 문의 보내기</button>
+      {submitError && <p className="auth-notice" role="alert">{submitError}</p>}
+      <button className="primary-action" type="button" disabled={submitStatus === 'submitting'} onClick={submit}>{submitStatus === 'submitting' ? '전송 중...' : '견적 문의 보내기'}</button>
     </section>
   </main>
 }

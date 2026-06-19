@@ -1,84 +1,107 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { buildAdminQuoteDraft, getAdminInquiryById } from '../../services'
 import { AdminLink, AdminMoney, AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
+import { AdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
+
+const quoteStatuses = ['draft', 'sent', 'accepted', 'cancelled']
 
 export function AdminQuotePage() {
-  const { inquiryId } = useParams()
-  const inquiry = getAdminInquiryById(inquiryId)
-  const draft = buildAdminQuoteDraft(inquiry)
-  const [message, setMessage] = useState('Draft preview is ready.')
+  const { quoteId } = useParams()
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [message, setMessage] = useState('')
+  const [savingStatus, setSavingStatus] = useState('')
+  const { data, error, status } = useAdminApiResource((api, token) => api.getQuote(quoteId, token), [quoteId, refreshKey])
+  const mutate = useAdminApiMutation()
+  const loading = <AdminApiState error={error} status={status} />
+  if (loading) return loading
 
-  if (!inquiry || !draft) {
+  const quote = data?.quote
+  const items = data?.items || []
+
+  if (!quote) {
     return <>
-      <AdminPageHeader title="Quote draft not found" description="The selected inquiry could not be converted into an Admin Quote preview." />
-      <AdminLink to="/admin/inquiries">Back to Inquiries</AdminLink>
+      <AdminPageHeader eyebrow="Admin API" title="Quote not found" description="The selected quote could not be loaded." />
+      <AdminLink to="/admin/quotes">Back to Quotes</AdminLink>
     </>
   }
 
+  const updateStatus = async (nextStatus) => {
+    setSavingStatus(nextStatus)
+    setMessage('')
+    try {
+      await mutate((api, token) => api.updateQuoteStatus(quote.id, nextStatus, token))
+      setMessage(`Quote status updated to ${nextStatus}.`)
+      setRefreshKey((current) => current + 1)
+    } catch (error) {
+      setMessage(error?.message || 'Unable to update quote status.')
+    } finally {
+      setSavingStatus('')
+    }
+  }
+
   return <>
-    <AdminPageHeader title={`Admin Quote Preview / ${draft.inquiryId}`} description="Review requested items and confirmed quote draft values before trusted production flow." actions={<><AdminLink to="/admin/quotes">Back to Quotes</AdminLink><AdminLink to={`/admin/inquiries/${inquiry.inquiryId}`}>Back to Inquiry</AdminLink></>} />
-    <AdminPreviewNote>Admin Quote is the final quotation basis after Noblesse review. This preview does not create a final transaction.</AdminPreviewNote>
+    <AdminPageHeader
+      eyebrow="Admin API"
+      title={`Admin Quote / ${quote.inquiryNumber || quote.id}`}
+      description="Review quote draft values generated from an inquiry snapshot."
+      actions={<><AdminLink to="/admin/quotes">Back to Quotes</AdminLink><AdminLink to={`/admin/inquiries/${quote.inquiryId}`}>Back to Inquiry</AdminLink></>}
+    />
+    <AdminPreviewNote>Quote status changes are available for admin tracking. External sending and price editing remain manual until a separate production workflow is approved.</AdminPreviewNote>
+    <section className="admin-card">
+      <h2>Quote Status</h2>
+      <p>Changing quote status is a protected admin API write and creates an audit log entry.</p>
+      <div className="admin-actions">
+        {quoteStatuses.map((status) => <button
+          disabled={savingStatus === status || quote.status === status}
+          key={status}
+          onClick={() => updateStatus(status)}
+          type="button"
+        >
+          {quote.status === status ? `${status} current` : `Set ${status}`}
+        </button>)}
+      </div>
+      {message && <p className="admin-inline-message">{message}</p>}
+    </section>
 
     <section className="admin-detail-grid">
       <article className="admin-card">
-        <h2>Inquiry Info</h2>
+        <h2>Quote Info</h2>
         <dl className="admin-definition-list">
-          <dt>Inquiry</dt><dd>{inquiry.inquiryId}</dd>
-          <dt>Buyer</dt><dd>{inquiry.buyerCompanyName}</dd>
-          <dt>Currency</dt><dd>{draft.currency}</dd>
-          <dt>Status</dt><dd>{draft.status}</dd>
-        </dl>
-      </article>
-      <article className="admin-card">
-        <h2>Buyer Info</h2>
-        <dl className="admin-definition-list">
-          <dt>Company</dt><dd>{inquiry.buyerCompanyName}</dd>
-          <dt>Country</dt><dd>{inquiry.buyerCountry}</dd>
-          <dt>Language</dt><dd>{inquiry.buyerLanguage}</dd>
-          <dt>Request Memo</dt><dd>{inquiry.requestMemo || 'No memo provided.'}</dd>
+          <dt>Inquiry</dt><dd>{quote.inquiryNumber || quote.inquiryId}</dd>
+          <dt>Buyer</dt><dd>{quote.companyName || '-'}</dd>
+          <dt>Currency</dt><dd>{quote.currency}</dd>
+          <dt>Status</dt><dd>{quote.status}</dd>
         </dl>
       </article>
       <article className="admin-card">
         <h2>Quote Conditions</h2>
         <dl className="admin-definition-list">
-          <dt>Lead Time</dt><dd>{draft.leadTime}</dd>
-          <dt>Shipping Note</dt><dd>{draft.shippingNote}</dd>
-          <dt>Currency</dt><dd>{draft.currency}</dd>
-          <dt>Confirmed Total</dt><dd><AdminMoney value={draft.confirmedTotal} currency={draft.currency} /></dd>
-        </dl>
-      </article>
-      <article className="admin-card">
-        <h2>Requested Snapshot</h2>
-        <dl className="admin-definition-list">
-          <dt>Requested Total</dt><dd><AdminMoney value={draft.requestedTotal} currency={draft.currency} /></dd>
-          <dt>Total Items</dt><dd>{inquiry.totalItems}</dd>
-          <dt>Total Quantity</dt><dd>{inquiry.totalQuantity}</dd>
-          <dt>Snapshot Rule</dt><dd>priceSnapshot is a reference captured at Request Quote time.</dd>
+          <dt>Lead Time</dt><dd>{quote.leadTime || '-'}</dd>
+          <dt>Shipping Note</dt><dd>{quote.shippingNote || '-'}</dd>
+          <dt>Requested Total</dt><dd><AdminMoney value={quote.requestedTotal || 0} currency={quote.currency} /></dd>
+          <dt>Confirmed Total</dt><dd><AdminMoney value={quote.confirmedTotal || 0} currency={quote.currency} /></dd>
         </dl>
       </article>
     </section>
 
     <section className="admin-card admin-quote-editor">
-      <h2>Admin Quote Draft Items</h2>
+      <h2>Admin Quote Items</h2>
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th>Product Code</th><th>Product Name</th><th>Requested Quantity</th><th>Confirmed Quantity</th><th>Requested priceSnapshot</th><th>Confirmed Unit Price</th><th>Confirmed Subtotal</th></tr></thead>
-          <tbody>{draft.items.map((item) => <tr key={item.productCode}>
+          <thead><tr><th>Product Code</th><th>Requested Quantity</th><th>Confirmed Quantity</th><th>Requested priceSnapshot</th><th>Confirmed Unit Price</th><th>Confirmed Subtotal</th></tr></thead>
+          <tbody>{items.map((item) => <tr key={item.id}>
             <td>{item.productCode}</td>
-            <td>{item.productName}</td>
             <td>{item.requestedQuantity}</td>
             <td>{item.confirmedQuantity}</td>
-            <td><AdminMoney value={item.requestedPriceSnapshot} currency={draft.currency} /></td>
-            <td><AdminMoney value={item.confirmedUnitPrice} currency={draft.currency} /></td>
-            <td><AdminMoney value={item.confirmedSubtotal} currency={draft.currency} /></td>
+            <td><AdminMoney value={item.requestedPriceSnapshot || 0} currency={quote.currency} /></td>
+            <td><AdminMoney value={item.confirmedUnitPrice || 0} currency={quote.currency} /></td>
+            <td><AdminMoney value={item.confirmedSubtotal || 0} currency={quote.currency} /></td>
           </tr>)}</tbody>
         </table>
+        {items.length === 0 && <p className="admin-empty">No quote items found.</p>}
       </div>
       <h2>Internal Memo</h2>
-      <label>Admin Memo<textarea readOnly value={draft.adminMemo} /></label>
-      <div className="admin-actions"><button type="button" onClick={() => setMessage('Draft preview saved locally.')}>Save Draft Preview</button><button type="button" onClick={() => setMessage('Send Quote preview complete. No message was sent.')}>Send Quote Preview</button></div>
-      <p className="admin-local-message">{message}</p>
+      <label>Admin Memo<textarea readOnly value={quote.adminMemo || ''} /></label>
     </section>
   </>
 }

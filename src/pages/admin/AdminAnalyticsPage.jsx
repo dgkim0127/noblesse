@@ -1,47 +1,89 @@
-import { getAdminAnalyticsSummary } from '../../services'
+import { useMemo } from 'react'
 import { AdminMoney, AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
+import { AdminApiState, useAdminApiResource } from './adminApiPageUtils'
 
-const viewCards = [
-  ['v_top_requested_products_30d', 'Recent 30-day most requested products.'],
-  ['v_top_requested_products_by_market', 'Popular requested products by market.'],
-  ['v_buyer_inquiry_summary', 'Buyer-level Request Quote summary.'],
-  ['v_category_inquiry_summary', 'Requested quantity and amount by category.'],
-  ['v_quote_conversion_monthly', 'Monthly requested to quoted to confirmed conversion.'],
-  ['v_popular_option_combinations', 'Requested color and size option combinations.'],
-  ['v_monthly_inquiry_trend', 'Monthly market and currency request trend.'],
-]
+function countBy(rows, getKey) {
+  return rows.reduce((counts, row) => {
+    const key = getKey(row) || 'unknown'
+    counts.set(key, (counts.get(key) || 0) + 1)
+    return counts
+  }, new Map())
+}
+
+function toRows(counts) {
+  return Array.from(counts.entries())
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+}
 
 export function AdminAnalyticsPage() {
-  const analytics = getAdminAnalyticsSummary()
+  const { data, error, status } = useAdminApiResource(async (api, token) => {
+    const [dashboard, inquiries, buyers, products] = await Promise.all([
+      api.getDashboard(token),
+      api.getInquiries({ limit: 100 }, token),
+      api.getBuyers({ limit: 100 }, token),
+      api.getProducts({ limit: 100 }, token),
+    ])
+
+    return {
+      data: {
+        dashboard: dashboard.data || dashboard,
+        inquiries: inquiries.data?.inquiries || [],
+        buyers: buyers.data?.buyers || [],
+        products: products.data?.products || [],
+      },
+    }
+  }, [])
+
+  const loading = <AdminApiState error={error} status={status} />
+  const analytics = useMemo(() => {
+    const inquiries = data?.inquiries || []
+    const buyers = data?.buyers || []
+    const products = data?.products || []
+    const totalEstimated = inquiries.reduce((sum, inquiry) => sum + Number(inquiry.estimatedTotal || 0), 0)
+
+    return {
+      totalEstimated,
+      statusRows: toRows(countBy(inquiries, (inquiry) => inquiry.status)),
+      marketRows: toRows(countBy(inquiries, (inquiry) => inquiry.market || inquiry.country)),
+      buyerRows: toRows(countBy(buyers, (buyer) => buyer.status)),
+      productRows: toRows(countBy(products, (product) => product.isVisible ? 'visible' : 'hidden')),
+    }
+  }, [data])
+
+  if (loading) return loading
 
   return <>
-    <AdminPageHeader title="Analytics Preview" description="Mock analytics cards prepared for future PostgreSQL/Supabase views." />
-    <AdminPreviewNote>No database query runs in this preview. Production analytics should read from trusted PostgreSQL/Supabase views through a protected admin API/RPC.</AdminPreviewNote>
+    <AdminPageHeader
+      eyebrow="Admin API"
+      title="Analytics"
+      description="Read-only operational summary based on protected Admin API responses."
+    />
+    <AdminPreviewNote>Analytics uses existing admin read endpoints. No browser direct database access or write operation runs here.</AdminPreviewNote>
 
-    <section className="admin-analytics-grid">
-      {viewCards.map(([viewName, description]) => <article className="admin-card" key={viewName}>
-        <p className="eyebrow">Reference View</p>
-        <h2>{viewName}</h2>
-        <span>{description}</span>
-      </article>)}
+    <section className="admin-metric-grid">
+      <article className="admin-card"><p className="eyebrow">Inquiries</p><h2>{data.dashboard?.inquiries?.total ?? data.inquiries.length}</h2><span>Total request records</span></article>
+      <article className="admin-card"><p className="eyebrow">Buyers</p><h2>{data.dashboard?.buyers?.total ?? data.buyers.length}</h2><span>Trade accounts</span></article>
+      <article className="admin-card"><p className="eyebrow">Products</p><h2>{data.dashboard?.products?.total ?? data.products.length}</h2><span>Catalog records</span></article>
+      <article className="admin-card"><p className="eyebrow">Estimated Total</p><h2><AdminMoney value={analytics.totalEstimated} currency="USD" /></h2><span>Mixed-currency reference only</span></article>
     </section>
 
     <section className="admin-layout two">
       <article className="admin-card">
-        <h2>Top Requested Products</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Product Code</th><th>Product Name</th><th>Quantity</th><th>Estimated Total</th></tr></thead><tbody>{analytics.topRequestedProducts.map((item) => <tr key={item.productCode}><td>{item.productCode}</td><td>{item.productName}</td><td>{item.totalQuantity}</td><td><AdminMoney value={item.estimatedTotal} currency="JPY" /></td></tr>)}</tbody></table></div>
+        <h2>Inquiry Status</h2>
+        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Status</th><th>Count</th></tr></thead><tbody>{analytics.statusRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
       </article>
       <article className="admin-card">
-        <h2>Top Markets</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Market</th><th>Buyer Count</th><th>Inquiry Count</th><th>Estimated Total</th></tr></thead><tbody>{analytics.topMarkets.map((market) => <tr key={market.market}><td>{market.market}</td><td>{market.buyerCount}</td><td>{market.inquiryCount}</td><td><AdminMoney value={market.estimatedTotal} currency={market.currency} /></td></tr>)}</tbody></table></div>
+        <h2>Markets</h2>
+        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Market</th><th>Count</th></tr></thead><tbody>{analytics.marketRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
       </article>
       <article className="admin-card">
-        <h2>Buyer Inquiry Summary</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Buyer</th><th>Inquiry Count</th><th>Estimated Total</th></tr></thead><tbody>{analytics.buyerInquirySummary.map((buyer) => <tr key={buyer.buyerId}><td>{buyer.companyName}</td><td>{buyer.inquiryCount}</td><td><AdminMoney value={buyer.estimatedTotal} currency="JPY" /></td></tr>)}</tbody></table></div>
+        <h2>Buyer Status</h2>
+        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Status</th><th>Count</th></tr></thead><tbody>{analytics.buyerRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
       </article>
       <article className="admin-card">
-        <h2>Popular Option Combinations</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Option</th><th>Total Quantity</th></tr></thead><tbody>{analytics.popularOptionCombinations.map((option) => <tr key={option.option}><td>{option.option}</td><td>{option.totalQuantity}</td></tr>)}</tbody></table></div>
+        <h2>Product Visibility</h2>
+        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Visibility</th><th>Count</th></tr></thead><tbody>{analytics.productRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
       </article>
     </section>
   </>

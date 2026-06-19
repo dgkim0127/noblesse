@@ -147,6 +147,69 @@ test("buyer API requires and passes token to buyer/me", async () => {
   assert.equal(profile.status, "approved");
 });
 
+test("buyer API calls price and inquiry endpoints with token", async () => {
+  const calls = [];
+  const apiClient = {
+    async apiFetch(path, options) {
+      calls.push({ path, options });
+      if (path === "/buyer/product-prices") {
+        return { data: { productPrices: [{ productCode: "NB-001", moq: 20 }] } };
+      }
+      if (path === "/buyer/inquiries?status=requested") {
+        return { data: { data: { inquiries: [{ inquiryId: "inq-1" }] }, meta: { requestId: "req-1" } } };
+      }
+      if (path === "/buyer/inquiries/inq-1") {
+        return { data: { data: { inquiry: { inquiryId: "inq-1", status: "quoted" } }, meta: { requestId: "req-detail" } } };
+      }
+      if (path === "/buyer/inquiries") {
+        return { data: { data: { inquiry: { inquiryId: "inq-2" } }, meta: { requestId: "req-2" } } };
+      }
+      return { data: { data: { profile: { status: "pending" } }, meta: { requestId: "req-3" } } };
+    }
+  };
+  const buyerApi = createBuyerApi(apiClient);
+
+  const prices = await buyerApi.getProductPrices("buyer-token");
+  const list = await buyerApi.getInquiries({ status: "requested" }, "buyer-token");
+  const detail = await buyerApi.getInquiry("inq-1", "buyer-token");
+  const created = await buyerApi.createInquiry({
+    requestMemo: "Check stock",
+    items: [{ productCode: "NB-001", color: "Silver", size: "6mm", quantity: 20 }]
+  }, "buyer-token");
+  const registered = await buyerApi.registerBuyer({
+    email: "buyer@example.test",
+    companyName: "Buyer Company",
+    contactName: "Buyer Contact",
+    country: "Japan",
+    preferredLanguage: "jp",
+    agreements: [{ key: "terms_of_service", version: "terms-v1.0", required: true, accepted: true }]
+  }, "buyer-token");
+
+  assert.equal(prices[0].productCode, "NB-001");
+  assert.equal(list.data.inquiries[0].inquiryId, "inq-1");
+  assert.equal(detail.data.inquiry.status, "quoted");
+  assert.equal(created.data.inquiry.inquiryId, "inq-2");
+  assert.equal(registered.data.profile.status, "pending");
+  assert.deepEqual(calls.map((call) => call.path), [
+    "/buyer/product-prices",
+    "/buyer/inquiries?status=requested",
+    "/buyer/inquiries/inq-1",
+    "/buyer/inquiries",
+    "/buyer/register"
+  ]);
+  assert.equal(calls[3].options.method, "POST");
+  assert.equal(calls[3].options.token, "buyer-token");
+  assert.deepEqual(calls[3].options.body.items[0], {
+    productCode: "NB-001",
+    color: "Silver",
+    size: "6mm",
+    quantity: 20
+  });
+  assert.equal(calls[4].options.method, "POST");
+  assert.equal(calls[4].options.token, "buyer-token");
+  assert.equal(calls[4].options.body.companyName, "Buyer Company");
+});
+
 test("catalog adapter does not invent protected price fields", async () => {
   const catalogApi = createCatalogApi({
     async apiFetch() {

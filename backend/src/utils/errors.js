@@ -20,6 +20,10 @@ export function notFound(message = "Resource not found") {
   return new ApiError(404, "NOT_FOUND", message);
 }
 
+export function conflict(message = "Request conflict") {
+  return new ApiError(409, "CONFLICT", message);
+}
+
 export function validationError(message = "Invalid request") {
   return new ApiError(400, "VALIDATION_ERROR", message);
 }

@@ -49,6 +49,19 @@ export function createAdminRoutes({ services, requireAdmin }) {
     })
   );
 
+  router.patch(
+    "/inquiries/:inquiryId/status",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = await services.inquiries.updateInquiryStatus(
+        req.params.inquiryId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
   router.get(
     "/inquiries/:inquiryId",
     requireAdmin,
@@ -74,6 +87,31 @@ export function createAdminRoutes({ services, requireAdmin }) {
   );
 
   router.get(
+    "/buyers/:buyerId",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = await services.buyers.getBuyerById(
+        req.params.buyerId,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.patch(
+    "/buyers/:buyerId/status",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = await services.buyers.updateBuyerStatus(
+        req.params.buyerId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
     "/products",
     requireAdmin,
     asyncRoute(async (req, res) => {
@@ -85,12 +123,152 @@ export function createAdminRoutes({ services, requireAdmin }) {
     })
   );
 
-  router.all("/inquiries/:inquiryId/status", () => {
-    throw notFound("Admin status route is not implemented");
-  });
-  router.all("/quotes", () => {
-    throw notFound("Admin quote route is not implemented");
-  });
+  router.get(
+    "/categories",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const result = await services.categories.listCategories(req.query, req.adminViewer);
+      res.json({
+        data: { categories: result.categories },
+        meta: withRequestId(req, result.meta)
+      });
+    })
+  );
+
+  router.post(
+    "/categories",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = await services.categories.createCategory(req.body, req.adminViewer);
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.patch(
+    "/categories/:categoryId",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = await services.categories.updateCategory(
+        req.params.categoryId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/products",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = await services.products.createProduct(req.body, req.adminViewer);
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/prices",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const result = await services.prices.listPrices(req.query, req.adminViewer);
+      res.json({
+        data: { prices: result.prices },
+        meta: withRequestId(req, result.meta)
+      });
+    })
+  );
+
+  router.post(
+    "/prices",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = await services.prices.createPrice(req.body, req.adminViewer);
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.patch(
+    "/prices/:priceId",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = await services.prices.updatePrice(
+        req.params.priceId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.patch(
+    "/products/:productId/visibility",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = await services.products.updateProductVisibility(
+        req.params.productId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.patch(
+    "/products/:productId",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = await services.products.updateProduct(
+        req.params.productId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/quotes",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const result = await services.quotes.listQuotes(req.query, req.adminViewer);
+      res.json({
+        data: { quotes: result.quotes },
+        meta: withRequestId(req, result.meta)
+      });
+    })
+  );
+
+  router.post(
+    "/quotes",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = await services.quotes.createQuote(req.body, req.adminViewer);
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/quotes/:quoteId",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = await services.quotes.getQuoteById(req.params.quoteId, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.patch(
+    "/quotes/:quoteId/status",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = await services.quotes.updateQuoteStatus(
+        req.params.quoteId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
   router.delete("*", () => {
     throw notFound("Admin delete routes are not implemented");
   });

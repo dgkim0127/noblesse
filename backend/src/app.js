@@ -3,12 +3,17 @@ import express from "express";
 import { getEnv } from "./config/env.js";
 import { createFirebaseTokenVerifier } from "./auth/firebaseAuth.js";
 import { createRequireAdmin } from "./auth/requireAdmin.js";
-import { createPostgresViewerLoader, createRequireUser } from "./auth/requireUser.js";
+import { createPostgresViewerLoader, createRequireFirebaseIdentity, createRequireUser } from "./auth/requireUser.js";
 import { createPool } from "./db/pool.js";
 import { createAdminBuyerQueries } from "./db/queries/adminBuyerQueries.js";
+import { createAdminCategoryQueries } from "./db/queries/adminCategoryQueries.js";
 import { createAdminDashboardQueries } from "./db/queries/adminDashboardQueries.js";
 import { createAdminInquiryQueries } from "./db/queries/adminInquiryQueries.js";
+import { createAdminPriceQueries } from "./db/queries/adminPriceQueries.js";
 import { createAdminProductQueries } from "./db/queries/adminProductQueries.js";
+import { createAdminQuoteQueries } from "./db/queries/adminQuoteQueries.js";
+import { createBuyerInquiryQueries } from "./db/queries/buyerInquiryQueries.js";
+import { createBuyerRegistrationQueries } from "./db/queries/buyerRegistrationQueries.js";
 import * as catalogQueries from "./db/queries/catalogQueries.js";
 import * as buyerQueries from "./db/queries/buyerQueries.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -18,9 +23,14 @@ import { createBuyerRoutes } from "./routes/buyerRoutes.js";
 import { createCatalogRoutes } from "./routes/catalogRoutes.js";
 import { createHealthRoutes } from "./routes/healthRoutes.js";
 import { createAdminBuyerService } from "./services/adminBuyerService.js";
+import { createAdminCategoryService } from "./services/adminCategoryService.js";
 import { createAdminDashboardService } from "./services/adminDashboardService.js";
 import { createAdminInquiryService } from "./services/adminInquiryService.js";
+import { createAdminPriceService } from "./services/adminPriceService.js";
 import { createAdminProductService } from "./services/adminProductService.js";
+import { createAdminQuoteService } from "./services/adminQuoteService.js";
+import { createBuyerInquiryService } from "./services/buyerInquiryService.js";
+import { createBuyerRegistrationService } from "./services/buyerRegistrationService.js";
 import { createBuyerService } from "./services/buyerService.js";
 import { createCatalogService } from "./services/catalogService.js";
 
@@ -42,6 +52,17 @@ export function createApp(options = {}) {
         queries: options.queries?.catalog || catalogQueries
       }),
     buyer: options.services?.buyer || createBuyerService(),
+    buyerRegistration:
+      options.services?.buyerRegistration ||
+      createBuyerRegistrationService({
+        queries:
+          options.queries?.buyerRegistration || createBuyerRegistrationQueries(pool)
+      }),
+    buyerInquiries:
+      options.services?.buyerInquiries ||
+      createBuyerInquiryService({
+        queries: options.queries?.buyerInquiries || createBuyerInquiryQueries(pool)
+      }),
     admin: {
       dashboard:
         options.services?.admin?.dashboard ||
@@ -59,10 +80,25 @@ export function createApp(options = {}) {
         createAdminBuyerService({
           queries: options.queries?.admin?.buyers || createAdminBuyerQueries(pool)
         }),
+      categories:
+        options.services?.admin?.categories ||
+        createAdminCategoryService({
+          queries: options.queries?.admin?.categories || createAdminCategoryQueries(pool)
+        }),
+      prices:
+        options.services?.admin?.prices ||
+        createAdminPriceService({
+          queries: options.queries?.admin?.prices || createAdminPriceQueries(pool)
+        }),
       products:
         options.services?.admin?.products ||
         createAdminProductService({
           queries: options.queries?.admin?.products || createAdminProductQueries(pool)
+        }),
+      quotes:
+        options.services?.admin?.quotes ||
+        createAdminQuoteService({
+          queries: options.queries?.admin?.quotes || createAdminQuoteQueries(pool)
         })
     }
   };
@@ -75,6 +111,8 @@ export function createApp(options = {}) {
       queries: options.queries?.buyer || buyerQueries
     });
   const requireUser = options.auth?.requireUser || createRequireUser({ verifier, loadViewer });
+  const requireFirebaseIdentity =
+    options.auth?.requireFirebaseIdentity || createRequireFirebaseIdentity({ verifier });
   const loadAdminUserByAuthUid =
     options.auth?.loadAdminUserByAuthUid ||
     (async (authUid) => {
@@ -103,7 +141,16 @@ export function createApp(options = {}) {
 
   app.use("/api/health", createHealthRoutes());
   app.use("/api/catalog", createCatalogRoutes({ catalogService: services.catalog }));
-  app.use("/api/buyer", createBuyerRoutes({ buyerService: services.buyer, requireUser }));
+  app.use(
+    "/api/buyer",
+    createBuyerRoutes({
+      buyerService: services.buyer,
+      buyerRegistrationService: services.buyerRegistration,
+      buyerInquiryService: services.buyerInquiries,
+      requireFirebaseIdentity,
+      requireUser
+    })
+  );
   app.use(
     "/api/admin",
     createAdminRoutes({

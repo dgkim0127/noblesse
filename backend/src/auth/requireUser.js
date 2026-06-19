@@ -21,8 +21,13 @@ export function createPostgresViewerLoader({ pool, queries }) {
       status: user.status,
       buyerId: buyer?.id || null,
       companyName: buyer?.company_name || null,
+      contactName: buyer?.contact_name || null,
+      country: buyer?.country || null,
+      preferredLanguage: buyer?.preferred_language || null,
       assignedMarket: buyer?.assigned_market || null,
-      currency: buyer?.currency || null
+      currency: buyer?.currency || null,
+      discountRate: buyer?.discount_rate || 0,
+      minOrderAmount: buyer?.min_order_amount || 0
     };
   };
 }
@@ -55,6 +60,26 @@ export function createRequireUser({ verifier, loadViewer }) {
         ...viewer,
         authUid: viewer.authUid || decoded.uid,
         email: viewer.email || decoded.email
+      };
+      next();
+    } catch (error) {
+      next(error.code ? error : unauthorized("Invalid authentication token"));
+    }
+  };
+}
+
+export function createRequireFirebaseIdentity({ verifier }) {
+  return async function requireFirebaseIdentity(req, _res, next) {
+    try {
+      const token = readBearerToken(req);
+      if (!token) {
+        throw unauthorized();
+      }
+
+      const decoded = await verifier.verifyIdToken(token);
+      req.firebaseIdentity = {
+        authUid: decoded.uid,
+        email: decoded.email || null
       };
       next();
     } catch (error) {

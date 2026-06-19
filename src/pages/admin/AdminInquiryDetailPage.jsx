@@ -1,50 +1,93 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getAdminInquiryById } from '../../services'
-import { AdminLink, AdminMoney, AdminPageHeader, AdminPreviewNote, AdminStatus } from './AdminPageParts'
+import { AdminLink, AdminMoney, AdminPageHeader, AdminStatus } from './AdminPageParts'
+import { AdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
+
+const statusOptions = ['requested', 'checking', 'quoted', 'confirmed', 'cancelled']
 
 export function AdminInquiryDetailPage() {
   const { inquiryId } = useParams()
-  const inquiry = getAdminInquiryById(inquiryId)
-  const [status, setStatus] = useState(inquiry?.status)
+  const [memoDraft, setMemoDraft] = useState('')
+  const [saveStatus, setSaveStatus] = useState('idle')
+  const [saveMessage, setSaveMessage] = useState('')
+  const [statusSaveState, setStatusSaveState] = useState('idle')
+  const [refreshKey, setRefreshKey] = useState(0)
+  const { data, error, status } = useAdminApiResource((api, token) => api.getInquiry(inquiryId, token), [inquiryId, refreshKey])
+  const mutate = useAdminApiMutation()
+  const loading = <AdminApiState error={error} status={status} />
+  if (loading) return loading
 
-  if (!inquiry) {
-    return <>
-      <AdminPageHeader title="Inquiry not found" description="The selected Request Quote preview could not be found." />
-      <AdminLink to="/admin/inquiries">Back to Inquiries</AdminLink>
-    </>
+  const inquiry = data?.inquiry || {}
+  const buyer = data?.buyer || {}
+  const items = data?.items || inquiry.items || []
+
+  const saveMemo = async () => {
+    if (saveStatus === 'saving') return
+    setSaveStatus('saving')
+    setSaveMessage('')
+    try {
+      await mutate((api, token) => api.updateInquiryMemo(inquiryId, memoDraft, token))
+      setSaveStatus('saved')
+      setSaveMessage('Admin memo saved.')
+      setRefreshKey((current) => current + 1)
+    } catch (saveError) {
+      setSaveStatus('idle')
+      setSaveMessage(saveError?.message || 'Unable to save admin memo.')
+    }
+  }
+
+  const updateStatus = async (nextStatus) => {
+    if (statusSaveState === 'saving') return
+    setStatusSaveState('saving')
+    setSaveMessage('')
+    try {
+      await mutate((api, token) => api.updateInquiryStatus(inquiryId, nextStatus, token))
+      setSaveMessage(`Inquiry status updated to ${nextStatus}.`)
+      setRefreshKey((current) => current + 1)
+    } catch (statusError) {
+      setSaveMessage(statusError?.message || 'Unable to update inquiry status.')
+    } finally {
+      setStatusSaveState('idle')
+    }
   }
 
   return <>
-    <AdminPageHeader title={inquiry.inquiryId} description="Inquiry detail and item snapshot preview." actions={<><AdminLink to="/admin/inquiries">Back to Inquiries</AdminLink><AdminLink className="primary-action" to={`/admin/quotes/${inquiry.inquiryId}`}>Create Admin Quote</AdminLink></>} />
-    <AdminPreviewNote>priceSnapshot is the reference price captured when the Request Quote was submitted. Admin Quote is the final quotation basis after review.</AdminPreviewNote>
-
-    <section className="admin-card">
-      <h2>Review Workflow</h2>
-      <div className="admin-workflow" aria-label="Inquiry review workflow">
-        {['Requested', 'Checking', 'Admin Quote', 'Confirmed / Cancelled'].map((step, index) => <span className={`admin-workflow-step ${index === 1 ? 'active' : ''}`} key={step}>{index + 1}. {step}</span>)}
-      </div>
-      <p className="admin-local-message">final unit price is confirmed in Admin Quote. This screen only reviews the submitted snapshot.</p>
-    </section>
+    <AdminPageHeader title={inquiry.inquiryNumber || inquiry.id || inquiryId} description="Live staging inquiry detail from the admin API." actions={<AdminLink to="/admin/inquiries">Back to Inquiries</AdminLink>} />
 
     <section className="admin-detail-grid">
       <article className="admin-card">
         <h2>Buyer Info</h2>
         <dl className="admin-definition-list">
-          <dt>Company</dt><dd>{inquiry.buyerCompanyName}</dd>
-          <dt>Country</dt><dd>{inquiry.buyerCountry}</dd>
-          <dt>Language</dt><dd>{inquiry.buyerLanguage}</dd>
+          <dt>Company</dt><dd>{buyer.companyName || inquiry.companyName || '-'}</dd>
+          <dt>Email</dt><dd>{buyer.email || inquiry.email || '-'}</dd>
+          <dt>Country</dt><dd>{buyer.country || inquiry.country || '-'}</dd>
           <dt>Currency</dt><dd>{inquiry.currency}</dd>
         </dl>
       </article>
       <article className="admin-card">
         <h2>Inquiry Status</h2>
-        <AdminStatus status={status} />
-        <div className="admin-actions"><button type="button" onClick={() => setStatus('checking')}>Mark Checking Preview</button><AdminLink to={`/admin/quotes/${inquiry.inquiryId}`}>Create Admin Quote</AdminLink><button type="button" onClick={() => setStatus('cancelled')}>Cancel Preview</button></div>
+        <AdminStatus status={inquiry.status} />
+        <div className="admin-actions">
+          {statusOptions.filter((item) => item !== inquiry.status).map((nextStatus) => <button
+            disabled={statusSaveState === 'saving'}
+            key={nextStatus}
+            onClick={() => updateStatus(nextStatus)}
+            type="button"
+          >
+            Set {nextStatus}
+          </button>)}
+        </div>
+        <dl className="admin-definition-list">
+          <dt>Total Items</dt><dd>{inquiry.totalItems}</dd>
+          <dt>Total Quantity</dt><dd>{inquiry.totalQuantity}</dd>
+          <dt>Estimated Total</dt><dd><AdminMoney value={inquiry.estimatedTotal} currency={inquiry.currency} /></dd>
+        </dl>
       </article>
       <article className="admin-card wide-card">
-        <h2>Request Memo</h2>
-        <p>{inquiry.requestMemo || 'No memo provided.'}</p>
+        <h2>Admin Memo</h2>
+        <textarea value={memoDraft || inquiry.adminMemo || ''} onChange={(event) => setMemoDraft(event.target.value)} />
+        <div className="admin-actions"><button type="button" disabled={saveStatus === 'saving'} onClick={saveMemo}>{saveStatus === 'saving' ? 'Saving...' : 'Save Memo'}</button></div>
+        {saveMessage && <p className="admin-local-message">{saveMessage}</p>}
       </article>
     </section>
 
@@ -53,7 +96,7 @@ export function AdminInquiryDetailPage() {
       <div className="admin-table-wrap">
         <table className="admin-table">
           <thead><tr><th>Product Code</th><th>Product Name</th><th>Color</th><th>Size</th><th>Quantity</th><th>MOQ</th><th>priceSnapshot</th><th>Subtotal</th></tr></thead>
-          <tbody>{inquiry.items.map((item) => <tr key={`${item.productId}-${item.color}-${item.size}`}>
+          <tbody>{items.map((item) => <tr key={`${item.id || item.productCode}-${item.color}-${item.size}`}>
             <td>{item.productCode}</td>
             <td>{item.productName}</td>
             <td>{item.color}</td>
@@ -65,7 +108,6 @@ export function AdminInquiryDetailPage() {
           </tr>)}</tbody>
         </table>
       </div>
-      <div className="admin-total-row"><span>Estimated Total</span><strong><AdminMoney value={inquiry.estimatedTotal} currency={inquiry.currency} /></strong></div>
     </section>
   </>
 }

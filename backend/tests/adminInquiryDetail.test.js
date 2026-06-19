@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createApp } from "../src/app.js";
 import { createAdminInquiryService } from "../src/services/adminInquiryService.js";
-import { notFound } from "../src/utils/errors.js";
 import { request } from "./testClient.js";
 
 const inquiryId = "11111111-1111-4111-8111-111111111111";
@@ -22,7 +21,7 @@ function createAppWithInquiryDetail() {
               return {
                 inquiry: { id, inquiryNumber: "INQ-001", status: "requested" },
                 buyer: { id: "buyer-1", companyName: "Noblesse Buyer" },
-                items: []
+                items: [{ id: "item-1", productCode: "NB-001", quantity: 20 }]
               };
             }
           }
@@ -47,6 +46,7 @@ test("GET /api/admin/inquiries/:inquiryId returns inquiry detail", async () => {
 
   assert.equal(response.status, 200);
   assert.equal(response.body.data.inquiry.id, inquiryId);
+  assert.equal(response.body.data.items[0].productCode, "NB-001");
 });
 
 test("GET /api/admin/inquiries/:inquiryId rejects invalid UUID", async () => {

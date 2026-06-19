@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ChevronDown, Clock3, Heart, Search, ShieldCheck, UserRound, X } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import noblesseLogo from '../assets/noblesse-logo.png'
@@ -11,7 +11,7 @@ const topMarqueeText = 'SILVER 925 & Surgical Piercing & Brass Piercing · 실�
 const shellCopy = {
   kr: {
     account: '마이페이지',
-    adminPreview: '관리자 미리보기',
+    adminPreview: '관리자',
     clearHistory: '검색 기록 지우기',
     countryLabels: { kr: '한국', en: '미국', jp: '일본', cn: '중국' },
     footer: '국내·해외 B2B 거래처를 위한 프리미엄 피어싱 카탈로그',
@@ -52,12 +52,12 @@ const shellCopy = {
       guest: '비회원',
       pending: '확인 중',
       approved: '거래 조건 안내 가능 / JP 지역',
-      admin: '관리자 미리보기',
+      admin: '관리자',
     },
   },
   en: {
     account: 'My page',
-    adminPreview: 'Admin preview',
+    adminPreview: 'Admin',
     clearHistory: 'Clear history',
     countryLabels: { kr: 'Korea', en: 'United States', jp: 'Japan', cn: 'China' },
     footer: 'Premium piercing catalog for domestic and international B2B buyers',
@@ -98,12 +98,12 @@ const shellCopy = {
       guest: 'Guest preview',
       pending: 'Under review',
       approved: 'Trade terms available / JP region',
-      admin: 'Admin preview',
+      admin: 'Admin',
     },
   },
   jp: {
     account: 'マイページ',
-    adminPreview: '管理者プレビュー',
+    adminPreview: '管理者',
     clearHistory: '検索履歴を削除',
     countryLabels: { kr: '韓国', en: '米国', jp: '日本', cn: '中国' },
     footer: '国内・海外B2B取引先向けプレミアムピアスカタログ',
@@ -144,12 +144,12 @@ const shellCopy = {
       guest: 'ゲストプレビュー',
       pending: '確認中',
       approved: '取引条件案内可能 / JP地域',
-      admin: '管理者プレビュー',
+      admin: '管理者',
     },
   },
   cn: {
     account: '我的页面',
-    adminPreview: '管理员预览',
+    adminPreview: '管理员',
     clearHistory: '清除搜索记录',
     countryLabels: { kr: '韩国', en: '美国', jp: '日本', cn: '中国' },
     footer: '面向国内外B2B买家的高端穿孔商品目录',
@@ -190,7 +190,7 @@ const shellCopy = {
       guest: '访客预览',
       pending: '确认中',
       approved: '可提供交易条件 / JP地区',
-      admin: '管理员预览',
+      admin: '管理员',
     },
   },
 }
@@ -437,6 +437,7 @@ export function StoreShell() {
     isPending,
     runtimeConfig,
     setViewerState,
+    signIn,
     viewerState,
   } = useCommerce()
   const { locale, localeMeta, toLanguagePath, toLocalePath } = useLocalePath()
@@ -558,6 +559,27 @@ export function StoreShell() {
     if (loginModalCloseTimerRef.current) window.clearTimeout(loginModalCloseTimerRef.current)
   }, [])
 
+  const closeCompactSearch = useCallback(() => {
+    if (!compactSearchVisibleRef.current && !isCompactSearchOpen && !isCompactSearchClosing) return
+    if (compactSearchCloseTimerRef.current) window.clearTimeout(compactSearchCloseTimerRef.current)
+    setCompactSearchPhase('closing')
+    compactSearchCloseTimerRef.current = window.setTimeout(() => {
+      setCompactSearchPhase('closed')
+      compactSearchCloseTimerRef.current = null
+    }, 1080)
+  }, [isCompactSearchClosing, isCompactSearchOpen])
+
+  const closeLoginModal = useCallback(() => {
+    if (!isLoginModalOpen || isLoginModalClosing) return
+    if (loginModalCloseTimerRef.current) window.clearTimeout(loginModalCloseTimerRef.current)
+    setIsLoginModalClosing(true)
+    loginModalCloseTimerRef.current = window.setTimeout(() => {
+      setIsLoginModalOpen(false)
+      setIsLoginModalClosing(false)
+      loginModalCloseTimerRef.current = null
+    }, 340)
+  }, [isLoginModalClosing, isLoginModalOpen])
+
   useEffect(() => {
     if (!isLoginModalOpen) return undefined
 
@@ -567,7 +589,7 @@ export function StoreShell() {
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isLoginModalOpen])
+  }, [closeLoginModal, isLoginModalOpen])
 
   useEffect(() => {
     if (!isCompactSearchOpen) return
@@ -586,7 +608,7 @@ export function StoreShell() {
 
     document.addEventListener('mousedown', handleOutsideClick)
     return () => document.removeEventListener('mousedown', handleOutsideClick)
-  }, [])
+  }, [closeCompactSearch])
 
   const saveSearchHistory = (query) => {
     if (!query) return
@@ -632,16 +654,6 @@ export function StoreShell() {
     setCompactSearchPhase('open')
   }
 
-  const closeCompactSearch = () => {
-    if (!compactSearchVisibleRef.current && !isCompactSearchOpen && !isCompactSearchClosing) return
-    if (compactSearchCloseTimerRef.current) window.clearTimeout(compactSearchCloseTimerRef.current)
-    setCompactSearchPhase('closing')
-    compactSearchCloseTimerRef.current = window.setTimeout(() => {
-      setCompactSearchPhase('closed')
-      compactSearchCloseTimerRef.current = null
-    }, 1080)
-  }
-
   const toggleCompactSearch = () => {
     if (isCompactSearchOpen || isCompactSearchClosing) closeCompactSearch()
     else openCompactSearch()
@@ -671,37 +683,19 @@ export function StoreShell() {
     openLoginModal(event, sideCopy.loginRequired)
   }
 
-  const closeLoginModal = () => {
-    if (!isLoginModalOpen || isLoginModalClosing) return
-    if (loginModalCloseTimerRef.current) window.clearTimeout(loginModalCloseTimerRef.current)
-    setIsLoginModalClosing(true)
-    loginModalCloseTimerRef.current = window.setTimeout(() => {
-      setIsLoginModalOpen(false)
-      setIsLoginModalClosing(false)
-      loginModalCloseTimerRef.current = null
-    }, 340)
-  }
-
-  const loginAsApprovedBuyer = (event) => {
+  const loginAsApprovedBuyer = async (event) => {
     event.preventDefault()
-    if (!isMockMode) {
-      setLoginModalNotice('Staging API mode requires server-side authentication. Mock buyer login is disabled in release mode.')
-      return
-    }
-    setViewerState('approved', { persist: isAutoLoginEnabled })
-    closeLoginModal()
-    navigate(toLocalePath('/account'))
-  }
+    const formData = new FormData(event.currentTarget)
+    const identifier = String(formData.get('username') ?? '').trim()
+    const password = String(formData.get('password') ?? '')
 
-  const browseAsGuest = () => {
-    if (!isMockMode) {
+    try {
+      await signIn({ identifier, password, remember: isAutoLoginEnabled })
       closeLoginModal()
-      navigate(toLocalePath('/products'))
-      return
+      navigate(toLocalePath('/account'))
+    } catch (error) {
+      setLoginModalNotice(error?.message || 'Login failed. Please check your account.')
     }
-    setViewerState('guest')
-    closeLoginModal()
-    navigate(toLocalePath('/products'))
   }
 
   const goToRegisterFromLogin = () => {

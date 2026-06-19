@@ -6,6 +6,7 @@ const adminNav = [
   { label: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard, end: true },
   { label: 'Buyers', path: '/admin/buyers', icon: Handshake },
   { label: 'Products', path: '/admin/products', icon: Gem },
+  { label: 'Categories', path: '/admin/categories', icon: Tags },
   { label: 'Prices', path: '/admin/prices', icon: Tags },
   { label: 'Inquiries', path: '/admin/inquiries', icon: FileText },
   { label: 'Quotes', path: '/admin/quotes', icon: FileText },
@@ -20,11 +21,11 @@ export function AdminShell() {
       <div className="admin-brand-block">
         <Gauge size={24} />
         <div>
-          <strong>귀족 Admin</strong>
-          <span>Noblesse Admin Preview</span>
+          <strong>Noblesse Admin</strong>
+          <span>Server-verified staging API</span>
         </div>
       </div>
-      <span className="admin-preview-badge">Preview</span>
+      <span className="admin-preview-badge">Staging API</span>
       <nav>
         {adminNav.map(({ end, icon: Icon, label, path }) => <NavLink end={end} key={path} to={toLocalePath(path)}>
           <Icon size={17} />

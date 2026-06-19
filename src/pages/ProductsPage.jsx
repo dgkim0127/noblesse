@@ -173,7 +173,7 @@ const formatCategoryLabel = (categoryId, locale) => categoryLabels[locale]?.[cat
 const hasText = (value, query) => String(value ?? '').toLowerCase().includes(query)
 
 export function ProductsPage() {
-  const { products } = useCommerce()
+  const { dataError, dataStatus, products } = useCommerce()
   const [searchParams, setSearchParams] = useSearchParams()
   const [gridMode, setGridMode] = useState('two')
   const { locale, toLocalePath } = useLocalePath()
@@ -213,6 +213,14 @@ export function ProductsPage() {
       ].some((value) => hasText(value, normalizedQuery))
     })
   }, [category, collection, color, material, products, q, tag])
+
+  if (dataStatus === 'loading') {
+    return <main className="content"><section className="empty product-empty"><h2>Loading catalog...</h2><p>Product metadata is being loaded from the catalog API.</p></section></main>
+  }
+
+  if (dataStatus === 'error') {
+    return <main className="content"><section className="empty product-empty"><h2>Catalog API unavailable</h2><p>{dataError || 'Unable to load catalog products.'}</p></section></main>
+  }
 
   const setFilter = (key, value) => {
     const next = new URLSearchParams(searchParams)

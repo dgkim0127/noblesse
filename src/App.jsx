@@ -23,24 +23,17 @@ function AdminPageFallback() {
   return <div className="admin-page-loading">Loading admin view...</div>
 }
 
-function AdminUnavailablePage() {
-  return <section className="admin-card admin-access-card">
-    <p className="eyebrow">Admin API Required</p>
-    <h1>Admin is not connected yet</h1>
-    <p>Release mode requires server-side authentication, role checks, and admin API responses before this screen can be used.</p>
-  </section>
-}
-
-const AdminAnalyticsPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminAnalyticsPage'), 'AdminAnalyticsPage') : AdminUnavailablePage
-const AdminBuyerDetailPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminBuyerDetailPage'), 'AdminBuyerDetailPage') : AdminUnavailablePage
-const AdminBuyersPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminBuyersPage'), 'AdminBuyersPage') : AdminUnavailablePage
-const AdminDashboardPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminDashboardPage'), 'AdminDashboardPage') : AdminUnavailablePage
-const AdminInquiriesPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminInquiriesPage'), 'AdminInquiriesPage') : AdminUnavailablePage
-const AdminInquiryDetailPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminInquiryDetailPage'), 'AdminInquiryDetailPage') : AdminUnavailablePage
-const AdminPricesPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminPricesPage'), 'AdminPricesPage') : AdminUnavailablePage
-const AdminProductsPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminProductsPage'), 'AdminProductsPage') : AdminUnavailablePage
-const AdminQuotePage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminQuotePage'), 'AdminQuotePage') : AdminUnavailablePage
-const AdminQuotesPage = import.meta.env.DEV ? lazyNamed(() => import('./pages/admin/AdminQuotesPage'), 'AdminQuotesPage') : AdminUnavailablePage
+const AdminAnalyticsPage = lazyNamed(() => import('./pages/admin/AdminAnalyticsPage'), 'AdminAnalyticsPage')
+const AdminBuyerDetailPage = lazyNamed(() => import('./pages/admin/AdminBuyerDetailPage'), 'AdminBuyerDetailPage')
+const AdminBuyersPage = lazyNamed(() => import('./pages/admin/AdminBuyersPage'), 'AdminBuyersPage')
+const AdminCategoriesPage = lazyNamed(() => import('./pages/admin/AdminCategoriesPage'), 'AdminCategoriesPage')
+const AdminDashboardPage = lazyNamed(() => import('./pages/admin/AdminDashboardPage'), 'AdminDashboardPage')
+const AdminInquiriesPage = lazyNamed(() => import('./pages/admin/AdminInquiriesPage'), 'AdminInquiriesPage')
+const AdminInquiryDetailPage = lazyNamed(() => import('./pages/admin/AdminInquiryDetailPage'), 'AdminInquiryDetailPage')
+const AdminPricesPage = lazyNamed(() => import('./pages/admin/AdminPricesPage'), 'AdminPricesPage')
+const AdminProductsPage = lazyNamed(() => import('./pages/admin/AdminProductsPage'), 'AdminProductsPage')
+const AdminQuotePage = lazyNamed(() => import('./pages/admin/AdminQuotePage'), 'AdminQuotePage')
+const AdminQuotesPage = lazyNamed(() => import('./pages/admin/AdminQuotesPage'), 'AdminQuotesPage')
 
 function withAdminSuspense(element) {
   return <Suspense fallback={<AdminPageFallback />}>{element}</Suspense>
@@ -76,11 +69,12 @@ function App() {
         <Route path="buyers" element={withAdminSuspense(<AdminBuyersPage />)} />
         <Route path="buyers/:buyerId" element={withAdminSuspense(<AdminBuyerDetailPage />)} />
         <Route path="products" element={withAdminSuspense(<AdminProductsPage />)} />
+        <Route path="categories" element={withAdminSuspense(<AdminCategoriesPage />)} />
         <Route path="prices" element={withAdminSuspense(<AdminPricesPage />)} />
         <Route path="inquiries" element={withAdminSuspense(<AdminInquiriesPage />)} />
         <Route path="inquiries/:inquiryId" element={withAdminSuspense(<AdminInquiryDetailPage />)} />
         <Route path="quotes" element={withAdminSuspense(<AdminQuotesPage />)} />
-        <Route path="quotes/:inquiryId" element={withAdminSuspense(<AdminQuotePage />)} />
+        <Route path="quotes/:quoteId" element={withAdminSuspense(<AdminQuotePage />)} />
         <Route path="analytics" element={withAdminSuspense(<AdminAnalyticsPage />)} />
       </Route>
       <Route path="/cart" element={<Navigate replace to="/inquiry-list" />} />
@@ -105,11 +99,12 @@ function App() {
         <Route path="buyers" element={withAdminSuspense(<AdminBuyersPage />)} />
         <Route path="buyers/:buyerId" element={withAdminSuspense(<AdminBuyerDetailPage />)} />
         <Route path="products" element={withAdminSuspense(<AdminProductsPage />)} />
+        <Route path="categories" element={withAdminSuspense(<AdminCategoriesPage />)} />
         <Route path="prices" element={withAdminSuspense(<AdminPricesPage />)} />
         <Route path="inquiries" element={withAdminSuspense(<AdminInquiriesPage />)} />
         <Route path="inquiries/:inquiryId" element={withAdminSuspense(<AdminInquiryDetailPage />)} />
         <Route path="quotes" element={withAdminSuspense(<AdminQuotesPage />)} />
-        <Route path="quotes/:inquiryId" element={withAdminSuspense(<AdminQuotePage />)} />
+        <Route path="quotes/:quoteId" element={withAdminSuspense(<AdminQuotePage />)} />
         <Route path="analytics" element={withAdminSuspense(<AdminAnalyticsPage />)} />
       </Route>
       <Route path="cart" element={<Navigate replace to="../inquiry-list" />} />

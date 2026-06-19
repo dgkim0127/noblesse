@@ -9,19 +9,26 @@ const brandLanguageLabel = '귀족 / Noblesse'
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const { dataMode, setViewerState } = useCommerce()
+  const { dataMode, setViewerState, signIn } = useCommerce()
   const { toLocalePath } = useLocalePath()
   const isMockMode = dataMode === 'mock'
   const [loginNotice, setLoginNotice] = useState('')
+  const [remember, setRemember] = useState(true)
 
-  const loginAsApprovedBuyer = (event) => {
+  const loginAsApprovedBuyer = async (event) => {
     event.preventDefault()
-    if (!isMockMode) {
-      setLoginNotice('Release mode requires server-side authentication. Preview login is disabled.')
-      return
+    const formData = new FormData(event.currentTarget)
+
+    try {
+      await signIn({
+        identifier: formData.get('identifier'),
+        password: formData.get('password'),
+        remember,
+      })
+      navigate(toLocalePath('/account'))
+    } catch (error) {
+      setLoginNotice(error?.message || 'Login failed. Please check your account.')
     }
-    setViewerState('approved')
-    navigate(toLocalePath('/account'))
   }
 
   const browseAsGuest = () => {
@@ -33,14 +40,20 @@ export function LoginPage() {
     <section className="account-panel auth-panel">
       <LogIn size={25} />
       <p className="eyebrow">거래처 로그인</p>
-      <h1>Noblesse 거래처 전용 접근</h1>
+      <h1>LOGIN</h1>
       <div className="brand-mini">
         <strong>{brandKoreanName}</strong>
         <span>{brandLanguageLabel}</span>
       </div>
       <p>확인된 거래처는 거래 조건, 문의 리스트, 견적 문의 기능을 사용할 수 있습니다. 견적 문의는 최종 주문이 아닙니다.</p>
       <form className="auth-form" onSubmit={loginAsApprovedBuyer}>
-        <label>이메일<input autoComplete="email" name="email" placeholder="이메일" type="email" /></label>
+        <div className="login-id-group">
+          <label>아이디<input autoComplete="username" name="identifier" placeholder="아이디" type="text" /></label>
+          <label className="auto-login-check">
+            <input checked={remember} name="autoLogin" onChange={(event) => setRemember(event.target.checked)} type="checkbox" />
+            <span>자동 로그인</span>
+          </label>
+        </div>
         <label>비밀번호<input autoComplete="current-password" name="password" placeholder="비밀번호" type="password" /></label>
         {loginNotice && <p className="auth-notice" role="status">{loginNotice}</p>}
         <button className="primary-action" type="submit">로그인</button>

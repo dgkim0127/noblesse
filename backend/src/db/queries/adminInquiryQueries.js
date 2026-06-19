@@ -31,6 +31,22 @@ function mapInquiry(row) {
   };
 }
 
+function mapInquiryItem(row) {
+  return {
+    id: row.id,
+    productId: row.product_id,
+    productCode: row.product_code,
+    productName: row.product_name,
+    material: row.material,
+    color: row.color,
+    size: row.size,
+    quantity: row.quantity,
+    moq: row.moq,
+    priceSnapshot: row.price_snapshot,
+    subtotal: row.subtotal
+  };
+}
+
 function mapMemoInquiry(row) {
   return {
     id: row.id,
@@ -40,11 +56,29 @@ function mapMemoInquiry(row) {
   };
 }
 
+function mapStatusInquiry(row) {
+  return {
+    id: row.id,
+    inquiryNumber: row.inquiry_number,
+    status: row.status,
+    updatedAt: row.updated_at
+  };
+}
+
 function createMemoSnapshot(row) {
   return {
     id: row.id,
     inquiryNumber: row.inquiry_number,
     adminMemo: row.admin_memo,
+    updatedAt: row.updated_at
+  };
+}
+
+function createStatusSnapshot(row) {
+  return {
+    id: row.id,
+    inquiryNumber: row.inquiry_number,
+    status: row.status,
     updatedAt: row.updated_at
   };
 }
@@ -100,7 +134,7 @@ export function createAdminInquiryQueries(pool) {
           filters.status || null,
           filters.market || null,
           filters.q ? `%${filters.q}%` : null,
-          filters.limit,
+          filters.dbLimit || filters.limit,
           filters.offset
         ]
       );
@@ -140,6 +174,26 @@ export function createAdminInquiryQueries(pool) {
       );
       if (!result.rows[0]) return null;
       const row = result.rows[0];
+      const itemsResult = await pool.query(
+        `
+          select
+            id,
+            product_id,
+            product_code,
+            product_name,
+            material,
+            color,
+            size,
+            quantity,
+            moq,
+            price_snapshot,
+            subtotal
+          from public.inquiry_items
+          where inquiry_id = $1
+          order by created_at asc, id asc
+        `,
+        [inquiryId]
+      );
       return {
         inquiry: mapInquiry(row),
         buyer: {
@@ -152,7 +206,7 @@ export function createAdminInquiryQueries(pool) {
           assignedMarket: row.assigned_market,
           status: row.buyer_status
         },
-        items: []
+        items: itemsResult.rows.map(mapInquiryItem)
       };
     },
 
@@ -235,6 +289,99 @@ export function createAdminInquiryQueries(pool) {
         await client.query("commit");
         return {
           inquiry: mapMemoInquiry(updatedRow),
+          auditLogId: auditResult.rows[0].id
+        };
+      } catch (error) {
+        try {
+          await client.query("rollback");
+        } catch {
+          // Preserve the original query error instead of masking it with rollback failure.
+        }
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+
+    async updateInquiryStatus(inquiryId, status, adminViewer = {}) {
+      assertTransactionPool(pool);
+      const client = await pool.connect();
+      const actor = getAdminActor(adminViewer);
+
+      try {
+        await client.query("begin");
+        const existingResult = await client.query(
+          `
+            select
+              id,
+              inquiry_number,
+              status,
+              updated_at
+            from public.inquiries
+            where id = $1
+            for update
+          `,
+          [inquiryId]
+        );
+
+        const existingRow = existingResult.rows[0];
+        if (!existingRow) {
+          await client.query("rollback");
+          return null;
+        }
+
+        const beforeSnapshot = createStatusSnapshot(existingRow);
+        const updateResult = await client.query(
+          `
+            update public.inquiries
+            set status = $2,
+                updated_at = now()
+            where id = $1
+            returning
+              id,
+              inquiry_number,
+              status,
+              updated_at
+          `,
+          [inquiryId, status]
+        );
+        const updatedRow = updateResult.rows[0];
+        const afterSnapshot = createStatusSnapshot(updatedRow);
+
+        const auditResult = await client.query(
+          `
+            insert into public.audit_logs (
+              actor_user_id,
+              actor_role,
+              action,
+              target_table,
+              target_id,
+              before_snapshot,
+              after_snapshot,
+              request_id,
+              ip_address,
+              user_agent
+            )
+            values ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8, $9, $10)
+            returning id
+          `,
+          [
+            actor.userId,
+            actor.role,
+            "admin.inquiry.status.update",
+            "inquiries",
+            inquiryId,
+            beforeSnapshot,
+            afterSnapshot,
+            actor.requestId,
+            actor.ipAddress,
+            actor.userAgent
+          ]
+        );
+
+        await client.query("commit");
+        return {
+          inquiry: mapStatusInquiry(updatedRow),
           auditLogId: auditResult.rows[0].id
         };
       } catch (error) {

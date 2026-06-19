@@ -27,6 +27,9 @@ async function loadViewer(decodedToken) {
     status: "approved",
     buyerId: "buyer-1",
     companyName: "Tokyo Piercing Lab",
+    contactName: "Aki Buyer",
+    country: "JP",
+    preferredLanguage: "jp",
     assignedMarket: "JP",
     currency: "JPY"
   };
@@ -83,6 +86,41 @@ test("GET /api/buyer/me returns current buyer profile for valid token", async ()
   assert.equal(response.body.profile.role, "buyer");
   assert.equal(response.body.profile.status, "approved");
   assert.equal(response.body.profile.buyerId, "buyer-1");
+  assert.equal(response.body.profile.contactName, "Aki Buyer");
+  assert.equal(response.body.profile.country, "JP");
+  assert.equal(response.body.profile.preferredLanguage, "jp");
   assert.equal(response.body.profile.assignedMarket, "JP");
   assert.equal(response.body.profile.currency, "JPY");
+});
+
+test("GET /api/buyer/me returns current admin profile for admin token", async () => {
+  const app = createApp({
+    env: { nodeEnv: "test", isProduction: false, allowedOrigins: [] },
+    services: { buyer: buyerService },
+    auth: {
+      verifier,
+      async loadViewer(decodedToken) {
+        return {
+          userId: "admin-user-1",
+          authUid: decodedToken.uid,
+          email: "admin@example.test",
+          role: "admin",
+          status: "approved"
+        };
+      }
+    }
+  });
+
+  const response = await request(app, "/api/buyer/me", {
+    headers: {
+      authorization: "Bearer valid-token"
+    }
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.profile.userId, "admin-user-1");
+  assert.equal(response.body.profile.role, "admin");
+  assert.equal(response.body.profile.status, "approved");
+  assert.equal(response.body.profile.buyerId, null);
+  assert.equal(response.body.profile.email, "admin@example.test");
 });

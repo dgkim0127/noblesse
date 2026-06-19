@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import {
   areRequiredAgreementsAccepted,
@@ -194,7 +194,7 @@ const registerCopy = {
   },
 }
 
-const fieldGroups = {
+const _fieldGroups = {
   buyer: [
     ['email', 'email'],
     ['password', 'password'],
@@ -637,7 +637,7 @@ const localizedAgreementSections = {
   },
 }
 
-function FieldGroup({ title, children }) {
+function _FieldGroup({ title, children }) {
   return <fieldset className="form-section">
     <legend>{title}</legend>
     <div className="register-grid">{children}</div>
@@ -693,7 +693,7 @@ function AgreementDocument({ document, locale }) {
   </div>
 }
 
-function AgreementRow({ agreement, checked, locale, onChange, t }) {
+function AgreementRow({ agreement, checked, locale, onChange }) {
   const metaCopy = agreementMetaCopy[locale] ?? agreementMetaCopy.kr
   const labelPrefix = agreement.required ? metaCopy.required : metaCopy.optional
   const agreementLabel = agreementLabelsByLocale[locale]?.[agreement.key] ?? agreementLabelsByLocale.kr[agreement.key] ?? agreement.titleKo
@@ -724,7 +724,7 @@ function AgreementRow({ agreement, checked, locale, onChange, t }) {
 
 export function RegisterPage() {
   const navigate = useNavigate()
-  const { setViewerState } = useCommerce()
+  const { dataMode, registerBuyer, setViewerState } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const t = registerCopy[locale] ?? registerCopy.kr
   const [agreements, setAgreements] = useState(getInitialAgreements)
@@ -739,6 +739,8 @@ export function RegisterPage() {
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [loginIdValue, setLoginIdValue] = useState('')
   const [duplicateStatus, setDuplicateStatus] = useState(null)
+  const [submitNotice, setSubmitNotice] = useState('')
+  const [submitStatus, setSubmitStatus] = useState('idle')
   const agreementSummaries = getAgreementSummaryForRegister()
   const registerAgreementSummaries = [ageAgreementSummary, ...agreementSummaries]
   const privacyPolicy = getAgreementDocument('privacy_policy')
@@ -817,8 +819,10 @@ export function RegisterPage() {
     </span>
   }
 
-  const submitRequest = (event) => {
+  const submitRequest = async (event) => {
     event.preventDefault()
+    if (submitStatus === 'submitting') return
+    setSubmitNotice('')
     if (!requiredAccepted) return
 
     const passwordInput = event.currentTarget.elements.password
@@ -831,9 +835,48 @@ export function RegisterPage() {
       return
     }
 
+    const form = event.currentTarget
+    const formData = new FormData(form)
+    const emailLocal = String(formData.get('emailLocal') || '').trim()
+    const selectedEmailDomain = String(formData.get('emailDomain') || '').trim()
+    const emailCustomDomain = String(formData.get('emailCustomDomain') || '').trim()
+    const finalEmailDomain = selectedEmailDomain === customEmailDomainValue ? emailCustomDomain : selectedEmailDomain
+    const email = emailLocal && finalEmailDomain ? `${emailLocal}@${finalEmailDomain}` : ''
+    const country = selectedCountry === countryOtherValue
+      ? String(formData.get('countryOther') || '').trim()
+      : String(formData.get('country') || selectedCountry || '').trim()
     const agreementSnapshot = buildAgreementSnapshot(agreements)
-    void agreementSnapshot
 
+    if (dataMode !== 'mock') {
+      setSubmitStatus('submitting')
+      try {
+        await registerBuyer({
+          email,
+          password: passwordInput.value,
+          profile: {
+            email,
+            companyName: formData.get('companyName'),
+            contactName: formData.get('name') || formData.get('contactName'),
+            country,
+            preferredLanguage: locale,
+            phone: formData.get('phone'),
+            messengerType: formData.get('messengerType'),
+            messengerId: formData.get('messengerId'),
+            salesChannel: formData.get('salesChannel'),
+            businessNumber: formData.get('businessNumber'),
+            requestMemo: formData.get('requestMemo'),
+            agreements: agreementSnapshot,
+          },
+        })
+        navigate(toLocalePath('/approval-pending'))
+      } catch (error) {
+        setSubmitNotice(error?.message || 'Unable to send buyer registration inquiry.')
+        setSubmitStatus('idle')
+      }
+      return
+    }
+
+    setSubmitStatus('submitting')
     setViewerState('pending')
     navigate(toLocalePath('/approval-pending'))
   }
@@ -1033,7 +1076,6 @@ export function RegisterPage() {
             key={agreement.key}
             locale={locale}
             onChange={setAgreement}
-            t={t}
           />)}
 
           {privacyPolicy && <details className="agreement-details privacy-policy-detail">
@@ -1067,7 +1109,8 @@ export function RegisterPage() {
           <span>{t.orderDisclaimer}</span>
         </div>
         <div className="account-actions agreement-actions">
-          <button className="primary-action" data-testid="request-buyer-access-submit" type="submit">{stepCopy.submit}</button>
+          {submitNotice && <p className="auth-notice" role="status">{submitNotice}</p>}
+          <button className="primary-action" data-testid="request-buyer-access-submit" disabled={submitStatus === 'submitting'} type="submit">{submitStatus === 'submitting' ? `${stepCopy.submit}...` : stepCopy.submit}</button>
         </div>
       </form>}
     </section>

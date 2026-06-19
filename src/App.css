@@ -921,6 +921,11 @@ h6 {
   text-decoration: none;
 }
 
+.admin-actions button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
 .admin-actions .primary-action,
 .admin-actions a.primary-action {
   background: var(--navy);
@@ -949,6 +954,17 @@ h6 {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.admin-empty,
+.admin-inline-message {
+  color: var(--admin-muted);
+  font-weight: 800;
+  margin: 12px 0 0;
+}
+
+.admin-inline-message {
+  color: var(--navy);
 }
 
 .admin-search {

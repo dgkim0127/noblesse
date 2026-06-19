@@ -20,11 +20,11 @@ function FeatureList({ buyerAccess }) {
 
 export function AccountPage() {
   const navigate = useNavigate()
-  const { buyer, buyerAccess, isAdmin, isApproved, isGuest, isPending, setViewerState, viewerState } = useCommerce()
+  const { buyer, buyerAccess, isAdmin, isApproved, isGuest, isPending, signOut, viewerState } = useCommerce()
   const { toLocalePath } = useLocalePath()
   const minimumRequestAmount = isGuest || isPending ? '확인 후 볼 수 있음' : formatMoney(buyer.minOrderAmount, buyer.currency)
   const profileRows = [
-    ['현재 미리보기 상태', viewerState],
+    ['현재 접근 상태', viewerState],
     ['회사명', buyer.companyName || '등록 전'],
     ['담당자명', buyer.contactName || '게스트'],
     ['국가', buyer.country || '선택 전'],
@@ -37,8 +37,8 @@ export function AccountPage() {
     ['문의 기준 금액', minimumRequestAmount],
   ]
 
-  const logoutMock = () => {
-    setViewerState('guest')
+  const handleSignOut = async () => {
+    await signOut()
     navigate(toLocalePath('/products'))
   }
 
@@ -48,7 +48,7 @@ export function AccountPage() {
       {isGuest && <div className="account-status-card"><UserRound size={25} /><h2>비회원으로 둘러보는 중입니다.</h2><p>제품 카탈로그는 볼 수 있으며, 거래 조건은 거래처 확인 후 안내됩니다.</p><div className="account-actions"><Link className="primary-action" to={toLocalePath('/register')}>거래처 문의</Link><Link className="secondary-action" to={toLocalePath('/login')}>로그인</Link><Link className="secondary-action" to={toLocalePath('/products')}>상품 목록 보기</Link></div></div>}
       {isPending && <div className="account-status-card"><Clock3 size={25} /><h2>거래처 정보 확인 중입니다.</h2><p>{buyer.companyName} 정보를 Noblesse가 확인 중입니다. 거래 조건과 문의 기능은 담당자 확인 후 안내됩니다.</p><div className="account-actions"><Link className="primary-action" to={toLocalePath('/products')}>상품 목록 보기</Link><Link className="secondary-action" to={toLocalePath('/approval-pending')}>확인 상태 보기</Link><Link className="secondary-action" to={toLocalePath('/register')}>거래처 문의 남기기</Link><a className="secondary-action" href="mailto:dgkim0127@gmail.com"><Mail size={15} />이메일 문의</a></div></div>}
       {isApproved && <div className="account-status-card"><BadgeCheck size={25} /><h2>거래 조건 안내 가능</h2><p>{buyer.companyName}은 {buyer.assignedMarket} 지역 거래 조건과 문의 리스트 / 견적 문의 기능을 사용할 수 있습니다. 견적 문의는 최종 주문이 아닙니다.</p><strong>{buyer.discountRate}% 거래 조건 / 문의 기준 금액 {formatMoney(buyer.minOrderAmount, buyer.currency)}</strong><div className="account-actions"><Link className="primary-action" to={toLocalePath('/products')}>상품 목록</Link><Link className="secondary-action" to={toLocalePath('/inquiry-list')}>문의 리스트</Link><Link className="secondary-action" to={toLocalePath('/my-inquiries')}>견적 내역</Link></div></div>}
-      {isAdmin && <div className="account-status-card"><ShieldCheck size={25} /><h2>관리자 미리보기</h2><p>관리자 화면은 이후 단계에서 구현합니다. 현재는 고객 화면과 권한 상태만 확인합니다.</p><div className="account-actions"><Link className="primary-action" to={toLocalePath('/products')}>상품 목록</Link><Link className="secondary-action" to={toLocalePath('/my-inquiries')}>견적 내역</Link></div></div>}
+      {isAdmin && <div className="account-status-card"><ShieldCheck size={25} /><h2>관리자 계정</h2><p>관리자 권한은 서버에서 확인되며 상품, 거래처, 문의와 견적 관리 화면을 사용할 수 있습니다.</p><div className="account-actions"><Link className="primary-action" to={toLocalePath('/admin')}>관리자 화면</Link><Link className="secondary-action" to={toLocalePath('/products')}>상품 목록</Link><Link className="secondary-action" to={toLocalePath('/my-inquiries')}>견적 내역</Link></div></div>}
     </section>
     <section className="account-panel">
       <h2>사용 가능 기능</h2>
@@ -57,7 +57,7 @@ export function AccountPage() {
     <section className="account-panel">
       <h2>거래처 프로필 필드</h2>
       <dl>{profileRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
-      <button className="text-action logout-action" type="button" onClick={logoutMock}><LogOut size={15} />목업 로그아웃</button>
+      <button className="text-action logout-action" type="button" onClick={handleSignOut}><LogOut size={15} />로그아웃</button>
     </section>
   </main>
 }

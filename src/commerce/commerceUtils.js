@@ -32,6 +32,29 @@ export const isAdmin = (profile) => profile?.role === 'admin'
 
 export const isGuestViewer = (viewerState) => viewerState === 'guest'
 
+export const getViewerStateFromProfile = (profile) => {
+  if (isAdmin(profile)) return 'admin'
+  if (isApprovedBuyer(profile)) return 'approved'
+  if (isPendingBuyer(profile)) return 'pending'
+  return 'guest'
+}
+
+export const normalizeBuyerProfile = (profile) => {
+  if (!profile) return guestProfile
+
+  return {
+    ...guestProfile,
+    ...profile,
+    uid: profile.uid || profile.userId || '',
+    companyName: profile.companyName || '',
+    contactName: profile.contactName || '',
+    assignedMarket: profile.assignedMarket || '',
+    currency: profile.currency || guestProfile.currency,
+    role: profile.role || null,
+    status: profile.status || null,
+  }
+}
+
 export const getBuyerAccessFeatures = (viewerState, profile) => {
   const base = {
     canViewProducts: true,
