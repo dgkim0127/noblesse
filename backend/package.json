@@ -7,6 +7,7 @@
     "start": "node src/server.js",
     "bootstrap:staging-e2e-accounts": "node src/scripts/bootstrapStagingE2eAccounts.js",
     "bootstrap:production-uat-accounts": "node src/scripts/bootstrapProductionUatAccounts.js",
+    "bootstrap:production-admin-account": "node src/scripts/bootstrapProductionAdminAccount.js",
     "test": "node --test tests/*.test.js"
   },
   "dependencies": {
