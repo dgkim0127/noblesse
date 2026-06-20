@@ -3,11 +3,12 @@ import { createAdminApi } from '../../api/adminApi'
 import { createApiClient } from '../../api/client'
 import { assertRuntimeConfig, getRuntimeConfig } from '../../config/runtimeConfig'
 import { getCurrentUserIdToken, isAuthConfigured } from '../../services/authService'
+import { useAdminCopy } from './adminCopy'
 
 function requireAdminApiRuntime(runtimeConfig) {
   assertRuntimeConfig(runtimeConfig)
   if (!isAuthConfigured()) {
-    const error = new Error('Firebase client configuration is required for admin API access.')
+    const error = new Error('CONFIGURATION_ERROR')
     error.code = 'CONFIGURATION_ERROR'
     throw error
   }
@@ -31,7 +32,7 @@ export function useAdminApiResource(loader, deps = []) {
         setState({ data: result.data, meta: result.meta || null, error: '', status: 'ready' })
       } catch (error) {
         if (!isMounted) return
-        setState({ data: null, meta: null, error: error?.message || 'Admin API request failed.', status: 'error' })
+        setState({ data: null, meta: null, error: error?.message || 'ADMIN_API_REQUEST_FAILED', status: 'error' })
       }
     }
 
@@ -59,7 +60,13 @@ export function useAdminApiMutation() {
 }
 
 export function AdminApiState({ error, status }) {
-  if (status === 'loading') return <section className="admin-card"><p>Loading admin API data...</p></section>
-  if (status === 'error') return <section className="admin-card admin-access-card"><p className="eyebrow">Admin API Error</p><h1>Unable to load admin data</h1><p>{error}</p></section>
+  const t = useAdminCopy()
+  const translatedError = error === 'CONFIGURATION_ERROR'
+    ? t.apiState.configError
+    : error === 'ADMIN_API_REQUEST_FAILED'
+      ? t.apiState.requestFailed
+      : error
+  if (status === 'loading') return <section className="admin-card"><p>{t.apiState.loading}</p></section>
+  if (status === 'error') return <section className="admin-card admin-access-card"><p className="eyebrow">{t.apiState.errorEyebrow}</p><h1>{t.apiState.errorTitle}</h1><p>{translatedError}</p></section>
   return null
 }

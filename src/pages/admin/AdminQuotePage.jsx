@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { AdminLink, AdminMoney, AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
+import { formatAdminCopy, getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
 const quoteStatuses = ['draft', 'sent', 'accepted', 'cancelled']
 
 export function AdminQuotePage() {
+  const t = useAdminCopy()
   const { quoteId } = useParams()
   const [refreshKey, setRefreshKey] = useState(0)
   const [message, setMessage] = useState('')
@@ -20,8 +22,8 @@ export function AdminQuotePage() {
 
   if (!quote) {
     return <>
-      <AdminPageHeader eyebrow="Admin API" title="Quote not found" description="The selected quote could not be loaded." />
-      <AdminLink to="/admin/quotes">Back to Quotes</AdminLink>
+      <AdminPageHeader title={t.quotes.notFound} description={t.quotes.notFoundDescription} />
+      <AdminLink to="/admin/quotes">{t.quotes.backToQuotes}</AdminLink>
     </>
   }
 
@@ -30,10 +32,10 @@ export function AdminQuotePage() {
     setMessage('')
     try {
       await mutate((api, token) => api.updateQuoteStatus(quote.id, nextStatus, token))
-      setMessage(`Quote status updated to ${nextStatus}.`)
+      setMessage(formatAdminCopy(t.quotes.statusUpdated, { status: getAdminStatusLabel(t, nextStatus) }))
       setRefreshKey((current) => current + 1)
     } catch (error) {
-      setMessage(error?.message || 'Unable to update quote status.')
+      setMessage(error?.message || t.quotes.statusFailed)
     } finally {
       setSavingStatus('')
     }
@@ -41,15 +43,14 @@ export function AdminQuotePage() {
 
   return <>
     <AdminPageHeader
-      eyebrow="Admin API"
-      title={`Admin Quote / ${quote.inquiryNumber || quote.id}`}
-      description="Review quote draft values generated from an inquiry snapshot."
-      actions={<><AdminLink to="/admin/quotes">Back to Quotes</AdminLink><AdminLink to={`/admin/inquiries/${quote.inquiryId}`}>Back to Inquiry</AdminLink></>}
+      title={`${t.quotes.detailTitle} / ${quote.inquiryNumber || quote.id}`}
+      description={t.quotes.detailDescription}
+      actions={<><AdminLink to="/admin/quotes">{t.quotes.backToQuotes}</AdminLink><AdminLink to={`/admin/inquiries/${quote.inquiryId}`}>{t.quotes.backToInquiry}</AdminLink></>}
     />
-    <AdminPreviewNote>Quote status changes are available for admin tracking. External sending and price editing remain manual until a separate production workflow is approved.</AdminPreviewNote>
+    <AdminPreviewNote>{t.quotes.detailNote}</AdminPreviewNote>
     <section className="admin-card">
-      <h2>Quote Status</h2>
-      <p>Changing quote status is a protected admin API write and creates an audit log entry.</p>
+      <h2>{t.quotes.quoteStatus}</h2>
+      <p>{t.quotes.statusHelp}</p>
       <div className="admin-actions">
         {quoteStatuses.map((status) => <button
           disabled={savingStatus === status || quote.status === status}
@@ -57,7 +58,7 @@ export function AdminQuotePage() {
           onClick={() => updateStatus(status)}
           type="button"
         >
-          {quote.status === status ? `${status} current` : `Set ${status}`}
+          {quote.status === status ? `${getAdminStatusLabel(t, status)} ${t.common.current}` : `${t.common.set} ${getAdminStatusLabel(t, status)}`}
         </button>)}
       </div>
       {message && <p className="admin-inline-message">{message}</p>}
@@ -65,30 +66,30 @@ export function AdminQuotePage() {
 
     <section className="admin-detail-grid">
       <article className="admin-card">
-        <h2>Quote Info</h2>
+        <h2>{t.quotes.quoteInfo}</h2>
         <dl className="admin-definition-list">
-          <dt>Inquiry</dt><dd>{quote.inquiryNumber || quote.inquiryId}</dd>
-          <dt>Buyer</dt><dd>{quote.companyName || '-'}</dd>
-          <dt>Currency</dt><dd>{quote.currency}</dd>
-          <dt>Status</dt><dd>{quote.status}</dd>
+          <dt>{t.fields.inquiry}</dt><dd>{quote.inquiryNumber || quote.inquiryId}</dd>
+          <dt>{t.fields.buyer}</dt><dd>{quote.companyName || '-'}</dd>
+          <dt>{t.fields.currency}</dt><dd>{quote.currency}</dd>
+          <dt>{t.common.status}</dt><dd>{getAdminStatusLabel(t, quote.status)}</dd>
         </dl>
       </article>
       <article className="admin-card">
-        <h2>Quote Conditions</h2>
+        <h2>{t.quotes.quoteConditions}</h2>
         <dl className="admin-definition-list">
-          <dt>Lead Time</dt><dd>{quote.leadTime || '-'}</dd>
-          <dt>Shipping Note</dt><dd>{quote.shippingNote || '-'}</dd>
-          <dt>Requested Total</dt><dd><AdminMoney value={quote.requestedTotal || 0} currency={quote.currency} /></dd>
-          <dt>Confirmed Total</dt><dd><AdminMoney value={quote.confirmedTotal || 0} currency={quote.currency} /></dd>
+          <dt>{t.quotes.leadTime}</dt><dd>{quote.leadTime || '-'}</dd>
+          <dt>{t.quotes.shippingNote}</dt><dd>{quote.shippingNote || '-'}</dd>
+          <dt>{t.quotes.requestedTotal}</dt><dd><AdminMoney value={quote.requestedTotal || 0} currency={quote.currency} /></dd>
+          <dt>{t.quotes.confirmedTotal}</dt><dd><AdminMoney value={quote.confirmedTotal || 0} currency={quote.currency} /></dd>
         </dl>
       </article>
     </section>
 
     <section className="admin-card admin-quote-editor">
-      <h2>Admin Quote Items</h2>
+      <h2>{t.quotes.quoteItems}</h2>
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th>Product Code</th><th>Requested Quantity</th><th>Confirmed Quantity</th><th>Requested priceSnapshot</th><th>Confirmed Unit Price</th><th>Confirmed Subtotal</th></tr></thead>
+          <thead><tr><th>{t.fields.productCode}</th><th>{t.quotes.requestedQuantity}</th><th>{t.quotes.confirmedQuantity}</th><th>{t.quotes.requestedPriceSnapshot}</th><th>{t.quotes.confirmedUnitPrice}</th><th>{t.quotes.confirmedSubtotal}</th></tr></thead>
           <tbody>{items.map((item) => <tr key={item.id}>
             <td>{item.productCode}</td>
             <td>{item.requestedQuantity}</td>
@@ -98,10 +99,10 @@ export function AdminQuotePage() {
             <td><AdminMoney value={item.confirmedSubtotal || 0} currency={quote.currency} /></td>
           </tr>)}</tbody>
         </table>
-        {items.length === 0 && <p className="admin-empty">No quote items found.</p>}
+        {items.length === 0 && <p className="admin-empty">{t.quotes.noItems}</p>}
       </div>
-      <h2>Internal Memo</h2>
-      <label>Admin Memo<textarea readOnly value={quote.adminMemo || ''} /></label>
+      <h2>{t.quotes.internalMemo}</h2>
+      <label>{t.inquiries.adminMemo}<textarea readOnly value={quote.adminMemo || ''} /></label>
     </section>
   </>
 }

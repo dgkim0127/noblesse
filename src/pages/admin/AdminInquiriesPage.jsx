@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import { AdminLink, AdminMoney, AdminPageHeader, AdminPagination, AdminStatus } from './AdminPageParts'
 import { AdminApiState, useAdminApiResource } from './adminApiPageUtils'
+import { getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
 const statusTabs = ['all', 'requested', 'checking', 'quoted', 'confirmed', 'cancelled']
 const pageSize = 20
 
 export function AdminInquiriesPage() {
+  const t = useAdminCopy()
   const [status, setStatus] = useState('all')
   const [query, setQuery] = useState('')
   const [offset, setOffset] = useState(0)
@@ -24,19 +26,19 @@ export function AdminInquiriesPage() {
   }
 
   return <>
-    <AdminPageHeader title="Inquiry Management" description="Live staging Request Quote records from the admin API." />
+    <AdminPageHeader title={t.inquiries.title} description={t.inquiries.description} />
 
     <div className="admin-toolbar">
-      <label className="admin-search">Search inquiries<input value={query} onChange={(event) => resetPage(setQuery)(event.target.value)} placeholder="Inquiry, company, market, or currency" /></label>
+      <label className="admin-search">{t.inquiries.searchLabel}<input value={query} onChange={(event) => resetPage(setQuery)(event.target.value)} placeholder={t.inquiries.searchPlaceholder} /></label>
       <div className="admin-filter-tabs">
-        {statusTabs.map((tab) => <button className={status === tab ? 'active' : ''} key={tab} type="button" onClick={() => resetPage(setStatus)(tab)}>{tab === 'all' ? 'All' : tab[0].toUpperCase() + tab.slice(1)}</button>)}
+        {statusTabs.map((tab) => <button className={status === tab ? 'active' : ''} key={tab} type="button" onClick={() => resetPage(setStatus)(tab)}>{tab === 'all' ? t.common.all : getAdminStatusLabel(t, tab)}</button>)}
       </div>
     </div>
 
     {loading || <section className="admin-card">
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th>Inquiry Number</th><th>Buyer Company</th><th>Market</th><th>Currency</th><th>Status</th><th>Total Items</th><th>Total Quantity</th><th>Estimated Total</th><th>Created At</th><th>Actions</th></tr></thead>
+          <thead><tr><th>{t.inquiries.inquiryNumber}</th><th>{t.inquiries.buyerCompany}</th><th>{t.inquiries.market}</th><th>{t.inquiries.currency}</th><th>{t.common.status}</th><th>{t.inquiries.totalItems}</th><th>{t.inquiries.totalQuantity}</th><th>{t.inquiries.estimatedTotal}</th><th>{t.common.createdAt}</th><th>{t.common.actions}</th></tr></thead>
           <tbody>{inquiries.map((inquiry) => <tr key={inquiry.id || inquiry.inquiryId}>
             <td>{inquiry.inquiryNumber || inquiry.inquiryId}</td>
             <td>{inquiry.companyName || inquiry.buyerCompanyName || '-'}</td>
@@ -47,7 +49,7 @@ export function AdminInquiriesPage() {
             <td>{inquiry.totalQuantity}</td>
             <td><AdminMoney value={inquiry.estimatedTotal} currency={inquiry.currency} /></td>
             <td>{inquiry.createdAt ? new Date(inquiry.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
-            <td><div className="admin-actions tight"><AdminLink to={`/admin/inquiries/${inquiry.id || inquiry.inquiryId}`}>View</AdminLink></div></td>
+            <td><div className="admin-actions tight"><AdminLink to={`/admin/inquiries/${inquiry.id || inquiry.inquiryId}`}>{t.common.view}</AdminLink></div></td>
           </tr>)}</tbody>
         </table>
         <AdminPagination

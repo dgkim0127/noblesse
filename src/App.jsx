@@ -7,6 +7,7 @@ import { AdminShell } from './components/AdminShell'
 import { StoreShell } from './components/StoreShell'
 import { AccountPage } from './pages/AccountPage'
 import { ApprovalPendingPage } from './pages/ApprovalPendingPage'
+import { useAdminCopy } from './pages/admin/adminCopy'
 import { HomePage } from './pages/HomePage'
 import { InquiryListPage } from './pages/InquiryListPage'
 import { LoginPage } from './pages/LoginPage'
@@ -20,7 +21,8 @@ import { buildLocalizedPath, supportedLocales } from './utils/locale'
 const lazyNamed = (loader, exportName) => lazy(() => loader().then((module) => ({ default: module[exportName] })))
 
 function AdminPageFallback() {
-  return <div className="admin-page-loading">Loading admin view...</div>
+  const t = useAdminCopy()
+  return <div className="admin-page-loading">{t.apiState.loading}</div>
 }
 
 const AdminAnalyticsPage = lazyNamed(() => import('./pages/admin/AdminAnalyticsPage'), 'AdminAnalyticsPage')

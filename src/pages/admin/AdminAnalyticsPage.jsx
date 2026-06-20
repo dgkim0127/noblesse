@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { AdminMoney, AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, useAdminApiResource } from './adminApiPageUtils'
+import { getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
 function countBy(rows, getKey) {
   return rows.reduce((counts, row) => {
@@ -17,6 +18,7 @@ function toRows(counts) {
 }
 
 export function AdminAnalyticsPage() {
+  const t = useAdminCopy()
   const { data, error, status } = useAdminApiResource(async (api, token) => {
     const [dashboard, inquiries, buyers, products] = await Promise.all([
       api.getDashboard(token),
@@ -44,46 +46,45 @@ export function AdminAnalyticsPage() {
 
     return {
       totalEstimated,
-      statusRows: toRows(countBy(inquiries, (inquiry) => inquiry.status)),
+      statusRows: toRows(countBy(inquiries, (inquiry) => getAdminStatusLabel(t, inquiry.status))),
       marketRows: toRows(countBy(inquiries, (inquiry) => inquiry.market || inquiry.country)),
-      buyerRows: toRows(countBy(buyers, (buyer) => buyer.status)),
-      productRows: toRows(countBy(products, (product) => product.isVisible ? 'visible' : 'hidden')),
+      buyerRows: toRows(countBy(buyers, (buyer) => getAdminStatusLabel(t, buyer.status))),
+      productRows: toRows(countBy(products, (product) => product.isVisible ? t.common.visible : t.common.hidden)),
     }
-  }, [data])
+  }, [data, t])
 
   if (loading) return loading
 
   return <>
     <AdminPageHeader
-      eyebrow="Admin API"
-      title="Analytics"
-      description="Read-only operational summary based on protected Admin API responses."
+      title={t.analytics.title}
+      description={t.analytics.description}
     />
-    <AdminPreviewNote>Analytics uses existing admin read endpoints. No browser direct database access or write operation runs here.</AdminPreviewNote>
+    <AdminPreviewNote>{t.analytics.note}</AdminPreviewNote>
 
     <section className="admin-metric-grid">
-      <article className="admin-card"><p className="eyebrow">Inquiries</p><h2>{data.dashboard?.inquiries?.total ?? data.inquiries.length}</h2><span>Total request records</span></article>
-      <article className="admin-card"><p className="eyebrow">Buyers</p><h2>{data.dashboard?.buyers?.total ?? data.buyers.length}</h2><span>Trade accounts</span></article>
-      <article className="admin-card"><p className="eyebrow">Products</p><h2>{data.dashboard?.products?.total ?? data.products.length}</h2><span>Catalog records</span></article>
-      <article className="admin-card"><p className="eyebrow">Estimated Total</p><h2><AdminMoney value={analytics.totalEstimated} currency="USD" /></h2><span>Mixed-currency reference only</span></article>
+      <article className="admin-card"><p className="eyebrow">{t.analytics.inquiries}</p><h2>{data.dashboard?.inquiries?.total ?? data.inquiries.length}</h2><span>{t.analytics.totalRequestRecords}</span></article>
+      <article className="admin-card"><p className="eyebrow">{t.analytics.buyers}</p><h2>{data.dashboard?.buyers?.total ?? data.buyers.length}</h2><span>{t.analytics.tradeAccounts}</span></article>
+      <article className="admin-card"><p className="eyebrow">{t.analytics.products}</p><h2>{data.dashboard?.products?.total ?? data.products.length}</h2><span>{t.analytics.catalogRecords}</span></article>
+      <article className="admin-card"><p className="eyebrow">{t.analytics.estimatedTotal}</p><h2><AdminMoney value={analytics.totalEstimated} currency="USD" /></h2><span>{t.analytics.mixedCurrency}</span></article>
     </section>
 
     <section className="admin-layout two">
       <article className="admin-card">
-        <h2>Inquiry Status</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Status</th><th>Count</th></tr></thead><tbody>{analytics.statusRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
+        <h2>{t.analytics.inquiryStatus}</h2>
+        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.common.status}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.statusRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
       </article>
       <article className="admin-card">
-        <h2>Markets</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Market</th><th>Count</th></tr></thead><tbody>{analytics.marketRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
+        <h2>{t.analytics.markets}</h2>
+        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.fields.market}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.marketRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
       </article>
       <article className="admin-card">
-        <h2>Buyer Status</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Status</th><th>Count</th></tr></thead><tbody>{analytics.buyerRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
+        <h2>{t.analytics.buyerStatus}</h2>
+        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.common.status}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.buyerRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
       </article>
       <article className="admin-card">
-        <h2>Product Visibility</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Visibility</th><th>Count</th></tr></thead><tbody>{analytics.productRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
+        <h2>{t.analytics.productVisibility}</h2>
+        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.analytics.visibility}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.productRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
       </article>
     </section>
   </>

@@ -1,12 +1,7 @@
 import { useMemo, useState } from 'react'
 import { AdminLink, AdminPageHeader, AdminPagination, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
-
-const visibilityTabs = [
-  { label: 'All', value: '' },
-  { label: 'Visible', value: 'true' },
-  { label: 'Hidden', value: 'false' },
-]
+import { useAdminCopy } from './adminCopy'
 
 const initialProductForm = {
   code: '',
@@ -19,6 +14,7 @@ const initialProductForm = {
 const pageSize = 20
 
 export function AdminProductsPage() {
+  const t = useAdminCopy()
   const [query, setQuery] = useState('')
   const [visible, setVisible] = useState('')
   const [offset, setOffset] = useState(0)
@@ -61,11 +57,11 @@ export function AdminProductsPage() {
         imageAlt: {},
         isVisible: form.isVisible,
       }, token))
-      setMessage('Product created.')
+      setMessage(t.products.created)
       setForm(initialProductForm)
       setRefreshKey((current) => current + 1)
     } catch (error) {
-      setMessage(error?.message || 'Unable to create product.')
+      setMessage(error?.message || t.products.createFailed)
     }
   }
 
@@ -74,10 +70,10 @@ export function AdminProductsPage() {
     setMessage('')
     try {
       await mutate((api, token) => api.updateProductVisibility(productId, nextVisible, token))
-      setMessage(nextVisible ? 'Product is now visible.' : 'Product is now hidden.')
+      setMessage(nextVisible ? t.products.visibleNow : t.products.hiddenNow)
       setRefreshKey((current) => current + 1)
     } catch (error) {
-      setMessage(error?.message || 'Unable to update product visibility.')
+      setMessage(error?.message || t.products.updateFailed)
     } finally {
       setSavingProductId('')
     }
@@ -85,26 +81,25 @@ export function AdminProductsPage() {
 
   return <>
     <AdminPageHeader
-      eyebrow="Admin API"
-      title="Product Management"
-      description="Review catalog metadata and control public visibility through the trusted backend API."
+      title={t.products.title}
+      description={t.products.description}
     />
-    <AdminPreviewNote>Product editing, price updates, image workflow, and destructive actions remain out of scope for this release.</AdminPreviewNote>
+    <AdminPreviewNote>{t.products.note}</AdminPreviewNote>
 
     <form className="admin-toolbar" onSubmit={createProduct}>
-      <label className="admin-search">Code<input value={form.code} onChange={(event) => setField('code', event.target.value)} placeholder="E2E_33A3_NB" required /></label>
-      <label className="admin-search">Name<input value={form.nameEn} onChange={(event) => setField('nameEn', event.target.value)} placeholder="Staging Product" required /></label>
-      <label className="admin-search">Category Key<input value={form.categoryKey} onChange={(event) => setField('categoryKey', event.target.value)} placeholder="category key" /></label>
-      <label className="admin-search">Material<input value={form.material} onChange={(event) => setField('material', event.target.value)} placeholder="Surgical Steel" /></label>
-      <label className="admin-search">MOQ<input value={form.moqDefault} min="1" onChange={(event) => setField('moqDefault', event.target.value)} type="number" /></label>
-      <label className="admin-check"><input checked={form.isVisible} onChange={(event) => setField('isVisible', event.target.checked)} type="checkbox" /> Visible</label>
-      <button className="primary-action" type="submit">Create Product</button>
+      <label className="admin-search">{t.products.code}<input value={form.code} onChange={(event) => setField('code', event.target.value)} placeholder="NB-001" required /></label>
+      <label className="admin-search">{t.products.name}<input value={form.nameEn} onChange={(event) => setField('nameEn', event.target.value)} placeholder={t.products.name} required /></label>
+      <label className="admin-search">{t.products.categoryKey}<input value={form.categoryKey} onChange={(event) => setField('categoryKey', event.target.value)} placeholder={t.products.categoryKey} /></label>
+      <label className="admin-search">{t.products.material}<input value={form.material} onChange={(event) => setField('material', event.target.value)} placeholder={t.products.material} /></label>
+      <label className="admin-search">{t.products.moq}<input value={form.moqDefault} min="1" onChange={(event) => setField('moqDefault', event.target.value)} type="number" /></label>
+      <label className="admin-check"><input checked={form.isVisible} onChange={(event) => setField('isVisible', event.target.checked)} type="checkbox" /> {t.common.visible}</label>
+      <button className="primary-action" type="submit">{t.products.create}</button>
     </form>
 
     <div className="admin-toolbar">
-      <label className="admin-search">Product Search<input value={query} onChange={(event) => resetPage(setQuery)(event.target.value)} placeholder="NB-001 or product name" /></label>
+      <label className="admin-search">{t.products.searchLabel}<input value={query} onChange={(event) => resetPage(setQuery)(event.target.value)} placeholder={t.products.searchPlaceholder} /></label>
       <div className="admin-filter-tabs">
-        {visibilityTabs.map((tab) => <button className={visible === tab.value ? 'active' : ''} key={tab.label} type="button" onClick={() => resetPage(setVisible)(tab.value)}>{tab.label}</button>)}
+        {[['', t.common.all], ['true', t.common.visible], ['false', t.common.hidden]].map(([value, label]) => <button className={visible === value ? 'active' : ''} key={value || 'all'} type="button" onClick={() => resetPage(setVisible)(value)}>{label}</button>)}
       </div>
     </div>
     {message && <p className="admin-inline-message">{message}</p>}
@@ -112,7 +107,7 @@ export function AdminProductsPage() {
     <section className="admin-card">
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th>Product Code</th><th>Product Name</th><th>Category</th><th>Material</th><th>Colors</th><th>Sizes</th><th>MOQ Default</th><th>Visible</th><th>Export Available</th><th>New</th><th>Best</th><th>Actions</th></tr></thead>
+          <thead><tr><th>{t.fields.productCode}</th><th>{t.fields.productName}</th><th>{t.fields.category}</th><th>{t.fields.material}</th><th>{t.fields.colors}</th><th>{t.fields.sizes}</th><th>{t.fields.moqDefault}</th><th>{t.common.visible}</th><th>{t.products.exportAvailable}</th><th>{t.products.isNew}</th><th>{t.products.isBest}</th><th>{t.common.actions}</th></tr></thead>
           <tbody>{products.map((product) => {
             const productRouteId = product.productId || product.code || product.id
             return <tr key={product.id}>
@@ -123,19 +118,19 @@ export function AdminProductsPage() {
             <td>{(product.colors || []).join(', ') || '-'}</td>
             <td>{(product.sizes || []).join(', ') || '-'}</td>
             <td>{product.moqDefault ?? '-'}</td>
-            <td>{product.isVisible ? 'Visible' : 'Hidden'}</td>
-            <td>{product.isExportAvailable ? 'Available' : 'Unavailable'}</td>
-            <td>{product.isNew ? 'Yes' : 'No'}</td>
-            <td>{product.isBest ? 'Yes' : 'No'}</td>
+            <td>{product.isVisible ? t.common.visible : t.common.hidden}</td>
+            <td>{product.isExportAvailable ? t.common.available : t.common.unavailable}</td>
+            <td>{product.isNew ? t.common.yes : t.common.no}</td>
+            <td>{product.isBest ? t.common.yes : t.common.no}</td>
             <td>
               <div className="admin-actions tight">
-                <AdminLink to={`/products/${productRouteId}`}>View Product</AdminLink>
+                <AdminLink to={`/products/${productRouteId}`}>{t.products.viewProduct}</AdminLink>
                 <button
                   disabled={savingProductId === product.id}
                   type="button"
                   onClick={() => updateVisibility(product.id, !product.isVisible)}
                 >
-                  {product.isVisible ? 'Hide' : 'Show'}
+                  {product.isVisible ? t.common.hide : t.common.show}
                 </button>
                 <button
                   disabled={savingProductId === product.id}
@@ -145,23 +140,23 @@ export function AdminProductsPage() {
                     setMessage('')
                     try {
                       await mutate((api, token) => api.updateProduct(product.id, { nameEn: `${product.nameEn || product.code} Updated` }, token))
-                      setMessage('Product name updated.')
+                      setMessage(t.products.nameUpdated)
                       setRefreshKey((current) => current + 1)
                     } catch (error) {
-                      setMessage(error?.message || 'Unable to update product.')
+                      setMessage(error?.message || t.products.updateFailed)
                     } finally {
                       setSavingProductId('')
                     }
                   }}
                 >
-                  Append Update
+                  {t.common.appendUpdate}
                 </button>
               </div>
             </td>
           </tr>
           })}</tbody>
         </table>
-        {products.length === 0 && <p className="admin-empty">No products found.</p>}
+        {products.length === 0 && <p className="admin-empty">{t.products.empty}</p>}
         <AdminPagination
           disabled={status === 'loading'}
           meta={meta}

@@ -249,6 +249,37 @@ const sideMemberLabels = {
   },
 }
 
+const runtimeErrorCopy = {
+  kr: {
+    runtimeConfiguration: '런타임 설정',
+    apiConnectionRequired: 'API 연결 확인이 필요합니다',
+    catalogApiUnavailable: '카탈로그 API를 사용할 수 없습니다.',
+    currentMode: '현재 모드',
+    mockPreviewDevelopmentOnly: '목 미리보기는 명시적인 개발 모드에서만 사용할 수 있습니다.',
+  },
+  en: {
+    runtimeConfiguration: 'Runtime configuration',
+    apiConnectionRequired: 'API connection required',
+    catalogApiUnavailable: 'The catalog API is not available.',
+    currentMode: 'Current mode',
+    mockPreviewDevelopmentOnly: 'Mock preview is only available in explicit development mode.',
+  },
+  jp: {
+    runtimeConfiguration: 'ランタイム設定',
+    apiConnectionRequired: 'API接続の確認が必要です',
+    catalogApiUnavailable: 'カタログAPIを利用できません。',
+    currentMode: '現在のモード',
+    mockPreviewDevelopmentOnly: 'モックプレビューは明示的な開発モードでのみ利用できます。',
+  },
+  cn: {
+    runtimeConfiguration: '运行时配置',
+    apiConnectionRequired: '需要检查 API 连接',
+    catalogApiUnavailable: '目录 API 当前不可用。',
+    currentMode: '当前模式',
+    mockPreviewDevelopmentOnly: '模拟预览仅可在明确的开发模式中使用。',
+  },
+}
+
 const loginModalCopy = {
   kr: {
     title: '거래처 로그인',
@@ -442,6 +473,7 @@ export function StoreShell() {
   } = useCommerce()
   const { locale, localeMeta, toLanguagePath, toLocalePath } = useLocalePath()
   const copy = shellCopy[locale] ?? shellCopy.kr
+  const runtimeCopy = runtimeErrorCopy[locale] ?? runtimeErrorCopy.kr
   const loginCopy = loginModalCopy[locale] ?? loginModalCopy.kr
   const compactViewerLabels = shellCompactViewerLabels[locale] ?? copy.viewerLabels
   const sideCopy = sideMemberLabels[locale] ?? sideMemberLabels.kr
@@ -961,10 +993,10 @@ export function StoreShell() {
     </button>}
     {dataStatus === 'error' && <main className="content runtime-config-error" role="alert">
       <section>
-        <p>Runtime configuration</p>
-        <h1>Staging API connection required</h1>
-        <span>{dataError || 'The catalog API is not available.'}</span>
-        <small>Current mode: {runtimeConfig?.dataMode || dataMode}. Mock preview is only available in explicit development mode.</small>
+        <p>{runtimeCopy.runtimeConfiguration}</p>
+        <h1>{runtimeCopy.apiConnectionRequired}</h1>
+        <span>{dataError || runtimeCopy.catalogApiUnavailable}</span>
+        <small>{runtimeCopy.currentMode}: {runtimeConfig?.dataMode || dataMode}. {runtimeCopy.mockPreviewDevelopmentOnly}</small>
       </section>
     </main>}
     <div className="locale-transition-frame" key={`locale-content-${locale}`}>

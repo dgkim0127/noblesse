@@ -1,25 +1,13 @@
 import { Link } from 'react-router-dom'
 import { formatMoney } from '../../utils/commerce'
 import { useLocalePath } from '../../utils/locale'
+import { getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
-export const inquiryStatusLabels = {
-  requested: 'Requested',
-  checking: 'Checking',
-  quoted: 'Quoted',
-  confirmed: 'Confirmed',
-  cancelled: 'Cancelled',
-}
-
-export const buyerStatusLabels = {
-  pending: 'Pending',
-  approved: 'Approved',
-  blocked: 'Blocked',
-}
-
-export function AdminPageHeader({ eyebrow = 'Admin API', title, description, actions }) {
+export function AdminPageHeader({ eyebrow, title, description, actions }) {
+  const t = useAdminCopy()
   return <div className="admin-page-header">
     <div>
-      <p className="eyebrow">{eyebrow}</p>
+      <p className="eyebrow">{eyebrow || t.common.adminApi}</p>
       <h1>{title}</h1>
       {description && <p>{description}</p>}
     </div>
@@ -32,7 +20,8 @@ export function AdminPreviewNote({ children }) {
 }
 
 export function AdminStatus({ status }) {
-  return <span className={`admin-status ${status}`}>{inquiryStatusLabels[status] ?? buyerStatusLabels[status] ?? status}</span>
+  const t = useAdminCopy()
+  return <span className={`admin-status ${status}`}>{getAdminStatusLabel(t, status)}</span>
 }
 
 export function AdminMoney({ value, currency = 'USD' }) {
@@ -45,6 +34,7 @@ export function AdminLink({ children, to, className = 'secondary-action' }) {
 }
 
 export function AdminPagination({ meta, onPrevious, onNext, disabled = false }) {
+  const t = useAdminCopy()
   if (!meta) return null
 
   const offset = Number(meta.offset || 0)
@@ -54,9 +44,9 @@ export function AdminPagination({ meta, onPrevious, onNext, disabled = false }) 
   const start = limit > 0 ? offset + 1 : offset
   const end = limit > 0 ? offset + limit : offset
 
-  return <div className="admin-actions admin-pagination" aria-label="Pagination">
-    <button disabled={disabled || !hasPrevious} type="button" onClick={onPrevious}>Previous</button>
+  return <div className="admin-actions admin-pagination" aria-label={t.common.pagination || 'Pagination'}>
+    <button disabled={disabled || !hasPrevious} type="button" onClick={onPrevious}>{t.common.previous}</button>
     <span>{start}-{end}</span>
-    <button disabled={disabled || !hasNext} type="button" onClick={onNext}>Next</button>
+    <button disabled={disabled || !hasNext} type="button" onClick={onNext}>{t.common.next}</button>
   </div>
 }

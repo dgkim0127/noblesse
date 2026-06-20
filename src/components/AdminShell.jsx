@@ -1,38 +1,42 @@
 import { BarChart3, FileText, Gauge, Gem, Handshake, LayoutDashboard, Tags } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
+import { getRuntimeConfig } from '../config/runtimeConfig'
+import { getAdminRuntimeKind, useAdminCopy } from '../pages/admin/adminCopy'
 import { useLocalePath } from '../utils/locale'
 
 const adminNav = [
-  { label: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard, end: true },
-  { label: 'Buyers', path: '/admin/buyers', icon: Handshake },
-  { label: 'Products', path: '/admin/products', icon: Gem },
-  { label: 'Categories', path: '/admin/categories', icon: Tags },
-  { label: 'Prices', path: '/admin/prices', icon: Tags },
-  { label: 'Inquiries', path: '/admin/inquiries', icon: FileText },
-  { label: 'Quotes', path: '/admin/quotes', icon: FileText },
-  { label: 'Analytics', path: '/admin/analytics', icon: BarChart3 },
+  { key: 'dashboard', path: '/admin', icon: LayoutDashboard, end: true },
+  { key: 'buyers', path: '/admin/buyers', icon: Handshake },
+  { key: 'products', path: '/admin/products', icon: Gem },
+  { key: 'categories', path: '/admin/categories', icon: Tags },
+  { key: 'prices', path: '/admin/prices', icon: Tags },
+  { key: 'inquiries', path: '/admin/inquiries', icon: FileText },
+  { key: 'quotes', path: '/admin/quotes', icon: FileText },
+  { key: 'analytics', path: '/admin/analytics', icon: BarChart3 },
 ]
 
 export function AdminShell() {
   const { toLocalePath } = useLocalePath()
+  const t = useAdminCopy()
+  const runtimeKind = getAdminRuntimeKind(getRuntimeConfig())
 
   return <main className="admin-shell">
-    <aside className="admin-sidebar" aria-label="Admin navigation">
+    <aside className="admin-sidebar" aria-label={t.shell.aria}>
       <div className="admin-brand-block">
         <Gauge size={24} />
         <div>
-          <strong>Noblesse Admin</strong>
-          <span>Server-verified staging API</span>
+          <strong>{t.shell.brand}</strong>
+          <span>{t.shell.serverVerified[runtimeKind]}</span>
         </div>
       </div>
-      <span className="admin-preview-badge">Staging API</span>
+      <span className="admin-preview-badge">{t.shell.badge[runtimeKind]}</span>
       <nav>
-        {adminNav.map(({ end, icon: Icon, label, path }) => <NavLink end={end} key={path} to={toLocalePath(path)}>
+        {adminNav.map(({ end, icon: Icon, key, path }) => <NavLink end={end} key={path} to={toLocalePath(path)}>
           <Icon size={17} />
-          <span>{label}</span>
+          <span>{t.shell.nav[key]}</span>
         </NavLink>)}
       </nav>
-      <NavLink className="admin-back-link" to={toLocalePath('/products')}>Back to Catalog</NavLink>
+      <NavLink className="admin-back-link" to={toLocalePath('/products')}>{t.shell.backToCatalog}</NavLink>
     </aside>
     <section className="admin-main">
       <Outlet />

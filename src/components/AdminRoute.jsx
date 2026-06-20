@@ -2,11 +2,13 @@ import { ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { isAuthConfigured } from '../services/authService'
+import { useAdminCopy } from '../pages/admin/adminCopy'
 import { useLocalePath } from '../utils/locale'
 
 export function AdminRoute({ children }) {
   const { authStatus, dataMode, isAdmin } = useCommerce()
   const { toLocalePath } = useLocalePath()
+  const t = useAdminCopy()
   const isMockMode = dataMode === 'mock'
 
   if (isAdmin) return children
@@ -15,9 +17,9 @@ export function AdminRoute({ children }) {
     return <main className="content admin-access-page">
       <section className="admin-card admin-access-card">
         <ShieldCheck size={30} />
-        <p className="eyebrow">Admin API</p>
-        <h1>Checking admin session</h1>
-        <p>Firebase authentication is being verified before the server-side admin role check runs.</p>
+        <p className="eyebrow">{t.route.checkingEyebrow}</p>
+        <h1>{t.route.checkingTitle}</h1>
+        <p>{t.route.checkingBody}</p>
       </section>
     </main>
   }
@@ -27,17 +29,17 @@ export function AdminRoute({ children }) {
   return <main className="content admin-access-page">
     <section className="admin-card admin-access-card">
       <ShieldCheck size={30} />
-      <p className="eyebrow">{isMockMode ? 'Admin Preview' : 'Admin API Required'}</p>
-      <h1>Admin access required</h1>
+      <p className="eyebrow">{isMockMode ? t.route.previewEyebrow : t.route.requiredEyebrow}</p>
+      <h1>{t.route.requiredTitle}</h1>
       <p>{authMissing
-        ? 'Firebase client configuration is required before an admin can sign in for the server-side role check.'
+        ? t.route.missingConfig
         : isMockMode
-          ? 'Admin preview is available only in explicit development mode.'
-          : 'Release mode does not trust frontend viewer state. Sign in with an approved admin account so the backend can verify the role server-side.'}</p>
+          ? t.route.previewBody
+          : t.route.releaseBody}</p>
       <div className="admin-actions">
-        {!isMockMode && <Link className="primary-action" to={toLocalePath('/login')}>Admin Login</Link>}
-        <Link className="secondary-action" to={toLocalePath('/products')}>Product List</Link>
-        <Link className="secondary-action" to={toLocalePath('/account')}>Account</Link>
+        {!isMockMode && <Link className="primary-action" to={toLocalePath('/login')}>{t.route.login}</Link>}
+        <Link className="secondary-action" to={toLocalePath('/products')}>{t.route.productList}</Link>
+        <Link className="secondary-action" to={toLocalePath('/account')}>{t.route.account}</Link>
       </div>
     </section>
   </main>

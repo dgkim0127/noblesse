@@ -1,12 +1,7 @@
 import { useMemo, useState } from 'react'
 import { AdminPageHeader, AdminPagination, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
-
-const visibilityTabs = [
-  { label: 'All', value: '' },
-  { label: 'Visible', value: 'true' },
-  { label: 'Hidden', value: 'false' },
-]
+import { useAdminCopy } from './adminCopy'
 
 const initialForm = {
   categoryId: '',
@@ -20,6 +15,7 @@ const initialForm = {
 const pageSize = 20
 
 export function AdminCategoriesPage() {
+  const t = useAdminCopy()
   const [query, setQuery] = useState('')
   const [visible, setVisible] = useState('')
   const [offset, setOffset] = useState(0)
@@ -59,11 +55,11 @@ export function AdminCategoriesPage() {
         sortOrder: Number(form.sortOrder || 0),
         isVisible: form.isVisible,
       }, token))
-      setMessage('Category created.')
+      setMessage(t.categories.created)
       setForm(initialForm)
       setRefreshKey((current) => current + 1)
     } catch (error) {
-      setMessage(error?.message || 'Unable to create category.')
+      setMessage(error?.message || t.categories.createFailed)
     }
   }
 
@@ -75,7 +71,7 @@ export function AdminCategoriesPage() {
       setMessage(successMessage)
       setRefreshKey((current) => current + 1)
     } catch (error) {
-      setMessage(error?.message || 'Unable to update category.')
+      setMessage(error?.message || t.categories.updateFailed)
     } finally {
       setSavingId('')
     }
@@ -83,25 +79,24 @@ export function AdminCategoriesPage() {
 
   return <>
     <AdminPageHeader
-      eyebrow="Admin API"
-      title="Category Management"
-      description="Create, review, and deactivate catalog categories through protected admin API writes."
+      title={t.categories.title}
+      description={t.categories.description}
     />
-    <AdminPreviewNote>Categories are deactivated by setting visibility off. No destructive delete runs from this screen.</AdminPreviewNote>
+    <AdminPreviewNote>{t.categories.note}</AdminPreviewNote>
 
     <form className="admin-toolbar" onSubmit={createCategory}>
-      <label className="admin-search">Category Key<input value={form.categoryId} onChange={(event) => setField('categoryId', event.target.value)} placeholder="E2E_33A3_category" required /></label>
-      <label className="admin-search">English Name<input value={form.nameEn} onChange={(event) => setField('nameEn', event.target.value)} placeholder="Staging Category" required /></label>
-      <label className="admin-search">Slug<input value={form.slug} onChange={(event) => setField('slug', event.target.value)} placeholder="staging-category" required /></label>
-      <label className="admin-search">Sort<input value={form.sortOrder} onChange={(event) => setField('sortOrder', event.target.value)} type="number" /></label>
-      <label className="admin-check"><input checked={form.isVisible} onChange={(event) => setField('isVisible', event.target.checked)} type="checkbox" /> Visible</label>
-      <button className="primary-action" type="submit">Create Category</button>
+      <label className="admin-search">{t.categories.key}<input value={form.categoryId} onChange={(event) => setField('categoryId', event.target.value)} placeholder="category-key" required /></label>
+      <label className="admin-search">{t.categories.englishName}<input value={form.nameEn} onChange={(event) => setField('nameEn', event.target.value)} placeholder={t.categories.englishName} required /></label>
+      <label className="admin-search">{t.categories.slug}<input value={form.slug} onChange={(event) => setField('slug', event.target.value)} placeholder="category-slug" required /></label>
+      <label className="admin-search">{t.categories.sort}<input value={form.sortOrder} onChange={(event) => setField('sortOrder', event.target.value)} type="number" /></label>
+      <label className="admin-check"><input checked={form.isVisible} onChange={(event) => setField('isVisible', event.target.checked)} type="checkbox" /> {t.common.visible}</label>
+      <button className="primary-action" type="submit">{t.categories.create}</button>
     </form>
 
     <div className="admin-toolbar">
-      <label className="admin-search">Search Categories<input value={query} onChange={(event) => resetPage(setQuery)(event.target.value)} placeholder="category key or name" /></label>
+      <label className="admin-search">{t.categories.searchLabel}<input value={query} onChange={(event) => resetPage(setQuery)(event.target.value)} placeholder={t.categories.searchPlaceholder} /></label>
       <div className="admin-filter-tabs">
-        {visibilityTabs.map((tab) => <button className={visible === tab.value ? 'active' : ''} key={tab.label} type="button" onClick={() => resetPage(setVisible)(tab.value)}>{tab.label}</button>)}
+        {[['', t.common.all], ['true', t.common.visible], ['false', t.common.hidden]].map(([value, label]) => <button className={visible === value ? 'active' : ''} key={value || 'all'} type="button" onClick={() => resetPage(setVisible)(value)}>{label}</button>)}
       </div>
     </div>
     {message && <p className="admin-inline-message">{message}</p>}
@@ -109,34 +104,34 @@ export function AdminCategoriesPage() {
     <section className="admin-card">
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th>Key</th><th>Name</th><th>Slug</th><th>Visible</th><th>Sort</th><th>Actions</th></tr></thead>
+          <thead><tr><th>{t.fields.key}</th><th>{t.fields.name}</th><th>{t.fields.slug}</th><th>{t.common.visible}</th><th>{t.fields.sort}</th><th>{t.common.actions}</th></tr></thead>
           <tbody>{categories.map((category) => <tr key={category.id}>
             <td>{category.categoryId}</td>
             <td>{category.nameEn || category.nameKo || category.nameJa || '-'}</td>
             <td>{category.slug}</td>
-            <td>{category.isVisible ? 'Visible' : 'Hidden'}</td>
+            <td>{category.isVisible ? t.common.visible : t.common.hidden}</td>
             <td>{category.sortOrder ?? 0}</td>
             <td>
               <div className="admin-actions tight">
                 <button
                   disabled={savingId === category.id}
-                  onClick={() => updateCategory(category.id, { isVisible: !category.isVisible }, category.isVisible ? 'Category hidden.' : 'Category visible.')}
+                  onClick={() => updateCategory(category.id, { isVisible: !category.isVisible }, category.isVisible ? t.categories.hidden : t.categories.visible)}
                   type="button"
                 >
-                  {category.isVisible ? 'Hide' : 'Show'}
+                  {category.isVisible ? t.common.hide : t.common.show}
                 </button>
                 <button
                   disabled={savingId === category.id}
-                  onClick={() => updateCategory(category.id, { nameEn: `${category.nameEn || category.categoryId} Updated` }, 'Category name updated.')}
+                  onClick={() => updateCategory(category.id, { nameEn: `${category.nameEn || category.categoryId} Updated` }, t.categories.nameUpdated)}
                   type="button"
                 >
-                  Append Update
+                  {t.common.appendUpdate}
                 </button>
               </div>
             </td>
           </tr>)}</tbody>
         </table>
-        {categories.length === 0 && <p className="admin-empty">No categories found.</p>}
+        {categories.length === 0 && <p className="admin-empty">{t.categories.empty}</p>}
         <AdminPagination
           disabled={status === 'loading'}
           meta={meta}

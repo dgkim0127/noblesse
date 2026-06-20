@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { AdminMoney, AdminPageHeader, AdminPagination, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
+import { useAdminCopy } from './adminCopy'
 
 const marketTabs = ['ALL', 'JP', 'US', 'GLOBAL', 'KR']
 const initialPriceForm = {
@@ -16,6 +17,7 @@ const initialPriceForm = {
 const pageSize = 20
 
 export function AdminPricesPage() {
+  const t = useAdminCopy()
   const [market, setMarket] = useState('ALL')
   const [query, setQuery] = useState('')
   const [activeOnly, setActiveOnly] = useState(false)
@@ -57,11 +59,11 @@ export function AdminPricesPage() {
         minOrderAmount: Number(form.minOrderAmount || 0),
         isActive: form.isActive,
       }, token))
-      setMessage('Price row created.')
+      setMessage(t.prices.created)
       setForm(initialPriceForm)
       setRefreshKey((current) => current + 1)
     } catch (error) {
-      setMessage(error?.message || 'Unable to create price row.')
+      setMessage(error?.message || t.prices.createFailed)
     }
   }
 
@@ -73,7 +75,7 @@ export function AdminPricesPage() {
       setMessage(successMessage)
       setRefreshKey((current) => current + 1)
     } catch (error) {
-      setMessage(error?.message || 'Unable to update price row.')
+      setMessage(error?.message || t.prices.updateFailed)
     } finally {
       setSavingPriceId('')
     }
@@ -81,32 +83,31 @@ export function AdminPricesPage() {
 
   return <>
     <AdminPageHeader
-      eyebrow="Admin API"
-      title="Price Management"
-      description="Review market price rows from the backend. Public catalog metadata remains separate from approved buyer pricing."
+      title={t.prices.title}
+      description={t.prices.description}
     />
-    <AdminPreviewNote>Price rows are managed through protected admin API writes. Public catalog reads still never expose approved buyer prices.</AdminPreviewNote>
+    <AdminPreviewNote>{t.prices.note}</AdminPreviewNote>
 
     <form className="admin-toolbar" onSubmit={createPrice}>
-      <label className="admin-search">Product Code<input value={form.productCode} onChange={(event) => setField('productCode', event.target.value)} placeholder="NB-001" required /></label>
-      <label className="admin-search">Market<select value={form.market} onChange={(event) => {
+      <label className="admin-search">{t.prices.productCode}<input value={form.productCode} onChange={(event) => setField('productCode', event.target.value)} placeholder="NB-001" required /></label>
+      <label className="admin-search">{t.prices.market}<select value={form.market} onChange={(event) => {
         const nextMarket = event.target.value
         setForm((current) => ({ ...current, market: nextMarket, currency: nextMarket === 'KR' ? 'KRW' : nextMarket === 'JP' ? 'JPY' : 'USD' }))
       }}>
         {marketTabs.filter((tab) => tab !== 'ALL').map((tab) => <option key={tab} value={tab}>{tab}</option>)}
       </select></label>
-      <label className="admin-search">Currency<select value={form.currency} onChange={(event) => setField('currency', event.target.value)}>
+      <label className="admin-search">{t.prices.currency}<select value={form.currency} onChange={(event) => setField('currency', event.target.value)}>
         {['KRW', 'JPY', 'USD'].map((currency) => <option key={currency} value={currency}>{currency}</option>)}
       </select></label>
-      <label className="admin-search">Wholesale<input min="0" value={form.wholesalePrice} onChange={(event) => setField('wholesalePrice', event.target.value)} required type="number" /></label>
-      <label className="admin-search">MOQ<input min="1" value={form.moq} onChange={(event) => setField('moq', event.target.value)} required type="number" /></label>
-      <label className="admin-check"><input checked={form.isActive} onChange={(event) => setField('isActive', event.target.checked)} type="checkbox" /> Active</label>
-      <button className="primary-action" type="submit">Create Price</button>
+      <label className="admin-search">{t.prices.wholesale}<input min="0" value={form.wholesalePrice} onChange={(event) => setField('wholesalePrice', event.target.value)} required type="number" /></label>
+      <label className="admin-search">{t.products.moq}<input min="1" value={form.moq} onChange={(event) => setField('moq', event.target.value)} required type="number" /></label>
+      <label className="admin-check"><input checked={form.isActive} onChange={(event) => setField('isActive', event.target.checked)} type="checkbox" /> {t.common.active}</label>
+      <button className="primary-action" type="submit">{t.prices.create}</button>
     </form>
 
     <div className="admin-toolbar">
-      <label className="admin-search">Search prices<input value={query} onChange={(event) => resetPage(setQuery)(event.target.value)} placeholder="Product code or name" /></label>
-      <label className="admin-toggle"><input checked={activeOnly} onChange={(event) => resetPage(setActiveOnly)(event.target.checked)} type="checkbox" /> Active only</label>
+      <label className="admin-search">{t.prices.searchLabel}<input value={query} onChange={(event) => resetPage(setQuery)(event.target.value)} placeholder={t.prices.searchPlaceholder} /></label>
+      <label className="admin-toggle"><input checked={activeOnly} onChange={(event) => resetPage(setActiveOnly)(event.target.checked)} type="checkbox" /> {t.prices.activeOnly}</label>
       <div className="admin-filter-tabs">
         {marketTabs.map((tab) => <button className={market === tab ? 'active' : ''} key={tab} type="button" onClick={() => resetPage(setMarket)(tab)}>{tab}</button>)}
       </div>
@@ -116,7 +117,7 @@ export function AdminPricesPage() {
     <section className="admin-card">
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th>Product Code</th><th>Product Name</th><th>Market</th><th>Currency</th><th>Wholesale Price</th><th>Retail Price</th><th>MOQ</th><th>Min Request Amount</th><th>Visible To</th><th>Active</th><th>Actions</th></tr></thead>
+          <thead><tr><th>{t.fields.productCode}</th><th>{t.fields.productName}</th><th>{t.fields.market}</th><th>{t.fields.currency}</th><th>{t.prices.wholesale}</th><th>{t.prices.retail}</th><th>{t.products.moq}</th><th>{t.prices.minRequestAmount}</th><th>{t.prices.visibleTo}</th><th>{t.common.active}</th><th>{t.common.actions}</th></tr></thead>
           <tbody>{prices.map((price) => <tr key={price.id}>
             <td>{price.productCode}</td>
             <td>{price.productNameEn || price.productNameKo || '-'}</td>
@@ -127,28 +128,28 @@ export function AdminPricesPage() {
             <td>{price.moq}</td>
             <td><AdminMoney value={price.minOrderAmount || 0} currency={price.currency} /></td>
             <td>{price.visibleTo}</td>
-            <td>{price.isActive ? 'Active' : 'Inactive'}</td>
+            <td>{price.isActive ? t.common.active : t.common.inactive}</td>
             <td>
               <div className="admin-actions tight">
                 <button
                   disabled={savingPriceId === price.id}
-                  onClick={() => updatePrice(price.id, { isActive: !price.isActive }, price.isActive ? 'Price row deactivated.' : 'Price row activated.')}
+                  onClick={() => updatePrice(price.id, { isActive: !price.isActive }, price.isActive ? t.prices.deactivated : t.prices.activated)}
                   type="button"
                 >
-                  {price.isActive ? 'Deactivate' : 'Activate'}
+                  {price.isActive ? t.common.deactivate : t.common.activate}
                 </button>
                 <button
                   disabled={savingPriceId === price.id}
-                  onClick={() => updatePrice(price.id, { wholesalePrice: Number(price.wholesalePrice || 0) + 1 }, 'Wholesale price adjusted.')}
+                  onClick={() => updatePrice(price.id, { wholesalePrice: Number(price.wholesalePrice || 0) + 1 }, t.prices.adjusted)}
                   type="button"
                 >
-                  Adjust +1
+                  {t.common.adjustPlusOne}
                 </button>
               </div>
             </td>
           </tr>)}</tbody>
         </table>
-        {prices.length === 0 && <p className="admin-empty">No price rows found.</p>}
+        {prices.length === 0 && <p className="admin-empty">{t.prices.empty}</p>}
         <AdminPagination
           disabled={status === 'loading'}
           meta={meta}
