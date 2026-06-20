@@ -47,8 +47,17 @@ export function validateStagingRcEnv(env = process.env) {
   }
 
   const baseUrl = env.VITE_API_BASE_URL.trim().replace(/\/+$/, "");
-  if (!baseUrl || !/^https?:\/\//i.test(baseUrl)) {
+  let parsedBaseUrl;
+  try {
+    parsedBaseUrl = new URL(baseUrl);
+  } catch {
     throw new Error("VITE_API_BASE_URL must be an absolute staging API URL");
+  }
+  if (!baseUrl || !/^https?:$/i.test(parsedBaseUrl.protocol)) {
+    throw new Error("VITE_API_BASE_URL must be an absolute staging API URL");
+  }
+  if (parsedBaseUrl.pathname.replace(/\/+$/, "") !== "/api") {
+    throw new Error("VITE_API_BASE_URL must include /api");
   }
   if (FORBIDDEN_BASE_URL_PATTERNS.some((pattern) => pattern.test(baseUrl))) {
     throw new Error("VITE_API_BASE_URL does not look like a staging API URL");

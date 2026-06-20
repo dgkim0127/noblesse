@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "postgres:transform-sample": "node scripts/postgres/transformFirebaseSalesSample.mjs",
     "preview": "vite preview",
+    "test:frontend": "node --test tests/*.test.mjs",
     "test:staging-rc": "node scripts/stagingRcE2e.mjs"
   },
   "dependencies": {
