@@ -339,6 +339,25 @@ const loginModalCopy = {
   },
 }
 
+const loginErrorCopy = {
+  kr: {
+    configError: 'Firebase 로그인 설정이 필요합니다.',
+    failed: '로그인에 실패했습니다. 계정을 확인해주세요.',
+  },
+  en: {
+    configError: 'Firebase client configuration is required for login.',
+    failed: 'Login failed. Please check your account.',
+  },
+  jp: {
+    configError: 'Firebase のログイン設定が必要です。',
+    failed: 'ログインに失敗しました。アカウントを確認してください。',
+  },
+  cn: {
+    configError: '需要配置 Firebase 登录信息。',
+    failed: '登录失败。请检查账号。',
+  },
+}
+
 const readSearchHistory = () => {
   if (typeof window === 'undefined') return []
 
@@ -475,6 +494,7 @@ export function StoreShell() {
   const copy = shellCopy[locale] ?? shellCopy.kr
   const runtimeCopy = runtimeErrorCopy[locale] ?? runtimeErrorCopy.kr
   const loginCopy = loginModalCopy[locale] ?? loginModalCopy.kr
+  const loginError = loginErrorCopy[locale] ?? loginErrorCopy.kr
   const compactViewerLabels = shellCompactViewerLabels[locale] ?? copy.viewerLabels
   const sideCopy = sideMemberLabels[locale] ?? sideMemberLabels.kr
   const headerBrandName = localeMeta?.brandName ?? '귀족'
@@ -726,7 +746,7 @@ export function StoreShell() {
       closeLoginModal()
       navigate(toLocalePath('/account'))
     } catch (error) {
-      setLoginModalNotice(error?.message || 'Login failed. Please check your account.')
+      setLoginModalNotice(error?.code === 'CONFIGURATION_ERROR' ? loginError.configError : (error?.message || loginError.failed))
     }
   }
 

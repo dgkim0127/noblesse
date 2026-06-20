@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:production": "node scripts/validateProductionBuildEnv.mjs && vite build",
     "lint": "eslint .",
     "postgres:transform-sample": "node scripts/postgres/transformFirebaseSalesSample.mjs",
     "preview": "vite preview",

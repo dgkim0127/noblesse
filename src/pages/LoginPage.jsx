@@ -4,13 +4,33 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { useLocalePath } from '../utils/locale'
 
+const loginErrorCopy = {
+  kr: {
+    configError: 'Firebase 로그인 설정이 필요합니다.',
+    failed: '로그인에 실패했습니다. 계정을 확인해주세요.',
+  },
+  en: {
+    configError: 'Firebase client configuration is required for login.',
+    failed: 'Login failed. Please check your account.',
+  },
+  jp: {
+    configError: 'Firebase のログイン設定が必要です。',
+    failed: 'ログインに失敗しました。アカウントを確認してください。',
+  },
+  cn: {
+    configError: '需要配置 Firebase 登录信息。',
+    failed: '登录失败。请检查账号。',
+  },
+}
+
 const brandKoreanName = '귀족'
 const brandLanguageLabel = '귀족 / Noblesse'
 
 export function LoginPage() {
   const navigate = useNavigate()
   const { dataMode, setViewerState, signIn } = useCommerce()
-  const { toLocalePath } = useLocalePath()
+  const { locale, toLocalePath } = useLocalePath()
+  const loginError = loginErrorCopy[locale] ?? loginErrorCopy.kr
   const isMockMode = dataMode === 'mock'
   const [loginNotice, setLoginNotice] = useState('')
   const [remember, setRemember] = useState(true)
@@ -27,7 +47,7 @@ export function LoginPage() {
       })
       navigate(toLocalePath('/account'))
     } catch (error) {
-      setLoginNotice(error?.message || 'Login failed. Please check your account.')
+      setLoginNotice(error?.code === 'CONFIGURATION_ERROR' ? loginError.configError : (error?.message || loginError.failed))
     }
   }
 
