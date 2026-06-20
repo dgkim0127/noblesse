@@ -10,7 +10,8 @@
     "postgres:transform-sample": "node scripts/postgres/transformFirebaseSalesSample.mjs",
     "preview": "vite preview",
     "test:frontend": "node --test tests/*.test.mjs",
-    "test:staging-rc": "node scripts/stagingRcE2e.mjs"
+    "test:staging-rc": "node scripts/stagingRcE2e.mjs",
+    "test:production-uat": "node scripts/productionUatE2e.mjs"
   },
   "dependencies": {
     "firebase": "12.6.0",
