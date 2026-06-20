@@ -76,6 +76,18 @@ test("production strict socket mode without CLOUD_SQL_INSTANCE_CONNECTION_NAME f
   );
 });
 
+test("production strict mode accepts Cloud Run ADC with Firebase project id", () => {
+  const env = getEnv({
+    NODE_ENV: "production",
+    DB_CONNECTION_MODE: "cloudsql-socket",
+    CLOUD_SQL_INSTANCE_CONNECTION_NAME: "project:region:instance",
+    DATABASE_URL: dummyDatabaseUrl,
+    FIREBASE_PROJECT_ID: "dummy-project"
+  });
+
+  assert.doesNotThrow(() => assertProductionConfig(env));
+});
+
 test("production health-only mode without DB/Auth secrets passes config assertion", () => {
   const env = getEnv({
     NODE_ENV: "production",

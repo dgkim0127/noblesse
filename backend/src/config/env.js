@@ -65,8 +65,12 @@ export function assertProductionConfig(env) {
     missing.push("CLOUD_SQL_INSTANCE_CONNECTION_NAME");
   }
   if (!env.firebaseProjectId) missing.push("FIREBASE_PROJECT_ID");
-  if (!env.firebaseClientEmail) missing.push("FIREBASE_CLIENT_EMAIL");
-  if (!env.firebasePrivateKey) missing.push("FIREBASE_PRIVATE_KEY");
+  const hasExplicitFirebaseCredentials = env.firebaseClientEmail && env.firebasePrivateKey;
+  const hasApplicationDefaultCredentials = env.firebaseProjectId;
+  if (!hasExplicitFirebaseCredentials && !hasApplicationDefaultCredentials) {
+    missing.push("FIREBASE_CLIENT_EMAIL or Cloud Run ADC");
+    missing.push("FIREBASE_PRIVATE_KEY or Cloud Run ADC");
+  }
 
   if (missing.length > 0) {
     throw new Error(`Missing required server configuration: ${missing.join(", ")}`);
