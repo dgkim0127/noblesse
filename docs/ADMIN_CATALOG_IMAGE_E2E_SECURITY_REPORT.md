@@ -21,6 +21,7 @@
 
 ## Security Test Results
 - No-token multipart upload: 401 `UNAUTHORIZED`.
+- No-token oversized multipart upload: 401 `UNAUTHORIZED`, before route-local parser.
 - Invalid-token multipart upload: 401 `UNAUTHORIZED`.
 - Parser before auth: not invoked for no-token/invalid-token requests.
 - Upload service before auth: not invoked for no-token/invalid-token requests.

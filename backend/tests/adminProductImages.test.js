@@ -177,6 +177,29 @@ test("POST /api/admin/products/:productId/images rejects invalid tokens before p
   assert.equal(authOrder.wasServiceCalled(), false);
 });
 
+test("POST /api/admin/products/:productId/images rejects unauthenticated large multipart before parsing", async () => {
+  const authOrder = createAuthOrderApp();
+  const boundary = "noblesse-large-unauthenticated-boundary";
+  const body = Buffer.concat([
+    Buffer.from(`--${boundary}\r\ncontent-disposition: form-data; name="images"; filename="large.png"\r\ncontent-type: image/png\r\n\r\n`),
+    Buffer.alloc(83 * 1024 * 1024, 0),
+    Buffer.from(`\r\n--${boundary}--\r\n`)
+  ]);
+
+  const response = await request(authOrder.app, `/api/admin/products/${productId}/images`, {
+    method: "POST",
+    headers: {
+      "content-type": `multipart/form-data; boundary=${boundary}`
+    },
+    body
+  });
+
+  assert.equal(response.status, 401);
+  assert.equal(response.body.error.code, "UNAUTHORIZED");
+  assert.equal(authOrder.wasParserCalled(), false);
+  assert.equal(authOrder.wasServiceCalled(), false);
+});
+
 test("POST /api/admin/products/:productId/images rejects malformed admin multipart safely", async () => {
   const objectStore = { async save() {}, async deleteMany() {} };
   const app = createImageApp({
