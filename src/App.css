@@ -986,6 +986,8 @@ h6 {
 }
 
 .admin-search input,
+.admin-search select,
+.admin-search textarea,
 .admin-filter-row select {
   background: #fff;
   border: 1px solid rgba(42, 36, 87, 0.16);
@@ -994,6 +996,15 @@ h6 {
   font: inherit;
   min-height: 42px;
   padding: 9px 12px;
+}
+
+.admin-search textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.admin-search.wide {
+  max-width: none;
 }
 
 .admin-filter-row {
@@ -1044,6 +1055,62 @@ h6 {
   background: var(--navy);
   border-color: var(--navy);
   color: #fff;
+}
+
+.admin-workflow-step.done {
+  background: rgba(255, 143, 169, 0.14);
+  border-color: rgba(255, 143, 169, 0.42);
+}
+
+.catalog-entry-card,
+.catalog-entry-section {
+  display: grid;
+  gap: 18px;
+}
+
+.catalog-entry-section h2 {
+  color: var(--navy);
+  font-size: 1.16rem;
+  margin: 0;
+}
+
+.catalog-entry-grid {
+  align-items: end;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.catalog-entry-grid .admin-search,
+.catalog-entry-grid .admin-check {
+  max-width: none;
+}
+
+.catalog-entry-actions {
+  border-top: 1px solid var(--admin-border);
+  justify-content: flex-end;
+  padding-top: 16px;
+}
+
+.catalog-entry-summary {
+  margin: 0;
+}
+
+.admin-check {
+  align-items: center;
+  color: var(--navy);
+  display: inline-flex;
+  font-size: 0.86rem;
+  font-weight: 800;
+  gap: 8px;
+  min-height: 42px;
+}
+
+.admin-field-error {
+  color: #9a2940;
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 800;
 }
 
 .admin-filter-tabs {

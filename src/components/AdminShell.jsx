@@ -1,4 +1,4 @@
-import { BarChart3, FileText, Gauge, Gem, Handshake, LayoutDashboard, Tags } from 'lucide-react'
+import { BarChart3, FileText, Gauge, Gem, Handshake, LayoutDashboard, PlusCircle, Tags } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { getRuntimeConfig } from '../config/runtimeConfig'
 import { getAdminRuntimeKind, useAdminCopy } from '../pages/admin/adminCopy'
@@ -6,6 +6,7 @@ import { useLocalePath } from '../utils/locale'
 
 const adminNav = [
   { key: 'dashboard', path: '/admin', icon: LayoutDashboard, end: true },
+  { key: 'catalogEntry', path: '/admin/catalog/new', icon: PlusCircle },
   { key: 'buyers', path: '/admin/buyers', icon: Handshake },
   { key: 'products', path: '/admin/products', icon: Gem },
   { key: 'categories', path: '/admin/categories', icon: Tags },

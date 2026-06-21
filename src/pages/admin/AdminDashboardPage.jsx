@@ -17,7 +17,7 @@ export function AdminDashboardPage() {
     <AdminPageHeader
       title={t.dashboard.title}
       description={t.dashboard.description}
-      actions={<><AdminLink to="/admin/inquiries">{t.dashboard.viewInquiries}</AdminLink></>}
+      actions={<><AdminLink className="primary-action" to="/admin/catalog/new">{t.dashboard.addProduct}</AdminLink><AdminLink to="/admin/inquiries">{t.dashboard.viewInquiries}</AdminLink></>}
     />
 
     <section className="admin-grid compact">

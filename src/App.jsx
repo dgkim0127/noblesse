@@ -28,6 +28,7 @@ function AdminPageFallback() {
 const AdminAnalyticsPage = lazyNamed(() => import('./pages/admin/AdminAnalyticsPage'), 'AdminAnalyticsPage')
 const AdminBuyerDetailPage = lazyNamed(() => import('./pages/admin/AdminBuyerDetailPage'), 'AdminBuyerDetailPage')
 const AdminBuyersPage = lazyNamed(() => import('./pages/admin/AdminBuyersPage'), 'AdminBuyersPage')
+const AdminCatalogEntryPage = lazyNamed(() => import('./pages/admin/AdminCatalogEntryPage'), 'AdminCatalogEntryPage')
 const AdminCategoriesPage = lazyNamed(() => import('./pages/admin/AdminCategoriesPage'), 'AdminCategoriesPage')
 const AdminDashboardPage = lazyNamed(() => import('./pages/admin/AdminDashboardPage'), 'AdminDashboardPage')
 const AdminInquiriesPage = lazyNamed(() => import('./pages/admin/AdminInquiriesPage'), 'AdminInquiriesPage')
@@ -70,6 +71,7 @@ function App() {
         <Route index element={withAdminSuspense(<AdminDashboardPage />)} />
         <Route path="buyers" element={withAdminSuspense(<AdminBuyersPage />)} />
         <Route path="buyers/:buyerId" element={withAdminSuspense(<AdminBuyerDetailPage />)} />
+        <Route path="catalog/new" element={withAdminSuspense(<AdminCatalogEntryPage />)} />
         <Route path="products" element={withAdminSuspense(<AdminProductsPage />)} />
         <Route path="categories" element={withAdminSuspense(<AdminCategoriesPage />)} />
         <Route path="prices" element={withAdminSuspense(<AdminPricesPage />)} />
@@ -100,6 +102,7 @@ function App() {
         <Route index element={withAdminSuspense(<AdminDashboardPage />)} />
         <Route path="buyers" element={withAdminSuspense(<AdminBuyersPage />)} />
         <Route path="buyers/:buyerId" element={withAdminSuspense(<AdminBuyerDetailPage />)} />
+        <Route path="catalog/new" element={withAdminSuspense(<AdminCatalogEntryPage />)} />
         <Route path="products" element={withAdminSuspense(<AdminProductsPage />)} />
         <Route path="categories" element={withAdminSuspense(<AdminCategoriesPage />)} />
         <Route path="prices" element={withAdminSuspense(<AdminPricesPage />)} />

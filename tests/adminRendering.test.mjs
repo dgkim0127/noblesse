@@ -13,6 +13,7 @@ const adminRoutePages = [
   'src/pages/admin/AdminAnalyticsPage.jsx',
   'src/pages/admin/AdminBuyerDetailPage.jsx',
   'src/pages/admin/AdminBuyersPage.jsx',
+  'src/pages/admin/AdminCatalogEntryPage.jsx',
   'src/pages/admin/AdminCategoriesPage.jsx',
   'src/pages/admin/AdminDashboardPage.jsx',
   'src/pages/admin/AdminInquiriesPage.jsx',
@@ -30,6 +31,7 @@ test('admin shell keeps child routes mounted through the outlet', () => {
   assert.match(shell, /<section className="admin-main">\s*<Outlet \/>\s*<\/section>/)
   assert.match(routes, /<Route path="admin" element=\{<AdminRoute><AdminShell \/><\/AdminRoute>\}>/)
   assert.match(routes, /<Route index element=\{withAdminSuspense\(<AdminDashboardPage \/>\)\}/)
+  assert.match(routes, /<Route path="catalog\/new" element=\{withAdminSuspense\(<AdminCatalogEntryPage \/>\)\}/)
 })
 
 test('admin API pages do not return a ready-state AdminApiState placeholder', () => {
