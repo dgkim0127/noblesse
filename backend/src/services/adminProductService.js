@@ -10,6 +10,7 @@ import {
   validationError
 } from "../utils/validators.js";
 import { conflict, notFound } from "../utils/errors.js";
+import { createAdminProductImageService } from "./adminProductImageService.js";
 
 function parseProductFilters(filters) {
   const pagination = parsePagination(filters);
@@ -115,7 +116,8 @@ function parseProductBody(body = {}, { partial = false } = {}) {
   return Object.fromEntries(Object.entries(parsed).filter(([, value]) => value !== undefined));
 }
 
-export function createAdminProductService({ queries }) {
+export function createAdminProductService({ queries, imageService }) {
+  const images = imageService || createAdminProductImageService({ queries });
   return {
     async listProducts(filters = {}, adminViewer) {
       const parsed = parseProductFilters(filters);
@@ -164,6 +166,16 @@ export function createAdminProductService({ queries }) {
         throw notFound("Product not found");
       }
       return result;
+    },
+
+    async uploadProductImages(productId, uploadRequest = {}, adminViewer) {
+      const id = validateUuid(productId, "productId");
+      return images.uploadProductImages({
+        productId: id,
+        contentType: uploadRequest.contentType,
+        body: uploadRequest.body,
+        adminViewer
+      });
     }
   };
 }

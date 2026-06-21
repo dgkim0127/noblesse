@@ -1728,12 +1728,14 @@ const catalogEntryUnifiedCopy = {
     sections: {
       categoryEyebrow: '카테고리',
       productEyebrow: '상품 정보',
+      imageEyebrow: '상품 사진',
       priceEyebrow: '가격',
     },
     saveStatus: {
       title: '저장 진행 상태',
       category: '카테고리',
       product: '상품',
+      images: '사진',
       price: '가격',
       idle: '대기',
       saving: '저장 중',
@@ -1743,6 +1745,36 @@ const catalogEntryUnifiedCopy = {
     productActive: '활성 상태',
     categoryNameConflict: '이미 같은 카테고리명이 있습니다.',
     productCodeInvalid: '상품 코드는 영문, 숫자, 점, 하이픈, 밑줄 80자 이내로 입력하세요.',
+    imageCopy: {
+      title: '3단계 — 상품 사진',
+      description: '대표 사진 1장을 포함해 최대 8장까지 등록할 수 있습니다.',
+      dropTitle: '사진을 끌어오거나 선택하세요',
+      dropDescription: 'JPEG, PNG, WebP만 가능하며 파일당 최대 10MB입니다.',
+      choose: '사진 선택',
+      photo: '사진',
+      primary: '대표 사진',
+      setPrimary: '대표 지정',
+      moveUp: '위로',
+      moveDown: '아래로',
+      remove: '삭제',
+      altText: 'Alt text',
+      altPlaceholder: '비워두면 상품명을 사용합니다',
+      previewAlt: '상품 사진 미리보기',
+      status: { ready: '준비 완료', uploading: '업로드 중', uploaded: '업로드 완료', error: '업로드 실패' },
+    },
+    imageValidation: {
+      imageRequired: '상품 사진을 최소 1장 추가하세요.',
+      imageCount: '상품 사진은 최대 8장까지 등록할 수 있습니다.',
+      imageType: 'JPEG, PNG, WebP 파일만 등록할 수 있습니다.',
+      imageTooLarge: '사진 1장당 최대 10MB까지 등록할 수 있습니다.',
+      imageSignature: '이미지 파일이 손상되었거나 형식이 올바르지 않습니다.',
+      imageInvalid: '사진을 확인하고 다시 선택하세요.',
+      imageUploadNeedsProduct: '사진 업로드 전에 상품 저장이 필요합니다.',
+    },
+    imageErrors: {
+      tooLarge: '사진 용량이 너무 큽니다. 10MB 이하 파일로 다시 시도하세요.',
+      unsupportedImage: '지원하지 않는 이미지 형식입니다.',
+    },
   },
   en: {
     summaryTitle: 'Save summary',
@@ -1750,12 +1782,14 @@ const catalogEntryUnifiedCopy = {
     sections: {
       categoryEyebrow: 'Category',
       productEyebrow: 'Product information',
+      imageEyebrow: 'Product photos',
       priceEyebrow: 'Price',
     },
     saveStatus: {
       title: 'Save progress',
       category: 'Category',
       product: 'Product',
+      images: 'Photos',
       price: 'Price',
       idle: 'Ready',
       saving: 'Saving',
@@ -1765,6 +1799,36 @@ const catalogEntryUnifiedCopy = {
     productActive: 'Active',
     categoryNameConflict: 'A category with this name already exists.',
     productCodeInvalid: 'Use up to 80 letters, numbers, periods, hyphens, or underscores.',
+    imageCopy: {
+      title: 'Step 3 — Product Photos',
+      description: 'Add at least one primary photo and up to eight photos total.',
+      dropTitle: 'Drop photos here or choose files',
+      dropDescription: 'JPEG, PNG, or WebP only. Maximum 10MB per file.',
+      choose: 'Choose photos',
+      photo: 'Photo',
+      primary: 'Primary photo',
+      setPrimary: 'Set primary',
+      moveUp: 'Move up',
+      moveDown: 'Move down',
+      remove: 'Remove',
+      altText: 'Alt text',
+      altPlaceholder: 'Product name is used when empty',
+      previewAlt: 'Product photo preview',
+      status: { ready: 'Ready', uploading: 'Uploading', uploaded: 'Uploaded', error: 'Upload failed' },
+    },
+    imageValidation: {
+      imageRequired: 'Add at least one product photo.',
+      imageCount: 'Add no more than eight product photos.',
+      imageType: 'Only JPEG, PNG, or WebP files are supported.',
+      imageTooLarge: 'Each photo must be 10MB or smaller.',
+      imageSignature: 'The image appears damaged or the file type is invalid.',
+      imageInvalid: 'Check the photos and choose them again.',
+      imageUploadNeedsProduct: 'Product must be saved before images can be uploaded.',
+    },
+    imageErrors: {
+      tooLarge: 'The photo is too large. Try a file under 10MB.',
+      unsupportedImage: 'This image type is not supported.',
+    },
   },
   jp: {
     summaryTitle: '保存内容の概要',
@@ -1772,12 +1836,14 @@ const catalogEntryUnifiedCopy = {
     sections: {
       categoryEyebrow: 'カテゴリー',
       productEyebrow: '商品情報',
+      imageEyebrow: '商品写真',
       priceEyebrow: '価格',
     },
     saveStatus: {
       title: '保存進行状況',
       category: 'カテゴリー',
       product: '商品',
+      images: '写真',
       price: '価格',
       idle: '待機',
       saving: '保存中',
@@ -1787,6 +1853,36 @@ const catalogEntryUnifiedCopy = {
     productActive: '有効状態',
     categoryNameConflict: '同じカテゴリー名がすでに存在します。',
     productCodeInvalid: '商品コードは英数字、ピリオド、ハイフン、アンダースコア80文字以内で入力してください。',
+    imageCopy: {
+      title: 'ステップ3 — 商品写真',
+      description: '代表写真を含め、最大8枚まで登録できます。',
+      dropTitle: '写真をドロップ、または選択してください',
+      dropDescription: 'JPEG、PNG、WebPのみ対応。1ファイル最大10MBです。',
+      choose: '写真を選択',
+      photo: '写真',
+      primary: '代表写真',
+      setPrimary: '代表に設定',
+      moveUp: '上へ',
+      moveDown: '下へ',
+      remove: '削除',
+      altText: 'Alt text',
+      altPlaceholder: '空欄の場合は商品名を使用します',
+      previewAlt: '商品写真プレビュー',
+      status: { ready: '準備完了', uploading: 'アップロード中', uploaded: 'アップロード完了', error: 'アップロード失敗' },
+    },
+    imageValidation: {
+      imageRequired: '商品写真を1枚以上追加してください。',
+      imageCount: '商品写真は最大8枚まで登録できます。',
+      imageType: 'JPEG、PNG、WebPのみ登録できます。',
+      imageTooLarge: '写真は1枚10MB以下にしてください。',
+      imageSignature: '画像が破損しているか、形式が正しくありません。',
+      imageInvalid: '写真を確認して再度選択してください。',
+      imageUploadNeedsProduct: '写真をアップロードする前に商品保存が必要です。',
+    },
+    imageErrors: {
+      tooLarge: '写真容量が大きすぎます。10MB以下のファイルで再試行してください。',
+      unsupportedImage: '対応していない画像形式です。',
+    },
   },
   cn: {
     summaryTitle: '保存摘要',
@@ -1794,12 +1890,14 @@ const catalogEntryUnifiedCopy = {
     sections: {
       categoryEyebrow: '分类',
       productEyebrow: '产品信息',
+      imageEyebrow: '产品图片',
       priceEyebrow: '价格',
     },
     saveStatus: {
       title: '保存进度',
       category: '分类',
       product: '产品',
+      images: '图片',
       price: '价格',
       idle: '待处理',
       saving: '保存中',
@@ -1809,6 +1907,36 @@ const catalogEntryUnifiedCopy = {
     productActive: '启用状态',
     categoryNameConflict: '已存在相同的分类名称。',
     productCodeInvalid: '产品代码限 80 个字符，可使用英文字母、数字、点、连字符或下划线。',
+    imageCopy: {
+      title: '第 3 步 — 产品图片',
+      description: '至少添加 1 张主图，最多可添加 8 张图片。',
+      dropTitle: '拖入图片或选择文件',
+      dropDescription: '仅支持 JPEG、PNG、WebP；单个文件最大 10MB。',
+      choose: '选择图片',
+      photo: '图片',
+      primary: '主图',
+      setPrimary: '设为主图',
+      moveUp: '上移',
+      moveDown: '下移',
+      remove: '删除',
+      altText: 'Alt text',
+      altPlaceholder: '留空时使用产品名称',
+      previewAlt: '产品图片预览',
+      status: { ready: '已准备', uploading: '上传中', uploaded: '已上传', error: '上传失败' },
+    },
+    imageValidation: {
+      imageRequired: '请至少添加 1 张产品图片。',
+      imageCount: '产品图片最多可添加 8 张。',
+      imageType: '仅支持 JPEG、PNG、WebP 文件。',
+      imageTooLarge: '每张图片必须小于等于 10MB。',
+      imageSignature: '图片已损坏或文件类型不正确。',
+      imageInvalid: '请检查图片后重新选择。',
+      imageUploadNeedsProduct: '上传图片前必须先保存产品。',
+    },
+    imageErrors: {
+      tooLarge: '图片过大。请使用 10MB 以下文件重试。',
+      unsupportedImage: '不支持该图片格式。',
+    },
   },
 }
 
@@ -1819,9 +1947,13 @@ for (const locale of Object.keys(catalogEntryUnifiedCopy)) {
   entry.retryFailed = extra.retryFailed
   entry.sections = extra.sections
   entry.saveStatus = extra.saveStatus
+  entry.images = extra.imageCopy
   entry.product.active = extra.productActive
+  entry.confirm.images = extra.imageCopy.photo
   entry.validation.categoryNameConflict = extra.categoryNameConflict
   entry.validation.productCodeInvalid = extra.productCodeInvalid
+  Object.assign(entry.validation, extra.imageValidation)
+  Object.assign(entry.errors, extra.imageErrors)
 }
 
 export const adminLocales = Object.keys(copy)

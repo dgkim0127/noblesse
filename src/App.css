@@ -1144,6 +1144,109 @@ h6 {
   background: rgba(42, 36, 87, 0.08);
 }
 
+.catalog-entry-dropzone {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(255, 143, 169, 0.12), rgba(255, 255, 255, 0.94));
+  border: 1px dashed rgba(42, 36, 87, 0.26);
+  border-radius: 18px;
+  color: var(--admin-muted);
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  min-height: 150px;
+  padding: 22px;
+  text-align: center;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.catalog-entry-dropzone.active {
+  background: rgba(255, 143, 169, 0.18);
+  border-color: var(--pink);
+  transform: translateY(-1px);
+}
+
+.catalog-entry-dropzone strong {
+  color: var(--navy);
+  font-size: 1rem;
+}
+
+.catalog-entry-dropzone button,
+.catalog-entry-image-card button {
+  min-height: 34px;
+}
+
+.catalog-entry-image-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.catalog-entry-image-card {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--admin-border);
+  border-radius: 16px;
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+  padding: 10px;
+}
+
+.catalog-entry-image-card.primary {
+  border-color: rgba(255, 143, 169, 0.78);
+  box-shadow: 0 12px 28px rgba(255, 143, 169, 0.16);
+}
+
+.catalog-entry-image-card img,
+.catalog-entry-summary-image img {
+  aspect-ratio: 1;
+  background: rgba(42, 36, 87, 0.04);
+  border-radius: 12px;
+  height: auto;
+  object-fit: cover;
+  width: 100%;
+}
+
+.catalog-entry-image-meta {
+  display: grid;
+  gap: 8px;
+}
+
+.catalog-entry-image-meta strong,
+.catalog-entry-summary-image span {
+  color: var(--navy);
+  font-weight: 900;
+}
+
+.catalog-entry-image-meta span,
+.catalog-entry-image-status {
+  color: var(--admin-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.catalog-entry-image-status.uploaded {
+  color: #23715f;
+}
+
+.catalog-entry-image-status.error {
+  color: #9a2940;
+}
+
+.catalog-entry-summary-image {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-actions.compact {
+  gap: 8px;
+}
+
+.admin-actions.compact button {
+  flex: 1 1 auto;
+  font-size: 0.78rem;
+  padding-inline: 10px;
+}
+
 .admin-check {
   align-items: center;
   color: var(--navy);

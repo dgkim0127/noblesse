@@ -28,6 +28,11 @@ import { createAdminDashboardService } from "./services/adminDashboardService.js
 import { createAdminInquiryService } from "./services/adminInquiryService.js";
 import { createAdminPriceService } from "./services/adminPriceService.js";
 import { createAdminProductService } from "./services/adminProductService.js";
+import {
+  createAdminProductImageService,
+  createFirebaseImageObjectStore,
+  decodeMediaKey
+} from "./services/adminProductImageService.js";
 import { createAdminQuoteService } from "./services/adminQuoteService.js";
 import { createBuyerInquiryService } from "./services/buyerInquiryService.js";
 import { createBuyerRegistrationService } from "./services/buyerRegistrationService.js";
@@ -44,6 +49,14 @@ function buildCorsOptions(env) {
 export function createApp(options = {}) {
   const env = options.env || getEnv();
   const pool = options.pool ?? createPool(env);
+  const imageObjectStore =
+    options.objectStore || createFirebaseImageObjectStore(env);
+  const mediaService =
+    options.services?.media || {
+      createReadStream(mediaKey) {
+        return imageObjectStore.createReadStream(decodeMediaKey(mediaKey));
+      }
+    };
   const services = {
     catalog:
       options.services?.catalog ||
@@ -93,7 +106,13 @@ export function createApp(options = {}) {
       products:
         options.services?.admin?.products ||
         createAdminProductService({
-          queries: options.queries?.admin?.products || createAdminProductQueries(pool)
+          queries: options.queries?.admin?.products || createAdminProductQueries(pool),
+          imageService:
+            options.services?.admin?.productImages ||
+            createAdminProductImageService({
+              queries: options.queries?.admin?.products || createAdminProductQueries(pool),
+              objectStore: imageObjectStore
+            })
         }),
       quotes:
         options.services?.admin?.quotes ||
@@ -137,10 +156,17 @@ export function createApp(options = {}) {
 
   app.use(requestId);
   app.use(cors(buildCorsOptions(env)));
+  app.use(
+    "/api/admin/products/:productId/images",
+    express.raw({
+      limit: "82mb",
+      type: (req) => String(req.headers["content-type"] || "").includes("multipart/form-data")
+    })
+  );
   app.use(express.json({ limit: "1mb" }));
 
   app.use("/api/health", createHealthRoutes());
-  app.use("/api/catalog", createCatalogRoutes({ catalogService: services.catalog }));
+  app.use("/api/catalog", createCatalogRoutes({ catalogService: services.catalog, mediaService }));
   app.use(
     "/api/buyer",
     createBuyerRoutes({

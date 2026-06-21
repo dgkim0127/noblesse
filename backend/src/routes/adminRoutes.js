@@ -226,6 +226,22 @@ export function createAdminRoutes({ services, requireAdmin }) {
     })
   );
 
+  router.post(
+    "/products/:productId/images",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = await services.products.uploadProductImages(
+        req.params.productId,
+        {
+          contentType: req.headers["content-type"] || "",
+          body: req.body
+        },
+        req.adminViewer
+      );
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
   router.get(
     "/quotes",
     requireAdmin,

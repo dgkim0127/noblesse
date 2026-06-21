@@ -47,6 +47,7 @@ function createProductSnapshot(row) {
     nameEn: row.name_en,
     categoryId: row.category_id,
     categoryKey: row.category_key || null,
+    imageSet: row.image_set || {},
     isVisible: row.is_visible,
     updatedAt: row.updated_at
   };
@@ -474,6 +475,87 @@ export function createAdminProductQueries(pool) {
             productId,
             beforeSnapshot,
             afterSnapshot,
+            actor.requestId,
+            actor.ipAddress,
+            actor.userAgent
+          ]
+        );
+
+        await client.query("commit");
+        return {
+          product: mapProduct(updatedRow),
+          auditLogId: auditResult.rows[0].id
+        };
+      } catch (error) {
+        try {
+          await client.query("rollback");
+        } catch {
+          // Preserve the original query error instead of masking it with rollback failure.
+        }
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+
+    async updateProductImages(productId, input, adminViewer = {}) {
+      assertTransactionPool(pool);
+      const client = await pool.connect();
+      const actor = getAdminActor(adminViewer);
+
+      try {
+        await client.query("begin");
+        const existingResult = await client.query(
+          `${productSelect} where p.id = $1 for update of p`,
+          [productId]
+        );
+        const existingRow = existingResult.rows[0];
+        if (!existingRow) {
+          await client.query("rollback");
+          return null;
+        }
+
+        const updateResult = await client.query(
+          `
+            update public.products
+            set image_set = $2::jsonb,
+                image_alt = $3::jsonb,
+                updated_at = now()
+            where id = $1
+            returning id
+          `,
+          [productId, JSON.stringify(input.imageSet || {}), JSON.stringify(input.imageAlt || {})]
+        );
+        const updatedResult = await client.query(
+          `${productSelect} where p.id = $1 limit 1`,
+          [updateResult.rows[0].id]
+        );
+        const updatedRow = updatedResult.rows[0];
+        const auditResult = await client.query(
+          `
+            insert into public.audit_logs (
+              actor_user_id,
+              actor_role,
+              action,
+              target_table,
+              target_id,
+              before_snapshot,
+              after_snapshot,
+              request_id,
+              ip_address,
+              user_agent
+            )
+            values ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8, $9, $10)
+            returning id
+          `,
+          [
+            actor.userId,
+            actor.role,
+            "admin.product.images.update",
+            "products",
+            productId,
+            createProductSnapshot(existingRow),
+            createProductSnapshot(updatedRow),
             actor.requestId,
             actor.ipAddress,
             actor.userAgent

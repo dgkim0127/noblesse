@@ -17,17 +17,20 @@ test('unified catalog entry route is exposed in locale and default admin trees',
   assert.equal(routeMatches.length, 2)
 })
 
-test('unified catalog entry form reuses existing admin API calls without upload guesses', () => {
+test('unified catalog entry form reuses existing admin API calls and backend image upload', () => {
   const page = readWorkspaceFile('src/pages/admin/AdminCatalogEntryPage.jsx')
+  const api = readWorkspaceFile('src/api/adminApi.js')
 
   assert.match(page, /api\.getCategories\(\{ limit: 200 \}, token\)/)
   assert.match(page, /api\.createCategory\(/)
   assert.match(page, /api\.getProducts\(\{ q: productCode, limit: 10 \}, token\)/)
   assert.match(page, /api\.createProduct\(/)
+  assert.match(page, /api\.uploadProductImages\(productId, formData, token\)/)
   assert.match(page, /api\.createPrice\(/)
   assert.match(page, /descriptionEn: productForm\.description\.trim\(\) \|\| undefined/)
   assert.match(page, /isExportAvailable: productForm\.isExportAvailable/)
-  assert.doesNotMatch(page, /FormData|type="file"|upload/i)
+  assert.match(api, /async uploadProductImages\(productId, formData, token\)/)
+  assert.match(api, /\/admin\/products\/\$\{encodeURIComponent\(productId\)\}\/images/)
 })
 
 test('unified catalog entry form is not a step switching wizard', () => {
@@ -48,7 +51,10 @@ test('unified catalog entry handles validation, conflicts, and protected errors'
   assert.match(page, /setFieldErrors\(\(current\) => \(\{ \.\.\.current, code: t\.validation\.productConflict \}\)\)/)
   assert.match(page, /productCodeInvalid/)
   assert.match(page, /parsePositiveMoney/)
-  assert.match(page, /disabled=\{isSaving\}/)
+  assert.match(page, /disabled=\{saveDisabled\}/)
+  assert.match(page, /imageRequired/)
+  assert.match(page, /allowedImageTypes/)
+  assert.match(page, /detectImageMime/)
   assert.match(page, /market: 'KR'/)
   assert.match(page, /currency: 'KRW'/)
 })
@@ -59,9 +65,23 @@ test('unified catalog entry tracks partial saves and retry state', () => {
   assert.match(page, /initialSaveStatus/)
   assert.match(page, /updateSaveStatus\('category', 'success'\)/)
   assert.match(page, /updateSaveStatus\('product', 'success'\)/)
+  assert.match(page, /updateSaveStatus\('images', 'success'\)/)
   assert.match(page, /updateSaveStatus\('price', 'success'\)/)
   assert.match(page, /retryFailed/)
   assert.match(page, /beforeunload/)
+})
+
+test('unified catalog entry image UI supports preview, primary, ordering, and cleanup', () => {
+  const page = readWorkspaceFile('src/pages/admin/AdminCatalogEntryPage.jsx')
+
+  assert.match(page, /type="file"/)
+  assert.match(page, /onDrop=\{\(event\) =>/)
+  assert.match(page, /URL\.createObjectURL\(file\)/)
+  assert.match(page, /URL\.revokeObjectURL/)
+  assert.match(page, /setPrimaryImage/)
+  assert.match(page, /moveImage/)
+  assert.match(page, /removeImage/)
+  assert.match(page, /maxImageCount = 8/)
 })
 
 test('products page exposes the unified catalog entry action', () => {
@@ -79,14 +99,22 @@ test('unified catalog entry copy exists for every admin locale', () => {
     assert.ok(copy.category.title)
     assert.ok(copy.product.title)
     assert.ok(copy.price.title)
+    assert.ok(copy.images.title)
+    assert.ok(copy.images.setPrimary)
     assert.ok(copy.confirm.title)
+    assert.ok(copy.confirm.images)
     assert.ok(copy.success.title)
     assert.ok(copy.errors.unauthorized)
     assert.ok(copy.errors.forbidden)
+    assert.ok(copy.errors.tooLarge)
+    assert.ok(copy.errors.unsupportedImage)
     assert.ok(copy.errors.server)
     assert.ok(copy.sections.categoryEyebrow)
+    assert.ok(copy.sections.imageEyebrow)
     assert.ok(copy.saveStatus.error)
+    assert.ok(copy.saveStatus.images)
     assert.ok(copy.validation.productCodeInvalid)
     assert.ok(copy.validation.categoryNameConflict)
+    assert.ok(copy.validation.imageRequired)
   }
 })

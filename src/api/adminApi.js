@@ -96,6 +96,14 @@ export function createAdminApi(apiClient) {
       }))
     },
 
+    async uploadProductImages(productId, formData, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/products/${encodeURIComponent(productId)}/images`, {
+        method: 'POST',
+        token: requireToken(token),
+        body: formData,
+      }))
+    },
+
     async getCategories(params = {}, token) {
       return unwrap(await apiClient.apiFetch(`/admin/categories${buildQuery(params)}`, { token: requireToken(token) }))
     },

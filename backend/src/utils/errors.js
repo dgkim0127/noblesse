@@ -24,6 +24,14 @@ export function conflict(message = "Request conflict") {
   return new ApiError(409, "CONFLICT", message);
 }
 
+export function payloadTooLarge(message = "Request payload too large") {
+  return new ApiError(413, "PAYLOAD_TOO_LARGE", message);
+}
+
+export function unsupportedMediaType(message = "Unsupported media type") {
+  return new ApiError(415, "UNSUPPORTED_MEDIA_TYPE", message);
+}
+
 export function validationError(message = "Invalid request") {
   return new ApiError(400, "VALIDATION_ERROR", message);
 }

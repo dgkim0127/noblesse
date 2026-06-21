@@ -1,9 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AdminLink, AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { useAdminCopy } from './adminCopy'
 import { useLocalePath } from '../../utils/locale'
+
+const maxImageCount = 8
+const maxImageBytes = 10 * 1024 * 1024
+const allowedImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
 const initialCategoryForm = {
   categoryId: '',
@@ -38,6 +42,7 @@ const initialPriceForm = {
 const initialSaveStatus = {
   category: 'idle',
   product: 'idle',
+  images: 'idle',
   price: 'idle',
 }
 
@@ -65,6 +70,8 @@ function getErrorKey(error) {
   if (error?.status === 401 || error?.code === 'UNAUTHORIZED') return 'unauthorized'
   if (error?.status === 403 || error?.code === 'FORBIDDEN') return 'forbidden'
   if (error?.status === 409 || error?.code === 'CONFLICT') return 'conflict'
+  if (error?.status === 413 || error?.code === 'PAYLOAD_TOO_LARGE') return 'tooLarge'
+  if (error?.status === 415 || error?.code === 'UNSUPPORTED_MEDIA_TYPE') return 'unsupportedImage'
   if (error?.status >= 500 || error?.code === 'INTERNAL_ERROR') return 'server'
   if (error?.code === 'NETWORK_ERROR') return 'network'
   return 'unknown'
@@ -116,26 +123,102 @@ function formatDisplayAmount(value, currency) {
   }).format(number)
 }
 
+function detectImageMime(bytes) {
+  const data = new Uint8Array(bytes)
+  if (data.length >= 3 && data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff) return 'image/jpeg'
+  if (
+    data.length >= 8 &&
+    data[0] === 0x89 &&
+    data[1] === 0x50 &&
+    data[2] === 0x4e &&
+    data[3] === 0x47 &&
+    data[4] === 0x0d &&
+    data[5] === 0x0a &&
+    data[6] === 0x1a &&
+    data[7] === 0x0a
+  ) return 'image/png'
+  if (
+    data.length >= 12 &&
+    String.fromCharCode(...data.slice(0, 4)) === 'RIFF' &&
+    String.fromCharCode(...data.slice(8, 12)) === 'WEBP'
+  ) return 'image/webp'
+  return ''
+}
+
+function readImage(previewUrl) {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve({ width: image.naturalWidth, height: image.naturalHeight })
+    image.onerror = () => reject(new Error('invalid_image'))
+    image.src = previewUrl
+  })
+}
+
+async function createImageItem(file, t) {
+  if (!allowedImageTypes.has(file.type)) {
+    throw new Error(t.validation.imageType)
+  }
+  if (file.size > maxImageBytes) {
+    throw new Error(t.validation.imageTooLarge)
+  }
+  const detectedType = detectImageMime(await file.slice(0, 12).arrayBuffer())
+  if (!detectedType || detectedType !== file.type) {
+    throw new Error(t.validation.imageSignature)
+  }
+  const previewUrl = URL.createObjectURL(file)
+  try {
+    const dimensions = await readImage(previewUrl)
+    return {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      file,
+      previewUrl,
+      altText: '',
+      isPrimary: false,
+      status: 'ready',
+      error: '',
+      ...dimensions,
+    }
+  } catch (error) {
+    URL.revokeObjectURL(previewUrl)
+    throw error
+  }
+}
+
+function buildImagesFormData(images, productName) {
+  const formData = new FormData()
+  images.forEach((image) => formData.append('images', image.file, image.file.name))
+  formData.append('metadata', JSON.stringify({
+    primaryIndex: Math.max(0, images.findIndex((image) => image.isPrimary)),
+    altTexts: images.map((image) => image.altText.trim() || productName),
+  }))
+  return formData
+}
+
 export function AdminCatalogEntryPage() {
   const adminCopy = useAdminCopy()
   const t = adminCopy.catalogEntry
   const { toLocalePath } = useLocalePath()
   const navigate = useNavigate()
   const mutate = useAdminApiMutation()
+  const imageInputRef = useRef(null)
+  const imagesRef = useRef([])
   const [mode, setMode] = useState('existing')
   const [selectedCategoryKey, setSelectedCategoryKey] = useState('')
   const [categoryForm, setCategoryForm] = useState(initialCategoryForm)
   const [productForm, setProductForm] = useState(initialProductForm)
   const [priceForm, setPriceForm] = useState(initialPriceForm)
+  const [images, setImages] = useState([])
   const [createdCategory, setCreatedCategory] = useState(null)
   const [createdProduct, setCreatedProduct] = useState(null)
   const [createdPrice, setCreatedPrice] = useState(null)
+  const [uploadedImages, setUploadedImages] = useState([])
   const [fieldErrors, setFieldErrors] = useState({})
   const [message, setMessage] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [saveStatus, setSaveStatus] = useState(initialSaveStatus)
   const [refreshKey, setRefreshKey] = useState(0)
   const [isComplete, setIsComplete] = useState(false)
+  const [isDropActive, setIsDropActive] = useState(false)
 
   const { data, error, status } = useAdminApiResource((api, token) => api.getCategories({ limit: 200 }, token), [refreshKey])
   const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
@@ -145,11 +228,15 @@ export function AdminCatalogEntryPage() {
   const productCode = normalizeCode(productForm.code)
   const productRouteId = getCreatedProductId(createdProduct, productCode)
   const parsedWholesalePrice = parsePositiveMoney(priceForm.wholesalePrice)
+  const primaryImage = images.find((image) => image.isPrimary) || images[0] || null
+  const canEditImages = !uploadedImages.length && !isSaving && !isComplete
   const isDirty = Boolean(
     selectedCategoryKey ||
     createdCategory ||
     createdProduct ||
     createdPrice ||
+    uploadedImages.length ||
+    images.length ||
     productForm.code ||
     productForm.nameEn ||
     productForm.description ||
@@ -157,6 +244,14 @@ export function AdminCatalogEntryPage() {
     categoryForm.categoryId ||
     categoryForm.nameEn
   )
+
+  useEffect(() => {
+    imagesRef.current = images
+  }, [images])
+
+  useEffect(() => () => {
+    imagesRef.current.forEach((image) => URL.revokeObjectURL(image.previewUrl))
+  }, [])
 
   useEffect(() => {
     if (!isDirty || isComplete) return undefined
@@ -216,6 +311,14 @@ export function AdminCatalogEntryPage() {
     return errors
   }
 
+  const validateImages = () => {
+    const errors = {}
+    if (!images.length && !uploadedImages.length) errors.images = t.validation.imageRequired
+    if (images.length > maxImageCount) errors.images = t.validation.imageCount
+    if (images.some((image) => image.error)) errors.images = t.validation.imageInvalid
+    return errors
+  }
+
   const validatePrice = () => {
     const errors = {}
     const wholesalePrice = parsePositiveMoney(priceForm.wholesalePrice)
@@ -233,6 +336,7 @@ export function AdminCatalogEntryPage() {
     const errors = {
       ...validateCategory(),
       ...validateProduct(),
+      ...validateImages(),
       ...validatePrice(),
     }
     setFieldErrors(errors)
@@ -248,6 +352,62 @@ export function AdminCatalogEntryPage() {
     } else {
       setSelectedCategoryKey('')
     }
+  }
+
+  const addImageFiles = async (fileList) => {
+    clearMessages()
+    const files = Array.from(fileList || [])
+    if (!files.length || !canEditImages) return
+    const remainingSlots = maxImageCount - images.length
+    const acceptedFiles = files.slice(0, remainingSlots)
+    if (files.length > remainingSlots) {
+      setFieldErrors((current) => ({ ...current, images: t.validation.imageCount }))
+    }
+
+    const nextImages = []
+    for (const file of acceptedFiles) {
+      try {
+        nextImages.push(await createImageItem(file, t))
+      } catch (error) {
+        setFieldErrors((current) => ({ ...current, images: error.message || t.validation.imageInvalid }))
+      }
+    }
+    if (!nextImages.length) return
+    setImages((current) => {
+      const merged = [...current, ...nextImages].slice(0, maxImageCount)
+      if (!merged.some((image) => image.isPrimary) && merged[0]) merged[0] = { ...merged[0], isPrimary: true }
+      return merged
+    })
+  }
+
+  const removeImage = (imageId) => {
+    setImages((current) => {
+      const removed = current.find((image) => image.id === imageId)
+      if (removed) URL.revokeObjectURL(removed.previewUrl)
+      const next = current.filter((image) => image.id !== imageId)
+      if (removed?.isPrimary && next[0]) next[0] = { ...next[0], isPrimary: true }
+      return next
+    })
+  }
+
+  const setPrimaryImage = (imageId) => {
+    setImages((current) => current.map((image) => ({ ...image, isPrimary: image.id === imageId })))
+  }
+
+  const moveImage = (imageId, direction) => {
+    setImages((current) => {
+      const index = current.findIndex((image) => image.id === imageId)
+      const target = index + direction
+      if (index < 0 || target < 0 || target >= current.length) return current
+      const next = [...current]
+      const [image] = next.splice(index, 1)
+      next.splice(target, 0, image)
+      return next
+    })
+  }
+
+  const setImageAltText = (imageId, altText) => {
+    setImages((current) => current.map((image) => image.id === imageId ? { ...image, altText } : image))
   }
 
   const createCategoryPayload = () => ({
@@ -295,6 +455,18 @@ export function AdminCatalogEntryPage() {
     }
   }
 
+  const uploadImagesForProduct = async (product) => {
+    const productId = product?.id
+    if (!productId) {
+      throw Object.assign(new Error(t.validation.imageUploadNeedsProduct), { field: 'images' })
+    }
+    const formData = buildImagesFormData(images, productForm.nameEn.trim())
+    const result = await mutate((api, token) => api.uploadProductImages(productId, formData, token))
+    setUploadedImages(result.data?.images || [])
+    if (result.data?.product) setCreatedProduct(result.data.product)
+    return result
+  }
+
   const submitAll = async () => {
     clearMessages()
     if (!validateAll()) return
@@ -302,8 +474,9 @@ export function AdminCatalogEntryPage() {
     let activeResource = ''
     try {
       let categoryKey = activeCategoryKey
+      let product = createdProduct
 
-      if (!createdProduct) {
+      if (!product) {
         await ensureProductCodeAvailable()
       }
 
@@ -321,13 +494,22 @@ export function AdminCatalogEntryPage() {
         updateSaveStatus('category', 'success')
       }
 
-      if (!createdProduct) {
+      if (!product) {
         activeResource = 'product'
         updateSaveStatus('product', 'saving')
         const productResult = await mutate((api, token) => api.createProduct(createProductPayload(categoryKey), token))
-        const product = productResult.data?.product || { code: productCode, nameEn: productForm.nameEn.trim() }
+        product = productResult.data?.product || { code: productCode, nameEn: productForm.nameEn.trim() }
         setCreatedProduct(product)
         updateSaveStatus('product', 'success')
+      }
+
+      if (!uploadedImages.length) {
+        activeResource = 'images'
+        updateSaveStatus('images', 'saving')
+        setImages((current) => current.map((image) => ({ ...image, status: 'uploading', error: '' })))
+        await uploadImagesForProduct(product)
+        setImages((current) => current.map((image) => ({ ...image, status: 'uploaded' })))
+        updateSaveStatus('images', 'success')
       }
 
       if (!createdPrice) {
@@ -343,6 +525,9 @@ export function AdminCatalogEntryPage() {
     } catch (error) {
       const key = error?.field || activeResource
       if (key && key !== 'code') updateSaveStatus(key, 'error')
+      if (key === 'images') {
+        setImages((current) => current.map((image) => ({ ...image, status: 'error', error: formatApiError(t, error) })))
+      }
       setMessage(formatApiError(t, error))
     } finally {
       setIsSaving(false)
@@ -350,11 +535,14 @@ export function AdminCatalogEntryPage() {
   }
 
   const continueAnother = () => {
+    images.forEach((image) => URL.revokeObjectURL(image.previewUrl))
     setMode('existing')
     setSelectedCategoryKey('')
     setCategoryForm(initialCategoryForm)
     setProductForm(initialProductForm)
     setPriceForm(initialPriceForm)
+    setImages([])
+    setUploadedImages([])
     setCreatedCategory(null)
     setCreatedProduct(null)
     setCreatedPrice(null)
@@ -371,6 +559,7 @@ export function AdminCatalogEntryPage() {
 
   const categorySummary = selectedCategory ? getCategoryName(selectedCategory) : mode === 'new' ? categoryForm.nameEn || categoryForm.categoryId || '-' : '-'
   const saveButtonLabel = isSaving ? t.saving : Object.values(saveStatus).includes('error') ? t.retryFailed : t.save
+  const saveDisabled = isSaving || (!images.length && !uploadedImages.length)
 
   return <>
     <AdminPageHeader
@@ -441,6 +630,63 @@ export function AdminCatalogEntryPage() {
 
         <section className="admin-card catalog-entry-section">
           <div>
+            <p className="eyebrow">{t.sections.imageEyebrow}</p>
+            <h2>{t.images.title}</h2>
+            <p className="admin-muted">{t.images.description}</p>
+          </div>
+          <div
+            className={`catalog-entry-dropzone ${isDropActive ? 'active' : ''}`}
+            onDragLeave={() => setIsDropActive(false)}
+            onDragOver={(event) => {
+              event.preventDefault()
+              setIsDropActive(true)
+            }}
+            onDrop={(event) => {
+              event.preventDefault()
+              setIsDropActive(false)
+              addImageFiles(event.dataTransfer.files)
+            }}
+          >
+            <input
+              accept="image/jpeg,image/png,image/webp"
+              hidden
+              multiple
+              onChange={(event) => {
+                addImageFiles(event.target.files)
+                event.target.value = ''
+              }}
+              ref={imageInputRef}
+              type="file"
+            />
+            <strong>{t.images.dropTitle}</strong>
+            <span>{t.images.dropDescription}</span>
+            <button disabled={!canEditImages || images.length >= maxImageCount} type="button" onClick={() => imageInputRef.current?.click()}>{t.images.choose}</button>
+            {fieldErrors.images && <small className="admin-field-error">{fieldErrors.images}</small>}
+          </div>
+          <div className="catalog-entry-image-grid">
+            {images.map((image, index) => <article className={`catalog-entry-image-card ${image.isPrimary ? 'primary' : ''}`} key={image.id}>
+              <img alt={image.altText || productForm.nameEn || t.images.previewAlt} src={image.previewUrl} />
+              <div className="catalog-entry-image-meta">
+                <strong>{image.isPrimary ? t.images.primary : `${t.images.photo} ${index + 1}`}</strong>
+                <span>{image.file.type} · {(image.file.size / 1024 / 1024).toFixed(2)}MB · {image.width}×{image.height}</span>
+                <label className="admin-search">{t.images.altText}
+                  <input value={image.altText} onChange={(event) => setImageAltText(image.id, event.target.value)} placeholder={productForm.nameEn || t.images.altPlaceholder} />
+                </label>
+              </div>
+              <div className="admin-actions compact">
+                <button disabled={!canEditImages || image.isPrimary} type="button" onClick={() => setPrimaryImage(image.id)}>{t.images.setPrimary}</button>
+                <button disabled={!canEditImages || index === 0} type="button" onClick={() => moveImage(image.id, -1)}>{t.images.moveUp}</button>
+                <button disabled={!canEditImages || index === images.length - 1} type="button" onClick={() => moveImage(image.id, 1)}>{t.images.moveDown}</button>
+                <button disabled={!canEditImages} type="button" onClick={() => removeImage(image.id)}>{t.images.remove}</button>
+              </div>
+              {image.status !== 'ready' && <p className={`catalog-entry-image-status ${image.status}`}>{t.images.status[image.status] || image.status}</p>}
+              {image.error && <small className="admin-field-error">{image.error}</small>}
+            </article>)}
+          </div>
+        </section>
+
+        <section className="admin-card catalog-entry-section">
+          <div>
             <p className="eyebrow">{t.sections.priceEyebrow}</p>
             <h2>{t.price.title}</h2>
           </div>
@@ -476,17 +722,22 @@ export function AdminCatalogEntryPage() {
           <p className="eyebrow">{t.confirm.title}</p>
           <h2>{t.summaryTitle}</h2>
         </div>
+        {primaryImage && <div className="catalog-entry-summary-image">
+          <img alt={primaryImage.altText || productForm.nameEn || t.images.previewAlt} src={primaryImage.previewUrl} />
+          <span>{t.images.primary}</span>
+        </div>}
         <dl className="admin-definition-list catalog-entry-summary">
           <dt>{t.confirm.category}</dt><dd>{categorySummary}</dd>
           <dt>{t.confirm.productCode}</dt><dd>{productCode || '-'}</dd>
           <dt>{t.confirm.productName}</dt><dd>{productForm.nameEn || '-'}</dd>
           <dt>{t.confirm.visibility}</dt><dd>{productForm.isVisible ? adminCopy.common.visible : adminCopy.common.hidden}</dd>
+          <dt>{t.confirm.images}</dt><dd>{uploadedImages.length || images.length}</dd>
           <dt>{t.confirm.market}</dt><dd>{priceForm.market}</dd>
           <dt>{t.confirm.currency}</dt><dd>{priceForm.currency}</dd>
           <dt>{t.confirm.price}</dt><dd>{parsedWholesalePrice == null ? '-' : formatDisplayAmount(parsedWholesalePrice, priceForm.currency)}</dd>
         </dl>
         <div className="catalog-entry-status-list" aria-label={t.saveStatus.title}>
-          {['category', 'product', 'price'].map((resource) => <p className={`catalog-entry-status ${saveStatus[resource]}`} key={resource}>
+          {['category', 'product', 'images', 'price'].map((resource) => <p className={`catalog-entry-status ${saveStatus[resource]}`} key={resource}>
             <span>{t.saveStatus[resource]}</span>
             <strong>{t.saveStatus[saveStatus[resource]]}</strong>
           </p>)}
@@ -494,7 +745,7 @@ export function AdminCatalogEntryPage() {
         {message && <p className="admin-inline-message" role="status">{message}</p>}
         {!isComplete ? <div className="admin-actions catalog-entry-actions">
           <button type="button" onClick={cancel}>{t.cancel}</button>
-          <button className="primary-action" disabled={isSaving} type="button" onClick={submitAll}>{saveButtonLabel}</button>
+          <button className="primary-action" disabled={saveDisabled} type="button" onClick={submitAll}>{saveButtonLabel}</button>
         </div> : <div className="admin-actions catalog-entry-actions">
           <AdminLink className="primary-action" to={`/products/${productRouteId}`}>{t.success.viewProduct}</AdminLink>
           <AdminLink to="/admin/products">{t.success.productList}</AdminLink>

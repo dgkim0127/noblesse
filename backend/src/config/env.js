@@ -49,6 +49,7 @@ export function getEnv(source = process.env) {
     firebaseProjectId: source.FIREBASE_PROJECT_ID || "",
     firebaseClientEmail: source.FIREBASE_CLIENT_EMAIL || "",
     firebasePrivateKey: source.FIREBASE_PRIVATE_KEY || "",
+    firebaseStorageBucket: source.FIREBASE_STORAGE_BUCKET || "",
     allowHealthOnlyStartup: source.ALLOW_HEALTH_ONLY_STARTUP === "true",
     allowedOrigins: parseAllowedOrigins(source.ALLOWED_ORIGINS),
     logLevel: source.LOG_LEVEL || "info"
