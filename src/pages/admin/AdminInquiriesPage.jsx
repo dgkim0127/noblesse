@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { AdminLink, AdminMoney, AdminPageHeader, AdminPagination, AdminStatus } from './AdminPageParts'
-import { AdminApiState, useAdminApiResource } from './adminApiPageUtils'
+import { AdminApiState, shouldShowAdminApiState, useAdminApiResource } from './adminApiPageUtils'
 import { getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
 const statusTabs = ['all', 'requested', 'checking', 'quoted', 'confirmed', 'cancelled']
@@ -18,7 +18,7 @@ export function AdminInquiriesPage() {
     offset,
   }), [offset, query, status])
   const { data, error, meta, status: requestStatus } = useAdminApiResource((api, token) => api.getInquiries(filters, token), [status, query, offset])
-  const loading = <AdminApiState error={error} status={requestStatus} />
+  const apiState = shouldShowAdminApiState(requestStatus) ? <AdminApiState error={error} status={requestStatus} /> : null
   const inquiries = data?.inquiries || []
   const resetPage = (setter) => (value) => {
     setter(value)
@@ -35,7 +35,7 @@ export function AdminInquiriesPage() {
       </div>
     </div>
 
-    {loading || <section className="admin-card">
+    {apiState || <section className="admin-card">
       <div className="admin-table-wrap">
         <table className="admin-table">
           <thead><tr><th>{t.inquiries.inquiryNumber}</th><th>{t.inquiries.buyerCompany}</th><th>{t.inquiries.market}</th><th>{t.inquiries.currency}</th><th>{t.common.status}</th><th>{t.inquiries.totalItems}</th><th>{t.inquiries.totalQuantity}</th><th>{t.inquiries.estimatedTotal}</th><th>{t.common.createdAt}</th><th>{t.common.actions}</th></tr></thead>

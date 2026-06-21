@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { AdminMoney, AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
-import { AdminApiState, useAdminApiResource } from './adminApiPageUtils'
+import { AdminApiState, shouldShowAdminApiState, useAdminApiResource } from './adminApiPageUtils'
 import { getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
 function countBy(rows, getKey) {
@@ -37,7 +37,7 @@ export function AdminAnalyticsPage() {
     }
   }, [])
 
-  const loading = <AdminApiState error={error} status={status} />
+  const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
   const analytics = useMemo(() => {
     const inquiries = data?.inquiries || []
     const buyers = data?.buyers || []
@@ -53,7 +53,7 @@ export function AdminAnalyticsPage() {
     }
   }, [data, t])
 
-  if (loading) return loading
+  if (apiState) return apiState
 
   return <>
     <AdminPageHeader

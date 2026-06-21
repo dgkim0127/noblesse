@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { AdminLink, AdminPageHeader, AdminPagination, AdminPreviewNote } from './AdminPageParts'
-import { AdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
+import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { useAdminCopy } from './adminCopy'
 
 const initialProductForm = {
@@ -30,8 +30,8 @@ export function AdminProductsPage() {
   }), [offset, query, visible])
   const { data, error, meta, status } = useAdminApiResource((api, token) => api.getProducts(filters, token), [query, visible, offset, refreshKey])
   const mutate = useAdminApiMutation()
-  const loading = <AdminApiState error={error} status={status} />
-  if (loading) return loading
+  const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
+  if (apiState) return apiState
 
   const products = data?.products || []
 

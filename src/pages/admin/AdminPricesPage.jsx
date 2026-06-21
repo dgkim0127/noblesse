@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { AdminMoney, AdminPageHeader, AdminPagination, AdminPreviewNote } from './AdminPageParts'
-import { AdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
+import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { useAdminCopy } from './adminCopy'
 
 const marketTabs = ['ALL', 'JP', 'US', 'GLOBAL', 'KR']
@@ -35,8 +35,8 @@ export function AdminPricesPage() {
   }), [activeOnly, market, offset, query])
   const { data, error, meta, status } = useAdminApiResource((api, token) => api.getPrices(filters, token), [activeOnly, market, query, offset, refreshKey])
   const mutate = useAdminApiMutation()
-  const loading = <AdminApiState error={error} status={status} />
-  if (loading) return loading
+  const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
+  if (apiState) return apiState
 
   const prices = data?.prices || []
   const setField = (field, value) => setForm((current) => ({ ...current, [field]: value }))

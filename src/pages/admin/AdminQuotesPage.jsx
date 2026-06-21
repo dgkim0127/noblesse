@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { AdminLink, AdminMoney, AdminPageHeader, AdminPagination, AdminPreviewNote } from './AdminPageParts'
-import { AdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
+import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
 const statusTabs = ['all', 'draft', 'sent', 'accepted', 'cancelled']
@@ -22,8 +22,8 @@ export function AdminQuotesPage() {
   }), [offset, query, status])
   const { data, error, meta, status: requestStatus } = useAdminApiResource((api, token) => api.getQuotes(filters, token), [status, query, offset, refreshKey])
   const mutate = useAdminApiMutation()
-  const loading = <AdminApiState error={error} status={requestStatus} />
-  if (loading) return loading
+  const apiState = shouldShowAdminApiState(requestStatus) ? <AdminApiState error={error} status={requestStatus} /> : null
+  if (apiState) return apiState
 
   const quotes = data?.quotes || []
   const resetPage = (setter) => (value) => {

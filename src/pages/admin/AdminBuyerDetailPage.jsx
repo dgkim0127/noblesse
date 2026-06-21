@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { AdminLink, AdminMoney, AdminPageHeader, AdminPreviewNote, AdminStatus } from './AdminPageParts'
-import { AdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
+import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy, getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
 function formatDate(value) {
@@ -17,8 +17,8 @@ export function AdminBuyerDetailPage() {
   const [message, setMessage] = useState('')
   const { data, error, status } = useAdminApiResource((api, token) => api.getBuyer(buyerId, token), [buyerId, refreshKey])
   const mutate = useAdminApiMutation()
-  const loading = <AdminApiState error={error} status={status} />
-  if (loading) return loading
+  const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
+  if (apiState) return apiState
 
   const buyer = data?.buyer
   const agreements = data?.agreements || []

@@ -1,13 +1,13 @@
 import { FileText, Handshake, Tags } from 'lucide-react'
 import { AdminLink, AdminPageHeader, AdminStatus } from './AdminPageParts'
-import { AdminApiState, useAdminApiResource } from './adminApiPageUtils'
+import { AdminApiState, shouldShowAdminApiState, useAdminApiResource } from './adminApiPageUtils'
 import { useAdminCopy } from './adminCopy'
 
 export function AdminDashboardPage() {
   const t = useAdminCopy()
   const { data, error, status } = useAdminApiResource((api, token) => api.getDashboard(token), [])
-  const loading = <AdminApiState error={error} status={status} />
-  if (loading) return loading
+  const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
+  if (apiState) return apiState
 
   const inquiries = data?.inquiries || {}
   const buyers = data?.buyers || {}

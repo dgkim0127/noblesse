@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { AdminLink, AdminMoney, AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
-import { AdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
+import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy, getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
 const quoteStatuses = ['draft', 'sent', 'accepted', 'cancelled']
@@ -14,8 +14,8 @@ export function AdminQuotePage() {
   const [savingStatus, setSavingStatus] = useState('')
   const { data, error, status } = useAdminApiResource((api, token) => api.getQuote(quoteId, token), [quoteId, refreshKey])
   const mutate = useAdminApiMutation()
-  const loading = <AdminApiState error={error} status={status} />
-  if (loading) return loading
+  const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
+  if (apiState) return apiState
 
   const quote = data?.quote
   const items = data?.items || []

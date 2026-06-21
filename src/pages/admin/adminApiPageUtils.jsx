@@ -59,6 +59,10 @@ export function useAdminApiMutation() {
   }
 }
 
+export function shouldShowAdminApiState(status) {
+  return status === 'loading' || status === 'error'
+}
+
 export function AdminApiState({ error, status }) {
   const t = useAdminCopy()
   const translatedError = error === 'CONFIGURATION_ERROR'

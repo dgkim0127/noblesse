@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { AdminPageHeader, AdminPagination, AdminPreviewNote, AdminStatus } from './AdminPageParts'
-import { AdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
+import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy, getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
 const filterTabs = ['all', 'pending', 'approved', 'blocked']
@@ -27,8 +27,8 @@ export function AdminBuyersPage() {
   }), [filter, offset, query])
   const { data, error, meta, status } = useAdminApiResource((api, token) => api.getBuyers(filters, token), [filter, query, offset, refreshKey])
   const mutate = useAdminApiMutation()
-  const loading = <AdminApiState error={error} status={status} />
-  if (loading) return loading
+  const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
+  if (apiState) return apiState
 
   const buyers = data?.buyers || []
   const resetPage = (setter) => (value) => {

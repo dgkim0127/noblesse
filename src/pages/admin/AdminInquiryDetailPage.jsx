@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { AdminLink, AdminMoney, AdminPageHeader, AdminStatus } from './AdminPageParts'
-import { AdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
+import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy, getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
 const statusOptions = ['requested', 'checking', 'quoted', 'confirmed', 'cancelled']
@@ -16,8 +16,8 @@ export function AdminInquiryDetailPage() {
   const [refreshKey, setRefreshKey] = useState(0)
   const { data, error, status } = useAdminApiResource((api, token) => api.getInquiry(inquiryId, token), [inquiryId, refreshKey])
   const mutate = useAdminApiMutation()
-  const loading = <AdminApiState error={error} status={status} />
-  if (loading) return loading
+  const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
+  if (apiState) return apiState
 
   const inquiry = data?.inquiry || {}
   const buyer = data?.buyer || {}
