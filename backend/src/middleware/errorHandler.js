@@ -11,7 +11,7 @@ export function errorHandler(err, req, res, _next) {
       ? err.message
       : "Internal server error";
 
-  if (!isApiError) {
+  if (!isApiError && !bodyParserPayloadTooLarge) {
     console.error("Unhandled backend error", {
       requestId: req.id,
       message: err?.message

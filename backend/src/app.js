@@ -156,13 +156,6 @@ export function createApp(options = {}) {
 
   app.use(requestId);
   app.use(cors(buildCorsOptions(env)));
-  app.use(
-    "/api/admin/products/:productId/images",
-    express.raw({
-      limit: "82mb",
-      type: (req) => String(req.headers["content-type"] || "").includes("multipart/form-data")
-    })
-  );
   app.use(express.json({ limit: "1mb" }));
 
   app.use("/api/health", createHealthRoutes());

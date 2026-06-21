@@ -134,6 +134,18 @@ function buildImageAlt(uploadedImages, primaryIndex) {
   };
 }
 
+async function cleanupUploadedObjects(objectStore, objectKeys) {
+  if (!objectKeys.length) return;
+  try {
+    await objectStore.deleteMany(objectKeys);
+  } catch (error) {
+    console.error("Product image cleanup failed", {
+      objectCount: objectKeys.length,
+      message: error?.message || "cleanup failed"
+    });
+  }
+}
+
 export function createFirebaseImageObjectStore(env, adminModule = admin) {
   return {
     async save({ objectKey, buffer, contentType }) {
@@ -213,7 +225,6 @@ export function createAdminProductImageService({ queries, objectStore }) {
         const imageAlt = buildImageAlt(uploadedImages, primaryIndex);
         const result = await queries.updateProductImages(productId, { imageSet, imageAlt }, adminViewer);
         if (!result) {
-          await objectStore.deleteMany(uploadedObjectKeys);
           throw notFound("Product not found");
         }
 
@@ -222,7 +233,7 @@ export function createAdminProductImageService({ queries, objectStore }) {
           images: uploadedImages
         };
       } catch (error) {
-        await objectStore.deleteMany(uploadedObjectKeys);
+        await cleanupUploadedObjects(objectStore, uploadedObjectKeys);
         throw error;
       }
     }

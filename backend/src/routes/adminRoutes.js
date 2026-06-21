@@ -1,4 +1,4 @@
-import { Router } from "express";
+import express, { Router } from "express";
 import { notFound } from "../utils/errors.js";
 
 function asyncRoute(handler) {
@@ -12,7 +12,14 @@ function withRequestId(req, meta = {}) {
   };
 }
 
-export function createAdminRoutes({ services, requireAdmin }) {
+function createImageUploadParser() {
+  return express.raw({
+    limit: "82mb",
+    type: (req) => String(req.headers["content-type"] || "").includes("multipart/form-data")
+  });
+}
+
+export function createAdminRoutes({ services, requireAdmin, imageUploadParser = createImageUploadParser() }) {
   const router = Router();
 
   router.get(
@@ -229,6 +236,7 @@ export function createAdminRoutes({ services, requireAdmin }) {
   router.post(
     "/products/:productId/images",
     requireAdmin,
+    imageUploadParser,
     asyncRoute(async (req, res) => {
       const data = await services.products.uploadProductImages(
         req.params.productId,
