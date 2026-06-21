@@ -83,6 +83,7 @@ export function AdminProductsPage() {
     <AdminPageHeader
       title={t.products.title}
       description={t.products.description}
+      actions={<AdminLink className="primary-action" to="/admin/catalog/new">{t.dashboard.addProduct}</AdminLink>}
     />
     <AdminPreviewNote>{t.products.note}</AdminPreviewNote>
 

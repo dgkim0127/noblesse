@@ -1721,6 +1721,109 @@ for (const locale of Object.keys(catalogEntryCopy)) {
   copy[locale].dashboard.addProduct = catalogEntryCopy[locale].navLabel
 }
 
+const catalogEntryUnifiedCopy = {
+  kr: {
+    summaryTitle: '저장 요약',
+    retryFailed: '실패한 단계 다시 저장',
+    sections: {
+      categoryEyebrow: '카테고리',
+      productEyebrow: '상품 정보',
+      priceEyebrow: '가격',
+    },
+    saveStatus: {
+      title: '저장 진행 상태',
+      category: '카테고리',
+      product: '상품',
+      price: '가격',
+      idle: '대기',
+      saving: '저장 중',
+      success: '완료',
+      error: '실패',
+    },
+    productActive: '활성 상태',
+    categoryNameConflict: '이미 같은 카테고리명이 있습니다.',
+    productCodeInvalid: '상품 코드는 영문, 숫자, 점, 하이픈, 밑줄 80자 이내로 입력하세요.',
+  },
+  en: {
+    summaryTitle: 'Save summary',
+    retryFailed: 'Retry failed step',
+    sections: {
+      categoryEyebrow: 'Category',
+      productEyebrow: 'Product information',
+      priceEyebrow: 'Price',
+    },
+    saveStatus: {
+      title: 'Save progress',
+      category: 'Category',
+      product: 'Product',
+      price: 'Price',
+      idle: 'Ready',
+      saving: 'Saving',
+      success: 'Done',
+      error: 'Failed',
+    },
+    productActive: 'Active',
+    categoryNameConflict: 'A category with this name already exists.',
+    productCodeInvalid: 'Use up to 80 letters, numbers, periods, hyphens, or underscores.',
+  },
+  jp: {
+    summaryTitle: '保存内容の概要',
+    retryFailed: '失敗したステップを再保存',
+    sections: {
+      categoryEyebrow: 'カテゴリー',
+      productEyebrow: '商品情報',
+      priceEyebrow: '価格',
+    },
+    saveStatus: {
+      title: '保存進行状況',
+      category: 'カテゴリー',
+      product: '商品',
+      price: '価格',
+      idle: '待機',
+      saving: '保存中',
+      success: '完了',
+      error: '失敗',
+    },
+    productActive: '有効状態',
+    categoryNameConflict: '同じカテゴリー名がすでに存在します。',
+    productCodeInvalid: '商品コードは英数字、ピリオド、ハイフン、アンダースコア80文字以内で入力してください。',
+  },
+  cn: {
+    summaryTitle: '保存摘要',
+    retryFailed: '重新保存失败步骤',
+    sections: {
+      categoryEyebrow: '分类',
+      productEyebrow: '产品信息',
+      priceEyebrow: '价格',
+    },
+    saveStatus: {
+      title: '保存进度',
+      category: '分类',
+      product: '产品',
+      price: '价格',
+      idle: '待处理',
+      saving: '保存中',
+      success: '完成',
+      error: '失败',
+    },
+    productActive: '启用状态',
+    categoryNameConflict: '已存在相同的分类名称。',
+    productCodeInvalid: '产品代码限 80 个字符，可使用英文字母、数字、点、连字符或下划线。',
+  },
+}
+
+for (const locale of Object.keys(catalogEntryUnifiedCopy)) {
+  const entry = copy[locale].catalogEntry
+  const extra = catalogEntryUnifiedCopy[locale]
+  entry.summaryTitle = extra.summaryTitle
+  entry.retryFailed = extra.retryFailed
+  entry.sections = extra.sections
+  entry.saveStatus = extra.saveStatus
+  entry.product.active = extra.productActive
+  entry.validation.categoryNameConflict = extra.categoryNameConflict
+  entry.validation.productCodeInvalid = extra.productCodeInvalid
+}
+
 export const adminLocales = Object.keys(copy)
 export const adminCopy = copy
 

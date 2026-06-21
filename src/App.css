@@ -1062,10 +1062,16 @@ h6 {
   border-color: rgba(255, 143, 169, 0.42);
 }
 
-.catalog-entry-card,
+.catalog-entry-layout,
+.catalog-entry-form-stack,
 .catalog-entry-section {
   display: grid;
   gap: 18px;
+}
+
+.catalog-entry-layout {
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
 }
 
 .catalog-entry-section h2 {
@@ -1088,12 +1094,54 @@ h6 {
 
 .catalog-entry-actions {
   border-top: 1px solid var(--admin-border);
-  justify-content: flex-end;
+  justify-content: space-between;
   padding-top: 16px;
 }
 
 .catalog-entry-summary {
   margin: 0;
+}
+
+.catalog-entry-summary-panel {
+  display: grid;
+  gap: 18px;
+  position: sticky;
+  top: 120px;
+}
+
+.catalog-entry-status-list {
+  display: grid;
+  gap: 8px;
+}
+
+.catalog-entry-status {
+  align-items: center;
+  background: rgba(42, 36, 87, 0.04);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  color: var(--admin-muted);
+  display: flex;
+  font-size: 0.82rem;
+  font-weight: 800;
+  justify-content: space-between;
+  margin: 0;
+  padding: 10px 12px;
+}
+
+.catalog-entry-status strong {
+  color: var(--navy);
+}
+
+.catalog-entry-status.success {
+  background: rgba(171, 224, 205, 0.28);
+}
+
+.catalog-entry-status.error {
+  background: rgba(255, 143, 169, 0.16);
+}
+
+.catalog-entry-status.saving {
+  background: rgba(42, 36, 87, 0.08);
 }
 
 .admin-check {
@@ -6038,6 +6086,14 @@ h6 {
 }
 
 @media (max-width: 1100px) {
+  .catalog-entry-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-entry-summary-panel {
+    position: static;
+  }
+
   .header-main {
     grid-template-columns: minmax(150px, auto) minmax(0, 1fr);
     gap: 16px;
