@@ -147,6 +147,14 @@ h6 {
   text-shadow: none;
 }
 
+.site-shell.admin-route-shell:not(.has-compact-header) .top-marquee {
+  position: relative;
+  z-index: 42;
+  color: #615a69;
+  background: #fffdf9;
+  text-shadow: none;
+}
+
 .site-shell.home-image-shell:not(.has-compact-header) .site-header {
   position: relative;
   top: auto;

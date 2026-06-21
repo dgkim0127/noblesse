@@ -503,6 +503,8 @@ export function StoreShell() {
   const isMockMode = dataMode === 'mock'
   const normalizedPathname = location.pathname.replace(/\/+$/, '') || '/'
   const isHomeImageRoute = normalizedPathname === '/' || supportedLocales.some((item) => normalizedPathname === `/${item}`)
+  const normalizedRoutePath = normalizedPathname.replace(/^\/(kr|en|jp|cn)(?=\/|$)/, '') || '/'
+  const isAdminRoute = normalizedRoutePath === '/admin' || normalizedRoutePath.startsWith('/admin/')
 
   useEffect(() => {
     const nav = navRef.current
@@ -775,7 +777,7 @@ export function StoreShell() {
 
   const shouldRenderCompactSearch = isCompactSearchOpen || isCompactSearchClosing
 
-  return <div className={`site-shell ${isHomeImageRoute ? 'home-image-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isSideLayout ? 'has-side-layout' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''} ${isPreviewBarHidden ? 'has-preview-hidden' : 'has-preview-visible'}`.trim()}>
+  return <div className={`site-shell ${isHomeImageRoute ? 'home-image-shell' : ''} ${isAdminRoute ? 'admin-route-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isSideLayout ? 'has-side-layout' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''} ${isPreviewBarHidden ? 'has-preview-hidden' : 'has-preview-visible'}`.trim()}>
     <div className={`top-marquee ${isMarqueeCollapsed ? 'is-collapsed' : ''}`} style={topMarqueeStyle} aria-label={`${headerBrandName} material notice`}>
       <div className="top-marquee-track" aria-hidden="true">
         {Array.from({ length: 4 }).map((_, index) => <span key={index}>{topMarqueeText}</span>)}
