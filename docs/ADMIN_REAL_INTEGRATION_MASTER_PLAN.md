@@ -488,3 +488,11 @@ No-Go remains:
 - Failure category is IAM/permission before migration runner start.
 - Job config appears structurally correct, but the execution did not reach Node or the migration runner.
 - Next gate is `APPROVE_MIGRATION_IAM_FIX = YES`.
+
+## N38-A4 RBAC Lifecycle Migration Idempotency
+
+- Idempotency report: `docs/ADMIN_RBAC_MIGRATION_IDEMPOTENCY_REPORT.md`.
+- The N38 lifecycle migration now preserves canonical `account_status`, `verification_status`, and existing admin roles on repeated runs.
+- The schema migration runner now uses `public.app_schema_migrations` with a SHA-256 checksum ledger.
+- Repeated execution with the same migration name/checksum is a no-op; checksum mismatch fails before schema SQL execution.
+- No DB connection, psql, Cloud Run Job execution, deploy, secret access, or production data mutation happened in N38-A4.

@@ -2,10 +2,10 @@
 -- Separates account lifecycle from buyer verification and adds admin RBAC.
 
 alter table public.users
-  add column if not exists account_status text not null default 'active';
+  add column if not exists account_status text;
 
 alter table public.buyers
-  add column if not exists verification_status text not null default 'draft',
+  add column if not exists verification_status text,
   add column if not exists submitted_at timestamptz,
   add column if not exists reviewed_at timestamptz,
   add column if not exists reviewed_by uuid references public.users(id),
@@ -63,9 +63,13 @@ create index if not exists idx_admin_permission_overrides_active on public.admin
 
 update public.users
 set account_status = case when status = 'blocked' then 'blocked' else 'active' end
-where account_status is null
-   or (status = 'blocked' and account_status <> 'blocked')
-   or (status <> 'blocked' and account_status <> 'active');
+where account_status is null;
+
+alter table public.users
+  alter column account_status set default 'active';
+
+alter table public.users
+  alter column account_status set not null;
 
 update public.buyers b
 set verification_status = case
@@ -73,63 +77,79 @@ set verification_status = case
     when u.status = 'approved' then 'approved'
     when u.status = 'blocked' then 'suspended'
     else 'draft'
-  end,
-  submitted_at = coalesce(b.submitted_at, b.created_at),
-  reviewed_at = case when u.status in ('approved', 'blocked') then coalesce(b.reviewed_at, u.updated_at) else b.reviewed_at end
+  end
 from public.users u
-where u.id = b.user_id;
+where u.id = b.user_id
+  and b.verification_status is null;
 
+update public.buyers b
+set submitted_at = b.created_at
+where b.submitted_at is null;
+
+update public.buyers b
+set reviewed_at = u.updated_at
+from public.users u
+where u.id = b.user_id
+  and b.reviewed_at is null
+  and b.verification_status in ('approved', 'suspended');
+
+alter table public.buyers
+  alter column verification_status set default 'draft';
+
+alter table public.buyers
+  alter column verification_status set not null;
+
+with admin_profile_state as (
+  select
+    exists (select 1 from public.admin_profiles) as has_any_profile,
+    exists (select 1 from public.admin_profiles where admin_role = 'owner') as has_owner
+),
+admin_candidates as (
+  select
+    u.id,
+    u.status,
+    u.account_status,
+    row_number() over (
+      order by
+        case when u.status = 'approved' and u.account_status = 'active' then 0 else 1 end,
+        u.created_at nulls last,
+        u.id
+    ) as backfill_rank
+  from public.users u
+  where u.role = 'admin'
+)
 insert into public.admin_profiles (user_id, admin_role)
-select id,
+select admin_candidates.id,
   case
-    when status = 'approved' and coalesce(account_status, 'active') = 'active' then 'owner'
+    when admin_candidates.status = 'approved'
+      and admin_candidates.account_status = 'active'
+      and admin_candidates.backfill_rank = 1
+      and admin_profile_state.has_any_profile = false
+      and admin_profile_state.has_owner = false
+      then 'owner'
     else 'operator'
   end
-from public.users
-where role = 'admin'
+from admin_candidates
+cross join admin_profile_state
 on conflict (user_id) do nothing;
 
-update public.admin_profiles ap
-set admin_role = 'operator',
-  updated_at = now()
-from public.users u
-where u.id = ap.user_id
-  and u.role = 'admin'
-  and (u.status <> 'approved' or coalesce(u.account_status, 'active') <> 'active')
-  and ap.admin_role <> 'operator';
-
 do $$
-declare
-  promoted_owner_id uuid;
 begin
   if exists (
     select 1 from public.users
     where role = 'admin'
       and status = 'approved'
-      and coalesce(account_status, 'active') = 'active'
+      and account_status = 'active'
   ) and not exists (
     select 1
     from public.users u
     join public.admin_profiles ap on ap.user_id = u.id
     where u.role = 'admin'
       and u.status = 'approved'
-      and coalesce(u.account_status, 'active') = 'active'
+      and u.account_status = 'active'
       and ap.admin_role = 'owner'
   ) then
-    select u.id
-    into promoted_owner_id
-    from public.users u
-    join public.admin_profiles ap on ap.user_id = u.id
-    where u.role = 'admin'
-      and u.status = 'approved'
-      and coalesce(u.account_status, 'active') = 'active'
-    order by u.created_at nulls last, u.id
-    limit 1;
-
-    update public.admin_profiles
-    set admin_role = 'owner',
-      updated_at = now()
-    where user_id = promoted_owner_id;
+    raise exception 'Active approved admin exists but no owner admin profile is present. Run explicit admin bootstrap/recovery.';
   end if;
 end $$;
 

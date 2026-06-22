@@ -76,6 +76,12 @@ create table if not exists public.admin_permission_overrides (
   unique(user_id, permission_key)
 );
 
+create table if not exists public.app_schema_migrations (
+  migration_name text primary key,
+  checksum text not null,
+  applied_at timestamptz not null default now()
+);
+
 create table if not exists public.categories (
   id uuid primary key default gen_random_uuid(),
   category_id text unique not null,

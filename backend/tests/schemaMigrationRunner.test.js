@@ -5,6 +5,7 @@ import test from "node:test";
 import {
   buildMigrationPlan,
   runSchemaMigration,
+  validateMigrationName,
   validateMigrationSql
 } from "../src/db/schemaMigrationRunner.js";
 import {
@@ -13,16 +14,28 @@ import {
   resolveSchemaSqlPath
 } from "../src/scripts/runStagingSchemaMigration.js";
 
-function createFakePool({ failOnSchema = false, failRollback = false } = {}) {
+function createFakePool({
+  failOnSchema = false,
+  failOnLedgerInsert = false,
+  failRollback = false,
+  existingChecksum = null
+} = {}) {
   const calls = [];
   const client = {
-    async query(sql) {
-      calls.push(sql);
-      if (sql === "CREATE TABLE test_example (id int);" && failOnSchema) {
+    async query(sql, params) {
+      const normalizedSql = typeof sql === "string" ? sql.trim().replace(/\s+/g, " ") : "";
+      calls.push({ sql: normalizedSql, params });
+      if (sql === dummySql && failOnSchema) {
         throw new Error("synthetic schema failure");
+      }
+      if (/insert into public\.app_schema_migrations/i.test(normalizedSql) && failOnLedgerInsert) {
+        throw new Error("synthetic ledger insert failure");
       }
       if (sql === "rollback" && failRollback) {
         throw new Error("synthetic rollback failure");
+      }
+      if (/select checksum from public\.app_schema_migrations/i.test(normalizedSql)) {
+        return existingChecksum ? { rows: [{ checksum: existingChecksum }] } : { rows: [] };
       }
       return { rows: [] };
     },
@@ -44,6 +57,10 @@ function createFakePool({ failOnSchema = false, failRollback = false } = {}) {
 }
 
 const dummySql = "CREATE TABLE test_example (id int);";
+const ledgerCreatePattern = /create table if not exists public\.app_schema_migrations/i;
+const ledgerSelectPattern = /select checksum from public\.app_schema_migrations/i;
+const ledgerInsertPattern = /insert into public\.app_schema_migrations/i;
+const sqlCalls = (pool) => pool.calls.map((call) => call.sql);
 
 test("validateMigrationSql rejects empty SQL", () => {
   assert.throws(() => validateMigrationSql("  "), /empty/i);
@@ -57,7 +74,14 @@ test("validateMigrationSql rejects transaction-control SQL", () => {
   assert.throws(() => validateMigrationSql("BEGIN;"), /transaction-control/i);
 });
 
-test("runSchemaMigration starts BEGIN, executes schema SQL, and commits", async () => {
+test("validateMigrationName rejects empty, path-like, and secret-shaped names", () => {
+  assert.throws(() => validateMigrationName(""), /invalid/i);
+  assert.throws(() => validateMigrationName("../schema"), /invalid/i);
+  assert.throws(() => validateMigrationName("postgres://example"), /invalid/i);
+  assert.doesNotThrow(() => validateMigrationName("20260622_admin_rbac_account_lifecycle"));
+});
+
+test("runSchemaMigration starts BEGIN, executes schema SQL, inserts ledger, and commits", async () => {
   const pool = createFakePool();
   const result = await runSchemaMigration({
     pool,
@@ -66,11 +90,50 @@ test("runSchemaMigration starts BEGIN, executes schema SQL, and commits", async 
   });
 
   assert.equal(pool.connectCalled, true);
-  assert.deepEqual(pool.calls, ["begin", dummySql, "commit"]);
+  assert.equal(pool.calls[0].sql, "begin");
+  assert.match(pool.calls[1].sql, ledgerCreatePattern);
+  assert.match(pool.calls[2].sql, ledgerSelectPattern);
+  assert.deepEqual(pool.calls[2].params, ["test-schema"]);
+  assert.equal(pool.calls[3].sql, dummySql);
+  assert.match(pool.calls[4].sql, ledgerInsertPattern);
+  assert.equal(pool.calls[4].params[0], "test-schema");
+  assert.match(pool.calls[4].params[1], /^[a-f0-9]{64}$/);
+  assert.equal(pool.calls[5].sql, "commit");
   assert.equal(pool.client.releaseCalled, true);
   assert.equal(result.executed, true);
+  assert.equal(result.alreadyApplied, false);
   assert.equal(result.transaction, "committed");
   assert.equal(result.migrationName, "test-schema");
+});
+
+test("runSchemaMigration skips schema SQL when ledger checksum already matches", async () => {
+  const plan = buildMigrationPlan({ sqlText: dummySql, migrationName: "test-schema" });
+  const pool = createFakePool({ existingChecksum: plan.checksum });
+
+  const result = await runSchemaMigration({
+    pool,
+    sqlText: dummySql,
+    migrationName: "test-schema"
+  });
+
+  assert.equal(result.executed, false);
+  assert.equal(result.alreadyApplied, true);
+  assert.equal(pool.calls.some((call) => call.sql === dummySql), false);
+  assert.equal(pool.calls.some((call) => ledgerInsertPattern.test(call.sql)), false);
+  assert.equal(pool.calls.at(-1).sql, "commit");
+});
+
+test("runSchemaMigration fails safely when ledger checksum mismatches and does not run schema SQL", async () => {
+  const pool = createFakePool({ existingChecksum: "0".repeat(64) });
+
+  await assert.rejects(
+    () => runSchemaMigration({ pool, sqlText: dummySql, migrationName: "test-schema" }),
+    /checksum mismatch/i
+  );
+
+  assert.equal(pool.calls.some((call) => call.sql === dummySql), false);
+  assert.equal(pool.calls.some((call) => ledgerInsertPattern.test(call.sql)), false);
+  assert.equal(pool.calls.at(-1).sql, "rollback");
 });
 
 test("runSchemaMigration rolls back on SQL failure", async () => {
@@ -81,7 +144,8 @@ test("runSchemaMigration rolls back on SQL failure", async () => {
     /synthetic schema failure/
   );
 
-  assert.deepEqual(pool.calls, ["begin", dummySql, "rollback"]);
+  assert.equal(sqlCalls(pool).at(-1), "rollback");
+  assert.equal(sqlCalls(pool).includes(dummySql), true);
   assert.equal(pool.client.releaseCalled, true);
 });
 
@@ -93,7 +157,21 @@ test("rollback failure does not hide original SQL failure", async () => {
     /synthetic schema failure/
   );
 
-  assert.deepEqual(pool.calls, ["begin", dummySql, "rollback"]);
+  assert.equal(sqlCalls(pool).at(-1), "rollback");
+  assert.equal(sqlCalls(pool).includes(dummySql), true);
+  assert.equal(pool.client.releaseCalled, true);
+});
+
+test("runSchemaMigration rolls back when ledger insert fails", async () => {
+  const pool = createFakePool({ failOnLedgerInsert: true });
+
+  await assert.rejects(
+    () => runSchemaMigration({ pool, sqlText: dummySql, migrationName: "test-schema" }),
+    /synthetic ledger insert failure/
+  );
+
+  assert.equal(sqlCalls(pool).includes(dummySql), true);
+  assert.equal(sqlCalls(pool).at(-1), "rollback");
   assert.equal(pool.client.releaseCalled, true);
 });
 
@@ -153,15 +231,33 @@ test("N38-A lifecycle migration has no transaction-control SQL", () => {
   assert.doesNotThrow(() => validateMigrationSql(sqlText));
   assert.doesNotMatch(sqlText, /create type public\.(account_status|buyer_verification_status|admin_role|admin_permission_effect)/i);
   assert.doesNotMatch(sqlText, /::public\.(account_status|buyer_verification_status|admin_role|admin_permission_effect)/i);
-  assert.match(sqlText, /account_status text not null default 'active'/i);
-  assert.match(sqlText, /verification_status text not null default 'draft'/i);
+  assert.match(sqlText, /add column if not exists account_status text;/i);
+  assert.match(sqlText, /where account_status is null;/i);
+  assert.match(sqlText, /alter column account_status set default 'active'/i);
+  assert.match(sqlText, /alter column account_status set not null/i);
+  assert.match(sqlText, /add column if not exists verification_status text,/i);
+  assert.match(sqlText, /and b\.verification_status is null/i);
+  assert.match(sqlText, /alter column verification_status set default 'draft'/i);
+  assert.match(sqlText, /alter column verification_status set not null/i);
   assert.match(sqlText, /admin_role text not null default 'operator'/i);
   assert.match(sqlText, /effect text not null/i);
   assert.match(sqlText, /reason text not null/i);
-  assert.match(sqlText, /status = 'approved' and coalesce\(account_status, 'active'\) = 'active' then 'owner'/i);
-  assert.match(sqlText, /update public\.admin_profiles ap\s+set admin_role = 'operator'/i);
-  assert.match(sqlText, /u\.status <> 'approved' or coalesce\(u\.account_status, 'active'\) <> 'active'/i);
-  assert.match(sqlText, /set admin_role = 'owner'/i);
+  assert.match(sqlText, /status = 'approved'\s+and account_status = 'active'/i);
+  assert.doesNotMatch(sqlText, /update public\.admin_profiles[\s\S]*set admin_role/i);
+  assert.match(sqlText, /raise exception 'Active approved admin exists but no owner admin profile is present/i);
+});
+
+test("N38-A lifecycle migration preserves canonical values on repeated runs", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260622_admin_rbac_account_lifecycle.sql"),
+    "utf8"
+  );
+
+  assert.match(sqlText, /set account_status = case when status = 'blocked' then 'blocked' else 'active' end\s+where account_status is null;/i);
+  assert.match(sqlText, /set verification_status = case[\s\S]*and b\.verification_status is null;/i);
+  assert.match(sqlText, /set submitted_at = b\.created_at\s+where b\.submitted_at is null;/i);
+  assert.match(sqlText, /set reviewed_at = u\.updated_at[\s\S]*and b\.reviewed_at is null/i);
+  assert.match(sqlText, /on conflict \(user_id\) do nothing;/i);
 });
 
 test("packaged lifecycle migration matches canonical migration exactly", () => {
@@ -212,11 +308,17 @@ test("fresh install schema matches lifecycle migration enum-like status contract
     "verification_status text not null default 'draft'",
     "admin_role text not null default 'operator'",
     "effect text not null",
-    "reason text not null"
+    "reason text not null",
+    "migration_name text primary key",
+    "checksum text not null"
   ]) {
     assert.match(schema, new RegExp(fragment.replace(/[()]/g, "\\$&"), "i"));
-    assert.match(migration, new RegExp(fragment.replace(/[()]/g, "\\$&"), "i"));
   }
+  assert.match(migration, /alter column account_status set default 'active'/i);
+  assert.match(migration, /alter column verification_status set default 'draft'/i);
+  assert.match(migration, /admin_role text not null default 'operator'/i);
+  assert.match(migration, /effect text not null/i);
+  assert.match(migration, /reason text not null/i);
   assert.match(schema, /account_status in \('active', 'blocked'\)/i);
   assert.match(migration, /account_status in \('active', 'blocked'\)/i);
   assert.match(schema, /admin_role in \('operator', 'manager', 'owner'\)/i);

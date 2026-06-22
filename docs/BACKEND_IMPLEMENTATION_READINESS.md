@@ -558,3 +558,16 @@ Before implementation starts:
 - The failure is classified as IAM/permission before migration runner start.
 - No backend source, tests, schema SQL, package files, Cloud Run Job, IAM, secret, or DB resource was changed.
 - Backend readiness remains blocked until the IAM fix gate is approved and completed.
+
+## N38-A4 RBAC Lifecycle Migration Idempotency
+
+- Idempotency report: `docs/ADMIN_RBAC_MIGRATION_IDEMPOTENCY_REPORT.md`.
+- Backend schema migration runner now uses `public.app_schema_migrations` as a transaction-managed ledger.
+- The runner records a SHA-256 checksum and treats same-name/same-checksum reruns as already applied.
+- Same-name checksum mismatch fails before schema SQL execution.
+- N38 lifecycle SQL now preserves canonical `account_status`, `verification_status`, and existing admin roles on repeated runs.
+- Backend fake-pool/static tests cover idempotency, rollback, checksum mismatch, packaged migration parity, and fresh-install schema parity.
+- DB connection/psql executed: No.
+- SQL/schema/migration execution: No.
+- Cloud Run Job execution/redeploy: No.
+- Firebase deploy or `/api` rewrite: No.

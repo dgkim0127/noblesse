@@ -1,5 +1,8 @@
+import { createHash } from "node:crypto";
+
 const unsafeErrorPattern =
   /DATABASE_URL|postgres:\/\/|postgresql:\/\/|password|private_key|BEGIN PRIVATE KEY/i;
+const migrationNamePattern = /^[a-zA-Z0-9_.-]{1,160}$/;
 
 export class SchemaMigrationError extends Error {
   constructor(message, options = {}) {
@@ -24,6 +27,26 @@ function estimateStatements(sqlText) {
     .filter(Boolean).length;
 }
 
+function calculateChecksum(sqlText) {
+  return createHash("sha256").update(sqlText, "utf8").digest("hex");
+}
+
+export function validateMigrationName(migrationName) {
+  if (typeof migrationName !== "string" || !migrationNamePattern.test(migrationName)) {
+    throw new SchemaMigrationError("Migration name is invalid.");
+  }
+
+  if (
+    migrationName.includes("DATABASE_URL") ||
+    migrationName.includes("postgres://") ||
+    migrationName.includes("postgresql://")
+  ) {
+    throw new SchemaMigrationError("Migration name is invalid.");
+  }
+
+  return true;
+}
+
 export function validateMigrationSql(sqlText) {
   if (typeof sqlText !== "string" || sqlText.trim().length === 0) {
     throw new SchemaMigrationError("Migration SQL is empty.");
@@ -43,8 +66,10 @@ export function validateMigrationSql(sqlText) {
 
 export function buildMigrationPlan({ sqlText, migrationName = "schema" }) {
   validateMigrationSql(sqlText);
+  validateMigrationName(migrationName);
   return {
     migrationName,
+    checksum: calculateChecksum(sqlText),
     sqlLength: sqlText.length,
     statementCountEstimate: estimateStatements(sqlText),
     transactionManagedByRunner: true
@@ -71,11 +96,55 @@ export async function runSchemaMigration({
 
   try {
     await client.query("begin");
+    await client.query(`
+      create table if not exists public.app_schema_migrations (
+        migration_name text primary key,
+        checksum text not null,
+        applied_at timestamptz not null default now()
+      )
+    `);
+
+    const existing = await client.query(
+      `
+        select checksum
+        from public.app_schema_migrations
+        where migration_name = $1
+        for update
+      `,
+      [plan.migrationName]
+    );
+
+    if (existing.rows?.[0]) {
+      if (existing.rows[0].checksum !== plan.checksum) {
+        throw new SchemaMigrationError("Migration checksum mismatch.");
+      }
+
+      await client.query("commit");
+
+      const result = {
+        executed: false,
+        alreadyApplied: true,
+        migrationName: plan.migrationName,
+        transaction: "committed"
+      };
+
+      logger?.info?.("schema migration already applied", result);
+      return result;
+    }
+
     await client.query(sqlText);
+    await client.query(
+      `
+        insert into public.app_schema_migrations (migration_name, checksum)
+        values ($1, $2)
+      `,
+      [plan.migrationName, plan.checksum]
+    );
     await client.query("commit");
 
     const result = {
       executed: true,
+      alreadyApplied: false,
       migrationName: plan.migrationName,
       statementCountEstimate: plan.statementCountEstimate,
       transaction: "committed"

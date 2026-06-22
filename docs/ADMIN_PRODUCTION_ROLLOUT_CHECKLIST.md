@@ -710,3 +710,12 @@ Required before 32K:
 - Job update: No.
 - IAM change: No.
 - Production admin_memo write remains No-Go.
+
+## N38-A4 RBAC Lifecycle Migration Idempotency Follow-up
+
+- Confirm `docs/ADMIN_RBAC_MIGRATION_IDEMPOTENCY_REPORT.md` before any N38 lifecycle migration execution approval.
+- Confirm the packaged migration is byte-identical to `supabase/migrations/20260622_admin_rbac_account_lifecycle.sql`.
+- Confirm repeated-run behavior is ledger controlled through `public.app_schema_migrations`.
+- Confirm checksum mismatch blocks schema SQL execution.
+- Confirm canonical account, buyer verification, and admin role values are not overwritten from legacy state on re-run.
+- N38-A4 did not execute migration SQL, connect to DB, deploy Cloud Run/Firebase, or mutate production data.

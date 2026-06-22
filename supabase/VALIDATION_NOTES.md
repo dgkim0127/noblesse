@@ -1678,3 +1678,23 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase deploy or `/api` rewrite: No.
 - Frontend source dirty staged in 32L-15R: No.
 - Conclusion: No safe secret/config-only mutation was supported; next gate is `APPROVE_STAGING_MIGRATION_JOB_RUNTIME_ENV_DIAGNOSTIC = YES`.
+
+## N38-A4 RBAC Lifecycle Migration Idempotency Follow-up
+
+- Date: 2026-06-22
+- Change: Added `docs/ADMIN_RBAC_MIGRATION_IDEMPOTENCY_REPORT.md`.
+- Scope: N38 lifecycle migration idempotency and migration runner ledger behavior.
+- Canonical state overwrite risk reduced: Yes.
+- `users.account_status` backfill scope: NULL rows only.
+- `buyers.verification_status` backfill scope: NULL rows only.
+- Existing admin role overwrite removed: Yes.
+- Migration ledger: `public.app_schema_migrations`.
+- Checksum mismatch behavior: safe failure before schema SQL execution.
+- Backend tests: fake-pool/static tests only.
+- SQL/schema/migration execution: No.
+- DB connection/psql executed: No.
+- Cloud Run Job redeploy/execute: No.
+- Cloud Run/Firebase deploy: No.
+- Secret/IAM/Storage/Firebase config change: No.
+- Production data mutation: No.
+- Conclusion: Idempotency is ready for a separately approved staging migration packaging/execution gate.

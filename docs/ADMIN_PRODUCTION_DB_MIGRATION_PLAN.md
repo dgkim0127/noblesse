@@ -475,3 +475,11 @@ Important:
 - Failure category: B. IAM/permission issue before migration runner start.
 - No re-execution, IAM change, DB connection, SQL execution, or secret value access happened.
 - Production migration and production write remain No-Go.
+
+## N38-A4 RBAC Lifecycle Migration Idempotency Follow-up
+
+- Idempotency report: `docs/ADMIN_RBAC_MIGRATION_IDEMPOTENCY_REPORT.md`.
+- The lifecycle migration is now designed so repeated execution does not re-derive canonical account, buyer verification, or admin role state from legacy fields.
+- `public.app_schema_migrations` is added to the fresh-install schema as the migration runner ledger.
+- The runner records `migration_name`, checksum, and `applied_at`; same checksum is already-applied, checksum mismatch is a safe failure.
+- Production schema migration was not executed in this step.
