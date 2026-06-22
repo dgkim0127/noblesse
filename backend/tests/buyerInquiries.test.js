@@ -23,6 +23,8 @@ function createBuyerViewer(overrides = {}) {
     email: "buyer@example.test",
     role: "buyer",
     status: "approved",
+    accountStatus: "active",
+    verificationStatus: "approved",
     buyerId: "buyer-1",
     companyName: "Noblesse Buyer",
     country: "JP",
@@ -117,11 +119,22 @@ function authHeaders() {
 }
 
 test("GET /api/buyer/product-prices requires approved buyer", async () => {
-  const app = createBuyerInquiryApp({ viewer: createBuyerViewer({ status: "pending" }) });
-  const response = await request(app, "/api/buyer/product-prices", { headers: authHeaders() });
+  for (const viewer of [
+    createBuyerViewer({ status: "pending", verificationStatus: "pending" }),
+    createBuyerViewer({ status: "pending", verificationStatus: "draft" }),
+    createBuyerViewer({ status: "pending", verificationStatus: "rejected" }),
+    createBuyerViewer({ status: "blocked", verificationStatus: "suspended" }),
+    createBuyerViewer({ status: "blocked", accountStatus: "blocked", verificationStatus: "approved" }),
+    createBuyerViewer({ status: "approved", verificationStatus: "suspended" }),
+    createBuyerViewer({ status: "approved", accountStatus: "blocked", verificationStatus: "approved" }),
+    createBuyerViewer({ buyerId: null })
+  ]) {
+    const app = createBuyerInquiryApp({ viewer });
+    const response = await request(app, "/api/buyer/product-prices", { headers: authHeaders() });
 
-  assert.equal(response.status, 403);
-  assert.equal(response.body.error.code, "FORBIDDEN");
+    assert.equal(response.status, 403);
+    assert.equal(response.body.error.code, "FORBIDDEN");
+  }
 });
 
 test("GET /api/buyer/product-prices returns buyer market prices", async () => {

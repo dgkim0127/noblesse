@@ -4,11 +4,15 @@ function mapBuyerProfile(row) {
     email: row.email,
     role: row.role,
     status: row.status,
+    legacyStatus: row.status,
+    accountStatus: row.account_status,
+    verificationStatus: row.verification_status,
     buyerId: row.buyer_id,
     companyName: row.company_name,
     contactName: row.contact_name,
     country: row.country,
     preferredLanguage: row.preferred_language,
+    submittedAt: row.submitted_at || null,
     assignedMarket: row.assigned_market,
     currency: row.currency
   };
@@ -27,7 +31,7 @@ export function createBuyerRegistrationQueries(pool) {
 
         const existingUserResult = await client.query(
           `
-            select id, auth_uid, email, role, status
+            select id, auth_uid, email, role, status, account_status
             from public.users
             where auth_uid = $1 or email = $2
             order by case when auth_uid = $1 then 0 else 1 end
@@ -46,22 +50,50 @@ export function createBuyerRegistrationQueries(pool) {
           await client.query("rollback");
           return { conflict: "not_buyer" };
         }
+        const existingAccountStatus =
+          existingUser?.account_status || (existingUser?.status === "blocked" ? "blocked" : "active");
+        if (existingUser && existingAccountStatus === "blocked") {
+          await client.query("rollback");
+          return { conflict: "account_blocked" };
+        }
+
+        let existingBuyer = null;
+        if (existingUser) {
+          const existingBuyerResult = await client.query(
+            `
+              select id, verification_status
+              from public.buyers
+              where user_id = $1
+              limit 1
+              for update
+            `,
+            [existingUser.id]
+          );
+          existingBuyer = existingBuyerResult.rows[0] || null;
+          if (["approved", "suspended"].includes(existingBuyer?.verification_status)) {
+            await client.query("rollback");
+            return { conflict: "buyer_finalized" };
+          }
+        }
 
         const userResult = existingUser
           ? await client.query(
               `
                 update public.users
-                set email = $2, updated_at = now()
+                set email = $2,
+                    status = 'pending',
+                    account_status = 'active',
+                    updated_at = now()
                 where id = $1
-                returning id, auth_uid, email, role, status
+                returning id, auth_uid, email, role, status, account_status
               `,
               [existingUser.id, identity.email]
             )
           : await client.query(
               `
-                insert into public.users (auth_uid, email, role, status)
-                values ($1, $2, 'buyer', 'pending')
-                returning id, auth_uid, email, role, status
+                insert into public.users (auth_uid, email, role, status, account_status)
+                values ($1, $2, 'buyer', 'pending', 'active')
+                returning id, auth_uid, email, role, status, account_status
               `,
               [identity.authUid, identity.email]
             );
@@ -81,9 +113,11 @@ export function createBuyerRegistrationQueries(pool) {
               sales_channel,
               business_number,
               assigned_market,
-              currency
+              currency,
+              verification_status,
+              submitted_at
             )
-            values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+            values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'pending', now())
             on conflict (user_id) do update set
               company_name = excluded.company_name,
               contact_name = excluded.contact_name,
@@ -96,6 +130,8 @@ export function createBuyerRegistrationQueries(pool) {
               business_number = excluded.business_number,
               assigned_market = excluded.assigned_market,
               currency = excluded.currency,
+              verification_status = 'pending',
+              submitted_at = now(),
               updated_at = now()
             returning
               id as buyer_id,
@@ -105,7 +141,9 @@ export function createBuyerRegistrationQueries(pool) {
               country,
               preferred_language,
               assigned_market,
-              currency
+              currency,
+              verification_status,
+              submitted_at
           `,
           [
             user.id,
@@ -178,7 +216,8 @@ export function createBuyerRegistrationQueries(pool) {
             ...buyer,
             email: user.email,
             role: user.role,
-            status: user.status
+            status: user.status,
+            account_status: user.account_status
           })
         };
       } catch (error) {

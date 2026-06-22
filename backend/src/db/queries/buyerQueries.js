@@ -6,6 +6,7 @@ export async function getUserByAuthUid(pool, authUid) {
   const result = await pool.query(
     `
       select id, auth_uid, email, role, status
+        , account_status
       from public.users
       where auth_uid = $1
       limit 1
@@ -34,6 +35,11 @@ export async function getBuyerByUserId(pool, userId) {
         currency,
         discount_rate,
         min_order_amount
+        , verification_status
+        , submitted_at
+        , reviewed_at
+        , rejection_reason
+        , suspension_reason
       from public.buyers
       where user_id = $1
       limit 1

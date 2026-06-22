@@ -168,11 +168,19 @@ test("requirePermission returns 403 and image parser is not called when catalog.
 
 test("settings.manage is reserved for owner role", () => {
   const owner = resolveAdminPermissions({ adminRole: "owner" });
-  const manager = resolveAdminPermissions({ adminRole: "manager" });
+  const manager = resolveAdminPermissions({
+    adminRole: "manager",
+    overrides: [
+      { permissionKey: "admins.manage", effect: "allow" },
+      { permissionKey: "settings.manage", effect: "allow" }
+    ]
+  });
   const operator = resolveAdminPermissions({ adminRole: "operator" });
 
   assert.equal(owner.permissions.includes("settings.manage"), true);
+  assert.equal(owner.permissions.includes("admins.manage"), true);
   assert.equal(manager.permissions.includes("settings.manage"), false);
+  assert.equal(manager.permissions.includes("admins.manage"), false);
   assert.equal(operator.permissions.includes("settings.manage"), false);
 });
 
@@ -185,7 +193,7 @@ test("permission override validation requires reason, future expiresAt, and uniq
     }
   });
   const userId = "11111111-1111-4111-8111-111111111111";
-  const adminViewer = { userId: "admin-1" };
+  const adminViewer = { userId: "admin-1", adminRole: "owner", permissions: ["admins.manage"] };
 
   await assert.rejects(
     () => service.replacePermissionOverrides(userId, {
@@ -208,6 +216,12 @@ test("permission override validation requires reason, future expiresAt, and uniq
     }, adminViewer),
     /Duplicate permissionKey/
   );
+  await assert.rejects(
+    () => service.replacePermissionOverrides(userId, {
+      overrides: [{ permissionKey: "admins.manage", effect: "allow", reason: "temporary" }]
+    }, { ...adminViewer, adminRole: "owner", permissions: ["admins.manage"] }),
+    /Governance permissions cannot be delegated/
+  );
 });
 
 test("single permission override upsert validates input and preserves sibling overrides through query API", async () => {
@@ -221,7 +235,7 @@ test("single permission override upsert validates input and preserves sibling ov
     }
   });
   const userId = "11111111-1111-4111-8111-111111111111";
-  const adminViewer = { userId: "admin-1" };
+  const adminViewer = { userId: "admin-1", adminRole: "owner", permissions: ["admins.manage"] };
 
   await assert.rejects(
     () => service.upsertPermissionOverride(userId, "buyers.read", { effect: "allow" }, adminViewer),
@@ -239,6 +253,39 @@ test("single permission override upsert validates input and preserves sibling ov
 
   assert.equal(result.override.permissionKey, "buyers.review");
   assert.equal(captured.override.reason, "temporary review block");
+});
+
+test("governance writes require owner role even when admins.manage is present", async () => {
+  const service = createAdminAccessService({
+    queries: {
+      async updateAdminRole() {
+        throw new Error("query should not be called");
+      },
+      async upsertPermissionOverride() {
+        throw new Error("query should not be called");
+      }
+    }
+  });
+  const userId = "11111111-1111-4111-8111-111111111111";
+  const managerWithForgedPermission = {
+    userId: "admin-1",
+    adminRole: "manager",
+    permissions: ["admins.manage"]
+  };
+
+  await assert.rejects(
+    () => service.updateAdminRole(userId, { adminRole: "owner" }, managerWithForgedPermission),
+    /Owner admin access required/
+  );
+  await assert.rejects(
+    () => service.upsertPermissionOverride(
+      userId,
+      "admins.read",
+      { effect: "allow", reason: "temporary" },
+      managerWithForgedPermission
+    ),
+    /Owner admin access required/
+  );
 });
 
 test("admin access query SQL uses existing audit target columns", () => {

@@ -11,6 +11,13 @@ function assertTransactionPool(pool) {
   }
 }
 
+function deriveLegacyBuyerStatus({ accountStatus, verificationStatus }) {
+  if (accountStatus === "blocked") return "blocked";
+  if (verificationStatus === "suspended") return "blocked";
+  if (verificationStatus === "approved") return "approved";
+  return "pending";
+}
+
 function mapBuyer(row) {
   const verificationStatus = row.verification_status || (row.status === "blocked" ? "suspended" : row.status);
   return {
@@ -343,10 +350,27 @@ export function createAdminBuyerQueries(pool) {
           [buyerId, verificationStatus, actor.userId, reason, assignedAdminId, internalMemo]
         );
         const updatedBuyer = updateResult.rows[0];
+        const legacyStatus = deriveLegacyBuyerStatus({
+          accountStatus: existingRow.account_status,
+          verificationStatus
+        });
+        const updatedUserResult = await client.query(
+          `
+            update public.users
+            set status = $2,
+                updated_at = now()
+            where id = $1
+            returning status, updated_at
+          `,
+          [existingRow.user_id, legacyStatus]
+        );
         const updatedRow = {
           ...existingRow,
           ...updatedBuyer,
-          updated_at: updatedBuyer.updated_at
+          status: updatedUserResult.rows[0].status,
+          updated_at: updatedUserResult.rows[0].updated_at > updatedBuyer.updated_at
+            ? updatedUserResult.rows[0].updated_at
+            : updatedBuyer.updated_at
         };
         const afterSnapshot = createBuyerSnapshot(updatedRow);
 
@@ -428,14 +452,24 @@ export function createAdminBuyerQueries(pool) {
         const updatedUserResult = await client.query(
           `
             update public.users
-            set account_status = $2, updated_at = now()
+            set account_status = $2,
+                status = $3,
+                updated_at = now()
             where id = $1
-            returning account_status, updated_at
+            returning status, account_status, updated_at
           `,
-          [existingRow.user_id, input.accountStatus]
+          [
+            existingRow.user_id,
+            input.accountStatus,
+            deriveLegacyBuyerStatus({
+              accountStatus: input.accountStatus,
+              verificationStatus: existingRow.verification_status
+            })
+          ]
         );
         const updatedRow = {
           ...existingRow,
+          status: updatedUserResult.rows[0].status,
           account_status: updatedUserResult.rows[0].account_status,
           updated_at: updatedUserResult.rows[0].updated_at
         };

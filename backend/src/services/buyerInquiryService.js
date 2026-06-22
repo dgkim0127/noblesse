@@ -1,4 +1,5 @@
 import { forbidden, notFound } from "../utils/errors.js";
+import { isApprovedBuyerLifecycle } from "../auth/buyerLifecycle.js";
 import { createPaginationMeta, parsePagination, slicePageRows } from "../utils/pagination.js";
 import {
   INQUIRY_STATUSES,
@@ -12,7 +13,7 @@ import {
 const productCodePattern = /^[A-Z0-9][A-Z0-9-]{1,39}$/i;
 
 function requireApprovedBuyer(viewer) {
-  if (!viewer || viewer.role !== "buyer" || viewer.status !== "approved" || !viewer.buyerId) {
+  if (!isApprovedBuyerLifecycle(viewer)) {
     throw forbidden("Approved buyer access required");
   }
   return viewer;

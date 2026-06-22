@@ -1,4 +1,5 @@
 import { unauthorized } from "../utils/errors.js";
+import { deriveLegacyBuyerStatus, normalizeAccountStatus, normalizeVerificationStatus } from "./buyerLifecycle.js";
 
 function readBearerToken(req) {
   const header = req.get("authorization") || "";
@@ -12,18 +13,32 @@ export function createPostgresViewerLoader({ pool, queries }) {
     if (!user) return null;
 
     const buyer = user.role === "buyer" ? await queries.getBuyerByUserId(pool, user.id) : null;
+    const accountStatus = normalizeAccountStatus(user.account_status, user.status);
+    const verificationStatus = buyer
+      ? normalizeVerificationStatus(buyer.verification_status, user.status)
+      : null;
+    const status = user.role === "buyer"
+      ? deriveLegacyBuyerStatus({ accountStatus, verificationStatus })
+      : user.status;
 
     return {
       userId: user.id,
       authUid: user.auth_uid,
       email: user.email || decodedToken.email,
       role: user.role,
-      status: user.status,
+      status,
+      legacyStatus: user.status,
+      accountStatus,
+      verificationStatus,
       buyerId: buyer?.id || null,
       companyName: buyer?.company_name || null,
       contactName: buyer?.contact_name || null,
       country: buyer?.country || null,
       preferredLanguage: buyer?.preferred_language || null,
+      submittedAt: buyer?.submitted_at || null,
+      reviewedAt: buyer?.reviewed_at || null,
+      rejectionReason: buyer?.rejection_reason || null,
+      suspensionReason: buyer?.suspension_reason || null,
       assignedMarket: buyer?.assigned_market || null,
       currency: buyer?.currency || null,
       discountRate: buyer?.discount_rate || 0,

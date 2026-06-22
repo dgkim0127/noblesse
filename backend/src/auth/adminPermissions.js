@@ -22,6 +22,11 @@ export const PERMISSIONS = [
   "settings.manage"
 ];
 
+export const NON_DELEGABLE_PERMISSIONS = ["admins.manage", "settings.manage"];
+export const DELEGABLE_PERMISSIONS = PERMISSIONS.filter(
+  (permission) => !NON_DELEGABLE_PERMISSIONS.includes(permission)
+);
+
 export const ADMIN_ROLE_PERMISSIONS = {
   operator: [
     "dashboard.read",
@@ -61,6 +66,9 @@ export function normalizeAdminRole(role) {
 
 function isActiveOverride(override, now) {
   if (!override?.permissionKey || !PERMISSIONS.includes(override.permissionKey)) {
+    return false;
+  }
+  if (NON_DELEGABLE_PERMISSIONS.includes(override.permissionKey)) {
     return false;
   }
   if (!override.expiresAt) {

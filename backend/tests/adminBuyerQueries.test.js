@@ -18,6 +18,8 @@ const existingBuyerRow = {
   email: "buyer@example.test",
   role: "buyer",
   status: "pending",
+  account_status: "active",
+  verification_status: "pending",
   company_name: "Buyer Co",
   contact_name: "Buyer",
   country: "KR",
@@ -40,8 +42,31 @@ function createFakePool({ selectRows = [existingBuyerRow], failOn = "" } = {}) {
       if (failOn && normalized.includes(failOn)) throw new Error("fake query failure");
       if (["begin", "commit", "rollback"].includes(normalized)) return { rows: [] };
       if (normalized.startsWith("select")) return { rows: selectRows };
+      if (normalized.startsWith("update public.buyers")) {
+        return {
+          rows: [{
+            verification_status: params[1],
+            reviewed_at: "2026-06-16T00:01:00.000Z",
+            reviewed_by: adminViewer.userId,
+            rejection_reason: params[1] === "rejected" ? params[3] : null,
+            suspension_reason: params[1] === "suspended" ? params[3] : null,
+            assigned_admin_id: params[4] || null,
+            internal_memo: params[5] || null,
+            updated_at: "2026-06-16T00:01:00.000Z"
+          }]
+        };
+      }
       if (normalized.startsWith("update public.users")) {
-        return { rows: [{ id: userId, email: "buyer@example.test", role: "buyer", status: params[1], updated_at: "2026-06-16T00:01:00.000Z" }] };
+        return {
+          rows: [{
+            id: userId,
+            email: "buyer@example.test",
+            role: "buyer",
+            status: params.length > 2 ? params[2] : params[1],
+            account_status: params[1],
+            updated_at: "2026-06-16T00:01:00.000Z"
+          }]
+        };
       }
       if (normalized.startsWith("insert into public.audit_logs")) return { rows: [{ id: "audit-1" }] };
       throw new Error(`Unexpected query: ${text}`);
@@ -77,6 +102,42 @@ test("updateBuyerStatus runs select/update/audit in a transaction and commits", 
   assert.equal(fake.releaseCount, 1);
   assert.equal(result.buyer.status, "approved");
   assert.equal(result.auditLogId, "audit-1");
+});
+
+test("updateBuyerVerificationStatus dual-writes verification status and legacy user status", async () => {
+  const fake = createFakePool();
+  const result = await createAdminBuyerQueries(fake.pool).updateBuyerVerificationStatus(
+    buyerId,
+    { verificationStatus: "approved" },
+    adminViewer
+  );
+  const buyerUpdate = fake.calls.find((call) => call.sql.toLowerCase().startsWith("update public.buyers"));
+  const userUpdate = fake.calls.find((call) => call.sql.toLowerCase().startsWith("update public.users"));
+
+  assert.equal(buyerUpdate.params[1], "approved");
+  assert.equal(userUpdate.params[0], userId);
+  assert.equal(userUpdate.params[1], "approved");
+  assert.equal(result.buyer.verificationStatus, "approved");
+  assert.equal(result.buyer.status, "approved");
+});
+
+test("updateBuyerAccountStatus dual-writes account status and keeps suspended legacy blocked", async () => {
+  const fake = createFakePool({
+    selectRows: [{ ...existingBuyerRow, status: "blocked", verification_status: "suspended" }]
+  });
+  const result = await createAdminBuyerQueries(fake.pool).updateBuyerAccountStatus(
+    buyerId,
+    { accountStatus: "active", reason: "reviewed" },
+    adminViewer
+  );
+  const userUpdate = fake.calls.find((call) => call.sql.toLowerCase().startsWith("update public.users"));
+
+  assert.equal(userUpdate.params[0], userId);
+  assert.equal(userUpdate.params[1], "active");
+  assert.equal(userUpdate.params[2], "blocked");
+  assert.equal(result.buyer.accountStatus, "active");
+  assert.equal(result.buyer.verificationStatus, "suspended");
+  assert.equal(result.buyer.status, "blocked");
 });
 
 test("updateBuyerStatus inserts an admin buyer status audit log", async () => {

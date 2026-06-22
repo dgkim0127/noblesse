@@ -1,5 +1,5 @@
-import { ADMIN_ROLES, PERMISSIONS } from "../auth/adminPermissions.js";
-import { conflict, notFound, validationError } from "../utils/errors.js";
+import { ADMIN_ROLES, NON_DELEGABLE_PERMISSIONS, PERMISSIONS } from "../auth/adminPermissions.js";
+import { conflict, forbidden, notFound, validationError } from "../utils/errors.js";
 import { parseRequiredString, rejectUnknownFields, validateUuid } from "../utils/validators.js";
 
 function parseAdminRole(value) {
@@ -13,6 +13,9 @@ function parseOverride(input = {}) {
   const safe = rejectUnknownFields(input, ["permissionKey", "effect", "reason", "expiresAt"]);
   if (!PERMISSIONS.includes(safe.permissionKey)) {
     throw validationError("Invalid permissionKey");
+  }
+  if (NON_DELEGABLE_PERMISSIONS.includes(safe.permissionKey)) {
+    throw validationError("Governance permissions cannot be delegated");
   }
   if (!["allow", "deny"].includes(safe.effect)) {
     throw validationError("Invalid override effect");
@@ -43,6 +46,16 @@ function parseOverride(input = {}) {
   };
 }
 
+function assertOwnerGovernance(adminViewer) {
+  if (
+    adminViewer?.adminRole !== "owner" ||
+    !Array.isArray(adminViewer?.permissions) ||
+    !adminViewer.permissions.includes("admins.manage")
+  ) {
+    throw forbidden("Owner admin access required");
+  }
+}
+
 export function createAdminAccessService({ queries }) {
   return {
     async getCurrentAdmin(adminViewer) {
@@ -63,6 +76,7 @@ export function createAdminAccessService({ queries }) {
     },
 
     async updateAdminRole(userId, body = {}, adminViewer) {
+      assertOwnerGovernance(adminViewer);
       const id = validateUuid(userId, "userId");
       const safe = rejectUnknownFields(body, ["adminRole"]);
       const adminRole = parseAdminRole(safe.adminRole);
@@ -73,6 +87,7 @@ export function createAdminAccessService({ queries }) {
     },
 
     async replacePermissionOverrides(userId, body = {}, adminViewer) {
+      assertOwnerGovernance(adminViewer);
       const id = validateUuid(userId, "userId");
       const safe = rejectUnknownFields(body, ["overrides"]);
       if (!Array.isArray(safe.overrides)) {
@@ -90,6 +105,7 @@ export function createAdminAccessService({ queries }) {
     },
 
     async upsertPermissionOverride(userId, permissionKey, body = {}, adminViewer) {
+      assertOwnerGovernance(adminViewer);
       const id = validateUuid(userId, "userId");
       const override = parseOverride({ ...body, permissionKey });
       const result = await queries.upsertPermissionOverride(id, override, adminViewer);
@@ -99,9 +115,13 @@ export function createAdminAccessService({ queries }) {
     },
 
     async deletePermissionOverride(userId, permissionKey, adminViewer) {
+      assertOwnerGovernance(adminViewer);
       const id = validateUuid(userId, "userId");
       if (!PERMISSIONS.includes(permissionKey)) {
         throw validationError("Invalid permissionKey");
+      }
+      if (NON_DELEGABLE_PERMISSIONS.includes(permissionKey)) {
+        throw validationError("Governance permissions cannot be delegated");
       }
       const result = await queries.deletePermissionOverride(id, permissionKey, adminViewer);
       if (!result) throw notFound("Permission override not found");

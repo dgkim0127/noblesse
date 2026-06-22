@@ -147,8 +147,8 @@ export function CommerceProvider({ children }) {
 
       try {
         const token = await getUserIdToken(user)
-        const profile = await buyerApi.getCurrentBuyerProfile(token)
-        const isApprovedProfile = profile?.role === 'buyer' && profile?.status === 'approved'
+        const profile = normalizeBuyerProfile(await buyerApi.getCurrentBuyerProfile(token))
+        const isApprovedProfile = isApprovedBuyer(profile)
         const [apiProductPrices, apiInquiries] = isApprovedProfile
           ? await Promise.all([
             buyerApi.getProductPrices(token),

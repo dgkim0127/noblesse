@@ -25,6 +25,9 @@ async function loadViewer(decodedToken) {
     email: decodedToken.email,
     role: "buyer",
     status: "approved",
+    legacyStatus: "approved",
+    accountStatus: "active",
+    verificationStatus: "approved",
     buyerId: "buyer-1",
     companyName: "Tokyo Piercing Lab",
     contactName: "Aki Buyer",
@@ -85,12 +88,50 @@ test("GET /api/buyer/me returns current buyer profile for valid token", async ()
   assert.equal(response.body.profile.userId, "user-1");
   assert.equal(response.body.profile.role, "buyer");
   assert.equal(response.body.profile.status, "approved");
+  assert.equal(response.body.profile.legacyStatus, "approved");
+  assert.equal(response.body.profile.accountStatus, "active");
+  assert.equal(response.body.profile.verificationStatus, "approved");
   assert.equal(response.body.profile.buyerId, "buyer-1");
   assert.equal(response.body.profile.contactName, "Aki Buyer");
   assert.equal(response.body.profile.country, "JP");
   assert.equal(response.body.profile.preferredLanguage, "jp");
   assert.equal(response.body.profile.assignedMarket, "JP");
   assert.equal(response.body.profile.currency, "JPY");
+});
+
+test("GET /api/buyer/me returns blocked and verification lifecycle fields", async () => {
+  const app = createApp({
+    env: { nodeEnv: "test", isProduction: false, allowedOrigins: [] },
+    services: { buyer: buyerService },
+    auth: {
+      verifier,
+      async loadViewer(decodedToken) {
+        return {
+          userId: "user-1",
+          authUid: decodedToken.uid,
+          email: decodedToken.email,
+          role: "buyer",
+          status: "blocked",
+          legacyStatus: "approved",
+          accountStatus: "blocked",
+          verificationStatus: "approved",
+          buyerId: "buyer-1"
+        };
+      }
+    }
+  });
+
+  const response = await request(app, "/api/buyer/me", {
+    headers: {
+      authorization: "Bearer valid-token"
+    }
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.profile.status, "blocked");
+  assert.equal(response.body.profile.legacyStatus, "approved");
+  assert.equal(response.body.profile.accountStatus, "blocked");
+  assert.equal(response.body.profile.verificationStatus, "approved");
 });
 
 test("GET /api/buyer/me returns current admin profile for admin token", async () => {

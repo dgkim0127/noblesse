@@ -3,23 +3,12 @@ import { useAdminAccess } from '../../components/AdminAccessContext'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { AdminPageHeader } from './AdminPageParts'
 import { useAdminCopy } from './adminCopy'
-
-const permissionOptions = [
-  'buyers.read',
-  'buyers.review',
-  'buyers.suspend',
-  'catalog.write',
-  'catalog.publish',
-  'prices.write',
-  'quotes.write',
-  'admins.read',
-  'admins.manage',
-  'audit.read',
-  'settings.manage',
-]
+import { delegableAdminPermissions, getAdminPermissionLabel } from '../../constants/adminPermissionCatalog'
+import { useLocalePath } from '../../utils/locale'
 
 export function AdminTeamPage() {
   const t = useAdminCopy()
+  const { locale } = useLocalePath()
   const { admin, hasPermission } = useAdminAccess()
   const [refreshKey, setRefreshKey] = useState(0)
   const [editingUserId, setEditingUserId] = useState('')
@@ -159,7 +148,7 @@ export function AdminTeamPage() {
                         ? '-'
                         : <ul className="admin-compact-list">
                           {row.permissionOverrides.map((override) => <li key={override.permissionKey}>
-                            <span>{override.effect}: {override.permissionKey}</span>
+                            <span>{override.effect}: {getAdminPermissionLabel(override.permissionKey, locale)}</span>
                             <small>{override.expiresAt || copy.noExpiry || 'No expiry'}</small>
                             {canManage && !isOwner && <button type="button" onClick={() => startOverrideEdit(row, override)}>{t.common.edit || 'Edit'}</button>}
                             {canManage && !isOwner && <button type="button" onClick={() => deleteOverride(row.userId, override.permissionKey)}>{t.common.remove || 'Remove'}</button>}
@@ -193,7 +182,7 @@ export function AdminTeamPage() {
                       <div className="admin-edit-panel">
                         <label>{copy.permissionKey || 'Permission'}
                           <select value={draft.permissionKey} onChange={(event) => setDraft((current) => ({ ...current, permissionKey: event.target.value }))}>
-                            {permissionOptions.map((item) => <option key={item} value={item}>{item}</option>)}
+                            {delegableAdminPermissions.map((item) => <option key={item} value={item}>{getAdminPermissionLabel(item, locale)}</option>)}
                           </select>
                         </label>
                         <label>{copy.effect || 'Effect'}

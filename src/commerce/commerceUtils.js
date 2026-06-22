@@ -12,6 +12,9 @@ export const guestProfile = {
   businessNumber: '',
   role: null,
   status: null,
+  legacyStatus: null,
+  accountStatus: null,
+  verificationStatus: null,
   assignedMarket: '',
   currency: 'USD',
   discountRate: 0,
@@ -24,9 +27,45 @@ export const guestProfile = {
 
 const allowedMarkets = ['KR', 'JP', 'US', 'GLOBAL']
 
-export const isApprovedBuyer = (profile) => profile?.role === 'buyer' && profile?.status === 'approved'
+export const deriveLegacyBuyerStatus = (profile = {}) => {
+  if (profile.accountStatus === 'blocked') return 'blocked'
+  if (profile.verificationStatus === 'suspended') return 'blocked'
+  if (profile.verificationStatus === 'approved') return 'approved'
+  return 'pending'
+}
 
-export const isPendingBuyer = (profile) => profile?.role === 'buyer' && profile?.status === 'pending'
+export const getBuyerLifecycle = (profile = {}) => {
+  const source = profile || {}
+  const accountStatus = source.accountStatus || (source.status === 'blocked' ? 'blocked' : 'active')
+  const verificationStatus = source.verificationStatus
+    || (source.status === 'blocked' ? 'suspended' : source.status === 'approved' ? 'approved' : source.status === 'pending' ? 'pending' : 'draft')
+  return { accountStatus, verificationStatus }
+}
+
+export const isApprovedBuyer = (profile) => {
+  const { accountStatus, verificationStatus } = getBuyerLifecycle(profile)
+  return profile?.role === 'buyer' && accountStatus === 'active' && verificationStatus === 'approved'
+}
+
+export const isPendingBuyer = (profile) => {
+  const { accountStatus, verificationStatus } = getBuyerLifecycle(profile)
+  return profile?.role === 'buyer' && accountStatus === 'active' && ['draft', 'pending'].includes(verificationStatus)
+}
+
+export const isBlockedBuyer = (profile) => {
+  const { accountStatus } = getBuyerLifecycle(profile)
+  return profile?.role === 'buyer' && accountStatus === 'blocked'
+}
+
+export const isRejectedBuyer = (profile) => {
+  const { accountStatus, verificationStatus } = getBuyerLifecycle(profile)
+  return profile?.role === 'buyer' && accountStatus === 'active' && verificationStatus === 'rejected'
+}
+
+export const isSuspendedBuyer = (profile) => {
+  const { accountStatus, verificationStatus } = getBuyerLifecycle(profile)
+  return profile?.role === 'buyer' && accountStatus === 'active' && verificationStatus === 'suspended'
+}
 
 export const isAdmin = (profile) => profile?.role === 'admin'
 
@@ -34,7 +73,10 @@ export const isGuestViewer = (viewerState) => viewerState === 'guest'
 
 export const getViewerStateFromProfile = (profile) => {
   if (isAdmin(profile)) return 'admin'
+  if (isBlockedBuyer(profile)) return 'blocked'
   if (isApprovedBuyer(profile)) return 'approved'
+  if (isRejectedBuyer(profile)) return 'rejected'
+  if (isSuspendedBuyer(profile)) return 'suspended'
   if (isPendingBuyer(profile)) return 'pending'
   return 'guest'
 }
@@ -42,6 +84,8 @@ export const getViewerStateFromProfile = (profile) => {
 export const normalizeBuyerProfile = (profile) => {
   if (!profile) return guestProfile
 
+  const lifecycle = getBuyerLifecycle(profile)
+  const status = profile.status || deriveLegacyBuyerStatus(lifecycle)
   return {
     ...guestProfile,
     ...profile,
@@ -51,7 +95,10 @@ export const normalizeBuyerProfile = (profile) => {
     assignedMarket: profile.assignedMarket || '',
     currency: profile.currency || guestProfile.currency,
     role: profile.role || null,
-    status: profile.status || null,
+    status,
+    legacyStatus: profile.legacyStatus || status,
+    accountStatus: lifecycle.accountStatus,
+    verificationStatus: lifecycle.verificationStatus,
   }
 }
 
