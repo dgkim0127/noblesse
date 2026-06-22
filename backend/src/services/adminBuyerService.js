@@ -18,6 +18,20 @@ const legacyStatusMap = {
   blocked: "suspended"
 };
 
+function canReadSensitive(adminViewer) {
+  return Array.isArray(adminViewer?.permissions) && adminViewer.permissions.includes("buyers.sensitive.read");
+}
+
+function maskSensitiveBuyerFields(buyer) {
+  if (!buyer) return buyer;
+  return {
+    ...buyer,
+    phone: buyer.phone ? "MASKED" : buyer.phone,
+    messengerId: buyer.messengerId ? "MASKED" : buyer.messengerId,
+    businessNumber: buyer.businessNumber ? "MASKED" : buyer.businessNumber
+  };
+}
+
 function parseBuyerFilters(filters) {
   const pagination = parsePagination(filters);
   return {
@@ -39,8 +53,9 @@ export function createAdminBuyerService({ queries }) {
     async listBuyers(filters = {}, adminViewer) {
       const parsed = parseBuyerFilters(filters);
       const buyers = await queries.listBuyers(parsed, { adminViewer });
+      const safeBuyers = canReadSensitive(adminViewer) ? buyers : buyers.map(maskSensitiveBuyerFields);
       return {
-        buyers: slicePageRows(buyers, parsed),
+        buyers: slicePageRows(safeBuyers, parsed),
         meta: createPaginationMeta(parsed, undefined, buyers.length)
       };
     },
@@ -50,6 +65,9 @@ export function createAdminBuyerService({ queries }) {
       const result = await queries.getBuyerById(id, { adminViewer });
       if (!result) {
         throw notFound("Buyer not found");
+      }
+      if (!canReadSensitive(adminViewer)) {
+        return { ...result, buyer: maskSensitiveBuyerFields(result.buyer) };
       }
       return result;
     },

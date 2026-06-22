@@ -8,7 +8,13 @@ import { runSchemaMigration } from "../db/schemaMigrationRunner.js";
 const currentFile = fileURLToPath(import.meta.url);
 const currentDir = path.dirname(currentFile);
 const repoRoot = path.resolve(currentDir, "../../..");
+const backendRoot = path.resolve(currentDir, "../..");
 const defaultSchemaPath = path.join(repoRoot, "supabase", "schema.sql");
+const packagedMigrationPath = path.join(
+  backendRoot,
+  "migrations",
+  "20260622_admin_rbac_account_lifecycle.sql"
+);
 
 export function assertRunnerAllowed(source = process.env) {
   if (source.ALLOW_STAGING_SCHEMA_MIGRATION_RUNNER !== "true") {
@@ -17,6 +23,10 @@ export function assertRunnerAllowed(source = process.env) {
 }
 
 export function resolveSchemaSqlPath(source = process.env) {
+  if (source.SCHEMA_SQL_PATH === "migrations/20260622_admin_rbac_account_lifecycle.sql") {
+    return packagedMigrationPath;
+  }
+
   const candidate = source.SCHEMA_SQL_PATH
     ? path.resolve(repoRoot, source.SCHEMA_SQL_PATH)
     : defaultSchemaPath;
@@ -29,6 +39,11 @@ export function resolveSchemaSqlPath(source = process.env) {
   return candidate;
 }
 
+export function getMigrationNameFromPath(schemaPath) {
+  const basename = path.basename(schemaPath);
+  return basename.replace(/\.sql$/i, "").replace(/[^a-zA-Z0-9_.-]/g, "-");
+}
+
 export async function loadSchemaSql(source = process.env) {
   const schemaPath = resolveSchemaSqlPath(source);
   return fs.readFile(schemaPath, "utf8");
@@ -39,13 +54,14 @@ export async function main(source = process.env) {
 
   const env = getEnv(source);
   const pool = createPool(env);
-  const sqlText = await loadSchemaSql(source);
+  const schemaPath = resolveSchemaSqlPath(source);
+  const sqlText = await fs.readFile(schemaPath, "utf8");
 
   try {
     return await runSchemaMigration({
       pool,
       sqlText,
-      migrationName: "staging-schema",
+      migrationName: getMigrationNameFromPath(schemaPath),
       logger: console
     });
   } finally {

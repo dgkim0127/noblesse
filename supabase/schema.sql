@@ -21,6 +21,7 @@ create table if not exists public.users (
   email text unique not null,
   role text not null check (role in ('buyer', 'admin')),
   status text not null check (status in ('pending', 'approved', 'blocked')),
+  account_status text not null default 'active' check (account_status in ('active', 'blocked')),
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -43,8 +44,36 @@ create table if not exists public.buyers (
   min_order_amount numeric(14,2) default 0,
   approved_at timestamptz,
   approved_by uuid references public.users(id),
+  verification_status text not null default 'draft' check (verification_status in ('draft', 'pending', 'approved', 'rejected', 'suspended')),
+  submitted_at timestamptz,
+  reviewed_at timestamptz,
+  reviewed_by uuid references public.users(id),
+  rejection_reason text,
+  suspension_reason text,
+  assigned_admin_id uuid references public.users(id),
+  internal_memo text,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
+);
+
+create table if not exists public.admin_profiles (
+  user_id uuid primary key references public.users(id) on delete cascade,
+  admin_role text not null default 'operator' check (admin_role in ('operator', 'manager', 'owner')),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table if not exists public.admin_permission_overrides (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.users(id) on delete cascade,
+  permission_key text not null,
+  effect text not null check (effect in ('allow', 'deny')),
+  reason text,
+  granted_by uuid references public.users(id),
+  expires_at timestamptz,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique(user_id, permission_key)
 );
 
 create table if not exists public.categories (
@@ -273,6 +302,14 @@ drop trigger if exists trg_buyers_updated_at on public.buyers;
 create trigger trg_buyers_updated_at before update on public.buyers
 for each row execute function public.update_updated_at_column();
 
+drop trigger if exists trg_admin_profiles_updated_at on public.admin_profiles;
+create trigger trg_admin_profiles_updated_at before update on public.admin_profiles
+for each row execute function public.update_updated_at_column();
+
+drop trigger if exists trg_admin_permission_overrides_updated_at on public.admin_permission_overrides;
+create trigger trg_admin_permission_overrides_updated_at before update on public.admin_permission_overrides
+for each row execute function public.update_updated_at_column();
+
 drop trigger if exists trg_categories_updated_at on public.categories;
 create trigger trg_categories_updated_at before update on public.categories
 for each row execute function public.update_updated_at_column();
@@ -302,10 +339,16 @@ create trigger trg_banners_updated_at before update on public.banners
 for each row execute function public.update_updated_at_column();
 
 create index if not exists idx_users_role_status on public.users(role, status);
+create index if not exists idx_users_account_status on public.users(account_status);
 create index if not exists idx_buyers_user_id on public.buyers(user_id);
 create index if not exists idx_buyers_assigned_market on public.buyers(assigned_market);
 create index if not exists idx_buyers_country on public.buyers(country);
 create index if not exists idx_buyers_company_name on public.buyers(company_name);
+create index if not exists idx_buyers_verification_status on public.buyers(verification_status);
+create index if not exists idx_buyers_assigned_admin_id on public.buyers(assigned_admin_id);
+create index if not exists idx_admin_permission_overrides_user on public.admin_permission_overrides(user_id);
+create index if not exists idx_admin_permission_overrides_active on public.admin_permission_overrides(user_id, permission_key)
+  where expires_at is null;
 create index if not exists idx_categories_visible_sort on public.categories(is_visible, sort_order);
 create index if not exists idx_products_category_id on public.products(category_id);
 create index if not exists idx_products_visible_sort on public.products(is_visible, sort_order);

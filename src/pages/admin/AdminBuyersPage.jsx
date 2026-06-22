@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
+import { useAdminAccess } from '../../components/AdminAccessContext'
 import { AdminPageHeader, AdminPagination, AdminPreviewNote, AdminStatus } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy, getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
-const filterTabs = ['all', 'pending', 'approved', 'blocked']
+const filterTabs = ['all', 'draft', 'pending', 'approved', 'rejected', 'suspended', 'blocked']
 const pageSize = 20
 
 function formatDate(value) {
@@ -13,6 +14,7 @@ function formatDate(value) {
 
 export function AdminBuyersPage() {
   const t = useAdminCopy()
+  const { hasPermission } = useAdminAccess()
   const [filter, setFilter] = useState('all')
   const [query, setQuery] = useState('')
   const [offset, setOffset] = useState(0)
@@ -20,7 +22,8 @@ export function AdminBuyersPage() {
   const [savingBuyerId, setSavingBuyerId] = useState('')
   const [message, setMessage] = useState('')
   const filters = useMemo(() => ({
-    status: filter === 'all' ? '' : filter,
+    verificationStatus: ['draft', 'pending', 'approved', 'rejected', 'suspended'].includes(filter) ? filter : '',
+    accountStatus: filter === 'blocked' ? 'blocked' : '',
     q: query.trim(),
     limit: pageSize,
     offset,
@@ -40,7 +43,10 @@ export function AdminBuyersPage() {
     setSavingBuyerId(buyerId)
     setMessage('')
     try {
-      await mutate((api, token) => api.updateBuyerStatus(buyerId, nextStatus, token))
+      await mutate((api, token) => api.updateBuyerVerification(buyerId, {
+        verificationStatus: nextStatus,
+        reason: ['rejected', 'suspended'].includes(nextStatus) ? 'Updated by admin review' : undefined,
+      }, token))
       setMessage(formatAdminCopy(t.buyers.updated, { status: getAdminStatusLabel(t, nextStatus) }))
       setRefreshKey((current) => current + 1)
     } catch (error) {
@@ -68,7 +74,7 @@ export function AdminBuyersPage() {
     <section className="admin-card">
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th>{t.fields.companyName}</th><th>{t.fields.contactName}</th><th>{t.fields.email}</th><th>{t.fields.country}</th><th>{t.fields.language}</th><th>{t.fields.market}</th><th>{t.fields.currency}</th><th>{t.common.status}</th><th>{t.common.createdAt}</th><th>{t.common.actions}</th></tr></thead>
+          <thead><tr><th>{t.fields.companyName}</th><th>{t.fields.contactName}</th><th>{t.fields.email}</th><th>{t.fields.country}</th><th>{t.fields.language}</th><th>{t.fields.market}</th><th>{t.fields.currency}</th><th>{t.common.status}</th><th>{t.buyers.accountStatus || 'Account'}</th><th>{t.buyers.waitingDays || 'Waiting'}</th><th>{t.buyers.inquiryCount || 'Inquiries'}</th><th>{t.common.createdAt}</th><th>{t.common.actions}</th></tr></thead>
           <tbody>{buyers.map((buyer) => <tr key={buyer.id}>
             <td>{buyer.companyName || '-'}</td>
             <td>{buyer.contactName || '-'}</td>
@@ -77,11 +83,14 @@ export function AdminBuyersPage() {
             <td>{buyer.preferredLanguage || '-'}</td>
             <td>{buyer.assignedMarket || '-'}</td>
             <td>{buyer.currency || '-'}</td>
-            <td><AdminStatus status={buyer.status} /></td>
+            <td><AdminStatus status={buyer.verificationStatus || buyer.status} /></td>
+            <td><AdminStatus status={buyer.accountStatus || 'active'} /></td>
+            <td>{buyer.waitingDays ?? '-'}</td>
+            <td>{buyer.inquiryCount ?? 0}</td>
             <td>{formatDate(buyer.createdAt)}</td>
             <td>
               <div className="admin-actions tight">
-                {['pending', 'approved', 'blocked'].filter((item) => item !== buyer.status).map((nextStatus) => <button
+                {hasPermission('buyers.review') && ['pending', 'approved', 'rejected', 'suspended'].filter((item) => item !== (buyer.verificationStatus || buyer.status)).map((nextStatus) => <button
                   disabled={savingBuyerId === buyer.id}
                   key={nextStatus}
                   type="button"

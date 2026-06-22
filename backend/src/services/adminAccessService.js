@@ -1,6 +1,6 @@
 import { ADMIN_ROLES, PERMISSIONS } from "../auth/adminPermissions.js";
 import { conflict, notFound, validationError } from "../utils/errors.js";
-import { parseOptionalString, rejectUnknownFields, validateUuid } from "../utils/validators.js";
+import { parseRequiredString, rejectUnknownFields, validateUuid } from "../utils/validators.js";
 
 function parseAdminRole(value) {
   if (!ADMIN_ROLES.includes(value)) {
@@ -17,11 +17,29 @@ function parseOverride(input = {}) {
   if (!["allow", "deny"].includes(safe.effect)) {
     throw validationError("Invalid override effect");
   }
+  if (safe.reason === undefined || safe.reason === null) {
+    throw validationError("reason is required");
+  }
+  const reason = parseRequiredString(safe.reason, { fieldName: "reason", maxLength: 240 });
+  let expiresAt = null;
+  if (safe.expiresAt !== undefined && safe.expiresAt !== null && safe.expiresAt !== "") {
+    if (typeof safe.expiresAt !== "string") {
+      throw validationError("expiresAt must be an ISO timestamp");
+    }
+    const parsed = new Date(safe.expiresAt);
+    if (Number.isNaN(parsed.getTime())) {
+      throw validationError("expiresAt must be a valid ISO timestamp");
+    }
+    if (parsed.getTime() <= Date.now()) {
+      throw validationError("expiresAt must be in the future");
+    }
+    expiresAt = safe.expiresAt;
+  }
   return {
     permissionKey: safe.permissionKey,
     effect: safe.effect,
-    reason: parseOptionalString(safe.reason, { maxLength: 240 }),
-    expiresAt: parseOptionalString(safe.expiresAt, { maxLength: 40 })
+    reason,
+    expiresAt
   };
 }
 
@@ -61,6 +79,10 @@ export function createAdminAccessService({ queries }) {
         throw validationError("overrides must be an array");
       }
       const overrides = safe.overrides.map(parseOverride);
+      const uniqueKeys = new Set(overrides.map((override) => override.permissionKey));
+      if (uniqueKeys.size !== overrides.length) {
+        throw validationError("Duplicate permissionKey override");
+      }
       const result = await queries.replacePermissionOverrides(id, overrides, adminViewer);
       if (!result) throw notFound("Admin user not found");
       if (result.ownerOverrideBlocked) throw validationError("Owner permissions cannot be overridden");
@@ -80,8 +102,14 @@ export function createAdminAccessService({ queries }) {
     async listAuditEntries(filters = {}) {
       const limit = Math.min(Math.max(Number(filters.limit || 50), 1), 100);
       const offset = Math.max(Number(filters.offset || 0), 0);
+      const action = typeof filters.action === "string" && filters.action.trim()
+        ? filters.action.trim()
+        : null;
+      const q = typeof filters.q === "string" && filters.q.trim()
+        ? filters.q.trim()
+        : null;
       return {
-        auditLogs: await queries.listAuditEntries({ limit, offset }),
+        auditLogs: await queries.listAuditEntries({ limit, offset, action, q }),
         meta: { limit, offset }
       };
     }

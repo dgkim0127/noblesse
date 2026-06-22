@@ -16,7 +16,6 @@ function mapAdmin(row, overrides = []) {
   });
   return {
     userId: row.user_id || row.id,
-    authUid: row.auth_uid,
     email: row.email,
     role: row.role,
     status: row.status,
@@ -35,8 +34,9 @@ function mapAuditLog(row) {
     id: row.id,
     actorUserId: row.actor_user_id,
     action: row.action,
-    entityType: row.entity_type,
-    entityId: row.entity_id,
+    actor: row.actor_user_id ? { userId: row.actor_user_id, role: row.actor_role || "admin" } : null,
+    entityType: row.target_table,
+    entityId: row.target_id,
     requestId: row.request_id,
     createdAt: row.created_at
   };
@@ -89,11 +89,10 @@ export function createAdminAccessQueries(pool) {
     },
 
     async listAdmins() {
-      const result = await pool.query(
+      const adminsResult = await pool.query(
         `
           select
             u.id as user_id,
-            u.auth_uid,
             u.email,
             u.role,
             u.status,
@@ -108,7 +107,25 @@ export function createAdminAccessQueries(pool) {
           limit 200
         `
       );
-      return result.rows.map((row) => mapAdmin(row));
+      if (!adminsResult.rowCount) return [];
+      const userIds = adminsResult.rows.map((row) => row.user_id);
+      const overridesResult = await pool.query(
+        `
+          select user_id, permission_key, effect, reason, expires_at
+          from public.admin_permission_overrides
+          where user_id = any($1::uuid[])
+            and (expires_at is null or expires_at > now())
+          order by user_id asc, permission_key asc
+        `,
+        [userIds]
+      );
+      const overridesByUserId = new Map();
+      for (const row of overridesResult.rows) {
+        const list = overridesByUserId.get(row.user_id) || [];
+        list.push(mapOverride(row));
+        overridesByUserId.set(row.user_id, list);
+      }
+      return adminsResult.rows.map((row) => mapAdmin(row, overridesByUserId.get(row.user_id) || []));
     },
 
     async updateAdminRole(userId, adminRole, adminViewer) {
@@ -154,10 +171,19 @@ export function createAdminAccessQueries(pool) {
         );
         await client.query(
           `
-            insert into public.audit_logs (actor_user_id, action, entity_type, entity_id, after_snapshot, request_id)
-            values ($1, 'admin.role.update', 'user', $2, jsonb_build_object('adminRole', $3), $4)
+            insert into public.audit_logs (
+              actor_user_id, actor_role, action, target_table, target_id,
+              before_snapshot, after_snapshot, request_id
+            )
+            values ($1, 'admin', 'admin.role.update', 'users', $2, $3::jsonb, $4::jsonb, $5)
           `,
-          [adminViewer.userId, userId, adminRole, adminViewer.requestId]
+          [
+            adminViewer.userId,
+            userId,
+            { adminRole: current.rows[0].admin_role },
+            { adminRole },
+            adminViewer.requestId
+          ]
         );
         await client.query("commit");
         return updated.rows[0];
@@ -185,6 +211,15 @@ export function createAdminAccessQueries(pool) {
           await client.query("rollback");
           return { ownerOverrideBlocked: true };
         }
+        const existingOverrides = await client.query(
+          `
+            select permission_key, effect, reason, expires_at
+            from public.admin_permission_overrides
+            where user_id = $1
+            order by permission_key asc
+          `,
+          [userId]
+        );
         await client.query("delete from public.admin_permission_overrides where user_id = $1", [userId]);
         for (const override of overrides) {
           await client.query(
@@ -205,10 +240,19 @@ export function createAdminAccessQueries(pool) {
         }
         await client.query(
           `
-            insert into public.audit_logs (actor_user_id, action, entity_type, entity_id, after_snapshot, request_id)
-            values ($1, 'admin.permission_overrides.replace', 'user', $2, jsonb_build_object('count', $3), $4)
+            insert into public.audit_logs (
+              actor_user_id, actor_role, action, target_table, target_id,
+              before_snapshot, after_snapshot, request_id
+            )
+            values ($1, 'admin', 'admin.permission_overrides.replace', 'users', $2, $3::jsonb, $4::jsonb, $5)
           `,
-          [adminViewer.userId, userId, overrides.length, adminViewer.requestId]
+          [
+            adminViewer.userId,
+            userId,
+            { overrides: existingOverrides.rows.map(mapOverride) },
+            { count: overrides.length, overrides },
+            adminViewer.requestId
+          ]
         );
         await client.query("commit");
         return { userId, overrides };
@@ -221,34 +265,72 @@ export function createAdminAccessQueries(pool) {
     },
 
     async deletePermissionOverride(userId, permissionKey, adminViewer) {
-      const result = await pool.query(
-        `
-          delete from public.admin_permission_overrides
-          where user_id = $1 and permission_key = $2
-          returning user_id, permission_key
-        `,
-        [userId, permissionKey]
-      );
-      if (!result.rowCount) return null;
-      await pool.query(
-        `
-          insert into public.audit_logs (actor_user_id, action, entity_type, entity_id, after_snapshot, request_id)
-          values ($1, 'admin.permission_override.delete', 'user', $2, jsonb_build_object('permissionKey', $3), $4)
-        `,
-        [adminViewer.userId, userId, permissionKey, adminViewer.requestId]
-      );
-      return { userId, permissionKey };
+      const client = await pool.connect();
+      try {
+        await client.query("begin");
+        const existing = await client.query(
+          `
+            select user_id, permission_key, effect, reason, expires_at
+            from public.admin_permission_overrides
+            where user_id = $1 and permission_key = $2
+            for update
+          `,
+          [userId, permissionKey]
+        );
+        if (!existing.rowCount) {
+          await client.query("rollback");
+          return null;
+        }
+        await client.query(
+          "delete from public.admin_permission_overrides where user_id = $1 and permission_key = $2",
+          [userId, permissionKey]
+        );
+        await client.query(
+          `
+            insert into public.audit_logs (
+              actor_user_id, actor_role, action, target_table, target_id,
+              before_snapshot, after_snapshot, request_id
+            )
+            values ($1, 'admin', 'admin.permission_override.delete', 'users', $2, $3::jsonb, $4::jsonb, $5)
+          `,
+          [
+            adminViewer.userId,
+            userId,
+            { override: mapOverride(existing.rows[0]) },
+            { permissionKey },
+            adminViewer.requestId
+          ]
+        );
+        await client.query("commit");
+        return { userId, permissionKey };
+      } catch (error) {
+        try {
+          await client.query("rollback");
+        } catch {
+          // Preserve the original query error instead of masking it.
+        }
+        throw error;
+      } finally {
+        client.release();
+      }
     },
 
-    async listAuditEntries({ limit = 50, offset = 0 } = {}) {
+    async listAuditEntries({ limit = 50, offset = 0, action = null, q = null } = {}) {
       const result = await pool.query(
         `
-          select id, actor_user_id, action, entity_type, entity_id, request_id, created_at
+          select id, actor_user_id, actor_role, action, target_table, target_id, request_id, created_at
           from public.audit_logs
+          where ($3::text is null or action = $3)
+            and (
+              $4::text is null
+              or request_id ilike $4
+              or target_id ilike $4
+              or target_table ilike $4
+            )
           order by created_at desc
           limit $1 offset $2
         `,
-        [limit, offset]
+        [limit, offset, action, q ? `%${q}%` : null]
       );
       return result.rows.map(mapAuditLog);
     }

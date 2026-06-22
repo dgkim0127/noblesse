@@ -82,6 +82,53 @@
   padding: 2rem;
 }
 
+.admin-compact-list {
+  display: grid;
+  gap: 0.45rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-compact-list li {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.admin-compact-list small,
+.admin-muted {
+  color: rgba(42, 35, 79, 0.58);
+  font-size: 0.78rem;
+}
+
+.admin-edit-panel {
+  background: rgba(255, 143, 169, 0.07);
+  border: 1px solid rgba(255, 143, 169, 0.22);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin: 0.5rem 0;
+  padding: 1rem;
+}
+
+.admin-edit-panel label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.admin-edit-panel input,
+.admin-edit-panel select {
+  border: 1px solid rgba(42, 35, 79, 0.15);
+  border-radius: 8px;
+  min-height: 2.4rem;
+  padding: 0.35rem 0.6rem;
+}
+
 @media (max-width: 820px) {
   .admin-console-shell {
     display: block;

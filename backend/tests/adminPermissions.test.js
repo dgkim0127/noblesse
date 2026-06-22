@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import express from "express";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { createRequireAdmin } from "../src/auth/requireAdmin.js";
 import { resolveAdminPermissions } from "../src/auth/adminPermissions.js";
 import { createAdminRoutes } from "../src/routes/adminRoutes.js";
+import { createAdminAccessService } from "../src/services/adminAccessService.js";
 import { errorHandler } from "../src/middleware/errorHandler.js";
 import { requestId } from "../src/middleware/requestId.js";
 import { request } from "./testClient.js";
@@ -131,4 +134,57 @@ test("requirePermission returns 403 and image parser is not called when catalog.
   assert.equal(response.status, 403);
   assert.equal(response.body.error.code, "FORBIDDEN");
   assert.equal(parserCalled, false);
+});
+
+test("settings.manage is reserved for owner role", () => {
+  const owner = resolveAdminPermissions({ adminRole: "owner" });
+  const manager = resolveAdminPermissions({ adminRole: "manager" });
+  const operator = resolveAdminPermissions({ adminRole: "operator" });
+
+  assert.equal(owner.permissions.includes("settings.manage"), true);
+  assert.equal(manager.permissions.includes("settings.manage"), false);
+  assert.equal(operator.permissions.includes("settings.manage"), false);
+});
+
+test("permission override validation requires reason, future expiresAt, and unique keys", async () => {
+  const service = createAdminAccessService({
+    queries: {
+      async replacePermissionOverrides() {
+        throw new Error("query should not be called for invalid input");
+      }
+    }
+  });
+  const userId = "11111111-1111-4111-8111-111111111111";
+  const adminViewer = { userId: "admin-1" };
+
+  await assert.rejects(
+    () => service.replacePermissionOverrides(userId, {
+      overrides: [{ permissionKey: "buyers.read", effect: "allow" }]
+    }, adminViewer),
+    /reason is required/
+  );
+  await assert.rejects(
+    () => service.replacePermissionOverrides(userId, {
+      overrides: [{ permissionKey: "buyers.read", effect: "allow", reason: "temporary", expiresAt: "2020-01-01T00:00:00Z" }]
+    }, adminViewer),
+    /future/
+  );
+  await assert.rejects(
+    () => service.replacePermissionOverrides(userId, {
+      overrides: [
+        { permissionKey: "buyers.read", effect: "allow", reason: "temporary" },
+        { permissionKey: "buyers.read", effect: "deny", reason: "temporary" }
+      ]
+    }, adminViewer),
+    /Duplicate permissionKey/
+  );
+});
+
+test("admin access query SQL uses existing audit target columns", () => {
+  const source = readFileSync(join(process.cwd(), "src", "db", "queries", "adminAccessQueries.js"), "utf8");
+
+  assert.match(source, /target_table/);
+  assert.match(source, /target_id/);
+  assert.doesNotMatch(source, /entity_type/);
+  assert.doesNotMatch(source, /entity_id/);
 });

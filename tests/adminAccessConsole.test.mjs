@@ -50,3 +50,51 @@ test('admin access copy covers every locale', () => {
     assert.match(copy, new RegExp(`${locale}: \\{[\\s\\S]*audit:`))
   }
 })
+
+test('admin dashboard renders RBAC lifecycle summary sections', () => {
+  const page = read('src/pages/admin/AdminDashboardPage.jsx')
+
+  for (const contractField of ['accountFunnel', 'workQueue', 'catalogHealth', 'recentActivity']) {
+    assert.match(page, new RegExp(contractField))
+  }
+  assert.match(page, /hasPermission\('buyers\.review'\)/)
+  assert.match(page, /hasPermission\('catalog\.write'\)/)
+  assert.match(page, /hasPermission\('audit\.read'\)/)
+  assert.match(page, /getAdminStatusLabel\(t, item\)/)
+})
+
+test('admin team page protects owner-only role and override controls', () => {
+  const page = read('src/pages/admin/AdminTeamPage.jsx')
+
+  assert.match(page, /admin\?\.adminRole === 'owner'/)
+  assert.match(page, /hasPermission\('admins\.manage'\)/)
+  assert.match(page, /permissionOptions = \[/)
+  assert.match(page, /settings\.manage/)
+  assert.match(page, /disabled=\{!draft\.reason\.trim\(\)\}/)
+  assert.match(page, /deletePermissionOverride/)
+  assert.match(page, /ownerProtected/)
+})
+
+test('admin audit page renders target fields without raw snapshots', () => {
+  const page = read('src/pages/admin/AdminAuditPage.jsx')
+
+  assert.match(page, /entry\.entityType/)
+  assert.match(page, /entry\.entityId/)
+  assert.match(page, /entry\.actor\?\.role/)
+  assert.match(page, /getAuditLogs\(params, token\)/)
+  assert.doesNotMatch(page, /beforeSnapshot|afterSnapshot|raw snapshot/i)
+})
+
+test('admin buyer pages separate account and verification status', () => {
+  const buyersPage = read('src/pages/admin/AdminBuyersPage.jsx')
+  const detailPage = read('src/pages/admin/AdminBuyerDetailPage.jsx')
+
+  assert.match(buyersPage, /verificationStatus/)
+  assert.match(buyersPage, /accountStatus/)
+  assert.match(buyersPage, /updateBuyerVerification/)
+  assert.match(buyersPage, /hasPermission\('buyers\.review'\)/)
+  assert.match(detailPage, /verificationStatus/)
+  assert.match(detailPage, /accountStatus/)
+  assert.match(detailPage, /buyers\.sensitive\.read/)
+  assert.match(detailPage, /Masked by permission/)
+})

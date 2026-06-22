@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import test from "node:test";
 import {
   buildMigrationPlan,
@@ -7,6 +9,7 @@ import {
 } from "../src/db/schemaMigrationRunner.js";
 import {
   assertRunnerAllowed,
+  getMigrationNameFromPath,
   resolveSchemaSqlPath
 } from "../src/scripts/runStagingSchemaMigration.js";
 
@@ -139,6 +142,51 @@ test("migration runner path guard prevents traversal outside repo", () => {
     () => resolveSchemaSqlPath({ SCHEMA_SQL_PATH: "..\\outside.sql" }),
     /inside the repository/
   );
+});
+
+test("N38-A lifecycle migration has no transaction-control SQL", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260622_admin_rbac_account_lifecycle.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+});
+
+test("packaged lifecycle migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260622_admin_rbac_account_lifecycle.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260622_admin_rbac_account_lifecycle.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
+test("migration runner resolves packaged lifecycle migration path explicitly", () => {
+  const resolved = resolveSchemaSqlPath({
+    SCHEMA_SQL_PATH: "migrations/20260622_admin_rbac_account_lifecycle.sql"
+  });
+
+  assert.equal(
+    resolved.endsWith("backend\\migrations\\20260622_admin_rbac_account_lifecycle.sql") ||
+      resolved.endsWith("backend/migrations/20260622_admin_rbac_account_lifecycle.sql"),
+    true
+  );
+  assert.equal(
+    getMigrationNameFromPath(resolved),
+    "20260622_admin_rbac_account_lifecycle"
+  );
+});
+
+test("backend Dockerfile packages migration artifacts without secrets", () => {
+  const dockerfile = readFileSync(join(process.cwd(), "Dockerfile"), "utf8");
+
+  assert.match(dockerfile, /COPY migrations \.\/migrations/);
+  assert.doesNotMatch(dockerfile, /DATABASE_URL|PRIVATE_KEY|SECRET/i);
 });
 
 test("migration runner does not access Secret Manager or open real DB in tests", () => {

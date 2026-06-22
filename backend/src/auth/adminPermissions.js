@@ -18,7 +18,8 @@ export const PERMISSIONS = [
   "analytics.read",
   "admins.read",
   "admins.manage",
-  "audit.read"
+  "audit.read",
+  "settings.manage"
 ];
 
 export const ADMIN_ROLE_PERMISSIONS = {

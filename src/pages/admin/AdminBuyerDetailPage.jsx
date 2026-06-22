@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { useAdminAccess } from '../../components/AdminAccessContext'
 import { AdminLink, AdminMoney, AdminPageHeader, AdminPreviewNote, AdminStatus } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy, getAdminStatusLabel, useAdminCopy } from './adminCopy'
@@ -11,6 +12,7 @@ function formatDate(value) {
 
 export function AdminBuyerDetailPage() {
   const t = useAdminCopy()
+  const { hasPermission } = useAdminAccess()
   const { buyerId } = useParams()
   const [refreshKey, setRefreshKey] = useState(0)
   const [saving, setSaving] = useState('')
@@ -35,7 +37,10 @@ export function AdminBuyerDetailPage() {
     setSaving(nextStatus)
     setMessage('')
     try {
-      await mutate((api, token) => api.updateBuyerStatus(buyer.id, nextStatus, token))
+      await mutate((api, token) => api.updateBuyerVerification(buyer.id, {
+        verificationStatus: nextStatus,
+        reason: ['rejected', 'suspended'].includes(nextStatus) ? 'Updated by admin review' : undefined,
+      }, token))
       setMessage(formatAdminCopy(t.buyers.updated, { status: getAdminStatusLabel(t, nextStatus) }))
       setRefreshKey((current) => current + 1)
     } catch (error) {
@@ -81,9 +86,14 @@ export function AdminBuyerDetailPage() {
           <dt>{t.fields.discountRate}</dt><dd>{buyer.discountRate ?? 0}%</dd>
           <dt>{t.prices.minRequestAmount}</dt><dd><AdminMoney value={buyer.minOrderAmount || 0} currency={buyer.currency || 'USD'} /></dd>
           <dt>{t.common.status}</dt><dd><AdminStatus status={buyer.status} /></dd>
+          <dt>{t.buyers.accountStatus || 'Account status'}</dt><dd><AdminStatus status={buyer.accountStatus || 'active'} /></dd>
+          <dt>{t.buyers.verificationStatus || 'Verification status'}</dt><dd><AdminStatus status={buyer.verificationStatus || buyer.status} /></dd>
+          <dt>{t.buyers.assignedAdmin || 'Assigned admin'}</dt><dd>{buyer.assignedAdmin?.email || '-'}</dd>
+          <dt>{t.buyers.recentInquiryAt || 'Recent inquiry'}</dt><dd>{formatDate(buyer.recentInquiryAt)}</dd>
+          <dt>{t.buyers.inquiryCount || 'Inquiry count'}</dt><dd>{buyer.inquiryCount ?? 0}</dd>
         </dl>
         <div className="admin-actions">
-          {['pending', 'approved', 'blocked'].filter((item) => item !== buyer.status).map((nextStatus) => <button
+          {hasPermission('buyers.review') && ['pending', 'approved', 'rejected', 'suspended'].filter((item) => item !== (buyer.verificationStatus || buyer.status)).map((nextStatus) => <button
             disabled={saving === nextStatus}
             key={nextStatus}
             onClick={() => updateStatus(nextStatus)}
@@ -100,6 +110,7 @@ export function AdminBuyerDetailPage() {
           <dt>{t.fields.phone}</dt><dd>{buyer.phone || '-'}</dd>
           <dt>{t.fields.messenger}</dt><dd>{buyer.messengerType || '-'} / {buyer.messengerId || '-'}</dd>
           <dt>{t.fields.language}</dt><dd>{buyer.preferredLanguage || '-'}</dd>
+          {!hasPermission('buyers.sensitive.read') && <><dt>{t.buyers.sensitiveAccess || 'Sensitive access'}</dt><dd>{t.buyers.masked || 'Masked by permission'}</dd></>}
         </dl>
       </article>
       <article className="admin-card">
