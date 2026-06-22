@@ -22,7 +22,15 @@ export function createAdminDashboardQueries(pool) {
           (select count(*)::int from public.users where role = 'buyer' and status = 'blocked') as buyer_blocked,
           (select count(*)::int from public.products) as product_total,
           (select count(*)::int from public.products where is_visible = true) as product_visible,
-          (select count(*)::int from public.products where is_visible = false) as product_hidden
+          (select count(*)::int from public.products where is_visible = false) as product_hidden,
+          (select count(*)::int from public.users where role = 'buyer' and coalesce(account_status, 'active') = 'blocked') as account_blocked,
+          (select count(*)::int from public.buyers where coalesce(verification_status, 'pending') = 'draft') as verification_draft,
+          (select count(*)::int from public.buyers where coalesce(verification_status, 'pending') = 'pending') as verification_pending,
+          (select count(*)::int from public.buyers where coalesce(verification_status, 'pending') = 'approved') as verification_approved,
+          (select count(*)::int from public.buyers where coalesce(verification_status, 'pending') = 'rejected') as verification_rejected,
+          (select count(*)::int from public.buyers where coalesce(verification_status, 'pending') = 'suspended') as verification_suspended,
+          (select count(*)::int from public.products where is_visible = true and coalesce(is_export_available, true) = true) as catalog_ready,
+          (select count(*)::int from public.products where is_visible = false or coalesce(is_export_available, true) = false) as catalog_needs_review
       `);
       const row = result.rows[0] || {};
       return {
@@ -48,6 +56,29 @@ export function createAdminDashboardQueries(pool) {
         manualFollowUp: {
           label: "Manual follow-up required",
           count: row.inquiry_requested || 0
+        },
+        accountFunnel: {
+          active: Math.max(0, (row.buyer_total || 0) - (row.account_blocked || 0)),
+          blocked: row.account_blocked || 0,
+          draft: row.verification_draft || 0,
+          pending: row.verification_pending || 0,
+          approved: row.verification_approved || 0,
+          rejected: row.verification_rejected || 0,
+          suspended: row.verification_suspended || 0
+        },
+        workQueue: {
+          buyerReviews: row.verification_pending || 0,
+          inquiryFollowUp: row.inquiry_requested || 0,
+          quoteFollowUp: row.inquiry_quoted || 0
+        },
+        catalogHealth: {
+          ready: row.catalog_ready || 0,
+          needsReview: row.catalog_needs_review || 0,
+          hidden: row.product_hidden || 0
+        },
+        recentActivity: {
+          label: "Audit activity is available in the audit log",
+          count: 0
         }
       };
     }

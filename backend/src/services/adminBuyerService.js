@@ -10,10 +10,20 @@ import {
 } from "../utils/validators.js";
 import { notFound } from "../utils/errors.js";
 
+const BUYER_VERIFICATION_STATUSES = ["draft", "pending", "approved", "rejected", "suspended"];
+const ACCOUNT_STATUSES = ["active", "blocked"];
+const legacyStatusMap = {
+  pending: "pending",
+  approved: "approved",
+  blocked: "suspended"
+};
+
 function parseBuyerFilters(filters) {
   const pagination = parsePagination(filters);
   return {
     status: parseOptionalEnum(filters.status, USER_STATUSES, "status"),
+    verificationStatus: parseOptionalEnum(filters.verificationStatus, BUYER_VERIFICATION_STATUSES, "verificationStatus"),
+    accountStatus: parseOptionalEnum(filters.accountStatus, ACCOUNT_STATUSES, "accountStatus"),
     market: parseOptionalEnum(filters.market, MARKETS, "market"),
     country: parseOptionalString(filters.country, { maxLength: 2 }),
     q: parseOptionalString(filters.q, { maxLength: 120 }),
@@ -52,7 +62,67 @@ export function createAdminBuyerService({ queries }) {
         throw validationError("status is required");
       }
 
-      const result = await queries.updateBuyerStatus(id, status, adminViewer);
+      const result = queries.updateBuyerVerificationStatus
+        ? await queries.updateBuyerVerificationStatus(
+          id,
+          { verificationStatus: legacyStatusMap[status] || status },
+          adminViewer
+        )
+        : await queries.updateBuyerStatus(id, status, adminViewer);
+      if (!result) {
+        throw notFound("Buyer not found");
+      }
+      return result;
+    },
+
+    async updateBuyerVerification(buyerId, body = {}, adminViewer) {
+      const id = validateUuid(buyerId, "buyerId");
+      const safeBody = rejectUnknownFields(body, ["verificationStatus", "reason", "assignedAdminId", "internalMemo"]);
+      const verificationStatus = parseOptionalEnum(
+        safeBody.verificationStatus,
+        BUYER_VERIFICATION_STATUSES,
+        "verificationStatus"
+      );
+      if (!verificationStatus) {
+        throw validationError("verificationStatus is required");
+      }
+      if (["rejected", "suspended"].includes(verificationStatus) && !safeBody.reason) {
+        throw validationError("reason is required");
+      }
+      const result = await queries.updateBuyerVerificationStatus(
+        id,
+        {
+          verificationStatus,
+          reason: parseOptionalString(safeBody.reason, { maxLength: 500 }),
+          assignedAdminId: parseOptionalString(safeBody.assignedAdminId, { maxLength: 36 }),
+          internalMemo: parseOptionalString(safeBody.internalMemo, { maxLength: 2000 })
+        },
+        adminViewer
+      );
+      if (!result) {
+        throw notFound("Buyer not found");
+      }
+      return result;
+    },
+
+    async updateBuyerAccountStatus(buyerId, body = {}, adminViewer) {
+      const id = validateUuid(buyerId, "buyerId");
+      const safeBody = rejectUnknownFields(body, ["accountStatus", "reason"]);
+      const accountStatus = parseOptionalEnum(safeBody.accountStatus, ACCOUNT_STATUSES, "accountStatus");
+      if (!accountStatus) {
+        throw validationError("accountStatus is required");
+      }
+      if (accountStatus === "blocked" && !safeBody.reason) {
+        throw validationError("reason is required");
+      }
+      const result = await queries.updateBuyerAccountStatus(
+        id,
+        {
+          accountStatus,
+          reason: parseOptionalString(safeBody.reason, { maxLength: 500 })
+        },
+        adminViewer
+      );
       if (!result) {
         throw notFound("Buyer not found");
       }

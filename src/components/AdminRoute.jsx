@@ -4,6 +4,7 @@ import { useCommerce } from '../commerce/commerceStore'
 import { isAuthConfigured } from '../services/authService'
 import { useAdminCopy } from '../pages/admin/adminCopy'
 import { useLocalePath } from '../utils/locale'
+import { AdminAccessProvider } from './AdminAccessContext'
 
 export function AdminRoute({ children }) {
   const { authStatus, dataMode, isAdmin } = useCommerce()
@@ -11,7 +12,7 @@ export function AdminRoute({ children }) {
   const t = useAdminCopy()
   const isMockMode = dataMode === 'mock'
 
-  if (isAdmin) return children
+  if (isAdmin) return <AdminAccessProvider>{children}</AdminAccessProvider>
 
   if (!isMockMode && authStatus === 'checking') {
     return <main className="content admin-access-page">

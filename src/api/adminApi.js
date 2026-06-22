@@ -32,6 +32,10 @@ function unwrap(response) {
 
 export function createAdminApi(apiClient) {
   return {
+    async getMe(token) {
+      return unwrap(await apiClient.apiFetch('/admin/me', { token: requireToken(token) }))
+    },
+
     async getDashboard(token) {
       return unwrap(await apiClient.apiFetch('/admin/dashboard', { token: requireToken(token) }))
     },
@@ -73,6 +77,22 @@ export function createAdminApi(apiClient) {
         method: 'PATCH',
         token: requireToken(token),
         body: { status },
+      }))
+    },
+
+    async updateBuyerVerification(buyerId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/buyers/${encodeURIComponent(buyerId)}/verification`, {
+        method: 'PATCH',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async updateBuyerAccountStatus(buyerId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/buyers/${encodeURIComponent(buyerId)}/account-status`, {
+        method: 'PATCH',
+        token: requireToken(token),
+        body: input,
       }))
     },
 
@@ -174,6 +194,37 @@ export function createAdminApi(apiClient) {
         token: requireToken(token),
         body: { isVisible },
       }))
+    },
+
+    async getAdmins(token) {
+      return unwrap(await apiClient.apiFetch('/admin/admins', { token: requireToken(token) }))
+    },
+
+    async updateAdminRole(userId, adminRole, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/admins/${encodeURIComponent(userId)}/role`, {
+        method: 'PATCH',
+        token: requireToken(token),
+        body: { adminRole },
+      }))
+    },
+
+    async replacePermissionOverrides(userId, overrides = [], token) {
+      return unwrap(await apiClient.apiFetch(`/admin/admins/${encodeURIComponent(userId)}/permission-overrides`, {
+        method: 'PUT',
+        token: requireToken(token),
+        body: { overrides },
+      }))
+    },
+
+    async deletePermissionOverride(userId, permissionKey, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/admins/${encodeURIComponent(userId)}/permission-overrides/${encodeURIComponent(permissionKey)}`, {
+        method: 'DELETE',
+        token: requireToken(token),
+      }))
+    },
+
+    async getAuditLogs(params = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/audit${buildQuery(params)}`, { token: requireToken(token) }))
     },
   }
 }

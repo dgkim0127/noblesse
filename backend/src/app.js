@@ -6,6 +6,7 @@ import { createRequireAdmin } from "./auth/requireAdmin.js";
 import { createPostgresViewerLoader, createRequireFirebaseIdentity, createRequireUser } from "./auth/requireUser.js";
 import { createPool } from "./db/pool.js";
 import { createAdminBuyerQueries } from "./db/queries/adminBuyerQueries.js";
+import { createAdminAccessQueries } from "./db/queries/adminAccessQueries.js";
 import { createAdminCategoryQueries } from "./db/queries/adminCategoryQueries.js";
 import { createAdminDashboardQueries } from "./db/queries/adminDashboardQueries.js";
 import { createAdminInquiryQueries } from "./db/queries/adminInquiryQueries.js";
@@ -23,6 +24,7 @@ import { createBuyerRoutes } from "./routes/buyerRoutes.js";
 import { createCatalogRoutes } from "./routes/catalogRoutes.js";
 import { createHealthRoutes } from "./routes/healthRoutes.js";
 import { createAdminBuyerService } from "./services/adminBuyerService.js";
+import { createAdminAccessService } from "./services/adminAccessService.js";
 import { createAdminCategoryService } from "./services/adminCategoryService.js";
 import { createAdminDashboardService } from "./services/adminDashboardService.js";
 import { createAdminInquiryService } from "./services/adminInquiryService.js";
@@ -49,6 +51,8 @@ function buildCorsOptions(env) {
 export function createApp(options = {}) {
   const env = options.env || getEnv();
   const pool = options.pool ?? createPool(env);
+  const adminAccessQueries =
+    options.queries?.admin?.access || createAdminAccessQueries(pool);
   const imageObjectStore =
     options.objectStore || createFirebaseImageObjectStore(env);
   const mediaService =
@@ -77,6 +81,11 @@ export function createApp(options = {}) {
         queries: options.queries?.buyerInquiries || createBuyerInquiryQueries(pool)
       }),
     admin: {
+      access:
+        options.services?.admin?.access ||
+        createAdminAccessService({
+          queries: adminAccessQueries
+        }),
       dashboard:
         options.services?.admin?.dashboard ||
         createAdminDashboardService({
@@ -134,17 +143,7 @@ export function createApp(options = {}) {
     options.auth?.requireFirebaseIdentity || createRequireFirebaseIdentity({ verifier });
   const loadAdminUserByAuthUid =
     options.auth?.loadAdminUserByAuthUid ||
-    (async (authUid) => {
-      const user = await buyerQueries.getUserByAuthUid(pool, authUid);
-      if (!user) return null;
-      return {
-        userId: user.id,
-        authUid: user.auth_uid,
-        email: user.email,
-        role: user.role,
-        status: user.status
-      };
-    });
+    ((authUid) => adminAccessQueries.getAdminUserByAuthUid(authUid));
   const requireAdmin =
     options.auth?.requireAdmin ||
     createRequireAdmin({

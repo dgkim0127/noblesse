@@ -12,7 +12,7 @@ function readWorkspaceFile(path) {
 
 test('unified catalog entry route is exposed in locale and default admin trees', () => {
   const routes = readWorkspaceFile('src/App.jsx')
-  const routeMatches = routes.match(/<Route path="catalog\/new" element=\{withAdminSuspense\(<AdminCatalogEntryPage \/>\)\} \/>/g) || []
+  const routeMatches = routes.match(/<Route path="catalog\/new" element=\{withAdminSuspense\(<AdminCatalogEntryPage \/>, 'catalog\.write'\)\} \/>/g) || []
 
   assert.equal(routeMatches.length, 2)
 })

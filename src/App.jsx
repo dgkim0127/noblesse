@@ -4,6 +4,7 @@ import './App.css'
 import { CommerceProvider } from './commerce/CommerceContext'
 import { AdminRoute } from './components/AdminRoute'
 import { AdminShell } from './components/AdminShell'
+import { AdminPermissionGate } from './components/AdminPermissionGate'
 import { StoreShell } from './components/StoreShell'
 import { AccountPage } from './pages/AccountPage'
 import { ApprovalPendingPage } from './pages/ApprovalPendingPage'
@@ -37,9 +38,12 @@ const AdminPricesPage = lazyNamed(() => import('./pages/admin/AdminPricesPage'),
 const AdminProductsPage = lazyNamed(() => import('./pages/admin/AdminProductsPage'), 'AdminProductsPage')
 const AdminQuotePage = lazyNamed(() => import('./pages/admin/AdminQuotePage'), 'AdminQuotePage')
 const AdminQuotesPage = lazyNamed(() => import('./pages/admin/AdminQuotesPage'), 'AdminQuotesPage')
+const AdminTeamPage = lazyNamed(() => import('./pages/admin/AdminTeamPage'), 'AdminTeamPage')
+const AdminAuditPage = lazyNamed(() => import('./pages/admin/AdminAuditPage'), 'AdminAuditPage')
 
-function withAdminSuspense(element) {
-  return <Suspense fallback={<AdminPageFallback />}>{element}</Suspense>
+function withAdminSuspense(element, permission) {
+  const content = <Suspense fallback={<AdminPageFallback />}>{element}</Suspense>
+  return permission ? <AdminPermissionGate permission={permission}>{content}</AdminPermissionGate> : content
 }
 
 function LegacyInquiryDetailRedirect() {
@@ -68,18 +72,20 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/approval-pending" element={<ApprovalPendingPage />} />
       <Route path="/admin" element={<AdminRoute><AdminShell /></AdminRoute>}>
-        <Route index element={withAdminSuspense(<AdminDashboardPage />)} />
-        <Route path="buyers" element={withAdminSuspense(<AdminBuyersPage />)} />
-        <Route path="buyers/:buyerId" element={withAdminSuspense(<AdminBuyerDetailPage />)} />
-        <Route path="catalog/new" element={withAdminSuspense(<AdminCatalogEntryPage />)} />
-        <Route path="products" element={withAdminSuspense(<AdminProductsPage />)} />
-        <Route path="categories" element={withAdminSuspense(<AdminCategoriesPage />)} />
-        <Route path="prices" element={withAdminSuspense(<AdminPricesPage />)} />
-        <Route path="inquiries" element={withAdminSuspense(<AdminInquiriesPage />)} />
-        <Route path="inquiries/:inquiryId" element={withAdminSuspense(<AdminInquiryDetailPage />)} />
-        <Route path="quotes" element={withAdminSuspense(<AdminQuotesPage />)} />
-        <Route path="quotes/:quoteId" element={withAdminSuspense(<AdminQuotePage />)} />
-        <Route path="analytics" element={withAdminSuspense(<AdminAnalyticsPage />)} />
+        <Route index element={withAdminSuspense(<AdminDashboardPage />, 'dashboard.read')} />
+        <Route path="buyers" element={withAdminSuspense(<AdminBuyersPage />, 'buyers.read')} />
+        <Route path="buyers/:buyerId" element={withAdminSuspense(<AdminBuyerDetailPage />, 'buyers.read')} />
+        <Route path="catalog/new" element={withAdminSuspense(<AdminCatalogEntryPage />, 'catalog.write')} />
+        <Route path="products" element={withAdminSuspense(<AdminProductsPage />, 'catalog.read')} />
+        <Route path="categories" element={withAdminSuspense(<AdminCategoriesPage />, 'catalog.read')} />
+        <Route path="prices" element={withAdminSuspense(<AdminPricesPage />, 'prices.read')} />
+        <Route path="inquiries" element={withAdminSuspense(<AdminInquiriesPage />, 'inquiries.read')} />
+        <Route path="inquiries/:inquiryId" element={withAdminSuspense(<AdminInquiryDetailPage />, 'inquiries.read')} />
+        <Route path="quotes" element={withAdminSuspense(<AdminQuotesPage />, 'quotes.read')} />
+        <Route path="quotes/:quoteId" element={withAdminSuspense(<AdminQuotePage />, 'quotes.read')} />
+        <Route path="analytics" element={withAdminSuspense(<AdminAnalyticsPage />, 'analytics.read')} />
+        <Route path="team" element={withAdminSuspense(<AdminTeamPage />, 'admins.read')} />
+        <Route path="audit" element={withAdminSuspense(<AdminAuditPage />, 'audit.read')} />
       </Route>
       <Route path="/cart" element={<Navigate replace to="/inquiry-list" />} />
       <Route path="/order-request" element={<Navigate replace to="/request-quote" />} />
@@ -99,18 +105,20 @@ function App() {
       <Route path="register" element={<RegisterPage />} />
       <Route path="approval-pending" element={<ApprovalPendingPage />} />
       <Route path="admin" element={<AdminRoute><AdminShell /></AdminRoute>}>
-        <Route index element={withAdminSuspense(<AdminDashboardPage />)} />
-        <Route path="buyers" element={withAdminSuspense(<AdminBuyersPage />)} />
-        <Route path="buyers/:buyerId" element={withAdminSuspense(<AdminBuyerDetailPage />)} />
-        <Route path="catalog/new" element={withAdminSuspense(<AdminCatalogEntryPage />)} />
-        <Route path="products" element={withAdminSuspense(<AdminProductsPage />)} />
-        <Route path="categories" element={withAdminSuspense(<AdminCategoriesPage />)} />
-        <Route path="prices" element={withAdminSuspense(<AdminPricesPage />)} />
-        <Route path="inquiries" element={withAdminSuspense(<AdminInquiriesPage />)} />
-        <Route path="inquiries/:inquiryId" element={withAdminSuspense(<AdminInquiryDetailPage />)} />
-        <Route path="quotes" element={withAdminSuspense(<AdminQuotesPage />)} />
-        <Route path="quotes/:quoteId" element={withAdminSuspense(<AdminQuotePage />)} />
-        <Route path="analytics" element={withAdminSuspense(<AdminAnalyticsPage />)} />
+        <Route index element={withAdminSuspense(<AdminDashboardPage />, 'dashboard.read')} />
+        <Route path="buyers" element={withAdminSuspense(<AdminBuyersPage />, 'buyers.read')} />
+        <Route path="buyers/:buyerId" element={withAdminSuspense(<AdminBuyerDetailPage />, 'buyers.read')} />
+        <Route path="catalog/new" element={withAdminSuspense(<AdminCatalogEntryPage />, 'catalog.write')} />
+        <Route path="products" element={withAdminSuspense(<AdminProductsPage />, 'catalog.read')} />
+        <Route path="categories" element={withAdminSuspense(<AdminCategoriesPage />, 'catalog.read')} />
+        <Route path="prices" element={withAdminSuspense(<AdminPricesPage />, 'prices.read')} />
+        <Route path="inquiries" element={withAdminSuspense(<AdminInquiriesPage />, 'inquiries.read')} />
+        <Route path="inquiries/:inquiryId" element={withAdminSuspense(<AdminInquiryDetailPage />, 'inquiries.read')} />
+        <Route path="quotes" element={withAdminSuspense(<AdminQuotesPage />, 'quotes.read')} />
+        <Route path="quotes/:quoteId" element={withAdminSuspense(<AdminQuotePage />, 'quotes.read')} />
+        <Route path="analytics" element={withAdminSuspense(<AdminAnalyticsPage />, 'analytics.read')} />
+        <Route path="team" element={withAdminSuspense(<AdminTeamPage />, 'admins.read')} />
+        <Route path="audit" element={withAdminSuspense(<AdminAuditPage />, 'audit.read')} />
       </Route>
       <Route path="cart" element={<Navigate replace to="../inquiry-list" />} />
       <Route path="order-request" element={<Navigate replace to="../request-quote" />} />

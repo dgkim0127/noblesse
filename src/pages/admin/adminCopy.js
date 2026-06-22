@@ -1956,6 +1956,60 @@ for (const locale of Object.keys(catalogEntryUnifiedCopy)) {
   Object.assign(entry.errors, extra.imageErrors)
 }
 
+const adminAccessConsoleCopy = {
+  kr: {
+    groups: { overview: '개요', operations: '운영', catalog: '카탈로그', insights: '인사이트', governance: '권한 관리' },
+    nav: { team: '관리자 팀', audit: '감사 로그' },
+    roles: { operator: '운영자', manager: '매니저', owner: '소유자' },
+    currentAdmin: '현재 관리자',
+    forbiddenTitle: '권한이 필요합니다',
+    forbiddenBody: '이 관리자 화면을 보려면 추가 권한이 필요합니다.',
+    team: { eyebrow: '권한 관리', title: '관리자 팀', body: '관리자 역할과 계정 상태를 확인합니다.', empty: '관리자 계정이 없습니다.', email: '이메일', role: '역할', account: '계정' },
+    audit: { eyebrow: '권한 관리', title: '감사 로그', body: '민감한 원본 값 없이 최근 관리자 활동을 확인합니다.', empty: '감사 이벤트가 없습니다.', action: '작업', entity: '대상', request: '요청', created: '생성일' },
+  },
+  en: {
+    groups: { overview: 'Overview', operations: 'Operations', catalog: 'Catalog', insights: 'Insights', governance: 'Governance' },
+    nav: { team: 'Admin team', audit: 'Audit log' },
+    roles: { operator: 'Operator', manager: 'Manager', owner: 'Owner' },
+    currentAdmin: 'Current admin',
+    forbiddenTitle: 'Permission required',
+    forbiddenBody: 'This admin page requires a permission that is not assigned to your account.',
+    team: { eyebrow: 'Governance', title: 'Admin team', body: 'Review admin roles and account state.', empty: 'No admin users found.', email: 'Email', role: 'Role', account: 'Account' },
+    audit: { eyebrow: 'Governance', title: 'Audit log', body: 'Review recent admin activity without sensitive snapshots.', empty: 'No audit events found.', action: 'Action', entity: 'Entity', request: 'Request', created: 'Created' },
+  },
+  jp: {
+    groups: { overview: '概要', operations: '運用', catalog: 'カタログ', insights: '分析', governance: '権限管理' },
+    nav: { team: '管理者チーム', audit: '監査ログ' },
+    roles: { operator: 'オペレーター', manager: 'マネージャー', owner: 'オーナー' },
+    currentAdmin: '現在の管理者',
+    forbiddenTitle: '権限が必要です',
+    forbiddenBody: 'この管理画面を表示するには追加権限が必要です。',
+    team: { eyebrow: '権限管理', title: '管理者チーム', body: '管理者の役割とアカウント状態を確認します。', empty: '管理者が見つかりません。', email: 'メール', role: '役割', account: 'アカウント' },
+    audit: { eyebrow: '権限管理', title: '監査ログ', body: '機密スナップショットなしで最近の管理者操作を確認します。', empty: '監査イベントはありません。', action: '操作', entity: '対象', request: 'リクエスト', created: '作成日' },
+  },
+  cn: {
+    groups: { overview: '概览', operations: '运营', catalog: '目录', insights: '分析', governance: '权限管理' },
+    nav: { team: '管理员团队', audit: '审计日志' },
+    roles: { operator: '操作员', manager: '经理', owner: '所有者' },
+    currentAdmin: '当前管理员',
+    forbiddenTitle: '需要权限',
+    forbiddenBody: '此管理页面需要账号具备额外权限。',
+    team: { eyebrow: '权限管理', title: '管理员团队', body: '查看管理员角色和账号状态。', empty: '未找到管理员。', email: '邮箱', role: '角色', account: '账号' },
+    audit: { eyebrow: '权限管理', title: '审计日志', body: '查看最近的管理员活动，不显示敏感快照。', empty: '没有审计事件。', action: '操作', entity: '对象', request: '请求', created: '创建时间' },
+  },
+}
+
+for (const locale of Object.keys(adminAccessConsoleCopy)) {
+  copy[locale].shell.groups = adminAccessConsoleCopy[locale].groups
+  copy[locale].shell.roles = adminAccessConsoleCopy[locale].roles
+  copy[locale].shell.currentAdmin = adminAccessConsoleCopy[locale].currentAdmin
+  copy[locale].shell.forbiddenTitle = adminAccessConsoleCopy[locale].forbiddenTitle
+  copy[locale].shell.forbiddenBody = adminAccessConsoleCopy[locale].forbiddenBody
+  Object.assign(copy[locale].shell.nav, adminAccessConsoleCopy[locale].nav)
+  copy[locale].team = adminAccessConsoleCopy[locale].team
+  copy[locale].audit = adminAccessConsoleCopy[locale].audit
+}
+
 export const adminLocales = Object.keys(copy)
 export const adminCopy = copy
 

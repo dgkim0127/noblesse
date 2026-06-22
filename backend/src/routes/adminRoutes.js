@@ -1,4 +1,5 @@
 import express, { Router } from "express";
+import { createRequirePermission } from "../auth/requirePermission.js";
 import { notFound } from "../utils/errors.js";
 
 function asyncRoute(handler) {
@@ -19,12 +20,87 @@ function createImageUploadParser() {
   });
 }
 
-export function createAdminRoutes({ services, requireAdmin, imageUploadParser = createImageUploadParser() }) {
+export function createAdminRoutes({
+  services,
+  requireAdmin,
+  requirePermission = createRequirePermission,
+  imageUploadParser = createImageUploadParser()
+}) {
   const router = Router();
+  const can = (permissionKey) => requirePermission(permissionKey);
+
+  router.get(
+    "/me",
+    requireAdmin,
+    asyncRoute(async (req, res) => {
+      const data = services.access?.getCurrentAdmin
+        ? await services.access.getCurrentAdmin(req.adminViewer)
+        : req.adminViewer;
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/admins",
+    requireAdmin,
+    can("admins.read"),
+    asyncRoute(async (req, res) => {
+      const data = await services.access.listAdmins(req.query, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.patch(
+    "/admins/:userId/role",
+    requireAdmin,
+    can("admins.manage"),
+    asyncRoute(async (req, res) => {
+      const data = await services.access.updateAdminRole(req.params.userId, req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.put(
+    "/admins/:userId/permission-overrides",
+    requireAdmin,
+    can("admins.manage"),
+    asyncRoute(async (req, res) => {
+      const data = await services.access.replacePermissionOverrides(req.params.userId, req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.delete(
+    "/admins/:userId/permission-overrides/:permissionKey",
+    requireAdmin,
+    can("admins.manage"),
+    asyncRoute(async (req, res) => {
+      const data = await services.access.deletePermissionOverride(
+        req.params.userId,
+        req.params.permissionKey,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/audit",
+    requireAdmin,
+    can("audit.read"),
+    asyncRoute(async (req, res) => {
+      const result = await services.access.listAuditEntries(req.query, req.adminViewer);
+      res.json({
+        data: { auditLogs: result.auditLogs },
+        meta: withRequestId(req, result.meta)
+      });
+    })
+  );
 
   router.get(
     "/dashboard",
     requireAdmin,
+    can("dashboard.read"),
     asyncRoute(async (req, res) => {
       const data = await services.dashboard.getDashboard(req.adminViewer);
       res.json({ data, meta: withRequestId(req) });
@@ -34,6 +110,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.get(
     "/inquiries",
     requireAdmin,
+    can("inquiries.read"),
     asyncRoute(async (req, res) => {
       const result = await services.inquiries.listInquiries(req.query, req.adminViewer);
       res.json({
@@ -46,6 +123,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.patch(
     "/inquiries/:inquiryId/memo",
     requireAdmin,
+    can("inquiries.manage"),
     asyncRoute(async (req, res) => {
       const data = await services.inquiries.updateInquiryMemo(
         req.params.inquiryId,
@@ -59,6 +137,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.patch(
     "/inquiries/:inquiryId/status",
     requireAdmin,
+    can("inquiries.manage"),
     asyncRoute(async (req, res) => {
       const data = await services.inquiries.updateInquiryStatus(
         req.params.inquiryId,
@@ -72,6 +151,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.get(
     "/inquiries/:inquiryId",
     requireAdmin,
+    can("inquiries.read"),
     asyncRoute(async (req, res) => {
       const data = await services.inquiries.getInquiryById(
         req.params.inquiryId,
@@ -84,6 +164,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.get(
     "/buyers",
     requireAdmin,
+    can("buyers.read"),
     asyncRoute(async (req, res) => {
       const result = await services.buyers.listBuyers(req.query, req.adminViewer);
       res.json({
@@ -96,6 +177,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.get(
     "/buyers/:buyerId",
     requireAdmin,
+    can("buyers.read"),
     asyncRoute(async (req, res) => {
       const data = await services.buyers.getBuyerById(
         req.params.buyerId,
@@ -108,8 +190,37 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.patch(
     "/buyers/:buyerId/status",
     requireAdmin,
+    can("buyers.review"),
     asyncRoute(async (req, res) => {
       const data = await services.buyers.updateBuyerStatus(
+        req.params.buyerId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.patch(
+    "/buyers/:buyerId/verification",
+    requireAdmin,
+    can("buyers.review"),
+    asyncRoute(async (req, res) => {
+      const data = await services.buyers.updateBuyerVerification(
+        req.params.buyerId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.patch(
+    "/buyers/:buyerId/account-status",
+    requireAdmin,
+    can("buyers.suspend"),
+    asyncRoute(async (req, res) => {
+      const data = await services.buyers.updateBuyerAccountStatus(
         req.params.buyerId,
         req.body,
         req.adminViewer
@@ -121,6 +232,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.get(
     "/products",
     requireAdmin,
+    can("catalog.read"),
     asyncRoute(async (req, res) => {
       const result = await services.products.listProducts(req.query, req.adminViewer);
       res.json({
@@ -133,6 +245,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.get(
     "/categories",
     requireAdmin,
+    can("catalog.read"),
     asyncRoute(async (req, res) => {
       const result = await services.categories.listCategories(req.query, req.adminViewer);
       res.json({
@@ -145,6 +258,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.post(
     "/categories",
     requireAdmin,
+    can("catalog.write"),
     asyncRoute(async (req, res) => {
       const data = await services.categories.createCategory(req.body, req.adminViewer);
       res.status(201).json({ data, meta: withRequestId(req) });
@@ -154,6 +268,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.patch(
     "/categories/:categoryId",
     requireAdmin,
+    can("catalog.write"),
     asyncRoute(async (req, res) => {
       const data = await services.categories.updateCategory(
         req.params.categoryId,
@@ -167,6 +282,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.post(
     "/products",
     requireAdmin,
+    can("catalog.write"),
     asyncRoute(async (req, res) => {
       const data = await services.products.createProduct(req.body, req.adminViewer);
       res.status(201).json({ data, meta: withRequestId(req) });
@@ -176,6 +292,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.get(
     "/prices",
     requireAdmin,
+    can("prices.read"),
     asyncRoute(async (req, res) => {
       const result = await services.prices.listPrices(req.query, req.adminViewer);
       res.json({
@@ -188,6 +305,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.post(
     "/prices",
     requireAdmin,
+    can("prices.write"),
     asyncRoute(async (req, res) => {
       const data = await services.prices.createPrice(req.body, req.adminViewer);
       res.status(201).json({ data, meta: withRequestId(req) });
@@ -197,6 +315,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.patch(
     "/prices/:priceId",
     requireAdmin,
+    can("prices.write"),
     asyncRoute(async (req, res) => {
       const data = await services.prices.updatePrice(
         req.params.priceId,
@@ -210,6 +329,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.patch(
     "/products/:productId/visibility",
     requireAdmin,
+    can("catalog.publish"),
     asyncRoute(async (req, res) => {
       const data = await services.products.updateProductVisibility(
         req.params.productId,
@@ -223,6 +343,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.patch(
     "/products/:productId",
     requireAdmin,
+    can("catalog.write"),
     asyncRoute(async (req, res) => {
       const data = await services.products.updateProduct(
         req.params.productId,
@@ -236,6 +357,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.post(
     "/products/:productId/images",
     requireAdmin,
+    can("catalog.write"),
     imageUploadParser,
     asyncRoute(async (req, res) => {
       const data = await services.products.uploadProductImages(
@@ -253,6 +375,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.get(
     "/quotes",
     requireAdmin,
+    can("quotes.read"),
     asyncRoute(async (req, res) => {
       const result = await services.quotes.listQuotes(req.query, req.adminViewer);
       res.json({
@@ -265,6 +388,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.post(
     "/quotes",
     requireAdmin,
+    can("quotes.write"),
     asyncRoute(async (req, res) => {
       const data = await services.quotes.createQuote(req.body, req.adminViewer);
       res.status(201).json({ data, meta: withRequestId(req) });
@@ -274,6 +398,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.get(
     "/quotes/:quoteId",
     requireAdmin,
+    can("quotes.read"),
     asyncRoute(async (req, res) => {
       const data = await services.quotes.getQuoteById(req.params.quoteId, req.adminViewer);
       res.json({ data, meta: withRequestId(req) });
@@ -283,6 +408,7 @@ export function createAdminRoutes({ services, requireAdmin, imageUploadParser = 
   router.patch(
     "/quotes/:quoteId/status",
     requireAdmin,
+    can("quotes.write"),
     asyncRoute(async (req, res) => {
       const data = await services.quotes.updateQuoteStatus(
         req.params.quoteId,

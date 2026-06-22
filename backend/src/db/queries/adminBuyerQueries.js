@@ -12,12 +12,26 @@ function assertTransactionPool(pool) {
 }
 
 function mapBuyer(row) {
+  const verificationStatus = row.verification_status || (row.status === "blocked" ? "suspended" : row.status);
   return {
     id: row.id,
     userId: row.user_id,
     email: row.email || null,
     role: row.role,
     status: row.status,
+    accountStatus: row.account_status || (row.status === "blocked" ? "blocked" : "active"),
+    verificationStatus,
+    submittedAt: row.submitted_at || null,
+    reviewedAt: row.reviewed_at || null,
+    reviewedBy: row.reviewed_by || null,
+    assignedAdmin: row.assigned_admin_id
+      ? { userId: row.assigned_admin_id, email: row.assigned_admin_email || null }
+      : null,
+    waitingDays: row.submitted_at
+      ? Math.max(0, Math.floor((Date.now() - new Date(row.submitted_at).getTime()) / 86400000))
+      : null,
+    recentInquiryAt: row.recent_inquiry_at || null,
+    inquiryCount: Number(row.inquiry_count || 0),
     companyName: row.company_name,
     contactName: row.contact_name,
     country: row.country,
@@ -40,7 +54,10 @@ function mapBuyerDetail(row) {
     discountRate: Number(row.discount_rate || 0),
     minOrderAmount: Number(row.min_order_amount || 0),
     approvedAt: row.approved_at || null,
-    approvedBy: row.approved_by || null
+    approvedBy: row.approved_by || null,
+    rejectionReason: row.rejection_reason || null,
+    suspensionReason: row.suspension_reason || null,
+    internalMemo: row.internal_memo || null
   };
 }
 
@@ -78,6 +95,8 @@ function createBuyerSnapshot(row) {
     email: row.email || null,
     role: row.role,
     status: row.status,
+    accountStatus: row.account_status || (row.status === "blocked" ? "blocked" : "active"),
+    verificationStatus: row.verification_status || (row.status === "blocked" ? "suspended" : row.status),
     companyName: row.company_name,
     contactName: row.contact_name,
     assignedMarket: row.assigned_market,
@@ -107,20 +126,36 @@ export function createAdminBuyerQueries(pool) {
             u.email,
             u.role,
             u.status,
+            coalesce(u.account_status, case when u.status = 'blocked' then 'blocked' else 'active' end) as account_status,
+            coalesce(b.verification_status, case when u.status = 'blocked' then 'suspended' else u.status end) as verification_status,
+            b.submitted_at,
+            b.reviewed_at,
+            b.reviewed_by,
+            b.assigned_admin_id,
+            assigned.email as assigned_admin_email,
             b.company_name,
             b.contact_name,
             b.country,
             b.preferred_language,
             b.assigned_market,
             b.currency,
+            stats.recent_inquiry_at,
+            coalesce(stats.inquiry_count, 0)::int as inquiry_count,
             b.created_at,
             b.updated_at
           from public.buyers b
           join public.users u on u.id = b.user_id
+          left join public.users assigned on assigned.id = b.assigned_admin_id
+          left join lateral (
+            select max(i.created_at) as recent_inquiry_at, count(i.id)::int as inquiry_count
+            from public.inquiries i
+            where i.buyer_id = b.id
+          ) stats on true
           where u.role = 'buyer'
-            and ($1::text is null or u.status = $1)
+            and ($1::text is null or coalesce(b.verification_status, case when u.status = 'blocked' then 'suspended' else u.status end) = $1)
             and ($2::text is null or b.assigned_market = $2)
             and ($3::text is null or b.country = $3)
+            and ($7::text is null or coalesce(u.account_status, case when u.status = 'blocked' then 'blocked' else 'active' end) = $7)
             and (
               $4::text is null
               or b.company_name ilike $4
@@ -130,12 +165,13 @@ export function createAdminBuyerQueries(pool) {
           limit $5 offset $6
         `,
         [
-          filters.status || null,
+          filters.verificationStatus || filters.status || null,
           filters.market || null,
           filters.country || null,
           filters.q ? `%${filters.q}%` : null,
           filters.dbLimit || filters.limit,
-          filters.offset
+          filters.offset,
+          filters.accountStatus || null
         ]
       );
       return result.rows.map(mapBuyer);
@@ -151,6 +187,15 @@ export function createAdminBuyerQueries(pool) {
             u.email,
             u.role,
             u.status,
+            coalesce(u.account_status, case when u.status = 'blocked' then 'blocked' else 'active' end) as account_status,
+            coalesce(b.verification_status, case when u.status = 'blocked' then 'suspended' else u.status end) as verification_status,
+            b.submitted_at,
+            b.reviewed_at,
+            b.reviewed_by,
+            b.rejection_reason,
+            b.suspension_reason,
+            b.assigned_admin_id,
+            b.internal_memo,
             b.company_name,
             b.contact_name,
             b.country,
@@ -166,10 +211,17 @@ export function createAdminBuyerQueries(pool) {
             b.min_order_amount,
             b.approved_at,
             b.approved_by,
+            stats.recent_inquiry_at,
+            coalesce(stats.inquiry_count, 0)::int as inquiry_count,
             b.created_at,
             b.updated_at
           from public.buyers b
           join public.users u on u.id = b.user_id
+          left join lateral (
+            select max(i.created_at) as recent_inquiry_at, count(i.id)::int as inquiry_count
+            from public.inquiries i
+            where i.buyer_id = b.id
+          ) stats on true
           where b.id = $1
             and u.role = 'buyer'
           limit 1
@@ -225,6 +277,205 @@ export function createAdminBuyerQueries(pool) {
         agreements: agreementsResult.rows.map(mapAgreement),
         recentInquiries: inquiriesResult.rows.map(mapRecentInquiry)
       };
+    },
+
+    async updateBuyerVerificationStatus(buyerId, input, adminViewer = {}) {
+      assertTransactionPool(pool);
+      const client = await pool.connect();
+      const actor = getAdminActor(adminViewer);
+      const verificationStatus =
+        typeof input === "string" ? input : input.verificationStatus;
+      const reason = typeof input === "string" ? null : input.reason || null;
+      const assignedAdminId = typeof input === "string" ? null : input.assignedAdminId || null;
+      const internalMemo = typeof input === "string" ? null : input.internalMemo || null;
+
+      try {
+        await client.query("begin");
+        const existingResult = await client.query(
+          `
+            select
+              b.id,
+              b.user_id,
+              u.email,
+              u.role,
+              u.status,
+              coalesce(u.account_status, case when u.status = 'blocked' then 'blocked' else 'active' end) as account_status,
+              coalesce(b.verification_status, case when u.status = 'blocked' then 'suspended' else u.status end) as verification_status,
+              b.company_name,
+              b.contact_name,
+              b.country,
+              b.preferred_language,
+              b.assigned_market,
+              b.currency,
+              b.created_at,
+              greatest(b.updated_at, u.updated_at) as updated_at
+            from public.buyers b
+            join public.users u on u.id = b.user_id
+            where b.id = $1
+              and u.role = 'buyer'
+            for update of b, u
+          `,
+          [buyerId]
+        );
+
+        const existingRow = existingResult.rows[0];
+        if (!existingRow) {
+          await client.query("rollback");
+          return null;
+        }
+
+        const beforeSnapshot = createBuyerSnapshot(existingRow);
+        const updateResult = await client.query(
+          `
+            update public.buyers
+            set verification_status = $2,
+                reviewed_at = now(),
+                reviewed_by = $3,
+                rejection_reason = case when $2 = 'rejected' then $4 else null end,
+                suspension_reason = case when $2 = 'suspended' then $4 else null end,
+                assigned_admin_id = coalesce($5, assigned_admin_id),
+                internal_memo = coalesce($6, internal_memo),
+                updated_at = now()
+            where id = $1
+            returning verification_status, reviewed_at, reviewed_by, rejection_reason,
+              suspension_reason, assigned_admin_id, internal_memo, updated_at
+          `,
+          [buyerId, verificationStatus, actor.userId, reason, assignedAdminId, internalMemo]
+        );
+        const updatedBuyer = updateResult.rows[0];
+        const updatedRow = {
+          ...existingRow,
+          ...updatedBuyer,
+          updated_at: updatedBuyer.updated_at
+        };
+        const afterSnapshot = createBuyerSnapshot(updatedRow);
+
+        const auditResult = await client.query(
+          `
+            insert into public.audit_logs (
+              actor_user_id,
+              actor_role,
+              action,
+              target_table,
+              target_id,
+              before_snapshot,
+              after_snapshot,
+              request_id,
+              ip_address,
+              user_agent
+            )
+            values ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8, $9, $10)
+            returning id
+          `,
+          [
+            actor.userId,
+            actor.role,
+            "admin.buyer.status.update",
+            "buyers",
+            buyerId,
+            beforeSnapshot,
+            afterSnapshot,
+            actor.requestId,
+            actor.ipAddress,
+            actor.userAgent
+          ]
+        );
+
+        await client.query("commit");
+        return {
+          buyer: mapBuyer(updatedRow),
+          auditLogId: auditResult.rows[0].id
+        };
+      } catch (error) {
+        try {
+          await client.query("rollback");
+        } catch {
+          // Preserve the original query error instead of masking it with rollback failure.
+        }
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+
+    async updateBuyerAccountStatus(buyerId, input, adminViewer = {}) {
+      assertTransactionPool(pool);
+      const client = await pool.connect();
+      const actor = getAdminActor(adminViewer);
+      try {
+        await client.query("begin");
+        const existingResult = await client.query(
+          `
+            select b.id, b.user_id, u.email, u.role, u.status,
+              coalesce(u.account_status, case when u.status = 'blocked' then 'blocked' else 'active' end) as account_status,
+              coalesce(b.verification_status, case when u.status = 'blocked' then 'suspended' else u.status end) as verification_status,
+              b.company_name, b.contact_name, b.country, b.preferred_language,
+              b.assigned_market, b.currency, b.created_at,
+              greatest(b.updated_at, u.updated_at) as updated_at
+            from public.buyers b
+            join public.users u on u.id = b.user_id
+            where b.id = $1 and u.role = 'buyer'
+            for update of b, u
+          `,
+          [buyerId]
+        );
+        const existingRow = existingResult.rows[0];
+        if (!existingRow) {
+          await client.query("rollback");
+          return null;
+        }
+        const beforeSnapshot = createBuyerSnapshot(existingRow);
+        const updatedUserResult = await client.query(
+          `
+            update public.users
+            set account_status = $2, updated_at = now()
+            where id = $1
+            returning account_status, updated_at
+          `,
+          [existingRow.user_id, input.accountStatus]
+        );
+        const updatedRow = {
+          ...existingRow,
+          account_status: updatedUserResult.rows[0].account_status,
+          updated_at: updatedUserResult.rows[0].updated_at
+        };
+        const auditResult = await client.query(
+          `
+            insert into public.audit_logs (
+              actor_user_id, actor_role, action, target_table, target_id,
+              before_snapshot, after_snapshot, request_id, ip_address, user_agent
+            )
+            values ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8, $9, $10)
+            returning id
+          `,
+          [
+            actor.userId,
+            actor.role,
+            "admin.buyer.account_status.update",
+            "buyers",
+            buyerId,
+            beforeSnapshot,
+            { ...createBuyerSnapshot(updatedRow), reason: input.reason || null },
+            actor.requestId,
+            actor.ipAddress,
+            actor.userAgent
+          ]
+        );
+        await client.query("commit");
+        return {
+          buyer: mapBuyer(updatedRow),
+          auditLogId: auditResult.rows[0].id
+        };
+      } catch (error) {
+        try {
+          await client.query("rollback");
+        } catch {
+          // Preserve the original query error instead of masking it with rollback failure.
+        }
+        throw error;
+      } finally {
+        client.release();
+      }
     },
 
     async updateBuyerStatus(buyerId, status, adminViewer = {}) {

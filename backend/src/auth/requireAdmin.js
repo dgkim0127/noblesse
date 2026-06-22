@@ -1,4 +1,5 @@
 import { forbidden, internalError, unauthorized } from "../utils/errors.js";
+import { resolveAdminPermissions } from "./adminPermissions.js";
 
 function readBearerToken(req) {
   const header = req.get("authorization") || "";
@@ -28,9 +29,19 @@ export function createRequireAdmin({ verifier, loadAdminUserByAuthUid }) {
       if (user.role !== "admin") {
         throw forbidden("Admin access required");
       }
+      const accountStatus =
+        user.accountStatus || user.account_status || (user.status === "blocked" ? "blocked" : "active");
       if (user.status !== "approved") {
         throw forbidden("Approved admin access required");
       }
+      if (accountStatus !== "active") {
+        throw forbidden("Active admin account required");
+      }
+
+      const resolvedPermissions = resolveAdminPermissions({
+        adminRole: user.adminRole || user.admin_role || "owner",
+        overrides: user.permissionOverrides || user.permission_overrides || []
+      });
 
       // Frontend viewerState never grants admin access. The backend must load
       // PostgreSQL user role/status before attaching the admin context.
@@ -40,6 +51,10 @@ export function createRequireAdmin({ verifier, loadAdminUserByAuthUid }) {
         email: user.email || decoded.email || null,
         role: user.role,
         status: user.status,
+        accountStatus,
+        adminRole: resolvedPermissions.adminRole,
+        permissions: resolvedPermissions.permissions,
+        deniedPermissions: resolvedPermissions.deniedPermissions,
         requestId: req.id
       };
 
