@@ -525,3 +525,15 @@ Important:
 - Production schema migration execution: No.
 - Production DB rollout remains No-Go.
 - Next gate: `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING = YES`.
+
+## N38-B5 Runtime Privilege Hardening Follow-up
+
+- Runtime privilege hardening report: `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING_REPORT.md`.
+- Staging DB Job identity separation completed.
+- Runtime hardening Job execution: No-Go, one execution failed with NonZeroExitCode.
+- Runtime DB user creation: No.
+- Runtime DB secret creation: No.
+- Runtime privilege verification: No.
+- Production schema migration execution: No.
+- Production DB rollout remains No-Go.
+- Next gate: `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS = YES`.

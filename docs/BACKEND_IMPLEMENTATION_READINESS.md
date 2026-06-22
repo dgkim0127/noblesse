@@ -623,3 +623,13 @@ Before implementation starts:
 - Existing staging migration Job was not executed again.
 - Ledger/checksum, schema contract, lifecycle counts, admin profile/owner coverage, and override invariants passed.
 - Backend readiness next requires runtime DB privilege hardening before application DB rollout.
+
+## N38-B5 Runtime DB Privilege Hardening
+
+- Runtime privilege hardening report: `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING_REPORT.md`.
+- Backend runtime privilege manifest, hardener, verifier, and fake-pool tests were added.
+- Backend tests passed after implementation.
+- Staging DB Job identity separation completed without re-running migration or RBAC verification Jobs.
+- Runtime hardening Job execution failed with NonZeroExitCode.
+- Runtime DB user, runtime DB secret, verifier Job, Cloud Run application deploy, Firebase deploy, and production rollout remain blocked.
+- Backend readiness next requires `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS = YES`.

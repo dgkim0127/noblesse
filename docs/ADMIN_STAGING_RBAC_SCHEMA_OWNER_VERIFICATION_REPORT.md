@@ -110,3 +110,17 @@
 ## Next Gate
 
 - `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING = YES`
+
+## N38-B5 Runtime Privilege Hardening Follow-up
+
+- Runtime privilege hardening report: `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING_REPORT.md`.
+- DB Job identity separation: Completed.
+- Migration Job execution count remained 12.
+- RBAC verification Job execution count remained 1.
+- Application identity migration-secret access removed: Yes.
+- Runtime hardening Job execute count: 1.
+- Runtime hardening Job result: No-Go, NonZeroExitCode.
+- Runtime user created: No.
+- Runtime secret created: No.
+- Application deploy: No.
+- Next gate: `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS = YES`.

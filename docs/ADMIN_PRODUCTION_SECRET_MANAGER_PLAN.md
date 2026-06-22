@@ -402,3 +402,13 @@ Important:
 - Secret value was not accessed/read.
 - Secret version count remains 1.
 - Production secrets, Cloud Run DB update, migration execution, Firebase rewrite, and production write remain No-Go.
+
+## N38-B5 Staging Runtime Secret Separation Follow-up
+
+- Runtime privilege hardening report: `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING_REPORT.md`.
+- Migration DB secret access was moved away from the staging application identity and retained on the DB Job identity.
+- The DB Job identity was not granted runtime DB secret access.
+- Runtime DB secret creation did not proceed because the hardening Job failed.
+- Secret payloads were not accessed/read or recorded.
+- Production secret creation remains No-Go.
+- Next gate: `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS = YES`.

@@ -556,3 +556,12 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - The verification Job is internal and read-only; it does not add a public API route.
 - Firebase Hosting `/api` rewrite and frontend direct PostgreSQL access remain unchanged.
 - Cloud Run application service deploy and production migration/write remain No-Go.
+
+## N38-B5 Runtime DB Privilege Hardening
+
+- Runtime privilege hardening is documented in `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING_REPORT.md`.
+- The new hardening/verifier runners are internal Cloud Run Job entrypoints, not public HTTP routes.
+- No Firebase Hosting `/api` rewrite was added.
+- No frontend direct PostgreSQL access was added.
+- Cloud Run application service deploy remains No-Go because the hardening execution failed.
+- Runtime DB user/secret creation and role E2E remain blocked pending recovery diagnosis approval.

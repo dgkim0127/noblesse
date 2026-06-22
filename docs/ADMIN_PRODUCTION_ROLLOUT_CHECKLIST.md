@@ -759,3 +759,13 @@ Required before 32K:
 - Staging schema, owner backfill, lifecycle backfill, and override invariants are Go.
 - Application DB runtime privilege hardening remains the next separate gate before DB-backed app rollout.
 - Next gate: `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING = YES`.
+
+## N38-B5 Runtime Privilege Hardening Follow-up
+
+- Confirm `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING_REPORT.md` before any staging application DB rollout.
+- DB Job identity separation completed and the application identity no longer has migration-secret access.
+- The runtime hardening Job executed exactly once and failed with NonZeroExitCode.
+- Runtime DB login user, runtime DB secret, runtime verifier Job, and application service deploy were not performed.
+- Staging application DB rollout remains No-Go.
+- Production rollout remains No-Go.
+- Next gate: `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS = YES`.

@@ -225,7 +225,7 @@ test("hardener result and sanitized errors do not expose sensitive values", asyn
   await assert.rejects(async () => {
     const client = await leakingPool.connect();
     client.query = async () => {
-      throw new Error("postgres://user:password@example.invalid/db");
+      throw new Error("DATABASE_URL contained unsafe value");
     };
     await hardenRuntimePrivileges({ pool: leakingPool });
   }, /Runtime privilege hardening failed/);

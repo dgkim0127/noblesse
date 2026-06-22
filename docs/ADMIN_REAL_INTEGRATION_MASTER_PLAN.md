@@ -537,3 +537,13 @@ No-Go remains:
 - Ledger/checksum, required schema objects, buyer lifecycle backfill counts, admin profile/owner coverage, and permission override invariants passed.
 - Runtime DB privilege hardening, application rollout, Firebase deploy, and production rollout remain No-Go.
 - Next gate is `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING = YES`.
+
+## N38-B5 Staging Runtime DB Privilege Hardening
+
+- Runtime privilege hardening report: `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING_REPORT.md`.
+- Backend hardening/verifier source and fake-pool tests were added and pushed.
+- DB Job identity separation completed for staging migration and RBAC verification Jobs without re-executing those Jobs.
+- Application identity migration-secret access was removed.
+- The approved runtime hardening Job was executed exactly once but failed with NonZeroExitCode.
+- Runtime DB user, runtime secret, runtime privilege verifier Job, Cloud Run app deploy, Firebase deploy, and production rollout were not performed.
+- Next gate is `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS = YES`.

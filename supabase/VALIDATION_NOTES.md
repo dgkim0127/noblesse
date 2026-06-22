@@ -1782,3 +1782,28 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Production data mutation: No.
 - Raw execution id/logs recorded in repo/docs: No.
 - Conclusion: Staging schema, owner backfill, and lifecycle backfill verification is Go; next gate is `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING = YES`.
+
+## N38-B5 Runtime DB Privilege Hardening Follow-up
+
+- Date: 2026-06-22
+- Change: Added `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING_REPORT.md`.
+- Scope: Staging DB runtime privilege manifest, hardener/verifier code, DB Job identity separation, and one approved hardening Job execution.
+- Backend code commit: `7443873fe`.
+- Backend tests: 240 passed.
+- Frontend tests: 70 passed.
+- Lint: Pass.
+- Build: Pass.
+- Migration Job execution count remained 12.
+- RBAC verification Job execution count remained 1.
+- Application identity migration-secret access removed: Yes.
+- Runtime hardening Job execute command run: Yes, exactly once.
+- Runtime hardening Job succeeded: No, NonZeroExitCode.
+- Runtime DB user created: No.
+- Runtime DB secret created: No.
+- Runtime privilege verifier Job executed: No.
+- Secret value access/read by operator: No.
+- DB connection/psql executed by operator: No.
+- Cloud Run application deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Production data mutation: No.
+- Conclusion: Runtime privilege hardening is No-Go; next gate is `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS = YES`.

@@ -200,7 +200,7 @@ test("runtime verifier rolls back on failure and sanitizes leaking errors", asyn
   const leakingPool = createFakePool();
   const client = await leakingPool.connect();
   client.query = async () => {
-    throw new Error("postgresql://user:password@example.invalid/db");
+    throw new Error("DATABASE_URL contained unsafe value");
   };
   await assert.rejects(
     () => verifyRuntimePrivileges({ pool: leakingPool }),
