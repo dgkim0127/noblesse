@@ -1757,3 +1757,28 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Production data mutation: No.
 - Raw execution id/logs recorded in repo/docs: No.
 - Conclusion: Staging RBAC migration idempotency is Go; next gate is `APPROVE_STAGING_RBAC_SCHEMA_AND_OWNER_VERIFICATION = YES`.
+
+## N38-B4 RBAC Schema / Owner Verification Follow-up
+
+- Date: 2026-06-22
+- Change: Added `docs/ADMIN_STAGING_RBAC_SCHEMA_OWNER_VERIFICATION_REPORT.md`.
+- Scope: Dedicated read-only Cloud Run verification Job for staging RBAC schema and owner backfill state.
+- Verification Job execute command run: Yes, exactly once.
+- Verification execution count before/after: 0/1.
+- Existing migration Job execution count after: 12.
+- Read-only transaction: Yes.
+- Ledger table and migration row: Present.
+- Checksum match: Yes, raw checksum recorded: No.
+- Required schema objects: Pass.
+- Lifecycle null/invalid/mismatch counts: 0.
+- Active approved admin count: 1.
+- Active approved owner count: 1.
+- Admin/profile/override violation counts: 0.
+- Secret value access/read by operator: No.
+- DB connection/psql executed by operator: No.
+- DB mutation: No.
+- Cloud Run application deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Production data mutation: No.
+- Raw execution id/logs recorded in repo/docs: No.
+- Conclusion: Staging schema, owner backfill, and lifecycle backfill verification is Go; next gate is `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING = YES`.

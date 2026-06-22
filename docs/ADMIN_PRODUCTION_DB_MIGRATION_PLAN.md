@@ -516,3 +516,12 @@ Important:
 - Production schema migration execution: No.
 - Production DB rollout remains No-Go.
 - Next gate: `APPROVE_STAGING_RBAC_SCHEMA_AND_OWNER_VERIFICATION = YES`.
+
+## N38-B4 RBAC Schema / Owner Verification Follow-up
+
+- Schema/owner verification report: `docs/ADMIN_STAGING_RBAC_SCHEMA_OWNER_VERIFICATION_REPORT.md`.
+- Staging verification used a dedicated read-only Cloud Run Job, not the migration Job.
+- Verification result: Go for staging schema, owner backfill, and lifecycle backfill.
+- Production schema migration execution: No.
+- Production DB rollout remains No-Go.
+- Next gate: `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING = YES`.

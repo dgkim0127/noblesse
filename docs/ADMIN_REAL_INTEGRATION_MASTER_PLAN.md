@@ -528,3 +528,12 @@ No-Go remains:
 - Migration idempotency: Go.
 - Schema/owner verification, runtime DB privilege hardening, app DB rollout, and production rollout remain separate No-Go gates.
 - Next gate is `APPROVE_STAGING_RBAC_SCHEMA_AND_OWNER_VERIFICATION = YES`.
+
+## N38-B4 RBAC Schema / Owner Verification
+
+- Schema/owner verification report: `docs/ADMIN_STAGING_RBAC_SCHEMA_OWNER_VERIFICATION_REPORT.md`.
+- A separate Cloud Run verification Job ran read-only SELECT checks against staging exactly once.
+- Existing staging migration Job was not executed and remained at execution count 12.
+- Ledger/checksum, required schema objects, buyer lifecycle backfill counts, admin profile/owner coverage, and permission override invariants passed.
+- Runtime DB privilege hardening, application rollout, Firebase deploy, and production rollout remain No-Go.
+- Next gate is `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING = YES`.

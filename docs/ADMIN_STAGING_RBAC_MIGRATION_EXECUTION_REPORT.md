@@ -117,3 +117,13 @@
 - Checksum mismatch: No.
 - No retry, Job update, Cloud Build, local psql, direct DB connection, secret value access, app deploy, Firebase deploy, or production mutation happened.
 - Next gate: `APPROVE_STAGING_RBAC_SCHEMA_AND_OWNER_VERIFICATION = YES`.
+
+## N38-B4 Schema / Owner Verification Follow-up
+
+- Verification report: `docs/ADMIN_STAGING_RBAC_SCHEMA_OWNER_VERIFICATION_REPORT.md`.
+- A separate read-only Cloud Run verification Job was created/updated and executed exactly once.
+- Existing staging migration Job execution count remained 12.
+- Read-only transaction: Yes.
+- Ledger/checksum/schema/lifecycle/admin owner/override checks: Go.
+- DB mutation, local psql, direct operator DB connection, migration execution, app deploy, Firebase deploy, and production mutation: No.
+- Next gate: `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING = YES`.

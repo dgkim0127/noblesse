@@ -99,3 +99,16 @@
 ## Next Gate
 
 - `APPROVE_STAGING_RBAC_SCHEMA_AND_OWNER_VERIFICATION = YES`
+
+## N38-B4 Schema / Owner Verification Follow-up
+
+- Verification report: `docs/ADMIN_STAGING_RBAC_SCHEMA_OWNER_VERIFICATION_REPORT.md`.
+- Dedicated verification Job used a read-only transaction against staging.
+- Execution count before/after for the verification Job: 0/1.
+- Existing migration Job was not executed again.
+- Ledger row count: 1.
+- Checksum match: Yes.
+- Lifecycle violation counts: 0.
+- Active approved owner invariant: Go.
+- Override violation counts: 0.
+- Next gate: `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING = YES`.

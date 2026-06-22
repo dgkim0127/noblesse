@@ -615,3 +615,11 @@ Before implementation starts:
 - Firebase deploy or `/api` rewrite: No.
 - Production DB/write: No.
 - Backend readiness next requires separate schema/owner verification before application DB rollout.
+
+## N38-B4 RBAC Schema / Owner Verification
+
+- Schema/owner verification report: `docs/ADMIN_STAGING_RBAC_SCHEMA_OWNER_VERIFICATION_REPORT.md`.
+- A dedicated Cloud Run verification Job used read-only transaction checks against staging.
+- Existing staging migration Job was not executed again.
+- Ledger/checksum, schema contract, lifecycle counts, admin profile/owner coverage, and override invariants passed.
+- Backend readiness next requires runtime DB privilege hardening before application DB rollout.

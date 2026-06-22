@@ -750,3 +750,12 @@ Required before 32K:
 - No retry, Cloud Build, Job redeploy, app deploy, Firebase deploy, production DB/write, local psql, or direct operator DB connection happened.
 - Application DB runtime privilege hardening remains a separate No-Go gate before DB-backed app rollout.
 - Next gate: `APPROVE_STAGING_RBAC_SCHEMA_AND_OWNER_VERIFICATION = YES`.
+
+## N38-B4 RBAC Schema / Owner Verification Follow-up
+
+- Confirm `docs/ADMIN_STAGING_RBAC_SCHEMA_OWNER_VERIFICATION_REPORT.md` before runtime privilege hardening approval.
+- Dedicated read-only verification Job execution count changed from 0 to 1.
+- Existing staging migration Job execution count remained 12.
+- Staging schema, owner backfill, lifecycle backfill, and override invariants are Go.
+- Application DB runtime privilege hardening remains the next separate gate before DB-backed app rollout.
+- Next gate: `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING = YES`.

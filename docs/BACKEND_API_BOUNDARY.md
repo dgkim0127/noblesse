@@ -549,3 +549,10 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - This did not deploy the Cloud Run application service.
 - This did not connect the public frontend directly to PostgreSQL.
 - Production migration/write remains No-Go.
+
+## N38-B4 RBAC Schema / Owner Verification
+
+- RBAC schema/owner verification is documented in `docs/ADMIN_STAGING_RBAC_SCHEMA_OWNER_VERIFICATION_REPORT.md`.
+- The verification Job is internal and read-only; it does not add a public API route.
+- Firebase Hosting `/api` rewrite and frontend direct PostgreSQL access remain unchanged.
+- Cloud Run application service deploy and production migration/write remain No-Go.
