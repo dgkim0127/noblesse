@@ -91,3 +91,14 @@ Reason:
 - Packaging config was rechecked and the expected service account, Cloud SQL attachment, secret reference, env, command, args, task count, retry count, and timeout were present.
 - Failure category is IAM/permission before migration runner start.
 - Job was not modified or re-executed.
+
+## N38-B1 RBAC Migration Job Repackage Follow-up
+
+- Repackage report: `docs/ADMIN_RBAC_MIGRATION_JOB_REPACKAGE_REPORT.md`.
+- Cloud Build was executed from `backend` source at the N38-A4 commit.
+- The existing staging migration Job was updated with the idempotent RBAC lifecycle migration package.
+- Secret reference now uses a specific enabled version rather than `latest`.
+- Job execution: No.
+- Schema migration execution: No.
+- Cloud Run application deploy: No.
+- Firebase deploy: No.

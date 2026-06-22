@@ -483,3 +483,13 @@ Important:
 - `public.app_schema_migrations` is added to the fresh-install schema as the migration runner ledger.
 - The runner records `migration_name`, checksum, and `applied_at`; same checksum is already-applied, checksum mismatch is a safe failure.
 - Production schema migration was not executed in this step.
+
+## N38-B1 RBAC Migration Job Repackage Follow-up
+
+- Repackage report: `docs/ADMIN_RBAC_MIGRATION_JOB_REPACKAGE_REPORT.md`.
+- The staging migration Job was updated to the idempotent RBAC migration package.
+- Cloud Build result: Success.
+- Execution count unchanged after update.
+- Staging schema migration execution: No.
+- Production schema migration execution: No.
+- Production DB rollout remains No-Go.

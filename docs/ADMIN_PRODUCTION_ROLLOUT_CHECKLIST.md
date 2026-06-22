@@ -719,3 +719,11 @@ Required before 32K:
 - Confirm checksum mismatch blocks schema SQL execution.
 - Confirm canonical account, buyer verification, and admin role values are not overwritten from legacy state on re-run.
 - N38-A4 did not execute migration SQL, connect to DB, deploy Cloud Run/Firebase, or mutate production data.
+
+## N38-B1 RBAC Migration Job Repackage Follow-up
+
+- Confirm `docs/ADMIN_RBAC_MIGRATION_JOB_REPACKAGE_REPORT.md` before migration execution approval.
+- The staging migration Job was repackaged from backend source and updated.
+- The Job pins a specific enabled staging DB secret version.
+- The Job was not executed and schema migration was not executed.
+- Application DB runtime privilege hardening remains a separate No-Go gate before DB-backed app rollout.

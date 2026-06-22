@@ -496,3 +496,11 @@ No-Go remains:
 - The schema migration runner now uses `public.app_schema_migrations` with a SHA-256 checksum ledger.
 - Repeated execution with the same migration name/checksum is a no-op; checksum mismatch fails before schema SQL execution.
 - No DB connection, psql, Cloud Run Job execution, deploy, secret access, or production data mutation happened in N38-A4.
+
+## N38-B1 RBAC Migration Job Repackage
+
+- Repackage report: `docs/ADMIN_RBAC_MIGRATION_JOB_REPACKAGE_REPORT.md`.
+- Cloud Build and existing staging migration Job update completed for the idempotent N38 lifecycle migration package.
+- The migration Job now pins the staging DB URL secret to a specific enabled version.
+- Job execution, schema migration execution, DB connection, Cloud Run app deploy, Firebase deploy, and production mutation did not happen.
+- Next gate is `APPROVE_STAGING_RBAC_MIGRATION_EXECUTION = YES`.

@@ -59,3 +59,13 @@
 
 - Approve controlled migration runner packaging/deploy if the current Cloud Run Job image must be refreshed.
 - Approve controlled staging migration execution only after confirming the packaged job uses this idempotent runner and migration SQL.
+
+## N38-B1 Packaging Follow-up
+
+- Job repackage report: `docs/ADMIN_RBAC_MIGRATION_JOB_REPACKAGE_REPORT.md`.
+- The staging migration Job was updated with the idempotent runner and packaged lifecycle migration.
+- Cloud Build result: Success.
+- Job execution: No.
+- Schema migration execution: No.
+- Secret value access: No.
+- DB connection/psql: No.

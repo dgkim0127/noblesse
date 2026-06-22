@@ -571,3 +571,16 @@ Before implementation starts:
 - SQL/schema/migration execution: No.
 - Cloud Run Job execution/redeploy: No.
 - Firebase deploy or `/api` rewrite: No.
+
+## N38-B1 RBAC Migration Job Repackage
+
+- Repackage report: `docs/ADMIN_RBAC_MIGRATION_JOB_REPACKAGE_REPORT.md`.
+- Cloud Build executed successfully from backend source.
+- Existing staging migration Job updated with the N38-A4 idempotent runner and migration package.
+- Job execution: No.
+- Schema migration execution: No.
+- DB connection/psql executed: No.
+- Secret value access: No.
+- Cloud Run application deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Application DB runtime privilege hardening remains a separate No-Go gate.

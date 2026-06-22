@@ -87,3 +87,12 @@ Reason:
 - Job config was rechecked and expected command/env/secret reference/Cloud SQL attachment were present.
 - No re-execution, Job update, IAM change, secret value access, DB connection, SQL execution, Firebase rewrite, or production write happened in 32L-13R.
 - Next recommended gate: `APPROVE_MIGRATION_IAM_FIX = YES`.
+
+## N38-B1 RBAC Migration Job Repackage Follow-up
+
+- Repackage report: `docs/ADMIN_RBAC_MIGRATION_JOB_REPACKAGE_REPORT.md`.
+- Existing staging migration Job was updated to include the idempotent N38 lifecycle migration and ledger/checksum runner.
+- Previous failed execution history was retained.
+- New Job execution created: No.
+- Migration execution: No.
+- Next migration execution still requires `APPROVE_STAGING_RBAC_MIGRATION_EXECUTION = YES`.

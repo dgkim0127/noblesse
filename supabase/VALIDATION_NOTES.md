@@ -1698,3 +1698,21 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret/IAM/Storage/Firebase config change: No.
 - Production data mutation: No.
 - Conclusion: Idempotency is ready for a separately approved staging migration packaging/execution gate.
+
+## N38-B1 RBAC Migration Job Repackage Follow-up
+
+- Date: 2026-06-22
+- Change: Added `docs/ADMIN_RBAC_MIGRATION_JOB_REPACKAGE_REPORT.md`.
+- Scope: Cloud Build and existing staging migration Job update for N38-A4 idempotent lifecycle migration package.
+- Cloud Build executed: Yes.
+- Existing staging migration Job updated: Yes.
+- Specific enabled secret version pinned: Yes.
+- Job execution: No.
+- Schema migration execution: No.
+- DB connection/psql executed: No.
+- Secret value access/read: No.
+- Cloud Run application deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Production data mutation: No.
+- Application runtime least-privilege hardening: No-Go until separately verified.
+- Conclusion: Repackaging is complete; next gate is `APPROVE_STAGING_RBAC_MIGRATION_EXECUTION = YES`.
