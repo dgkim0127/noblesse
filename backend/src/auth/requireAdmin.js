@@ -39,7 +39,7 @@ export function createRequireAdmin({ verifier, loadAdminUserByAuthUid }) {
       }
 
       const resolvedPermissions = resolveAdminPermissions({
-        adminRole: user.adminRole || user.admin_role || "owner",
+        adminRole: user.adminRole || user.admin_role || "operator",
         overrides: user.permissionOverrides || user.permission_overrides || []
       });
 

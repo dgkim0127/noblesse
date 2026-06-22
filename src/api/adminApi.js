@@ -216,6 +216,14 @@ export function createAdminApi(apiClient) {
       }))
     },
 
+    async upsertPermissionOverride(userId, permissionKey, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/admins/${encodeURIComponent(userId)}/permission-overrides/${encodeURIComponent(permissionKey)}`, {
+        method: 'PUT',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
     async deletePermissionOverride(userId, permissionKey, token) {
       return unwrap(await apiClient.apiFetch(`/admin/admins/${encodeURIComponent(userId)}/permission-overrides/${encodeURIComponent(permissionKey)}`, {
         method: 'DELETE',

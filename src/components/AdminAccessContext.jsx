@@ -28,6 +28,7 @@ const ownerFallback = {
     'admins.read',
     'admins.manage',
     'audit.read',
+    'settings.manage',
   ],
 }
 

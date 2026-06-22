@@ -63,7 +63,7 @@ function createAppWithPrices() {
     auth: {
       adminVerifier: { async verifyIdToken() { return { uid: "admin-uid" }; } },
       async loadAdminUserByAuthUid() {
-        return { userId: "admin-1", role: "admin", status: "approved" };
+        return { userId: "admin-1", role: "admin", status: "approved", adminRole: "manager" };
       }
     }
   });

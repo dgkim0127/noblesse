@@ -151,6 +151,17 @@ test("N38-A lifecycle migration has no transaction-control SQL", () => {
   );
 
   assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.doesNotMatch(sqlText, /create type public\.(account_status|buyer_verification_status|admin_role|admin_permission_effect)/i);
+  assert.doesNotMatch(sqlText, /::public\.(account_status|buyer_verification_status|admin_role|admin_permission_effect)/i);
+  assert.match(sqlText, /account_status text not null default 'active'/i);
+  assert.match(sqlText, /verification_status text not null default 'draft'/i);
+  assert.match(sqlText, /admin_role text not null default 'operator'/i);
+  assert.match(sqlText, /effect text not null/i);
+  assert.match(sqlText, /reason text not null/i);
+  assert.match(sqlText, /status = 'approved' and coalesce\(account_status, 'active'\) = 'active' then 'owner'/i);
+  assert.match(sqlText, /update public\.admin_profiles ap\s+set admin_role = 'operator'/i);
+  assert.match(sqlText, /u\.status <> 'approved' or coalesce\(u\.account_status, 'active'\) <> 'active'/i);
+  assert.match(sqlText, /set admin_role = 'owner'/i);
 });
 
 test("packaged lifecycle migration matches canonical migration exactly", () => {
@@ -187,6 +198,31 @@ test("backend Dockerfile packages migration artifacts without secrets", () => {
 
   assert.match(dockerfile, /COPY migrations \.\/migrations/);
   assert.doesNotMatch(dockerfile, /DATABASE_URL|PRIVATE_KEY|SECRET/i);
+});
+
+test("fresh install schema matches lifecycle migration enum-like status contracts", () => {
+  const schema = readFileSync(join(process.cwd(), "..", "supabase", "schema.sql"), "utf8");
+  const migration = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260622_admin_rbac_account_lifecycle.sql"),
+    "utf8"
+  );
+
+  for (const fragment of [
+    "account_status text not null default 'active'",
+    "verification_status text not null default 'draft'",
+    "admin_role text not null default 'operator'",
+    "effect text not null",
+    "reason text not null"
+  ]) {
+    assert.match(schema, new RegExp(fragment.replace(/[()]/g, "\\$&"), "i"));
+    assert.match(migration, new RegExp(fragment.replace(/[()]/g, "\\$&"), "i"));
+  }
+  assert.match(schema, /account_status in \('active', 'blocked'\)/i);
+  assert.match(migration, /account_status in \('active', 'blocked'\)/i);
+  assert.match(schema, /admin_role in \('operator', 'manager', 'owner'\)/i);
+  assert.match(migration, /admin_role in \('operator', 'manager', 'owner'\)/i);
+  assert.match(schema, /effect in \('allow', 'deny'\)/i);
+  assert.match(migration, /effect in \('allow', 'deny'\)/i);
 });
 
 test("migration runner does not access Secret Manager or open real DB in tests", () => {

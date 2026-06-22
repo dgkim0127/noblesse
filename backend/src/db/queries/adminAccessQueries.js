@@ -9,6 +9,34 @@ function mapOverride(row) {
   };
 }
 
+const sensitiveAuditKeys = new Set([
+  "password",
+  "token",
+  "idtoken",
+  "accesstoken",
+  "refreshtoken",
+  "secret",
+  "privatekey",
+  "private_key",
+  "databaseurl",
+  "database_url",
+  "connectionstring"
+]);
+
+function getChangedFields(beforeSnapshot = {}, afterSnapshot = {}) {
+  const before = beforeSnapshot && typeof beforeSnapshot === "object" && !Array.isArray(beforeSnapshot)
+    ? beforeSnapshot
+    : {};
+  const after = afterSnapshot && typeof afterSnapshot === "object" && !Array.isArray(afterSnapshot)
+    ? afterSnapshot
+    : {};
+  const keys = new Set([...Object.keys(before), ...Object.keys(after)]);
+  return [...keys]
+    .filter((key) => !sensitiveAuditKeys.has(String(key).toLowerCase()))
+    .filter((key) => JSON.stringify(before[key]) !== JSON.stringify(after[key]))
+    .sort();
+}
+
 function mapAdmin(row, overrides = []) {
   const resolved = resolveAdminPermissions({
     adminRole: row.admin_role || "operator",
@@ -37,6 +65,7 @@ function mapAuditLog(row) {
     actor: row.actor_user_id ? { userId: row.actor_user_id, role: row.actor_role || "admin" } : null,
     entityType: row.target_table,
     entityId: row.target_id,
+    changedFields: getChangedFields(row.before_snapshot, row.after_snapshot),
     requestId: row.request_id,
     createdAt: row.created_at
   };
@@ -264,6 +293,84 @@ export function createAdminAccessQueries(pool) {
       }
     },
 
+    async upsertPermissionOverride(userId, override, adminViewer) {
+      const client = await pool.connect();
+      try {
+        await client.query("begin");
+        const profile = await client.query(
+          "select admin_role from public.admin_profiles where user_id = $1 for update",
+          [userId]
+        );
+        if (!profile.rowCount) {
+          await client.query("rollback");
+          return null;
+        }
+        if (profile.rows[0].admin_role === "owner") {
+          await client.query("rollback");
+          return { ownerOverrideBlocked: true };
+        }
+        const existing = await client.query(
+          `
+            select permission_key, effect, reason, expires_at
+            from public.admin_permission_overrides
+            where user_id = $1 and permission_key = $2
+            for update
+          `,
+          [userId, override.permissionKey]
+        );
+        const updated = await client.query(
+          `
+            insert into public.admin_permission_overrides
+              (user_id, permission_key, effect, reason, granted_by, expires_at)
+            values ($1, $2, $3, $4, $5, $6)
+            on conflict (user_id, permission_key)
+            do update set
+              effect = excluded.effect,
+              reason = excluded.reason,
+              granted_by = excluded.granted_by,
+              expires_at = excluded.expires_at,
+              updated_at = now()
+            returning permission_key, effect, reason, expires_at
+          `,
+          [
+            userId,
+            override.permissionKey,
+            override.effect,
+            override.reason,
+            adminViewer.userId,
+            override.expiresAt || null
+          ]
+        );
+        await client.query(
+          `
+            insert into public.audit_logs (
+              actor_user_id, actor_role, action, target_table, target_id,
+              before_snapshot, after_snapshot, request_id
+            )
+            values ($1, 'admin', 'admin.permission_override.upsert', 'users', $2, $3::jsonb, $4::jsonb, $5)
+          `,
+          [
+            adminViewer.userId,
+            userId,
+            { override: existing.rowCount ? mapOverride(existing.rows[0]) : null },
+            { override: mapOverride(updated.rows[0]) },
+            adminViewer.requestId
+          ]
+        );
+        await client.query("commit");
+        return { userId, override: mapOverride(updated.rows[0]) };
+      } catch (error) {
+        try {
+          await client.query("rollback");
+        } catch {
+          // Preserve the original query error instead of masking it.
+        }
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+
     async deletePermissionOverride(userId, permissionKey, adminViewer) {
       const client = await pool.connect();
       try {
@@ -318,7 +425,7 @@ export function createAdminAccessQueries(pool) {
     async listAuditEntries({ limit = 50, offset = 0, action = null, q = null } = {}) {
       const result = await pool.query(
         `
-          select id, actor_user_id, actor_role, action, target_table, target_id, request_id, created_at
+          select id, actor_user_id, actor_role, action, target_table, target_id, before_snapshot, after_snapshot, request_id, created_at
           from public.audit_logs
           where ($3::text is null or action = $3)
             and (

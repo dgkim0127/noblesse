@@ -34,6 +34,7 @@ test('admin api exposes access, buyer lifecycle, team, and audit methods', () =>
     'getAdmins',
     'updateAdminRole',
     'replacePermissionOverrides',
+    'upsertPermissionOverride',
     'deletePermissionOverride',
     'getAuditLogs',
   ]) {
@@ -65,6 +66,7 @@ test('admin dashboard renders RBAC lifecycle summary sections', () => {
 
 test('admin team page protects owner-only role and override controls', () => {
   const page = read('src/pages/admin/AdminTeamPage.jsx')
+  const api = read('src/api/adminApi.js')
 
   assert.match(page, /admin\?\.adminRole === 'owner'/)
   assert.match(page, /hasPermission\('admins\.manage'\)/)
@@ -73,6 +75,13 @@ test('admin team page protects owner-only role and override controls', () => {
   assert.match(page, /disabled=\{!draft\.reason\.trim\(\)\}/)
   assert.match(page, /deletePermissionOverride/)
   assert.match(page, /ownerProtected/)
+  assert.match(page, /value="owner"/)
+  assert.match(page, /startRoleEdit\(row\)/)
+  assert.match(page, /startOverrideEdit\(row/)
+  assert.match(page, /window\.confirm/)
+  assert.match(page, /upsertPermissionOverride/)
+  assert.doesNotMatch(page, /replacePermissionOverrides\(userId, \[\{/)
+  assert.match(api, /\/permission-overrides\/\$\{encodeURIComponent\(permissionKey\)\}/)
 })
 
 test('admin audit page renders target fields without raw snapshots', () => {
@@ -80,6 +89,7 @@ test('admin audit page renders target fields without raw snapshots', () => {
 
   assert.match(page, /entry\.entityType/)
   assert.match(page, /entry\.entityId/)
+  assert.match(page, /entry\.changedFields/)
   assert.match(page, /entry\.actor\?\.role/)
   assert.match(page, /getAuditLogs\(params, token\)/)
   assert.doesNotMatch(page, /beforeSnapshot|afterSnapshot|raw snapshot/i)
@@ -97,4 +107,10 @@ test('admin buyer pages separate account and verification status', () => {
   assert.match(detailPage, /accountStatus/)
   assert.match(detailPage, /buyers\.sensitive\.read/)
   assert.match(detailPage, /Masked by permission/)
+})
+
+test('admin mock owner includes settings.manage permission', () => {
+  const context = read('src/components/AdminAccessContext.jsx')
+
+  assert.match(context, /settings\.manage/)
 })

@@ -68,7 +68,7 @@ create table if not exists public.admin_permission_overrides (
   user_id uuid not null references public.users(id) on delete cascade,
   permission_key text not null,
   effect text not null check (effect in ('allow', 'deny')),
-  reason text,
+  reason text not null,
   granted_by uuid references public.users(id),
   expires_at timestamptz,
   created_at timestamptz default now(),

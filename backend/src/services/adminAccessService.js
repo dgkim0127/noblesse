@@ -89,6 +89,15 @@ export function createAdminAccessService({ queries }) {
       return result;
     },
 
+    async upsertPermissionOverride(userId, permissionKey, body = {}, adminViewer) {
+      const id = validateUuid(userId, "userId");
+      const override = parseOverride({ ...body, permissionKey });
+      const result = await queries.upsertPermissionOverride(id, override, adminViewer);
+      if (!result) throw notFound("Admin user not found");
+      if (result.ownerOverrideBlocked) throw validationError("Owner permissions cannot be overridden");
+      return result;
+    },
+
     async deletePermissionOverride(userId, permissionKey, adminViewer) {
       const id = validateUuid(userId, "userId");
       if (!PERMISSIONS.includes(permissionKey)) {

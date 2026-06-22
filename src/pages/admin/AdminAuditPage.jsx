@@ -37,8 +37,8 @@ export function AdminAuditPage() {
       <label className="admin-search">{copy.action}
         <input value={action} onChange={(event) => { setAction(event.target.value); setOffset(0) }} placeholder="admin.buyer.status.update" />
       </label>
-      <label className="admin-search">{copy.search || 'Actor or target'}
-        <input value={query} onChange={(event) => { setQuery(event.target.value); setOffset(0) }} placeholder={copy.searchPlaceholder || 'request id, target id'} />
+      <label className="admin-search">{copy.search || 'Request or target'}
+        <input value={query} onChange={(event) => { setQuery(event.target.value); setOffset(0) }} placeholder={copy.searchPlaceholder || 'request id, target id, target table'} />
       </label>
     </div>
     <section className="admin-card">
@@ -50,6 +50,7 @@ export function AdminAuditPage() {
               <tr>
                 <th>{copy.action}</th>
                 <th>{copy.entity}</th>
+                <th>{copy.changedFields || 'Changed fields'}</th>
                 <th>{copy.actor || 'Actor'}</th>
                 <th>{copy.request}</th>
                 <th>{copy.created}</th>
@@ -59,6 +60,7 @@ export function AdminAuditPage() {
               {auditLogs.map((entry) => <tr key={entry.id}>
                 <td>{entry.action}</td>
                 <td>{entry.entityType || '-'} {entry.entityId ? `#${String(entry.entityId).slice(0, 8)}` : ''}</td>
+                <td>{Array.isArray(entry.changedFields) && entry.changedFields.length > 0 ? entry.changedFields.join(', ') : '-'}</td>
                 <td>{entry.actor?.role || '-'}</td>
                 <td>{entry.requestId || '-'}</td>
                 <td>{entry.createdAt ? new Date(entry.createdAt).toLocaleString() : '-'}</td>

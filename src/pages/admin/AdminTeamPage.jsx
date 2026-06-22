@@ -23,6 +23,7 @@ export function AdminTeamPage() {
   const { admin, hasPermission } = useAdminAccess()
   const [refreshKey, setRefreshKey] = useState(0)
   const [editingUserId, setEditingUserId] = useState('')
+  const [editingMode, setEditingMode] = useState('')
   const [draft, setDraft] = useState({ adminRole: 'operator', permissionKey: 'buyers.read', effect: 'allow', reason: '', expiresAt: '' })
   const [message, setMessage] = useState('')
   const { data, error, status } = useAdminApiResource((api, token) => api.getAdmins(token), [refreshKey])
@@ -41,8 +42,9 @@ export function AdminTeamPage() {
   if (shouldShowAdminApiState(status)) return <AdminApiState error={error} status={status} />
 
   const admins = data?.admins || []
-  const startEdit = (row) => {
+  const startRoleEdit = (row) => {
     setEditingUserId(row.userId)
+    setEditingMode('role')
     setDraft({
       adminRole: row.adminRole || 'operator',
       permissionKey: 'buyers.read',
@@ -53,29 +55,59 @@ export function AdminTeamPage() {
     setMessage('')
   }
 
-  const saveRole = async (userId) => {
+  const startOverrideEdit = (row, override = null) => {
+    setEditingUserId(row.userId)
+    setEditingMode('override')
+    setDraft({
+      adminRole: row.adminRole || 'operator',
+      permissionKey: override?.permissionKey || 'buyers.read',
+      effect: override?.effect || 'allow',
+      reason: override?.reason || '',
+      expiresAt: override?.expiresAt || '',
+    })
     setMessage('')
+  }
+
+  const saveRole = async (row) => {
+    setMessage('')
+    const nextRole = draft.adminRole
+    const currentRole = row.adminRole || 'operator'
+    if (nextRole === currentRole) {
+      setEditingUserId('')
+      setEditingMode('')
+      return
+    }
+    const isSelfOwnerDowngrade = row.userId === admin?.userId && currentRole === 'owner' && nextRole !== 'owner'
+    const confirmMessage = isSelfOwnerDowngrade
+      ? (copy.confirmSelfDowngrade || 'You are changing your own owner role. Continue?')
+      : nextRole === 'owner'
+        ? (copy.confirmPromoteOwner || 'Promote this admin to owner?')
+        : currentRole === 'owner'
+          ? (copy.confirmDowngradeOwner || 'Downgrade this owner role?')
+          : (copy.confirmRoleChange || 'Change this admin role?')
+    if (!window.confirm(confirmMessage)) return
     try {
-      await mutate((api, token) => api.updateAdminRole(userId, draft.adminRole, token))
+      await mutate((api, token) => api.updateAdminRole(row.userId, nextRole, token))
       setMessage(copy.roleSaved || 'Admin role updated.')
       setEditingUserId('')
+      setEditingMode('')
       setRefreshKey((current) => current + 1)
     } catch (error) {
       setMessage(error?.message || copy.saveFailed || 'Unable to update admin role.')
     }
   }
 
-  const replaceOverride = async (userId) => {
+  const upsertOverride = async (userId) => {
     setMessage('')
     try {
-      await mutate((api, token) => api.replacePermissionOverrides(userId, [{
-        permissionKey: draft.permissionKey,
+      await mutate((api, token) => api.upsertPermissionOverride(userId, draft.permissionKey, {
         effect: draft.effect,
         reason: draft.reason,
         expiresAt: draft.expiresAt || null,
-      }], token))
+      }, token))
       setMessage(copy.overrideSaved || 'Permission override saved.')
       setEditingUserId('')
+      setEditingMode('')
       setRefreshKey((current) => current + 1)
     } catch (error) {
       setMessage(error?.message || copy.saveFailed || 'Unable to save permission override.')
@@ -113,7 +145,8 @@ export function AdminTeamPage() {
             </thead>
             <tbody>
               {admins.map((row) => {
-                const isEditing = editingUserId === row.userId
+                const isEditingRole = editingUserId === row.userId && editingMode === 'role'
+                const isEditingOverride = editingUserId === row.userId && editingMode === 'override'
                 const isOwner = row.adminRole === 'owner'
                 return <Fragment key={row.userId}>
                   <tr>
@@ -128,25 +161,36 @@ export function AdminTeamPage() {
                           {row.permissionOverrides.map((override) => <li key={override.permissionKey}>
                             <span>{override.effect}: {override.permissionKey}</span>
                             <small>{override.expiresAt || copy.noExpiry || 'No expiry'}</small>
+                            {canManage && !isOwner && <button type="button" onClick={() => startOverrideEdit(row, override)}>{t.common.edit || 'Edit'}</button>}
                             {canManage && !isOwner && <button type="button" onClick={() => deleteOverride(row.userId, override.permissionKey)}>{t.common.remove || 'Remove'}</button>}
                           </li>)}
                         </ul>}
                     </td>
                     <td>
-                      {canManage && !isOwner && <button type="button" onClick={() => startEdit(row)}>{t.common.edit || 'Edit'}</button>}
+                      {canManage && <button type="button" onClick={() => startRoleEdit(row)}>{copy.editRole || 'Edit role'}</button>}
+                      {canManage && !isOwner && <button type="button" onClick={() => startOverrideEdit(row)}>{copy.addOverride || 'Add override'}</button>}
                       {canManage && isOwner && <span className="admin-muted">{copy.ownerProtected || 'Owner overrides are not allowed.'}</span>}
                     </td>
                   </tr>
-                  {isEditing && <tr>
+                  {isEditingRole && <tr>
                     <td colSpan={6}>
                       <div className="admin-edit-panel">
                         <label>{copy.role}
                           <select value={draft.adminRole} onChange={(event) => setDraft((current) => ({ ...current, adminRole: event.target.value }))}>
                             <option value="operator">{t.shell.roles?.operator || 'Operator'}</option>
                             <option value="manager">{t.shell.roles?.manager || 'Manager'}</option>
+                            <option value="owner">{t.shell.roles?.owner || 'Owner'}</option>
                           </select>
                         </label>
-                        <button type="button" onClick={() => saveRole(row.userId)}>{copy.saveRole || 'Save role'}</button>
+                        {row.userId === admin?.userId && row.adminRole === 'owner' && draft.adminRole !== 'owner' && <p className="admin-muted">{copy.selfDowngradeWarning || 'You are downgrading your own owner role.'}</p>}
+                        <button type="button" onClick={() => saveRole(row)}>{copy.saveRole || 'Save role'}</button>
+                        <button type="button" onClick={() => { setEditingUserId(''); setEditingMode('') }}>{copy.cancel || 'Cancel'}</button>
+                      </div>
+                    </td>
+                  </tr>}
+                  {isEditingOverride && !isOwner && <tr>
+                    <td colSpan={6}>
+                      <div className="admin-edit-panel">
                         <label>{copy.permissionKey || 'Permission'}
                           <select value={draft.permissionKey} onChange={(event) => setDraft((current) => ({ ...current, permissionKey: event.target.value }))}>
                             {permissionOptions.map((item) => <option key={item} value={item}>{item}</option>)}
@@ -164,7 +208,8 @@ export function AdminTeamPage() {
                         <label>{copy.expiresAt || 'Expires at'}
                           <input value={draft.expiresAt} onChange={(event) => setDraft((current) => ({ ...current, expiresAt: event.target.value }))} placeholder="2026-12-31T00:00:00Z" />
                         </label>
-                        <button disabled={!draft.reason.trim()} type="button" onClick={() => replaceOverride(row.userId)}>{copy.saveOverride || 'Save override'}</button>
+                        <button disabled={!draft.reason.trim()} type="button" onClick={() => upsertOverride(row.userId)}>{copy.saveOverride || 'Save override'}</button>
+                        <button type="button" onClick={() => { setEditingUserId(''); setEditingMode('') }}>{copy.cancel || 'Cancel'}</button>
                       </div>
                     </td>
                   </tr>}

@@ -69,6 +69,36 @@ test("requireAdmin attaches account status, role, and permissions", async () => 
   assert.equal(response.body.adminViewer.permissions.includes("buyers.review"), true);
 });
 
+test("requireAdmin does not promote missing or invalid adminRole to owner", async () => {
+  async function loadAdminUserByAuthUid(_uid) {
+    return {
+      userId: "admin-1",
+      authUid: "admin-uid",
+      email: "admin@example.test",
+      role: "admin",
+      status: "approved",
+      accountStatus: "active"
+    };
+  }
+  const middleware = createRequireAdmin({
+    verifier: { async verifyIdToken() { return { uid: "admin-uid", email: "admin@example.test" }; } },
+    loadAdminUserByAuthUid
+  });
+  const app = express();
+  app.use(requestId);
+  app.get("/protected", middleware, (req, res) => res.json({ adminViewer: req.adminViewer }));
+  app.use(errorHandler);
+
+  const response = await request(app, "/protected", {
+    headers: { authorization: "Bearer token" }
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.adminViewer.adminRole, "operator");
+  assert.equal(response.body.adminViewer.permissions.includes("settings.manage"), false);
+  assert.equal(response.body.adminViewer.permissions.includes("admins.manage"), false);
+});
+
 test("GET /api/admin/me returns the server-verified admin access context", async () => {
   const app = express();
   app.use(requestId);
@@ -180,6 +210,37 @@ test("permission override validation requires reason, future expiresAt, and uniq
   );
 });
 
+test("single permission override upsert validates input and preserves sibling overrides through query API", async () => {
+  let captured = null;
+  const service = createAdminAccessService({
+    queries: {
+      async upsertPermissionOverride(userId, override, adminViewer) {
+        captured = { userId, override, adminViewer };
+        return { userId, override };
+      }
+    }
+  });
+  const userId = "11111111-1111-4111-8111-111111111111";
+  const adminViewer = { userId: "admin-1" };
+
+  await assert.rejects(
+    () => service.upsertPermissionOverride(userId, "buyers.read", { effect: "allow" }, adminViewer),
+    /reason is required/
+  );
+  await assert.rejects(
+    () => service.upsertPermissionOverride(userId, "buyers.read", { effect: "allow", reason: "temporary", expiresAt: "2020-01-01T00:00:00Z" }, adminViewer),
+    /future/
+  );
+
+  const result = await service.upsertPermissionOverride(userId, "buyers.review", {
+    effect: "deny",
+    reason: "temporary review block"
+  }, adminViewer);
+
+  assert.equal(result.override.permissionKey, "buyers.review");
+  assert.equal(captured.override.reason, "temporary review block");
+});
+
 test("admin access query SQL uses existing audit target columns", () => {
   const source = readFileSync(join(process.cwd(), "src", "db", "queries", "adminAccessQueries.js"), "utf8");
 
@@ -187,4 +248,7 @@ test("admin access query SQL uses existing audit target columns", () => {
   assert.match(source, /target_id/);
   assert.doesNotMatch(source, /entity_type/);
   assert.doesNotMatch(source, /entity_id/);
+  assert.match(source, /admin\.permission_override\.upsert/);
+  assert.match(source, /on conflict \(user_id, permission_key\)/);
+  assert.match(source, /changedFields/);
 });

@@ -70,6 +70,21 @@ export function createAdminRoutes({
     })
   );
 
+  router.put(
+    "/admins/:userId/permission-overrides/:permissionKey",
+    requireAdmin,
+    can("admins.manage"),
+    asyncRoute(async (req, res) => {
+      const data = await services.access.upsertPermissionOverride(
+        req.params.userId,
+        req.params.permissionKey,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
   router.delete(
     "/admins/:userId/permission-overrides/:permissionKey",
     requireAdmin,
