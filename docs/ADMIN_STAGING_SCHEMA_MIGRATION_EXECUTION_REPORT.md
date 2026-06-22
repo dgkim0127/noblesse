@@ -96,3 +96,16 @@ Reason:
 - New Job execution created: No.
 - Migration execution: No.
 - Next migration execution still requires `APPROVE_STAGING_RBAC_MIGRATION_EXECUTION = YES`.
+
+## N38-B2 RBAC Migration Execution Follow-up
+
+- Execution report: `docs/ADMIN_STAGING_RBAC_MIGRATION_EXECUTION_REPORT.md`.
+- Existing staging migration Job was executed exactly once.
+- Execution count before: 10.
+- Execution count after: 11.
+- Migration committed: Yes.
+- Already applied: No.
+- Checksum mismatch: No.
+- Raw execution id/logs recorded in repo/docs: No.
+- No retry, Job update, Cloud Build, local psql, direct DB connection, secret value access, Firebase deploy, or production mutation happened.
+- Next gate: `APPROVE_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK = YES`.

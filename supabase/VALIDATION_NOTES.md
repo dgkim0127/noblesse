@@ -1716,3 +1716,23 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Production data mutation: No.
 - Application runtime least-privilege hardening: No-Go until separately verified.
 - Conclusion: Repackaging is complete; next gate is `APPROVE_STAGING_RBAC_MIGRATION_EXECUTION = YES`.
+
+## N38-B2 RBAC Migration Execution Follow-up
+
+- Date: 2026-06-22
+- Change: Added `docs/ADMIN_STAGING_RBAC_MIGRATION_EXECUTION_REPORT.md`.
+- Scope: Existing staging RBAC migration Job execution.
+- Job execute command run: Yes, exactly once.
+- Execution count before/after: 10/11.
+- Execution succeeded: Yes.
+- Migration committed: Yes.
+- Already applied: No.
+- Checksum mismatch: No.
+- Secret value access/read by operator: No.
+- DB connection/psql executed by operator: No.
+- Cloud Build or Job redeploy: No.
+- Cloud Run application deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Production data mutation: No.
+- Raw execution id/logs recorded in repo/docs: No.
+- Conclusion: Staging RBAC lifecycle migration is Go; next gate is `APPROVE_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK = YES`.

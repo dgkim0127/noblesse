@@ -493,3 +493,14 @@ Important:
 - Staging schema migration execution: No.
 - Production schema migration execution: No.
 - Production DB rollout remains No-Go.
+
+## N38-B2 RBAC Migration Execution Follow-up
+
+- Execution report: `docs/ADMIN_STAGING_RBAC_MIGRATION_EXECUTION_REPORT.md`.
+- Staging RBAC lifecycle migration executed once through the existing Cloud Run Job.
+- Migration committed: Yes.
+- Already applied: No.
+- Checksum mismatch: No.
+- Production schema migration execution: No.
+- Production DB rollout remains No-Go.
+- Next gate: `APPROVE_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK = YES`.

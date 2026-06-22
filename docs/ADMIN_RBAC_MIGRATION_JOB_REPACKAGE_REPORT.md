@@ -74,3 +74,14 @@ If packaging is accepted:
 Separately required before application DB rollout:
 
 - `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_HARDENING = YES`
+
+## N38-B2 Migration Execution Follow-up
+
+- Execution report: `docs/ADMIN_STAGING_RBAC_MIGRATION_EXECUTION_REPORT.md`.
+- Existing staging migration Job was executed exactly once.
+- Execution count changed from 10 to 11.
+- Migration committed: Yes.
+- Already applied: No.
+- Checksum mismatch: No.
+- No retry, Job redeploy, Cloud Build, secret value access, local psql, direct DB connection, app deploy, Firebase deploy, or production mutation happened.
+- Next gate: `APPROVE_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK = YES`.

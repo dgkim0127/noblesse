@@ -504,3 +504,14 @@ No-Go remains:
 - The migration Job now pins the staging DB URL secret to a specific enabled version.
 - Job execution, schema migration execution, DB connection, Cloud Run app deploy, Firebase deploy, and production mutation did not happen.
 - Next gate is `APPROVE_STAGING_RBAC_MIGRATION_EXECUTION = YES`.
+
+## N38-B2 RBAC Migration Execution
+
+- Execution report: `docs/ADMIN_STAGING_RBAC_MIGRATION_EXECUTION_REPORT.md`.
+- Existing staging migration Job was executed exactly once and completed successfully.
+- Migration committed: Yes.
+- Already applied: No.
+- Checksum mismatch: No.
+- No retry, Job redeploy, Cloud Build, direct operator DB connection, local psql, secret value access, Cloud Run app deploy, Firebase deploy, or production mutation happened.
+- Schema/owner verification, runtime DB privilege hardening, app DB rollout, and production rollout remain separate No-Go gates.
+- Next gate is `APPROVE_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK = YES`.

@@ -727,3 +727,14 @@ Required before 32K:
 - The Job pins a specific enabled staging DB secret version.
 - The Job was not executed and schema migration was not executed.
 - Application DB runtime privilege hardening remains a separate No-Go gate before DB-backed app rollout.
+
+## N38-B2 RBAC Migration Execution Follow-up
+
+- Confirm `docs/ADMIN_STAGING_RBAC_MIGRATION_EXECUTION_REPORT.md` before idempotency recheck approval.
+- Existing staging migration Job execution count changed from 10 to 11.
+- Migration committed: Yes.
+- Already applied: No.
+- Checksum mismatch: No.
+- No retry, Cloud Build, Job redeploy, app deploy, Firebase deploy, production DB/write, local psql, or direct operator DB connection happened.
+- Application DB runtime privilege hardening remains a separate No-Go gate before DB-backed app rollout.
+- Next gate: `APPROVE_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK = YES`.

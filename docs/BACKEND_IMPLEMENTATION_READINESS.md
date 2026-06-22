@@ -584,3 +584,18 @@ Before implementation starts:
 - Cloud Run application deploy: No.
 - Firebase deploy or `/api` rewrite: No.
 - Application DB runtime privilege hardening remains a separate No-Go gate.
+
+## N38-B2 RBAC Migration Execution
+
+- Execution report: `docs/ADMIN_STAGING_RBAC_MIGRATION_EXECUTION_REPORT.md`.
+- Existing staging migration Job executed exactly once.
+- Execution count before/after: 10/11.
+- Migration committed: Yes.
+- Already applied: No.
+- Checksum mismatch: No.
+- Local psql/direct operator DB connection: No.
+- Secret value access/read: No.
+- Cloud Run application deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Production DB/write: No.
+- Backend readiness next requires an idempotency recheck and separate schema/owner verification before application DB rollout.

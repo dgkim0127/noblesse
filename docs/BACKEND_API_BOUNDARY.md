@@ -528,3 +528,13 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - This did not add a Firebase Hosting `/api` rewrite.
 - This did not connect the frontend to admin APIs or PostgreSQL.
 - Staging schema migration remains No-Go pending IAM fix approval.
+
+## N38-B2 RBAC Migration Execution
+
+- RBAC migration execution is documented in `docs/ADMIN_STAGING_RBAC_MIGRATION_EXECUTION_REPORT.md`.
+- The existing staging migration Job was executed exactly once and committed the lifecycle migration.
+- This did not add or change public API routes.
+- This did not add a Firebase Hosting `/api` rewrite.
+- This did not deploy the Cloud Run application service.
+- This did not connect the public frontend directly to PostgreSQL.
+- Production migration/write remains No-Go.

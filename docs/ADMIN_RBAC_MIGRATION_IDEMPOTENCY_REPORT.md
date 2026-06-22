@@ -69,3 +69,13 @@
 - Schema migration execution: No.
 - Secret value access: No.
 - DB connection/psql: No.
+
+## N38-B2 Execution Follow-up
+
+- Execution report: `docs/ADMIN_STAGING_RBAC_MIGRATION_EXECUTION_REPORT.md`.
+- Existing staging migration Job executed exactly once.
+- First RBAC lifecycle migration execution result: committed.
+- Already applied: No.
+- Checksum mismatch: No.
+- No retry, raw secret/log recording, local psql, direct operator DB connection, Cloud Run app deploy, Firebase deploy, or production mutation happened.
+- Next gate: `APPROVE_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK = YES`.
