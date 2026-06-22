@@ -85,3 +85,15 @@ Separately required before application DB rollout:
 - Checksum mismatch: No.
 - No retry, Job redeploy, Cloud Build, secret value access, local psql, direct DB connection, app deploy, Firebase deploy, or production mutation happened.
 - Next gate: `APPROVE_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK = YES`.
+
+## N38-B3 Idempotency Recheck Follow-up
+
+- Idempotency recheck report: `docs/ADMIN_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK_REPORT.md`.
+- Existing staging migration Job was executed exactly once for a second approved run.
+- Execution count changed from 11 to 12.
+- alreadyApplied: true.
+- Schema migration committed again: No.
+- Lifecycle schema SQL re-executed: No.
+- Checksum mismatch: No.
+- No retry, Job redeploy, Cloud Build, secret value access, local psql, direct DB connection, app deploy, Firebase deploy, or production mutation happened.
+- Next gate: `APPROVE_STAGING_RBAC_SCHEMA_AND_OWNER_VERIFICATION = YES`.

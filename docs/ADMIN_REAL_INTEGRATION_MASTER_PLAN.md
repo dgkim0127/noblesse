@@ -515,3 +515,16 @@ No-Go remains:
 - No retry, Job redeploy, Cloud Build, direct operator DB connection, local psql, secret value access, Cloud Run app deploy, Firebase deploy, or production mutation happened.
 - Schema/owner verification, runtime DB privilege hardening, app DB rollout, and production rollout remain separate No-Go gates.
 - Next gate is `APPROVE_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK = YES`.
+
+## N38-B3 RBAC Migration Idempotency Recheck
+
+- Idempotency recheck report: `docs/ADMIN_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK_REPORT.md`.
+- Same staging migration Job was executed exactly once after the first committed run.
+- alreadyApplied: true.
+- Schema migration committed again: No.
+- Lifecycle schema SQL re-executed: No.
+- Checksum mismatch: No.
+- No retry, Job redeploy, Cloud Build, direct operator DB connection, local psql, secret value access, Cloud Run app deploy, Firebase deploy, or production mutation happened.
+- Migration idempotency: Go.
+- Schema/owner verification, runtime DB privilege hardening, app DB rollout, and production rollout remain separate No-Go gates.
+- Next gate is `APPROVE_STAGING_RBAC_SCHEMA_AND_OWNER_VERIFICATION = YES`.

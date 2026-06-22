@@ -738,3 +738,15 @@ Required before 32K:
 - No retry, Cloud Build, Job redeploy, app deploy, Firebase deploy, production DB/write, local psql, or direct operator DB connection happened.
 - Application DB runtime privilege hardening remains a separate No-Go gate before DB-backed app rollout.
 - Next gate: `APPROVE_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK = YES`.
+
+## N38-B3 RBAC Migration Idempotency Recheck Follow-up
+
+- Confirm `docs/ADMIN_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK_REPORT.md` before schema/owner verification approval.
+- Existing staging migration Job execution count changed from 11 to 12.
+- alreadyApplied: true.
+- Schema migration committed again: No.
+- Lifecycle schema SQL re-executed: No.
+- Checksum mismatch: No.
+- No retry, Cloud Build, Job redeploy, app deploy, Firebase deploy, production DB/write, local psql, or direct operator DB connection happened.
+- Application DB runtime privilege hardening remains a separate No-Go gate before DB-backed app rollout.
+- Next gate: `APPROVE_STAGING_RBAC_SCHEMA_AND_OWNER_VERIFICATION = YES`.

@@ -538,3 +538,14 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - This did not deploy the Cloud Run application service.
 - This did not connect the public frontend directly to PostgreSQL.
 - Production migration/write remains No-Go.
+
+## N38-B3 RBAC Migration Idempotency Recheck
+
+- RBAC migration idempotency recheck is documented in `docs/ADMIN_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK_REPORT.md`.
+- The same staging migration Job was executed exactly once and returned already-applied behavior.
+- Lifecycle schema SQL was not re-executed.
+- This did not add or change public API routes.
+- This did not add a Firebase Hosting `/api` rewrite.
+- This did not deploy the Cloud Run application service.
+- This did not connect the public frontend directly to PostgreSQL.
+- Production migration/write remains No-Go.

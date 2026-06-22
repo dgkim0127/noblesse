@@ -79,3 +79,15 @@
 - Checksum mismatch: No.
 - No retry, raw secret/log recording, local psql, direct operator DB connection, Cloud Run app deploy, Firebase deploy, or production mutation happened.
 - Next gate: `APPROVE_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK = YES`.
+
+## N38-B3 Idempotency Recheck Follow-up
+
+- Idempotency recheck report: `docs/ADMIN_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK_REPORT.md`.
+- Same staging migration Job executed exactly once after the first committed run.
+- Second execution result: already applied.
+- alreadyApplied: true.
+- Schema migration committed again: No.
+- Lifecycle schema SQL re-executed: No.
+- Checksum mismatch: No.
+- No retry, raw secret/log recording, local psql, direct operator DB connection, Cloud Run app deploy, Firebase deploy, or production mutation happened.
+- Next gate: `APPROVE_STAGING_RBAC_SCHEMA_AND_OWNER_VERIFICATION = YES`.

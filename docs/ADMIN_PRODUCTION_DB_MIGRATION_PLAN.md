@@ -504,3 +504,15 @@ Important:
 - Production schema migration execution: No.
 - Production DB rollout remains No-Go.
 - Next gate: `APPROVE_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK = YES`.
+
+## N38-B3 RBAC Migration Idempotency Recheck Follow-up
+
+- Idempotency recheck report: `docs/ADMIN_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK_REPORT.md`.
+- Same staging RBAC lifecycle migration Job executed once more for the approved idempotency recheck.
+- alreadyApplied: true.
+- Schema migration committed again: No.
+- Lifecycle schema SQL re-executed: No.
+- Checksum mismatch: No.
+- Production schema migration execution: No.
+- Production DB rollout remains No-Go.
+- Next gate: `APPROVE_STAGING_RBAC_SCHEMA_AND_OWNER_VERIFICATION = YES`.

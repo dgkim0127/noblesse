@@ -1736,3 +1736,24 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Production data mutation: No.
 - Raw execution id/logs recorded in repo/docs: No.
 - Conclusion: Staging RBAC lifecycle migration is Go; next gate is `APPROVE_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK = YES`.
+
+## N38-B3 RBAC Migration Idempotency Recheck Follow-up
+
+- Date: 2026-06-22
+- Change: Added `docs/ADMIN_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK_REPORT.md`.
+- Scope: Existing staging RBAC migration Job idempotency recheck.
+- Job execute command run: Yes, exactly once.
+- Execution count before/after: 11/12.
+- Execution succeeded: Yes.
+- alreadyApplied: true.
+- Schema migration committed again: No.
+- Lifecycle schema SQL re-executed: No.
+- Checksum mismatch: No.
+- Secret value access/read by operator: No.
+- DB connection/psql executed by operator: No.
+- Cloud Build or Job redeploy: No.
+- Cloud Run application deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Production data mutation: No.
+- Raw execution id/logs recorded in repo/docs: No.
+- Conclusion: Staging RBAC migration idempotency is Go; next gate is `APPROVE_STAGING_RBAC_SCHEMA_AND_OWNER_VERIFICATION = YES`.

@@ -599,3 +599,19 @@ Before implementation starts:
 - Firebase deploy or `/api` rewrite: No.
 - Production DB/write: No.
 - Backend readiness next requires an idempotency recheck and separate schema/owner verification before application DB rollout.
+
+## N38-B3 RBAC Migration Idempotency Recheck
+
+- Idempotency recheck report: `docs/ADMIN_STAGING_RBAC_MIGRATION_IDEMPOTENCY_RECHECK_REPORT.md`.
+- Same staging migration Job executed exactly once after the first committed run.
+- Execution count before/after: 11/12.
+- alreadyApplied: true.
+- Schema migration committed again: No.
+- Lifecycle schema SQL re-executed: No.
+- Checksum mismatch: No.
+- Local psql/direct operator DB connection: No.
+- Secret value access/read: No.
+- Cloud Run application deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Production DB/write: No.
+- Backend readiness next requires separate schema/owner verification before application DB rollout.
