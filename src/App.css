@@ -9817,7 +9817,7 @@ h6 {
 }
 
 .section-weekly-pick .home-product-section-title {
-  transform: none !important;
+  transform: translateX(clamp(-2.75rem, -2.4vw, -1.5rem)) !important;
 }
 
 .section-new-arrival .home-scroll-reveal,
