@@ -102,3 +102,9 @@
 ## Next Gate
 
 - `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_FIX = YES`
+- Follow-up report: `docs/ADMIN_STAGING_RUNTIME_SECRET_WRAPPER_FIX_REPORT.md`.
+- Result: Case B - wrapper still fails before target API reachability.
+- Secret version add invocation count: 1.
+- Target runtime secret version created: No.
+- Password reset, version enable, IAM grant, DB login/query, runtime verifier, Cloud Run Job execution, app/Firebase deploy, and production mutation were not performed.
+- Updated next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_RECOVERY_DIAGNOSIS = YES`.

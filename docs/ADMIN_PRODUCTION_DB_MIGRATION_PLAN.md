@@ -627,3 +627,10 @@ Important:
 - Classification: A - LOCAL_WRAPPER_OR_PATH_FAILURE.
 - Production DB migration and rollout remain unaffected.
 - Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_FIX = YES`.
+
+## N38-B6S1 Follow-up
+
+- Wrapper retry report: `docs/ADMIN_STAGING_RUNTIME_SECRET_WRAPPER_FIX_REPORT.md`.
+- No production DB work, migration, DB login/query, or password reset was performed.
+- The staging runtime secret still has no version, so application runtime DB rollout remains blocked.
+- Next staging gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_RECOVERY_DIAGNOSIS = YES`.

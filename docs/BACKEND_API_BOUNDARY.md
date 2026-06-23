@@ -597,3 +597,11 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - No frontend direct PostgreSQL access was added.
 - No Cloud Run application service deploy happened.
 - Runtime DB user/secret creation and role E2E remain blocked pending a separate approval.
+
+## N38-B6S1 Follow-up
+
+- Wrapper retry report: `docs/ADMIN_STAGING_RUNTIME_SECRET_WRAPPER_FIX_REPORT.md`.
+- The retry did not change public API behavior, Firebase Hosting rewrites, backend routes, or frontend API clients.
+- No runtime verifier, Cloud Run Job execution, backend deploy, Firebase deploy, DB login/query, or production mutation was performed.
+- Runtime DB-backed application rollout remains blocked.
+- Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_RECOVERY_DIAGNOSIS = YES`.

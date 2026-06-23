@@ -145,3 +145,10 @@
 - DB login/query, runtime verifier, Job execution, app/Firebase deploy, and production mutation: No.
 - Result category: Case B - Secret stage/disable failure.
 - Next gate: `APPROVE_STAGING_RUNTIME_SECRET_STAGING_RECOVERY = YES`.
+
+## N38-B6S1 Follow-up
+
+- Follow-up report: `docs/ADMIN_STAGING_RUNTIME_SECRET_WRAPPER_FIX_REPORT.md`.
+- The approved wrapper retry still did not create a target runtime secret version.
+- The runtime DB user remains without the completed secret/password handoff path.
+- Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_RECOVERY_DIAGNOSIS = YES`.

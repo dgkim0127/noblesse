@@ -124,3 +124,11 @@
 - Secret version add retry, password reset, IAM mutation, secret access, DB login/query, Job execution, app/Firebase deploy, and production mutation: No.
 - Classification: A - LOCAL_WRAPPER_OR_PATH_FAILURE.
 - Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_FIX = YES`.
+
+## N38-B6S1 Follow-up
+
+- Follow-up report: `docs/ADMIN_STAGING_RUNTIME_SECRET_WRAPPER_FIX_REPORT.md`.
+- The approved wrapper retry did not create a staged runtime secret version.
+- Password reset invocation count remained 0.
+- No DB login/query, secret payload access, runtime verifier, Cloud Run Job execution, app/Firebase deploy, or production mutation was performed.
+- Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_RECOVERY_DIAGNOSIS = YES`.

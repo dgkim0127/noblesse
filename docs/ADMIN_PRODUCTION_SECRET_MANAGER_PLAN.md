@@ -506,3 +506,11 @@ Important:
 - Application identity secretAccessor grant: No.
 - Production secret creation remains No-Go.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
+## N38-B6S1 Follow-up
+
+- Wrapper retry report: `docs/ADMIN_STAGING_RUNTIME_SECRET_WRAPPER_FIX_REPORT.md`.
+- The staging runtime secret version add was invoked once but did not create a target version.
+- Password reset and application runtime-secret IAM grant were not performed.
+- Production Secret Manager planning remains unchanged.
+- Next staging gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_RECOVERY_DIAGNOSIS = YES`.

@@ -719,3 +719,10 @@ Before implementation starts:
 - Secret version add retry, password reset, IAM mutation, secret access, DB login/query, Job execution, application deploy, Firebase deploy, and production mutation: No.
 - Classification: A - LOCAL_WRAPPER_OR_PATH_FAILURE.
 - Backend readiness remains blocked pending `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_FIX = YES`.
+
+## N38-B6S1 Follow-up
+
+- Wrapper retry report: `docs/ADMIN_STAGING_RUNTIME_SECRET_WRAPPER_FIX_REPORT.md`.
+- Backend DB-backed rollout remains blocked because the target runtime secret version was not created.
+- Password reset, version enable, IAM grant, runtime verifier, backend deploy, Firebase deploy, DB login/query, and production mutation were not performed.
+- Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_RECOVERY_DIAGNOSIS = YES`.

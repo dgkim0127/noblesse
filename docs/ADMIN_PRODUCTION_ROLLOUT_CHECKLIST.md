@@ -865,3 +865,11 @@ Required before 32K:
 - Classification: A - LOCAL_WRAPPER_OR_PATH_FAILURE.
 - Runtime verifier, application DB rollout, and production rollout remain blocked.
 - Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_FIX = YES`.
+
+## N38-B6S1 Follow-up
+
+- Wrapper retry report: `docs/ADMIN_STAGING_RUNTIME_SECRET_WRAPPER_FIX_REPORT.md`.
+- The approved wrapper retry did not create a target runtime secret version.
+- Password reset, version enable, IAM grant, verifier, application deploy, Firebase deploy, and production mutation were not performed.
+- Production rollout remains blocked.
+- Next staging gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_RECOVERY_DIAGNOSIS = YES`.

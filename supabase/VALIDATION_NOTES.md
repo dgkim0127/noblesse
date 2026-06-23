@@ -1996,3 +1996,12 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret value, DB URL, password, operation ID, raw gcloud stdout/stderr recorded: No.
 - Classification: A - LOCAL_WRAPPER_OR_PATH_FAILURE.
 - Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_FIX = YES`.
+
+## N38-B6S1 Follow-up
+
+- Staging runtime wrapper retry documented in `docs/ADMIN_STAGING_RUNTIME_SECRET_WRAPPER_FIX_REPORT.md`.
+- Secret version add invocation count: 1.
+- Target runtime secret version created: No.
+- Password reset, version enable, IAM grant, DB login/query/psql, runtime verifier, Cloud Run Job execution, app/Firebase deploy, and production mutation were not performed.
+- No SQL file change.
+- Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_RECOVERY_DIAGNOSIS = YES`.

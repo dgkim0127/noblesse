@@ -105,3 +105,12 @@
 - Secret version add retry, password reset, IAM mutation, secret access, DB login/query, Job execution, app/Firebase deploy, and production mutation: No.
 - Classification: A - LOCAL_WRAPPER_OR_PATH_FAILURE.
 - Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_FIX = YES`.
+
+## N38-B6S1 Follow-up
+
+- Follow-up report: `docs/ADMIN_STAGING_RUNTIME_SECRET_WRAPPER_FIX_REPORT.md`.
+- Start-Process wrapper add invocation count: 1.
+- Target runtime secret version count after the attempt: 0.
+- Target AddSecretVersion audit event found: No.
+- Password reset and IAM grant remained unexecuted.
+- Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_RECOVERY_DIAGNOSIS = YES`.

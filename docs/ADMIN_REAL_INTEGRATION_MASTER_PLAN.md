@@ -648,3 +648,10 @@ No-Go remains:
 - Secret version add retry, password reset, IAM mutation, secret access, DB login/query, Job execution, app/Firebase deploy, and production mutation: No.
 - Classification: A - LOCAL_WRAPPER_OR_PATH_FAILURE.
 - Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_FIX = YES`.
+
+## N38-B6S1 Follow-up
+
+- Wrapper retry report: `docs/ADMIN_STAGING_RUNTIME_SECRET_WRAPPER_FIX_REPORT.md`.
+- Runtime credential handoff remains blocked because the target runtime secret still has zero versions after one approved add attempt.
+- Password reset, version enable, IAM grant, runtime verifier, application rollout, Firebase deploy, and production rollout remain blocked.
+- Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_RECOVERY_DIAGNOSIS = YES`.
