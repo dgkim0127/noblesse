@@ -123,3 +123,14 @@
 - Password reset retry: No.
 - Secret version add and IAM mutation: No.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_PASSWORD_RESET_WRAPPER_RECOVERY = YES`.
+
+## N38-B6R3 Password Wrapper Recovery Follow-up
+
+- Recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_PASSWORD_WRAPPER_RECOVERY_REPORT.md`.
+- Password reset command executed exactly once.
+- Cloud SQL server-side operation result: Success.
+- Runtime secret version add result: Not completed; enabled version count remains 0.
+- Runtime secret IAM grant: Not executed.
+- DB login/query, runtime verifier, Job execution, app/Firebase deploy, and production mutation: No.
+- Result category: Case C - Reset success / secret version failure.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.

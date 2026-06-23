@@ -443,6 +443,17 @@ Important:
 - Production secret creation remains No-Go.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
 
+## N38-B6R3 Staging Runtime DB Password Wrapper Recovery Follow-up
+
+- Recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_PASSWORD_WRAPPER_RECOVERY_REPORT.md`.
+- Password reset command executed exactly once.
+- Cloud SQL server-side operation result: Success.
+- Runtime secret version add result: Not completed; enabled version count remains 0.
+- Application identity secretAccessor grant: No.
+- Secret value, DB URL, and password recorded: No.
+- Production secret creation remains No-Go.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
 ## N38-B6R2 Staging Runtime DB Secret Recovery Follow-up
 
 - Completion report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_COMPLETION_REPORT.md`.

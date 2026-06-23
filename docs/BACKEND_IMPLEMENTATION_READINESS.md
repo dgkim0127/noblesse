@@ -689,3 +689,13 @@ Before implementation starts:
 - Local wrapper failure blocked secret-version handoff.
 - No password reset retry, secret version, IAM mutation, DB login/query, runtime verifier, application deploy, Firebase deploy, or production mutation occurred.
 - Backend readiness next requires wrapper recovery approval before secret-version handoff and verifier.
+
+## N38-B6R3 Runtime DB Password Wrapper Recovery
+
+- Recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_PASSWORD_WRAPPER_RECOVERY_REPORT.md`.
+- Password reset command executed exactly once.
+- Cloud SQL server-side operation result: Success.
+- Runtime secret version add result: Not completed; enabled version count remains 0.
+- Runtime secret IAM grant: Not executed.
+- No DB login/query, runtime verifier, Job execution, application deploy, Firebase deploy, or production mutation occurred.
+- Backend readiness remains blocked pending `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.

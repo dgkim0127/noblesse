@@ -1945,3 +1945,20 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Actual password, DB URL, token, private key, service account email, project id, operation ID, raw logs, and TEMP file contents recorded: No.
 - Result: A - API_SUCCEEDED_LOCAL_WRAPPER_FAILED.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_PASSWORD_RESET_WRAPPER_RECOVERY = YES`.
+
+## N38-B6R3 Follow-up - Staging runtime DB password wrapper recovery
+
+- Scope: Server-state based recovery from local wrapper failure.
+- Follow-up report: `docs/ADMIN_STAGING_RUNTIME_DB_PASSWORD_WRAPPER_RECOVERY_REPORT.md`.
+- Password reset command executed exactly once: Yes.
+- Cloud SQL server-side operation result: Success.
+- Runtime secret version add: No.
+- Runtime secret enabled version count: 0.
+- Runtime secret IAM grant: No.
+- TEMP credential cleanup: Complete.
+- DB login/query, psql, runtime verifier: No.
+- Cloud Run Job execution: No.
+- Application deploy, Firebase deploy, production mutation: No.
+- Secret value, DB URL, password, operation ID, raw gcloud stdout/stderr recorded: No.
+- Result category: Case C - Reset success / secret version failure.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.

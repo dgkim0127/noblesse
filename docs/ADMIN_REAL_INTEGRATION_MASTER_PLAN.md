@@ -616,3 +616,14 @@ No-Go remains:
 - DB login/query and runtime verifier execution: No.
 - Application/Firebase deploy and production mutation: No.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
+## N38-B6R3 Runtime DB Password Wrapper Recovery Follow-up
+
+- Runtime DB password wrapper recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_PASSWORD_WRAPPER_RECOVERY_REPORT.md`.
+- Password reset command executed exactly once.
+- Cloud SQL server-side operation result: Success.
+- Runtime secret version add result: Not completed; enabled version count remains 0.
+- Application runtime secretAccessor grant: No.
+- DB login/query and runtime verifier execution: No.
+- Application/Firebase deploy and production mutation: No.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.

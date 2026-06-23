@@ -832,3 +832,14 @@ Required before 32K:
 - Runtime verifier and application DB rollout: No-Go.
 - Production rollout remains blocked.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
+## N38-B6R3 Runtime DB Password Wrapper Recovery Follow-up
+
+- Recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_PASSWORD_WRAPPER_RECOVERY_REPORT.md`.
+- Password reset command executed exactly once.
+- Cloud SQL server-side operation result: Success.
+- Runtime secret version add result: Not completed; enabled version count remains 0.
+- Application secretAccessor grant: No.
+- Runtime verifier and application DB rollout: No-Go.
+- Production rollout remains blocked.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
