@@ -791,3 +791,13 @@ Required before 32K:
 - Runtime DB login user, runtime DB secret, runtime verifier, and staging backend deploy remain No-Go.
 - Production rollout remains No-Go.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_AND_SECRET_CREATE = YES`.
+
+## N38-B6 Runtime DB User Secret Follow-up
+
+- Runtime DB user/secret handoff report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_REPORT.md`.
+- Runtime secret container created: Yes, zero versions.
+- Runtime DB login user created: No.
+- Application secretAccessor grant: No.
+- Runtime verifier and application DB rollout: No-Go.
+- Production rollout remains blocked.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.

@@ -558,3 +558,12 @@ Important:
 - Production schema migration execution: No.
 - Production DB rollout remains No-Go.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_AND_SECRET_CREATE = YES`.
+
+## N38-B6 Runtime DB User Secret Follow-up
+
+- Runtime DB user/secret handoff report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_REPORT.md`.
+- Staging runtime secret container exists but has zero versions.
+- Staging runtime DB login user was not created.
+- No DB login/query, runtime verifier, application deploy, Firebase deploy, or production mutation occurred.
+- Production DB migration and rollout remain unaffected.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.

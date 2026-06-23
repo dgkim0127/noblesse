@@ -72,6 +72,8 @@ Backend API boundaries are not implementation approval. `docs/BACKEND_STACK_DECI
 
 32L-4 adds backend-only Cloud SQL socket pool configuration support. This remains server-side only: no frontend DB access, no `DATABASE_URL` in frontend, no Firebase `/api` rewrite, and no production admin write.
 
+N38-B6 attempted the staging runtime DB credential handoff after runtime privilege hardening. It created only an empty dedicated runtime secret container, did not create a runtime DB login user, did not add a secret version, did not grant runtime secret access, and did not run a DB login/query or runtime verifier. Application DB rollout remains blocked pending `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
 32L-5 attempted staging Cloud SQL resource creation and was blocked before any usable DB resource was created. Backend API boundaries remain unchanged: no DB connection, no Cloud Run DB update, no Firebase `/api` rewrite, and no production admin write.
 
 32L-5R documents revised staging DB tier candidates only. It does not create a DB, connect backend APIs to DB, add a Firebase rewrite, or change frontend access boundaries.

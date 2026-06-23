@@ -652,3 +652,12 @@ Before implementation starts:
 - Staging runtime privilege hardening: Go.
 - Root lint remains blocked by an existing out-of-scope `src/pages/HomePage.jsx` hook-order dirty change.
 - Backend readiness next requires runtime DB user/secret creation and runtime verifier approval; application DB rollout remains blocked.
+
+## N38-B6 Runtime DB User Secret Handoff
+
+- Runtime DB user/secret handoff report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_REPORT.md`.
+- Runtime secret container exists with zero versions.
+- Runtime DB login user was not created.
+- Secret-level application accessor was not granted.
+- No DB login/query, runtime verifier, application deploy, Firebase deploy, or production mutation occurred.
+- Backend readiness next requires runtime DB user/secret recovery approval before verifier or application DB rollout.

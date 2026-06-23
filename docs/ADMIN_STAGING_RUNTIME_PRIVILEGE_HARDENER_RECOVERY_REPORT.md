@@ -102,3 +102,16 @@
 ## Next Gate
 
 - `APPROVE_STAGING_RUNTIME_DB_USER_AND_SECRET_CREATE = YES`
+
+## N38-B6 Runtime DB User Secret Follow-up
+
+- Follow-up report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_REPORT.md`.
+- Runtime secret container created: Yes.
+- Runtime secret version count: 0.
+- Runtime DB login user created: No.
+- Failure stage: local temporary password generation before Cloud SQL user creation.
+- Password/DB URL/secret value recorded: No.
+- Runtime verifier executed: No.
+- Application/Firebase deploy: No.
+- Production mutation: No.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.

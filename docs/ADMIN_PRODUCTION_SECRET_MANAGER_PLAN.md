@@ -431,3 +431,14 @@ Important:
 - Runtime DB secret creation: No.
 - Production secret creation: No.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_AND_SECRET_CREATE = YES`.
+
+## N38-B6 Staging Runtime DB Secret Follow-up
+
+- Runtime DB user/secret handoff report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_REPORT.md`.
+- Dedicated staging runtime DB secret container created: Yes.
+- Runtime secret version added: No.
+- Runtime DB login user created: No.
+- Secret value, DB URL, and password recorded: No.
+- Application identity secretAccessor grant: No.
+- Production secret creation remains No-Go.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.

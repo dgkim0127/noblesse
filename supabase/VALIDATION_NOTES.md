@@ -1864,3 +1864,19 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase deploy or `/api` rewrite: No.
 - Production data mutation: No.
 - Conclusion: Staging runtime privilege hardening is Go; next gate is `APPROVE_STAGING_RUNTIME_DB_USER_AND_SECRET_CREATE = YES`.
+
+## N38-B6 Follow-up - Staging runtime DB user secret handoff
+
+- Scope: Create staging application runtime DB login user, dedicated runtime DB secret, and secret-level application accessor after runtime privilege hardening.
+- Runtime secret container created: Yes.
+- Runtime secret version added: No.
+- Runtime DB login user created: No.
+- Failure stage: local temporary password generation before Cloud SQL user creation.
+- Password, DB URL, service account email, connection name, secret value, token, and private key recorded: No.
+- TEMP files removed: Yes.
+- DB login/query: No.
+- Runtime verifier execution: No.
+- Application/Firebase deploy: No.
+- Production mutation: No.
+- Result: Safe partial state; runtime credential handoff No-Go.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.

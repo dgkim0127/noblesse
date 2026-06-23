@@ -576,3 +576,13 @@ No-Go remains:
 - Migration ledger access: No.
 - Runtime DB user creation, runtime secret creation, runtime verifier, application deploy, Firebase deploy, and production rollout remain blocked.
 - Next gate is `APPROVE_STAGING_RUNTIME_DB_USER_AND_SECRET_CREATE = YES`.
+
+## N38-B6 Runtime DB User Secret Follow-up
+
+- Runtime DB user/secret handoff report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_REPORT.md`.
+- Runtime secret container created: Yes, with zero versions.
+- Runtime DB login user created: No.
+- Application runtime secretAccessor grant: No.
+- DB login/query and runtime verifier execution: No.
+- Application/Firebase deploy and production mutation: No.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
