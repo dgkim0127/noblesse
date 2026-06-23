@@ -633,3 +633,13 @@ Before implementation starts:
 - Runtime hardening Job execution failed with NonZeroExitCode.
 - Runtime DB user, runtime DB secret, verifier Job, Cloud Run application deploy, Firebase deploy, and production rollout remain blocked.
 - Backend readiness next requires `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS = YES`.
+
+## N38-B5R Runtime Privilege Recovery Diagnosis
+
+- Recovery diagnosis report: `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS.md`.
+- Read-only diagnostic runner and tests were added.
+- Diagnostic Job executed exactly once and succeeded.
+- Classification: B - database/schema ownership or runtime role setup failure.
+- Runtime group role exists: No.
+- Expected runtime privilege checks missing: 36 of 36.
+- Backend readiness next requires a hardener fix/rerun approval; application DB rollout remains blocked.

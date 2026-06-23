@@ -101,3 +101,20 @@
 ## Next Gate
 
 - `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS = YES`
+
+## N38-B5R Recovery Diagnosis Follow-up
+
+- Recovery diagnosis report: `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS.md`.
+- Diagnostic source commit: `065ae2931`.
+- Diagnostic Job created: Yes.
+- Diagnostic Job executed: Yes, exactly once.
+- Diagnostic Job result: Success.
+- Hardening Job re-executed: No.
+- Migration Job execution count remained 12.
+- RBAC verification Job execution count remained 1.
+- Hardening Job execution count remained 1.
+- Classification: B - database/schema ownership or runtime role setup failure.
+- Runtime group role exists: No.
+- Expected runtime privilege checks missing: 36 of 36.
+- Atomicity finding: the current hardener evaluates failed checks after commit; future recovery must validate before commit and rollback on failed checks.
+- Next gate: `APPROVE_STAGING_RUNTIME_PRIVILEGE_HARDENER_FIX_AND_RERUN = YES`.

@@ -769,3 +769,15 @@ Required before 32K:
 - Staging application DB rollout remains No-Go.
 - Production rollout remains No-Go.
 - Next gate: `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS = YES`.
+
+## N38-B5R Runtime Privilege Recovery Diagnosis Follow-up
+
+- Confirm `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS.md` before approving any hardening retry.
+- Read-only diagnostic Job executed exactly once and succeeded.
+- Classification: B - database/schema ownership or runtime role setup failure.
+- Runtime group role exists: No.
+- Expected runtime privilege checks missing: 36 of 36.
+- Current hardener atomicity issue: validation happens after commit; future recovery must validate before commit and rollback on failed checks.
+- Staging application DB rollout remains No-Go.
+- Production rollout remains No-Go.
+- Next gate: `APPROVE_STAGING_RUNTIME_PRIVILEGE_HARDENER_FIX_AND_RERUN = YES`.

@@ -547,3 +547,18 @@ No-Go remains:
 - The approved runtime hardening Job was executed exactly once but failed with NonZeroExitCode.
 - Runtime DB user, runtime secret, runtime privilege verifier Job, Cloud Run app deploy, Firebase deploy, and production rollout were not performed.
 - Next gate is `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS = YES`.
+
+## N38-B5R Runtime Privilege Recovery Diagnosis
+
+- Recovery diagnosis report: `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS.md`.
+- Diagnostic runner source commit: `065ae2931`.
+- Diagnostic Cloud Run Job ran read-only checks exactly once.
+- Migration Job execution count remained 12.
+- RBAC verification Job execution count remained 1.
+- Failed hardening Job execution count remained 1.
+- Classification: B - database/schema ownership or runtime role setup failure.
+- Runtime group role exists: No.
+- Expected runtime privilege checks missing: 36 of 36.
+- Atomicity issue identified: hardener validation currently happens after commit; recovery must validate before commit and rollback on failed checks.
+- Runtime DB user creation, runtime secret creation, Cloud Run application deploy, Firebase deploy, and production rollout remain blocked.
+- Next gate is `APPROVE_STAGING_RUNTIME_PRIVILEGE_HARDENER_FIX_AND_RERUN = YES`.

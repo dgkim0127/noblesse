@@ -124,3 +124,16 @@
 - Runtime secret created: No.
 - Application deploy: No.
 - Next gate: `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS = YES`.
+
+## N38-B5R Runtime Privilege Recovery Diagnosis Follow-up
+
+- Recovery diagnosis report: `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS.md`.
+- Separate read-only diagnostic Job executed exactly once.
+- Existing migration Job execution count remained 12.
+- Existing RBAC verification Job execution count remained 1.
+- Failed hardening Job execution count remained 1.
+- Classification: B - database/schema ownership or runtime role setup failure.
+- Runtime group role exists: No.
+- Expected runtime privilege checks missing: 36 of 36.
+- Runtime hardening retry, runtime user/secret creation, application deploy, Firebase deploy, and production rollout remain No-Go.
+- Next gate: `APPROVE_STAGING_RUNTIME_PRIVILEGE_HARDENER_FIX_AND_RERUN = YES`.

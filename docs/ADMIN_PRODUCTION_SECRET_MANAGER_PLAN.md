@@ -412,3 +412,13 @@ Important:
 - Secret payloads were not accessed/read or recorded.
 - Production secret creation remains No-Go.
 - Next gate: `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS = YES`.
+
+## N38-B5R Runtime Privilege Recovery Diagnosis Follow-up
+
+- Recovery diagnosis report: `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS.md`.
+- Diagnostic Job used the existing migration DB URL secret reference; secret payload was not accessed/read by the operator.
+- Runtime DB secret creation: No.
+- Production secret creation: No.
+- Classification: B - database/schema ownership or runtime role setup failure.
+- Runtime group role exists: No.
+- Next gate: `APPROVE_STAGING_RUNTIME_PRIVILEGE_HARDENER_FIX_AND_RERUN = YES`.

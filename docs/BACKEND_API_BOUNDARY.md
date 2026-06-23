@@ -565,3 +565,12 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - No frontend direct PostgreSQL access was added.
 - Cloud Run application service deploy remains No-Go because the hardening execution failed.
 - Runtime DB user/secret creation and role E2E remain blocked pending recovery diagnosis approval.
+
+## N38-B5R Runtime Privilege Recovery Diagnosis
+
+- Runtime privilege recovery diagnosis is documented in `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS.md`.
+- The diagnostic runner is an internal Cloud Run Job entrypoint, not a public HTTP route.
+- No Firebase Hosting `/api` rewrite was added.
+- No frontend direct PostgreSQL access was added.
+- No Cloud Run application service deploy happened.
+- Runtime hardening retry, runtime DB user/secret creation, and role E2E remain blocked pending a separate fix/rerun approval.

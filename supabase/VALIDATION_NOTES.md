@@ -1807,3 +1807,28 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase deploy or `/api` rewrite: No.
 - Production data mutation: No.
 - Conclusion: Runtime privilege hardening is No-Go; next gate is `APPROVE_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS = YES`.
+
+## N38-B5R Runtime Privilege Recovery Diagnosis Follow-up
+
+- Date: 2026-06-23
+- Change: Added `docs/ADMIN_STAGING_DB_RUNTIME_PRIVILEGE_RECOVERY_DIAGNOSIS.md`.
+- Scope: Read-only staging runtime privilege recovery diagnosis after failed hardening Job.
+- Diagnostic code commit: `065ae2931`.
+- Diagnostic Job execute command run: Yes, exactly once.
+- Diagnostic Job succeeded: Yes.
+- Classification: B - database/schema ownership or runtime role setup failure.
+- Runtime group role exists: No.
+- Expected runtime privilege checks missing: 36 of 36.
+- Migration Job execution count remained 12.
+- RBAC verification Job execution count remained 1.
+- Failed hardening Job execution count remained 1.
+- Secret value access/read by operator: No.
+- DB connection/psql executed by operator: No.
+- DB mutation: No.
+- Hardening retry: No.
+- Runtime DB user created: No.
+- Runtime DB secret created: No.
+- Cloud Run application deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Production data mutation: No.
+- Conclusion: Recovery diagnosis is Go; next gate is `APPROVE_STAGING_RUNTIME_PRIVILEGE_HARDENER_FIX_AND_RERUN = YES`.
