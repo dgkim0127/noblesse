@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { ClipboardList, Headphones, Heart, Mail } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
+import { mockProducts } from '../data/catalog'
 import { formatMoney } from '../utils/commerce'
 import { useLocalePath } from '../utils/locale'
 import { getLocalizedProductAlt, getLocalizedProductName } from '../utils/locale'
@@ -971,9 +972,11 @@ function HomeProductCard({ product, index, variant = 'default' }) {
 }
 
 function ProductSection({ products, sectionId, title, note }) {
-  if (products.length === 0) return null
   const [activeTab, setActiveTab] = useState(0)
   const [tabMotionKey, setTabMotionKey] = useState(0)
+
+  if (products.length === 0) return null
+
   const sectionSubtabs = homeSectionSubtabs[sectionId] ?? []
   const sectionTabFilters = homeSectionTabFilters[sectionId] ?? []
   const viewAll = homeSectionViewAll[sectionId]
@@ -1113,7 +1116,8 @@ export function HomePage() {
   const { isApproved, products } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const copy = homeCopy[locale] ?? homeCopy.kr
-  const homeProducts = products.filter(isAllowedHomeProduct)
+  const homeSourceProducts = products.length > 0 ? products : mockProducts
+  const homeProducts = homeSourceProducts.filter(isAllowedHomeProduct)
   const newProducts = _fillHomeSectionProducts(homeProducts.filter((product) => product.isNew), homeProducts)
   const weeklyProducts = _fillHomeSectionProducts(homeProducts.filter((product) => product.isBest), homeProducts)
   const piercingCatalogProducts = _fillHomeSectionProducts(
