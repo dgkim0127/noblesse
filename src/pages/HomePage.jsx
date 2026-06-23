@@ -879,7 +879,7 @@ const buyerConceptPanels = [
 const getWeeklyDemand = (index) => weeklyDemandSamples[index % weeklyDemandSamples.length]
 
 function HomeProductCard({ product, index, variant = 'default' }) {
-  const { addInquiryItem, approvedPrice, buyer, getPrice, isApproved, viewerState } = useCommerce()
+  const { addInquiryItem, approvedPrice, getPrice, isApproved, viewerState } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const [isFavorite, setIsFavorite] = useState(false)
   const [favoriteNotice, setFavoriteNotice] = useState('')
@@ -893,9 +893,10 @@ function HomeProductCard({ product, index, variant = 'default' }) {
   ].filter((src) => src && !src.includes('cdn.example.com'))
   const fallbackImage = homeShowcasePanels[index % homeShowcasePanels.length]?.image
   const cardImageSources = imageSources.length > 0 ? imageSources : [fallbackImage].filter(Boolean)
+  const unavailablePriceLabel = { kr: '가격 미등록', en: 'Price unavailable', jp: '価格未登録', cn: '价格未登记' }[locale] ?? 'Price unavailable'
   const displayPrice = isApproved && price
-    ? formatMoney(approvedPrice(product.productId), buyer.currency)
-    : '승인 후 가격 확인 가능'
+    ? formatMoney(approvedPrice(product.productId), price.currency)
+    : isApproved ? unavailablePriceLabel : '승인 후 가격 확인 가능'
   const statusLabel = product.isNew ? 'NEW' : product.isBest ? 'BEST' : 'B2B'
   const weeklyDemand = variant === 'weekly-pick' ? getWeeklyDemand(index) : null
 

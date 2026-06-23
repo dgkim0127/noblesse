@@ -1,3 +1,5 @@
+import { getDisplayCurrency, isValidMarketCurrencyPair, marketCurrency, supportedMarkets } from '../config/currency.js'
+
 export const guestProfile = {
   uid: '',
   email: '',
@@ -25,7 +27,18 @@ export const guestProfile = {
   approvedBy: null,
 }
 
-const allowedMarkets = ['KR', 'JP', 'US', 'GLOBAL']
+const allowedMarkets = supportedMarkets
+
+export const getDiscountedPrice = (price, discountRate) => {
+  if (!price) return null
+  return Math.round(price.wholesalePrice * (1 - (Number(discountRate) || 0) / 100))
+}
+
+const findExactPrice = (prices, matcher) => (prices || []).find((price) => (
+  matcher(price)
+  && price.visibleTo === 'approved_only'
+  && price.isActive === true
+)) ?? null
 
 export const deriveLegacyBuyerStatus = (profile = {}) => {
   if (profile.accountStatus === 'blocked') return 'blocked'
@@ -140,23 +153,73 @@ export const getBuyerAccessFeatures = (viewerState, profile) => {
 export const getMarketPrice = (productPrices, productId, market, isApproved) => {
   if (!isApproved || !allowedMarkets.includes(market)) return null
 
-  return productPrices.find((price) => (
+  return findExactPrice(productPrices, (price) => (
     price.productId === productId
     && price.market === market
-    && price.visibleTo === 'approved_only'
-    && price.isActive === true
-  )) ?? null
+  ))
+}
+
+export const selectProductPrice = ({ prices, viewer, locale, productId } = {}) => {
+  const isApproved = isApprovedBuyer(viewer) || isAdmin(viewer)
+  const displayCurrency = getDisplayCurrency({ viewer, locale })
+
+  if (!isApproved) {
+    return {
+      displayCurrency,
+      isAvailable: false,
+      price: null,
+      reason: 'restricted',
+    }
+  }
+
+  const scopedPrices = productId
+    ? (prices || []).filter((price) => price.productId === productId)
+    : (prices || [])
+  const byCurrency = findExactPrice(
+    [...scopedPrices].sort((left, right) => (left.market === viewer?.assignedMarket ? 0 : 1) - (right.market === viewer?.assignedMarket ? 0 : 1)),
+    (price) => price.currency === displayCurrency
+  )
+  if (byCurrency) {
+    return {
+      displayCurrency: byCurrency.currency,
+      isAvailable: true,
+      price: byCurrency,
+      reason: 'currency',
+    }
+  }
+
+  const assignedMarket = viewer?.assignedMarket
+  const assignedCurrency = marketCurrency[assignedMarket]
+  if (assignedMarket && assignedCurrency) {
+    const byMarket = findExactPrice(scopedPrices, (price) => (
+      price.market === assignedMarket
+      && isValidMarketCurrencyPair(price.market, price.currency)
+    ))
+    if (byMarket) {
+      return {
+        displayCurrency: byMarket.currency,
+        isAvailable: true,
+        price: byMarket,
+        reason: 'market',
+      }
+    }
+  }
+
+  return {
+    displayCurrency,
+    isAvailable: false,
+    price: null,
+    reason: 'unavailable',
+  }
 }
 
 export const getApprovedBuyerPrice = (productPrices, productId, market, discountRate, isApproved) => {
   const price = getMarketPrice(productPrices, productId, market, isApproved)
-  if (!price) return null
-
-  return Math.round(price.wholesalePrice * (1 - (Number(discountRate) || 0) / 100))
+  return getDiscountedPrice(price, discountRate)
 }
 
-export const getPriceForBuyer = (productPrices, productId, buyer, isApproved) => (
-  getMarketPrice(productPrices, productId, buyer?.assignedMarket, isApproved)
+export const getPriceForBuyer = (productPrices, productId, buyer, _isApproved) => (
+  selectProductPrice({ prices: productPrices, viewer: buyer, productId }).price
 )
 
 export const normalizeQuantity = (rawQuantity, moq) => {
@@ -177,7 +240,7 @@ export const isSameInquiryItem = (item, productId, option = {}) => getInquiryIte
 export const buildInquiryRows = (inquiryItems, products, buyer, isApproved, productPrices) => inquiryItems.map((item) => {
   const product = products.find((candidate) => candidate.productId === item.productId)
   const price = getPriceForBuyer(productPrices, item.productId, buyer, isApproved)
-  const priceSnapshot = getApprovedBuyerPrice(productPrices, item.productId, buyer?.assignedMarket, buyer?.discountRate, isApproved)
+  const priceSnapshot = getDiscountedPrice(price, buyer?.discountRate)
   const option = getDefaultOption(product, item)
 
   return product && price && priceSnapshot !== null ? {
@@ -192,6 +255,8 @@ export const buildInquiryRows = (inquiryItems, products, buyer, isApproved, prod
     color: option.color,
     size: option.size,
     moq: price.moq,
+    currency: price.currency,
+    market: price.market,
     priceSnapshot,
     subtotal: priceSnapshot * item.quantity,
     tone: product.tone,
@@ -209,7 +274,7 @@ export const buildInquirySnapshot = ({ inquiryRows, buyer, requestMemo, inquiryI
     buyerCompanyName: buyer.companyName,
     buyerCountry: buyer.country,
     buyerLanguage: buyer.preferredLanguage,
-    currency: buyer.currency,
+    currency: inquiryRows[0]?.currency || buyer.currency,
     status: 'requested',
     items: inquiryRows.map((row) => ({
       productId: row.productId,

@@ -8,9 +8,9 @@ import {
   buildInquiryRows,
   buildInquirySnapshot,
   guestProfile,
-  getApprovedBuyerPrice,
   getDefaultOption,
   getBuyerAccessFeatures,
+  getDiscountedPrice,
   getPriceForBuyer,
   getViewerStateFromProfile,
   isApprovedBuyer,
@@ -179,8 +179,8 @@ export function CommerceProvider({ children }) {
   const getPrice = useCallback((productId) => getPriceForBuyer(productPrices, productId, buyer, isApproved), [buyer, isApproved, productPrices])
 
   const approvedPrice = useCallback((productId) => (
-    getApprovedBuyerPrice(productPrices, productId, buyer?.assignedMarket, buyer?.discountRate, isApproved)
-  ), [buyer?.assignedMarket, buyer?.discountRate, isApproved, productPrices])
+    getDiscountedPrice(getPriceForBuyer(productPrices, productId, buyer, isApproved), buyer?.discountRate)
+  ), [buyer, isApproved, productPrices])
 
   const inquiryRows = useMemo(() => buildInquiryRows(inquiryItems, products, buyer, isApproved, productPrices), [buyer, inquiryItems, isApproved, productPrices, products])
   const estimatedTotal = inquiryRows.reduce((sum, row) => sum + row.subtotal, 0)

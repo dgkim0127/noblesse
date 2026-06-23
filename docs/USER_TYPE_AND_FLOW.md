@@ -38,7 +38,7 @@ Firestore user documents use a separate role/status model.
 | --- | --- | --- |
 | `role` | `buyer`, `admin` | `guest` is not a Firestore role |
 | `status` | `pending`, `approved`, `blocked` | Buyer Approval lifecycle |
-| `assignedMarket` | `KR`, `JP`, `US`, `GLOBAL` | Used for market-specific Buyer pricing |
+| `assignedMarket` | `KR`, `JP`, `US`, `CN`, `GLOBAL` | Used for market-specific Buyer pricing |
 
 ## Buyer Access Rules
 

@@ -182,10 +182,14 @@ export const mockProducts = productSeeds.map(([nameEn, nameKo, nameJa, categoryI
 })
 
 const markets = [
+  { market: 'KR', currency: 'KRW', multiplier: 10, minOrderAmount: 300000 },
   { market: 'JP', currency: 'JPY', multiplier: 1, minOrderAmount: 30000 },
   { market: 'US', currency: 'USD', multiplier: 0.008, minOrderAmount: 250 },
+  { market: 'CN', currency: 'CNY', multiplier: 0.058, minOrderAmount: 1800 },
   { market: 'GLOBAL', currency: 'USD', multiplier: 0.009, minOrderAmount: 300 },
 ]
+
+const zeroDecimalCurrencies = new Set(['KRW', 'JPY'])
 
 export const mockProductPrices = mockProducts.flatMap((product, index) => {
   const basePrice = 1100 + index * 165
@@ -193,8 +197,8 @@ export const mockProductPrices = mockProducts.flatMap((product, index) => {
     productId: product.productId,
     market,
     currency,
-    wholesalePrice: currency === 'JPY' ? basePrice : Number((basePrice * multiplier).toFixed(2)),
-    retailPrice: currency === 'JPY' ? basePrice * 3 : Number((basePrice * multiplier * 3).toFixed(2)),
+    wholesalePrice: zeroDecimalCurrencies.has(currency) ? Math.round(basePrice * multiplier) : Number((basePrice * multiplier).toFixed(2)),
+    retailPrice: zeroDecimalCurrencies.has(currency) ? Math.round(basePrice * multiplier * 3) : Number((basePrice * multiplier * 3).toFixed(2)),
     moq: product.moqDefault,
     minOrderAmount,
     visibleTo: 'approved_only',

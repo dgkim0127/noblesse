@@ -27,6 +27,8 @@ function mapItem(row) {
     size: row.size,
     quantity: row.quantity,
     moq: row.moq,
+    market: row.market,
+    currency: row.currency,
     priceSnapshot: toNumber(row.price_snapshot),
     subtotal: toNumber(row.subtotal)
   };
@@ -80,7 +82,7 @@ function createInquiryNumber() {
   return `INQ-${date}-${suffix}`;
 }
 
-async function loadPricedProduct(client, productCode, market) {
+async function loadPricedProduct(client, productCode, market, currency) {
   const result = await client.query(
     `
       select
@@ -101,12 +103,22 @@ async function loadPricedProduct(client, productCode, market) {
       join public.product_prices pp on pp.product_id = p.id
       where p.code = $1
         and p.is_visible = true
-        and pp.market = $2
+        and (
+          pp.currency = $3
+          or pp.market = $2
+        )
         and pp.visible_to = 'approved_only'
         and pp.is_active = true
+      order by
+        case
+          when pp.currency = $3 and pp.market = $2 then 0
+          when pp.currency = $3 then 1
+          when pp.market = $2 then 2
+          else 3
+        end
       limit 1
     `,
-    [productCode, market]
+    [productCode, market, currency]
   );
   return result.rows[0] || null;
 }
@@ -131,12 +143,23 @@ export function createBuyerInquiryQueries(pool) {
           from public.product_prices pp
           join public.products p on p.id = pp.product_id
           where p.is_visible = true
-            and pp.market = $1
+            and (
+              pp.currency = $2
+              or pp.market = $1
+            )
             and pp.visible_to = 'approved_only'
             and pp.is_active = true
-          order by p.sort_order asc, p.created_at desc
+          order by
+            case
+              when pp.currency = $2 and pp.market = $1 then 0
+              when pp.currency = $2 then 1
+              when pp.market = $1 then 2
+              else 3
+            end,
+            p.sort_order asc,
+            p.created_at desc
         `,
-        [viewer.assignedMarket]
+        [viewer.assignedMarket, viewer.currency]
       );
       return result.rows.map(mapProductPrice);
     },
@@ -173,6 +196,8 @@ export function createBuyerInquiryQueries(pool) {
                   'size', ii.size,
                   'quantity', ii.quantity,
                   'moq', ii.moq,
+                  'market', i.market,
+                  'currency', i.currency,
                   'price_snapshot', ii.price_snapshot,
                   'subtotal', ii.subtotal
                 )
@@ -226,6 +251,8 @@ export function createBuyerInquiryQueries(pool) {
                   'size', ii.size,
                   'quantity', ii.quantity,
                   'moq', ii.moq,
+                  'market', i.market,
+                  'currency', i.currency,
                   'price_snapshot', ii.price_snapshot,
                   'subtotal', ii.subtotal
                 )
@@ -255,7 +282,7 @@ export function createBuyerInquiryQueries(pool) {
 
         const pricedItems = [];
         for (const item of input.items) {
-          const pricedProduct = await loadPricedProduct(client, item.productCode, viewer.assignedMarket);
+          const pricedProduct = await loadPricedProduct(client, item.productCode, viewer.assignedMarket, viewer.currency);
           if (!pricedProduct) {
             await client.query("rollback");
             return null;
@@ -278,6 +305,8 @@ export function createBuyerInquiryQueries(pool) {
             size: item.size || "",
             quantity,
             moq,
+            market: pricedProduct.market,
+            currency: pricedProduct.currency,
             priceSnapshot: unitPrice,
             subtotal
           });
@@ -318,8 +347,8 @@ export function createBuyerInquiryQueries(pool) {
           [
             createInquiryNumber(),
             viewer.buyerId,
-            viewer.assignedMarket,
-            viewer.currency,
+            pricedItems[0]?.market || viewer.assignedMarket,
+            pricedItems[0]?.currency || viewer.currency,
             totalItems,
             totalQuantity,
             estimatedTotal,

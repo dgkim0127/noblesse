@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
+import { getCurrencyInputStep, marketCurrency, supportedCurrencies, supportedMarkets } from '../../config/currency.js'
 import { AdminMoney, AdminPageHeader, AdminPagination, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { useAdminCopy } from './adminCopy'
 
-const marketTabs = ['ALL', 'JP', 'US', 'GLOBAL', 'KR']
+const marketTabs = ['ALL', 'KR', 'JP', 'US', 'CN', 'GLOBAL']
 const initialPriceForm = {
   productCode: '',
-  market: 'JP',
-  currency: 'JPY',
+  market: 'KR',
+  currency: 'KRW',
   wholesalePrice: '',
   retailPrice: '',
   moq: '1',
@@ -40,6 +41,7 @@ export function AdminPricesPage() {
 
   const prices = data?.prices || []
   const setField = (field, value) => setForm((current) => ({ ...current, [field]: value }))
+  const priceInputStep = getCurrencyInputStep(form.currency)
   const resetPage = (setter) => (value) => {
     setter(value)
     setOffset(0)
@@ -92,14 +94,14 @@ export function AdminPricesPage() {
       <label className="admin-search">{t.prices.productCode}<input value={form.productCode} onChange={(event) => setField('productCode', event.target.value)} placeholder="NB-001" required /></label>
       <label className="admin-search">{t.prices.market}<select value={form.market} onChange={(event) => {
         const nextMarket = event.target.value
-        setForm((current) => ({ ...current, market: nextMarket, currency: nextMarket === 'KR' ? 'KRW' : nextMarket === 'JP' ? 'JPY' : 'USD' }))
+        setForm((current) => ({ ...current, market: nextMarket, currency: marketCurrency[nextMarket] || 'USD' }))
       }}>
-        {marketTabs.filter((tab) => tab !== 'ALL').map((tab) => <option key={tab} value={tab}>{tab}</option>)}
+        {supportedMarkets.map((tab) => <option key={tab} value={tab}>{tab}</option>)}
       </select></label>
       <label className="admin-search">{t.prices.currency}<select value={form.currency} onChange={(event) => setField('currency', event.target.value)}>
-        {['KRW', 'JPY', 'USD'].map((currency) => <option key={currency} value={currency}>{currency}</option>)}
+        {supportedCurrencies.map((currency) => <option disabled={currency !== marketCurrency[form.market]} key={currency} value={currency}>{currency}</option>)}
       </select></label>
-      <label className="admin-search">{t.prices.wholesale}<input min="0" value={form.wholesalePrice} onChange={(event) => setField('wholesalePrice', event.target.value)} required type="number" /></label>
+      <label className="admin-search">{t.prices.wholesale}<input min="0" step={priceInputStep} value={form.wholesalePrice} onChange={(event) => setField('wholesalePrice', event.target.value)} required type="number" /></label>
       <label className="admin-search">{t.products.moq}<input min="1" value={form.moq} onChange={(event) => setField('moq', event.target.value)} required type="number" /></label>
       <label className="admin-check"><input checked={form.isActive} onChange={(event) => setField('isActive', event.target.checked)} type="checkbox" /> {t.common.active}</label>
       <button className="primary-action" type="submit">{t.prices.create}</button>
@@ -137,13 +139,6 @@ export function AdminPricesPage() {
                   type="button"
                 >
                   {price.isActive ? t.common.deactivate : t.common.activate}
-                </button>
-                <button
-                  disabled={savingPriceId === price.id}
-                  onClick={() => updatePrice(price.id, { wholesalePrice: Number(price.wholesalePrice || 0) + 1 }, t.prices.adjusted)}
-                  type="button"
-                >
-                  {t.common.adjustPlusOne}
                 </button>
               </div>
             </td>

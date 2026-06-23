@@ -57,6 +57,9 @@ test('unified catalog entry handles validation, conflicts, and protected errors'
   assert.match(page, /detectImageMime/)
   assert.match(page, /market: 'KR'/)
   assert.match(page, /currency: 'KRW'/)
+  assert.match(page, /supportedMarkets/)
+  assert.match(page, /supportedCurrencies/)
+  assert.match(page, /isValidMarketCurrencyPair/)
 })
 
 test('unified catalog entry tracks partial saves and retry state', () => {

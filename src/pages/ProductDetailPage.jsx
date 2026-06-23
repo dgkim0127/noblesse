@@ -32,6 +32,7 @@ const detailCopy = {
     lockGuest: '제품 정보, 소재, 옵션, MOQ를 확인한 뒤 거래처 문의를 남겨주세요.',
     material: '재질',
     memberPrice: '거래 조건',
+    unavailable: '가격 미등록',
     moq: 'MOQ',
     moqAfterReview: '확인 후 볼 수 있음',
     origin: '원산지',
@@ -69,6 +70,7 @@ const detailCopy = {
     lockGuest: 'Review product details, material, options, and MOQ, then send a trade inquiry.',
     material: 'Material',
     memberPrice: 'Approved trade terms',
+    unavailable: 'Price unavailable',
     moq: 'MOQ',
     moqAfterReview: 'Available after review',
     origin: 'Origin',
@@ -106,6 +108,7 @@ const detailCopy = {
     lockGuest: '商品情報、素材、オプション、最小数量を確認し、取引先お問い合わせを送信してください。',
     material: '素材',
     memberPrice: '取引条件',
+    unavailable: '価格未登録',
     moq: '最小数量',
     moqAfterReview: '確認後に表示',
     origin: '原産地',
@@ -143,6 +146,7 @@ const detailCopy = {
     lockGuest: '查看商品信息、材质、选项和最小数量后，请提交贸易咨询。',
     material: '材质',
     memberPrice: '交易条件',
+    unavailable: '价格未登记',
     moq: '最小数量',
     moqAfterReview: '确认后显示',
     origin: '产地',
@@ -192,7 +196,7 @@ function OptionButtons({ label, options, selected, onSelect }) {
 
 export function ProductDetailPage() {
   const { productId } = useParams()
-  const { addInquiryItem, approvedPrice, buyer, dataError, dataStatus, getPrice, isApproved, products, viewerState } = useCommerce()
+  const { addInquiryItem, approvedPrice, dataError, dataStatus, getPrice, isApproved, products, viewerState } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const product = products.find((item) => item.productId === productId)
   const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] ?? '')
@@ -253,8 +257,8 @@ export function ProductDetailPage() {
         {canUseTradeTerms ? <>
           <div className="detail-price">
             <small>{copy.memberPrice}</small>
-            <strong>{formatMoney(approvedPrice(product.productId), buyer.currency)}</strong>
-            <span>{copy.moq} {price.moq} / {copy.region(price.market)}</span>
+            <strong>{formatMoney(approvedPrice(product.productId), price.currency)}</strong>
+            <span>{copy.moq} {price.moq} / {copy.region(price.market)} · {price.currency}</span>
           </div>
           <OptionButtons label={copy.color} options={product.colors} selected={activeColor} onSelect={setSelectedColor} />
           <OptionButtons label={copy.size} options={product.sizes} selected={activeSize} onSelect={setSelectedSize} />
@@ -271,7 +275,7 @@ export function ProductDetailPage() {
           <p className="quote-note">{copy.quoteNote}</p>
         </> : <div className="approval-lock">
           <LockKeyhole size={19} />
-          <strong>{copy.lockTitle}</strong>
+          <strong>{isApproved ? copy.unavailable : copy.lockTitle}</strong>
           <span>{viewerState === 'pending' ? copy.lockPending : copy.lockGuest}</span>
           <Link className="secondary-action" to={toLocalePath(accessLink)}>{accessLabel}</Link>
         </div>}

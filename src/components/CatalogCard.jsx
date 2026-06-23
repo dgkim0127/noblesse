@@ -11,6 +11,7 @@ const cardCopy = {
     lockedButton: '거래처 문의 필요',
     minQty: 'MOQ',
     memberPrice: '거래 조건',
+    unavailable: '가격 미등록',
   },
   en: {
     add: 'Ask about this product',
@@ -18,6 +19,7 @@ const cardCopy = {
     lockedButton: 'Trade inquiry needed',
     minQty: 'Minimum qty',
     memberPrice: 'Trade terms',
+    unavailable: 'Price unavailable',
   },
   jp: {
     add: 'この商品を問い合わせる',
@@ -25,6 +27,7 @@ const cardCopy = {
     lockedButton: '取引先お問い合わせが必要',
     minQty: '最小数量',
     memberPrice: '取引条件',
+    unavailable: '価格未登録',
   },
   cn: {
     add: '咨询此商品',
@@ -32,11 +35,12 @@ const cardCopy = {
     lockedButton: '需要贸易咨询',
     minQty: '最小数量',
     memberPrice: '交易条件',
+    unavailable: '价格未登记',
   },
 }
 
 export function CatalogCard({ product }) {
-  const { addInquiryItem, approvedPrice, buyer, getPrice, isApproved } = useCommerce()
+  const { addInquiryItem, approvedPrice, getPrice, isApproved } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const price = getPrice(product.productId)
   const copy = cardCopy[locale] ?? cardCopy.kr
@@ -53,7 +57,7 @@ export function CatalogCard({ product }) {
       <small>{product.code}</small>
       <Link to={toLocalePath(`/products/${product.productId}`)}><h3>{productName}</h3></Link>
       <p>{product.material}</p>
-      {canUseTradeTerms ? <div className="approved-price"><strong>{formatMoney(approvedPrice(product.productId), buyer.currency)}</strong><span>{copy.minQty} {price.moq} / {copy.memberPrice}</span></div> : <div className="locked-price"><LockKeyhole size={14} />{copy.locked}</div>}
+      {canUseTradeTerms ? <div className="approved-price"><strong>{formatMoney(approvedPrice(product.productId), price.currency)}</strong><span>{copy.minQty} {price.moq} / {copy.memberPrice} · {price.currency}</span></div> : <div className="locked-price"><LockKeyhole size={14} />{isApproved ? copy.unavailable : copy.locked}</div>}
     </div>
     <button className="add-inquiry" type="button" disabled={!canUseTradeTerms} onClick={() => addInquiryItem(product.productId)}><Plus size={16} />{canUseTradeTerms ? copy.add : copy.lockedButton}</button>
   </article>

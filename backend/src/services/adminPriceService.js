@@ -1,5 +1,10 @@
 import { createPaginationMeta, parsePagination, slicePageRows } from "../utils/pagination.js";
 import {
+  CURRENCIES,
+  CURRENCY_BY_MARKET,
+  validateMarketCurrencyPair
+} from "../config/pricing.js";
+import {
   MARKETS,
   parseBooleanLike,
   parseOptionalEnum,
@@ -35,13 +40,6 @@ const priceWriteFields = [
   "isActive"
 ];
 
-const currenciesByMarket = {
-  KR: "KRW",
-  JP: "JPY",
-  US: "USD",
-  GLOBAL: "USD"
-};
-
 function parseMoney(value, fieldName, { required = false } = {}) {
   if (value === undefined || value === null || value === "") {
     if (required) throw validationError(`${fieldName} is required`);
@@ -69,10 +67,10 @@ function parseInteger(value, fieldName, { required = false, min = 1 } = {}) {
 function parseCurrency(value, market, { required = false } = {}) {
   const currency = parseOptionalString(value, { maxLength: 3 });
   if (!currency) {
-    if (required) return currenciesByMarket[market] || "USD";
+    if (required) return CURRENCY_BY_MARKET[market] || "USD";
     return undefined;
   }
-  if (!["KRW", "JPY", "USD"].includes(currency)) {
+  if (!CURRENCIES.includes(currency)) {
     throw validationError("Invalid currency");
   }
   return currency;
@@ -90,11 +88,19 @@ function parsePriceBody(body = {}, { partial = false } = {}) {
   if (partial && market !== undefined) {
     throw validationError("market cannot be changed");
   }
+  if (partial && safeBody.currency !== undefined) {
+    throw validationError("currency cannot be changed");
+  }
+
+  const currency = parseCurrency(safeBody.currency, market, { required: !partial });
+  if (market && currency && !validateMarketCurrencyPair(market, currency)) {
+    throw validationError("Invalid market/currency pair");
+  }
 
   const parsed = {
     productCode: partial ? undefined : parseRequiredString(safeBody.productCode, { fieldName: "productCode", maxLength: 80 }),
     market,
-    currency: parseCurrency(safeBody.currency, market, { required: !partial }),
+    currency,
     wholesalePrice: parseMoney(safeBody.wholesalePrice, "wholesalePrice", { required: !partial }),
     retailPrice: parseMoney(safeBody.retailPrice, "retailPrice"),
     moq: parseInteger(safeBody.moq, "moq", { required: !partial, min: 1 }),

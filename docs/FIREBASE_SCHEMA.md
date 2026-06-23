@@ -9,8 +9,8 @@ Version 1 remains mock-only. Live Firebase connection is intentionally deferred.
 - Store money as integer amounts in the document currency.
 - Store image URLs only. Image binary files belong in Firebase Storage.
 - Keep public product metadata separate from protected Buyer pricing.
-- Use uppercase markets: `KR`, `JP`, `US`, and `GLOBAL`.
-- Use `KRW`, `JPY`, and `USD` currency codes.
+- Use uppercase markets: `KR`, `JP`, `US`, `CN`, and `GLOBAL`.
+- Use `KRW`, `JPY`, `USD`, and `CNY` currency codes.
 
 ## Architecture Note
 
@@ -61,8 +61,8 @@ Use the Firebase Authentication UID: `users/{uid}`.
 | `businessNumber` | `string` | Tax or business identifier |
 | `role` | `string` | `buyer` or `admin` |
 | `status` | `string` | `pending`, `approved`, or `blocked` |
-| `assignedMarket` | `string` | `KR`, `JP`, `US`, or `GLOBAL` |
-| `currency` | `string` | `KRW`, `JPY`, or `USD` |
+| `assignedMarket` | `string` | `KR`, `JP`, `US`, `CN`, or `GLOBAL` |
+| `currency` | `string` | `KRW`, `JPY`, `USD`, or `CNY` |
 | `discountRate` | `number` | Buyer discount percent |
 | `minOrderAmount` | `number` | Minimum Request Quote amount |
 | `createdAt` | `timestamp` | Created time |
@@ -206,8 +206,8 @@ Use `{productId}_{market}`: `productPrices/NB-001_JP`.
 | Field | Type | Description |
 | --- | --- | --- |
 | `productId` | `string` | Related product |
-| `market` | `string` | `KR`, `JP`, `US`, or `GLOBAL` |
-| `currency` | `string` | `KRW`, `JPY`, or `USD` |
+| `market` | `string` | `KR`, `JP`, `US`, `CN`, or `GLOBAL` |
+| `currency` | `string` | `KRW`, `JPY`, `USD`, or `CNY` |
 | `wholesalePrice` | `number` | Base wholesale price |
 | `retailPrice` | `number` | Optional reference price |
 | `moq` | `number` | Market MOQ |
@@ -516,7 +516,7 @@ Use a stable file slug: `catalogFiles/{fileId}`.
 | `fileId` | `string` |
 | `titleKo`, `titleEn`, `titleJa` | `string` |
 | `fileUrl` | `string` |
-| `market` | `string` | `KR`, `JP`, `US`, or `GLOBAL` |
+| `market` | `string` | `KR`, `JP`, `US`, `CN`, or `GLOBAL` |
 | `priceIncluded` | `boolean` |
 | `visibleTo` | `string` | `public` or `approved_only` |
 | `uploadedAt` | `timestamp` |

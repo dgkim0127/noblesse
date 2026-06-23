@@ -83,13 +83,13 @@ export function RequestQuotePage() {
       </div>
       <div className="quote-section">
         <h3>거래처 정보</h3>
-        <dl><dt>회사명</dt><dd>{buyer.companyName}</dd><dt>담당자</dt><dd>{buyer.contactName}</dd><dt>지역</dt><dd>{buyer.assignedMarket}</dd><dt>통화</dt><dd>{buyer.currency}</dd></dl>
+        <dl><dt>회사명</dt><dd>{buyer.companyName}</dd><dt>담당자</dt><dd>{buyer.contactName}</dd><dt>지역</dt><dd>{buyer.assignedMarket}</dd><dt>통화</dt><dd>{inquiryRows[0]?.currency || buyer.currency}</dd></dl>
       </div>
       <div className="quote-section">
         <h3>견적 요약</h3>
-        <dl><dt>상품 수</dt><dd>{inquiryRows.length}</dd><dt>총 수량</dt><dd>{totalQuantity}</dd><dt>예상 합계</dt><dd>{formatMoney(estimatedTotal, buyer.currency)}</dd></dl>
+        <dl><dt>상품 수</dt><dd>{inquiryRows.length}</dd><dt>총 수량</dt><dd>{totalQuantity}</dd><dt>예상 합계</dt><dd>{formatMoney(estimatedTotal, inquiryRows[0]?.currency || buyer.currency)}</dd></dl>
       </div>
-      {inquiryRows.map((row) => <QuoteLine key={`${row.productId}-${row.color}-${row.size}`} row={row} currency={buyer.currency} />)}
+      {inquiryRows.map((row) => <QuoteLine key={`${row.productId}-${row.color}-${row.size}`} row={row} currency={row.currency || buyer.currency} />)}
       <textarea value={memo} onChange={(event) => setMemo(event.target.value)} placeholder="요청 메모" />
       {submitError && <p className="auth-notice" role="alert">{submitError}</p>}
       <button className="primary-action" type="button" disabled={submitStatus === 'submitting'} onClick={submit}>{submitStatus === 'submitting' ? '전송 중...' : '견적 문의 보내기'}</button>

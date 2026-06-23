@@ -72,8 +72,8 @@ Confirm before execution:
 - Table creation order matches foreign key dependencies.
 - Foreign key dependency order is valid.
 - Check constraint values match the current application contract.
-- Market values are `KR`, `JP`, `US`, `GLOBAL`.
-- Currency values are `KRW`, `JPY`, `USD`.
+- Market values are `KR`, `JP`, `US`, `CN`, `GLOBAL`.
+- Currency values are `KRW`, `JPY`, `USD`, `CNY`.
 - Inquiry statuses are `requested`, `checking`, `quoted`, `confirmed`, `cancelled`.
 - Admin Quote statuses are `draft`, `sent`, `accepted`, `cancelled`.
 - Agreement keys are:

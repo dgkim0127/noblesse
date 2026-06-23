@@ -1,2 +1,3 @@
-export const formatMoney = (value, currency = 'USD') =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value ?? 0)
+import { formatCurrency } from '../config/currency.js'
+
+export const formatMoney = (value, currency = 'USD', options = {}) => formatCurrency(value, currency, options)

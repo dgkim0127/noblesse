@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { AdminLink, AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { useAdminCopy } from './adminCopy'
+import { formatCurrency, getCurrencyInputStep, isValidMarketCurrencyPair, marketCurrency, supportedCurrencies, supportedMarkets } from '../../config/currency.js'
 import { useLocalePath } from '../../utils/locale'
 
 const maxImageCount = 8
@@ -115,12 +116,7 @@ function parseOptionalNonnegativeMoney(value) {
 function formatDisplayAmount(value, currency) {
   const number = Number(value)
   if (!Number.isFinite(number)) return '-'
-  return new Intl.NumberFormat('ko-KR', {
-    maximumFractionDigits: 2,
-    minimumFractionDigits: Number.isInteger(number) ? 0 : 2,
-    style: 'currency',
-    currency: currency || 'KRW',
-  }).format(number)
+  return formatCurrency(number, currency || 'KRW', { showCode: true })
 }
 
 function detectImageMime(bytes) {
@@ -325,6 +321,7 @@ export function AdminCatalogEntryPage() {
     const retailPrice = parseOptionalPositiveMoney(priceForm.retailPrice)
     if (!priceForm.market) errors.market = t.validation.marketRequired
     if (!priceForm.currency) errors.currency = t.validation.currencyRequired
+    if (priceForm.market && priceForm.currency && !isValidMarketCurrencyPair(priceForm.market, priceForm.currency)) errors.currency = t.validation.currencyRequired
     if (wholesalePrice == null) errors.wholesalePrice = t.validation.priceRequired
     if (priceForm.retailPrice !== '' && retailPrice == null) errors.retailPrice = t.validation.retailPriceInvalid
     if (Number(priceForm.moq || 0) < 1) errors.moq = t.validation.moqRequired
@@ -560,6 +557,7 @@ export function AdminCatalogEntryPage() {
   const categorySummary = selectedCategory ? getCategoryName(selectedCategory) : mode === 'new' ? categoryForm.nameEn || categoryForm.categoryId || '-' : '-'
   const saveButtonLabel = isSaving ? t.saving : Object.values(saveStatus).includes('error') ? t.retryFailed : t.save
   const saveDisabled = isSaving || (!images.length && !uploadedImages.length)
+  const priceInputStep = getCurrencyInputStep(priceForm.currency)
 
   return <>
     <AdminPageHeader
@@ -693,23 +691,23 @@ export function AdminCatalogEntryPage() {
           <div className="catalog-entry-grid">
             <label className="admin-search">{t.price.market}<select value={priceForm.market} onChange={(event) => {
               const market = event.target.value
-              setPriceForm((current) => ({ ...current, market, currency: market === 'KR' ? 'KRW' : market === 'JP' ? 'JPY' : 'USD' }))
+              setPriceForm((current) => ({ ...current, market, currency: marketCurrency[market] || 'USD' }))
             }}>
-              {['KR', 'JP', 'US', 'GLOBAL'].map((market) => <option key={market} value={market}>{market}</option>)}
+              {supportedMarkets.map((market) => <option key={market} value={market}>{market}</option>)}
             </select></label>
             <label className="admin-search">{t.price.currency}<select value={priceForm.currency} onChange={(event) => setPriceField('currency', event.target.value)}>
-              {['KRW', 'JPY', 'USD'].map((currency) => <option key={currency} value={currency}>{currency}</option>)}
+              {supportedCurrencies.map((currency) => <option disabled={currency !== marketCurrency[priceForm.market]} key={currency} value={currency}>{currency}</option>)}
             </select></label>
-            <label className="admin-search">{t.price.wholesale}<input inputMode="decimal" value={priceForm.wholesalePrice} onChange={(event) => setPriceField('wholesalePrice', event.target.value)} placeholder="12000" />
+            <label className="admin-search">{t.price.wholesale}<input inputMode="decimal" step={priceInputStep} value={priceForm.wholesalePrice} onChange={(event) => setPriceField('wholesalePrice', event.target.value)} placeholder="12000" />
               {fieldErrors.wholesalePrice && <small className="admin-field-error">{fieldErrors.wholesalePrice}</small>}
             </label>
-            <label className="admin-search">{t.price.retail}<input inputMode="decimal" value={priceForm.retailPrice} onChange={(event) => setPriceField('retailPrice', event.target.value)} placeholder="15000" />
+            <label className="admin-search">{t.price.retail}<input inputMode="decimal" step={priceInputStep} value={priceForm.retailPrice} onChange={(event) => setPriceField('retailPrice', event.target.value)} placeholder="15000" />
               {fieldErrors.retailPrice && <small className="admin-field-error">{fieldErrors.retailPrice}</small>}
             </label>
             <label className="admin-search">{t.price.moq}<input min="1" value={priceForm.moq} onChange={(event) => setPriceField('moq', event.target.value)} type="number" />
               {fieldErrors.moq && <small className="admin-field-error">{fieldErrors.moq}</small>}
             </label>
-            <label className="admin-search">{t.price.minOrderAmount}<input inputMode="decimal" value={priceForm.minOrderAmount} onChange={(event) => setPriceField('minOrderAmount', event.target.value)} placeholder="0" />
+            <label className="admin-search">{t.price.minOrderAmount}<input inputMode="decimal" step={priceInputStep} value={priceForm.minOrderAmount} onChange={(event) => setPriceField('minOrderAmount', event.target.value)} placeholder="0" />
               {fieldErrors.minOrderAmount && <small className="admin-field-error">{fieldErrors.minOrderAmount}</small>}
             </label>
             <label className="admin-check"><input checked={priceForm.isActive} onChange={(event) => setPriceField('isActive', event.target.checked)} type="checkbox" /> {t.price.active}</label>

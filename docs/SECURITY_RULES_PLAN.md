@@ -14,7 +14,7 @@ Version 1 remains mock-only. Do not deploy production rules or connect Firebase 
 
 Persisted user documents use `role: "buyer" | "admin"` and `status: "pending" | "approved" | "blocked"`.
 The `guest` state exists only when no authenticated Buyer document is available.
-Firestore market values and `users.assignedMarket` use uppercase enum values: `KR`, `JP`, `US`, and `GLOBAL`.
+Firestore market values and `users.assignedMarket` use uppercase enum values: `KR`, `JP`, `US`, `CN`, and `GLOBAL`.
 Storage folder segments remain lowercase paths such as `/catalogs/jp/**` and `/catalogs/us/**`.
 
 ## Firestore Access Table

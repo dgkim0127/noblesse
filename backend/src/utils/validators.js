@@ -1,8 +1,8 @@
 import { validationError as createValidationError } from "./errors.js";
+export { MARKETS } from "../config/pricing.js";
 
 export const INQUIRY_STATUSES = ["requested", "checking", "quoted", "confirmed", "cancelled"];
 export const USER_STATUSES = ["pending", "approved", "blocked"];
-export const MARKETS = ["KR", "JP", "US", "GLOBAL"];
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 

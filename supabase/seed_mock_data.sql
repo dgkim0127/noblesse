@@ -259,15 +259,31 @@ select p.id, price.market, price.currency, price.wholesale_price, price.retail_p
 from public.products p
 join (
   values
+    ('NB-001', 'KR', 'KRW', 11000::numeric, 36000::numeric, 20, 300000::numeric),
     ('NB-001', 'JP', 'JPY', 1100::numeric, 3600::numeric, 20, 0::numeric),
     ('NB-001', 'US', 'USD', 8.50::numeric, 24.00::numeric, 20, 0::numeric),
+    ('NB-001', 'CN', 'CNY', 63.80::numeric, 208.80::numeric, 20, 1800::numeric),
     ('NB-001', 'GLOBAL', 'USD', 8.00::numeric, 22.00::numeric, 20, 0::numeric),
+    ('NB-002', 'KR', 'KRW', 14000::numeric, 42000::numeric, 20, 300000::numeric),
     ('NB-002', 'JP', 'JPY', 1400::numeric, 4200::numeric, 20, 0::numeric),
     ('NB-002', 'US', 'USD', 10.00::numeric, 28.00::numeric, 20, 0::numeric),
+    ('NB-002', 'CN', 'CNY', 81.20::numeric, 243.60::numeric, 20, 1800::numeric),
     ('NB-002', 'GLOBAL', 'USD', 9.50::numeric, 26.00::numeric, 20, 0::numeric),
+    ('NB-003', 'KR', 'KRW', 18000::numeric, 52000::numeric, 12, 300000::numeric),
     ('NB-003', 'JP', 'JPY', 1800::numeric, 5200::numeric, 12, 0::numeric),
+    ('NB-003', 'US', 'USD', 13.60::numeric, 39.00::numeric, 12, 250::numeric),
+    ('NB-003', 'CN', 'CNY', 104.40::numeric, 301.60::numeric, 12, 1800::numeric),
+    ('NB-003', 'GLOBAL', 'USD', 12.90::numeric, 37.00::numeric, 12, 300::numeric),
+    ('NB-004', 'KR', 'KRW', 32000::numeric, 88000::numeric, 10, 300000::numeric),
     ('NB-004', 'JP', 'JPY', 3200::numeric, 8800::numeric, 10, 0::numeric),
-    ('NB-005', 'JP', 'JPY', 1600::numeric, 4600::numeric, 20, 0::numeric)
+    ('NB-004', 'US', 'USD', 24.20::numeric, 66.00::numeric, 10, 250::numeric),
+    ('NB-004', 'CN', 'CNY', 185.60::numeric, 510.40::numeric, 10, 1800::numeric),
+    ('NB-004', 'GLOBAL', 'USD', 23.00::numeric, 63.00::numeric, 10, 300::numeric),
+    ('NB-005', 'KR', 'KRW', 16000::numeric, 46000::numeric, 20, 300000::numeric),
+    ('NB-005', 'JP', 'JPY', 1600::numeric, 4600::numeric, 20, 0::numeric),
+    ('NB-005', 'US', 'USD', 12.10::numeric, 34.50::numeric, 20, 250::numeric),
+    ('NB-005', 'CN', 'CNY', 92.80::numeric, 266.80::numeric, 20, 1800::numeric),
+    ('NB-005', 'GLOBAL', 'USD', 11.50::numeric, 33.00::numeric, 20, 300::numeric)
 ) as price(code, market, currency, wholesale_price, retail_price, moq, min_order_amount) on price.code = p.code
 on conflict (product_id, market) do update set
   currency = excluded.currency,

@@ -80,12 +80,12 @@ test("GET /api/admin/prices returns price rows", async () => {
 });
 
 test("GET /api/admin/prices allows market and active filters", async () => {
-  const response = await request(createAppWithPrices(), "/api/admin/prices?market=JP&active=false", {
+  const response = await request(createAppWithPrices(), "/api/admin/prices?market=CN&active=false", {
     headers: { authorization: "Bearer admin-token" }
   });
 
   assert.equal(response.status, 200);
-  assert.equal(response.body.data.prices[0].market, "JP");
+  assert.equal(response.body.data.prices[0].market, "CN");
   assert.equal(response.body.data.prices[0].isActive, false);
 });
 
@@ -117,6 +117,49 @@ test("POST /api/admin/prices creates price row", async () => {
   assert.equal(response.status, 201);
   assert.equal(response.body.data.price.productCode, "NB-001");
   assert.equal(response.body.data.auditLogId, "audit-create-1");
+});
+
+test("POST /api/admin/prices creates CNY price row", async () => {
+  const response = await request(createAppWithPrices(), "/api/admin/prices", {
+    method: "POST",
+    headers: {
+      authorization: "Bearer admin-token",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      productCode: "NB-001",
+      market: "CN",
+      currency: "CNY",
+      wholesalePrice: 58.2,
+      retailPrice: 89.9,
+      moq: 20
+    })
+  });
+
+  assert.equal(response.status, 201);
+  assert.equal(response.body.data.price.market, "CN");
+  assert.equal(response.body.data.price.currency, "CNY");
+});
+
+test("POST /api/admin/prices rejects invalid market currency pairs", async () => {
+  for (const body of [
+    { productCode: "NB-001", market: "CN", currency: "JPY", wholesalePrice: 1200, moq: 20 },
+    { productCode: "NB-001", market: "JP", currency: "CNY", wholesalePrice: 58.2, moq: 20 },
+    { productCode: "NB-001", market: "KR", currency: "USD", wholesalePrice: 9.2, moq: 20 },
+    { productCode: "NB-001", market: "US", currency: "KRW", wholesalePrice: 12000, moq: 20 }
+  ]) {
+    const response = await request(createAppWithPrices(), "/api/admin/prices", {
+      method: "POST",
+      headers: {
+        authorization: "Bearer admin-token",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.error.code, "VALIDATION_ERROR");
+  }
 });
 
 test("POST /api/admin/prices rejects unknown product code", async () => {
@@ -179,7 +222,7 @@ test("PATCH /api/admin/prices/:priceId updates price row", async () => {
   assert.equal(response.body.data.auditLogId, "audit-update-1");
 });
 
-test("PATCH /api/admin/prices/:priceId rejects product and market mutation", async () => {
+test("PATCH /api/admin/prices/:priceId rejects product market and currency mutation", async () => {
   const response = await request(
     createAppWithPrices(),
     "/api/admin/prices/11111111-1111-4111-8111-111111111111",
@@ -189,7 +232,7 @@ test("PATCH /api/admin/prices/:priceId rejects product and market mutation", asy
         authorization: "Bearer admin-token",
         "content-type": "application/json"
       },
-      body: JSON.stringify({ productCode: "NB-002", market: "US" })
+      body: JSON.stringify({ productCode: "NB-002", market: "US", currency: "USD" })
     }
   );
 

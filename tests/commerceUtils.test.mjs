@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { getViewerStateFromProfile, guestProfile, normalizeBuyerProfile } from '../src/commerce/commerceUtils.js'
+import { getViewerStateFromProfile, guestProfile, normalizeBuyerProfile, selectProductPrice } from '../src/commerce/commerceUtils.js'
 
 test('viewer state is derived from backend buyer/admin profile', () => {
   assert.equal(getViewerStateFromProfile({ role: 'admin', status: 'approved' }), 'admin')
@@ -27,4 +27,34 @@ test('buyer profile normalization keeps guest defaults and maps userId', () => {
   assert.equal(profile.status, 'approved')
   assert.equal(profile.accountStatus, 'active')
   assert.equal(profile.verificationStatus, 'approved')
+})
+
+test('approved buyer currency exact price wins over locale and market fallback', () => {
+  const prices = [
+    { productId: 'NB-001', market: 'JP', currency: 'JPY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 1200 },
+    { productId: 'NB-001', market: 'CN', currency: 'CNY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 58.2 },
+  ]
+  const selected = selectProductPrice({
+    prices,
+    productId: 'NB-001',
+    locale: 'kr',
+    viewer: { role: 'buyer', accountStatus: 'active', verificationStatus: 'approved', assignedMarket: 'JP', currency: 'CNY' },
+  })
+
+  assert.equal(selected.isAvailable, true)
+  assert.equal(selected.price.market, 'CN')
+  assert.equal(selected.displayCurrency, 'CNY')
+})
+
+test('missing exact price is unavailable instead of using another market amount', () => {
+  const selected = selectProductPrice({
+    prices: [{ productId: 'NB-001', market: 'US', currency: 'USD', visibleTo: 'approved_only', isActive: true, wholesalePrice: 10 }],
+    productId: 'NB-001',
+    locale: 'cn',
+    viewer: { role: 'buyer', accountStatus: 'active', verificationStatus: 'approved', assignedMarket: 'CN', currency: 'CNY' },
+  })
+
+  assert.equal(selected.isAvailable, false)
+  assert.equal(selected.price, null)
+  assert.equal(selected.displayCurrency, 'CNY')
 })

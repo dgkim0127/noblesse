@@ -292,7 +292,7 @@ Common validation:
 
 - UUID path params.
 - Status query only allows current schema values.
-- Market query only allows `KR`, `JP`, `US`, or `GLOBAL`.
+- Market query only allows `KR`, `JP`, `US`, `CN`, or `GLOBAL`.
 - Country query length is limited.
 - `q` query length is limited.
 - `limit` has a max cap.
