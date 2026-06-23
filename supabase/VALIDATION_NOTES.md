@@ -1962,3 +1962,20 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret value, DB URL, password, operation ID, raw gcloud stdout/stderr recorded: No.
 - Result category: Case C - Reset success / secret version failure.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
+## N38-B6R4 Follow-up - Staging runtime staged credential handoff
+
+- Scope: Stage runtime DATABASE_URL before DB password reset.
+- Follow-up report: `docs/ADMIN_STAGING_RUNTIME_DB_STAGED_CREDENTIAL_HANDOFF_REPORT.md`.
+- Secret version add invocation count: 1.
+- Staged version add result: Failed by server-state verification.
+- Runtime secret enabled version count: 0.
+- Password reset command count: 0.
+- Runtime secret IAM grant: No.
+- TEMP credential cleanup: Complete.
+- DB login/query, psql, runtime verifier: No.
+- Cloud Run Job execution: No.
+- Application deploy, Firebase deploy, production mutation: No.
+- Secret value, DB URL, password, operation ID, raw gcloud stdout/stderr recorded: No.
+- Result category: Case B - Secret stage/disable failure.
+- Next gate: `APPROVE_STAGING_RUNTIME_SECRET_STAGING_RECOVERY = YES`.

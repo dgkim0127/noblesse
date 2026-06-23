@@ -137,3 +137,14 @@
 - DB login/query, runtime verifier, Job execution, app/Firebase deploy, and production mutation: No.
 - Result category: Case C - Reset success / secret version failure.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
+## N38-B6R4 Staged Credential Handoff Follow-up
+
+- Follow-up report: `docs/ADMIN_STAGING_RUNTIME_DB_STAGED_CREDENTIAL_HANDOFF_REPORT.md`.
+- Secret version add invocation count: 1.
+- Staged version add result: Failed by server-state verification; runtime secret version count remains 0.
+- Password reset command count: 0.
+- Runtime secret IAM grant: Not executed.
+- DB login/query, runtime verifier, Job execution, app/Firebase deploy, and production mutation: No.
+- Result category: Case B - Secret stage/disable failure.
+- Next gate: `APPROVE_STAGING_RUNTIME_SECRET_STAGING_RECOVERY = YES`.

@@ -605,3 +605,14 @@ Important:
 - No DB login/query, runtime verifier, application deploy, Firebase deploy, or production mutation occurred.
 - Production DB migration and rollout remain unaffected.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
+## N38-B6R4 Staged Runtime Credential Handoff Follow-up
+
+- Follow-up report: `docs/ADMIN_STAGING_RUNTIME_DB_STAGED_CREDENTIAL_HANDOFF_REPORT.md`.
+- Secret version add invocation count: 1.
+- Staged version add result: Failed by server-state verification; runtime secret version count remains 0.
+- Password reset command count: 0.
+- Runtime secret IAM grant: Not executed.
+- No DB login/query, runtime verifier, application deploy, Firebase deploy, or production mutation occurred.
+- Production DB migration and rollout remain unaffected.
+- Next gate: `APPROVE_STAGING_RUNTIME_SECRET_STAGING_RECOVERY = YES`.
