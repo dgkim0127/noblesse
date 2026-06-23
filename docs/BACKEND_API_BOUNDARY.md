@@ -78,6 +78,8 @@ N38-B6R recovered the runtime DB login user creation but did not add the runtime
 
 N38-B6R2 attempted the approved password reset exactly once and failed before secret version creation. It did not add a secret version, grant runtime secret access, run a DB login/query, execute any Job, deploy the application, or mutate production. Application DB rollout remains blocked pending `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_DIAGNOSIS = YES`.
 
+N38-B6D diagnosed the failed password reset as a local wrapper failure with server-side Cloud SQL operation success evidence. It did not retry password reset, add a secret version, change IAM, run a DB login/query, execute Jobs, deploy the application, or mutate production. Application DB rollout remains blocked pending `APPROVE_STAGING_RUNTIME_DB_PASSWORD_RESET_WRAPPER_RECOVERY = YES`.
+
 32L-5 attempted staging Cloud SQL resource creation and was blocked before any usable DB resource was created. Backend API boundaries remain unchanged: no DB connection, no Cloud Run DB update, no Firebase `/api` rewrite, and no production admin write.
 
 32L-5R documents revised staging DB tier candidates only. It does not create a DB, connect backend APIs to DB, add a Firebase rewrite, or change frontend access boundaries.

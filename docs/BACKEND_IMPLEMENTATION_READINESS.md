@@ -681,3 +681,11 @@ Before implementation starts:
 - Secret-level application accessor was not granted.
 - No DB login/query, runtime verifier, application deploy, Firebase deploy, or production mutation occurred.
 - Backend readiness next requires runtime DB user/secret recovery diagnosis before verifier or application DB rollout.
+
+## N38-B6D Runtime DB Password Reset Diagnosis
+
+- Password reset diagnosis report: `docs/ADMIN_STAGING_RUNTIME_DB_PASSWORD_RESET_DIAGNOSIS.md`.
+- Cloud SQL operation evidence indicates the prior reset likely succeeded server-side.
+- Local wrapper failure blocked secret-version handoff.
+- No password reset retry, secret version, IAM mutation, DB login/query, runtime verifier, application deploy, Firebase deploy, or production mutation occurred.
+- Backend readiness next requires wrapper recovery approval before secret-version handoff and verifier.

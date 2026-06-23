@@ -101,3 +101,15 @@
 ## Next Gate
 
 - `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_DIAGNOSIS = YES`
+
+## N38-B6D Password Reset Diagnosis Follow-up
+
+- Diagnosis report: `docs/ADMIN_STAGING_RUNTIME_DB_PASSWORD_RESET_DIAGNOSIS.md`.
+- Password reset retry: No.
+- Cloud SQL operation evidence: successful user operation observed.
+- Flags-file parser: accepted.
+- Operation created by parser tests: No.
+- Classification: A - API_SUCCEEDED_LOCAL_WRAPPER_FAILED.
+- Password likely changed by prior attempt: Yes.
+- Secret version add, IAM mutation, DB login/query, Job execution, app/Firebase deploy, and production mutation: No.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_PASSWORD_RESET_WRAPPER_RECOVERY = YES`.

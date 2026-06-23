@@ -115,3 +115,11 @@
 - Application secretAccessor grant: No.
 - Runtime credential handoff: No-Go.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_DIAGNOSIS = YES`.
+
+## N38-B6D Password Reset Diagnosis Follow-up
+
+- Diagnosis report: `docs/ADMIN_STAGING_RUNTIME_DB_PASSWORD_RESET_DIAGNOSIS.md`.
+- Category: A - API_SUCCEEDED_LOCAL_WRAPPER_FAILED.
+- Password reset retry: No.
+- Secret version add and IAM mutation: No.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_PASSWORD_RESET_WRAPPER_RECOVERY = YES`.

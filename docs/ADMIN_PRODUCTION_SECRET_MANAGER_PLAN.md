@@ -454,6 +454,15 @@ Important:
 - Production secret creation remains No-Go.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_DIAGNOSIS = YES`.
 
+## N38-B6D Staging Runtime DB Password Reset Diagnosis Follow-up
+
+- Diagnosis report: `docs/ADMIN_STAGING_RUNTIME_DB_PASSWORD_RESET_DIAGNOSIS.md`.
+- Diagnosis only; no password reset retry, secret version, IAM change, DB login/query, Job execution, app/Firebase deploy, or production mutation.
+- Category: A - API_SUCCEEDED_LOCAL_WRAPPER_FAILED.
+- Password likely changed by prior attempt: Yes.
+- Runtime secret version remains 0.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_PASSWORD_RESET_WRAPPER_RECOVERY = YES`.
+
 ## N38-B6R Staging Runtime DB Secret Recovery Follow-up
 
 - Recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_REPORT.md`.

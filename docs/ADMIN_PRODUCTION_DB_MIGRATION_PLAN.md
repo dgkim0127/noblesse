@@ -578,6 +578,14 @@ Important:
 - Production DB migration and rollout remain unaffected.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_DIAGNOSIS = YES`.
 
+## N38-B6D Runtime DB Password Reset Diagnosis Follow-up
+
+- Diagnosis report: `docs/ADMIN_STAGING_RUNTIME_DB_PASSWORD_RESET_DIAGNOSIS.md`.
+- Diagnosis only; no staging password reset retry, secret version, IAM mutation, DB login/query, Job execution, application deploy, Firebase deploy, or production mutation occurred.
+- Category: A - API_SUCCEEDED_LOCAL_WRAPPER_FAILED.
+- Production DB migration and rollout remain unaffected.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_PASSWORD_RESET_WRAPPER_RECOVERY = YES`.
+
 ## N38-B6R Runtime DB User Secret Recovery Follow-up
 
 - Runtime DB user/secret recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_REPORT.md`.

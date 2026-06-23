@@ -813,6 +813,16 @@ Required before 32K:
 - Production rollout remains blocked.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_DIAGNOSIS = YES`.
 
+## N38-B6D Runtime DB Password Reset Diagnosis Follow-up
+
+- Diagnosis report: `docs/ADMIN_STAGING_RUNTIME_DB_PASSWORD_RESET_DIAGNOSIS.md`.
+- Password reset retry: No.
+- Runtime secret version add and IAM mutation: No.
+- Runtime verifier and application DB rollout: No-Go.
+- Production rollout remains blocked.
+- Category: A - API_SUCCEEDED_LOCAL_WRAPPER_FAILED.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_PASSWORD_RESET_WRAPPER_RECOVERY = YES`.
+
 ## N38-B6R Runtime DB User Secret Recovery Follow-up
 
 - Runtime DB user/secret recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_REPORT.md`.

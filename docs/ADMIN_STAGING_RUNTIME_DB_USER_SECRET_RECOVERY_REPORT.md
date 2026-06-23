@@ -118,3 +118,11 @@
 - DB login/query, Job execution, runtime verifier, app/Firebase deploy, and production mutation: No.
 - Result: Case B - password reset failure.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_DIAGNOSIS = YES`.
+
+## N38-B6D Password Reset Diagnosis Follow-up
+
+- Diagnosis report: `docs/ADMIN_STAGING_RUNTIME_DB_PASSWORD_RESET_DIAGNOSIS.md`.
+- Cloud SQL operation evidence indicates the prior reset likely succeeded server-side.
+- Local wrapper failure remains the blocker for secret-version handoff.
+- No mutation was performed in the diagnosis.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_PASSWORD_RESET_WRAPPER_RECOVERY = YES`.

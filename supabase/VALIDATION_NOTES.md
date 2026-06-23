@@ -1924,3 +1924,24 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Production mutation: No.
 - Result: Case B - password reset failure.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_DIAGNOSIS = YES`.
+
+## N38-B6D Follow-up - Staging runtime DB password reset diagnosis
+
+- Scope: Read-only diagnosis of failed staging runtime DB password reset.
+- Password reset retry: No.
+- Secret version add: No.
+- IAM mutation: No.
+- DB login/query: No.
+- Job execution: No.
+- Runtime verifier execution: No.
+- Application/Firebase deploy: No.
+- Production mutation: No.
+- Cloud SQL operation evidence: relevant user operation found and succeeded.
+- Audit API call observed: Yes.
+- Flags-file parser accepted dummy input: Yes.
+- Parser test operation created: No.
+- Wrapper diagnosis: local wrapper failure likely.
+- Password likely changed by prior attempt: Yes.
+- Actual password, DB URL, token, private key, service account email, project id, operation ID, raw logs, and TEMP file contents recorded: No.
+- Result: A - API_SUCCEEDED_LOCAL_WRAPPER_FAILED.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_PASSWORD_RESET_WRAPPER_RECOVERY = YES`.
