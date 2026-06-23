@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Headphones, Heart, Mail, MessageCircle } from 'lucide-react'
+import { ClipboardList, Headphones, Heart, Mail } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatMoney } from '../utils/commerce'
@@ -340,25 +340,120 @@ const homeSectionNav = [
   { id: 'new-arrival', label: '신상품' },
   { id: 'weekly-pick', label: '주간 추천' },
   { id: 'buyer-selection', label: '바이어 셀렉션' },
-  { id: 'piercing-catalog', label: '피어싱 카탈로그' },
-  { id: 'premium-jewelry', label: '프리미엄 주얼리' },
+  { id: 'piercing-catalog', label: 'Piercing' },
+  { id: 'steady-selection', label: '스테디 셀렉션' },
 ]
 
 const homeCategoryChips = [
-  { label: '🦴 써지컬 피어싱', to: '/products?material=Surgical%20Steel' },
-  { label: '━ 바벨형 피어싱', to: '/products?q=barbell' },
-  { label: '🧷 925실버 피어싱', to: '/products?material=Silver%20925' },
-  { label: '🪄 14K 피어싱', to: '/products?material=14K%20Gold' },
-  { label: '🧚‍♀️ 피어싱 세트', to: '/products?q=set' },
-  { label: '🌺 얇은 피어싱', to: '/products?q=tiny' },
-  { label: '🪩 링 피어싱', to: '/products?q=ring' },
-  { label: '🌙 큐빅 피어싱', to: '/products?q=cubic' },
-  { label: '🎀 리본 아이템', to: '/products?q=ribbon' },
-  { label: '🦋 나비 아이템', to: '/products?q=butterfly' },
+  { icon: 'surgical', label: '써지컬 피어싱', to: '/products?material=Surgical%20Steel' },
+  { icon: 'silver', label: '실버 925', to: '/products?material=Silver%20925' },
+  { icon: 'ring', label: '링 피어싱', to: '/products?q=ring' },
+  { icon: 'cubic', label: '큐빅 피어싱', to: '/products?q=cubic' },
+  { icon: 'ribbon', label: '리본 아이템', to: '/products?q=ribbon' },
+  { icon: 'butterfly', label: '나비 아이템', to: '/products?q=butterfly' },
 ]
 
+function CategoryChipIcon({ type }) {
+  if (type === 'surgical') {
+    return <svg aria-hidden="true" className="home-category-svg icon-surgical" viewBox="0 0 32 32">
+      <circle cx="8" cy="16" r="4.4" />
+      <circle cx="24" cy="16" r="4.4" />
+      <path d="M12 16h8" />
+      <path d="M16 9.5v13" />
+    </svg>
+  }
+
+  if (type === 'silver') {
+    return <svg aria-hidden="true" className="home-category-svg icon-silver" viewBox="0 0 32 32">
+      <path className="silver-body" d="M7.2 12.2h17.6c1.7 0 3 1.3 3 3v1.6c0 1.7-1.3 3-3 3H7.2c-1.7 0-3-1.3-3-3v-1.6c0-1.7 1.3-3 3-3z" />
+      <path className="silver-shine" d="M8 14h15.8" />
+      <path className="silver-shadow" d="M8.4 18.1h15.2" />
+      <text x="16" y="17.5" textAnchor="middle">925</text>
+    </svg>
+  }
+
+  if (type === 'ring') {
+    return <svg aria-hidden="true" className="home-category-svg icon-ring" viewBox="0 0 32 32">
+      <circle cx="16" cy="17" r="8.4" />
+      <circle cx="16" cy="17" r="4.7" />
+      <path d="M20.6 7.4l2.2-2.2M23.3 10.2l2.7-.8" />
+    </svg>
+  }
+
+  if (type === 'cubic') {
+    return <svg aria-hidden="true" className="home-category-svg icon-cubic" viewBox="0 0 32 32">
+      <path d="M10 7.5h12l4.5 6.5L16 25 5.5 14z" />
+      <path d="M10 7.5L16 25l6-17.5M5.5 14h21M10 7.5l-4.5 6.5M22 7.5l4.5 6.5" />
+    </svg>
+  }
+
+  if (type === 'ribbon') {
+    return <svg aria-hidden="true" className="home-category-svg icon-ribbon" viewBox="0 0 32 32">
+      <path className="ribbon-loop-left" d="M15 15.2C11.3 10.7 6.5 9.7 4.8 12.6c-1.6 2.7 1.6 6.2 5.1 5.6 1.8-.3 3.5-1.3 5.1-3z" />
+      <path className="ribbon-loop-right" d="M17 15.2c3.7-4.5 8.5-5.5 10.2-2.6 1.6 2.7-1.6 6.2-5.1 5.6-1.8-.3-3.5-1.3-5.1-3z" />
+      <rect className="ribbon-knot" x="13.1" y="13.4" width="5.8" height="5.4" rx="1.8" />
+      <path className="ribbon-tail-left" d="M13.8 18.1l-3.2 6.1 5.4-2.5" />
+      <path className="ribbon-tail-right" d="M18.2 18.1l3.2 6.1-5.4-2.5" />
+    </svg>
+  }
+
+  return <svg aria-hidden="true" className="home-category-svg icon-butterfly" viewBox="0 0 32 32">
+    <path d="M15 15.5C11.8 7.8 6.7 6.3 4.4 9.6c-2.1 3 .4 8.2 5 8.5 2.2.2 4.1-.9 5.6-2.6z" />
+    <path d="M17 15.5c3.2-7.7 8.3-9.2 10.6-5.9 2.1 3-.4 8.2-5 8.5-2.2.2-4.1-.9-5.6-2.6z" />
+    <path d="M15 17.2c-2.6 1-4.5 3.7-3.1 6 1.4 2.1 4.1.8 4.1-3.7M17 17.2c2.6 1 4.5 3.7 3.1 6-1.4 2.1-4.1.8-4.1-3.7" />
+    <path d="M16 13.8v7.7" />
+  </svg>
+}
+
 const homeShowcasePanels = [
-  ...heroBanners,
+  {
+    ...heroBanners[1],
+    key: 'cubic-premium',
+    title: {
+      kr: '프리미엄 큐빅 피어싱',
+      en: 'Premium Cubic Piercing',
+      jp: 'プレミアムキュービックピアス',
+      cn: '高级锆石穿孔饰品',
+    },
+    eyebrow: {
+      kr: 'NEW',
+      en: 'NEW',
+      jp: 'NEW',
+      cn: 'NEW',
+    },
+    text: {
+      kr: '빛 반사가 살아나는 큐빅 중심의 셀렉션',
+      en: 'A cubic-focused selection with clear light reflection.',
+      jp: '光の反射が映えるキュービック中心のセレクション。',
+      cn: '以清晰光泽为重点的锆石精选。',
+    },
+    to: '/products?collection=premium-cubic-line',
+    image: 'https://images.unsplash.com/photo-1602722872368-0cfc00f748ff?auto=format&fit=crop&crop=faces&w=900&h=1350&q=86',
+  },
+  {
+    ...heroBanners[3],
+    key: 'trade-export',
+    title: {
+      kr: '수출 베스트 아이템',
+      en: 'Export Best Items',
+      jp: '輸出ベストアイテム',
+      cn: '出口热选单品',
+    },
+    eyebrow: {
+      kr: 'TRADE',
+      en: 'TRADE',
+      jp: 'TRADE',
+      cn: 'TRADE',
+    },
+    text: {
+      kr: '해외 거래처 상담에 맞춘 대표 라인',
+      en: 'Representative lines for global trade inquiries.',
+      jp: '海外取引先の相談に合わせた代表ライン。',
+      cn: '适合海外贸易咨询的代表系列。',
+    },
+    to: '/products?collection=export-best-items',
+    image: 'https://images.unsplash.com/photo-1690126889953-a100f54b619e?auto=format&fit=crop&crop=faces&w=900&h=1350&q=86',
+  },
   {
     ...heroBanners[1],
     key: 'silver-daily',
@@ -551,25 +646,242 @@ function ScrambleText({ as: Tag = 'span', children, className = '', persistKey =
   </Tag>
 }
 
-const homeSectionLimit = 15
+const homeSectionLimit = 8
 
-const _fillHomeSectionProducts = (preferredProducts, allProducts) => {
+const homeSectionProductLimit = {
+  'new-arrival': 12,
+  'weekly-pick': 7,
+  'buyer-selection': 12,
+  'piercing-catalog': 16,
+  'steady-selection': 12,
+}
+
+const homeSectionSubtabs = {
+  'piercing-catalog': ['볼피어싱', '링피어싱', '라블렛', '드롭/투핀', '귀걸이형'],
+  'steady-selection': ['데일리 실버', '미니 큐빅', '베이직 링', '하트/리본', '스테디 바벨'],
+}
+
+const piercingCatalogTabFilters = [
+  { label: '볼피어싱', categoryIds: ['piercing', 'cubic', 'pearl', 'surgical-steel'] },
+  { label: '링피어싱', categoryIds: ['belly-ring'] },
+  { label: '라블렛', categoryIds: ['labret'] },
+  { label: '드롭/투핀', categoryIds: ['barbell'] },
+  { label: '귀걸이형', categoryIds: ['earrings'] },
+]
+
+const homeSectionTabFilters = {
+  'piercing-catalog': piercingCatalogTabFilters,
+  'steady-selection': [
+    { categoryIds: ['piercing', 'surgical-steel'], materialIncludes: ['Silver', 'Steel'] },
+    { categoryIds: ['cubic'], collectionIds: ['premium-cubic-line'] },
+    { categoryIds: ['piercing', 'belly-ring'] },
+    { categoryIds: ['pearl', 'cubic', 'earrings'], collectionIds: ['japan-buyer-picks'] },
+    { categoryIds: ['barbell', 'surgical-steel'], collectionIds: ['minimal-piercing-line'] },
+  ],
+}
+
+const productMatchesTabFilter = (product, filter) => {
+  if (!filter) return true
+
+  const matchesCategory = filter.categoryIds?.includes(product.categoryId)
+  const matchesCollection = filter.collectionIds?.some((collectionId) => product.collectionIds?.includes(collectionId))
+  const matchesMaterial = filter.materialIncludes?.some((material) => product.material?.includes(material))
+
+  return Boolean(matchesCategory || matchesCollection || matchesMaterial)
+}
+
+const homeSectionViewAll = {
+  'new-arrival': { label: '신상품 더보기', to: '/products?collection=new-arrivals' },
+  'weekly-pick': { label: '주간 추천 더보기', to: '/products?sort=best' },
+  'piercing-catalog': { label: '피어싱 더 보기', to: '/products?category=piercing' },
+  'steady-selection': { label: '스테디 더보기', to: '/products?collection=steady' },
+}
+
+const isAllowedHomeProduct = (product) => (
+  product
+  && !/(14K|Titanium)/i.test(product.material ?? '')
+  && !['14k-gold', 'titanium'].includes(product.categoryId)
+)
+
+const _fillHomeSectionProducts = (preferredProducts, allProducts, limit = homeSectionLimit) => {
   const picked = []
   const seen = new Set()
 
   for (const product of [...preferredProducts, ...allProducts]) {
+    if (!isAllowedHomeProduct(product)) continue
     if (!product || seen.has(product.productId)) continue
     picked.push(product)
     seen.add(product.productId)
-    if (picked.length >= homeSectionLimit) break
+    if (picked.length >= limit) break
   }
 
   return picked
 }
 
-function HomeProductCard({ product, index }) {
-  const { approvedPrice, buyer, getPrice, isApproved } = useCommerce()
+const weeklyDemandSamples = [
+  { inquiries: 17155, checks: 287 },
+  { inquiries: 57070, checks: 1642 },
+  { inquiries: 6507, checks: 64 },
+  { inquiries: 9059, checks: 213 },
+  { inquiries: 44796, checks: 1635 },
+  { inquiries: 58112, checks: 721 },
+  { inquiries: 12061, checks: 381 },
+]
+
+const buyerConceptPanels = [
+  {
+    key: 'buyer-consult-line',
+    eyebrow: 'BUYER BOARD',
+    title: {
+      kr: '거래처 상담 라인',
+      en: 'Buyer Consultation Line',
+      jp: '取引先相談ライン',
+      cn: '客户洽谈系列',
+    },
+    text: {
+      kr: '신규 거래처가 소재와 스타일을 빠르게 검토하기 좋은 대표 구성을 모았습니다.',
+      en: 'A representative board for reviewing materials and styles quickly.',
+      jp: '素材とスタイルをすばやく確認できる取引先向け構成です。',
+      cn: '适合客户快速确认材质与风格的代表组合。',
+    },
+    tags: {
+      kr: ['MOQ 협의', '소재 제안', '샘플 상담'],
+      en: ['MOQ Review', 'Material Guide', 'Sample Talk'],
+      jp: ['MOQ相談', '素材提案', 'サンプル相談'],
+      cn: ['MOQ 协商', '材质建议', '样品咨询'],
+    },
+    image: 'https://images.unsplash.com/photo-1722410180651-efd51636f260?auto=format&fit=crop&crop=faces&w=1200&h=1200&q=86',
+    to: '/products?collection=buyer-consultation',
+  },
+  {
+    key: 'jp-market-curation',
+    eyebrow: 'JP MARKET',
+    title: {
+      kr: 'JP 지역 추천 구성',
+      en: 'JP Market Curation',
+      jp: 'JP地域おすすめ構成',
+      cn: 'JP 地区推荐组合',
+    },
+    text: {
+      kr: '작고 선명한 실버·큐빅 라인을 중심으로 상담하기 좋은 셀렉션입니다.',
+      en: 'A compact silver and cubic-focused curation for JP market talks.',
+      jp: '小ぶりなシルバーとキュービックを中心にした相談向けセレクションです。',
+      cn: '以小巧银色与锆石系列为主的 JP 市场洽谈组合。',
+    },
+    tags: {
+      kr: ['JP 상담', '데일리 라인', '재입고 제안'],
+      en: ['JP Inquiry', 'Daily Line', 'Restock'],
+      jp: ['JP相談', 'デイリー', '再入荷提案'],
+      cn: ['JP 咨询', '日常系列', '补货建议'],
+    },
+    image: 'https://images.unsplash.com/photo-1602722872368-0cfc00f748ff?auto=format&fit=crop&crop=faces&w=1200&h=1200&q=86',
+    to: '/products?market=JP',
+  },
+  {
+    key: 'export-sample-kit',
+    eyebrow: 'EXPORT KIT',
+    title: {
+      kr: '수출 샘플 보드',
+      en: 'Export Sample Board',
+      jp: '輸出サンプルボード',
+      cn: '出口样品板',
+    },
+    text: {
+      kr: '상담용 대표 이미지와 샘플 구성을 함께 확인하는 B2B 보드입니다.',
+      en: 'A B2B board pairing sample sets with representative imagery.',
+      jp: '代表画像とサンプル構成を一緒に確認するB2Bボードです。',
+      cn: '可同时确认代表图片与样品组合的 B2B 看板。',
+    },
+    tags: {
+      kr: ['수출 추천', '이미지 상담', '대표 구성'],
+      en: ['Export Pick', 'Image Review', 'Core Set'],
+      jp: ['輸出提案', '画像相談', '代表構成'],
+      cn: ['出口推荐', '图片确认', '核心组合'],
+    },
+    image: 'https://images.unsplash.com/photo-1690126889953-a100f54b619e?auto=format&fit=crop&crop=faces&w=1200&h=1200&q=86',
+    to: '/products?collection=export-best-items',
+  },
+  {
+    key: 'steady-reorder',
+    eyebrow: 'REORDER',
+    title: {
+      kr: '꾸준한 재입고 라인',
+      en: 'Steady Reorder Line',
+      jp: '定番再入荷ライン',
+      cn: '稳定补货系列',
+    },
+    text: {
+      kr: '계절을 크게 타지 않는 기본 라인으로 반복 상담에 적합합니다.',
+      en: 'Stable everyday lines designed for repeat buyer discussions.',
+      jp: '季節を問わず継続相談しやすい定番ラインです。',
+      cn: '不太受季节影响，适合持续洽谈的基础系列。',
+    },
+    tags: {
+      kr: ['스테디', '기본 구성', '거래처용'],
+      en: ['Steady', 'Core Line', 'For Buyers'],
+      jp: ['定番', '基本構成', '取引先向け'],
+      cn: ['常备', '基础组合', '客户用'],
+    },
+    image: 'https://images.unsplash.com/photo-1653227907864-560dce4c252d?auto=format&fit=crop&crop=entropy&w=1200&h=1200&q=86',
+    to: '/products?collection=steady',
+  },
+  {
+    key: 'display-board',
+    eyebrow: 'DISPLAY',
+    title: {
+      kr: '매장 진열 제안',
+      en: 'Display Board Proposal',
+      jp: '売場ディスプレイ提案',
+      cn: '陈列展示建议',
+    },
+    text: {
+      kr: '진열과 촬영 컷을 함께 고려한 상담용 이미지 중심 구성입니다.',
+      en: 'Image-led curation for merchandising and catalog display talks.',
+      jp: '陳列と撮影イメージを合わせて提案する構成です。',
+      cn: '兼顾陈列与拍摄效果的图片导向组合。',
+    },
+    tags: {
+      kr: ['진열 제안', '촬영 컷', '카탈로그용'],
+      en: ['Display', 'Photo Set', 'Catalog'],
+      jp: ['陳列提案', '撮影カット', 'カタログ用'],
+      cn: ['陈列建议', '拍摄图', '目录用'],
+    },
+    image: 'https://images.unsplash.com/photo-1701777892740-88419a701472?auto=format&fit=crop&crop=faces&w=1200&h=1200&q=86',
+    to: '/products?collection=display-board',
+  },
+  {
+    key: 'material-match',
+    eyebrow: 'MATERIAL',
+    title: {
+      kr: '소재별 상담 보드',
+      en: 'Material Match Board',
+      jp: '素材別相談ボード',
+      cn: '材质洽谈看板',
+    },
+    text: {
+      kr: '써지컬, 실버, 큐빅 등 거래처가 비교하기 쉬운 소재 중심 구성입니다.',
+      en: 'Material-led comparison board for buyer-side selection.',
+      jp: 'サージカル、シルバー、キュービックを比較しやすい構成です。',
+      cn: '便于客户比较外科钢、银、锆石等材质。',
+    },
+    tags: {
+      kr: ['소재 비교', '가격 상담', '라인 제안'],
+      en: ['Material', 'Price Talk', 'Line Plan'],
+      jp: ['素材比較', '価格相談', 'ライン提案'],
+      cn: ['材质比较', '价格洽谈', '系列建议'],
+    },
+    image: 'https://images.unsplash.com/photo-1671644730555-916aa8d8157f?auto=format&fit=crop&crop=faces&w=1200&h=1200&q=86',
+    to: '/products?collection=material-match',
+  },
+]
+
+const getWeeklyDemand = (index) => weeklyDemandSamples[index % weeklyDemandSamples.length]
+
+function HomeProductCard({ product, index, variant = 'default' }) {
+  const { addInquiryItem, approvedPrice, buyer, getPrice, isApproved, viewerState } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [favoriteNotice, setFavoriteNotice] = useState('')
   const productName = getLocalizedProductName(product, locale)
   const productAlt = getLocalizedProductAlt(product, locale)
   const price = getPrice(product.productId)
@@ -577,21 +889,53 @@ function HomeProductCard({ product, index }) {
     product.imageSet?.card,
     product.imageSet?.detail,
     product.imageSet?.zoom,
-  ].filter(Boolean)
+  ].filter((src) => src && !src.includes('cdn.example.com'))
+  const fallbackImage = homeShowcasePanels[index % homeShowcasePanels.length]?.image
+  const cardImageSources = imageSources.length > 0 ? imageSources : [fallbackImage].filter(Boolean)
   const displayPrice = isApproved && price
     ? formatMoney(approvedPrice(product.productId), buyer.currency)
     : '승인 후 가격 확인 가능'
   const statusLabel = product.isNew ? 'NEW' : product.isBest ? 'BEST' : 'B2B'
+  const weeklyDemand = variant === 'weekly-pick' ? getWeeklyDemand(index) : null
 
-  return <article className="home-product-card">
+  const handleFavoriteClick = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    if (viewerState === 'guest') {
+      setFavoriteNotice('로그인 후 사용할 수 있어요')
+      window.clearTimeout(window.__noblesseFavoriteNoticeTimer)
+      window.__noblesseFavoriteNoticeTimer = window.setTimeout(() => setFavoriteNotice(''), 1800)
+      return
+    }
+
+    setIsFavorite((current) => !current)
+  }
+
+  const handleInquiryActionClick = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    if (!isApproved) {
+      setFavoriteNotice('승인 후 이용 가능')
+      window.clearTimeout(window.__noblesseFavoriteNoticeTimer)
+      window.__noblesseFavoriteNoticeTimer = window.setTimeout(() => setFavoriteNotice(''), 1800)
+      return
+    }
+
+    addInquiryItem(product.productId)
+    setFavoriteNotice('견적 리스트에 담았어요')
+    window.clearTimeout(window.__noblesseFavoriteNoticeTimer)
+    window.__noblesseFavoriteNoticeTimer = window.setTimeout(() => setFavoriteNotice(''), 1800)
+  }
+
+  return <article className={`home-product-card variant-${variant}`} style={{ '--product-index': index }}>
+    <div className="home-product-media">
     <Link className={`home-product-image tone-${product.tone}`} to={toLocalePath(`/products/${product.productId}`)} aria-label={productName}>
-      <button className="home-product-heart" type="button" aria-label={`${productName} 관심 상품`}>
-        <Heart size={15} />
-      </button>
       <span className="home-product-status">{statusLabel}</span>
       <span className="jewel-shape" />
       <span className="home-product-image-cycle" style={{ '--cycle-delay': `${(index % 5) * 0.18}s` }}>
-        {imageSources.map((src, imageIndex) => <img
+        {cardImageSources.map((src, imageIndex) => <img
           alt={imageIndex === 0 ? productAlt : ''}
           aria-hidden={imageIndex === 0 ? undefined : 'true'}
           key={`${product.productId}-${imageIndex}`}
@@ -603,9 +947,22 @@ function HomeProductCard({ product, index }) {
         />)}
       </span>
     </Link>
+    <div className="home-product-actions" aria-label={`${productName} 빠른 작업`}>
+      <button className="home-product-action" type="button" aria-label={`${productName} 견적 리스트에 담기`} onClick={handleInquiryActionClick}>
+        <ClipboardList size={15} />
+      </button>
+      <button className={`home-product-action home-product-heart${isFavorite ? ' is-saved' : ''}`} type="button" aria-pressed={isFavorite} aria-label={`${productName} 좋아요`} onClick={handleFavoriteClick}>
+        <Heart size={15} fill={isFavorite ? 'currentColor' : 'none'} />
+      </button>
+    </div>
+    {favoriteNotice ? <span className="home-product-favorite-notice">{favoriteNotice}</span> : null}
+    </div>
     <div className="home-product-info">
       <Link to={toLocalePath(`/products/${product.productId}`)}>
         <strong>{productName}</strong>
+        {weeklyDemand ? <span className="home-product-demand">
+          {`누적 문의 ${weeklyDemand.inquiries.toLocaleString('ko-KR')}건+ · 확인 ${weeklyDemand.checks.toLocaleString('ko-KR')}회`}
+        </span> : null}
         <small>{product.material}</small>
       </Link>
       <b>{displayPrice}</b>
@@ -613,16 +970,130 @@ function HomeProductCard({ product, index }) {
   </article>
 }
 
-function ProductSection({ products, sectionId, title }) {
+function ProductSection({ products, sectionId, title, note }) {
   if (products.length === 0) return null
+  const [activeTab, setActiveTab] = useState(0)
+  const [tabMotionKey, setTabMotionKey] = useState(0)
+  const sectionSubtabs = homeSectionSubtabs[sectionId] ?? []
+  const sectionTabFilters = homeSectionTabFilters[sectionId] ?? []
+  const viewAll = homeSectionViewAll[sectionId]
+  const isLoopSection = sectionId === 'weekly-pick'
+  const activeTabFilter = sectionTabFilters[activeTab] ?? null
+  const filteredProducts = activeTabFilter
+    ? products.filter((product) => productMatchesTabFilter(product, activeTabFilter))
+    : products
+  const safeProducts = sectionTabFilters.length > 0
+    ? _fillHomeSectionProducts(filteredProducts, products, homeSectionProductLimit[sectionId])
+    : filteredProducts.length > 0 ? filteredProducts : products
+  const sectionProducts = safeProducts.slice(0, homeSectionProductLimit[sectionId] ?? homeSectionLimit)
+  const renderProducts = isLoopSection ? [...sectionProducts, ...sectionProducts] : sectionProducts
+  const handleTabClick = (index) => {
+    if (index === activeTab) return
 
-  return <section className="section-wrap product-feature-section" id={`home-${sectionId}`}>
+    setActiveTab(index)
+    setTabMotionKey((current) => current + 1)
+  }
+
+  return <section className={`section-wrap product-feature-section section-${sectionId}`} id={`home-${sectionId}`}>
     <div className="home-product-section-title">
-      <span aria-hidden="true">✧</span>
       <ScrambleText as="h2" persistKey={`product-section-title-${sectionId}`}>{title}</ScrambleText>
-      <span aria-hidden="true">✧</span>
+      {note ? <p>{note}</p> : null}
     </div>
-    <div className="home-product-grid">{products.slice(0, homeSectionLimit).map((product, index) => <HomeProductCard key={product.productId} product={product} index={index} />)}</div>
+    {sectionSubtabs.length > 0 ? <div className="home-section-subtabs" aria-label={`${title} categories`}>
+      {sectionSubtabs.map((tab, index) => <button className={index === activeTab ? 'is-active' : undefined} key={tab} type="button" onClick={() => handleTabClick(index)}>{tab}</button>)}
+    </div> : null}
+    <div className={`home-product-grid${isLoopSection ? ' is-looping' : ''}${sectionTabFilters.length > 0 ? ' has-tab-motion' : ''}`} key={`${sectionId}-${tabMotionKey}`}>
+      {renderProducts.map((product, index) => <HomeProductCard key={`${product.productId}-${index}`} product={product} index={index} variant={sectionId} />)}
+    </div>
+    {viewAll ? <Link className="home-section-more" to={viewAll.to}>
+      <span>{viewAll.label}</span>
+    </Link> : null}
+  </section>
+}
+
+function BuyerCollectionSection() {
+  const { locale, toLocalePath } = useLocalePath()
+  const marqueeViewportRef = useRef(null)
+  const panels = [...buyerConceptPanels, ...buyerConceptPanels, ...buyerConceptPanels]
+
+  useEffect(() => {
+    const viewport = marqueeViewportRef.current
+    const rail = viewport?.querySelector('.buyer-concept-rail')
+
+    if (!viewport || !rail) return undefined
+
+    const getCardStep = () => {
+      const loopPoint = rail.scrollWidth / 3
+      const firstCard = rail.querySelector('.buyer-concept-card')
+      const gap = Number.parseFloat(window.getComputedStyle(rail).gap) || 0
+      const cardStep = firstCard ? firstCard.getBoundingClientRect().width + gap : 0
+
+      return {
+        cardStep,
+        loopPoint,
+      }
+    }
+
+    const slide = () => {
+      const { cardStep, loopPoint } = getCardStep()
+      if (!cardStep || loopPoint <= viewport.clientWidth) return
+
+      if (viewport.scrollLeft >= loopPoint) {
+        viewport.scrollLeft -= loopPoint
+      }
+
+      const nextLeft = viewport.scrollLeft + cardStep * 2
+
+      viewport.scrollTo({
+        behavior: 'smooth',
+        left: nextLeft,
+      })
+
+      if (nextLeft >= loopPoint) {
+        window.setTimeout(() => {
+          if (viewport.scrollLeft >= loopPoint) {
+            viewport.scrollLeft -= loopPoint
+          }
+        }, 720)
+      }
+    }
+
+    const interval = window.setInterval(slide, 2000)
+
+    return () => {
+      window.clearInterval(interval)
+    }
+  }, [])
+
+  return <section className="section-wrap buyer-collection-section" id="home-buyer-selection">
+    <div className="buyer-collection-heading">
+      <span className="buyer-heading-spark" aria-hidden="true">✦</span>
+      <div>
+        <ScrambleText as="h2" persistKey="buyer-concept-title">바이어 셀렉션</ScrambleText>
+        <p>국내·해외 거래처 상담 흐름에 맞춰 정리한 B2B 컨셉 보드입니다.</p>
+      </div>
+    </div>
+    <div className="buyer-concept-viewport" ref={marqueeViewportRef}>
+      <div className="buyer-concept-rail">
+        {panels.map((panel, index) => {
+          const title = getLocalizedValue(panel.title, locale)
+          const text = getLocalizedValue(panel.text, locale)
+          const tags = getLocalizedValue(panel.tags, locale)
+
+          return <Link className="buyer-concept-card" to={toLocalePath(panel.to)} key={`${panel.key}-${index}`}>
+            <img src={panel.image} alt={title} loading="lazy" width="1200" height="1200" />
+            <span className="buyer-concept-eyebrow">NOBLESSE</span>
+            <div className="buyer-concept-copy">
+              <strong>{title}</strong>
+              <p>{text}</p>
+              <ul>
+                {tags.map((tag) => <li key={tag}>{tag}</li>)}
+              </ul>
+            </div>
+          </Link>
+        })}
+      </div>
+    </div>
   </section>
 }
 
@@ -642,24 +1113,79 @@ export function HomePage() {
   const { isApproved, products } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const copy = homeCopy[locale] ?? homeCopy.kr
-  const newProducts = products.filter((product) => product.isNew).slice(0, 5)
-  const weeklyProducts = products.filter((product) => product.isBest).slice(0, 5)
-  const buyerSelectionProducts = products
-    .filter((product) => product.collectionIds.some((id) => ['japan-buyer-picks', 'us-buyer-picks', 'export-best-items'].includes(id)))
-    .slice(0, 5)
-  const piercingCatalogProducts = products
-    .filter((product) => ['piercing', 'barbell', 'labret', 'nose-piercing', 'belly-ring'].includes(product.categoryId))
-    .slice(0, 5)
-  const premiumJewelryProducts = products
-    .filter((product) => product.material.includes('Silver') || product.material.includes('14K') || product.collectionIds.includes('premium-cubic-line'))
-    .slice(0, 5)
-  const showcaseLoopPanels = [...homeShowcasePanels, ...homeShowcasePanels]
+  const homeProducts = products.filter(isAllowedHomeProduct)
+  const newProducts = _fillHomeSectionProducts(homeProducts.filter((product) => product.isNew), homeProducts)
+  const weeklyProducts = _fillHomeSectionProducts(homeProducts.filter((product) => product.isBest), homeProducts)
+  const piercingCatalogProducts = _fillHomeSectionProducts(
+    homeProducts.filter((product) => ['piercing', 'barbell', 'labret', 'nose-piercing', 'belly-ring'].includes(product.categoryId)),
+    homeProducts,
+    homeSectionProductLimit['piercing-catalog'],
+  )
+  const steadySelectionProducts = _fillHomeSectionProducts(
+    homeProducts.filter((product) => product.material.includes('Silver') || product.collectionIds.includes('minimal-piercing-line') || product.collectionIds.includes('premium-cubic-line')),
+    homeProducts,
+  )
+  const showcaseLoopPanels = [...homeShowcasePanels, ...homeShowcasePanels, ...homeShowcasePanels]
+
+  const replayProductSectionReveal = (section) => {
+    const cards = Array.from(section.querySelectorAll('.home-product-card'))
+
+    if (!cards.length) return
+
+    cards.forEach((card, index) => {
+      card.style.setProperty('--reveal-index', String(index % 8))
+      card.classList.remove('is-visible')
+    })
+
+    const revealCards = () => {
+      cards.forEach((card) => {
+        card.classList.add('is-visible')
+      })
+    }
+
+    const sectionIsVisible = () => {
+      const rect = section.getBoundingClientRect()
+      return rect.top < window.innerHeight * 0.84 && rect.bottom > window.innerHeight * 0.16
+    }
+
+    if (sectionIsVisible()) {
+      window.requestAnimationFrame(() => {
+        window.setTimeout(revealCards, 70)
+      })
+      return
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return
+
+      observer.disconnect()
+      window.setTimeout(revealCards, 80)
+    }, {
+      rootMargin: '0px 0px -12% 0px',
+      threshold: 0.08,
+    })
+
+    observer.observe(section)
+    window.setTimeout(() => {
+      observer.disconnect()
+      if (sectionIsVisible()) revealCards()
+    }, 1600)
+  }
 
   const scrollToHomeSection = (sectionId) => {
     setActiveHomeSection(sectionId)
-    document.getElementById(`home-${sectionId}`)?.scrollIntoView({
+    const section = document.getElementById(`home-${sectionId}`)
+    if (!section) return
+
+    if (['new-arrival', 'piercing-catalog', 'steady-selection'].includes(sectionId)) {
+      replayProductSectionReveal(section)
+    }
+
+    const headerOffset = window.matchMedia('(max-width: 760px)').matches ? 92 : 88
+    const targetTop = section.getBoundingClientRect().top + window.scrollY - headerOffset
+    window.scrollTo({
       behavior: 'smooth',
-      block: 'start',
+      top: Math.max(0, targetTop),
     })
   }
 
@@ -690,35 +1216,83 @@ export function HomePage() {
     alignShowcaseGapToCenter()
     window.addEventListener('resize', alignShowcaseGapToCenter)
 
-    const timer = window.setInterval(() => {
-      const scroller = showcaseScrollerRef.current
-      const step = getShowcaseStep()
-
-      if (!scroller || !step || showcaseDragRef.current.isDragging) return
-
-      const loopWidth = step * homeShowcasePanels.length
-
-      if (scroller.scrollLeft >= loopWidth - step / 2) {
-        scroller.scrollLeft -= loopWidth
-      }
-
-      const target = scroller.scrollLeft + step * 2
-      scroller.scrollTo({ behavior: 'smooth', left: target })
-
-      if (target >= loopWidth) {
-        window.setTimeout(() => {
-          if (!showcaseDragRef.current.isDragging && scroller.scrollLeft >= loopWidth) {
-            scroller.scrollLeft -= loopWidth
-          }
-        }, 900)
-      }
-    }, 4000)
-
     return () => {
-      window.clearInterval(timer)
       window.removeEventListener('resize', alignShowcaseGapToCenter)
     }
   }, [alignShowcaseGapToCenter, getShowcaseStep])
+
+  useEffect(() => {
+    const root = document.querySelector('main')
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    if (!root || reduceMotion || !('IntersectionObserver' in window)) return undefined
+
+    const revealSelector = [
+      '.section-new-arrival .home-product-card',
+      '.section-piercing-catalog .home-product-card',
+      '.section-steady-selection .home-product-card',
+    ].join(', ')
+    const forceRevealSections = [
+      'section-new-arrival',
+      'section-piercing-catalog',
+      'section-steady-selection',
+    ]
+    const observedItems = new WeakSet()
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return
+
+        entry.target.classList.add('is-visible')
+        observer.unobserve(entry.target)
+      })
+    }, {
+      rootMargin: '0px 0px -10% 0px',
+      threshold: 0.08,
+    })
+
+    const prepareRevealItem = (item) => {
+      if (!(item instanceof HTMLElement) || observedItems.has(item)) return
+
+      const siblings = Array.from(item.parentElement?.querySelectorAll('.home-product-card') ?? [])
+      const itemIndex = Math.max(0, siblings.indexOf(item))
+      const sectionClass = forceRevealSections.find((className) => item.closest(`.${className}`))
+
+      observedItems.add(item)
+      item.style.setProperty('--reveal-index', String(itemIndex % 8))
+      item.classList.remove('is-visible')
+      item.classList.add('home-scroll-reveal')
+      if (sectionClass) item.classList.add(`reveal-${sectionClass.replace('section-', '')}`)
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          observer.observe(item)
+        })
+      })
+    }
+
+    root.querySelectorAll(revealSelector).forEach(prepareRevealItem)
+
+    const mutationObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (!(node instanceof HTMLElement)) return
+
+          if (node.matches(revealSelector)) prepareRevealItem(node)
+          node.querySelectorAll?.(revealSelector).forEach(prepareRevealItem)
+        })
+      })
+    })
+
+    mutationObserver.observe(root, {
+      childList: true,
+      subtree: true,
+    })
+
+    return () => {
+      mutationObserver.disconnect()
+      observer.disconnect()
+    }
+  }, [])
 
   useLayoutEffect(() => {
     const fixedTop = () => (window.matchMedia('(max-width: 760px)').matches ? 74 : 18)
@@ -845,7 +1419,8 @@ export function HomePage() {
       </div>
       <div className="home-showcase-categories" aria-label="피어싱 카테고리">
         {homeCategoryChips.map((category) => <Link key={category.label} to={toLocalePath(category.to)}>
-          {category.label}
+          <CategoryChipIcon type={category.icon} />
+          <b>{category.label}</b>
         </Link>)}
       </div>
     </section>
@@ -863,11 +1438,11 @@ export function HomePage() {
       </button>)}
     </div> : null}
 
-    <ProductSection products={newProducts} sectionId="new-arrival" title="신상품" note="새롭게 입고된 도매 카탈로그 제품입니다." viewAllLabel={copy.viewAll} />
-    <ProductSection products={weeklyProducts} sectionId="weekly-pick" title="주간 추천" note="이번 주 거래처 문의에 추천할 만한 제품입니다." viewAllLabel={copy.viewAll} />
-    <ProductSection products={buyerSelectionProducts} sectionId="buyer-selection" title="바이어 셀렉션" note="국내·해외 바이어 상담에 맞춰 고른 제품입니다." viewAllLabel={copy.viewAll} />
-    <ProductSection products={piercingCatalogProducts} sectionId="piercing-catalog" title="피어싱 카탈로그" note="기본 피어싱 제품군을 빠르게 확인하세요." viewAllLabel={copy.viewAll} />
-    <ProductSection products={premiumJewelryProducts} sectionId="premium-jewelry" title="프리미엄 주얼리" note="실버, 14K, 큐빅 중심의 고급 라인입니다." viewAllLabel={copy.viewAll} />
+    <ProductSection products={newProducts} sectionId="new-arrival" title="NEW" note="새롭게 준비한 신규 라인과 이번 주 추천 아이템입니다." />
+    <ProductSection products={weeklyProducts} sectionId="weekly-pick" title="WEEKLY BEST" />
+    <BuyerCollectionSection />
+    <ProductSection products={piercingCatalogProducts} sectionId="piercing-catalog" title="Piercing" note="피어싱=귀족, 더이상 말이 필요한가요?" />
+    <ProductSection products={steadySelectionProducts} sectionId="steady-selection" title="스테디 셀렉션" note="꾸준히 찾는 데일리 라인을 모았습니다." />
 
     <section className="campaign-banner">
       <div>
@@ -898,13 +1473,6 @@ export function HomePage() {
       </article>
     </section>
 
-    <section className="brand-note">
-      <MessageCircle size={21} />
-      <div>
-        <ScrambleText as="strong" persistKey="brand-note-title">{copy.brandNoteTitle}</ScrambleText>
-        <ScrambleText persistKey="brand-note-text">{copy.brandNoteText}</ScrambleText>
-      </div>
-    </section>
   </main>
 }
 

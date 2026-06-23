@@ -222,6 +222,65 @@ const shellCompactViewerLabels = {
   },
 }
 
+const footerInfo = {
+  kr: {
+    brand: 'NOBLESSE',
+    note: '국내·해외 B2B 거래처를 위한 프리미엄 피어싱 카탈로그',
+    companyTitle: 'COMPANY',
+    companyLines: ['귀족 · Noblesse Piercing', 'B2B 피어싱 카탈로그 / 거래처 문의 지원', '사업자 정보는 운영자 확인 후 입력됩니다.'],
+    csTitle: 'CS CENTER',
+    csLines: ['거래처 문의 상담', 'Email · KakaoTalk · WhatsApp', 'MON-FRI 10:00 - 17:00', 'LUNCH 12:30 - 13:30'],
+    quoteTitle: 'QUOTE INFO',
+    quoteLines: ['승인 후 가격 확인 가능', '견적 리스트에서 상품 검토', '최종 거래 조건은 담당자 확인 후 안내'],
+    snsTitle: 'SNS',
+    snsLines: ['Instagram', 'KakaoTalk', 'Noblesse updates'],
+    links: ['회사소개', '이용약관', '개인정보처리방침', '이용안내'],
+    copyright: 'Copyright © Noblesse. All rights reserved.',
+  },
+  en: {
+    brand: 'NOBLESSE',
+    note: 'Premium piercing catalog for domestic and international B2B buyers',
+    companyTitle: 'COMPANY',
+    companyLines: ['Noblesse Piercing', 'B2B piercing catalog / trade inquiry support', 'Business registration details will be added after operator confirmation.'],
+    csTitle: 'CS CENTER',
+    csLines: ['Trade inquiry support', 'Email · KakaoTalk · WhatsApp', 'MON-FRI 10:00 - 17:00', 'LUNCH 12:30 - 13:30'],
+    quoteTitle: 'QUOTE INFO',
+    quoteLines: ['Price available after approval', 'Review items in Inquiry List', 'Final trade terms are confirmed by manager'],
+    snsTitle: 'SNS',
+    snsLines: ['Instagram', 'KakaoTalk', 'Noblesse updates'],
+    links: ['Company', 'Agreement', 'Privacy Policy', 'Guide'],
+    copyright: 'Copyright © Noblesse. All rights reserved.',
+  },
+  jp: {
+    brand: 'NOBLESSE',
+    note: '国内・海外B2B取引先向けプレミアムピアスカタログ',
+    companyTitle: 'COMPANY',
+    companyLines: ['貴族 · Noblesse Piercing', 'B2Bピアスカタログ / 取引先お問い合わせ対応', '事業者情報は運営者確認後に入力されます。'],
+    csTitle: 'CS CENTER',
+    csLines: ['取引先お問い合わせ対応', 'Email · KakaoTalk · WhatsApp', 'MON-FRI 10:00 - 17:00', 'LUNCH 12:30 - 13:30'],
+    quoteTitle: 'QUOTE INFO',
+    quoteLines: ['承認後に価格確認可能', 'お問い合わせリストで商品確認', '最終取引条件は担当者確認後に案内'],
+    snsTitle: 'SNS',
+    snsLines: ['Instagram', 'KakaoTalk', 'Noblesse updates'],
+    links: ['会社紹介', '利用規約', 'プライバシーポリシー', '利用案内'],
+    copyright: 'Copyright © Noblesse. All rights reserved.',
+  },
+  cn: {
+    brand: 'NOBLESSE',
+    note: '面向国内外B2B买家的高端穿孔商品目录',
+    companyTitle: 'COMPANY',
+    companyLines: ['贵族 · Noblesse Piercing', 'B2B穿孔商品目录 / 贸易咨询支持', '营业信息将在运营者确认后填写。'],
+    csTitle: 'CS CENTER',
+    csLines: ['贸易咨询支持', 'Email · KakaoTalk · WhatsApp', 'MON-FRI 10:00 - 17:00', 'LUNCH 12:30 - 13:30'],
+    quoteTitle: 'QUOTE INFO',
+    quoteLines: ['审批后可查看价格', '在询价列表中查看商品', '最终交易条件由负责人确认后提供'],
+    snsTitle: 'SNS',
+    snsLines: ['Instagram', 'KakaoTalk', 'Noblesse updates'],
+    links: ['公司介绍', '使用条款', '隐私政策', '使用指南'],
+    copyright: 'Copyright © Noblesse. All rights reserved.',
+  },
+}
+
 const sideMemberLabels = {
   kr: {
     inquiryList: '견적 리스트',
@@ -246,37 +305,6 @@ const sideMemberLabels = {
     loginRequired: '登录后可查看。',
     my: 'MY',
     myInquiries: '我的报价',
-  },
-}
-
-const runtimeErrorCopy = {
-  kr: {
-    runtimeConfiguration: '런타임 설정',
-    apiConnectionRequired: 'API 연결 확인이 필요합니다',
-    catalogApiUnavailable: '카탈로그 API를 사용할 수 없습니다.',
-    currentMode: '현재 모드',
-    mockPreviewDevelopmentOnly: '목 미리보기는 명시적인 개발 모드에서만 사용할 수 있습니다.',
-  },
-  en: {
-    runtimeConfiguration: 'Runtime configuration',
-    apiConnectionRequired: 'API connection required',
-    catalogApiUnavailable: 'The catalog API is not available.',
-    currentMode: 'Current mode',
-    mockPreviewDevelopmentOnly: 'Mock preview is only available in explicit development mode.',
-  },
-  jp: {
-    runtimeConfiguration: 'ランタイム設定',
-    apiConnectionRequired: 'API接続の確認が必要です',
-    catalogApiUnavailable: 'カタログAPIを利用できません。',
-    currentMode: '現在のモード',
-    mockPreviewDevelopmentOnly: 'モックプレビューは明示的な開発モードでのみ利用できます。',
-  },
-  cn: {
-    runtimeConfiguration: '运行时配置',
-    apiConnectionRequired: '需要检查 API 连接',
-    catalogApiUnavailable: '目录 API 当前不可用。',
-    currentMode: '当前模式',
-    mockPreviewDevelopmentOnly: '模拟预览仅可在明确的开发模式中使用。',
   },
 }
 
@@ -336,25 +364,6 @@ const loginModalCopy = {
     guest: '以访客浏览',
     register: '会员注册',
     close: '关闭登录弹窗',
-  },
-}
-
-const loginErrorCopy = {
-  kr: {
-    configError: 'Firebase 로그인 설정이 필요합니다.',
-    failed: '로그인에 실패했습니다. 계정을 확인해주세요.',
-  },
-  en: {
-    configError: 'Firebase client configuration is required for login.',
-    failed: 'Login failed. Please check your account.',
-  },
-  jp: {
-    configError: 'Firebase のログイン設定が必要です。',
-    failed: 'ログインに失敗しました。アカウントを確認してください。',
-  },
-  cn: {
-    configError: '需要配置 Firebase 登录信息。',
-    failed: '登录失败。请检查账号。',
   },
 }
 
@@ -492,9 +501,8 @@ export function StoreShell() {
   } = useCommerce()
   const { locale, localeMeta, toLanguagePath, toLocalePath } = useLocalePath()
   const copy = shellCopy[locale] ?? shellCopy.kr
-  const runtimeCopy = runtimeErrorCopy[locale] ?? runtimeErrorCopy.kr
+  const footer = footerInfo[locale] ?? footerInfo.kr
   const loginCopy = loginModalCopy[locale] ?? loginModalCopy.kr
-  const loginError = loginErrorCopy[locale] ?? loginErrorCopy.kr
   const compactViewerLabels = shellCompactViewerLabels[locale] ?? copy.viewerLabels
   const sideCopy = sideMemberLabels[locale] ?? sideMemberLabels.kr
   const headerBrandName = localeMeta?.brandName ?? '귀족'
@@ -503,8 +511,6 @@ export function StoreShell() {
   const isMockMode = dataMode === 'mock'
   const normalizedPathname = location.pathname.replace(/\/+$/, '') || '/'
   const isHomeImageRoute = normalizedPathname === '/' || supportedLocales.some((item) => normalizedPathname === `/${item}`)
-  const normalizedRoutePath = normalizedPathname.replace(/^\/(kr|en|jp|cn)(?=\/|$)/, '') || '/'
-  const isAdminRoute = normalizedRoutePath === '/admin' || normalizedRoutePath.startsWith('/admin/')
 
   useEffect(() => {
     const nav = navRef.current
@@ -748,7 +754,7 @@ export function StoreShell() {
       closeLoginModal()
       navigate(toLocalePath('/account'))
     } catch (error) {
-      setLoginModalNotice(error?.code === 'CONFIGURATION_ERROR' ? loginError.configError : (error?.message || loginError.failed))
+      setLoginModalNotice(error?.message || 'Login failed. Please check your account.')
     }
   }
 
@@ -777,7 +783,7 @@ export function StoreShell() {
 
   const shouldRenderCompactSearch = isCompactSearchOpen || isCompactSearchClosing
 
-  return <div className={`site-shell ${isHomeImageRoute ? 'home-image-shell' : ''} ${isAdminRoute ? 'admin-route-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isSideLayout ? 'has-side-layout' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''} ${isPreviewBarHidden ? 'has-preview-hidden' : 'has-preview-visible'}`.trim()}>
+  return <div className={`site-shell ${isHomeImageRoute ? 'home-image-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isSideLayout ? 'has-side-layout' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''} ${isPreviewBarHidden ? 'has-preview-hidden' : 'has-preview-visible'}`.trim()}>
     <div className={`top-marquee ${isMarqueeCollapsed ? 'is-collapsed' : ''}`} style={topMarqueeStyle} aria-label={`${headerBrandName} material notice`}>
       <div className="top-marquee-track" aria-hidden="true">
         {Array.from({ length: 4 }).map((_, index) => <span key={index}>{topMarqueeText}</span>)}
@@ -934,7 +940,7 @@ export function StoreShell() {
         </div>
       </div>}
 
-      {isPending && <div className="header-lower" style={compactHeaderCollapseStyle}>
+      {(buyerAccess.canRequestQuote || isPending) && <div className="header-lower" style={compactHeaderCollapseStyle}>
         <nav className="header-nav" ref={navRef} aria-label={copy.mainNav}>
           <span
             aria-hidden="true"
@@ -944,6 +950,7 @@ export function StoreShell() {
               width: `${navIndicator.width}px`,
             }}
           />
+          {buyerAccess.canRequestQuote && <NavLink to={toLocalePath('/request-quote')}>{copy.requestQuote}</NavLink>}
           {isPending && <NavLink to={toLocalePath('/approval-pending')}>{copy.pending}</NavLink>}
         </nav>
       </div>}
@@ -1014,15 +1021,45 @@ export function StoreShell() {
     </button>}
     {dataStatus === 'error' && <main className="content runtime-config-error" role="alert">
       <section>
-        <p>{runtimeCopy.runtimeConfiguration}</p>
-        <h1>{runtimeCopy.apiConnectionRequired}</h1>
-        <span>{dataError || runtimeCopy.catalogApiUnavailable}</span>
-        <small>{runtimeCopy.currentMode}: {runtimeConfig?.dataMode || dataMode}. {runtimeCopy.mockPreviewDevelopmentOnly}</small>
+        <p>Runtime configuration</p>
+        <h1>Staging API connection required</h1>
+        <span>{dataError || 'The catalog API is not available.'}</span>
+        <small>Current mode: {runtimeConfig?.dataMode || dataMode}. Mock preview is only available in explicit development mode.</small>
       </section>
     </main>}
     <div className="locale-transition-frame" key={`locale-content-${locale}`}>
       {dataStatus === 'error' ? null : <Outlet />}
     </div>
-    <footer className="site-footer"><strong>{headerBrandName}</strong><span>{copy.footer}</span><Heart size={15} /></footer>
+    <footer className="site-footer">
+      <div className="site-footer-inner">
+        <section className="site-footer-brand" aria-label="Noblesse company summary">
+          <strong>{footer.brand}</strong>
+          <p>{footer.note}</p>
+          <nav className="site-footer-links" aria-label="Footer links">
+            {footer.links.map((item) => <span key={item}>{item}</span>)}
+          </nav>
+          <small>{footer.copyright}</small>
+        </section>
+        <section className="site-footer-info" aria-label="Noblesse footer information">
+          <div className="site-footer-column">
+            <h2>{footer.csTitle}</h2>
+            {footer.csLines.map((line) => <span key={line}>{line}</span>)}
+          </div>
+          <div className="site-footer-column">
+            <h2>{footer.quoteTitle}</h2>
+            {footer.quoteLines.map((line) => <span key={line}>{line}</span>)}
+          </div>
+          <div className="site-footer-column">
+            <h2>{footer.companyTitle}</h2>
+            {footer.companyLines.map((line) => <span key={line}>{line}</span>)}
+          </div>
+          <div className="site-footer-column">
+            <h2>{footer.snsTitle}</h2>
+            {footer.snsLines.map((line) => <span key={line}>{line}</span>)}
+            <Heart className="site-footer-heart" size={15} />
+          </div>
+        </section>
+      </div>
+    </footer>
   </div>
 }
