@@ -8038,7 +8038,7 @@ h6 {
   place-items: center;
   padding: 0;
   text-align: center;
-  transform: translateX(clamp(-5.25rem, -5vw, -2.25rem));
+  transform: none;
 }
 
 .section-weekly-pick .home-product-section-title h2 {
@@ -9817,7 +9817,7 @@ h6 {
 }
 
 .section-weekly-pick .home-product-section-title {
-  transform: translateX(clamp(-5.25rem, -5vw, -2.25rem)) !important;
+  transform: none !important;
 }
 
 .section-new-arrival .home-scroll-reveal,
