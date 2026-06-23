@@ -671,3 +671,13 @@ Before implementation starts:
 - Secret-level application accessor was not granted.
 - No DB login/query, runtime verifier, application deploy, Firebase deploy, or production mutation occurred.
 - Backend readiness next still requires runtime DB user/secret recovery before verifier or application DB rollout.
+
+## N38-B6R2 Runtime DB User Secret Recovery Completion
+
+- Runtime DB user/secret recovery completion report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_COMPLETION_REPORT.md`.
+- Password reset was attempted exactly once and failed.
+- Runtime DB login user remains present with the expected custom role metadata.
+- Runtime secret version was not added.
+- Secret-level application accessor was not granted.
+- No DB login/query, runtime verifier, application deploy, Firebase deploy, or production mutation occurred.
+- Backend readiness next requires runtime DB user/secret recovery diagnosis before verifier or application DB rollout.

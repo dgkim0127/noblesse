@@ -105,3 +105,13 @@
 - Secret accessor grant: No.
 - DB login/query, runtime verifier, Job execution, app/Firebase deploy, and production mutation: No.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
+## N38-B6R2 Recovery Completion Follow-up
+
+- Completion report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_COMPLETION_REPORT.md`.
+- Password reset executed: Yes, exactly once.
+- Password reset result: Failed.
+- Runtime secret version added: No.
+- Application secretAccessor grant: No.
+- Runtime credential handoff: No-Go.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_DIAGNOSIS = YES`.

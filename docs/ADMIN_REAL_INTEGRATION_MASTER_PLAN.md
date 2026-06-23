@@ -587,6 +587,16 @@ No-Go remains:
 - Application/Firebase deploy and production mutation: No.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
 
+## N38-B6R2 Runtime DB User Secret Recovery Follow-up
+
+- Runtime DB user/secret recovery completion report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_COMPLETION_REPORT.md`.
+- Password reset attempted: Yes, exactly once.
+- Password reset result: Failed.
+- Runtime secret version added: No.
+- DB login/query and runtime verifier execution: No.
+- Application/Firebase deploy and production mutation: No.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_DIAGNOSIS = YES`.
+
 ## N38-B6R Runtime DB User Secret Recovery Follow-up
 
 - Runtime DB user/secret recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_REPORT.md`.

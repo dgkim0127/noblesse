@@ -103,3 +103,18 @@
 ## Next Gate
 
 - `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`
+
+## N38-B6R2 Recovery Completion Follow-up
+
+- Completion report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_COMPLETION_REPORT.md`.
+- Password reset executed: Yes, exactly once.
+- Password reset result: Failed.
+- Runtime DB login user remains present: Yes.
+- Custom role metadata remains present: Yes.
+- Explicit cloudsqlsuperuser assignment: No.
+- Runtime secret version count remains 0.
+- Secret version add executed: No.
+- Secret accessor grant: No.
+- DB login/query, Job execution, runtime verifier, app/Firebase deploy, and production mutation: No.
+- Result: Case B - password reset failure.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_DIAGNOSIS = YES`.

@@ -568,6 +568,16 @@ Important:
 - Production DB migration and rollout remain unaffected.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
 
+## N38-B6R2 Runtime DB User Secret Recovery Follow-up
+
+- Runtime DB user/secret recovery completion report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_COMPLETION_REPORT.md`.
+- Password reset attempted: Yes, exactly once.
+- Password reset result: Failed.
+- Staging runtime secret version added: No.
+- No DB login/query, runtime verifier, application deploy, Firebase deploy, or production mutation occurred.
+- Production DB migration and rollout remain unaffected.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_DIAGNOSIS = YES`.
+
 ## N38-B6R Runtime DB User Secret Recovery Follow-up
 
 - Runtime DB user/secret recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_REPORT.md`.

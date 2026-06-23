@@ -1901,3 +1901,26 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Production mutation: No.
 - Result: Case C - user success / secret version not added.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
+## N38-B6R2 Follow-up - Staging runtime DB user secret recovery completion
+
+- Scope: Reset existing staging runtime DB user password and add first runtime secret version only after reset success.
+- Node credential generation: Success.
+- PowerShell direct gcloud invocation: No.
+- Password reset executed: Yes, exactly once.
+- Password reset result: Failed.
+- Runtime DB login user remains present: Yes.
+- Custom role metadata remains present: Yes.
+- Explicit cloudsqlsuperuser assignment: No.
+- Runtime secret version added: No.
+- Runtime secret enabled version count: 0.
+- Application secretAccessor grant: No.
+- Password, DB URL, service account email, connection name, secret value, token, private key, flags-file content, and TEMP output recorded: No.
+- TEMP files removed: Yes.
+- DB login/query: No.
+- Job execution: No.
+- Runtime verifier execution: No.
+- Application/Firebase deploy: No.
+- Production mutation: No.
+- Result: Case B - password reset failure.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_DIAGNOSIS = YES`.

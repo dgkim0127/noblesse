@@ -443,6 +443,17 @@ Important:
 - Production secret creation remains No-Go.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
 
+## N38-B6R2 Staging Runtime DB Secret Recovery Follow-up
+
+- Completion report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_COMPLETION_REPORT.md`.
+- Password reset attempted: Yes, exactly once.
+- Password reset result: Failed.
+- Runtime secret version added: No.
+- Runtime secret enabled version count: 0.
+- Secret value, DB URL, and password recorded: No.
+- Production secret creation remains No-Go.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_DIAGNOSIS = YES`.
+
 ## N38-B6R Staging Runtime DB Secret Recovery Follow-up
 
 - Recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_REPORT.md`.
