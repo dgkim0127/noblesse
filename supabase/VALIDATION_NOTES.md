@@ -1979,3 +1979,20 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret value, DB URL, password, operation ID, raw gcloud stdout/stderr recorded: No.
 - Result category: Case B - Secret stage/disable failure.
 - Next gate: `APPROVE_STAGING_RUNTIME_SECRET_STAGING_RECOVERY = YES`.
+
+## N38-B6S Follow-up - Staging runtime secret version add diagnosis
+
+- Scope: Read-only diagnosis of failed runtime secret version add.
+- Follow-up report: `docs/ADMIN_STAGING_RUNTIME_SECRET_VERSION_ADD_DIAGNOSIS.md`.
+- AddSecretVersion audit event found: No.
+- Request reached Secret Manager API: No.
+- Caller add-version permission: Unknown.
+- Active project/resource context: Match.
+- Parser/path result: plain data-file paths accepted; explicit-project add-version help shape failed before API reachability.
+- Secret version add retry: No.
+- Password reset, IAM mutation, secret access, DB login/query, psql, runtime verifier: No.
+- Cloud Run Job execution: No.
+- Application deploy, Firebase deploy, production mutation: No.
+- Secret value, DB URL, password, operation ID, raw gcloud stdout/stderr recorded: No.
+- Classification: A - LOCAL_WRAPPER_OR_PATH_FAILURE.
+- Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_FIX = YES`.

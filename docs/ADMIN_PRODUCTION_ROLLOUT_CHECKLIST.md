@@ -854,3 +854,14 @@ Required before 32K:
 - Runtime verifier and application DB rollout: No-Go.
 - Production rollout remains blocked.
 - Next gate: `APPROVE_STAGING_RUNTIME_SECRET_STAGING_RECOVERY = YES`.
+
+## N38-B6S Runtime Secret Version Add Diagnosis Follow-up
+
+- Follow-up report: `docs/ADMIN_STAGING_RUNTIME_SECRET_VERSION_ADD_DIAGNOSIS.md`.
+- Diagnosis scope: Read-only.
+- AddSecretVersion audit event found: No.
+- Parser/path result: explicit-project add-version help shape failed before API reachability.
+- Secret version add retry, password reset, IAM mutation, secret access, DB login/query, Job execution, app/Firebase deploy, and production mutation: No.
+- Classification: A - LOCAL_WRAPPER_OR_PATH_FAILURE.
+- Runtime verifier, application DB rollout, and production rollout remain blocked.
+- Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_FIX = YES`.
