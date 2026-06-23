@@ -586,3 +586,13 @@ No-Go remains:
 - DB login/query and runtime verifier execution: No.
 - Application/Firebase deploy and production mutation: No.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
+## N38-B6R Runtime DB User Secret Recovery Follow-up
+
+- Runtime DB user/secret recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- Runtime DB login user created: Yes.
+- Runtime secret version added: No.
+- Application runtime secretAccessor grant: No.
+- DB login/query and runtime verifier execution: No.
+- Application/Firebase deploy and production mutation: No.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.

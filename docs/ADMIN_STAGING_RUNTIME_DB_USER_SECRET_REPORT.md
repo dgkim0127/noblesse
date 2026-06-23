@@ -91,3 +91,17 @@
 ## Next Gate
 
 - `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`
+
+## N38-B6R Recovery Follow-up
+
+- Recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- Node credential generation: Success.
+- Runtime DB login user created: Yes, exactly once.
+- Custom role metadata: Yes.
+- Explicit cloudsqlsuperuser assignment: No.
+- Secret version added: No.
+- Runtime secret version count: 0.
+- Failure class: Case C - user success / secret version not added.
+- Secret accessor grant: No.
+- DB login/query, runtime verifier, Job execution, app/Firebase deploy, and production mutation: No.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.

@@ -1880,3 +1880,24 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Production mutation: No.
 - Result: Safe partial state; runtime credential handoff No-Go.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
+## N38-B6R Follow-up - Staging runtime DB user secret recovery
+
+- Scope: Recover from the N38-B6 empty runtime secret container partial state.
+- Node credential generation: Success.
+- PowerShell crypto used: No.
+- Runtime DB login user created: Yes, exactly once.
+- Custom role metadata: Yes.
+- Explicit cloudsqlsuperuser assignment: No.
+- Runtime secret version added: No.
+- Runtime secret enabled version count: 0.
+- Application secretAccessor grant: No.
+- Password, DB URL, service account email, connection name, secret value, token, and private key recorded: No.
+- TEMP files removed: Yes.
+- DB login/query: No.
+- Job execution: No.
+- Runtime verifier execution: No.
+- Application/Firebase deploy: No.
+- Production mutation: No.
+- Result: Case C - user success / secret version not added.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.

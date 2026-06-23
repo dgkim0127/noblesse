@@ -442,3 +442,14 @@ Important:
 - Application identity secretAccessor grant: No.
 - Production secret creation remains No-Go.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
+## N38-B6R Staging Runtime DB Secret Recovery Follow-up
+
+- Recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- Runtime DB login user created: Yes.
+- Runtime secret version added: No.
+- Runtime secret enabled version count: 0.
+- Secret value, DB URL, and password recorded: No.
+- Application identity secretAccessor grant: No.
+- Production secret creation remains No-Go.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.

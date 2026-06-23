@@ -151,3 +151,16 @@
 - Application/Firebase deploy: No.
 - Production mutation: No.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
+## N38-B6R Runtime DB User Secret Recovery Follow-up
+
+- Recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- Runtime DB login user created: Yes.
+- Custom role metadata: Yes.
+- Explicit cloudsqlsuperuser assignment: No.
+- Runtime secret version count remains 0.
+- Secret accessor grant: No.
+- Runtime verifier executed: No.
+- Application/Firebase deploy: No.
+- Production mutation: No.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.

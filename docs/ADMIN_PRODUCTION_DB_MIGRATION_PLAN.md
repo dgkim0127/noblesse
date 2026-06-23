@@ -567,3 +567,12 @@ Important:
 - No DB login/query, runtime verifier, application deploy, Firebase deploy, or production mutation occurred.
 - Production DB migration and rollout remain unaffected.
 - Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
+
+## N38-B6R Runtime DB User Secret Recovery Follow-up
+
+- Runtime DB user/secret recovery report: `docs/ADMIN_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY_REPORT.md`.
+- Staging runtime DB login user created: Yes.
+- Staging runtime secret version added: No.
+- No DB login/query, runtime verifier, application deploy, Firebase deploy, or production mutation occurred.
+- Production DB migration and rollout remain unaffected.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_SECRET_RECOVERY = YES`.
