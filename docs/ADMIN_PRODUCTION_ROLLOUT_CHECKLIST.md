@@ -781,3 +781,13 @@ Required before 32K:
 - Staging application DB rollout remains No-Go.
 - Production rollout remains No-Go.
 - Next gate: `APPROVE_STAGING_RUNTIME_PRIVILEGE_HARDENER_FIX_AND_RERUN = YES`.
+
+## N38-B5F Runtime Privilege Hardener Recovery Follow-up
+
+- Confirm `docs/ADMIN_STAGING_RUNTIME_PRIVILEGE_HARDENER_RECOVERY_REPORT.md` before approving runtime user/secret creation.
+- Hardening Job was updated and re-executed exactly once.
+- Staging runtime privilege hardening: Go.
+- Runtime role exists and expected privileges are present.
+- Runtime DB login user, runtime DB secret, runtime verifier, and staging backend deploy remain No-Go.
+- Production rollout remains No-Go.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_AND_SECRET_CREATE = YES`.

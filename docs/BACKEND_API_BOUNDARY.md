@@ -574,3 +574,12 @@ These are candidate endpoint boundaries only. They are not implemented in this s
 - No frontend direct PostgreSQL access was added.
 - No Cloud Run application service deploy happened.
 - Runtime hardening retry, runtime DB user/secret creation, and role E2E remain blocked pending a separate fix/rerun approval.
+
+## N38-B5F Runtime Privilege Hardener Recovery
+
+- Runtime privilege hardener recovery is documented in `docs/ADMIN_STAGING_RUNTIME_PRIVILEGE_HARDENER_RECOVERY_REPORT.md`.
+- The hardener remains an internal Cloud Run Job entrypoint, not a public HTTP route.
+- No Firebase Hosting `/api` rewrite was added.
+- No frontend direct PostgreSQL access was added.
+- No Cloud Run application service deploy happened.
+- Runtime DB user/secret creation and role E2E remain blocked pending a separate approval.

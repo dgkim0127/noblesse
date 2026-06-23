@@ -562,3 +562,17 @@ No-Go remains:
 - Atomicity issue identified: hardener validation currently happens after commit; recovery must validate before commit and rollback on failed checks.
 - Runtime DB user creation, runtime secret creation, Cloud Run application deploy, Firebase deploy, and production rollout remain blocked.
 - Next gate is `APPROVE_STAGING_RUNTIME_PRIVILEGE_HARDENER_FIX_AND_RERUN = YES`.
+
+## N38-B5F Runtime Privilege Hardener Recovery
+
+- Recovery report: `docs/ADMIN_STAGING_RUNTIME_PRIVILEGE_HARDENER_RECOVERY_REPORT.md`.
+- Hardener fix commit: `6b6daece82ef875c987031545ec1eb58fe37974f`.
+- Ownership-aware preflight and validation-before-commit were added.
+- Hardening Job was updated and executed exactly once.
+- Hardening Job result: Success.
+- Runtime role created: Yes.
+- Expected runtime privilege missing count: 0.
+- Unexpected runtime privilege count: 0.
+- Migration ledger access: No.
+- Runtime DB user creation, runtime secret creation, runtime verifier, application deploy, Firebase deploy, and production rollout remain blocked.
+- Next gate is `APPROVE_STAGING_RUNTIME_DB_USER_AND_SECRET_CREATE = YES`.

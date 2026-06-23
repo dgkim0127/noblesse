@@ -137,3 +137,15 @@
 - Expected runtime privilege checks missing: 36 of 36.
 - Runtime hardening retry, runtime user/secret creation, application deploy, Firebase deploy, and production rollout remain No-Go.
 - Next gate: `APPROVE_STAGING_RUNTIME_PRIVILEGE_HARDENER_FIX_AND_RERUN = YES`.
+
+## N38-B5F Runtime Privilege Hardener Recovery Follow-up
+
+- Recovery report: `docs/ADMIN_STAGING_RUNTIME_PRIVILEGE_HARDENER_RECOVERY_REPORT.md`.
+- Hardening Job was updated and re-executed exactly once.
+- Existing migration Job execution count remained 12.
+- Existing RBAC verification Job execution count remained 1.
+- Existing diagnosis Job execution count remained 1.
+- Hardening Job execution count became 2.
+- Staging runtime privilege hardening: Go.
+- Runtime user/secret creation, runtime verifier, application deploy, Firebase deploy, and production rollout remain No-Go.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_AND_SECRET_CREATE = YES`.

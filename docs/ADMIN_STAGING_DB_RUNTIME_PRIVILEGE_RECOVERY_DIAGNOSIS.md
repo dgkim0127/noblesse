@@ -94,3 +94,16 @@
 ## Next Gate
 
 - `APPROVE_STAGING_RUNTIME_PRIVILEGE_HARDENER_FIX_AND_RERUN = YES`
+
+## N38-B5F Hardener Recovery Follow-up
+
+- Recovery report: `docs/ADMIN_STAGING_RUNTIME_PRIVILEGE_HARDENER_RECOVERY_REPORT.md`.
+- The hardener now performs ownership-aware authority preflight before mutation.
+- PUBLIC database CONNECT and schema USAGE are accepted as safe effective access when CREATE is not public.
+- Database/schema ACL mutation is skipped when effective state is already safe.
+- Runtime privilege verification now happens before COMMIT.
+- Failed checks now rollback before COMMIT.
+- Hardening Job was updated and executed exactly once.
+- Hardening result: Go.
+- Runtime user/secret creation remains No-Go pending the next gate.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_AND_SECRET_CREATE = YES`.

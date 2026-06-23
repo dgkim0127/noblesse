@@ -547,3 +547,14 @@ Important:
 - Expected runtime privilege checks missing: 36 of 36.
 - Hardening retry, runtime user/secret creation, staging application DB rollout, and production schema migration remain No-Go.
 - Next gate: `APPROVE_STAGING_RUNTIME_PRIVILEGE_HARDENER_FIX_AND_RERUN = YES`.
+
+## N38-B5F Runtime Privilege Hardener Recovery Follow-up
+
+- Recovery report: `docs/ADMIN_STAGING_RUNTIME_PRIVILEGE_HARDENER_RECOVERY_REPORT.md`.
+- Hardening Job update and one approved re-execution succeeded.
+- Staging runtime privilege hardening: Go.
+- Runtime user/secret creation and runtime verifier remain separate No-Go gates.
+- Staging application DB rollout remains No-Go.
+- Production schema migration execution: No.
+- Production DB rollout remains No-Go.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_AND_SECRET_CREATE = YES`.

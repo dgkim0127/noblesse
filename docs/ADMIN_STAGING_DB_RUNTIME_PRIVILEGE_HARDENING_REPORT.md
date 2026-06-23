@@ -118,3 +118,23 @@
 - Expected runtime privilege checks missing: 36 of 36.
 - Atomicity finding: the current hardener evaluates failed checks after commit; future recovery must validate before commit and rollback on failed checks.
 - Next gate: `APPROVE_STAGING_RUNTIME_PRIVILEGE_HARDENER_FIX_AND_RERUN = YES`.
+
+## N38-B5F Hardener Recovery Follow-up
+
+- Recovery report: `docs/ADMIN_STAGING_RUNTIME_PRIVILEGE_HARDENER_RECOVERY_REPORT.md`.
+- Fix code commit: `6b6daece82ef875c987031545ec1eb58fe37974f`.
+- Ownership-aware preflight added: Yes.
+- Validation before commit added: Yes.
+- Hardening Job updated: Yes.
+- Hardening Job execution count: 1 -> 2.
+- Hardening Job result: Success.
+- Database/schema ACL mutation executed: No.
+- Runtime role created: Yes.
+- Expected runtime privilege missing count: 0.
+- Unexpected runtime privilege count: 0.
+- Migration ledger access: No.
+- Runtime user created: No.
+- Runtime secret created: No.
+- Runtime verifier executed: No.
+- Application/Firebase deploy: No.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_AND_SECRET_CREATE = YES`.

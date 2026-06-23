@@ -1832,3 +1832,35 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Firebase deploy or `/api` rewrite: No.
 - Production data mutation: No.
 - Conclusion: Recovery diagnosis is Go; next gate is `APPROVE_STAGING_RUNTIME_PRIVILEGE_HARDENER_FIX_AND_RERUN = YES`.
+
+## N38-B5F Runtime Privilege Hardener Recovery Follow-up
+
+- Date: 2026-06-23
+- Change: Added `docs/ADMIN_STAGING_RUNTIME_PRIVILEGE_HARDENER_RECOVERY_REPORT.md`.
+- Scope: Ownership-aware, atomic staging runtime privilege hardener fix and one approved hardening Job re-execution.
+- Fix code commit: `6b6daece82ef875c987031545ec1eb58fe37974f`.
+- Backend tests: 262 passed.
+- Frontend tests: 70 passed.
+- Backend targeted lint: Pass.
+- Root lint: Blocked by existing out-of-scope `src/pages/HomePage.jsx` hook-order dirty change.
+- Build: Pass.
+- Hardening Job update: Success.
+- Hardening Job execute command run: Yes, exactly once.
+- Hardening Job execution count: 1/2.
+- Hardening Job succeeded: Yes.
+- Runtime role created: Yes.
+- Expected runtime privilege missing count: 0.
+- Unexpected runtime privilege count: 0.
+- Migration ledger access: No.
+- Migration Job execution count remained 12.
+- RBAC verification Job execution count remained 1.
+- Diagnosis Job execution count remained 1.
+- Runtime DB user created: No.
+- Runtime DB secret created: No.
+- Runtime verifier executed: No.
+- Secret value access/read by operator: No.
+- DB connection/psql executed by operator: No.
+- Cloud Run application deploy: No.
+- Firebase deploy or `/api` rewrite: No.
+- Production data mutation: No.
+- Conclusion: Staging runtime privilege hardening is Go; next gate is `APPROVE_STAGING_RUNTIME_DB_USER_AND_SECRET_CREATE = YES`.

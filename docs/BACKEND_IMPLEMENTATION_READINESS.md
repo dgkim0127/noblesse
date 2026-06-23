@@ -643,3 +643,12 @@ Before implementation starts:
 - Runtime group role exists: No.
 - Expected runtime privilege checks missing: 36 of 36.
 - Backend readiness next requires a hardener fix/rerun approval; application DB rollout remains blocked.
+
+## N38-B5F Runtime Privilege Hardener Recovery
+
+- Recovery report: `docs/ADMIN_STAGING_RUNTIME_PRIVILEGE_HARDENER_RECOVERY_REPORT.md`.
+- Ownership-aware hardener preflight and validation-before-commit were implemented.
+- Hardening Job was updated and executed exactly once.
+- Staging runtime privilege hardening: Go.
+- Root lint remains blocked by an existing out-of-scope `src/pages/HomePage.jsx` hook-order dirty change.
+- Backend readiness next requires runtime DB user/secret creation and runtime verifier approval; application DB rollout remains blocked.

@@ -422,3 +422,12 @@ Important:
 - Classification: B - database/schema ownership or runtime role setup failure.
 - Runtime group role exists: No.
 - Next gate: `APPROVE_STAGING_RUNTIME_PRIVILEGE_HARDENER_FIX_AND_RERUN = YES`.
+
+## N38-B5F Runtime Privilege Hardener Recovery Follow-up
+
+- Recovery report: `docs/ADMIN_STAGING_RUNTIME_PRIVILEGE_HARDENER_RECOVERY_REPORT.md`.
+- Hardening Job used the existing migration DB URL secret reference; secret payload was not accessed/read by the operator.
+- Runtime DB privilege hardening: Go.
+- Runtime DB secret creation: No.
+- Production secret creation: No.
+- Next gate: `APPROVE_STAGING_RUNTIME_DB_USER_AND_SECRET_CREATE = YES`.
