@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   applyDiscount,
   multiplyMoney,
+  sumMoney,
   toMinorUnits,
   validateMoneyPrecision
 } from "../src/utils/money.js";
@@ -46,4 +47,13 @@ test("money multiplication uses integer minor units", () => {
   assert.equal(multiplyMoney(8.99, 3, "USD"), 26.97);
   assert.equal(multiplyMoney(51.22, 3, "CNY"), 153.66);
   assert.equal(multiplyMoney(10560, 2, "KRW"), 21120);
+});
+
+test("money summation uses integer minor units and rejects unsafe totals", () => {
+  assert.equal(sumMoney([26.97, 9.05], "USD"), 36.02);
+  assert.equal(sumMoney([51.22, 102.44], "CNY"), 153.66);
+  assert.equal(sumMoney([10560, 21120], "KRW"), 31680);
+  assert.equal(multiplyMoney(Number.MAX_SAFE_INTEGER, 2, "KRW"), null);
+  assert.equal(sumMoney([Number.MAX_SAFE_INTEGER, 1], "KRW"), null);
+  assert.equal(toMinorUnits(Number.MAX_SAFE_INTEGER + 1, "KRW"), null);
 });

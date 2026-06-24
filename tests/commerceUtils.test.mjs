@@ -108,11 +108,25 @@ test('buildInquiryRows preserves subtotal cents', () => {
 
 test('buildInquirySnapshot rejects mixed currency rows', () => {
   const snapshot = buildInquirySnapshot({
-    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'KR', preferredLanguage: 'kr', currency: 'KRW' },
+    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'KR', preferredLanguage: 'kr', assignedMarket: 'US', currency: 'USD' },
     inquiryId: 'INQ-001',
     inquiryRows: [
-      { productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 1, currency: 'USD', priceSnapshot: 8.99, subtotal: 8.99 },
-      { productId: 'NB-002', productCode: 'NB-002', productName: 'Two', material: 'Cubic', color: '', size: '', moq: 1, quantity: 1, currency: 'CNY', priceSnapshot: 51.22, subtotal: 51.22 },
+      { productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 1, market: 'US', currency: 'USD', priceSnapshot: 8.99, subtotal: 8.99 },
+      { productId: 'NB-002', productCode: 'NB-002', productName: 'Two', material: 'Cubic', color: '', size: '', moq: 1, quantity: 1, market: 'CN', currency: 'CNY', priceSnapshot: 51.22, subtotal: 51.22 },
+    ],
+    requestMemo: '',
+  })
+
+  assert.equal(snapshot, null)
+})
+
+test('buildInquirySnapshot rejects mixed market rows', () => {
+  const snapshot = buildInquirySnapshot({
+    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'US', preferredLanguage: 'en', assignedMarket: 'US', currency: 'USD' },
+    inquiryId: 'INQ-001',
+    inquiryRows: [
+      { productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 1, market: 'US', currency: 'USD', priceSnapshot: 8.99, subtotal: 8.99 },
+      { productId: 'NB-002', productCode: 'NB-002', productName: 'Two', material: 'Cubic', color: '', size: '', moq: 1, quantity: 1, market: 'GLOBAL', currency: 'USD', priceSnapshot: 9.05, subtotal: 9.05 },
     ],
     requestMemo: '',
   })
@@ -122,16 +136,17 @@ test('buildInquirySnapshot rejects mixed currency rows', () => {
 
 test('buildInquirySnapshot sums same-currency cents without drift', () => {
   const snapshot = buildInquirySnapshot({
-    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'US', preferredLanguage: 'en', currency: 'USD' },
+    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'US', preferredLanguage: 'en', assignedMarket: 'US', currency: 'USD' },
     inquiryId: 'INQ-001',
     inquiryRows: [
-      { productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 3, currency: 'USD', priceSnapshot: 8.99, subtotal: 26.97 },
-      { productId: 'NB-002', productCode: 'NB-002', productName: 'Two', material: 'Cubic', color: '', size: '', moq: 1, quantity: 5, currency: 'USD', priceSnapshot: 1.81, subtotal: 9.05 },
+      { productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 3, market: 'US', currency: 'USD', priceSnapshot: 8.99, subtotal: 26.97 },
+      { productId: 'NB-002', productCode: 'NB-002', productName: 'Two', material: 'Cubic', color: '', size: '', moq: 1, quantity: 5, market: 'US', currency: 'USD', priceSnapshot: 1.81, subtotal: 9.05 },
     ],
     requestMemo: '',
   })
 
   assert.equal(snapshot.estimatedTotal, 36.02)
+  assert.equal(snapshot.market, 'US')
   assert.equal(snapshot.currency, 'USD')
 })
 

@@ -1,5 +1,5 @@
 import { getDisplayCurrency, isValidMarketCurrencyPair, marketCurrency, supportedMarkets } from '../config/currency.js'
-import { applyDiscount, fromMinorUnits, multiplyMoney, toMinorUnits } from '../utils/money.js'
+import { applyDiscount, multiplyMoney, sumMoney } from '../utils/money.js'
 
 export const guestProfile = {
   uid: '',
@@ -280,15 +280,13 @@ export const buildInquiryRows = (inquiryItems, products, buyer, isApproved, prod
 export const buildInquirySnapshot = ({ inquiryRows, buyer, requestMemo, inquiryId }) => {
   const now = new Date().toISOString()
   const currency = inquiryRows[0]?.currency || buyer.currency
-  if (!currency || inquiryRows.some((row) => row.currency !== currency)) return null
-  let estimatedTotalMinor = 0
-  for (const row of inquiryRows) {
-    const minor = toMinorUnits(row.subtotal, currency)
-    if (minor === null) return null
-    estimatedTotalMinor += minor
-  }
+  const market = inquiryRows[0]?.market || buyer.assignedMarket
+  if (!currency || !market) return null
+  if (buyer.currency && buyer.currency !== currency) return null
+  if (buyer.assignedMarket && buyer.assignedMarket !== market) return null
+  if (inquiryRows.some((row) => row.currency !== currency || row.market !== market)) return null
   const totalQuantity = inquiryRows.reduce((sum, row) => sum + row.quantity, 0)
-  const estimatedTotal = fromMinorUnits(estimatedTotalMinor, currency)
+  const estimatedTotal = sumMoney(inquiryRows.map((row) => row.subtotal), currency)
   if (estimatedTotal === null) return null
 
   return {
@@ -297,6 +295,7 @@ export const buildInquirySnapshot = ({ inquiryRows, buyer, requestMemo, inquiryI
     buyerCompanyName: buyer.companyName,
     buyerCountry: buyer.country,
     buyerLanguage: buyer.preferredLanguage,
+    market,
     currency,
     status: 'requested',
     items: inquiryRows.map((row) => ({

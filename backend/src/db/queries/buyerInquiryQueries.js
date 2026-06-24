@@ -1,4 +1,4 @@
-import { applyDiscount, fromMinorUnits, multiplyMoney, toMinorUnits } from "../../utils/money.js";
+import { applyDiscount, multiplyMoney, sumMoney, toMinorUnits } from "../../utils/money.js";
 
 function assertPool(pool) {
   if (!pool) {
@@ -342,10 +342,7 @@ export function createBuyerInquiryQueries(pool) {
 
         const totalItems = pricedItems.length;
         const totalQuantity = pricedItems.reduce((sum, item) => sum + item.quantity, 0);
-        const estimatedTotal = fromMinorUnits(
-          pricedItems.reduce((sum, item) => sum + item.subtotalMinor, 0),
-          viewer.currency
-        );
+        const estimatedTotal = sumMoney(pricedItems.map((item) => item.subtotal), viewer.currency);
         if (estimatedTotal === null) {
           await client.query("rollback");
           return null;

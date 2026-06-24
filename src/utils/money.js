@@ -86,3 +86,14 @@ export function multiplyMoney(value, quantity, currency) {
   if (subtotal > BigInt(Number.MAX_SAFE_INTEGER)) return null
   return fromMinorUnits(Number(subtotal), currency)
 }
+
+export function sumMoney(values, currency) {
+  let total = 0n
+  for (const value of values) {
+    const minor = toMinorUnits(value, currency)
+    if (minor === null) return null
+    total += BigInt(minor)
+    if (total > BigInt(Number.MAX_SAFE_INTEGER)) return null
+  }
+  return fromMinorUnits(Number(total), currency)
+}

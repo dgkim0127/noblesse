@@ -190,3 +190,51 @@ test("createInquiry stores discounted cents and subtotal without floating drift"
   assert.equal(itemInserts[1].params[11], 9.05);
   assert.ok(calls.some((call) => call.sql === "commit"));
 });
+
+test("createInquiry rolls back if subtotal exceeds safe integer range", async () => {
+  const calls = [];
+  const client = {
+    async query(sql, params) {
+      calls.push({ sql: String(sql), params });
+      if (/from public\.products p/i.test(sql)) {
+        return {
+          rows: [{
+            product_id: "product-1",
+            product_code: "NB-001",
+            name_en: "Product",
+            name_ko: "Product",
+            category_id: "category-1",
+            material: "Surgical Steel",
+            id: "price-1",
+            market: "KR",
+            currency: "KRW",
+            wholesale_price: Number.MAX_SAFE_INTEGER,
+            moq: 1,
+            visible_to: "approved_only",
+            is_active: true
+          }]
+        };
+      }
+      return { rows: [] };
+    },
+    release() {}
+  };
+  const pool = { async connect() { return client; } };
+
+  const inquiry = await createBuyerInquiryQueries(pool).createInquiry(
+    {
+      buyerId: "buyer-1",
+      assignedMarket: "KR",
+      currency: "KRW",
+      discountRate: 0
+    },
+    {
+      requestMemo: "",
+      items: [{ productCode: "NB-001", quantity: 2 }]
+    }
+  );
+
+  assert.equal(inquiry, null);
+  assert.ok(calls.some((call) => call.sql === "rollback"));
+  assert.ok(!calls.some((call) => /insert into public\.inquiries/i.test(call.sql)));
+});
