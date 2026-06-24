@@ -57,7 +57,7 @@ Next step is local test and route QA for the scaffold. Provider resource creatio
 
 N39 status: Four-currency price-book binding and automatic FX price policy code are implemented. The approval draft workflow has been replaced with `manual_fixed` and `fx_auto` policies, 5% deadband, 15% circuit breaker, and 72h stale-rate protection. FX migration files are drafted and packaged, but no staging or production migration has been executed. Live FX provider selection, Cloud Run Job deployment/execution, Cloud Scheduler creation, and production price writes remain blocked until separate approval.
 
-N39 FX Auto status: Admin FX monitoring now exposes current price, reference price, divergence, latest rate, status, and history without approve/reject drafts. Existing inquiry and quote snapshots remain immutable. Next backend readiness gate is provider selection and a separately approved staging migration/job rollout.
+N39 FX Auto status: Admin FX monitoring now exposes current price, reference price, divergence, latest rate, status, and history without approve/reject drafts. Hardening adds complete-bundle evaluation, fixed server-side thresholds, pause/manual-fixed no-mutation enforcement, advisory-lock/idempotency protection, split source baselines, and product registration binding from KR/KRW source price to JP/JPY, US/USD, and CN/CNY FX_AUTO policies. Existing inquiry and quote snapshots remain immutable. Next backend readiness gate is provider selection and a separately approved staging migration/job rollout.
 
 ## Decision Status
 

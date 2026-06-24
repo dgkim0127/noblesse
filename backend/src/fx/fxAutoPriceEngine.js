@@ -11,10 +11,13 @@ import {
 import { FX_PRICING_MODES, isFxAutoAllowed } from "./fxAutoPricePolicy.js";
 
 export function getFxAutoThresholds(input = {}) {
+  if (Object.keys(input || {}).some((key) => ["updateThresholdBps", "circuitBreakerBps", "maxRateAgeHours"].includes(key))) {
+    throw new Error("FX automatic policy thresholds are fixed and cannot be overridden");
+  }
   return {
-    updateThresholdBps: Number(input.updateThresholdBps ?? FX_AUTO_UPDATE_THRESHOLD_BPS),
-    circuitBreakerBps: Number(input.circuitBreakerBps ?? FX_AUTO_CIRCUIT_BREAKER_BPS),
-    maxRateAgeHours: Number(input.maxRateAgeHours ?? FX_MAX_RATE_AGE_HOURS)
+    updateThresholdBps: FX_AUTO_UPDATE_THRESHOLD_BPS,
+    circuitBreakerBps: FX_AUTO_CIRCUIT_BREAKER_BPS,
+    maxRateAgeHours: FX_MAX_RATE_AGE_HOURS
   };
 }
 
@@ -34,6 +37,25 @@ export function calculateFxReference({ policy, sourcePrice, rate }) {
       ? null
       : convertKrwToCurrency(sourcePrice.minOrderAmount, rate.rateScaled, policy.targetCurrency)
   };
+}
+
+function buildReferenceState({ baseResult, policy, sourcePrice, publishedPrice, rate, thresholds, now }) {
+  if (!sourcePrice || !rate) return baseResult;
+  const reference = calculateFxReference({ policy, sourcePrice, rate });
+  const next = { ...baseResult, reference, latestReferenceWholesalePrice: reference?.wholesalePrice ?? null };
+  if (!reference) return next;
+  if (!isSnapshotFresh(rate.sourceEffectiveAt, now, thresholds.maxRateAgeHours)) {
+    return { ...next, rateFresh: false };
+  }
+  if (policy.lastAppliedRateScaled) {
+    next.rateChangeBps = calculateRateChangeBps(policy.lastAppliedRateScaled, rate.rateScaled);
+  }
+  if (publishedPrice?.wholesalePrice != null) {
+    const publishedMinor = toMinorUnits(publishedPrice.wholesalePrice, policy.targetCurrency);
+    const referenceMinor = toMinorUnits(reference.wholesalePrice, policy.targetCurrency);
+    next.divergenceBps = calculateDivergenceBps(publishedMinor, referenceMinor);
+  }
+  return { ...next, rateFresh: true };
 }
 
 export function evaluateFxAutoPolicy({
@@ -59,8 +81,24 @@ export function evaluateFxAutoPolicy({
     status: policy.status || "pending_rate"
   };
 
+  const referenceState = buildReferenceState({ baseResult, policy, sourcePrice, publishedPrice, rate, thresholds, now });
+
   if (policy.pricingMode === FX_PRICING_MODES.MANUAL_FIXED) {
-    return { ...baseResult, action: "manual_fixed", status: "active", reason: "Manual fixed price is not changed by FX" };
+    return {
+      ...referenceState,
+      action: referenceState.reference ? "reference_updated" : "manual_fixed",
+      status: "active",
+      reason: "Manual fixed price is not changed by FX"
+    };
+  }
+
+  if (policy.status === "paused") {
+    return {
+      ...referenceState,
+      action: "paused",
+      status: "paused",
+      reason: "FX_AUTO policy is paused and cannot apply price changes"
+    };
   }
 
   if (!isFxAutoAllowed(policy.targetMarket, policy.targetCurrency)) {
@@ -75,13 +113,12 @@ export function evaluateFxAutoPolicy({
     return { ...baseResult, action: "pending_rate", status: "pending_rate", reason: "Complete FX rate bundle is missing" };
   }
 
-  const reference = calculateFxReference({ policy, sourcePrice, rate });
-  const next = { ...baseResult, reference, latestReferenceWholesalePrice: reference?.wholesalePrice ?? null };
   const fresh = isSnapshotFresh(rate.sourceEffectiveAt, now, thresholds.maxRateAgeHours);
   if (!fresh) {
-    return { ...next, action: "blocked_stale", status: "blocked_stale", reason: "FX rate sourceEffectiveAt is stale" };
+    return { ...referenceState, action: "blocked_stale", status: "blocked_stale", reason: "FX rate sourceEffectiveAt is stale" };
   }
 
+  const next = referenceState;
   if (policy.lastAppliedRateScaled) {
     const rateChangeBps = calculateRateChangeBps(policy.lastAppliedRateScaled, rate.rateScaled);
     next.rateChangeBps = rateChangeBps;
@@ -92,8 +129,8 @@ export function evaluateFxAutoPolicy({
 
   const sourceChanged = Boolean(
     sourcePrice.updatedAt &&
-    policy.sourcePriceUpdatedAt &&
-    String(sourcePrice.updatedAt) !== String(policy.sourcePriceUpdatedAt)
+    policy.lastAppliedSourcePriceUpdatedAt &&
+    String(sourcePrice.updatedAt) !== String(policy.lastAppliedSourcePriceUpdatedAt)
   );
 
   if (!publishedPrice) {
@@ -101,7 +138,7 @@ export function evaluateFxAutoPolicy({
   }
 
   const publishedMinor = toMinorUnits(publishedPrice.wholesalePrice, policy.targetCurrency);
-  const referenceMinor = toMinorUnits(reference.wholesalePrice, policy.targetCurrency);
+  const referenceMinor = toMinorUnits(next.reference.wholesalePrice, policy.targetCurrency);
   const divergenceBps = calculateDivergenceBps(publishedMinor, referenceMinor);
   next.divergenceBps = divergenceBps;
 

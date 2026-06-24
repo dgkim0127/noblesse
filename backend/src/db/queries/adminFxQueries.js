@@ -34,6 +34,7 @@ function mapRate(row) {
     rateScaled: row.rate_scaled,
     sourceEffectiveAt: row.source_effective_at,
     fetchedAt: row.fetched_at,
+    payloadHash: row.payload_hash,
     createdAt: row.created_at
   };
 }
@@ -79,6 +80,8 @@ function mapPolicy(row) {
     latestReferenceWholesalePrice: row.latest_reference_wholesale_price,
     latestReferenceRetailPrice: row.latest_reference_retail_price,
     latestReferenceMinOrderAmount: row.latest_reference_min_order_amount,
+    latestSourcePriceUpdatedAt: row.latest_source_price_updated_at,
+    lastAppliedSourcePriceUpdatedAt: row.last_applied_source_price_updated_at,
     divergenceBps: row.divergence_bps,
     rateChangeBps: row.rate_change_bps,
     latestRate: row.latest_rate,
@@ -91,6 +94,66 @@ function mapPolicy(row) {
     updatedAt: row.updated_at,
     createdAt: row.created_at
   };
+}
+
+function buildRunIdempotencyKey({ triggerType, productId, snapshotBundle }) {
+  return [
+    triggerType,
+    productId || "all",
+    snapshotBundle?.provider || "no-provider",
+    snapshotBundle?.sourceEffectiveAt || "no-source-effective-at",
+    snapshotBundle?.payloadHash || "no-payload"
+  ].join(":");
+}
+
+function buildEventKey({ row, evaluation, sourcePrice }) {
+  return [
+    row.id,
+    evaluation.action,
+    evaluation.rateSnapshotId || "no-rate",
+    sourcePrice?.updatedAt || "no-source",
+    evaluation.reference?.wholesalePrice ?? "no-reference"
+  ].join(":");
+}
+
+function buildSnapshotBundle(rows) {
+  if (!rows.length) return null;
+  const rates = Object.fromEntries(rows.map((row) => [row.quote_currency, mapRate(row)]));
+  const currencies = ["KRW", "JPY", "USD", "CNY"];
+  if (currencies.some((currency) => !rates[currency])) return null;
+  return {
+    provider: rows[0].provider,
+    sourceEffectiveAt: rows[0].source_effective_at,
+    payloadHash: rows[0].payload_hash,
+    rates
+  };
+}
+
+async function loadLatestCompleteFxBundle(clientOrPool) {
+  const bundleKey = await clientOrPool.query(`
+    select provider, source_effective_at, payload_hash
+    from public.fx_rate_snapshots
+    where base_currency = 'KRW'
+      and quote_currency in ('KRW', 'JPY', 'USD', 'CNY')
+    group by provider, source_effective_at, payload_hash
+    having count(distinct quote_currency) = 4
+    order by source_effective_at desc, max(created_at) desc
+    limit 1
+  `);
+  const key = bundleKey.rows[0];
+  if (!key) return null;
+  const rows = await clientOrPool.query(
+    `
+      select *
+      from public.fx_rate_snapshots
+      where provider = $1
+        and source_effective_at = $2
+        and payload_hash = $3
+      order by quote_currency asc
+    `,
+    [key.provider, key.source_effective_at, key.payload_hash]
+  );
+  return buildSnapshotBundle(rows.rows);
 }
 
 function mapEvent(row) {
@@ -150,6 +213,9 @@ async function insertAudit(client, action, targetTable, targetId, beforeSnapshot
 }
 
 async function runEvaluationTransaction(client, { triggerType, productId = null, thresholds, snapshotBundle = null, actor }) {
+  await client.query("select pg_advisory_xact_lock(hashtext('noblesse.fx_auto_price_evaluation'))");
+  const effectiveBundle = snapshotBundle || await loadLatestCompleteFxBundle(client);
+  const runIdempotencyKey = buildRunIdempotencyKey({ triggerType, productId, snapshotBundle: effectiveBundle });
   const runResult = await client.query(
     `
       insert into public.fx_auto_price_runs (
@@ -157,25 +223,35 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
         provider,
         source_effective_at,
         payload_hash,
+        idempotency_key,
         update_threshold_bps,
         circuit_breaker_bps,
         max_rate_age_hours,
         status,
         started_at
       )
-      values ($1, $2, $3, $4, $5, $6, $7, 'running', now())
+      values ($1, $2, $3, $4, $5, $6, $7, $8, 'running', now())
+      on conflict (idempotency_key) where idempotency_key is not null do nothing
       returning *
     `,
     [
       triggerType,
-      snapshotBundle?.provider || null,
-      snapshotBundle?.sourceEffectiveAt || null,
-      snapshotBundle?.payloadHash || null,
+      effectiveBundle?.provider || null,
+      effectiveBundle?.sourceEffectiveAt || null,
+      effectiveBundle?.payloadHash || null,
+      runIdempotencyKey,
       thresholds.updateThresholdBps,
       thresholds.circuitBreakerBps,
       thresholds.maxRateAgeHours
     ]
   );
+  if (!runResult.rows[0]) {
+    const existingRun = await client.query(
+      "select * from public.fx_auto_price_runs where idempotency_key = $1 limit 1",
+      [runIdempotencyKey]
+    );
+    return { run: mapRun(existingRun.rows[0]), auditLogId: null, skipped: true };
+  }
   const run = runResult.rows[0];
 
   const policyResult = await client.query(
@@ -183,9 +259,11 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
       select
         ppp.*,
         p.code as product_code,
+        p.moq_default as product_moq_default,
         source.wholesale_price as source_wholesale_price,
         source.retail_price as source_retail_price,
         source.min_order_amount as source_min_order_amount,
+        source.moq as source_moq,
         source.updated_at as source_updated_at,
         published.wholesale_price as current_wholesale_price,
         published.retail_price as current_retail_price,
@@ -197,25 +275,12 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
       left join public.product_prices source on source.id = ppp.source_price_id
       left join public.product_prices published on published.id = ppp.published_price_id
       left join public.fx_rate_snapshots applied on applied.id = ppp.last_applied_rate_snapshot_id
-      where ppp.pricing_mode = 'fx_auto'
+      where ppp.pricing_mode in ('manual_fixed', 'fx_auto')
         and ($1::uuid is null or ppp.product_id = $1)
       for update of ppp
     `,
     [productId]
   );
-
-  const latestRates = snapshotBundle?.rates || Object.fromEntries((await client.query(`
-    select distinct on (quote_currency) *
-    from public.fx_rate_snapshots
-    order by quote_currency, source_effective_at desc, created_at desc
-  `)).rows.map((row) => [row.quote_currency, mapRate(row)]));
-
-  const effectiveBundle = snapshotBundle || {
-    provider: latestRates.USD?.provider || latestRates.JPY?.provider || latestRates.CNY?.provider || null,
-    sourceEffectiveAt: latestRates.USD?.sourceEffectiveAt || latestRates.JPY?.sourceEffectiveAt || latestRates.CNY?.sourceEffectiveAt || null,
-    payloadHash: latestRates.USD?.payloadHash || null,
-    rates: latestRates
-  };
 
   const counters = { evaluated: 0, created: 0, updated: 0, held: 0, blocked: 0, error: 0 };
   for (const row of policyResult.rows) {
@@ -227,7 +292,8 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
       targetCurrency: row.target_currency,
       pricingMode: row.pricing_mode,
       status: row.status,
-      sourcePriceUpdatedAt: row.source_price_updated_at,
+      latestSourcePriceUpdatedAt: row.latest_source_price_updated_at,
+      lastAppliedSourcePriceUpdatedAt: row.last_applied_source_price_updated_at,
       lastAppliedRateScaled: row.last_applied_rate_scaled
     };
     const sourcePrice = row.source_price_id ? {
@@ -235,6 +301,7 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
       wholesalePrice: row.source_wholesale_price,
       retailPrice: row.source_retail_price,
       minOrderAmount: row.source_min_order_amount,
+      moq: row.source_moq || row.product_moq_default || 1,
       updatedAt: row.source_updated_at
     } : null;
     const publishedPrice = row.published_price_id ? {
@@ -252,14 +319,9 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
       thresholds
     });
 
-    if (evaluation.status === "created") counters.created += 1;
-    else if (evaluation.status === "updated") counters.updated += 1;
-    else if (evaluation.status === "held_deadband") counters.held += 1;
-    else if (evaluation.status?.startsWith("blocked")) counters.blocked += 1;
-    else if (evaluation.status === "error") counters.error += 1;
-
     let appliedPriceId = row.published_price_id;
-    const shouldApply = ["initial_created", "auto_updated"].includes(evaluation.action);
+    const shouldApply = row.pricing_mode === FX_PRICING_MODES.FX_AUTO && ["initial_created", "auto_updated"].includes(evaluation.action);
+    let didApplyPrice = false;
     if (shouldApply && evaluation.reference?.wholesalePrice != null) {
       if (appliedPriceId) {
         await client.query(
@@ -279,6 +341,7 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
             evaluation.reference.minOrderAmount
           ]
         );
+        didApplyPrice = true;
       } else {
         const insertPrice = await client.query(
           `
@@ -293,12 +356,8 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
               visible_to,
               is_active
             )
-            values ($1, $2, $3, $4, $5, 1, coalesce($6, 0), 'approved_only', true)
-            on conflict (product_id, market) do update
-              set wholesale_price = excluded.wholesale_price,
-                  retail_price = excluded.retail_price,
-                  min_order_amount = excluded.min_order_amount,
-                  updated_at = now()
+            values ($1, $2, $3, $4, $5, $6, coalesce($7, 0), 'approved_only', true)
+            on conflict (product_id, market) do nothing
             returning id
           `,
           [
@@ -307,12 +366,26 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
             row.target_currency,
             evaluation.reference.wholesalePrice,
             evaluation.reference.retailPrice,
+            sourcePrice?.moq || row.product_moq_default || 1,
             evaluation.reference.minOrderAmount
           ]
         );
-        appliedPriceId = insertPrice.rows[0].id;
+        if (insertPrice.rows[0]) {
+          appliedPriceId = insertPrice.rows[0].id;
+          didApplyPrice = true;
+        } else {
+          evaluation.action = "error";
+          evaluation.status = "error";
+          evaluation.reason = "Existing manual price conflict; automatic price was not applied";
+        }
       }
     }
+
+    if (evaluation.status === "created") counters.created += 1;
+    else if (evaluation.status === "updated") counters.updated += 1;
+    else if (evaluation.status === "held_deadband") counters.held += 1;
+    else if (evaluation.status?.startsWith("blocked")) counters.blocked += 1;
+    else if (evaluation.status === "error") counters.error += 1;
 
     await client.query(
       `
@@ -325,7 +398,8 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
           latest_reference_min_order_amount = $6,
           latest_reference_rate_snapshot_id = $7,
           last_applied_rate_snapshot_id = case when $8::boolean then $7 else last_applied_rate_snapshot_id end,
-          source_price_updated_at = coalesce($9, source_price_updated_at),
+          latest_source_price_updated_at = coalesce($9, latest_source_price_updated_at),
+          last_applied_source_price_updated_at = case when $8::boolean then $9 else last_applied_source_price_updated_at end,
           last_evaluated_at = now(),
           last_applied_at = case when $8::boolean then now() else last_applied_at end,
           updated_at = now()
@@ -339,7 +413,7 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
         evaluation.reference?.retailPrice ?? null,
         evaluation.reference?.minOrderAmount ?? null,
         evaluation.rateSnapshotId,
-        shouldApply,
+        didApplyPrice,
         sourcePrice?.updatedAt ?? null
       ]
     );
@@ -347,6 +421,7 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
     await client.query(
       `
         insert into public.fx_auto_price_events (
+          event_key,
           run_id,
           policy_id,
           product_id,
@@ -363,10 +438,11 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
           source_price_updated_at,
           reason
         )
-        values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-        on conflict do nothing
+        values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+        on conflict (event_key) where event_key is not null do nothing
       `,
       [
+        buildEventKey({ row, evaluation, sourcePrice }),
         run.id,
         row.id,
         row.product_id,
@@ -376,7 +452,7 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
         evaluation.action,
         row.current_wholesale_price,
         evaluation.reference?.wholesalePrice ?? null,
-        shouldApply ? evaluation.reference?.wholesalePrice ?? null : null,
+        didApplyPrice ? evaluation.reference?.wholesalePrice ?? null : null,
         evaluation.divergenceBps,
         evaluation.rateChangeBps,
         evaluation.rateSnapshotId,
@@ -385,7 +461,7 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
       ]
     );
 
-    if (shouldApply) {
+    if (didApplyPrice) {
       await insertAudit(
         client,
         evaluation.action === "initial_created" ? "fx.auto.price.create" : "fx.auto.price.update",
@@ -432,12 +508,8 @@ export function createAdminFxQueries(pool) {
   return {
     async getFxStatus() {
       assertPool(pool);
-      const [rateResult, runResult, policyResult] = await Promise.all([
-        pool.query(`
-          select distinct on (quote_currency) *
-          from public.fx_rate_snapshots
-          order by quote_currency, source_effective_at desc, created_at desc
-        `),
+      const [latestBundle, runResult, policyResult] = await Promise.all([
+        loadLatestCompleteFxBundle(pool),
         pool.query(`
           select *
           from public.fx_auto_price_runs
@@ -451,7 +523,7 @@ export function createAdminFxQueries(pool) {
         `)
       ]);
       return {
-        latestRates: rateResult.rows.map(mapRate),
+        latestRates: Object.values(latestBundle?.rates || {}),
         lastRun: runResult.rows[0] ? mapRun(runResult.rows[0]) : null,
         priceCounts: Object.fromEntries(policyResult.rows.map((row) => [row.status, row.count]))
       };
@@ -459,12 +531,8 @@ export function createAdminFxQueries(pool) {
 
     async listFxRates() {
       assertPool(pool);
-      const result = await pool.query(`
-        select distinct on (quote_currency) *
-        from public.fx_rate_snapshots
-        order by quote_currency, source_effective_at desc, created_at desc
-      `);
-      return result.rows.map(mapRate);
+      const latestBundle = await loadLatestCompleteFxBundle(pool);
+      return Object.values(latestBundle?.rates || {});
     },
 
     async listFxAutoRuns() {
@@ -681,7 +749,49 @@ export function createAdminFxQueries(pool) {
           `,
           [productId, market, input.currency]
         );
-        const published = publishedResult.rows[0] || null;
+        let published = publishedResult.rows[0] || null;
+        if (input.pricingMode === FX_PRICING_MODES.MANUAL_FIXED && input.manualPrice) {
+          const manualResult = await client.query(
+            `
+              insert into public.product_prices (
+                product_id,
+                market,
+                currency,
+                wholesale_price,
+                retail_price,
+                moq,
+                min_order_amount,
+                visible_to,
+                is_active
+              )
+              values ($1, $2, $3, $4, $5, $6, $7, 'approved_only', $8)
+              on conflict (product_id, market) do update
+                set currency = excluded.currency,
+                    wholesale_price = excluded.wholesale_price,
+                    retail_price = excluded.retail_price,
+                    moq = excluded.moq,
+                    min_order_amount = excluded.min_order_amount,
+                    is_active = excluded.is_active,
+                    updated_at = now()
+              returning id
+            `,
+            [
+              productId,
+              market,
+              input.currency,
+              input.manualPrice.wholesalePrice,
+              input.manualPrice.retailPrice,
+              input.manualPrice.moq,
+              input.manualPrice.minOrderAmount,
+              input.manualPrice.isActive
+            ]
+          );
+          published = manualResult.rows[0];
+        }
+        if (input.pricingMode === FX_PRICING_MODES.MANUAL_FIXED && !published && !input.keepPublishedPrice) {
+          await client.query("rollback");
+          return { manualPriceRequired: true };
+        }
         const upsertResult = await client.query(
           `
             insert into public.product_price_policies (
@@ -692,15 +802,16 @@ export function createAdminFxQueries(pool) {
               source_price_id,
               published_price_id,
               status,
-              source_price_updated_at
+              latest_source_price_updated_at,
+              last_applied_source_price_updated_at
             )
-            values ($1, $2, $3, $4, $5, $6, $7, $8)
+            values ($1, $2, $3, $4, $5, $6, $7, $8, null)
             on conflict (product_id, target_market, target_currency) do update
               set pricing_mode = excluded.pricing_mode,
                   source_price_id = excluded.source_price_id,
                   published_price_id = excluded.published_price_id,
                   status = excluded.status,
-                  source_price_updated_at = excluded.source_price_updated_at,
+                  latest_source_price_updated_at = excluded.latest_source_price_updated_at,
                   paused_at = null,
                   pause_reason = null,
                   updated_at = now()
@@ -711,8 +822,8 @@ export function createAdminFxQueries(pool) {
             market,
             input.currency,
             input.pricingMode,
-            input.pricingMode === FX_PRICING_MODES.FX_AUTO ? source.id : null,
-            published?.id || null,
+            input.pricingMode === FX_PRICING_MODES.FX_AUTO || (input.pricingMode === FX_PRICING_MODES.MANUAL_FIXED && published) ? source?.id || null : null,
+            input.keepPublishedPrice || input.pricingMode === FX_PRICING_MODES.MANUAL_FIXED ? published?.id || null : null,
             input.pricingMode === FX_PRICING_MODES.FX_AUTO ? "pending_rate" : "active",
             source?.updated_at || null
           ]
@@ -750,11 +861,15 @@ export function createAdminFxQueries(pool) {
           `
             update public.product_price_policies
             set status = 'paused', paused_at = now(), pause_reason = $2, updated_at = now()
-            where id = $1
+            where id = $1 and pricing_mode = 'fx_auto'
             returning *
           `,
           [policyId, input.reason]
         );
+        if (!updated.rows[0]) {
+          await client.query("rollback");
+          return { policy: null, auditLogId: null };
+        }
         const auditLogId = await insertAudit(client, "fx.auto.pause", "product_price_policies", policyId, null, input, actor);
         await client.query("commit");
         return { policy: mapPolicy(updated.rows[0]), auditLogId };
@@ -780,14 +895,24 @@ export function createAdminFxQueries(pool) {
           `
             update public.product_price_policies
             set status = 'pending_rate', paused_at = null, pause_reason = null, updated_at = now()
-            where id = $1
+            where id = $1 and pricing_mode = 'fx_auto'
             returning *
           `,
           [policyId]
         );
+        if (!updated.rows[0]) {
+          await client.query("rollback");
+          return { policy: null, auditLogId: null };
+        }
         const auditLogId = await insertAudit(client, "fx.auto.resume", "product_price_policies", policyId, null, { resumed: true }, actor);
+        const evaluation = await runEvaluationTransaction(client, {
+          triggerType: "manual_recheck",
+          productId: updated.rows[0].product_id,
+          thresholds: { updateThresholdBps: 500, circuitBreakerBps: 1500, maxRateAgeHours: 72 },
+          actor
+        });
         await client.query("commit");
-        return { policy: mapPolicy(updated.rows[0]), auditLogId };
+        return { policy: mapPolicy(updated.rows[0]), auditLogId, evaluation: evaluation.run };
       } catch (error) {
         try {
           await client.query("rollback");

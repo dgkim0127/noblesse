@@ -321,6 +321,8 @@ export function AdminCatalogEntryPage() {
     const retailPrice = parseOptionalPositiveMoney(priceForm.retailPrice)
     if (!priceForm.market) errors.market = t.validation.marketRequired
     if (!priceForm.currency) errors.currency = t.validation.currencyRequired
+    if (priceForm.market && priceForm.market !== 'KR') errors.market = t.validation.marketRequired
+    if (priceForm.currency && priceForm.currency !== 'KRW') errors.currency = t.validation.currencyRequired
     if (priceForm.market && priceForm.currency && !isValidMarketCurrencyPair(priceForm.market, priceForm.currency)) errors.currency = t.validation.currencyRequired
     if (wholesalePrice == null) errors.wholesalePrice = t.validation.priceRequired
     if (priceForm.retailPrice !== '' && retailPrice == null) errors.retailPrice = t.validation.retailPriceInvalid
@@ -443,6 +445,21 @@ export function AdminCatalogEntryPage() {
     isActive: priceForm.isActive,
   })
 
+  const createPriceBookPayload = () => ({
+    kr: {
+      wholesalePrice: parsePositiveMoney(priceForm.wholesalePrice),
+      retailPrice: parseOptionalPositiveMoney(priceForm.retailPrice),
+      moq: Number(priceForm.moq || 1),
+      minOrderAmount: parseOptionalNonnegativeMoney(priceForm.minOrderAmount) ?? 0,
+      isActive: priceForm.isActive,
+    },
+    markets: [
+      { market: 'JP', currency: 'JPY', pricingMode: 'fx_auto' },
+      { market: 'US', currency: 'USD', pricingMode: 'fx_auto' },
+      { market: 'CN', currency: 'CNY', pricingMode: 'fx_auto' },
+    ],
+  })
+
   const ensureProductCodeAvailable = async () => {
     const existingProducts = await mutate((api, token) => api.getProducts({ q: productCode, limit: 10 }, token))
     const duplicateProduct = (existingProducts.data?.products || []).find((product) => String(product.code || '').toLowerCase() === productCode.toLowerCase())
@@ -512,8 +529,12 @@ export function AdminCatalogEntryPage() {
       if (!createdPrice) {
         activeResource = 'price'
         updateSaveStatus('price', 'saving')
-        const priceResult = await mutate((api, token) => api.createPrice(createPricePayload(), token))
-        setCreatedPrice(priceResult.data?.price || { productCode, ...priceForm })
+        const productId = product?.id
+        const priceResult = productId
+          ? await mutate((api, token) => api.setupProductPriceBooks(productId, createPriceBookPayload(), token))
+          : await mutate((api, token) => api.createPrice(createPricePayload(), token))
+        const createdKrPrice = (priceResult.data?.prices || []).find((price) => price.market === 'KR') || priceResult.data?.price
+        setCreatedPrice(createdKrPrice || { productCode, ...priceForm })
         updateSaveStatus('price', 'success')
       }
 
@@ -693,10 +714,10 @@ export function AdminCatalogEntryPage() {
               const market = event.target.value
               setPriceForm((current) => ({ ...current, market, currency: marketCurrency[market] || 'USD' }))
             }}>
-              {supportedMarkets.map((market) => <option key={market} value={market}>{formatMarketLabel(market)}</option>)}
+              {supportedMarkets.filter((market) => market === 'KR').map((market) => <option key={market} value={market}>{formatMarketLabel(market)}</option>)}
             </select></label>
             <label className="admin-search">{t.price.currency}<select value={priceForm.currency} onChange={(event) => setPriceField('currency', event.target.value)}>
-              {supportedCurrencies.map((currency) => <option disabled={currency !== marketCurrency[priceForm.market]} key={currency} value={currency}>{currency}</option>)}
+              {supportedCurrencies.filter((currency) => currency === 'KRW').map((currency) => <option key={currency} value={currency}>{currency}</option>)}
             </select></label>
             <label className="admin-search">{t.price.wholesale}<input inputMode="decimal" step={priceInputStep} value={priceForm.wholesalePrice} onChange={(event) => setPriceField('wholesalePrice', event.target.value)} placeholder="12000" />
               {fieldErrors.wholesalePrice && <small className="admin-field-error">{fieldErrors.wholesalePrice}</small>}

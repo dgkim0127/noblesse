@@ -2043,3 +2043,24 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Production product price mutation: No.
 - Existing inquiry/quote snapshots: immutable.
 - Next gate: `APPROVE_FX_PROVIDER_SELECTION = YES`.
+
+## N39 FX Auto Hardening Follow-up
+
+- Scope: Harden automatic FX price scaffolding before provider selection or migration execution.
+- Complete rate bundle: Requires same provider, `source_effective_at`, and `payload_hash` for KRW, JPY, USD, and CNY.
+- Threshold policy: Fixed 5% deadband, 15% circuit breaker, and 72h stale protection; API threshold overrides are rejected.
+- Manual fixed policy: Reference-only monitoring; published prices are not overwritten by FX evaluation.
+- Pause policy: Paused automatic policies expose reference state but never apply prices.
+- Concurrency/idempotency: Advisory transaction lock, run idempotency keys, event keys, and existing manual-price conflict protection added.
+- Source baseline: Latest observed source price and last applied source price are tracked separately.
+- Product registration: KR/KRW manual source is bound to JP/JPY, US/USD, and CN/CNY FX_AUTO policies; GLOBAL remains manual-only.
+- Migration revision: Backfills existing product prices as `manual_fixed` and missing JP/US/CN policies as pending `fx_auto` when a KR/KRW source exists.
+- Migration execution: No.
+- DB direct access/psql: No.
+- External FX provider fetch: No.
+- Cloud Run Job deploy/execute: No.
+- Cloud Scheduler create: No.
+- Firebase deploy: No.
+- Secret/IAM mutation: No.
+- Production product price mutation: No.
+- Next gate: `APPROVE_FX_PROVIDER_SELECTION = YES`.

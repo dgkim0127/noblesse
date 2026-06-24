@@ -50,12 +50,14 @@ Discounts, subtotals, and totals use minor-unit helpers. Scientific notation and
 - Used when an admin directly enters a foreign market price.
 - FX changes never overwrite the published amount.
 - Latest reference values may still be shown for operator awareness.
+- Reference updates are monitoring-only and do not imply a buyer-facing price change.
 
 `fx_auto`:
 
 - Used for JP / JPY, US / USD, and CN / CNY when the foreign price is left empty or explicitly switched to automatic mode.
 - Uses the KR / KRW source price and the latest fresh KRW-per-unit rate snapshot.
 - Creates or updates the stored foreign price without an approval draft when policy gates pass.
+- Product registration creates KR / KRW as the fixed source price, then binds JP / JPY, US / USD, and CN / CNY to automatic FX policies.
 
 Manual-only markets:
 
@@ -84,6 +86,10 @@ Automatic update rules:
 - Rate movement at or above 15%: block automatic update and mark `blocked_spike`.
 - `source_effective_at` older than 72 hours: block automatic update and mark `blocked_stale`.
 - KR / KRW source price changes bypass the 5% deadband, but still respect stale-rate and spike protection.
+- Admin API calls cannot override the 5%, 15%, or 72h thresholds.
+- Evaluations require a complete KRW, JPY, USD, and CNY rate bundle from the same provider, effective time, and payload hash.
+- Paused policies and `manual_fixed` policies never mutate published prices.
+- Evaluations are protected by transaction advisory locking, run idempotency keys, and event idempotency keys.
 
 ## Inquiry And Quote Snapshots
 
@@ -92,8 +98,9 @@ Historic inquiries and quotes keep the original market, currency, unit amount, s
 ## Current Go / No-Go
 
 - Four-currency storefront binding: Go
-- Automatic FX pricing code and migration draft: Go
+- Automatic FX pricing hardening code and migration draft: Go
 - Admin automatic FX monitoring UI: Go
+- Product registration price-book binding: Go
 - Staging migration execution: No-Go
 - Live FX provider fetch: No-Go
 - Cloud Run Job deploy/execute: No-Go

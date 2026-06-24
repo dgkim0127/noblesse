@@ -66,6 +66,29 @@ function createAppWithPrices({ adminUser = {} } = {}) {
                 },
                 auditLogId: "audit-update-1"
               };
+            },
+            async setupProductPriceBooks(productId, input) {
+              if (productId !== "22222222-2222-4222-8222-222222222222") return null;
+              return {
+                prices: [{
+                  id: "price-kr-1",
+                  productId,
+                  market: "KR",
+                  currency: "KRW",
+                  wholesalePrice: input.kr.wholesalePrice,
+                  moq: input.kr.moq,
+                  isActive: input.kr.isActive
+                }],
+                policies: input.markets.map((market) => ({
+                  productId,
+                  targetMarket: market.market,
+                  targetCurrency: market.currency,
+                  pricingMode: market.pricingMode,
+                  status: "pending_rate"
+                })),
+                autoPolicyCount: input.markets.filter((market) => market.pricingMode === "fx_auto").length,
+                auditLogId: "audit-price-books-1"
+              };
             }
           }
         }),
@@ -378,4 +401,32 @@ test("PATCH /api/admin/prices/:priceId rejects product market and currency mutat
 
   assert.equal(response.status, 400);
   assert.equal(response.body.error.code, "VALIDATION_ERROR");
+});
+
+test("PUT /api/admin/products/:productId/price-books creates KR manual source and FX auto markets", async () => {
+  const response = await request(createAppWithPrices(), "/api/admin/products/22222222-2222-4222-8222-222222222222/price-books", {
+    method: "PUT",
+    headers: {
+      authorization: "Bearer admin-token",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      kr: {
+        wholesalePrice: 12000,
+        moq: 20,
+        minOrderAmount: 0,
+        isActive: true
+      },
+      markets: [
+        { market: "JP", currency: "JPY", pricingMode: "fx_auto" },
+        { market: "US", currency: "USD", pricingMode: "fx_auto" },
+        { market: "CN", currency: "CNY", pricingMode: "fx_auto" }
+      ]
+    })
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.data.prices[0].market, "KR");
+  assert.equal(response.body.data.policies.length, 3);
+  assert.equal(response.body.data.autoPolicyCount, 3);
 });

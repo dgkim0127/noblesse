@@ -4,6 +4,7 @@ import {
   CURRENCY_BY_MARKET,
   validateMarketCurrencyPair
 } from "../config/pricing.js";
+import { FX_PRICING_MODES, assertPricingModeAllowed, getDefaultPricingMode } from "../fx/fxAutoPricePolicy.js";
 import { validateMoneyPrecision } from "../utils/money.js";
 import {
   MARKETS,
@@ -34,6 +35,18 @@ const priceWriteFields = [
   "productCode",
   "market",
   "currency",
+  "wholesalePrice",
+  "retailPrice",
+  "moq",
+  "minOrderAmount",
+  "isActive"
+];
+
+const priceBookFields = ["kr", "markets"];
+const priceBookMarketFields = [
+  "market",
+  "currency",
+  "pricingMode",
   "wholesalePrice",
   "retailPrice",
   "moq",
@@ -121,6 +134,61 @@ function parsePriceBody(body = {}, { partial = false, existingCurrency } = {}) {
   return Object.fromEntries(Object.entries(parsed).filter(([, value]) => value !== undefined));
 }
 
+function parseBookPriceFields(input = {}, { market, currency, manualRequired = false } = {}) {
+  const parsed = {
+    wholesalePrice: parseMoney(input.wholesalePrice, "wholesalePrice", { required: manualRequired, currency }),
+    retailPrice: parseMoney(input.retailPrice, "retailPrice", { currency }),
+    moq: parseInteger(input.moq, "moq", { required: manualRequired, min: 1 }),
+    minOrderAmount: parseMoney(input.minOrderAmount, "minOrderAmount", { currency }),
+    isActive: parseBooleanLike(input.isActive, "isActive")
+  };
+  if (manualRequired) {
+    parsed.moq = parsed.moq ?? 1;
+    parsed.minOrderAmount = parsed.minOrderAmount ?? 0;
+    parsed.isActive = parsed.isActive ?? true;
+  }
+  return Object.fromEntries(Object.entries({ market, currency, ...parsed }).filter(([, value]) => value !== undefined));
+}
+
+function parsePriceBookBody(body = {}) {
+  const safeBody = rejectUnknownFields(body, priceBookFields);
+  const krInput = rejectUnknownFields(safeBody.kr || {}, priceBookMarketFields);
+  const kr = {
+    pricingMode: FX_PRICING_MODES.MANUAL_FIXED,
+    ...parseBookPriceFields(krInput, { market: "KR", currency: "KRW", manualRequired: true })
+  };
+  const marketInputs = Array.isArray(safeBody.markets) ? safeBody.markets : [];
+  const markets = marketInputs.map((item) => {
+    const input = rejectUnknownFields(item || {}, priceBookMarketFields);
+    const market = parseOptionalEnum(input.market, MARKETS, "market");
+    const currency = parseCurrency(input.currency, market, { required: true });
+    if (!market || !currency || !validateMarketCurrencyPair(market, currency)) {
+      throw validationError("Invalid market/currency pair");
+    }
+    const pricingMode = parseOptionalString(input.pricingMode, { maxLength: 40 })
+      || getDefaultPricingMode({ market, hasManualAmount: input.wholesalePrice !== undefined && input.wholesalePrice !== "" });
+    try {
+      assertPricingModeAllowed({ market, currency, pricingMode });
+    } catch (error) {
+      throw validationError(error.message);
+    }
+    return {
+      pricingMode,
+      ...parseBookPriceFields(input, {
+        market,
+        currency,
+        manualRequired: pricingMode === FX_PRICING_MODES.MANUAL_FIXED
+      })
+    };
+  });
+  const seen = new Set(["KR"]);
+  for (const entry of markets) {
+    if (seen.has(entry.market)) throw validationError("Duplicate market in price book");
+    seen.add(entry.market);
+  }
+  return { kr, markets };
+}
+
 async function evaluateFxAutoAfterKrwChange(result, fxService, adminViewer) {
   if (!fxService?.evaluateProduct || result?.price?.market !== "KR" || result?.price?.currency !== "KRW") {
     return result;
@@ -173,6 +241,35 @@ export function createAdminPriceService({ queries, fxService = null }) {
         throw notFound("Product price not found");
       }
       return evaluateFxAutoAfterKrwChange(result, fxService, adminViewer);
+    },
+
+    async setupProductPriceBooks(productId, body = {}, adminViewer) {
+      const id = validateUuid(productId, "productId");
+      const parsed = parsePriceBookBody(body);
+      const result = await queries.setupProductPriceBooks(id, parsed, adminViewer);
+      if (!result) {
+        throw notFound("Product not found");
+      }
+      if (result?.missingSourcePrice) {
+        throw validationError("KR/KRW source price is required");
+      }
+      if (result?.conflict) {
+        throw conflict("Product price book conflict");
+      }
+      if (fxService?.evaluateProduct && result?.autoPolicyCount > 0) {
+        try {
+          const evaluation = await fxService.evaluateProduct(id, {}, adminViewer);
+          return { ...result, fxAutoEvaluation: evaluation.run || null };
+        } catch (error) {
+          return {
+            ...result,
+            fxAutoEvaluationError: {
+              category: error?.code || error?.message || "FX_AUTO_EVALUATION_FAILED"
+            }
+          };
+        }
+      }
+      return result;
     }
   };
 }

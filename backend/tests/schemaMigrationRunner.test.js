@@ -289,6 +289,15 @@ test("N39 managed FX migration has additive schema and no transaction-control SQ
   assert.match(sqlText, /pricing_mode text not null check \(pricing_mode in \('manual_fixed', 'fx_auto'\)\)/i);
   assert.match(sqlText, /update_threshold_bps integer not null default 500/i);
   assert.match(sqlText, /circuit_breaker_bps integer not null default 1500/i);
+  assert.match(sqlText, /latest_source_price_updated_at timestamptz/i);
+  assert.match(sqlText, /last_applied_source_price_updated_at timestamptz/i);
+  assert.match(sqlText, /idempotency_key text/i);
+  assert.match(sqlText, /event_key text/i);
+  assert.match(sqlText, /idx_fx_auto_price_runs_idempotency_key/i);
+  assert.match(sqlText, /idx_fx_auto_price_events_event_key/i);
+  assert.match(sqlText, /select\s+pp\.product_id,\s+pp\.market,\s+pp\.currency,\s+'manual_fixed'/i);
+  assert.match(sqlText, /cross join \(\s*values \('JP', 'JPY'\), \('US', 'USD'\), \('CN', 'CNY'\)\s*\)/i);
+  assert.doesNotMatch(sqlText, /'GLOBAL', 'USD'\)[\s\S]*'fx_auto'/i);
   assert.doesNotMatch(sqlText, /\bdrop\s+table\b|\btruncate\b|\bdelete\s+from\b/i);
 });
 
@@ -370,7 +379,13 @@ test("fresh install schema includes managed FX review workflow objects", () => {
     "quote_currency text not null check (quote_currency in ('KRW', 'JPY', 'USD', 'CNY'))",
     "pricing_mode text not null check (pricing_mode in ('manual_fixed', 'fx_auto'))",
     "update_threshold_bps integer not null default 500",
-    "circuit_breaker_bps integer not null default 1500"
+    "circuit_breaker_bps integer not null default 1500",
+    "latest_source_price_updated_at timestamptz",
+    "last_applied_source_price_updated_at timestamptz",
+    "idempotency_key text",
+    "event_key text",
+    "idx_fx_auto_price_runs_idempotency_key",
+    "idx_fx_auto_price_events_event_key"
   ]) {
     assert.match(schema, new RegExp(fragment.replace(/[()]/g, "\\$&"), "i"));
   }

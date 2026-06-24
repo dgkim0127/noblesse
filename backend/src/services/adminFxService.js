@@ -3,13 +3,16 @@ import { getFxAutoThresholds } from "../fx/fxAutoPriceEngine.js";
 import { FX_PRICING_MODES, assertPricingModeAllowed } from "../fx/fxAutoPricePolicy.js";
 import { parseManualFxPayload } from "../fx/manualFxProvider.js";
 import { getCurrencyStep, isSnapshotFresh } from "../fx/fxMath.js";
+import { validateMoneyPrecision } from "../utils/money.js";
 import {
   parseOptionalEnum,
   parseOptionalString,
   parseRequiredString,
+  rejectUnknownFields,
   validateUuid,
   validationError
 } from "../utils/validators.js";
+import { notFound } from "../utils/errors.js";
 
 const POLICY_STATUSES = [
   "pending_rate",
@@ -45,18 +48,52 @@ function parsePolicyFilters(filters = {}) {
 }
 
 function parseEvaluateBody(body = {}) {
-  const thresholds = getFxAutoThresholds(body);
-  for (const [key, value] of Object.entries(thresholds)) {
-    if (!Number.isSafeInteger(value) || value < 1) {
-      throw validationError(`Invalid ${key}`);
-    }
+  const forbidden = ["updateThresholdBps", "circuitBreakerBps", "maxRateAgeHours"];
+  const bodyObject = body && typeof body === "object" && !Array.isArray(body) ? body : {};
+  const override = forbidden.find((key) => Object.hasOwn(bodyObject, key));
+  if (override) {
+    throw validationError("FX automatic policy thresholds are fixed");
   }
-  return thresholds;
+  return getFxAutoThresholds();
+}
+
+function parseMoney(value, fieldName, { required = false, currency } = {}) {
+  if (value === undefined || value === null || value === "") {
+    if (required) throw validationError(`${fieldName} is required`);
+    return undefined;
+  }
+  if (currency && !validateMoneyPrecision(value, currency)) {
+    throw validationError(`Invalid ${fieldName} precision for ${currency}`);
+  }
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    throw validationError(`Invalid ${fieldName}`);
+  }
+  return parsed;
+}
+
+function parseInteger(value, fieldName, { min = 1 } = {}) {
+  if (value === undefined || value === null || value === "") return undefined;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < min) {
+    throw validationError(`Invalid ${fieldName}`);
+  }
+  return parsed;
 }
 
 function parseModeBody(body = {}, market) {
-  const pricingMode = parseRequiredString(body.pricingMode, { fieldName: "pricingMode", maxLength: 40 });
-  const currency = parseOptionalString(body.currency, { maxLength: 3 }) || (market === "JP" ? "JPY" : market === "CN" ? "CNY" : market === "KR" ? "KRW" : "USD");
+  const safeBody = rejectUnknownFields(body, [
+    "pricingMode",
+    "currency",
+    "keepPublishedPrice",
+    "wholesalePrice",
+    "retailPrice",
+    "moq",
+    "minOrderAmount",
+    "isActive"
+  ]);
+  const pricingMode = parseRequiredString(safeBody.pricingMode, { fieldName: "pricingMode", maxLength: 40 });
+  const currency = parseOptionalString(safeBody.currency, { maxLength: 3 }) || (market === "JP" ? "JPY" : market === "CN" ? "CNY" : market === "KR" ? "KRW" : "USD");
   if (!MARKETS.includes(market) || !CURRENCIES.includes(currency) || !validateMarketCurrencyPair(market, currency)) {
     throw validationError("Invalid market/currency pair");
   }
@@ -65,10 +102,27 @@ function parseModeBody(body = {}, market) {
   } catch (error) {
     throw validationError(error.message);
   }
+  const hasManualPrice = [
+    "wholesalePrice",
+    "retailPrice",
+    "moq",
+    "minOrderAmount",
+    "isActive"
+  ].some((field) => safeBody[field] !== undefined && safeBody[field] !== null && safeBody[field] !== "");
+  const manualPrice = pricingMode === FX_PRICING_MODES.MANUAL_FIXED && hasManualPrice
+    ? {
+        wholesalePrice: parseMoney(safeBody.wholesalePrice, "wholesalePrice", { required: true, currency }),
+        retailPrice: parseMoney(safeBody.retailPrice, "retailPrice", { currency }),
+        moq: parseInteger(safeBody.moq, "moq") ?? 1,
+        minOrderAmount: parseMoney(safeBody.minOrderAmount, "minOrderAmount", { currency }) ?? 0,
+        isActive: safeBody.isActive !== false
+      }
+    : null;
   return {
     pricingMode,
     currency,
-    keepPublishedPrice: body.keepPublishedPrice === true
+    keepPublishedPrice: safeBody.keepPublishedPrice === true,
+    manualPrice
   };
 }
 
@@ -137,20 +191,27 @@ export function createAdminFxService({ queries, now = () => new Date() }) {
     },
 
     async setProductMarketMode(productId, market, body = {}, adminViewer) {
-      return queries.setProductMarketPricingMode(
+      const result = await queries.setProductMarketPricingMode(
         validateUuid(productId, "productId"),
         parseOptionalEnum(market, MARKETS, "market"),
         parseModeBody(body, market),
         adminViewer
       );
+      if (result?.missingSourcePrice) throw validationError("KR/KRW source price is required for FX_AUTO");
+      if (result?.manualPriceRequired) throw validationError("A manual price or keepPublishedPrice=true is required for MANUAL_FIXED");
+      return result;
     },
 
     async pausePrice(policyId, body = {}, adminViewer) {
-      return queries.pauseFxAutoPolicy(validateUuid(policyId, "policyId"), parsePauseBody(body), adminViewer);
+      const result = await queries.pauseFxAutoPolicy(validateUuid(policyId, "policyId"), parsePauseBody(body), adminViewer);
+      if (!result?.policy) throw notFound("FX_AUTO policy not found");
+      return result;
     },
 
     async resumePrice(policyId, _body = {}, adminViewer) {
-      return queries.resumeFxAutoPolicy(validateUuid(policyId, "policyId"), adminViewer);
+      const result = await queries.resumeFxAutoPolicy(validateUuid(policyId, "policyId"), adminViewer);
+      if (!result?.policy) throw notFound("FX_AUTO policy not found");
+      return result;
     }
   };
 }

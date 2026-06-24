@@ -341,6 +341,20 @@ export function createAdminRoutes({
     })
   );
 
+  router.put(
+    "/products/:productId/price-books",
+    requireAdmin,
+    can("prices.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.prices.setupProductPriceBooks(
+        req.params.productId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
   router.get(
     "/fx/status",
     requireAdmin,

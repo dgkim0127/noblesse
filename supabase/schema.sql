@@ -166,7 +166,8 @@ create table if not exists public.product_price_policies (
   latest_reference_min_order_amount numeric(14,2),
   latest_reference_rate_snapshot_id uuid references public.fx_rate_snapshots(id) on delete set null,
   last_applied_rate_snapshot_id uuid references public.fx_rate_snapshots(id) on delete set null,
-  source_price_updated_at timestamptz,
+  latest_source_price_updated_at timestamptz,
+  last_applied_source_price_updated_at timestamptz,
   last_evaluated_at timestamptz,
   last_applied_at timestamptz,
   paused_at timestamptz,
@@ -196,6 +197,7 @@ create table if not exists public.fx_auto_price_runs (
   provider text,
   source_effective_at timestamptz,
   payload_hash text,
+  idempotency_key text,
   update_threshold_bps integer not null default 500 check (update_threshold_bps > 0),
   circuit_breaker_bps integer not null default 1500 check (circuit_breaker_bps > 0),
   max_rate_age_hours integer not null default 72 check (max_rate_age_hours > 0),
@@ -214,6 +216,7 @@ create table if not exists public.fx_auto_price_runs (
 
 create table if not exists public.fx_auto_price_events (
   id uuid primary key default gen_random_uuid(),
+  event_key text,
   run_id uuid references public.fx_auto_price_runs(id) on delete set null,
   policy_id uuid references public.product_price_policies(id) on delete set null,
   product_id uuid not null references public.products(id) on delete cascade,
@@ -463,8 +466,10 @@ create index if not exists idx_fx_rate_snapshots_quote_effective on public.fx_ra
 create index if not exists idx_product_price_policies_product_market on public.product_price_policies(product_id, target_market, target_currency);
 create index if not exists idx_product_price_policies_status on public.product_price_policies(status, pricing_mode, target_market);
 create index if not exists idx_fx_auto_price_runs_created_at on public.fx_auto_price_runs(created_at desc);
+create unique index if not exists idx_fx_auto_price_runs_idempotency_key on public.fx_auto_price_runs(idempotency_key) where idempotency_key is not null;
 create index if not exists idx_fx_auto_price_events_policy_created_at on public.fx_auto_price_events(policy_id, created_at desc);
 create index if not exists idx_fx_auto_price_events_product_created_at on public.fx_auto_price_events(product_id, created_at desc);
+create unique index if not exists idx_fx_auto_price_events_event_key on public.fx_auto_price_events(event_key) where event_key is not null;
 create index if not exists idx_collections_visible_sort on public.collections(is_visible, sort_order);
 create index if not exists idx_product_collections_collection_sort on public.product_collections(collection_id, sort_order);
 create index if not exists idx_inquiries_buyer_created on public.inquiries(buyer_id, created_at);

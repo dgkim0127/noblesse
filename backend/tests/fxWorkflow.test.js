@@ -115,7 +115,7 @@ test("FX automatic pricing uses five percent deadband", () => {
   assert.equal(calculateDivergenceBps(100, 105.01), 501);
 
   const baseInput = {
-    policy: { pricingMode: FX_PRICING_MODES.FX_AUTO, targetMarket: "US", targetCurrency: "USD", sourcePriceUpdatedAt: "2026-06-23T00:00:00.000Z" },
+    policy: { pricingMode: FX_PRICING_MODES.FX_AUTO, targetMarket: "US", targetCurrency: "USD", lastAppliedSourcePriceUpdatedAt: "2026-06-23T00:00:00.000Z" },
     sourcePrice: { wholesalePrice: 104990, updatedAt: "2026-06-23T00:00:00.000Z" },
     snapshotBundle: freshBundle,
     thresholds: { updateThresholdBps: 500, circuitBreakerBps: 1500, maxRateAgeHours: 72 },
@@ -130,7 +130,7 @@ test("FX automatic pricing blocks rate movement at fifteen percent and above", (
   assert.equal(calculateRateChangeBps(toRateScaled(100), toRateScaled(114.99)), 1499);
   assert.equal(calculateRateChangeBps(toRateScaled(100), toRateScaled(115)), 1500);
   const input = {
-    policy: { pricingMode: FX_PRICING_MODES.FX_AUTO, targetMarket: "US", targetCurrency: "USD", lastAppliedRateScaled: toRateScaled(1000), sourcePriceUpdatedAt: "2026-06-23T00:00:00.000Z" },
+    policy: { pricingMode: FX_PRICING_MODES.FX_AUTO, targetMarket: "US", targetCurrency: "USD", lastAppliedRateScaled: toRateScaled(1000), lastAppliedSourcePriceUpdatedAt: "2026-06-23T00:00:00.000Z" },
     sourcePrice: { wholesalePrice: 115000, updatedAt: "2026-06-23T00:00:00.000Z" },
     publishedPrice: { wholesalePrice: 100 },
     snapshotBundle: {
@@ -163,15 +163,32 @@ test("FX automatic pricing freshness uses sourceEffectiveAt, not fetchedAt", () 
 });
 
 test("manual fixed and manual-only markets are protected from automatic updates", () => {
-  assert.equal(evaluateFxAutoPolicy({
+  const manualResult = evaluateFxAutoPolicy({
     policy: { pricingMode: FX_PRICING_MODES.MANUAL_FIXED, targetMarket: "US", targetCurrency: "USD" },
     sourcePrice: { wholesalePrice: 100000 },
     publishedPrice: { wholesalePrice: 50 },
     snapshotBundle: freshBundle
-  }).action, "manual_fixed");
+  });
+  assert.equal(manualResult.action, "reference_updated");
+  assert.equal(manualResult.status, "active");
+  assert.equal(manualResult.reference.wholesalePrice, 100);
 
   assert.throws(() => assertPricingModeAllowed({ market: "KR", currency: "KRW", pricingMode: FX_PRICING_MODES.FX_AUTO }), /only allowed/);
   assert.throws(() => assertPricingModeAllowed({ market: "GLOBAL", currency: "USD", pricingMode: FX_PRICING_MODES.FX_AUTO }), /only allowed/);
+});
+
+test("paused FX automatic policy exposes reference but blocks price application", () => {
+  const result = evaluateFxAutoPolicy({
+    policy: { pricingMode: FX_PRICING_MODES.FX_AUTO, status: "paused", targetMarket: "US", targetCurrency: "USD" },
+    sourcePrice: { wholesalePrice: 100000, updatedAt: "2026-06-23T00:00:00.000Z" },
+    publishedPrice: { wholesalePrice: 50 },
+    snapshotBundle: freshBundle,
+    thresholds: { updateThresholdBps: 500, circuitBreakerBps: 1500, maxRateAgeHours: 72 },
+    now: freshNow
+  });
+  assert.equal(result.action, "paused");
+  assert.equal(result.status, "paused");
+  assert.equal(result.reference.wholesalePrice, 100);
 });
 
 test("FX conversion respects currency minor units", () => {
@@ -214,6 +231,57 @@ test("admin FX write routes require prices.write", async () => {
 
   assert.equal(response.status, 403);
   assert.equal(response.body.error.code, "FORBIDDEN");
+});
+
+test("admin FX evaluate rejects API threshold overrides", async () => {
+  const response = await request(createFxApp(), "/api/admin/fx/evaluate", {
+    method: "POST",
+    headers: {
+      authorization: "Bearer admin-token",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({ updateThresholdBps: 1 })
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(response.body.error.code, "VALIDATION_ERROR");
+});
+
+test("admin FX manual fixed mode accepts validated manual price payload", async () => {
+  let capturedInput = null;
+  const fxService = createAdminFxService({
+    queries: {
+      async setProductMarketPricingMode(productId, market, input) {
+        capturedInput = { productId, market, ...input };
+        return { policy: { id: "policy-1", productId, market, pricingMode: input.pricingMode }, auditLogId: "audit-1" };
+      }
+    }
+  });
+  const response = await request(createFxApp({ fxService }), "/api/admin/fx/products/11111111-1111-4111-8111-111111111111/markets/US/mode", {
+    method: "PUT",
+    headers: {
+      authorization: "Bearer admin-token",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      pricingMode: "manual_fixed",
+      currency: "USD",
+      wholesalePrice: "8.80",
+      retailPrice: "9.90",
+      moq: 2,
+      minOrderAmount: "20.00",
+      isActive: false
+    })
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(capturedInput.productId, "11111111-1111-4111-8111-111111111111");
+  assert.equal(capturedInput.market, "US");
+  assert.equal(capturedInput.manualPrice.wholesalePrice, 8.8);
+  assert.equal(capturedInput.manualPrice.retailPrice, 9.9);
+  assert.equal(capturedInput.manualPrice.moq, 2);
+  assert.equal(capturedInput.manualPrice.minOrderAmount, 20);
+  assert.equal(capturedInput.manualPrice.isActive, false);
 });
 
 test("admin FX approve and reject draft routes are removed", async () => {

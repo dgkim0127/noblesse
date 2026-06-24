@@ -164,6 +164,14 @@ export function createAdminApi(apiClient) {
       }))
     },
 
+    async setupProductPriceBooks(productId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/products/${encodeURIComponent(productId)}/price-books`, {
+        method: 'PUT',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
     async getFxStatus(token) {
       return unwrap(await apiClient.apiFetch('/admin/fx/status', { token: requireToken(token) }))
     },

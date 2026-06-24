@@ -109,6 +109,17 @@ async function insertAudit(client, action, priceId, beforeSnapshot, afterSnapsho
 }
 
 async function upsertManualPricePolicy(client, row) {
+  const sourceResult = row.market === "KR" && row.currency === "KRW"
+    ? { rows: [{ id: row.id }] }
+    : await client.query(
+        `
+          select id
+          from public.product_prices
+          where product_id = $1 and market = 'KR' and currency = 'KRW'
+          limit 1
+        `,
+        [row.product_id]
+      );
   await client.query(
     `
       insert into public.product_price_policies (
@@ -116,20 +127,92 @@ async function upsertManualPricePolicy(client, row) {
         target_market,
         target_currency,
         pricing_mode,
+        source_price_id,
         published_price_id,
         status
       )
-      values ($1, $2, $3, 'manual_fixed', $4, 'active')
+      values ($1, $2, $3, 'manual_fixed', $4, $5, 'active')
       on conflict (product_id, target_market, target_currency) do update
         set pricing_mode = 'manual_fixed',
+            source_price_id = excluded.source_price_id,
             published_price_id = excluded.published_price_id,
             status = 'active',
             paused_at = null,
             pause_reason = null,
             updated_at = now()
     `,
-    [row.product_id, row.market, row.currency, row.id]
+    [row.product_id, row.market, row.currency, sourceResult.rows[0]?.id || null, row.id]
   );
+}
+
+async function upsertPriceRow(client, productId, input) {
+  const result = await client.query(
+    `
+      insert into public.product_prices (
+        product_id,
+        market,
+        currency,
+        wholesale_price,
+        retail_price,
+        moq,
+        min_order_amount,
+        visible_to,
+        is_active
+      )
+      values ($1, $2, $3, $4, $5, $6, $7, 'approved_only', $8)
+      on conflict (product_id, market) do update
+        set currency = excluded.currency,
+            wholesale_price = excluded.wholesale_price,
+            retail_price = excluded.retail_price,
+            moq = excluded.moq,
+            min_order_amount = excluded.min_order_amount,
+            is_active = excluded.is_active,
+            updated_at = now()
+      returning id
+    `,
+    [
+      productId,
+      input.market,
+      input.currency,
+      input.wholesalePrice,
+      input.retailPrice,
+      input.moq,
+      input.minOrderAmount,
+      input.isActive
+    ]
+  );
+  const rowResult = await client.query(`${priceSelect} where pp.id = $1 limit 1`, [result.rows[0].id]);
+  return rowResult.rows[0];
+}
+
+async function upsertFxAutoPolicy(client, productId, marketConfig, sourcePrice) {
+  const result = await client.query(
+    `
+      insert into public.product_price_policies (
+        product_id,
+        target_market,
+        target_currency,
+        pricing_mode,
+        source_price_id,
+        published_price_id,
+        status,
+        latest_source_price_updated_at
+      )
+      values ($1, $2, $3, 'fx_auto', $4, null, 'pending_rate', $5)
+      on conflict (product_id, target_market, target_currency) do update
+        set pricing_mode = 'fx_auto',
+            source_price_id = excluded.source_price_id,
+            published_price_id = null,
+            status = 'pending_rate',
+            paused_at = null,
+            pause_reason = null,
+            latest_source_price_updated_at = excluded.latest_source_price_updated_at,
+            updated_at = now()
+      returning *
+    `,
+    [productId, marketConfig.market, marketConfig.currency, sourcePrice.id, sourcePrice.updated_at]
+  );
+  return result.rows[0];
 }
 
 export function createAdminPriceQueries(pool) {
@@ -307,6 +390,104 @@ export function createAdminPriceQueries(pool) {
 
         await client.query("commit");
         return { price: mapPrice(row), auditLogId };
+      } catch (error) {
+        try {
+          await client.query("rollback");
+        } catch {
+          // Preserve the original query error.
+        }
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+
+    async setupProductPriceBooks(productId, input, adminViewer = {}) {
+      assertTransactionPool(pool);
+      const client = await pool.connect();
+      const actor = getAdminActor(adminViewer);
+
+      try {
+        await client.query("begin");
+        const productResult = await client.query(
+          "select id, code, moq_default from public.products where id = $1 for update",
+          [productId]
+        );
+        const product = productResult.rows[0];
+        if (!product) {
+          await client.query("rollback");
+          return null;
+        }
+
+        const krRow = await upsertPriceRow(client, productId, input.kr);
+        await upsertManualPricePolicy(client, krRow);
+
+        const prices = [mapPrice(krRow)];
+        const policies = [];
+        let autoPolicyCount = 0;
+        for (const marketConfig of input.markets) {
+          if (marketConfig.pricingMode === "manual_fixed") {
+            const manualRow = await upsertPriceRow(client, productId, {
+              ...marketConfig,
+              moq: marketConfig.moq ?? krRow.moq ?? product.moq_default ?? 1,
+              minOrderAmount: marketConfig.minOrderAmount ?? 0,
+              isActive: marketConfig.isActive ?? true
+            });
+            await upsertManualPricePolicy(client, manualRow);
+            prices.push(mapPrice(manualRow));
+            continue;
+          }
+          const policy = await upsertFxAutoPolicy(client, productId, marketConfig, krRow);
+          policies.push(policy);
+          autoPolicyCount += 1;
+        }
+
+        const auditResult = await client.query(
+          `
+            insert into public.audit_logs (
+              actor_user_id,
+              actor_role,
+              action,
+              target_table,
+              target_id,
+              before_snapshot,
+              after_snapshot,
+              request_id,
+              ip_address,
+              user_agent
+            )
+            values ($1, $2, 'admin.product_price_books.setup', 'products', $3, null, $4::jsonb, $5, $6, $7)
+            returning id
+          `,
+          [
+            actor.userId,
+            actor.role,
+            productId,
+            {
+              productId,
+              markets: [input.kr.market, ...input.markets.map((entry) => entry.market)],
+              autoPolicyCount
+            },
+            actor.requestId,
+            actor.ipAddress,
+            actor.userAgent
+          ]
+        );
+
+        await client.query("commit");
+        return {
+          prices,
+          policies: policies.map((policy) => ({
+            id: policy.id,
+            productId: policy.product_id,
+            targetMarket: policy.target_market,
+            targetCurrency: policy.target_currency,
+            pricingMode: policy.pricing_mode,
+            status: policy.status
+          })),
+          autoPolicyCount,
+          auditLogId: auditResult.rows[0].id
+        };
       } catch (error) {
         try {
           await client.query("rollback");

@@ -116,6 +116,10 @@ test('admin price writes call protected price routes', async () => {
     moq: 20,
   }, 'admin-token')
   await adminApi.updatePrice('11111111-1111-4111-8111-111111111111', { isActive: false }, 'admin-token')
+  await adminApi.setupProductPriceBooks('22222222-2222-4222-8222-222222222222', {
+    kr: { wholesalePrice: 12000, moq: 20 },
+    markets: [{ market: 'JP', currency: 'JPY', pricingMode: 'fx_auto' }],
+  }, 'admin-token')
 
   assert.equal(calls[0].path, '/admin/prices')
   assert.equal(calls[0].options.method, 'POST')
@@ -131,6 +135,13 @@ test('admin price writes call protected price routes', async () => {
   assert.equal(calls[1].options.method, 'PATCH')
   assert.equal(calls[1].options.token, 'admin-token')
   assert.deepEqual(calls[1].options.body, { isActive: false })
+  assert.equal(calls[2].path, '/admin/products/22222222-2222-4222-8222-222222222222/price-books')
+  assert.equal(calls[2].options.method, 'PUT')
+  assert.equal(calls[2].options.token, 'admin-token')
+  assert.deepEqual(calls[2].options.body, {
+    kr: { wholesalePrice: 12000, moq: 20 },
+    markets: [{ market: 'JP', currency: 'JPY', pricingMode: 'fx_auto' }],
+  })
 })
 
 test('admin FX methods call protected automatic pricing routes', async () => {
@@ -140,7 +151,7 @@ test('admin FX methods call protected automatic pricing routes', async () => {
   await adminApi.getFxStatus('admin-token')
   await adminApi.getFxRates('admin-token')
   await adminApi.getFxPrices({ status: 'pending_rate', market: 'US' }, 'admin-token')
-  await adminApi.evaluateFxPrices({ updateThresholdBps: 500 }, 'admin-token')
+  await adminApi.evaluateFxPrices({}, 'admin-token')
   await adminApi.setFxProductMarketMode('22222222-2222-4222-8222-222222222222', 'US', { pricingMode: 'fx_auto', currency: 'USD' }, 'admin-token')
   await adminApi.pauseFxPrice('11111111-1111-4111-8111-111111111111', { reason: 'Manual review' }, 'admin-token')
   await adminApi.resumeFxPrice('11111111-1111-4111-8111-111111111111', 'admin-token')
@@ -154,7 +165,7 @@ test('admin FX methods call protected automatic pricing routes', async () => {
     'POST /admin/fx/prices/11111111-1111-4111-8111-111111111111/pause',
     'POST /admin/fx/prices/11111111-1111-4111-8111-111111111111/resume',
   ])
-  assert.deepEqual(calls[3].options.body, { updateThresholdBps: 500 })
+  assert.deepEqual(calls[3].options.body, {})
   assert.deepEqual(calls[4].options.body, { pricingMode: 'fx_auto', currency: 'USD' })
   assert.deepEqual(calls[5].options.body, { reason: 'Manual review' })
 })
