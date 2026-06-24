@@ -1,6 +1,7 @@
-import { LockKeyhole, Plus } from 'lucide-react'
+import { Heart, LockKeyhole, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
+import { formatAdminPriceBook } from '../config/currency'
 import { formatMoney } from '../utils/commerce'
 import { getLocalizedProductAlt, getLocalizedProductName, useLocalePath } from '../utils/locale'
 
@@ -40,24 +41,40 @@ const cardCopy = {
 }
 
 export function CatalogCard({ product }) {
-  const { addInquiryItem, approvedPrice, getPrice, isApproved } = useCommerce()
+  const { addInquiryItem, approvedPrice, getAdminPriceBooks, getPrice, isAdmin, isApproved } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const price = getPrice(product.productId)
   const copy = cardCopy[locale] ?? cardCopy.kr
+  const adminPriceLabel = { kr: '관리자 가격', en: 'Admin prices', jp: '管理者価格', cn: '管理员价格' }[locale] ?? 'Admin prices'
   const productName = getLocalizedProductName(product, locale)
   const productAlt = getLocalizedProductAlt(product, locale)
   const canUseTradeTerms = isApproved && price
+  const adminPriceBooks = isAdmin ? getAdminPriceBooks(product.productId) : []
+  const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
+  const favoriteLabel = { kr: '좋아요', en: 'Favorite', jp: 'お気に入り', cn: '收藏' }[locale] ?? 'Favorite'
   return <article className="catalog-card">
-    <Link className={`catalog-image tone-${product.tone}`} to={toLocalePath(`/products/${product.productId}`)} aria-label={productName}>
-      <span className="jewel-shape" />
-      {product.imageSet?.card && <img src={product.imageSet.card} alt={productAlt} loading="lazy" width="600" height="600" onError={(event) => { event.currentTarget.hidden = true }} />}
-      {product.isNew && <b>NEW</b>}
-    </Link>
+    <div className="catalog-media">
+      <Link className={`catalog-image tone-${product.tone}`} to={toLocalePath(`/products/${product.productId}`)} aria-label={productName}>
+        <span className="jewel-shape" />
+        {product.imageSet?.card && <img src={product.imageSet.card} alt={productAlt} loading="lazy" width="600" height="900" onError={(event) => { event.currentTarget.hidden = true }} />}
+        {product.isNew && <b>NEW</b>}
+      </Link>
+      <div className="catalog-quick-actions" aria-label={`${productName} actions`}>
+        <button className="catalog-quick-action" type="button" disabled={!canUseTradeTerms} onClick={() => addInquiryItem(product.productId)} title={canUseTradeTerms ? copy.add : copy.lockedButton} aria-label={canUseTradeTerms ? copy.add : copy.lockedButton}>
+          <Plus size={17} />
+        </button>
+        <button className="catalog-quick-action" type="button" title={favoriteLabel} aria-label={favoriteLabel}>
+          <Heart size={17} />
+        </button>
+      </div>
+    </div>
     <div className="catalog-body">
       <small>{product.code}</small>
       <Link to={toLocalePath(`/products/${product.productId}`)}><h3>{productName}</h3></Link>
       <p>{product.material}</p>
-      {canUseTradeTerms ? <div className="approved-price"><strong>{formatMoney(approvedPrice(product.productId), price.currency)}</strong><span>{copy.minQty} {price.moq} / {copy.memberPrice} · {price.currency}</span></div> : <div className="locked-price"><LockKeyhole size={14} />{isApproved ? copy.unavailable : copy.locked}</div>}
+      {adminPriceBooks.length > 0
+        ? <div className="approved-price admin-price-books"><strong>{adminPriceLabel}</strong><span className="admin-price-book-grid">{adminPriceItems.map((item) => <span className="admin-price-book-item" key={item.currency}><img alt={item.flagLabel} className="admin-price-book-flag" src={item.flagSrc} /><span className="admin-price-book-value"><b>{item.amount}</b><span>{item.symbol}</span></span></span>)}</span></div>
+        : canUseTradeTerms ? <div className="approved-price"><strong>{formatMoney(approvedPrice(product.productId), price.currency)}</strong><span>{copy.minQty} {price.moq} / {copy.memberPrice} · {price.currency}</span></div> : <div className="locked-price"><LockKeyhole size={14} />{isApproved ? copy.unavailable : copy.locked}</div>}
     </div>
     <button className="add-inquiry" type="button" disabled={!canUseTradeTerms} onClick={() => addInquiryItem(product.productId)}><Plus size={16} />{canUseTradeTerms ? copy.add : copy.lockedButton}</button>
   </article>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { AdminLink, AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { useAdminCopy } from './adminCopy'
-import { formatCurrency, getCurrencyInputStep, isValidMarketCurrencyPair, marketCurrency, supportedCurrencies, supportedMarkets } from '../../config/currency.js'
+import { formatCurrency, formatMarketLabel, getCurrencyInputStep, getMarketDisplay, isValidMarketCurrencyPair, marketCurrency, supportedCurrencies, supportedMarkets } from '../../config/currency.js'
 import { useLocalePath } from '../../utils/locale'
 
 const maxImageCount = 8
@@ -693,7 +693,7 @@ export function AdminCatalogEntryPage() {
               const market = event.target.value
               setPriceForm((current) => ({ ...current, market, currency: marketCurrency[market] || 'USD' }))
             }}>
-              {supportedMarkets.map((market) => <option key={market} value={market}>{market}</option>)}
+              {supportedMarkets.map((market) => <option key={market} value={market}>{formatMarketLabel(market)}</option>)}
             </select></label>
             <label className="admin-search">{t.price.currency}<select value={priceForm.currency} onChange={(event) => setPriceField('currency', event.target.value)}>
               {supportedCurrencies.map((currency) => <option disabled={currency !== marketCurrency[priceForm.market]} key={currency} value={currency}>{currency}</option>)}
@@ -730,7 +730,7 @@ export function AdminCatalogEntryPage() {
           <dt>{t.confirm.productName}</dt><dd>{productForm.nameEn || '-'}</dd>
           <dt>{t.confirm.visibility}</dt><dd>{productForm.isVisible ? adminCopy.common.visible : adminCopy.common.hidden}</dd>
           <dt>{t.confirm.images}</dt><dd>{uploadedImages.length || images.length}</dd>
-          <dt>{t.confirm.market}</dt><dd>{priceForm.market}</dd>
+          <dt>{t.confirm.market}</dt><dd><img alt={getMarketDisplay(priceForm.market).label} className="admin-market-flag" src={getMarketDisplay(priceForm.market).flagSrc} title={priceForm.market} /></dd>
           <dt>{t.confirm.currency}</dt><dd>{priceForm.currency}</dd>
           <dt>{t.confirm.price}</dt><dd>{parsedWholesalePrice == null ? '-' : formatDisplayAmount(parsedWholesalePrice, priceForm.currency)}</dd>
         </dl>

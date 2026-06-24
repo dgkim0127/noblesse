@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { getCurrencyInputStep, marketCurrency, supportedCurrencies, supportedMarkets } from '../../config/currency.js'
+import { formatMarketLabel, getCurrencyInputStep, getMarketDisplay, marketCurrency, supportedCurrencies, supportedMarkets } from '../../config/currency.js'
 import { AdminMoney, AdminPageHeader, AdminPagination, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { useAdminCopy } from './adminCopy'
@@ -96,7 +96,7 @@ export function AdminPricesPage() {
         const nextMarket = event.target.value
         setForm((current) => ({ ...current, market: nextMarket, currency: marketCurrency[nextMarket] || 'USD' }))
       }}>
-        {supportedMarkets.map((tab) => <option key={tab} value={tab}>{tab}</option>)}
+        {supportedMarkets.map((tab) => <option key={tab} value={tab}>{formatMarketLabel(tab)}</option>)}
       </select></label>
       <label className="admin-search">{t.prices.currency}<select value={form.currency} onChange={(event) => setField('currency', event.target.value)}>
         {supportedCurrencies.map((currency) => <option disabled={currency !== marketCurrency[form.market]} key={currency} value={currency}>{currency}</option>)}
@@ -111,7 +111,10 @@ export function AdminPricesPage() {
       <label className="admin-search">{t.prices.searchLabel}<input value={query} onChange={(event) => resetPage(setQuery)(event.target.value)} placeholder={t.prices.searchPlaceholder} /></label>
       <label className="admin-toggle"><input checked={activeOnly} onChange={(event) => resetPage(setActiveOnly)(event.target.checked)} type="checkbox" /> {t.prices.activeOnly}</label>
       <div className="admin-filter-tabs">
-        {marketTabs.map((tab) => <button className={market === tab ? 'active' : ''} key={tab} type="button" onClick={() => resetPage(setMarket)(tab)}>{tab}</button>)}
+        {marketTabs.map((tab) => {
+          const display = getMarketDisplay(tab)
+          return <button className={market === tab ? 'active' : ''} key={tab} type="button" onClick={() => resetPage(setMarket)(tab)}>{tab === 'ALL' ? t.common.all : <img alt={display.label} className="admin-market-flag" src={display.flagSrc} />}</button>
+        })}
       </div>
     </div>
     {message && <p className="admin-inline-message">{message}</p>}
@@ -123,7 +126,7 @@ export function AdminPricesPage() {
           <tbody>{prices.map((price) => <tr key={price.id}>
             <td>{price.productCode}</td>
             <td>{price.productNameEn || price.productNameKo || '-'}</td>
-            <td>{price.market}</td>
+            <td><img alt={getMarketDisplay(price.market).label} className="admin-market-flag" src={getMarketDisplay(price.market).flagSrc} title={price.market} /></td>
             <td>{price.currency}</td>
             <td><AdminMoney value={price.wholesalePrice} currency={price.currency} /></td>
             <td>{price.retailPrice == null ? '-' : <AdminMoney value={price.retailPrice} currency={price.currency} />}</td>

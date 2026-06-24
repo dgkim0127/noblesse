@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ChevronDown, Clock3, Heart, Search, ShieldCheck, UserRound, X } from 'lucide-react'
+import { ChevronDown, Clock3, Eye, EyeOff, Heart, Search, ShieldCheck, UserRound, X } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import noblesseLogo from '../assets/noblesse-logo.png'
 import { useCommerce } from '../commerce/commerceStore'
+import { getLoginErrorMessage } from '../services/authErrors'
 import { supportedLocales, useLocalePath } from '../utils/locale'
 
 const searchHistoryKey = 'noblesse-search-history'
@@ -483,6 +484,7 @@ export function StoreShell() {
   const [loginModalOrigin, setLoginModalOrigin] = useState({ x: 0, y: 0 })
   const [loginModalNotice, setLoginModalNotice] = useState('')
   const [isAutoLoginEnabled, setIsAutoLoginEnabled] = useState(true)
+  const [isLoginPasswordVisible, setIsLoginPasswordVisible] = useState(false)
   const [navIndicator, setNavIndicator] = useState({ left: 0, ready: false, width: 0 })
   const {
     buyerAccess,
@@ -511,6 +513,11 @@ export function StoreShell() {
   const isMockMode = dataMode === 'mock'
   const normalizedPathname = location.pathname.replace(/\/+$/, '') || '/'
   const isHomeImageRoute = normalizedPathname === '/' || supportedLocales.some((item) => normalizedPathname === `/${item}`)
+  const firstPathSegment = normalizedPathname.split('/')[1]
+  const pathnameWithoutLocale = supportedLocales.includes(firstPathSegment)
+    ? normalizedPathname.slice(firstPathSegment.length + 1) || '/'
+    : normalizedPathname
+  const usesHomeStyleHeader = isHomeImageRoute || pathnameWithoutLocale === '/products' || pathnameWithoutLocale.startsWith('/products/')
 
   useEffect(() => {
     const nav = navRef.current
@@ -636,6 +643,7 @@ export function StoreShell() {
     loginModalCloseTimerRef.current = window.setTimeout(() => {
       setIsLoginModalOpen(false)
       setIsLoginModalClosing(false)
+      setIsLoginPasswordVisible(false)
       loginModalCloseTimerRef.current = null
     }, 340)
   }, [isLoginModalClosing, isLoginModalOpen])
@@ -752,9 +760,9 @@ export function StoreShell() {
     try {
       await signIn({ identifier, password, remember: isAutoLoginEnabled })
       closeLoginModal()
-      navigate(toLocalePath('/account'))
+      navigate(toLocalePath('/'))
     } catch (error) {
-      setLoginModalNotice(error?.message || 'Login failed. Please check your account.')
+      setLoginModalNotice(getLoginErrorMessage(error, locale))
     }
   }
 
@@ -783,7 +791,7 @@ export function StoreShell() {
 
   const shouldRenderCompactSearch = isCompactSearchOpen || isCompactSearchClosing
 
-  return <div className={`site-shell ${isHomeImageRoute ? 'home-image-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isSideLayout ? 'has-side-layout' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''} ${isPreviewBarHidden ? 'has-preview-hidden' : 'has-preview-visible'}`.trim()}>
+  return <div className={`site-shell ${usesHomeStyleHeader ? 'home-image-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isSideLayout ? 'has-side-layout' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''} ${isPreviewBarHidden ? 'has-preview-hidden' : 'has-preview-visible'}`.trim()}>
     <div className={`top-marquee ${isMarqueeCollapsed ? 'is-collapsed' : ''}`} style={topMarqueeStyle} aria-label={`${headerBrandName} material notice`}>
       <div className="top-marquee-track" aria-hidden="true">
         {Array.from({ length: 4 }).map((_, index) => <span key={index}>{topMarqueeText}</span>)}
@@ -856,10 +864,10 @@ export function StoreShell() {
         </div>
 
         <nav className="header-actions" aria-label={copy.memberNav}>
-          {isHomeImageRoute && <>
-            <IconAction className="header-login-icon-action" label={copy.login} onClick={openLoginModal}><UserRound size={17} /></IconAction>
+          {usesHomeStyleHeader && <>
             {isGuest
               ? <>
+                <IconAction className="header-login-icon-action" label={copy.login} onClick={openLoginModal}><UserRound size={17} /></IconAction>
                 <IconAction className="header-side-icon" label={sideCopy.myInquiries} onClick={openLoginRequiredModal}><Clock3 size={17} /></IconAction>
                 <IconAction className="header-side-icon" label={sideCopy.inquiryList} onClick={openLoginRequiredModal}><InquiryListIcon /></IconAction>
                 <IconAction className="header-my-action" label={copy.account} onClick={openLoginRequiredModal}>{sideCopy.my}</IconAction>
@@ -870,7 +878,7 @@ export function StoreShell() {
                 <IconAction className="header-my-action" label={copy.account} to={toLocalePath('/account')}>{sideCopy.my}</IconAction>
               </>}
           </>}
-          {isGuest && !isHomeImageRoute && <IconAction label={copy.login} onClick={openLoginModal}><UserRound size={18} /></IconAction>}
+          {isGuest && !usesHomeStyleHeader && <IconAction label={copy.login} onClick={openLoginModal}><UserRound size={18} /></IconAction>}
           {isPending && <>
             <IconAction label={copy.pending} to={toLocalePath('/approval-pending')}><Clock3 size={18} /></IconAction>
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
@@ -999,7 +1007,24 @@ export function StoreShell() {
               <span>{loginCopy.autoLogin}</span>
             </label>
           </div>
-          <label>{loginCopy.password}<input autoComplete="current-password" name="password" placeholder={loginCopy.passwordPlaceholder} type="password" /></label>
+          <label>{loginCopy.password}
+            <span className="login-password-control">
+              <input
+                autoComplete="current-password"
+                name="password"
+                placeholder={loginCopy.passwordPlaceholder}
+                type={isLoginPasswordVisible ? 'text' : 'password'}
+              />
+              <button
+                aria-label={isLoginPasswordVisible ? 'Hide password' : 'Show password'}
+                className="login-password-toggle"
+                onClick={() => setIsLoginPasswordVisible((current) => !current)}
+                type="button"
+              >
+                {isLoginPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </span>
+          </label>
           <button className="primary-action" type="submit">{loginCopy.submit}</button>
         </form>
         <div className="auth-links">

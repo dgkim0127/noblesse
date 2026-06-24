@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { CatalogCard } from '../components/CatalogCard'
 import { useCommerce } from '../commerce/commerceStore'
+import { formatAdminPriceBook } from '../config/currency'
 import { formatMoney } from '../utils/commerce'
 import { getLocalizedProductAlt, getLocalizedProductDescription, getLocalizedProductName, useLocalePath } from '../utils/locale'
 
@@ -196,13 +197,16 @@ function OptionButtons({ label, options, selected, onSelect }) {
 
 export function ProductDetailPage() {
   const { productId } = useParams()
-  const { addInquiryItem, approvedPrice, dataError, dataStatus, getPrice, isApproved, products, viewerState } = useCommerce()
+  const { addInquiryItem, approvedPrice, dataError, dataStatus, getAdminPriceBooks, getPrice, isAdmin, isApproved, products, viewerState } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const product = products.find((item) => item.productId === productId)
   const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] ?? '')
   const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] ?? '')
   const price = product ? getPrice(product.productId) : null
-  const moq = price?.moq ?? product?.moqDefault ?? 1
+  const adminPriceBooks = product && isAdmin ? getAdminPriceBooks(product.productId) : []
+  const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
+  const primaryAdminPrice = adminPriceBooks[0] ?? null
+  const moq = price?.moq ?? primaryAdminPrice?.moq ?? product?.moqDefault ?? 1
   const [quantity, setQuantity] = useState(moq)
 
   if (dataStatus === 'loading') {
@@ -224,8 +228,9 @@ export function ProductDetailPage() {
   const productName = getLocalizedProductName(product, locale)
   const description = getLocalizedProductDescription(product, locale) ?? ''
   const copy = detailCopy[locale] ?? detailCopy.kr
-  const moqLabel = isApproved && price ? price.moq : copy.moqAfterReview
-  const fallbackMoqLabel = !isApproved && product.moqDefault ? copy.fallbackMoq(product.moqDefault) : ''
+  const adminPriceLabel = { kr: '관리자 가격', en: 'Admin prices', jp: '管理者価格', cn: '管理员价格' }[locale] ?? 'Admin prices'
+  const moqLabel = isApproved && price ? price.moq : primaryAdminPrice ? primaryAdminPrice.moq : copy.moqAfterReview
+  const fallbackMoqLabel = !isApproved && !primaryAdminPrice && product.moqDefault ? copy.fallbackMoq(product.moqDefault) : ''
   const accessLink = viewerState === 'pending' ? '/approval-pending' : '/register'
   const accessLabel = viewerState === 'pending' ? copy.reviewStatus : copy.requestAccess
   const canUseTradeTerms = isApproved && price
@@ -254,6 +259,11 @@ export function ProductDetailPage() {
           <div><dt>{copy.exportAvailable}</dt><dd>{product.isExportAvailable ? copy.exportYes : copy.exportNo}</dd></div>
         </dl>
 
+        {adminPriceBooks.length > 0 ? <div className="detail-price admin-price-books">
+          <small>{adminPriceLabel}</small>
+          <span className="admin-price-book-grid detail-admin-price-book-grid">{adminPriceItems.map((item) => <span className="admin-price-book-item" key={item.currency}><img alt={item.flagLabel} className="admin-price-book-flag" src={item.flagSrc} /><span className="admin-price-book-value"><b>{item.amount}</b><span>{item.symbol}</span></span></span>)}</span>
+        </div> : null}
+
         {canUseTradeTerms ? <>
           <div className="detail-price">
             <small>{copy.memberPrice}</small>
@@ -273,7 +283,7 @@ export function ProductDetailPage() {
           </div>
           <button className="primary-action" type="button" onClick={addSelectedItem}><Plus size={17} />{copy.add}</button>
           <p className="quote-note">{copy.quoteNote}</p>
-        </> : <div className="approval-lock">
+        </> : adminPriceBooks.length > 0 ? null : <div className="approval-lock">
           <LockKeyhole size={19} />
           <strong>{isApproved ? copy.unavailable : copy.lockTitle}</strong>
           <span>{viewerState === 'pending' ? copy.lockPending : copy.lockGuest}</span>

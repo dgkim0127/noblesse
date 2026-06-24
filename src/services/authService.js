@@ -8,6 +8,7 @@ import {
   signOut,
 } from 'firebase/auth'
 import { auth, hasFirebaseConfig } from '../firebase'
+import { normalizeSignInIdentifier } from './authIdentifiers'
 
 function requireAuth() {
   if (!hasFirebaseConfig || !auth) {
@@ -33,7 +34,7 @@ export function subscribeAuthState(onChange) {
 
 export async function signInWithCredentials(identifier, password, { remember = true } = {}) {
   const clientAuth = requireAuth()
-  const email = String(identifier || '').trim()
+  const email = normalizeSignInIdentifier(identifier)
   const safePassword = String(password || '')
 
   if (!email || !safePassword) {

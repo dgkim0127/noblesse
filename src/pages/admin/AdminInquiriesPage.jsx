@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { getMarketDisplay } from '../../config/currency.js'
 import { AdminLink, AdminMoney, AdminPageHeader, AdminPagination, AdminStatus } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiResource } from './adminApiPageUtils'
 import { getAdminStatusLabel, useAdminCopy } from './adminCopy'
@@ -42,7 +43,7 @@ export function AdminInquiriesPage() {
           <tbody>{inquiries.map((inquiry) => <tr key={inquiry.id || inquiry.inquiryId}>
             <td>{inquiry.inquiryNumber || inquiry.inquiryId}</td>
             <td>{inquiry.companyName || inquiry.buyerCompanyName || '-'}</td>
-            <td>{inquiry.market}</td>
+            <td><img alt={getMarketDisplay(inquiry.market).label} className="admin-market-flag" src={getMarketDisplay(inquiry.market).flagSrc} title={inquiry.market} /></td>
             <td>{inquiry.currency}</td>
             <td><AdminStatus status={inquiry.status} /></td>
             <td>{inquiry.totalItems}</td>

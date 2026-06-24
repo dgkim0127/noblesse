@@ -11,6 +11,7 @@ import {
   getDefaultOption,
   getBuyerAccessFeatures,
   getDiscountedPrice,
+  getAdminPriceBooksForProduct,
   getPriceForBuyer,
   getViewerStateFromProfile,
   isApprovedBuyer,
@@ -35,6 +36,38 @@ function upsertInquiry(inquiries, nextInquiry) {
   return found
     ? inquiries.map((item) => getInquiryKey(item) === nextKey ? nextInquiry : item)
     : [nextInquiry, ...inquiries]
+}
+
+async function loadAuthenticatedCommerceState({ apiBaseUrl, token }) {
+  const apiClient = createApiClient({ baseUrl: apiBaseUrl })
+  const buyerApi = createBuyerApi(apiClient)
+  const profile = normalizeBuyerProfile(await buyerApi.getCurrentBuyerProfile(token))
+  const isApprovedProfile = isApprovedBuyer(profile)
+  const isAdminProfile = isAdmin(profile)
+  let prices = []
+  let inquiryResult = { data: { inquiries: [] } }
+
+  if (isApprovedProfile || isAdminProfile) {
+    try {
+      prices = await buyerApi.getProductPrices(token)
+    } catch {
+      prices = []
+    }
+  }
+
+  if (isApprovedProfile) {
+    try {
+      inquiryResult = await buyerApi.getInquiries({}, token)
+    } catch {
+      inquiryResult = { data: { inquiries: [] } }
+    }
+  }
+
+  return {
+    inquiries: inquiryResult.data?.inquiries || [],
+    prices,
+    profile,
+  }
 }
 
 export function CommerceProvider({ children }) {
@@ -127,8 +160,6 @@ export function CommerceProvider({ children }) {
       return undefined
     }
 
-    const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
-    const buyerApi = createBuyerApi(apiClient)
     let isMounted = true
 
     const unsubscribe = subscribeAuthState(async (user) => {
@@ -147,18 +178,14 @@ export function CommerceProvider({ children }) {
 
       try {
         const token = await getUserIdToken(user)
-        const profile = normalizeBuyerProfile(await buyerApi.getCurrentBuyerProfile(token))
-        const isApprovedProfile = isApprovedBuyer(profile)
-        const [apiProductPrices, apiInquiries] = isApprovedProfile
-          ? await Promise.all([
-            buyerApi.getProductPrices(token),
-            buyerApi.getInquiries({}, token),
-          ])
-          : [[], { data: { inquiries: [] } }]
+        const nextState = await loadAuthenticatedCommerceState({
+          apiBaseUrl: runtimeConfig.apiBaseUrl,
+          token,
+        })
         if (!isMounted) return
-        setApiProfile(profile)
-        setProductPrices(apiProductPrices)
-        setInquiries(apiInquiries.data?.inquiries || [])
+        setApiProfile(nextState.profile)
+        setProductPrices(nextState.prices)
+        setInquiries(nextState.inquiries)
         setAuthStatus('authenticated')
       } catch (error) {
         if (!isMounted) return
@@ -182,6 +209,10 @@ export function CommerceProvider({ children }) {
     getDiscountedPrice(getPriceForBuyer(productPrices, productId, buyer, isApproved), buyer?.discountRate)
   ), [buyer, isApproved, productPrices])
 
+  const getAdminPriceBooks = useCallback((productId) => (
+    isAdminViewer ? getAdminPriceBooksForProduct(productPrices, productId) : []
+  ), [isAdminViewer, productPrices])
+
   const inquiryRows = useMemo(() => buildInquiryRows(inquiryItems, products, buyer, isApproved, productPrices), [buyer, inquiryItems, isApproved, productPrices, products])
   const estimatedTotal = inquiryRows.reduce((sum, row) => sum + row.subtotal, 0)
   const totalQuantity = inquiryRows.reduce((sum, row) => sum + row.quantity, 0)
@@ -202,13 +233,22 @@ export function CommerceProvider({ children }) {
     setAuthError('')
 
     try {
-      await signInWithCredentials(identifier, password, { remember })
+      const credential = await signInWithCredentials(identifier, password, { remember })
+      const token = await getUserIdToken(credential.user, true)
+      const nextState = await loadAuthenticatedCommerceState({
+        apiBaseUrl: runtimeConfig.apiBaseUrl,
+        token,
+      })
+      setApiProfile(nextState.profile)
+      setProductPrices(nextState.prices)
+      setInquiries(nextState.inquiries)
+      setAuthStatus('authenticated')
     } catch (error) {
       setAuthStatus(isAuthConfigured() ? 'error' : 'config-missing')
       setAuthError(error?.message || 'Unable to sign in.')
       throw error
     }
-  }, [isMockMode, setViewerState])
+  }, [isMockMode, runtimeConfig.apiBaseUrl, setViewerState])
 
   const registerBuyer = useCallback(async ({ email, password, profile, remember = true } = {}) => {
     if (isMockMode) {
@@ -364,6 +404,7 @@ export function CommerceProvider({ children }) {
     dataStatus,
     estimatedTotal,
     getPrice,
+    getAdminPriceBooks,
     inquiries,
     inquiryItems,
     inquiryRows,

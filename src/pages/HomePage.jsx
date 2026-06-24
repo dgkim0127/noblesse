@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { ClipboardList, Headphones, Heart, Mail } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
+import { formatAdminPriceBook } from '../config/currency'
 import { mockProducts } from '../data/catalog'
 import { formatMoney } from '../utils/commerce'
 import { useLocalePath } from '../utils/locale'
@@ -879,7 +880,7 @@ const buyerConceptPanels = [
 const getWeeklyDemand = (index) => weeklyDemandSamples[index % weeklyDemandSamples.length]
 
 function HomeProductCard({ product, index, variant = 'default' }) {
-  const { addInquiryItem, approvedPrice, getPrice, isApproved, viewerState } = useCommerce()
+  const { addInquiryItem, approvedPrice, getAdminPriceBooks, getPrice, isAdmin, isApproved, viewerState } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const [isFavorite, setIsFavorite] = useState(false)
   const [favoriteNotice, setFavoriteNotice] = useState('')
@@ -893,8 +894,12 @@ function HomeProductCard({ product, index, variant = 'default' }) {
   ].filter((src) => src && !src.includes('cdn.example.com'))
   const fallbackImage = homeShowcasePanels[index % homeShowcasePanels.length]?.image
   const cardImageSources = imageSources.length > 0 ? imageSources : [fallbackImage].filter(Boolean)
+  const adminPriceBooks = isAdmin ? getAdminPriceBooks(product.productId) : []
+  const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
   const unavailablePriceLabel = { kr: '가격 미등록', en: 'Price unavailable', jp: '価格未登録', cn: '价格未登记' }[locale] ?? 'Price unavailable'
-  const displayPrice = isApproved && price
+  const displayPrice = adminPriceBooks.length > 0
+    ? null
+    : isApproved && price
     ? formatMoney(approvedPrice(product.productId), price.currency)
     : isApproved ? unavailablePriceLabel : '승인 후 가격 확인 가능'
   const statusLabel = product.isNew ? 'NEW' : product.isBest ? 'BEST' : 'B2B'
@@ -967,7 +972,9 @@ function HomeProductCard({ product, index, variant = 'default' }) {
         </span> : null}
         <small>{product.material}</small>
       </Link>
-      <b>{displayPrice}</b>
+      {adminPriceItems.length > 0
+        ? <span className="admin-price-book-grid home-admin-price-book-grid">{adminPriceItems.map((item) => <span className="admin-price-book-item" key={item.currency}><img alt={item.flagLabel} className="admin-price-book-flag" src={item.flagSrc} /><span className="admin-price-book-value"><b>{item.amount}</b><span>{item.symbol}</span></span></span>)}</span>
+        : <b>{displayPrice}</b>}
     </div>
   </article>
 }
