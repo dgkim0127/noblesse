@@ -1,4 +1,4 @@
-import { getDisplayCurrency, isValidMarketCurrencyPair, marketCurrency, supportedMarkets } from '../config/currency.js'
+import { getDisplayCurrency, isValidMarketCurrencyPair, marketCurrency, supportedCurrencies, supportedMarkets } from '../config/currency.js'
 
 export const guestProfile = {
   uid: '',
@@ -152,10 +152,13 @@ export const getBuyerAccessFeatures = (viewerState, profile) => {
 
 export const getMarketPrice = (productPrices, productId, market, isApproved) => {
   if (!isApproved || !allowedMarkets.includes(market)) return null
+  const currency = marketCurrency[market]
+  if (!currency) return null
 
   return findExactPrice(productPrices, (price) => (
     price.productId === productId
     && price.market === market
+    && price.currency === currency
   ))
 }
 
@@ -175,32 +178,19 @@ export const selectProductPrice = ({ prices, viewer, locale, productId } = {}) =
   const scopedPrices = productId
     ? (prices || []).filter((price) => price.productId === productId)
     : (prices || [])
-  const byCurrency = findExactPrice(
-    [...scopedPrices].sort((left, right) => (left.market === viewer?.assignedMarket ? 0 : 1) - (right.market === viewer?.assignedMarket ? 0 : 1)),
-    (price) => price.currency === displayCurrency
-  )
-  if (byCurrency) {
-    return {
-      displayCurrency: byCurrency.currency,
-      isAvailable: true,
-      price: byCurrency,
-      reason: 'currency',
-    }
-  }
-
   const assignedMarket = viewer?.assignedMarket
-  const assignedCurrency = marketCurrency[assignedMarket]
-  if (assignedMarket && assignedCurrency) {
-    const byMarket = findExactPrice(scopedPrices, (price) => (
+  const assignedCurrency = viewer?.currency || marketCurrency[assignedMarket]
+  if (assignedMarket && assignedCurrency && isValidMarketCurrencyPair(assignedMarket, assignedCurrency)) {
+    const exactPrice = findExactPrice(scopedPrices, (price) => (
       price.market === assignedMarket
-      && isValidMarketCurrencyPair(price.market, price.currency)
+      && price.currency === assignedCurrency
     ))
-    if (byMarket) {
+    if (exactPrice) {
       return {
-        displayCurrency: byMarket.currency,
+        displayCurrency: exactPrice.currency,
         isAvailable: true,
-        price: byMarket,
-        reason: 'market',
+        price: exactPrice,
+        reason: 'exact',
       }
     }
   }
@@ -221,6 +211,22 @@ export const getApprovedBuyerPrice = (productPrices, productId, market, discount
 export const getPriceForBuyer = (productPrices, productId, buyer, _isApproved) => (
   selectProductPrice({ prices: productPrices, viewer: buyer, productId }).price
 )
+
+export const getAdminPriceBooksForProduct = (productPrices, productId) => {
+  const scopedPrices = (productPrices || []).filter((price) => (
+    price.productId === productId
+    && price.visibleTo === 'approved_only'
+    && price.isActive === true
+    && isValidMarketCurrencyPair(price.market, price.currency)
+  ))
+  const byCurrency = new Map()
+  supportedCurrencies.forEach((currency) => {
+    const exactMarket = Object.entries(marketCurrency).find(([, itemCurrency]) => itemCurrency === currency)?.[0]
+    const selected = scopedPrices.find((price) => price.currency === currency && price.market === exactMarket)
+    if (selected) byCurrency.set(currency, selected)
+  })
+  return supportedCurrencies.map((currency) => byCurrency.get(currency)).filter(Boolean)
+}
 
 export const normalizeQuantity = (rawQuantity, moq) => {
   const numeric = Number(rawQuantity)

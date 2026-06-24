@@ -19,6 +19,13 @@ function requireApprovedBuyer(viewer) {
   return viewer;
 }
 
+function requirePriceBookViewer(viewer) {
+  if (isApprovedBuyerLifecycle(viewer) || viewer?.role === "admin") {
+    return viewer;
+  }
+  throw forbidden("Approved buyer or admin access required");
+}
+
 function parsePositiveInteger(value, fieldName) {
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed <= 0 || parsed > 100000) {
@@ -68,8 +75,8 @@ function parseCreateInquiryBody(body = {}) {
 export function createBuyerInquiryService({ queries }) {
   return {
     async listProductPrices(viewer) {
-      const buyer = requireApprovedBuyer(viewer);
-      return queries.listProductPrices(buyer);
+      const priceBookViewer = requirePriceBookViewer(viewer);
+      return queries.listProductPrices(priceBookViewer);
     },
 
     async listInquiries(filters = {}, viewer) {

@@ -40,6 +40,18 @@ function createAppWithPrices() {
                 auditLogId: "audit-create-1"
               };
             },
+            async getPriceById(id) {
+              if (id !== "11111111-1111-4111-8111-111111111111") return null;
+              return {
+                id,
+                productCode: "NB-001",
+                market: "JP",
+                currency: "JPY",
+                wholesalePrice: 1200,
+                moq: 20,
+                isActive: true
+              };
+            },
             async updatePrice(id, input) {
               if (id !== "11111111-1111-4111-8111-111111111111") return null;
               return {
@@ -162,6 +174,27 @@ test("POST /api/admin/prices rejects invalid market currency pairs", async () =>
   }
 });
 
+test("POST /api/admin/prices rejects currency precision mismatches", async () => {
+  for (const body of [
+    { productCode: "NB-001", market: "KR", currency: "KRW", wholesalePrice: 1200.5, moq: 20 },
+    { productCode: "NB-001", market: "JP", currency: "JPY", wholesalePrice: 1200.1, moq: 20 },
+    { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: 8.123, moq: 20 },
+    { productCode: "NB-001", market: "CN", currency: "CNY", wholesalePrice: 58.234, moq: 20 }
+  ]) {
+    const response = await request(createAppWithPrices(), "/api/admin/prices", {
+      method: "POST",
+      headers: {
+        authorization: "Bearer admin-token",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.error.code, "VALIDATION_ERROR");
+  }
+});
+
 test("POST /api/admin/prices rejects unknown product code", async () => {
   const response = await request(createAppWithPrices(), "/api/admin/prices", {
     method: "POST",
@@ -220,6 +253,24 @@ test("PATCH /api/admin/prices/:priceId updates price row", async () => {
   assert.equal(response.body.data.price.wholesalePrice, 1300);
   assert.equal(response.body.data.price.isActive, false);
   assert.equal(response.body.data.auditLogId, "audit-update-1");
+});
+
+test("PATCH /api/admin/prices/:priceId validates precision using existing currency", async () => {
+  const response = await request(
+    createAppWithPrices(),
+    "/api/admin/prices/11111111-1111-4111-8111-111111111111",
+    {
+      method: "PATCH",
+      headers: {
+        authorization: "Bearer admin-token",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({ wholesalePrice: 1300.25 })
+    }
+  );
+
+  assert.equal(response.status, 400);
+  assert.equal(response.body.error.code, "VALIDATION_ERROR");
 });
 
 test("PATCH /api/admin/prices/:priceId rejects product market and currency mutation", async () => {

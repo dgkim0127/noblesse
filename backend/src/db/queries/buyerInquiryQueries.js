@@ -103,19 +103,10 @@ async function loadPricedProduct(client, productCode, market, currency) {
       join public.product_prices pp on pp.product_id = p.id
       where p.code = $1
         and p.is_visible = true
-        and (
-          pp.currency = $3
-          or pp.market = $2
-        )
+        and pp.market = $2
+        and pp.currency = $3
         and pp.visible_to = 'approved_only'
         and pp.is_active = true
-      order by
-        case
-          when pp.currency = $3 and pp.market = $2 then 0
-          when pp.currency = $3 then 1
-          when pp.market = $2 then 2
-          else 3
-        end
       limit 1
     `,
     [productCode, market, currency]
@@ -127,6 +118,41 @@ export function createBuyerInquiryQueries(pool) {
   return {
     async listProductPrices(viewer) {
       assertPool(pool);
+      if (viewer.role === "admin") {
+        const result = await pool.query(
+          `
+            select
+              pp.id,
+              p.code as product_code,
+              pp.market,
+              pp.currency,
+              pp.wholesale_price,
+              pp.retail_price,
+              pp.moq,
+              pp.min_order_amount,
+              pp.visible_to,
+              pp.is_active
+            from public.product_prices pp
+            join public.products p on p.id = pp.product_id
+            where p.is_visible = true
+              and pp.visible_to = 'approved_only'
+              and pp.is_active = true
+            order by
+              p.sort_order asc,
+              p.created_at desc,
+              case pp.market
+                when 'KR' then 0
+                when 'JP' then 1
+                when 'US' then 2
+                when 'CN' then 3
+                when 'GLOBAL' then 4
+                else 5
+              end
+          `
+        );
+        return result.rows.map(mapProductPrice);
+      }
+
       const result = await pool.query(
         `
           select
@@ -143,19 +169,11 @@ export function createBuyerInquiryQueries(pool) {
           from public.product_prices pp
           join public.products p on p.id = pp.product_id
           where p.is_visible = true
-            and (
-              pp.currency = $2
-              or pp.market = $1
-            )
+            and pp.market = $1
+            and pp.currency = $2
             and pp.visible_to = 'approved_only'
             and pp.is_active = true
           order by
-            case
-              when pp.currency = $2 and pp.market = $1 then 0
-              when pp.currency = $2 then 1
-              when pp.market = $1 then 2
-              else 3
-            end,
             p.sort_order asc,
             p.created_at desc
         `,
@@ -284,6 +302,10 @@ export function createBuyerInquiryQueries(pool) {
         for (const item of input.items) {
           const pricedProduct = await loadPricedProduct(client, item.productCode, viewer.assignedMarket, viewer.currency);
           if (!pricedProduct) {
+            await client.query("rollback");
+            return null;
+          }
+          if (pricedProduct.market !== viewer.assignedMarket || pricedProduct.currency !== viewer.currency) {
             await client.query("rollback");
             return null;
           }

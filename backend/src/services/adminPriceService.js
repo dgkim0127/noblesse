@@ -2,7 +2,8 @@ import { createPaginationMeta, parsePagination, slicePageRows } from "../utils/p
 import {
   CURRENCIES,
   CURRENCY_BY_MARKET,
-  validateMarketCurrencyPair
+  validateMarketCurrencyPair,
+  validateMoneyPrecision
 } from "../config/pricing.js";
 import {
   MARKETS,
@@ -40,7 +41,7 @@ const priceWriteFields = [
   "isActive"
 ];
 
-function parseMoney(value, fieldName, { required = false } = {}) {
+function parseMoney(value, fieldName, { required = false, currency } = {}) {
   if (value === undefined || value === null || value === "") {
     if (required) throw validationError(`${fieldName} is required`);
     return undefined;
@@ -48,6 +49,9 @@ function parseMoney(value, fieldName, { required = false } = {}) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed < 0) {
     throw validationError(`Invalid ${fieldName}`);
+  }
+  if (currency && !validateMoneyPrecision(parsed, currency)) {
+    throw validationError(`Invalid ${fieldName} precision for ${currency}`);
   }
   return parsed;
 }
@@ -76,7 +80,7 @@ function parseCurrency(value, market, { required = false } = {}) {
   return currency;
 }
 
-function parsePriceBody(body = {}, { partial = false } = {}) {
+function parsePriceBody(body = {}, { partial = false, existingCurrency } = {}) {
   const safeBody = rejectUnknownFields(body, priceWriteFields);
   const market = partial
     ? parseOptionalEnum(safeBody.market, MARKETS, "market")
@@ -96,15 +100,16 @@ function parsePriceBody(body = {}, { partial = false } = {}) {
   if (market && currency && !validateMarketCurrencyPair(market, currency)) {
     throw validationError("Invalid market/currency pair");
   }
+  const moneyCurrency = partial ? existingCurrency : currency;
 
   const parsed = {
     productCode: partial ? undefined : parseRequiredString(safeBody.productCode, { fieldName: "productCode", maxLength: 80 }),
     market,
     currency,
-    wholesalePrice: parseMoney(safeBody.wholesalePrice, "wholesalePrice", { required: !partial }),
-    retailPrice: parseMoney(safeBody.retailPrice, "retailPrice"),
+    wholesalePrice: parseMoney(safeBody.wholesalePrice, "wholesalePrice", { required: !partial, currency: moneyCurrency }),
+    retailPrice: parseMoney(safeBody.retailPrice, "retailPrice", { currency: moneyCurrency }),
     moq: parseInteger(safeBody.moq, "moq", { required: !partial, min: 1 }),
-    minOrderAmount: parseMoney(safeBody.minOrderAmount, "minOrderAmount"),
+    minOrderAmount: parseMoney(safeBody.minOrderAmount, "minOrderAmount", { currency: moneyCurrency }),
     isActive: parseBooleanLike(safeBody.isActive, "isActive")
   };
 
@@ -141,7 +146,11 @@ export function createAdminPriceService({ queries }) {
 
     async updatePrice(priceId, body = {}, adminViewer) {
       const id = validateUuid(priceId, "priceId");
-      const parsed = parsePriceBody(body, { partial: true });
+      const existing = await queries.getPriceById?.(id, { adminViewer });
+      if (!existing) {
+        throw notFound("Product price not found");
+      }
+      const parsed = parsePriceBody(body, { partial: true, existingCurrency: existing.currency });
       const result = await queries.updatePrice(id, parsed, adminViewer);
       if (!result) {
         throw notFound("Product price not found");

@@ -137,6 +137,15 @@ export function createAdminPriceQueries(pool) {
       return result.rows.map(mapPrice);
     },
 
+    async getPriceById(priceId) {
+      assertPool(pool);
+      const result = await pool.query(
+        `${priceSelect} where pp.id = $1 limit 1`,
+        [priceId]
+      );
+      return result.rows[0] ? mapPrice(result.rows[0]) : null;
+    },
+
     async createPrice(input, adminViewer = {}) {
       assertTransactionPool(pool);
       const client = await pool.connect();

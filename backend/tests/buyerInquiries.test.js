@@ -36,6 +36,23 @@ function createBuyerViewer(overrides = {}) {
   };
 }
 
+function createAdminViewer(overrides = {}) {
+  return {
+    userId: "admin-1",
+    authUid: "buyer-uid",
+    email: "admin@example.test",
+    role: "admin",
+    status: "approved",
+    accountStatus: "active",
+    verificationStatus: "approved",
+    assignedMarket: "GLOBAL",
+    currency: "USD",
+    discountRate: 0,
+    minOrderAmount: 0,
+    ...overrides
+  };
+}
+
 function createBuyerInquiryApp({ viewer = createBuyerViewer(), queriesOverrides = {} } = {}) {
   const queries = {
     async listProductPrices(currentViewer) {
@@ -144,6 +161,27 @@ test("GET /api/buyer/product-prices returns buyer market prices", async () => {
   assert.equal(response.status, 200);
   assert.equal(response.body.productPrices[0].productCode, "NB-001");
   assert.equal(response.body.productPrices[0].visibleTo, "approved_only");
+});
+
+test("GET /api/buyer/product-prices allows admin to read all active price books", async () => {
+  const app = createBuyerInquiryApp({
+    viewer: createAdminViewer(),
+    queriesOverrides: {
+      async listProductPrices(currentViewer) {
+        assert.equal(currentViewer.role, "admin");
+        return [
+          { productCode: "NB-001", market: "KR", currency: "KRW", wholesalePrice: 10000, visibleTo: "approved_only", isActive: true },
+          { productCode: "NB-001", market: "JP", currency: "JPY", wholesalePrice: 1200, visibleTo: "approved_only", isActive: true },
+          { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: 8, visibleTo: "approved_only", isActive: true },
+          { productCode: "NB-001", market: "CN", currency: "CNY", wholesalePrice: 58, visibleTo: "approved_only", isActive: true }
+        ];
+      }
+    }
+  });
+  const response = await request(app, "/api/buyer/product-prices", { headers: authHeaders() });
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(response.body.productPrices.map((price) => price.currency), ["KRW", "JPY", "USD", "CNY"]);
 });
 
 test("GET /api/buyer/inquiries returns only current buyer inquiries", async () => {

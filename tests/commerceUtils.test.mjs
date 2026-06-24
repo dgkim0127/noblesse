@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { getViewerStateFromProfile, guestProfile, normalizeBuyerProfile, selectProductPrice } from '../src/commerce/commerceUtils.js'
+import { getAdminPriceBooksForProduct, getViewerStateFromProfile, guestProfile, normalizeBuyerProfile, selectProductPrice } from '../src/commerce/commerceUtils.js'
 
 test('viewer state is derived from backend buyer/admin profile', () => {
   assert.equal(getViewerStateFromProfile({ role: 'admin', status: 'approved' }), 'admin')
@@ -29,7 +29,7 @@ test('buyer profile normalization keeps guest defaults and maps userId', () => {
   assert.equal(profile.verificationStatus, 'approved')
 })
 
-test('approved buyer currency exact price wins over locale and market fallback', () => {
+test('approved buyer requires exact assigned market and currency price', () => {
   const prices = [
     { productId: 'NB-001', market: 'JP', currency: 'JPY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 1200 },
     { productId: 'NB-001', market: 'CN', currency: 'CNY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 58.2 },
@@ -41,9 +41,26 @@ test('approved buyer currency exact price wins over locale and market fallback',
     viewer: { role: 'buyer', accountStatus: 'active', verificationStatus: 'approved', assignedMarket: 'JP', currency: 'CNY' },
   })
 
-  assert.equal(selected.isAvailable, true)
-  assert.equal(selected.price.market, 'CN')
+  assert.equal(selected.isAvailable, false)
+  assert.equal(selected.price, null)
   assert.equal(selected.displayCurrency, 'CNY')
+})
+
+test('approved buyer exact market and currency price is available', () => {
+  const selected = selectProductPrice({
+    prices: [
+      { productId: 'NB-001', market: 'JP', currency: 'JPY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 1200 },
+      { productId: 'NB-001', market: 'CN', currency: 'CNY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 58.2 },
+    ],
+    productId: 'NB-001',
+    locale: 'kr',
+    viewer: { role: 'buyer', accountStatus: 'active', verificationStatus: 'approved', assignedMarket: 'JP', currency: 'JPY' },
+  })
+
+  assert.equal(selected.isAvailable, true)
+  assert.equal(selected.price.market, 'JP')
+  assert.equal(selected.price.currency, 'JPY')
+  assert.equal(selected.reason, 'exact')
 })
 
 test('missing exact price is unavailable instead of using another market amount', () => {
@@ -57,4 +74,21 @@ test('missing exact price is unavailable instead of using another market amount'
   assert.equal(selected.isAvailable, false)
   assert.equal(selected.price, null)
   assert.equal(selected.displayCurrency, 'CNY')
+})
+
+test('admin price books expose one row for KRW JPY USD and CNY', () => {
+  const prices = [
+    { productId: 'NB-001', market: 'KR', currency: 'KRW', visibleTo: 'approved_only', isActive: true, wholesalePrice: 10000 },
+    { productId: 'NB-001', market: 'JP', currency: 'JPY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 1200 },
+    { productId: 'NB-001', market: 'GLOBAL', currency: 'USD', visibleTo: 'approved_only', isActive: true, wholesalePrice: 9 },
+    { productId: 'NB-001', market: 'US', currency: 'USD', visibleTo: 'approved_only', isActive: true, wholesalePrice: 8 },
+    { productId: 'NB-001', market: 'CN', currency: 'CNY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 58 },
+    { productId: 'NB-001', market: 'KR', currency: 'USD', visibleTo: 'approved_only', isActive: true, wholesalePrice: 1 },
+    { productId: 'NB-002', market: 'KR', currency: 'KRW', visibleTo: 'approved_only', isActive: true, wholesalePrice: 20000 },
+  ]
+
+  const books = getAdminPriceBooksForProduct(prices, 'NB-001')
+
+  assert.deepEqual(books.map((price) => price.currency), ['KRW', 'JPY', 'USD', 'CNY'])
+  assert.deepEqual(books.map((price) => price.market), ['KR', 'JP', 'US', 'CN'])
 })
