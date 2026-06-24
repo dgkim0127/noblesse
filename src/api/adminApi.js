@@ -172,12 +172,16 @@ export function createAdminApi(apiClient) {
       return unwrap(await apiClient.apiFetch('/admin/fx/rates', { token: requireToken(token) }))
     },
 
-    async getFxReviewRuns(token) {
-      return unwrap(await apiClient.apiFetch('/admin/fx/review-runs', { token: requireToken(token) }))
+    async getFxRuns(token) {
+      return unwrap(await apiClient.apiFetch('/admin/fx/runs', { token: requireToken(token) }))
     },
 
-    async getFxDrafts(params = {}, token) {
-      return unwrap(await apiClient.apiFetch(`/admin/fx/drafts${buildQuery(params)}`, { token: requireToken(token) }))
+    async getFxPrices(params = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/fx/prices${buildQuery(params)}`, { token: requireToken(token) }))
+    },
+
+    async getFxPriceHistory(policyId, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/fx/prices/${encodeURIComponent(policyId)}/history`, { token: requireToken(token) }))
     },
 
     async importFxRates(input = {}, token) {
@@ -188,42 +192,42 @@ export function createAdminApi(apiClient) {
       }))
     },
 
-    async createFxReviewRun(input = {}, token) {
-      return unwrap(await apiClient.apiFetch('/admin/fx/review-runs', {
+    async evaluateFxPrices(input = {}, token) {
+      return unwrap(await apiClient.apiFetch('/admin/fx/evaluate', {
         method: 'POST',
         token: requireToken(token),
         body: input,
       }))
     },
 
-    async approveFxDraft(draftId, token) {
-      return unwrap(await apiClient.apiFetch(`/admin/fx/drafts/${encodeURIComponent(draftId)}/approve`, {
-        method: 'POST',
-        token: requireToken(token),
-      }))
-    },
-
-    async rejectFxDraft(draftId, reason, token) {
-      return unwrap(await apiClient.apiFetch(`/admin/fx/drafts/${encodeURIComponent(draftId)}/reject`, {
-        method: 'POST',
-        token: requireToken(token),
-        body: { reason },
-      }))
-    },
-
-    async enableFxManagedPrice(priceId, input = {}, token) {
-      return unwrap(await apiClient.apiFetch(`/admin/fx/prices/${encodeURIComponent(priceId)}/enable`, {
+    async evaluateFxProduct(productId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/fx/products/${encodeURIComponent(productId)}/evaluate`, {
         method: 'POST',
         token: requireToken(token),
         body: input,
       }))
     },
 
-    async disableFxManagedPrice(priceId, input = {}, token) {
-      return unwrap(await apiClient.apiFetch(`/admin/fx/prices/${encodeURIComponent(priceId)}/disable`, {
+    async setFxProductMarketMode(productId, market, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/fx/products/${encodeURIComponent(productId)}/markets/${encodeURIComponent(market)}/mode`, {
+        method: 'PUT',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async pauseFxPrice(policyId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/fx/prices/${encodeURIComponent(policyId)}/pause`, {
         method: 'POST',
         token: requireToken(token),
         body: input,
+      }))
+    },
+
+    async resumeFxPrice(policyId, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/fx/prices/${encodeURIComponent(policyId)}/resume`, {
+        method: 'POST',
+        token: requireToken(token),
       }))
     },
 

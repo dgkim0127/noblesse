@@ -4,7 +4,7 @@ import { AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { useAdminCopy } from './adminCopy'
 
-const draftStatuses = ['pending', 'approved', 'rejected', 'expired', 'stale']
+const policyStatuses = ['pending_rate', 'active', 'held_deadband', 'updated', 'created', 'blocked_stale', 'blocked_spike', 'paused', 'error']
 
 function formatDateTime(value) {
   if (!value) return '-'
@@ -14,7 +14,9 @@ function formatDateTime(value) {
 }
 
 function formatBps(value) {
-  const parsed = Number(value || 0)
+  if (value === undefined || value === null || value === '') return '-'
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return '-'
   return `${(parsed / 100).toFixed(2)}%`
 }
 
@@ -32,41 +34,50 @@ function FxRateCard({ rate, t }) {
 
 export function AdminFxPage() {
   const t = useAdminCopy()
-  const [statusFilter, setStatusFilter] = useState('pending')
+  const [statusFilter, setStatusFilter] = useState('')
   const [message, setMessage] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
   const filters = useMemo(() => ({ status: statusFilter }), [statusFilter])
   const statusResource = useAdminApiResource((api, token) => api.getFxStatus(token), [refreshKey])
   const ratesResource = useAdminApiResource((api, token) => api.getFxRates(token), [refreshKey])
-  const runsResource = useAdminApiResource((api, token) => api.getFxReviewRuns(token), [refreshKey])
-  const draftsResource = useAdminApiResource((api, token) => api.getFxDrafts(filters, token), [statusFilter, refreshKey])
+  const runsResource = useAdminApiResource((api, token) => api.getFxRuns(token), [refreshKey])
+  const pricesResource = useAdminApiResource((api, token) => api.getFxPrices(filters, token), [statusFilter, refreshKey])
   const mutate = useAdminApiMutation()
-  const apiState = [statusResource, ratesResource, runsResource, draftsResource]
+  const apiState = [statusResource, ratesResource, runsResource, pricesResource]
     .map((resource) => shouldShowAdminApiState(resource.status) ? <AdminApiState error={resource.error} key={resource.status + resource.error} status={resource.status} /> : null)
     .find(Boolean)
   if (apiState) return apiState
 
   const rates = ratesResource.data?.rates || statusResource.data?.latestRates || []
-  const runs = runsResource.data?.reviewRuns || []
-  const drafts = draftsResource.data?.drafts || []
-  const lastRun = statusResource.data?.lastReviewRun || runs[0]
-  const pendingCount = statusResource.data?.draftCounts?.pending ?? drafts.filter((draft) => draft.status === 'pending').length
+  const runs = runsResource.data?.runs || []
+  const prices = pricesResource.data?.prices || []
+  const lastRun = statusResource.data?.lastRun || runs[0]
+  const priceCounts = statusResource.data?.priceCounts || {}
+  const policy = statusResource.data?.policy || {}
 
-  const approveDraft = async (draftId) => {
-    if (!window.confirm(t.fx.confirmApprove)) return
+  const refresh = () => setRefreshKey((current) => current + 1)
+
+  const evaluateAll = async () => {
     setMessage('')
-    await mutate((api, token) => api.approveFxDraft(draftId, token))
-    setMessage(t.fx.approved)
-    setRefreshKey((current) => current + 1)
+    await mutate((api, token) => api.evaluateFxPrices({}, token))
+    setMessage(t.fx.evaluated)
+    refresh()
   }
 
-  const rejectDraft = async (draftId) => {
-    const reason = window.prompt(t.fx.rejectReason)
+  const pausePrice = async (policyId) => {
+    const reason = window.prompt(t.fx.pauseReason)
     if (!reason?.trim()) return
     setMessage('')
-    await mutate((api, token) => api.rejectFxDraft(draftId, reason.trim(), token))
-    setMessage(t.fx.rejected)
-    setRefreshKey((current) => current + 1)
+    await mutate((api, token) => api.pauseFxPrice(policyId, { reason: reason.trim() }, token))
+    setMessage(t.fx.paused)
+    refresh()
+  }
+
+  const resumePrice = async (policyId) => {
+    setMessage('')
+    await mutate((api, token) => api.resumeFxPrice(policyId, token))
+    setMessage(t.fx.resumed)
+    refresh()
   }
 
   return <>
@@ -78,17 +89,17 @@ export function AdminFxPage() {
         <p className="eyebrow">{t.fx.policy}</p>
         <h2>{t.fx.reviewTitle}</h2>
         <dl className="admin-fx-kpis">
-          <div><dt>{t.fx.threshold}</dt><dd>2%</dd></div>
-          <div><dt>{t.fx.maxAge}</dt><dd>72h</dd></div>
-          <div><dt>{t.fx.pendingDrafts}</dt><dd>{pendingCount}</dd></div>
-          <div><dt>{t.fx.lastReview}</dt><dd>{formatDateTime(lastRun?.completedAt || lastRun?.createdAt)}</dd></div>
+          <div><dt>{t.fx.deadband}</dt><dd>{formatBps(policy.updateThresholdBps ?? 500)}</dd></div>
+          <div><dt>{t.fx.breaker}</dt><dd>{formatBps(policy.circuitBreakerBps ?? 1500)}</dd></div>
+          <div><dt>{t.fx.maxAge}</dt><dd>{policy.maxRateAgeHours ?? 72}h</dd></div>
+          <div><dt>{t.fx.lastRun}</dt><dd>{formatDateTime(lastRun?.completedAt || lastRun?.createdAt)}</dd></div>
         </dl>
       </article>
       <article className="admin-card">
         <p className="eyebrow">{t.fx.schedule}</p>
         <h2>{t.fx.scheduleTitle}</h2>
-        <p>{t.fx.snapshotSchedule}</p>
-        <p>{t.fx.reviewSchedule}</p>
+        <p>{t.fx.autoRule}</p>
+        <p>{policy.schedule?.rateSnapshotAndEvaluation || t.fx.snapshotSchedule}</p>
       </article>
     </section>
 
@@ -98,6 +109,7 @@ export function AdminFxPage() {
           <p className="eyebrow">{t.fx.currentRates}</p>
           <h2>{t.fx.ratesTitle}</h2>
         </div>
+        <button type="button" onClick={evaluateAll}>{t.fx.evaluate}</button>
       </div>
       <div className="admin-fx-rates">
         {rates.length === 0 ? <p className="admin-empty">{t.fx.emptyRates}</p> : rates.map((rate) => <FxRateCard key={rate.id || rate.quoteCurrency} rate={rate} t={t} />)}
@@ -107,37 +119,44 @@ export function AdminFxPage() {
     <section className="admin-card">
       <div className="admin-card-heading">
         <div>
-          <p className="eyebrow">{t.fx.drafts}</p>
-          <h2>{t.fx.draftsTitle}</h2>
+          <p className="eyebrow">{t.fx.prices}</p>
+          <h2>{t.fx.pricesTitle}</h2>
         </div>
         <label className="admin-search">{t.common.status}<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-          {draftStatuses.map((status) => <option key={status} value={status}>{t.fx.statuses[status]}</option>)}
+          <option value="">{t.common.all}</option>
+          {policyStatuses.map((status) => <option key={status} value={status}>{t.fx.statuses[status]}</option>)}
         </select></label>
       </div>
       {message && <p className="admin-inline-message">{message}</p>}
+      <div className="admin-fx-counts">
+        {policyStatuses.map((status) => <span key={status}>{t.fx.statuses[status]}: {priceCounts[status] || 0}</span>)}
+      </div>
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th>{t.fields.productCode}</th><th>{t.fields.market}</th><th>{t.fields.currency}</th><th>{t.fx.currentPrice}</th><th>{t.fx.proposedPrice}</th><th>{t.fx.rateChange}</th><th>{t.common.status}</th><th>{t.common.actions}</th></tr></thead>
-          <tbody>{drafts.map((draft) => {
-            const market = getMarketDisplay(draft.targetMarket)
-            return <tr key={draft.id}>
-              <td>{draft.productCode || draft.productNameEn || draft.productNameKo || '-'}</td>
-              <td><img alt={market.label} className="admin-market-flag" src={market.flagSrc} title={formatMarketLabel(draft.targetMarket)} /></td>
-              <td>{draft.targetCurrency}</td>
-              <td>{draft.currentAmount == null ? '-' : formatCurrency(draft.currentAmount, draft.targetCurrency, { showCode: true })}</td>
-              <td>{formatCurrency(draft.proposedAmount, draft.targetCurrency, { showCode: true })}</td>
-              <td>{formatBps(draft.rateChangeBps)}</td>
-              <td>{t.fx.statuses[draft.status] || draft.status}</td>
+          <thead><tr><th>{t.fields.productCode}</th><th>{t.fields.market}</th><th>{t.fields.currency}</th><th>{t.fx.mode}</th><th>{t.fx.publishedPrice}</th><th>{t.fx.referencePrice}</th><th>{t.fx.divergence}</th><th>{t.fx.lastAutoUpdate}</th><th>{t.common.status}</th><th>{t.common.actions}</th></tr></thead>
+          <tbody>{prices.map((price) => {
+            const market = getMarketDisplay(price.targetMarket)
+            return <tr key={price.id}>
+              <td>{price.productCode || price.productNameEn || price.productNameKo || '-'}</td>
+              <td><img alt={market.label} className="admin-market-flag" src={market.flagSrc} title={formatMarketLabel(price.targetMarket)} /></td>
+              <td>{price.targetCurrency}</td>
+              <td>{t.fx.modes[price.pricingMode] || price.pricingMode}</td>
+              <td>{price.currentWholesalePrice == null ? '-' : formatCurrency(price.currentWholesalePrice, price.targetCurrency, { showCode: true })}</td>
+              <td>{price.latestReferenceWholesalePrice == null ? '-' : formatCurrency(price.latestReferenceWholesalePrice, price.targetCurrency, { showCode: true })}</td>
+              <td>{formatBps(price.divergenceBps)}</td>
+              <td>{formatDateTime(price.lastAppliedAt)}</td>
+              <td>{t.fx.statuses[price.status] || price.status}</td>
               <td>
                 <div className="admin-actions tight">
-                  <button disabled={draft.status !== 'pending'} type="button" onClick={() => approveDraft(draft.id)}>{t.fx.approve}</button>
-                  <button disabled={draft.status !== 'pending'} type="button" onClick={() => rejectDraft(draft.id)}>{t.fx.reject}</button>
+                  {price.status === 'paused'
+                    ? <button type="button" onClick={() => resumePrice(price.id)}>{t.fx.resume}</button>
+                    : <button type="button" onClick={() => pausePrice(price.id)}>{t.fx.pause}</button>}
                 </div>
               </td>
             </tr>
           })}</tbody>
         </table>
-        {drafts.length === 0 && <p className="admin-empty">{t.fx.emptyDrafts}</p>}
+        {prices.length === 0 && <p className="admin-empty">{t.fx.emptyPrices}</p>}
       </div>
     </section>
 

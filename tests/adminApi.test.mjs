@@ -133,26 +133,29 @@ test('admin price writes call protected price routes', async () => {
   assert.deepEqual(calls[1].options.body, { isActive: false })
 })
 
-test('admin FX methods call protected FX review routes', async () => {
-  const { calls, client } = createMockApiClient({ data: { drafts: [] } })
+test('admin FX methods call protected automatic pricing routes', async () => {
+  const { calls, client } = createMockApiClient({ data: { prices: [] } })
   const adminApi = createAdminApi(client)
 
   await adminApi.getFxStatus('admin-token')
   await adminApi.getFxRates('admin-token')
-  await adminApi.getFxDrafts({ status: 'pending', market: 'US' }, 'admin-token')
-  await adminApi.createFxReviewRun({ thresholdBps: 200 }, 'admin-token')
-  await adminApi.approveFxDraft('11111111-1111-4111-8111-111111111111', 'admin-token')
-  await adminApi.rejectFxDraft('11111111-1111-4111-8111-111111111111', 'Manual review', 'admin-token')
+  await adminApi.getFxPrices({ status: 'pending_rate', market: 'US' }, 'admin-token')
+  await adminApi.evaluateFxPrices({ updateThresholdBps: 500 }, 'admin-token')
+  await adminApi.setFxProductMarketMode('22222222-2222-4222-8222-222222222222', 'US', { pricingMode: 'fx_auto', currency: 'USD' }, 'admin-token')
+  await adminApi.pauseFxPrice('11111111-1111-4111-8111-111111111111', { reason: 'Manual review' }, 'admin-token')
+  await adminApi.resumeFxPrice('11111111-1111-4111-8111-111111111111', 'admin-token')
 
   assert.deepEqual(calls.map((call) => `${call.options.method || 'GET'} ${call.path}`), [
     'GET /admin/fx/status',
     'GET /admin/fx/rates',
-    'GET /admin/fx/drafts?status=pending&market=US',
-    'POST /admin/fx/review-runs',
-    'POST /admin/fx/drafts/11111111-1111-4111-8111-111111111111/approve',
-    'POST /admin/fx/drafts/11111111-1111-4111-8111-111111111111/reject',
+    'GET /admin/fx/prices?status=pending_rate&market=US',
+    'POST /admin/fx/evaluate',
+    'PUT /admin/fx/products/22222222-2222-4222-8222-222222222222/markets/US/mode',
+    'POST /admin/fx/prices/11111111-1111-4111-8111-111111111111/pause',
+    'POST /admin/fx/prices/11111111-1111-4111-8111-111111111111/resume',
   ])
-  assert.deepEqual(calls[3].options.body, { thresholdBps: 200 })
+  assert.deepEqual(calls[3].options.body, { updateThresholdBps: 500 })
+  assert.deepEqual(calls[4].options.body, { pricingMode: 'fx_auto', currency: 'USD' })
   assert.deepEqual(calls[5].options.body, { reason: 'Manual review' })
 })
 
