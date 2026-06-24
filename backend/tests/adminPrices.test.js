@@ -181,7 +181,8 @@ test("POST /api/admin/prices accepts exact money values including zero", async (
     { productCode: "NB-001", market: "JP", currency: "JPY", wholesalePrice: 1250, moq: 20 },
     { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: 2.01, moq: 20 },
     { productCode: "NB-001", market: "CN", currency: "CNY", wholesalePrice: "58.20", moq: 20 },
-    { productCode: "NB-001", market: "KR", currency: "KRW", wholesalePrice: 0, moq: 20 }
+    { productCode: "NB-001", market: "KR", currency: "KRW", wholesalePrice: 0, moq: 20 },
+    { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: "0", moq: 20 }
   ]) {
     const response = await request(createAppWithPrices(), "/api/admin/prices", {
       method: "POST",
@@ -246,6 +247,9 @@ test("POST /api/admin/prices rejects scientific and non-decimal money strings", 
     { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: "Infinity", moq: 20 },
     { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: "NaN", moq: 20 },
     { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: "0x10", moq: 20 },
+    { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: "", moq: 20 },
+    { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: 8.2, retailPrice: "1e2", moq: 20 },
+    { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: 8.2, minOrderAmount: "5e-2", moq: 20 },
     { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: -1, moq: 20 }
   ]) {
     const response = await request(createAppWithPrices(), "/api/admin/prices", {
@@ -333,6 +337,24 @@ test("PATCH /api/admin/prices/:priceId validates precision using existing curren
         "content-type": "application/json"
       },
       body: JSON.stringify({ wholesalePrice: 1300.25 })
+    }
+  );
+
+  assert.equal(response.status, 400);
+  assert.equal(response.body.error.code, "VALIDATION_ERROR");
+});
+
+test("PATCH /api/admin/prices/:priceId rejects scientific notation using existing currency", async () => {
+  const response = await request(
+    createAppWithPrices(),
+    "/api/admin/prices/11111111-1111-4111-8111-111111111111",
+    {
+      method: "PATCH",
+      headers: {
+        authorization: "Bearer admin-token",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({ wholesalePrice: "1e2" })
     }
   );
 

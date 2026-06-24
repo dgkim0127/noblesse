@@ -155,6 +155,20 @@ test('buildInquirySnapshot rejects empty rows or missing buyer market currency',
     inquiryRows: [{ productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 1, market: 'US', currency: 'USD', priceSnapshot: 8.99, subtotal: 8.99 }],
     requestMemo: '',
   }), null)
+
+  assert.equal(buildInquirySnapshot({
+    buyer: null,
+    inquiryId: 'INQ-001',
+    inquiryRows: [{ productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 1, market: 'US', currency: 'USD', priceSnapshot: 8.99, subtotal: 8.99 }],
+    requestMemo: '',
+  }), null)
+
+  assert.equal(buildInquirySnapshot({
+    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'US', preferredLanguage: 'en', assignedMarket: 'US', currency: 'CNY' },
+    inquiryId: 'INQ-001',
+    inquiryRows: [{ productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 1, market: 'US', currency: 'USD', priceSnapshot: 8.99, subtotal: 8.99 }],
+    requestMemo: '',
+  }), null)
 })
 
 test('buildInquirySnapshot sums same-currency cents without drift', () => {
