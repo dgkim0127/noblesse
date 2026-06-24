@@ -55,6 +55,8 @@ Next step is local test and route QA for the scaffold. Provider resource creatio
 
 32L-5R status: Revised staging DB tier plan is documented in `docs/ADMIN_STAGING_DB_TIER_REVISION_PLAN.md`. First revised candidate is `db-g1-small`; fallback is `db-custom-1-3840`. Staging DB creation remains blocked until `APPROVE_STAGING_DB_CREATE_REVISED = YES`.
 
+N39 status: Four-currency price-book binding and managed FX review workflow code are implemented. FX migration files are drafted and packaged, but no staging or production migration has been executed. Live FX provider selection, Cloud Run Job deployment/execution, Cloud Scheduler creation, and production price writes remain blocked until separate approval.
+
 ## Decision Status
 
 | Area | Current Status | Decision Needed Before Implementation |

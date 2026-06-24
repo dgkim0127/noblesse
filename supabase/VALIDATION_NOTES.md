@@ -2005,3 +2005,22 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Password reset, version enable, IAM grant, DB login/query/psql, runtime verifier, Cloud Run Job execution, app/Firebase deploy, and production mutation were not performed.
 - No SQL file change.
 - Next gate: `APPROVE_STAGING_RUNTIME_SECRET_WRAPPER_RECOVERY_DIAGNOSIS = YES`.
+
+## N39 Pricing Master R2 Follow-up
+
+- Scope: Four-currency price binding and managed FX review workflow code/draft.
+- KR/KRW, JP/JPY, US/USD, CN/CNY, GLOBAL/USD explicit price books: Implemented.
+- Buyer exact market/currency price boundary: Preserved.
+- Admin FX API/UI: Implemented behind `prices.read` and `prices.write`.
+- FX migration draft: Added in `supabase/migrations/20260624_managed_fx_review_workflow.sql`.
+- Backend packaged migration parity: Added in `backend/migrations/20260624_managed_fx_review_workflow.sql`.
+- Fresh schema updated: Yes.
+- Migration execution: No.
+- DB direct access/psql: No.
+- External FX provider fetch: No.
+- Cloud Run Job deploy/execute: No.
+- Cloud Scheduler create: No.
+- Firebase deploy: No.
+- Secret/IAM mutation: No.
+- Production product price mutation: No.
+- Next gate: `APPROVE_STAGING_MULTI_CURRENCY_FX_MIGRATION_AND_JOBS = YES` after FX provider selection is approved or manual-provider staging rollout is accepted.
