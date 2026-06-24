@@ -2,9 +2,9 @@ import { createPaginationMeta, parsePagination, slicePageRows } from "../utils/p
 import {
   CURRENCIES,
   CURRENCY_BY_MARKET,
-  validateMarketCurrencyPair,
-  validateMoneyPrecision
+  validateMarketCurrencyPair
 } from "../config/pricing.js";
+import { validateMoneyPrecision } from "../utils/money.js";
 import {
   MARKETS,
   parseBooleanLike,

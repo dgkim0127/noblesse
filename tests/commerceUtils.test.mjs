@@ -1,6 +1,16 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { getAdminPriceBooksForProduct, getViewerStateFromProfile, guestProfile, normalizeBuyerProfile, selectProductPrice } from '../src/commerce/commerceUtils.js'
+import {
+  buildInquiryRows,
+  buildInquirySnapshot,
+  getAdminMarketPriceBooksForProduct,
+  getAdminPriceBooksForProduct,
+  getDiscountedPrice,
+  getViewerStateFromProfile,
+  guestProfile,
+  normalizeBuyerProfile,
+  selectProductPrice,
+} from '../src/commerce/commerceUtils.js'
 
 test('viewer state is derived from backend buyer/admin profile', () => {
   assert.equal(getViewerStateFromProfile({ role: 'admin', status: 'approved' }), 'admin')
@@ -76,7 +86,56 @@ test('missing exact price is unavailable instead of using another market amount'
   assert.equal(selected.displayCurrency, 'CNY')
 })
 
-test('admin price books expose one row for KRW JPY USD and CNY', () => {
+test('frontend discount calculation preserves currency minor units', () => {
+  assert.equal(getDiscountedPrice({ wholesalePrice: 9.99, currency: 'USD' }, 10), 8.99)
+  assert.equal(getDiscountedPrice({ wholesalePrice: 58.2, currency: 'CNY' }, 12), 51.22)
+  assert.equal(getDiscountedPrice({ wholesalePrice: 12000, currency: 'KRW' }, 12), 10560)
+  assert.equal(getDiscountedPrice({ wholesalePrice: 1200, currency: 'JPY' }, 12), 1056)
+})
+
+test('buildInquiryRows preserves subtotal cents', () => {
+  const rows = buildInquiryRows(
+    [{ productId: 'NB-001', quantity: 3 }],
+    [{ productId: 'NB-001', code: 'NB-001', nameEn: 'Product', material: 'Surgical Steel', imageSet: {}, tone: 'pink' }],
+    { assignedMarket: 'US', currency: 'USD', discountRate: 10, role: 'buyer', accountStatus: 'active', verificationStatus: 'approved' },
+    true,
+    [{ productId: 'NB-001', market: 'US', currency: 'USD', visibleTo: 'approved_only', isActive: true, wholesalePrice: 9.99, moq: 1 }]
+  )
+
+  assert.equal(rows[0].priceSnapshot, 8.99)
+  assert.equal(rows[0].subtotal, 26.97)
+})
+
+test('buildInquirySnapshot rejects mixed currency rows', () => {
+  const snapshot = buildInquirySnapshot({
+    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'KR', preferredLanguage: 'kr', currency: 'KRW' },
+    inquiryId: 'INQ-001',
+    inquiryRows: [
+      { productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 1, currency: 'USD', priceSnapshot: 8.99, subtotal: 8.99 },
+      { productId: 'NB-002', productCode: 'NB-002', productName: 'Two', material: 'Cubic', color: '', size: '', moq: 1, quantity: 1, currency: 'CNY', priceSnapshot: 51.22, subtotal: 51.22 },
+    ],
+    requestMemo: '',
+  })
+
+  assert.equal(snapshot, null)
+})
+
+test('buildInquirySnapshot sums same-currency cents without drift', () => {
+  const snapshot = buildInquirySnapshot({
+    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'US', preferredLanguage: 'en', currency: 'USD' },
+    inquiryId: 'INQ-001',
+    inquiryRows: [
+      { productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 3, currency: 'USD', priceSnapshot: 8.99, subtotal: 26.97 },
+      { productId: 'NB-002', productCode: 'NB-002', productName: 'Two', material: 'Cubic', color: '', size: '', moq: 1, quantity: 5, currency: 'USD', priceSnapshot: 1.81, subtotal: 9.05 },
+    ],
+    requestMemo: '',
+  })
+
+  assert.equal(snapshot.estimatedTotal, 36.02)
+  assert.equal(snapshot.currency, 'USD')
+})
+
+test('admin price books preserve US and GLOBAL USD as separate market rows', () => {
   const prices = [
     { productId: 'NB-001', market: 'KR', currency: 'KRW', visibleTo: 'approved_only', isActive: true, wholesalePrice: 10000 },
     { productId: 'NB-001', market: 'JP', currency: 'JPY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 1200 },
@@ -87,8 +146,9 @@ test('admin price books expose one row for KRW JPY USD and CNY', () => {
     { productId: 'NB-002', market: 'KR', currency: 'KRW', visibleTo: 'approved_only', isActive: true, wholesalePrice: 20000 },
   ]
 
-  const books = getAdminPriceBooksForProduct(prices, 'NB-001')
+  const books = getAdminMarketPriceBooksForProduct(prices, 'NB-001')
 
-  assert.deepEqual(books.map((price) => price.currency), ['KRW', 'JPY', 'USD', 'CNY'])
-  assert.deepEqual(books.map((price) => price.market), ['KR', 'JP', 'US', 'CN'])
+  assert.deepEqual(books.map((price) => price.currency), ['KRW', 'JPY', 'USD', 'CNY', 'USD'])
+  assert.deepEqual(books.map((price) => price.market), ['KR', 'JP', 'US', 'CN', 'GLOBAL'])
+  assert.deepEqual(getAdminPriceBooksForProduct(prices, 'NB-001').map((price) => price.market), ['KR', 'JP', 'US', 'CN', 'GLOBAL'])
 })

@@ -1,3 +1,5 @@
+import { applyDiscount, fromMinorUnits, multiplyMoney, toMinorUnits } from "../../utils/money.js";
+
 function assertPool(pool) {
   if (!pool) {
     throw new Error("PostgreSQL pool is not configured for buyer inquiry queries.");
@@ -312,10 +314,13 @@ export function createBuyerInquiryQueries(pool) {
 
           const moq = Number(pricedProduct.moq) || 1;
           const quantity = Math.max(moq, Math.ceil(item.quantity / moq) * moq);
-          const unitPrice = Math.round(
-            toNumber(pricedProduct.wholesale_price) * (1 - (Number(viewer.discountRate) || 0) / 100)
-          );
-          const subtotal = unitPrice * quantity;
+          const unitPrice = applyDiscount(pricedProduct.wholesale_price, viewer.discountRate, pricedProduct.currency);
+          const subtotal = multiplyMoney(unitPrice, quantity, pricedProduct.currency);
+          const subtotalMinor = toMinorUnits(subtotal, pricedProduct.currency);
+          if (unitPrice === null || subtotal === null || subtotalMinor === null) {
+            await client.query("rollback");
+            return null;
+          }
 
           pricedItems.push({
             productId: pricedProduct.product_id,
@@ -330,13 +335,21 @@ export function createBuyerInquiryQueries(pool) {
             market: pricedProduct.market,
             currency: pricedProduct.currency,
             priceSnapshot: unitPrice,
-            subtotal
+            subtotal,
+            subtotalMinor
           });
         }
 
         const totalItems = pricedItems.length;
         const totalQuantity = pricedItems.reduce((sum, item) => sum + item.quantity, 0);
-        const estimatedTotal = pricedItems.reduce((sum, item) => sum + item.subtotal, 0);
+        const estimatedTotal = fromMinorUnits(
+          pricedItems.reduce((sum, item) => sum + item.subtotalMinor, 0),
+          viewer.currency
+        );
+        if (estimatedTotal === null) {
+          await client.query("rollback");
+          return null;
+        }
         const inquiryResult = await client.query(
           `
             insert into public.inquiries (
@@ -369,8 +382,8 @@ export function createBuyerInquiryQueries(pool) {
           [
             createInquiryNumber(),
             viewer.buyerId,
-            pricedItems[0]?.market || viewer.assignedMarket,
-            pricedItems[0]?.currency || viewer.currency,
+            viewer.assignedMarket,
+            viewer.currency,
             totalItems,
             totalQuantity,
             estimatedTotal,

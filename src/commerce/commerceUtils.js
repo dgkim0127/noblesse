@@ -1,4 +1,5 @@
-import { getDisplayCurrency, isValidMarketCurrencyPair, marketCurrency, supportedCurrencies, supportedMarkets } from '../config/currency.js'
+import { getDisplayCurrency, isValidMarketCurrencyPair, marketCurrency, supportedMarkets } from '../config/currency.js'
+import { applyDiscount, fromMinorUnits, multiplyMoney, toMinorUnits } from '../utils/money.js'
 
 export const guestProfile = {
   uid: '',
@@ -31,7 +32,7 @@ const allowedMarkets = supportedMarkets
 
 export const getDiscountedPrice = (price, discountRate) => {
   if (!price) return null
-  return Math.round(price.wholesalePrice * (1 - (Number(discountRate) || 0) / 100))
+  return applyDiscount(price.wholesalePrice, discountRate, price.currency)
 }
 
 const findExactPrice = (prices, matcher) => (prices || []).find((price) => (
@@ -212,21 +213,27 @@ export const getPriceForBuyer = (productPrices, productId, buyer, _isApproved) =
   selectProductPrice({ prices: productPrices, viewer: buyer, productId }).price
 )
 
-export const getAdminPriceBooksForProduct = (productPrices, productId) => {
+const marketPriceBookOrder = ['KR', 'JP', 'US', 'CN', 'GLOBAL']
+
+export const getAdminMarketPriceBooksForProduct = (productPrices, productId) => {
   const scopedPrices = (productPrices || []).filter((price) => (
     price.productId === productId
     && price.visibleTo === 'approved_only'
     && price.isActive === true
     && isValidMarketCurrencyPair(price.market, price.currency)
   ))
-  const byCurrency = new Map()
-  supportedCurrencies.forEach((currency) => {
-    const exactMarket = Object.entries(marketCurrency).find(([, itemCurrency]) => itemCurrency === currency)?.[0]
-    const selected = scopedPrices.find((price) => price.currency === currency && price.market === exactMarket)
-    if (selected) byCurrency.set(currency, selected)
+  const byMarket = new Map()
+  marketPriceBookOrder.forEach((market) => {
+    const selected = scopedPrices.find((price) => (
+      price.market === market
+      && price.currency === marketCurrency[market]
+    ))
+    if (selected) byMarket.set(market, selected)
   })
-  return supportedCurrencies.map((currency) => byCurrency.get(currency)).filter(Boolean)
+  return marketPriceBookOrder.map((market) => byMarket.get(market)).filter(Boolean)
 }
+
+export const getAdminPriceBooksForProduct = getAdminMarketPriceBooksForProduct
 
 export const normalizeQuantity = (rawQuantity, moq) => {
   const numeric = Number(rawQuantity)
@@ -247,9 +254,10 @@ export const buildInquiryRows = (inquiryItems, products, buyer, isApproved, prod
   const product = products.find((candidate) => candidate.productId === item.productId)
   const price = getPriceForBuyer(productPrices, item.productId, buyer, isApproved)
   const priceSnapshot = getDiscountedPrice(price, buyer?.discountRate)
+  const subtotal = priceSnapshot === null ? null : multiplyMoney(priceSnapshot, item.quantity, price.currency)
   const option = getDefaultOption(product, item)
 
-  return product && price && priceSnapshot !== null ? {
+  return product && price && priceSnapshot !== null && subtotal !== null ? {
     ...item,
     product,
     price,
@@ -264,15 +272,24 @@ export const buildInquiryRows = (inquiryItems, products, buyer, isApproved, prod
     currency: price.currency,
     market: price.market,
     priceSnapshot,
-    subtotal: priceSnapshot * item.quantity,
+    subtotal,
     tone: product.tone,
   } : null
 }).filter(Boolean)
 
 export const buildInquirySnapshot = ({ inquiryRows, buyer, requestMemo, inquiryId }) => {
   const now = new Date().toISOString()
+  const currency = inquiryRows[0]?.currency || buyer.currency
+  if (!currency || inquiryRows.some((row) => row.currency !== currency)) return null
+  let estimatedTotalMinor = 0
+  for (const row of inquiryRows) {
+    const minor = toMinorUnits(row.subtotal, currency)
+    if (minor === null) return null
+    estimatedTotalMinor += minor
+  }
   const totalQuantity = inquiryRows.reduce((sum, row) => sum + row.quantity, 0)
-  const estimatedTotal = inquiryRows.reduce((sum, row) => sum + row.subtotal, 0)
+  const estimatedTotal = fromMinorUnits(estimatedTotalMinor, currency)
+  if (estimatedTotal === null) return null
 
   return {
     inquiryId,
@@ -280,7 +297,7 @@ export const buildInquirySnapshot = ({ inquiryRows, buyer, requestMemo, inquiryI
     buyerCompanyName: buyer.companyName,
     buyerCountry: buyer.country,
     buyerLanguage: buyer.preferredLanguage,
-    currency: inquiryRows[0]?.currency || buyer.currency,
+    currency,
     status: 'requested',
     items: inquiryRows.map((row) => ({
       productId: row.productId,

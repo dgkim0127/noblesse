@@ -27,10 +27,14 @@ export function getCurrencyMinorUnits(currency) {
 
 export function validateMoneyPrecision(value, currency) {
   if (!CURRENCIES.includes(currency)) return false;
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return false;
   const minorUnits = getCurrencyMinorUnits(currency);
-  const multiplier = 10 ** minorUnits;
-  const scaled = parsed * multiplier;
-  return Math.abs(scaled - Math.round(scaled)) < Number.EPSILON * 100;
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) return false;
+    value = String(value);
+  }
+  if (typeof value !== "string") return false;
+  const normalized = value.trim();
+  if (!normalized || /e/i.test(normalized) || !/^\d+(?:\.\d+)?$/.test(normalized)) return false;
+  const fraction = normalized.split(".")[1] || "";
+  return fraction.length <= minorUnits;
 }
