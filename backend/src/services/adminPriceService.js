@@ -121,7 +121,24 @@ function parsePriceBody(body = {}, { partial = false, existingCurrency } = {}) {
   return Object.fromEntries(Object.entries(parsed).filter(([, value]) => value !== undefined));
 }
 
-export function createAdminPriceService({ queries }) {
+async function evaluateFxAutoAfterKrwChange(result, fxService, adminViewer) {
+  if (!fxService?.evaluateProduct || result?.price?.market !== "KR" || result?.price?.currency !== "KRW") {
+    return result;
+  }
+  try {
+    const evaluation = await fxService.evaluateProduct(result.price.productId, {}, adminViewer);
+    return { ...result, fxAutoEvaluation: evaluation.run || null };
+  } catch (error) {
+    return {
+      ...result,
+      fxAutoEvaluationError: {
+        category: error?.code || error?.message || "FX_AUTO_EVALUATION_FAILED"
+      }
+    };
+  }
+}
+
+export function createAdminPriceService({ queries, fxService = null }) {
   return {
     async listPrices(filters = {}, adminViewer) {
       const parsed = parsePriceFilters(filters);
@@ -141,7 +158,7 @@ export function createAdminPriceService({ queries }) {
       if (result?.conflict) {
         throw conflict("Product price already exists for this market");
       }
-      return result;
+      return evaluateFxAutoAfterKrwChange(result, fxService, adminViewer);
     },
 
     async updatePrice(priceId, body = {}, adminViewer) {
@@ -155,7 +172,7 @@ export function createAdminPriceService({ queries }) {
       if (!result) {
         throw notFound("Product price not found");
       }
-      return result;
+      return evaluateFxAutoAfterKrwChange(result, fxService, adminViewer);
     }
   };
 }

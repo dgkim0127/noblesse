@@ -362,21 +362,31 @@ export function createAdminRoutes({
   );
 
   router.get(
-    "/fx/review-runs",
+    "/fx/runs",
     requireAdmin,
     can("prices.read"),
     asyncRoute(async (req, res) => {
-      const data = await services.fx.listReviewRuns(req.query, req.adminViewer);
+      const data = await services.fx.listRuns(req.query, req.adminViewer);
       res.json({ data, meta: withRequestId(req) });
     })
   );
 
   router.get(
-    "/fx/drafts",
+    "/fx/prices",
     requireAdmin,
     can("prices.read"),
     asyncRoute(async (req, res) => {
-      const data = await services.fx.listDrafts(req.query, req.adminViewer);
+      const data = await services.fx.listPrices(req.query, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/fx/prices/:policyId/history",
+    requireAdmin,
+    can("prices.read"),
+    asyncRoute(async (req, res) => {
+      const data = await services.fx.listHistory(req.params.policyId, req.query, req.adminViewer);
       res.json({ data, meta: withRequestId(req) });
     })
   );
@@ -392,52 +402,60 @@ export function createAdminRoutes({
   );
 
   router.post(
-    "/fx/review-runs",
+    "/fx/evaluate",
     requireAdmin,
     can("prices.write"),
     asyncRoute(async (req, res) => {
-      const data = await services.fx.createReviewRun(req.body, req.adminViewer);
+      const data = await services.fx.evaluateAll(req.body, req.adminViewer);
       res.status(201).json({ data, meta: withRequestId(req) });
     })
   );
 
   router.post(
-    "/fx/drafts/:draftId/approve",
+    "/fx/products/:productId/evaluate",
     requireAdmin,
     can("prices.write"),
     asyncRoute(async (req, res) => {
-      const data = await services.fx.approveDraft(req.params.draftId, req.body, req.adminViewer);
+      const data = await services.fx.evaluateProduct(req.params.productId, req.body, req.adminViewer);
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.put(
+    "/fx/products/:productId/markets/:market/mode",
+    requireAdmin,
+    can("prices.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.fx.setProductMarketMode(req.params.productId, req.params.market, req.body, req.adminViewer);
       res.json({ data, meta: withRequestId(req) });
     })
   );
 
   router.post(
-    "/fx/drafts/:draftId/reject",
+    "/fx/prices/:policyId/pause",
     requireAdmin,
     can("prices.write"),
     asyncRoute(async (req, res) => {
-      const data = await services.fx.rejectDraft(req.params.draftId, req.body, req.adminViewer);
+      const data = await services.fx.pausePrice(req.params.policyId, req.body, req.adminViewer);
       res.json({ data, meta: withRequestId(req) });
     })
   );
 
   router.post(
-    "/fx/prices/:priceId/enable",
+    "/fx/prices/:policyId/resume",
     requireAdmin,
     can("prices.write"),
     asyncRoute(async (req, res) => {
-      const data = await services.fx.enablePriceFx(req.params.priceId, req.body, req.adminViewer);
+      const data = await services.fx.resumePrice(req.params.policyId, req.body, req.adminViewer);
       res.json({ data, meta: withRequestId(req) });
     })
   );
 
-  router.post(
-    "/fx/prices/:priceId/disable",
+  router.all(
+    ["/fx/drafts", "/fx/drafts/*", "/fx/review-runs"],
     requireAdmin,
-    can("prices.write"),
-    asyncRoute(async (req, res) => {
-      const data = await services.fx.disablePriceFx(req.params.priceId, req.body, req.adminViewer);
-      res.json({ data, meta: withRequestId(req) });
+    asyncRoute(async () => {
+      throw notFound("Admin FX approval draft routes are not implemented");
     })
   );
 

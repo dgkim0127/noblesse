@@ -108,6 +108,30 @@ async function insertAudit(client, action, priceId, beforeSnapshot, afterSnapsho
   return auditResult.rows[0].id;
 }
 
+async function upsertManualPricePolicy(client, row) {
+  await client.query(
+    `
+      insert into public.product_price_policies (
+        product_id,
+        target_market,
+        target_currency,
+        pricing_mode,
+        published_price_id,
+        status
+      )
+      values ($1, $2, $3, 'manual_fixed', $4, 'active')
+      on conflict (product_id, target_market, target_currency) do update
+        set pricing_mode = 'manual_fixed',
+            published_price_id = excluded.published_price_id,
+            status = 'active',
+            paused_at = null,
+            pause_reason = null,
+            updated_at = now()
+    `,
+    [row.product_id, row.market, row.currency, row.id]
+  );
+}
+
 export function createAdminPriceQueries(pool) {
   return {
     async listPrices(filters) {
@@ -201,6 +225,7 @@ export function createAdminPriceQueries(pool) {
           [insertResult.rows[0].id]
         );
         const row = createdResult.rows[0];
+        await upsertManualPricePolicy(client, row);
         const auditLogId = await insertAudit(
           client,
           "admin.product_price.create",
@@ -270,6 +295,7 @@ export function createAdminPriceQueries(pool) {
           [updateResult.rows[0].id]
         );
         const row = updatedResult.rows[0];
+        await upsertManualPricePolicy(client, row);
         const auditLogId = await insertAudit(
           client,
           "admin.product_price.update",

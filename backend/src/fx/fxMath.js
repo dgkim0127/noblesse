@@ -1,7 +1,8 @@
 import { getCurrencyMinorUnits } from "../config/pricing.js";
 
 export const FX_RATE_SCALE = 100000000;
-export const FX_REVIEW_THRESHOLD_BPS = 200;
+export const FX_AUTO_UPDATE_THRESHOLD_BPS = 500;
+export const FX_AUTO_CIRCUIT_BREAKER_BPS = 1500;
 export const FX_MAX_RATE_AGE_HOURS = 72;
 
 export function toRateScaled(krwPerUnit) {
@@ -24,23 +25,75 @@ export function fromRateScaled(rateScaled) {
   return parsed / FX_RATE_SCALE;
 }
 
+export function calculateBpsChange(previousValue, currentValue) {
+  const previous = Number(previousValue);
+  const current = Number(currentValue);
+  if (!Number.isFinite(previous) || !Number.isFinite(current) || previous < 0 || current < 0) {
+    throw new Error("Invalid basis-point values");
+  }
+  if (previous === 0) {
+    return current === 0 ? 0 : 10000;
+  }
+  return Math.round((Math.abs(current - previous) * 10000) / previous);
+}
+
 export function calculateRateChangeBps(anchorRateScaled, currentRateScaled) {
   const anchor = Number(anchorRateScaled);
   const current = Number(currentRateScaled);
   if (!Number.isFinite(anchor) || !Number.isFinite(current) || anchor <= 0 || current <= 0) {
     throw new Error("Invalid FX rate movement");
   }
-  return Math.round((Math.abs(current - anchor) * 10000) / anchor);
+  return calculateBpsChange(anchor, current);
 }
 
-export function isRateMovementDraftable(anchorRateScaled, currentRateScaled, thresholdBps = FX_REVIEW_THRESHOLD_BPS) {
-  return calculateRateChangeBps(anchorRateScaled, currentRateScaled) >= thresholdBps;
+export function calculateDivergenceBps(publishedMinor, referenceMinor) {
+  const published = Number(publishedMinor);
+  const reference = Number(referenceMinor);
+  if (!Number.isFinite(published) || !Number.isFinite(reference) || published < 0 || reference < 0) {
+    throw new Error("Invalid FX divergence values");
+  }
+  return Math.round((Math.abs(reference - published) * 10000) / Math.max(Math.abs(published), 1));
 }
 
-export function isSnapshotFresh(fetchedAt, now = new Date(), maxAgeHours = FX_MAX_RATE_AGE_HOURS) {
-  const fetched = new Date(fetchedAt).getTime();
-  if (!Number.isFinite(fetched)) return false;
-  return now.getTime() - fetched <= maxAgeHours * 60 * 60 * 1000;
+export function isSnapshotFresh(sourceEffectiveAt, now = new Date(), maxAgeHours = FX_MAX_RATE_AGE_HOURS) {
+  const effective = new Date(sourceEffectiveAt).getTime();
+  const nowTime = new Date(now).getTime();
+  if (!Number.isFinite(effective) || !Number.isFinite(nowTime)) return false;
+  if (effective - nowTime > 5 * 60 * 1000) return false;
+  return nowTime - effective <= maxAgeHours * 60 * 60 * 1000;
+}
+
+export function getCurrencyStep(currency) {
+  return getCurrencyMinorUnits(currency) === 0 ? 1 : 0.01;
+}
+
+export function toMinorUnits(value, currency) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    throw new Error("Invalid money value");
+  }
+  const multiplier = 10 ** getCurrencyMinorUnits(currency);
+  const minor = Math.round(parsed * multiplier);
+  if (!Number.isSafeInteger(minor)) {
+    throw new Error("Unsafe money value");
+  }
+  return minor;
+}
+
+export function fromMinorUnits(minorValue, currency) {
+  const parsed = Number(minorValue);
+  if (!Number.isSafeInteger(parsed) || parsed < 0) {
+    throw new Error("Invalid minor-unit value");
+  }
+  const multiplier = 10 ** getCurrencyMinorUnits(currency);
+  return roundCalculatedMoney(parsed / multiplier, currency);
+}
+
+export function roundCalculatedMoney(value, currency) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) return null;
+  const multiplier = 10 ** getCurrencyMinorUnits(currency);
+  return Math.round(parsed * multiplier) / multiplier;
 }
 
 export function convertKrwToCurrency(krwAmount, currentRateScaled, currency) {
@@ -55,16 +108,4 @@ export function convertPublishedAmountByFxChange(currentAmount, anchorRateScaled
   }
   const impliedKrw = amount * fromRateScaled(anchorRateScaled);
   return roundCalculatedMoney(impliedKrw / fromRateScaled(currentRateScaled), currency);
-}
-
-export function getCurrencyStep(currency) {
-  return getCurrencyMinorUnits(currency) === 0 ? 1 : 0.01;
-}
-
-export function roundCalculatedMoney(value, currency) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed < 0) return null;
-  const minorUnits = getCurrencyMinorUnits(currency);
-  const multiplier = 10 ** minorUnits;
-  return Math.round(parsed * multiplier) / multiplier;
 }

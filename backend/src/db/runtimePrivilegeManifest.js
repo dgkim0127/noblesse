@@ -11,6 +11,10 @@ export const runtimePrivilegeManifest = Object.freeze({
   categories: ["SELECT", "INSERT", "UPDATE"],
   products: ["SELECT", "INSERT", "UPDATE"],
   product_prices: ["SELECT", "INSERT", "UPDATE"],
+  product_price_policies: ["SELECT", "INSERT", "UPDATE"],
+  fx_rate_snapshots: ["SELECT", "INSERT", "UPDATE"],
+  fx_auto_price_runs: ["SELECT", "INSERT", "UPDATE"],
+  fx_auto_price_events: ["SELECT", "INSERT"],
   collections: [],
   product_collections: [],
   inquiries: ["SELECT", "INSERT", "UPDATE"],
@@ -44,6 +48,7 @@ const querySourceModules = Object.freeze([
   "adminBuyerQueries.js",
   "adminCategoryQueries.js",
   "adminInquiryQueries.js",
+  "adminFxQueries.js",
   "adminPriceQueries.js",
   "adminProductQueries.js",
   "adminQuoteQueries.js"

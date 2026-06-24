@@ -63,6 +63,17 @@ export function createApp(options = {}) {
         return imageObjectStore.createReadStream(decodeMediaKey(mediaKey));
       }
     };
+  const adminFxService =
+    options.services?.admin?.fx ||
+    createAdminFxService({
+      queries: options.queries?.admin?.fx || createAdminFxQueries(pool)
+    });
+  const adminPriceService =
+    options.services?.admin?.prices ||
+    createAdminPriceService({
+      queries: options.queries?.admin?.prices || createAdminPriceQueries(pool),
+      fxService: adminFxService
+    });
   const services = {
     catalog:
       options.services?.catalog ||
@@ -110,15 +121,9 @@ export function createApp(options = {}) {
           queries: options.queries?.admin?.categories || createAdminCategoryQueries(pool)
         }),
       prices:
-        options.services?.admin?.prices ||
-        createAdminPriceService({
-          queries: options.queries?.admin?.prices || createAdminPriceQueries(pool)
-        }),
+        adminPriceService,
       fx:
-        options.services?.admin?.fx ||
-        createAdminFxService({
-          queries: options.queries?.admin?.fx || createAdminFxQueries(pool)
-        }),
+        adminFxService,
       products:
         options.services?.admin?.products ||
         createAdminProductService({

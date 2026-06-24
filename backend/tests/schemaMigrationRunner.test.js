@@ -281,11 +281,14 @@ test("N39 managed FX migration has additive schema and no transaction-control SQ
 
   assert.doesNotThrow(() => validateMigrationSql(sqlText));
   assert.match(sqlText, /create table if not exists public\.fx_rate_snapshots/i);
-  assert.match(sqlText, /create table if not exists public\.fx_review_runs/i);
-  assert.match(sqlText, /create table if not exists public\.fx_price_drafts/i);
-  assert.match(sqlText, /add column if not exists fx_managed boolean not null default false/i);
+  assert.match(sqlText, /create table if not exists public\.product_price_policies/i);
+  assert.match(sqlText, /create table if not exists public\.fx_auto_price_runs/i);
+  assert.match(sqlText, /create table if not exists public\.fx_auto_price_events/i);
+  assert.doesNotMatch(sqlText, /fx_price_drafts|fx_review_runs|fx_managed/i);
   assert.match(sqlText, /quote_currency text not null check \(quote_currency in \('KRW', 'JPY', 'USD', 'CNY'\)\)/i);
-  assert.match(sqlText, /status text not null default 'pending' check \(status in \('pending', 'approved', 'rejected', 'expired', 'stale'\)\)/i);
+  assert.match(sqlText, /pricing_mode text not null check \(pricing_mode in \('manual_fixed', 'fx_auto'\)\)/i);
+  assert.match(sqlText, /update_threshold_bps integer not null default 500/i);
+  assert.match(sqlText, /circuit_breaker_bps integer not null default 1500/i);
   assert.doesNotMatch(sqlText, /\bdrop\s+table\b|\btruncate\b|\bdelete\s+from\b/i);
 });
 
@@ -360,16 +363,18 @@ test("fresh install schema includes managed FX review workflow objects", () => {
   const schema = readFileSync(join(process.cwd(), "..", "supabase", "schema.sql"), "utf8");
 
   for (const fragment of [
-    "fx_managed boolean not null default false",
     "create table if not exists public.fx_rate_snapshots",
-    "create table if not exists public.fx_review_runs",
-    "create table if not exists public.fx_price_drafts",
+    "create table if not exists public.product_price_policies",
+    "create table if not exists public.fx_auto_price_runs",
+    "create table if not exists public.fx_auto_price_events",
     "quote_currency text not null check (quote_currency in ('KRW', 'JPY', 'USD', 'CNY'))",
-    "threshold_bps integer not null default 200",
-    "status text not null default 'pending' check (status in ('pending', 'approved', 'rejected', 'expired', 'stale'))"
+    "pricing_mode text not null check (pricing_mode in ('manual_fixed', 'fx_auto'))",
+    "update_threshold_bps integer not null default 500",
+    "circuit_breaker_bps integer not null default 1500"
   ]) {
     assert.match(schema, new RegExp(fragment.replace(/[()]/g, "\\$&"), "i"));
   }
+  assert.doesNotMatch(schema, /fx_price_drafts|fx_review_runs|fx_managed/i);
 });
 
 test("migration runner does not access Secret Manager or open real DB in tests", () => {

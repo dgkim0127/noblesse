@@ -9,7 +9,7 @@
     "bootstrap:production-uat-accounts": "node src/scripts/bootstrapProductionUatAccounts.js",
     "bootstrap:production-admin-account": "node src/scripts/bootstrapProductionAdminAccount.js",
     "fx:fetch-rate-snapshots": "node src/scripts/fetchFxRateSnapshots.js",
-    "fx:generate-price-drafts": "node src/scripts/generateFxPriceDrafts.js",
+    "fx:evaluate-auto-prices": "node src/scripts/evaluateFxAutoPrices.js",
     "test": "node --test tests/*.test.js"
   },
   "dependencies": {
