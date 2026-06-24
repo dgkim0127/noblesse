@@ -5,6 +5,7 @@ import {
   Gauge,
   Gem,
   Handshake,
+  Landmark,
   LayoutDashboard,
   PlusCircle,
   ShieldCheck,
@@ -38,6 +39,7 @@ const adminNavGroups = [
       { key: 'products', path: '/admin/products', icon: Gem, permission: 'catalog.read' },
       { key: 'categories', path: '/admin/categories', icon: Tags, permission: 'catalog.read' },
       { key: 'prices', path: '/admin/prices', icon: Tags, permission: 'prices.read' },
+      { key: 'fx', path: '/admin/fx', icon: Landmark, permission: 'prices.read' },
     ],
   },
   {

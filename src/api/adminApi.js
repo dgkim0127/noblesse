@@ -164,6 +164,69 @@ export function createAdminApi(apiClient) {
       }))
     },
 
+    async getFxStatus(token) {
+      return unwrap(await apiClient.apiFetch('/admin/fx/status', { token: requireToken(token) }))
+    },
+
+    async getFxRates(token) {
+      return unwrap(await apiClient.apiFetch('/admin/fx/rates', { token: requireToken(token) }))
+    },
+
+    async getFxReviewRuns(token) {
+      return unwrap(await apiClient.apiFetch('/admin/fx/review-runs', { token: requireToken(token) }))
+    },
+
+    async getFxDrafts(params = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/fx/drafts${buildQuery(params)}`, { token: requireToken(token) }))
+    },
+
+    async importFxRates(input = {}, token) {
+      return unwrap(await apiClient.apiFetch('/admin/fx/rates/import', {
+        method: 'POST',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async createFxReviewRun(input = {}, token) {
+      return unwrap(await apiClient.apiFetch('/admin/fx/review-runs', {
+        method: 'POST',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async approveFxDraft(draftId, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/fx/drafts/${encodeURIComponent(draftId)}/approve`, {
+        method: 'POST',
+        token: requireToken(token),
+      }))
+    },
+
+    async rejectFxDraft(draftId, reason, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/fx/drafts/${encodeURIComponent(draftId)}/reject`, {
+        method: 'POST',
+        token: requireToken(token),
+        body: { reason },
+      }))
+    },
+
+    async enableFxManagedPrice(priceId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/fx/prices/${encodeURIComponent(priceId)}/enable`, {
+        method: 'POST',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async disableFxManagedPrice(priceId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/fx/prices/${encodeURIComponent(priceId)}/disable`, {
+        method: 'POST',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
     async getQuotes(params = {}, token) {
       return unwrap(await apiClient.apiFetch(`/admin/quotes${buildQuery(params)}`, { token: requireToken(token) }))
     },

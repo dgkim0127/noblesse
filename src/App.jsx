@@ -32,6 +32,7 @@ const AdminBuyersPage = lazyNamed(() => import('./pages/admin/AdminBuyersPage'),
 const AdminCatalogEntryPage = lazyNamed(() => import('./pages/admin/AdminCatalogEntryPage'), 'AdminCatalogEntryPage')
 const AdminCategoriesPage = lazyNamed(() => import('./pages/admin/AdminCategoriesPage'), 'AdminCategoriesPage')
 const AdminDashboardPage = lazyNamed(() => import('./pages/admin/AdminDashboardPage'), 'AdminDashboardPage')
+const AdminFxPage = lazyNamed(() => import('./pages/admin/AdminFxPage'), 'AdminFxPage')
 const AdminInquiriesPage = lazyNamed(() => import('./pages/admin/AdminInquiriesPage'), 'AdminInquiriesPage')
 const AdminInquiryDetailPage = lazyNamed(() => import('./pages/admin/AdminInquiryDetailPage'), 'AdminInquiryDetailPage')
 const AdminPricesPage = lazyNamed(() => import('./pages/admin/AdminPricesPage'), 'AdminPricesPage')
@@ -79,6 +80,7 @@ function App() {
         <Route path="products" element={withAdminSuspense(<AdminProductsPage />, 'catalog.read')} />
         <Route path="categories" element={withAdminSuspense(<AdminCategoriesPage />, 'catalog.read')} />
         <Route path="prices" element={withAdminSuspense(<AdminPricesPage />, 'prices.read')} />
+        <Route path="fx" element={withAdminSuspense(<AdminFxPage />, 'prices.read')} />
         <Route path="inquiries" element={withAdminSuspense(<AdminInquiriesPage />, 'inquiries.read')} />
         <Route path="inquiries/:inquiryId" element={withAdminSuspense(<AdminInquiryDetailPage />, 'inquiries.read')} />
         <Route path="quotes" element={withAdminSuspense(<AdminQuotesPage />, 'quotes.read')} />
@@ -112,6 +114,7 @@ function App() {
         <Route path="products" element={withAdminSuspense(<AdminProductsPage />, 'catalog.read')} />
         <Route path="categories" element={withAdminSuspense(<AdminCategoriesPage />, 'catalog.read')} />
         <Route path="prices" element={withAdminSuspense(<AdminPricesPage />, 'prices.read')} />
+        <Route path="fx" element={withAdminSuspense(<AdminFxPage />, 'prices.read')} />
         <Route path="inquiries" element={withAdminSuspense(<AdminInquiriesPage />, 'inquiries.read')} />
         <Route path="inquiries/:inquiryId" element={withAdminSuspense(<AdminInquiryDetailPage />, 'inquiries.read')} />
         <Route path="quotes" element={withAdminSuspense(<AdminQuotesPage />, 'quotes.read')} />

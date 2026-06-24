@@ -273,6 +273,35 @@ test("packaged lifecycle migration matches canonical migration exactly", () => {
   assert.equal(packaged, canonical);
 });
 
+test("N39 managed FX migration has additive schema and no transaction-control SQL", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260624_managed_fx_review_workflow.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.match(sqlText, /create table if not exists public\.fx_rate_snapshots/i);
+  assert.match(sqlText, /create table if not exists public\.fx_review_runs/i);
+  assert.match(sqlText, /create table if not exists public\.fx_price_drafts/i);
+  assert.match(sqlText, /add column if not exists fx_managed boolean not null default false/i);
+  assert.match(sqlText, /quote_currency text not null check \(quote_currency in \('KRW', 'JPY', 'USD', 'CNY'\)\)/i);
+  assert.match(sqlText, /status text not null default 'pending' check \(status in \('pending', 'approved', 'rejected', 'expired', 'stale'\)\)/i);
+  assert.doesNotMatch(sqlText, /\bdrop\s+table\b|\btruncate\b|\bdelete\s+from\b/i);
+});
+
+test("packaged managed FX migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260624_managed_fx_review_workflow.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260624_managed_fx_review_workflow.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
 test("migration runner resolves packaged lifecycle migration path explicitly", () => {
   const resolved = resolveSchemaSqlPath({
     SCHEMA_SQL_PATH: "migrations/20260622_admin_rbac_account_lifecycle.sql"
@@ -325,6 +354,22 @@ test("fresh install schema matches lifecycle migration enum-like status contract
   assert.match(migration, /admin_role in \('operator', 'manager', 'owner'\)/i);
   assert.match(schema, /effect in \('allow', 'deny'\)/i);
   assert.match(migration, /effect in \('allow', 'deny'\)/i);
+});
+
+test("fresh install schema includes managed FX review workflow objects", () => {
+  const schema = readFileSync(join(process.cwd(), "..", "supabase", "schema.sql"), "utf8");
+
+  for (const fragment of [
+    "fx_managed boolean not null default false",
+    "create table if not exists public.fx_rate_snapshots",
+    "create table if not exists public.fx_review_runs",
+    "create table if not exists public.fx_price_drafts",
+    "quote_currency text not null check (quote_currency in ('KRW', 'JPY', 'USD', 'CNY'))",
+    "threshold_bps integer not null default 200",
+    "status text not null default 'pending' check (status in ('pending', 'approved', 'rejected', 'expired', 'stale'))"
+  ]) {
+    assert.match(schema, new RegExp(fragment.replace(/[()]/g, "\\$&"), "i"));
+  }
 });
 
 test("migration runner does not access Secret Manager or open real DB in tests", () => {

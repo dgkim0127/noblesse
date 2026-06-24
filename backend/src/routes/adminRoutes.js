@@ -341,6 +341,106 @@ export function createAdminRoutes({
     })
   );
 
+  router.get(
+    "/fx/status",
+    requireAdmin,
+    can("prices.read"),
+    asyncRoute(async (req, res) => {
+      const data = await services.fx.getStatus(req.query, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/fx/rates",
+    requireAdmin,
+    can("prices.read"),
+    asyncRoute(async (req, res) => {
+      const data = await services.fx.listRates(req.query, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/fx/review-runs",
+    requireAdmin,
+    can("prices.read"),
+    asyncRoute(async (req, res) => {
+      const data = await services.fx.listReviewRuns(req.query, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/fx/drafts",
+    requireAdmin,
+    can("prices.read"),
+    asyncRoute(async (req, res) => {
+      const data = await services.fx.listDrafts(req.query, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/fx/rates/import",
+    requireAdmin,
+    can("prices.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.fx.importRates(req.body, req.adminViewer);
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/fx/review-runs",
+    requireAdmin,
+    can("prices.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.fx.createReviewRun(req.body, req.adminViewer);
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/fx/drafts/:draftId/approve",
+    requireAdmin,
+    can("prices.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.fx.approveDraft(req.params.draftId, req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/fx/drafts/:draftId/reject",
+    requireAdmin,
+    can("prices.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.fx.rejectDraft(req.params.draftId, req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/fx/prices/:priceId/enable",
+    requireAdmin,
+    can("prices.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.fx.enablePriceFx(req.params.priceId, req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/fx/prices/:priceId/disable",
+    requireAdmin,
+    can("prices.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.fx.disablePriceFx(req.params.priceId, req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
   router.patch(
     "/products/:productId/visibility",
     requireAdmin,

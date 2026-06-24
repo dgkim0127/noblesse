@@ -10,6 +10,7 @@ import { createAdminAccessQueries } from "./db/queries/adminAccessQueries.js";
 import { createAdminCategoryQueries } from "./db/queries/adminCategoryQueries.js";
 import { createAdminDashboardQueries } from "./db/queries/adminDashboardQueries.js";
 import { createAdminInquiryQueries } from "./db/queries/adminInquiryQueries.js";
+import { createAdminFxQueries } from "./db/queries/adminFxQueries.js";
 import { createAdminPriceQueries } from "./db/queries/adminPriceQueries.js";
 import { createAdminProductQueries } from "./db/queries/adminProductQueries.js";
 import { createAdminQuoteQueries } from "./db/queries/adminQuoteQueries.js";
@@ -28,6 +29,7 @@ import { createAdminAccessService } from "./services/adminAccessService.js";
 import { createAdminCategoryService } from "./services/adminCategoryService.js";
 import { createAdminDashboardService } from "./services/adminDashboardService.js";
 import { createAdminInquiryService } from "./services/adminInquiryService.js";
+import { createAdminFxService } from "./services/adminFxService.js";
 import { createAdminPriceService } from "./services/adminPriceService.js";
 import { createAdminProductService } from "./services/adminProductService.js";
 import {
@@ -111,6 +113,11 @@ export function createApp(options = {}) {
         options.services?.admin?.prices ||
         createAdminPriceService({
           queries: options.queries?.admin?.prices || createAdminPriceQueries(pool)
+        }),
+      fx:
+        options.services?.admin?.fx ||
+        createAdminFxService({
+          queries: options.queries?.admin?.fx || createAdminFxQueries(pool)
         }),
       products:
         options.services?.admin?.products ||

@@ -133,6 +133,29 @@ test('admin price writes call protected price routes', async () => {
   assert.deepEqual(calls[1].options.body, { isActive: false })
 })
 
+test('admin FX methods call protected FX review routes', async () => {
+  const { calls, client } = createMockApiClient({ data: { drafts: [] } })
+  const adminApi = createAdminApi(client)
+
+  await adminApi.getFxStatus('admin-token')
+  await adminApi.getFxRates('admin-token')
+  await adminApi.getFxDrafts({ status: 'pending', market: 'US' }, 'admin-token')
+  await adminApi.createFxReviewRun({ thresholdBps: 200 }, 'admin-token')
+  await adminApi.approveFxDraft('11111111-1111-4111-8111-111111111111', 'admin-token')
+  await adminApi.rejectFxDraft('11111111-1111-4111-8111-111111111111', 'Manual review', 'admin-token')
+
+  assert.deepEqual(calls.map((call) => `${call.options.method || 'GET'} ${call.path}`), [
+    'GET /admin/fx/status',
+    'GET /admin/fx/rates',
+    'GET /admin/fx/drafts?status=pending&market=US',
+    'POST /admin/fx/review-runs',
+    'POST /admin/fx/drafts/11111111-1111-4111-8111-111111111111/approve',
+    'POST /admin/fx/drafts/11111111-1111-4111-8111-111111111111/reject',
+  ])
+  assert.deepEqual(calls[3].options.body, { thresholdBps: 200 })
+  assert.deepEqual(calls[5].options.body, { reason: 'Manual review' })
+})
+
 test('admin quotes call list detail and create routes', async () => {
   const { calls, client } = createMockApiClient({ data: { quotes: [], quote: { id: 'quote-1' } } })
   const adminApi = createAdminApi(client)
