@@ -5,7 +5,7 @@
 - Four-currency price book mapping exists for KR/KRW, JP/JPY, US/USD, CN/CNY, and GLOBAL/USD.
 - Buyer price reads require exact assigned market and currency.
 - Admin price reads use admin routes.
-- Managed FX review API, UI, scripts, and migration draft exist.
+- Automatic FX price policy API, UI, guarded script, and migration draft exist.
 - Migration files are drafted but not executed.
 
 ## Staging Rollout Gate
@@ -29,15 +29,16 @@ Before this gate, do not:
 
 1. Confirm clean branch and migration artifact parity.
 2. Apply migration once in staging.
-3. Deploy backend image that includes FX code and packaged migration.
+3. Deploy backend image that includes automatic FX code and packaged migration.
 4. Verify `/api/admin/fx/status`.
 5. Import a sanitized manual FX payload.
-6. Run review job once.
-7. Verify drafts.
-8. Approve and reject synthetic draft data only.
-9. Confirm quote and inquiry snapshots are unchanged.
-10. Decide whether to enable scheduler.
+6. Run automatic evaluation once.
+7. Verify `product_price_policies`, `fx_auto_price_runs`, and `fx_auto_price_events`.
+8. Verify `manual_fixed` prices stay unchanged.
+9. Verify `fx_auto` prices respect 5% deadband, 15% circuit breaker, and 72h stale protection.
+10. Confirm quote and inquiry snapshots are unchanged.
+11. Decide whether to enable scheduler.
 
 ## Rollback
 
-The migration is additive and keeps existing data. If staging verification fails, stop writes, keep existing published product prices, and diagnose from audit logs and draft status.
+The migration is additive and keeps existing data. If staging verification fails, stop writes, keep existing published product prices, and diagnose from audit logs, policy state, run records, and auto price events.

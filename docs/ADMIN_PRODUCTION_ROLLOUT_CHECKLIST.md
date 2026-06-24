@@ -10,7 +10,7 @@
 ## Current Decision Status
 
 - Production rollout checklist: Go
-- Managed FX review workflow code: Go
+- Automatic FX price policy code: Go
 - Managed FX migration execution: No-Go
 - Managed FX Job/Scheduler rollout: No-Go
 - Production rollout execution: No-Go
@@ -23,7 +23,7 @@
 - Firebase Hosting `/api` rewrite: No-Go
 - Production admin_memo write: No-Go
 - Status/buyer/product/price/quote writes: No-Go
-- FX draft approval in production: No-Go until staging FX migration and job verification are complete
+- FX automatic pricing in production: No-Go until staging FX migration and job verification are complete
 
 ## Inputs Reviewed
 
@@ -72,7 +72,7 @@ Conclusion:
 - Do not add Firebase `/api` rewrite.
 - Do not deploy backend runtime.
 - Do not connect production DB/Auth/Secret yet.
-- Do not run the managed FX migration, deploy FX jobs, create FX schedules, or mutate production product prices through FX drafts yet.
+- Do not run the managed FX migration, deploy FX jobs, create FX schedules, or mutate production product prices through automatic FX policies yet.
 
 ## Gate 1. Backend Runtime
 

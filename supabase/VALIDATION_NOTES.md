@@ -2024,3 +2024,22 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret/IAM mutation: No.
 - Production product price mutation: No.
 - Next gate: `APPROVE_STAGING_MULTI_CURRENCY_FX_MIGRATION_AND_JOBS = YES` after FX provider selection is approved or manual-provider staging rollout is accepted.
+
+## N39 FX Auto Pricing Follow-up
+
+- Scope: Replace managed FX approval drafts with automatic price policies.
+- Price modes: `manual_fixed` and `fx_auto`.
+- Automatic rules: 5% deadband, 15% circuit breaker, 72h stale-rate protection, KR source price immediate recalculation.
+- Admin visibility: current published price, latest reference price, divergence, latest rate, policy status, and event history.
+- Schema draft: `fx_rate_snapshots`, `product_price_policies`, `fx_auto_price_runs`, and `fx_auto_price_events`.
+- Removed current model references: `fx_price_drafts`, `fx_review_runs`, and product-level `fx_managed`.
+- Migration execution: No.
+- DB direct access/psql: No.
+- External FX provider fetch: No.
+- Cloud Run Job deploy/execute: No.
+- Cloud Scheduler create: No.
+- Firebase deploy: No.
+- Secret/IAM mutation: No.
+- Production product price mutation: No.
+- Existing inquiry/quote snapshots: immutable.
+- Next gate: `APPROVE_FX_PROVIDER_SELECTION = YES`.
