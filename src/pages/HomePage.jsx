@@ -973,7 +973,7 @@ function HomeProductCard({ product, index, variant = 'default' }) {
         <small>{product.material}</small>
       </Link>
       {adminPriceItems.length > 0
-        ? <span className="admin-price-book-grid home-admin-price-book-grid">{adminPriceItems.map((item) => <span className="admin-price-book-item" key={item.currency}><img alt={item.flagLabel} className="admin-price-book-flag" src={item.flagSrc} /><span className="admin-price-book-value"><b>{item.amount}</b><span>{item.symbol}</span></span></span>)}</span>
+        ? <span className="admin-price-book-grid home-admin-price-book-grid">{adminPriceItems.map((item) => <span className="admin-price-book-item" key={item.currency}><img alt={item.flagLabel} className="admin-price-book-flag" src={item.flagSrc} /><span className="admin-price-book-value"><b>{item.amount}</b><span>{item.symbol}</span><em>{item.currency}</em></span></span>)}</span>
         : <b>{displayPrice}</b>}
     </div>
   </article>

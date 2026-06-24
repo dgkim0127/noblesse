@@ -4502,6 +4502,14 @@ h6 {
   transform: translateY(-0.02em);
 }
 
+.admin-price-book-value em {
+  color: rgb(42 35 79 / 62%);
+  font-size: 0.72em;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1;
+}
+
 .admin-market-flag {
   width: 24px;
   height: 16px;

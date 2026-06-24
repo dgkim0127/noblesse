@@ -39,10 +39,10 @@ export const adminCurrencyDisplay = {
 }
 
 export const marketDisplay = {
-  KR: { flagSrc: '/flags/kr.svg', label: '한국' },
-  JP: { flagSrc: '/flags/jp.svg', label: '일본' },
-  US: { flagSrc: '/flags/us.svg', label: '미국' },
-  CN: { flagSrc: '/flags/cn.svg', label: '중국' },
+  KR: { flagSrc: '/flags/kr.svg', label: 'Korea' },
+  JP: { flagSrc: '/flags/jp.svg', label: 'Japan' },
+  US: { flagSrc: '/flags/us.svg', label: 'United States' },
+  CN: { flagSrc: '/flags/cn.svg', label: 'China' },
   GLOBAL: { flagSrc: '/flags/global.svg', label: 'Global' },
 }
 

@@ -6,8 +6,8 @@ import {
   formatCurrency,
   formatCurrencyAmount,
   formatMarketLabel,
-  getMarketDisplay,
   getDisplayCurrency,
+  getMarketDisplay,
   isValidMarketCurrencyPair,
   marketCurrency,
   supportedCurrencies,
@@ -71,7 +71,7 @@ test('admin price display uses suffix units and readable amounts', () => {
   assert.deepEqual(formatAdminPriceBook({ currency: 'KRW', wholesalePrice: 11000 }), {
     amount: '11,000',
     currency: 'KRW',
-    flagLabel: '한국',
+    flagLabel: 'Korea',
     flagSrc: '/flags/kr.svg',
     market: 'KR',
     symbol: '₩',
@@ -79,7 +79,7 @@ test('admin price display uses suffix units and readable amounts', () => {
   assert.deepEqual(formatAdminPriceBook({ currency: 'USD', wholesalePrice: 8.8 }), {
     amount: '8.80',
     currency: 'USD',
-    flagLabel: '미국',
+    flagLabel: 'United States',
     flagSrc: '/flags/us.svg',
     market: 'US',
     symbol: '$',
@@ -87,9 +87,9 @@ test('admin price display uses suffix units and readable amounts', () => {
 })
 
 test('market display uses flag assets instead of visible market codes', () => {
-  assert.deepEqual(getMarketDisplay('KR'), { flagSrc: '/flags/kr.svg', label: '한국' })
-  assert.deepEqual(getMarketDisplay('JP'), { flagSrc: '/flags/jp.svg', label: '일본' })
-  assert.deepEqual(getMarketDisplay('US'), { flagSrc: '/flags/us.svg', label: '미국' })
-  assert.deepEqual(getMarketDisplay('CN'), { flagSrc: '/flags/cn.svg', label: '중국' })
+  assert.deepEqual(getMarketDisplay('KR'), { flagSrc: '/flags/kr.svg', label: 'Korea' })
+  assert.deepEqual(getMarketDisplay('JP'), { flagSrc: '/flags/jp.svg', label: 'Japan' })
+  assert.deepEqual(getMarketDisplay('US'), { flagSrc: '/flags/us.svg', label: 'United States' })
+  assert.deepEqual(getMarketDisplay('CN'), { flagSrc: '/flags/cn.svg', label: 'China' })
   assert.equal(formatMarketLabel('GLOBAL'), 'Global')
 })
