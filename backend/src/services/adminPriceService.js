@@ -46,12 +46,12 @@ function parseMoney(value, fieldName, { required = false, currency } = {}) {
     if (required) throw validationError(`${fieldName} is required`);
     return undefined;
   }
+  if (currency && !validateMoneyPrecision(value, currency)) {
+    throw validationError(`Invalid ${fieldName} precision for ${currency}`);
+  }
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed < 0) {
     throw validationError(`Invalid ${fieldName}`);
-  }
-  if (currency && !validateMoneyPrecision(parsed, currency)) {
-    throw validationError(`Invalid ${fieldName} precision for ${currency}`);
   }
   return parsed;
 }

@@ -4,7 +4,7 @@ import { createApp } from "../src/app.js";
 import { createAdminPriceService } from "../src/services/adminPriceService.js";
 import { request } from "./testClient.js";
 
-function createAppWithPrices() {
+function createAppWithPrices({ adminUser = {} } = {}) {
   return createApp({
     env: { nodeEnv: "test", isProduction: false, allowedOrigins: [] },
     services: {
@@ -75,11 +75,18 @@ function createAppWithPrices() {
     auth: {
       adminVerifier: { async verifyIdToken() { return { uid: "admin-uid" }; } },
       async loadAdminUserByAuthUid() {
-        return { userId: "admin-1", role: "admin", status: "approved", adminRole: "manager" };
+        return { userId: "admin-1", role: "admin", status: "approved", adminRole: "manager", ...adminUser };
       }
     }
   });
 }
+
+test("GET /api/admin/prices requires an admin token", async () => {
+  const response = await request(createAppWithPrices(), "/api/admin/prices");
+
+  assert.equal(response.status, 401);
+  assert.equal(response.body.error.code, "UNAUTHORIZED");
+});
 
 test("GET /api/admin/prices returns price rows", async () => {
   const response = await request(createAppWithPrices(), "/api/admin/prices", {
@@ -89,6 +96,21 @@ test("GET /api/admin/prices returns price rows", async () => {
   assert.equal(response.status, 200);
   assert.equal(response.body.data.prices.length, 1);
   assert.equal(response.body.data.prices[0].productCode, "NB-001");
+});
+
+test("GET /api/admin/prices rejects admins denied prices.read", async () => {
+  const response = await request(
+    createAppWithPrices({
+      adminUser: {
+        permissionOverrides: [{ permissionKey: "prices.read", effect: "deny" }]
+      }
+    }),
+    "/api/admin/prices",
+    { headers: { authorization: "Bearer admin-token" } }
+  );
+
+  assert.equal(response.status, 403);
+  assert.equal(response.body.error.code, "FORBIDDEN");
 });
 
 test("GET /api/admin/prices allows market and active filters", async () => {
@@ -153,6 +175,27 @@ test("POST /api/admin/prices creates CNY price row", async () => {
   assert.equal(response.body.data.price.currency, "CNY");
 });
 
+test("POST /api/admin/prices accepts exact money values including zero", async () => {
+  for (const body of [
+    { productCode: "NB-001", market: "KR", currency: "KRW", wholesalePrice: 12000, moq: 20 },
+    { productCode: "NB-001", market: "JP", currency: "JPY", wholesalePrice: 1250, moq: 20 },
+    { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: 2.01, moq: 20 },
+    { productCode: "NB-001", market: "CN", currency: "CNY", wholesalePrice: "58.20", moq: 20 },
+    { productCode: "NB-001", market: "KR", currency: "KRW", wholesalePrice: 0, moq: 20 }
+  ]) {
+    const response = await request(createAppWithPrices(), "/api/admin/prices", {
+      method: "POST",
+      headers: {
+        authorization: "Bearer admin-token",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    assert.equal(response.status, 201);
+  }
+});
+
 test("POST /api/admin/prices rejects invalid market currency pairs", async () => {
   for (const body of [
     { productCode: "NB-001", market: "CN", currency: "JPY", wholesalePrice: 1200, moq: 20 },
@@ -180,6 +223,30 @@ test("POST /api/admin/prices rejects currency precision mismatches", async () =>
     { productCode: "NB-001", market: "JP", currency: "JPY", wholesalePrice: 1200.1, moq: 20 },
     { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: 8.123, moq: 20 },
     { productCode: "NB-001", market: "CN", currency: "CNY", wholesalePrice: 58.234, moq: 20 }
+  ]) {
+    const response = await request(createAppWithPrices(), "/api/admin/prices", {
+      method: "POST",
+      headers: {
+        authorization: "Bearer admin-token",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.error.code, "VALIDATION_ERROR");
+  }
+});
+
+test("POST /api/admin/prices rejects scientific and non-decimal money strings", async () => {
+  for (const body of [
+    { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: "1e2", moq: 20 },
+    { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: "1E2", moq: 20 },
+    { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: "5e-2", moq: 20 },
+    { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: "Infinity", moq: 20 },
+    { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: "NaN", moq: 20 },
+    { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: "0x10", moq: 20 },
+    { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: -1, moq: 20 }
   ]) {
     const response = await request(createAppWithPrices(), "/api/admin/prices", {
       method: "POST",

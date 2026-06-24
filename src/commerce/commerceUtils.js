@@ -278,13 +278,16 @@ export const buildInquiryRows = (inquiryItems, products, buyer, isApproved, prod
 }).filter(Boolean)
 
 export const buildInquirySnapshot = ({ inquiryRows, buyer, requestMemo, inquiryId }) => {
+  if (!Array.isArray(inquiryRows) || inquiryRows.length === 0) return null
   const now = new Date().toISOString()
-  const currency = inquiryRows[0]?.currency || buyer.currency
-  const market = inquiryRows[0]?.market || buyer.assignedMarket
-  if (!currency || !market) return null
-  if (buyer.currency && buyer.currency !== currency) return null
-  if (buyer.assignedMarket && buyer.assignedMarket !== market) return null
-  if (inquiryRows.some((row) => row.currency !== currency || row.market !== market)) return null
+  const market = buyer?.assignedMarket
+  const currency = buyer?.currency
+  if (!market || !currency || !isValidMarketCurrencyPair(market, currency)) return null
+  if (inquiryRows.some((row) => (
+    row.market !== market
+    || row.currency !== currency
+    || !isValidMarketCurrencyPair(row.market, row.currency)
+  ))) return null
   const totalQuantity = inquiryRows.reduce((sum, row) => sum + row.quantity, 0)
   const estimatedTotal = sumMoney(inquiryRows.map((row) => row.subtotal), currency)
   if (estimatedTotal === null) return null
@@ -307,6 +310,8 @@ export const buildInquirySnapshot = ({ inquiryRows, buyer, requestMemo, inquiryI
       color: row.color,
       size: row.size,
       moq: row.moq,
+      market: row.market,
+      currency: row.currency,
       quantity: row.quantity,
       priceSnapshot: row.priceSnapshot,
       subtotal: row.subtotal,

@@ -24,17 +24,3 @@ export function validateMarketCurrencyPair(market, currency) {
 export function getCurrencyMinorUnits(currency) {
   return CURRENCY_MINOR_UNITS[currency] ?? 2;
 }
-
-export function validateMoneyPrecision(value, currency) {
-  if (!CURRENCIES.includes(currency)) return false;
-  const minorUnits = getCurrencyMinorUnits(currency);
-  if (typeof value === "number") {
-    if (!Number.isFinite(value)) return false;
-    value = String(value);
-  }
-  if (typeof value !== "string") return false;
-  const normalized = value.trim();
-  if (!normalized || /e/i.test(normalized) || !/^\d+(?:\.\d+)?$/.test(normalized)) return false;
-  const fraction = normalized.split(".")[1] || "";
-  return fraction.length <= minorUnits;
-}

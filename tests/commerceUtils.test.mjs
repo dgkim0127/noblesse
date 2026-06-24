@@ -134,6 +134,29 @@ test('buildInquirySnapshot rejects mixed market rows', () => {
   assert.equal(snapshot, null)
 })
 
+test('buildInquirySnapshot rejects empty rows or missing buyer market currency', () => {
+  assert.equal(buildInquirySnapshot({
+    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'US', preferredLanguage: 'en', assignedMarket: 'US', currency: 'USD' },
+    inquiryId: 'INQ-001',
+    inquiryRows: [],
+    requestMemo: '',
+  }), null)
+
+  assert.equal(buildInquirySnapshot({
+    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'US', preferredLanguage: 'en', currency: 'USD' },
+    inquiryId: 'INQ-001',
+    inquiryRows: [{ productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 1, market: 'US', currency: 'USD', priceSnapshot: 8.99, subtotal: 8.99 }],
+    requestMemo: '',
+  }), null)
+
+  assert.equal(buildInquirySnapshot({
+    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'US', preferredLanguage: 'en', assignedMarket: 'US' },
+    inquiryId: 'INQ-001',
+    inquiryRows: [{ productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 1, market: 'US', currency: 'USD', priceSnapshot: 8.99, subtotal: 8.99 }],
+    requestMemo: '',
+  }), null)
+})
+
 test('buildInquirySnapshot sums same-currency cents without drift', () => {
   const snapshot = buildInquirySnapshot({
     buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'US', preferredLanguage: 'en', assignedMarket: 'US', currency: 'USD' },
@@ -148,6 +171,46 @@ test('buildInquirySnapshot sums same-currency cents without drift', () => {
   assert.equal(snapshot.estimatedTotal, 36.02)
   assert.equal(snapshot.market, 'US')
   assert.equal(snapshot.currency, 'USD')
+  assert.deepEqual(snapshot.items.map((item) => [item.market, item.currency]), [['US', 'USD'], ['US', 'USD']])
+})
+
+test('buildInquirySnapshot accepts GLOBAL USD and CN CNY rows for matching buyers', () => {
+  const globalSnapshot = buildInquirySnapshot({
+    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'US', preferredLanguage: 'en', assignedMarket: 'GLOBAL', currency: 'USD' },
+    inquiryId: 'INQ-001',
+    inquiryRows: [
+      { productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 1, market: 'GLOBAL', currency: 'USD', priceSnapshot: 9.05, subtotal: 9.05 },
+    ],
+    requestMemo: '',
+  })
+  const cnSnapshot = buildInquirySnapshot({
+    buyer: { uid: 'buyer-2', companyName: 'Buyer', country: 'CN', preferredLanguage: 'cn', assignedMarket: 'CN', currency: 'CNY' },
+    inquiryId: 'INQ-002',
+    inquiryRows: [
+      { productId: 'NB-002', productCode: 'NB-002', productName: 'Two', material: 'Cubic', color: '', size: '', moq: 1, quantity: 1, market: 'CN', currency: 'CNY', priceSnapshot: 51.22, subtotal: 51.22 },
+      { productId: 'NB-003', productCode: 'NB-003', productName: 'Three', material: 'Pearl', color: '', size: '', moq: 1, quantity: 1, market: 'CN', currency: 'CNY', priceSnapshot: 102.44, subtotal: 102.44 },
+    ],
+    requestMemo: '',
+  })
+
+  assert.equal(globalSnapshot.market, 'GLOBAL')
+  assert.equal(globalSnapshot.currency, 'USD')
+  assert.equal(cnSnapshot.market, 'CN')
+  assert.equal(cnSnapshot.currency, 'CNY')
+  assert.equal(cnSnapshot.estimatedTotal, 153.66)
+})
+
+test('buildInquirySnapshot rejects GLOBAL USD row for US buyer', () => {
+  const snapshot = buildInquirySnapshot({
+    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'US', preferredLanguage: 'en', assignedMarket: 'US', currency: 'USD' },
+    inquiryId: 'INQ-001',
+    inquiryRows: [
+      { productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 1, market: 'GLOBAL', currency: 'USD', priceSnapshot: 9.05, subtotal: 9.05 },
+    ],
+    requestMemo: '',
+  })
+
+  assert.equal(snapshot, null)
 })
 
 test('admin price books preserve US and GLOBAL USD as separate market rows', () => {
