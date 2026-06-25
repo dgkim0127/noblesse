@@ -2103,3 +2103,23 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - DB direct access/psql: No.
 - Product price mutation: No.
 - Next gate: `APPROVE_FX_PROVIDER_ADAPTER_IMPLEMENTATION = YES`.
+
+## N41 FX Provider Adapter Implementation Follow-up
+
+- Scope: ExchangeRate-API adapter implementation with mock/fixture validation only.
+- Provider identifier: `exchange_rate_api`.
+- Secret variable name: `EXCHANGE_RATE_API_KEY`.
+- Fixed endpoint: `https://v6.exchangerate-api.com/v6/latest/KRW`.
+- Authentication: Bearer header only; API key is not placed in URL path, query string, request body, logs, or serialized config.
+- Canonical direction: Provider KRW-base target-per-KRW rates are inverted into Noblesse `KRW_PER_UNIT` snapshots.
+- Timestamp mapping: `time_last_update_unix` is mapped to `sourceEffectiveAt` as provider dataset update time; `fetchedAt` remains the server receive/parse time.
+- Adapter tests: Mock transport only; no DNS or live provider request.
+- Provider credential creation: No.
+- Live provider fetch: No.
+- Secret/IAM mutation: No.
+- Cloud Run Job deploy/execute: No.
+- Scheduler change: No.
+- Migration execution: No.
+- DB direct access/psql: No.
+- Product price mutation: No.
+- Next gate: `APPROVE_FX_PROVIDER_CREDENTIAL_PROVISIONING = YES`.

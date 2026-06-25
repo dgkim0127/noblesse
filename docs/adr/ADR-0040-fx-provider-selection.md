@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for adapter implementation planning. Runtime provider fetch, credentials, Secret Manager changes, scheduler changes, Cloud Run Job deploy/execution, migrations, DB access, and price mutation remain blocked until separate approval.
+Selected for implementation. Adapter code may be implemented and tested with fixtures/mock transport only. Runtime provider fetch, credentials, Secret Manager changes, scheduler changes, Cloud Run Job deploy/execution, migrations, DB access, and price mutation remain blocked until separate approval.
 
 ## Context
 
@@ -49,7 +49,7 @@ Verified on 2026-06-25 using official provider documentation only. No live FX AP
 
 | Provider | Official evidence URLs | Currency coverage | Timestamp semantics | Commercial/plan evidence | Auth and operations | Result |
 | --- | --- | --- | --- | --- | --- | --- |
-| ExchangeRate-API | `https://www.exchangerate-api.com/docs/standard-requests`, `https://www.exchangerate-api.com/docs/supported-currencies`, `https://www.exchangerate-api.com/docs/authentication`, `https://www.exchangerate-api.com/pricing`, `https://www.exchangerate-api.com/product/uptime`, `https://www.exchangerate-api.com/terms` | Official supported-currency docs list the currency table used by the API; KRW, JPY, USD, and CNY are supported. | Standard request responses document update fields including Unix/UTC update times and next update times. | Pricing page documents plan tiers and request allowances. Terms cover service use. | Authentication docs support Bearer authorization, which lets the adapter avoid putting the API key in URL query logs. Official uptime documentation describes provider monitoring/status history. | PASS |
+| ExchangeRate-API | `https://www.exchangerate-api.com/docs/standard-requests`, `https://www.exchangerate-api.com/docs/supported-currencies`, `https://www.exchangerate-api.com/docs/authentication`, `https://www.exchangerate-api.com/`, `https://www.exchangerate-api.com/product/uptime`, `https://www.exchangerate-api.com/terms` | Official supported-currency docs list the currency table used by the API; KRW, JPY, USD, and CNY are supported. | Standard request responses document update fields including Unix/UTC update times and next update times. `time_last_update_unix` is treated only as the provider dataset update time. It is not a market observation time, central-bank publication time, or transaction execution time. | The official Plans section documents Pro with 60 minute updates and 30,000 requests per month; prices are checked-date values and must be reconfirmed before purchase. Terms cover service use and restrictions. | Authentication docs support Bearer authorization, which lets the adapter avoid putting the API key in URL query logs. Official uptime documentation describes provider monitoring/status history. | PASS |
 | Open Exchange Rates | `https://docs.openexchangerates.org/reference/latest-json`, `https://docs.openexchangerates.org/reference/historical-json`, `https://openexchangerates.org/currencies.json`, `https://openexchangerates.org/signup`, `https://status.openexchangerates.org/`, `https://openexchangerates.org/license` | Official currency list includes KRW, JPY, USD, and CNY. | Latest/historical API docs expose timestamped snapshots. | Signup/pricing and license pages define paid use. | Status page exists; auth is app id based and must be strongly redacted from URL logs. | PASS with caveat |
 | Currencylayer | `https://currencylayer.com/documentation`, `https://currencylayer.com/pricing`, `https://currencylayer.com/terms` | Official docs describe supported currency list and quote codes. | Live endpoint docs expose `timestamp`, `source`, and `quotes`. | Pricing/terms pages define paid use. | Query-string access key handling and plan-dependent source currency reduce fit. | CONDITIONAL |
 | Fixer / Exchangerates API | `https://exchangeratesapi.io/documentation/`, `https://exchangeratesapi.io/pricing/`, `https://exchangeratesapi.io/terms/` | Official docs expose symbols and base/latest endpoints. | Latest endpoint docs expose timestamped responses. | Pricing/terms pages define plan access. | Base switching, refresh rate, and URL key handling require stricter plan review. | CONDITIONAL |
@@ -57,18 +57,18 @@ Verified on 2026-06-25 using official provider documentation only. No live FX AP
 
 ## Decision
 
-Select `ExchangeRate-API` as the primary FX provider for the first Noblesse production adapter, using a paid plan that provides hourly or better update cadence and enough monthly quota for scheduled jobs and manual rechecks.
+Select ExchangeRate-API as the primary FX provider for the first Noblesse production adapter, using its Pro plan or better.
 
 Provider identifier:
 
 ```text
-exchangerate-api
+exchange_rate_api
 ```
 
 Required plan/tier:
 
 ```text
-ExchangeRate-API Pro or equivalent paid tier with hourly updates and quota comfortably above the planned job volume.
+ExchangeRate-API Pro: 60 minute update cadence and 30,000 requests per month, as checked on 2026-06-25. Reconfirm plan pricing and terms before purchase or credential creation.
 ```
 
 ## Why This Is The Best Fit
@@ -110,11 +110,11 @@ Mapping:
 
 | Internal field | Provider field or rule |
 | --- | --- |
-| `provider` | `exchangerate-api` |
+| `provider` | `exchange_rate_api` |
 | `baseCurrency` | Internal normalized value: `KRW` |
 | required quote currencies | `KRW`, `JPY`, `USD`, `CNY` |
 | provider base currency | `base_code` must equal `KRW` |
-| `sourceEffectiveAt` | Convert `time_last_update_unix` to ISO. If needed for audit display, retain `time_last_update_utc` as provider metadata. |
+| `sourceEffectiveAt` | Convert `time_last_update_unix` to ISO. This is the provider dataset update time only. If needed for audit display, retain `time_last_update_utc` as provider metadata. |
 | `fetchedAt` | Server receive time after successful HTTPS response. Must be greater than or equal to `sourceEffectiveAt`. |
 | freshness | `now - sourceEffectiveAt <= 72h` |
 | future skew | `sourceEffectiveAt` and `fetchedAt` must not exceed server time by more than 5 minutes. |
@@ -165,7 +165,9 @@ Logs and redaction:
 
 The adapter must run only server-side in the Cloud Run FX rate job. Secret Manager should inject the provider key at runtime after separate approval. Frontend bundles must never contain provider credentials. Documentation must not include placeholder strings that look like real keys.
 
-The recommended auth mode is Bearer header auth. If the implementation later proves that the selected plan only supports key-in-path mode, stop and re-open this ADR before implementation.
+Bearer header authentication is officially documented and is the required Noblesse integration mode. API keys must not be sent in URL path, query string, or request body. If the selected plan cannot use Bearer authorization, stop and re-open this ADR before implementation.
+
+ExchangeRate-API rates are suitable for indicative catalog price management, not direct transaction settlement, payment, or financial execution. Production enablement still requires business/legal acceptance of provider terms, including restrictions on raw rate redistribution. Noblesse must expose stored product prices, not redistribute raw provider rate feeds.
 
 ## Operational Risks
 
@@ -177,7 +179,7 @@ The recommended auth mode is Bearer header auth. If the implementation later pro
 
 ## Cost Assumptions
 
-The current schedule needs about 66 provider requests per month. A small paid tier with hourly update cadence and thousands of monthly requests is enough. Free tiers are not recommended for production because update cadence, SLA, commercial terms, and support are weaker.
+The current schedule needs about 66 provider requests per month. The selected Pro plan basis is 60 minute updates and 30,000 requests per month, checked on 2026-06-25 from the official Plans section. Free tiers are not recommended for production because update cadence, commercial terms, and support are weaker.
 
 ## Open Questions
 
@@ -197,5 +199,5 @@ The current schedule needs about 66 provider requests per month. A small paid ti
 ## Next Approval Gate
 
 ```text
-APPROVE_FX_PROVIDER_ADAPTER_IMPLEMENTATION = YES
+APPROVE_FX_PROVIDER_CREDENTIAL_PROVISIONING = YES
 ```

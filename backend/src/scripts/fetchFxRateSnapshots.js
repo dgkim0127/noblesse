@@ -2,6 +2,7 @@ import { createPool } from "../db/pool.js";
 import { createAdminFxQueries } from "../db/queries/adminFxQueries.js";
 import { getEnv } from "../config/env.js";
 import { createAdminFxService } from "../services/adminFxService.js";
+import { getFxProviderSnapshot } from "../fx/fxProvider.js";
 
 export function assertFxRateFetchAllowed(env = process.env) {
   if (env.ALLOW_FX_RATE_FETCH_JOB !== "true") {
@@ -9,12 +10,10 @@ export function assertFxRateFetchAllowed(env = process.env) {
   }
 }
 
-export async function runFxRateSnapshotImport({ env = process.env, pool } = {}) {
+export async function runFxRateSnapshotImport({ env = process.env, pool, fetchImpl, now } = {}) {
   assertFxRateFetchAllowed(env);
-  if (env.FX_PROVIDER !== "manual") {
-    throw new Error("Live FX provider fetch is not approved. Use manual payload import or approve provider selection.");
-  }
-  if (!env.FX_MANUAL_PAYLOAD_JSON) {
+  const provider = env.FX_PROVIDER || "manual";
+  if (provider === "manual" && !env.FX_MANUAL_PAYLOAD_JSON) {
     throw new Error("FX_MANUAL_PAYLOAD_JSON is required for manual FX import.");
   }
 
@@ -22,8 +21,15 @@ export async function runFxRateSnapshotImport({ env = process.env, pool } = {}) 
   const service = createAdminFxService({
     queries: createAdminFxQueries(effectivePool)
   });
-  const result = await service.importRates(
-    { payload: JSON.parse(env.FX_MANUAL_PAYLOAD_JSON) },
+  const snapshot = await getFxProviderSnapshot({
+    provider,
+    payload: env.FX_MANUAL_PAYLOAD_JSON,
+    env,
+    fetchImpl,
+    now
+  });
+  const result = await service.importProviderSnapshot(
+    snapshot,
     {
       userId: null,
       role: "system",

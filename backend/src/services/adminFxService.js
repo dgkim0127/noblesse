@@ -182,6 +182,10 @@ export function createAdminFxService({ queries, now = () => new Date() }) {
       return queries.importFxRateSnapshotsAndEvaluate(snapshot, parseEvaluateBody(body), adminViewer);
     },
 
+    async importProviderSnapshot(snapshot, adminViewer) {
+      return queries.importFxRateSnapshotsAndEvaluate(snapshot, getFxAutoThresholds(), adminViewer);
+    },
+
     async evaluateAll(body = {}, adminViewer) {
       return queries.evaluateFxAutoPrices(parseEvaluateBody(body), adminViewer);
     },
