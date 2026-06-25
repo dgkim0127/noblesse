@@ -1956,6 +1956,52 @@ for (const locale of Object.keys(catalogEntryUnifiedCopy)) {
   Object.assign(entry.errors, extra.imageErrors)
 }
 
+const catalogEntryMarketPriceCopy = {
+  kr: {
+    mode: '가격 방식',
+    markets: '시장별 가격',
+    autoNote: 'KRW 기준 가격과 최신 환율 묶음으로 자동 계산됩니다.',
+    unavailableNote: '이 시장 가격은 이번 저장에서 등록하지 않습니다.',
+    modes: { fx_auto: '환율 자동', manual_fixed: '고정 가격', unavailable: '미등록' },
+    marketModeRequired: '시장별 가격 방식을 확인하세요.',
+  },
+  en: {
+    mode: 'Price mode',
+    markets: 'Market prices',
+    autoNote: 'Calculated automatically from the KRW source price and the latest FX bundle.',
+    unavailableNote: 'This market price will not be registered in this save.',
+    modes: { fx_auto: 'FX auto', manual_fixed: 'Manual fixed', unavailable: 'Unavailable' },
+    marketModeRequired: 'Check the market price mode.',
+  },
+  jp: {
+    mode: '価格方式',
+    markets: '市場別価格',
+    autoNote: 'KRW基準価格と最新為替レートで自動計算されます。',
+    unavailableNote: 'この市場価格は今回登録しません。',
+    modes: { fx_auto: '為替自動', manual_fixed: '固定価格', unavailable: '未登録' },
+    marketModeRequired: '市場別の価格方式を確認してください。',
+  },
+  cn: {
+    mode: '价格模式',
+    markets: '各市场价格',
+    autoNote: '根据 KRW 基准价和最新汇率自动计算。',
+    unavailableNote: '本次保存不会登记该市场价格。',
+    modes: { fx_auto: '汇率自动', manual_fixed: '固定价格', unavailable: '未登记' },
+    marketModeRequired: '请确认各市场的价格模式。',
+  },
+}
+
+for (const locale of Object.keys(catalogEntryMarketPriceCopy)) {
+  const entry = copy[locale].catalogEntry
+  const extra = catalogEntryMarketPriceCopy[locale]
+  entry.price.mode = extra.mode
+  entry.price.modes = extra.modes
+  entry.price.autoNote = extra.autoNote
+  entry.price.unavailableNote = extra.unavailableNote
+  entry.confirm.markets = extra.markets
+  entry.validation.marketModeRequired = extra.marketModeRequired
+}
+
 const adminAccessConsoleCopy = {
   kr: {
     groups: { overview: '개요', operations: '운영', catalog: '카탈로그', insights: '인사이트', governance: '권한 관리' },

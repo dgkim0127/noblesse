@@ -73,7 +73,7 @@ export function CatalogCard({ product }) {
       <Link to={toLocalePath(`/products/${product.productId}`)}><h3>{productName}</h3></Link>
       <p>{product.material}</p>
       {adminPriceBooks.length > 0
-        ? <div className="approved-price admin-price-books"><strong>{adminPriceLabel}</strong><span className="admin-price-book-grid">{adminPriceItems.map((item) => <span className="admin-price-book-item" key={item.currency}><img alt={item.flagLabel} className="admin-price-book-flag" src={item.flagSrc} /><span className="admin-price-book-value"><b>{item.amount}</b><span>{item.symbol}</span><em>{item.currency}</em></span></span>)}</span></div>
+        ? <div className="approved-price admin-price-books"><strong>{adminPriceLabel}</strong><span className="admin-price-book-grid">{adminPriceItems.map((item, index) => <span className="admin-price-book-item" key={`${item.market}-${item.currency}-${index}`}><img alt={item.flagLabel} className="admin-price-book-flag" src={item.flagSrc} /><span className="admin-price-book-value"><b>{item.amount}</b><span>{item.symbol}</span><em>{item.currency}</em></span></span>)}</span></div>
         : canUseTradeTerms ? <div className="approved-price"><strong>{formatMoney(approvedPrice(product.productId), price.currency)}</strong><span>{copy.minQty} {price.moq} / {copy.memberPrice} · {price.currency}</span></div> : <div className="locked-price"><LockKeyhole size={14} />{isApproved ? copy.unavailable : copy.locked}</div>}
     </div>
     <button className="add-inquiry" type="button" disabled={!canUseTradeTerms} onClick={() => addInquiryItem(product.productId)}><Plus size={16} />{canUseTradeTerms ? copy.add : copy.lockedButton}</button>

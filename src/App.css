@@ -4587,11 +4587,83 @@ h6 {
   color: #9b2748;
 }
 
+.catalog-entry-market-prices {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.catalog-entry-market-card {
+  display: grid;
+  gap: 0.8rem;
+  min-width: 0;
+  border: 1px solid rgb(42 35 79 / 10%);
+  border-radius: 8px;
+  background: #fffafd;
+  padding: 0.95rem;
+}
+
+.catalog-entry-market-card header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.catalog-entry-market-card header span {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0.45rem;
+  color: #2a234f;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.catalog-entry-market-card select {
+  min-width: 8.5rem;
+  border: 1px solid rgb(42 35 79 / 12%);
+  border-radius: 999px;
+  background: #fff;
+  color: #2a234f;
+  font-weight: 800;
+  padding: 0.45rem 0.7rem;
+}
+
+.catalog-entry-market-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.catalog-entry-summary-market {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0.55rem 0.35rem 0;
+  white-space: nowrap;
+}
+
 @media (max-width: 860px) {
   .admin-fx-summary,
   .admin-fx-rates,
   .admin-fx-market-list {
     grid-template-columns: 1fr;
+  }
+
+  .catalog-entry-market-card header,
+  .catalog-entry-market-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-entry-market-card header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .catalog-entry-market-card select {
+    width: 100%;
   }
 }
 

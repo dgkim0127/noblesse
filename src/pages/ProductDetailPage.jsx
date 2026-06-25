@@ -261,7 +261,7 @@ export function ProductDetailPage() {
 
         {adminPriceBooks.length > 0 ? <div className="detail-price admin-price-books">
           <small>{adminPriceLabel}</small>
-          <span className="admin-price-book-grid detail-admin-price-book-grid">{adminPriceItems.map((item) => <span className="admin-price-book-item" key={item.currency}><img alt={item.flagLabel} className="admin-price-book-flag" src={item.flagSrc} /><span className="admin-price-book-value"><b>{item.amount}</b><span>{item.symbol}</span><em>{item.currency}</em></span></span>)}</span>
+          <span className="admin-price-book-grid detail-admin-price-book-grid">{adminPriceItems.map((item, index) => <span className="admin-price-book-item" key={`${item.market}-${item.currency}-${index}`}><img alt={item.flagLabel} className="admin-price-book-flag" src={item.flagSrc} /><span className="admin-price-book-value"><b>{item.amount}</b><span>{item.symbol}</span><em>{item.currency}</em></span></span>)}</span>
         </div> : null}
 
         {canUseTradeTerms ? <>

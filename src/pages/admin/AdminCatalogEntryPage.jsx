@@ -40,6 +40,22 @@ const initialPriceForm = {
   isActive: true,
 }
 
+const priceMarketOrder = ['JP', 'US', 'CN', 'GLOBAL']
+const autoPriceMarkets = new Set(['JP', 'US', 'CN'])
+
+function createInitialMarketPriceForms() {
+  return Object.fromEntries(priceMarketOrder.map((market) => [market, {
+    market,
+    currency: marketCurrency[market] || 'USD',
+    pricingMode: market === 'GLOBAL' ? 'unavailable' : 'fx_auto',
+    wholesalePrice: '',
+    retailPrice: '',
+    moq: '1',
+    minOrderAmount: '0',
+    isActive: true,
+  }]))
+}
+
 const initialSaveStatus = {
   category: 'idle',
   product: 'idle',
@@ -91,23 +107,27 @@ function isValidProductCode(value) {
   return code.length > 0 && code.length <= 80 && /^[A-Za-z0-9._-]+$/.test(code)
 }
 
-function parsePositiveMoney(value) {
+function getMoneyPattern(currency) {
+  return currency === 'KRW' || currency === 'JPY' ? /^\d+$/ : /^\d+(\.\d{1,2})?$/
+}
+
+function parsePositiveMoney(value, currency = 'KRW') {
   const text = String(value || '').trim()
-  if (!/^\d+(\.\d{1,2})?$/.test(text)) return null
+  if (!getMoneyPattern(currency).test(text)) return null
   const number = Number(text)
   if (!Number.isFinite(number) || number <= 0) return null
   return number
 }
 
-function parseOptionalPositiveMoney(value) {
+function parseOptionalPositiveMoney(value, currency = 'KRW') {
   if (String(value || '').trim() === '') return undefined
-  return parsePositiveMoney(value)
+  return parsePositiveMoney(value, currency)
 }
 
-function parseOptionalNonnegativeMoney(value) {
+function parseOptionalNonnegativeMoney(value, currency = 'KRW') {
   const text = String(value || '').trim()
   if (text === '') return undefined
-  if (!/^\d+(\.\d{1,2})?$/.test(text)) return null
+  if (!getMoneyPattern(currency).test(text)) return null
   const number = Number(text)
   if (!Number.isFinite(number) || number < 0) return null
   return number
@@ -203,6 +223,7 @@ export function AdminCatalogEntryPage() {
   const [categoryForm, setCategoryForm] = useState(initialCategoryForm)
   const [productForm, setProductForm] = useState(initialProductForm)
   const [priceForm, setPriceForm] = useState(initialPriceForm)
+  const [marketPriceForms, setMarketPriceForms] = useState(createInitialMarketPriceForms)
   const [images, setImages] = useState([])
   const [createdCategory, setCreatedCategory] = useState(null)
   const [createdProduct, setCreatedProduct] = useState(null)
@@ -223,7 +244,7 @@ export function AdminCatalogEntryPage() {
   const activeCategoryKey = getCategoryKey(createdCategory) || selectedCategoryKey
   const productCode = normalizeCode(productForm.code)
   const productRouteId = getCreatedProductId(createdProduct, productCode)
-  const parsedWholesalePrice = parsePositiveMoney(priceForm.wholesalePrice)
+  const parsedWholesalePrice = parsePositiveMoney(priceForm.wholesalePrice, priceForm.currency)
   const primaryImage = images.find((image) => image.isPrimary) || images[0] || null
   const canEditImages = !uploadedImages.length && !isSaving && !isComplete
   const isDirty = Boolean(
@@ -237,6 +258,7 @@ export function AdminCatalogEntryPage() {
     productForm.nameEn ||
     productForm.description ||
     priceForm.wholesalePrice ||
+    Object.values(marketPriceForms).some((entry) => entry.pricingMode === 'manual_fixed' || entry.wholesalePrice) ||
     categoryForm.categoryId ||
     categoryForm.nameEn
   )
@@ -268,6 +290,26 @@ export function AdminCatalogEntryPage() {
   }))
   const setProductField = (field, value) => setProductForm((current) => ({ ...current, [field]: value }))
   const setPriceField = (field, value) => setPriceForm((current) => ({ ...current, [field]: value }))
+  const setMarketPriceField = (market, field, value) => setMarketPriceForms((current) => {
+    const entry = current[market]
+    if (!entry) return current
+    const shouldSwitchManual = ['wholesalePrice', 'retailPrice', 'moq', 'minOrderAmount'].includes(field) && String(value || '').trim() !== ''
+    return {
+      ...current,
+      [market]: {
+        ...entry,
+        [field]: value,
+        ...(field === 'pricingMode' && value === 'unavailable' ? {
+          wholesalePrice: '',
+          retailPrice: '',
+          minOrderAmount: '0',
+          moq: '1',
+          isActive: true,
+        } : {}),
+        ...(shouldSwitchManual && entry.pricingMode === 'fx_auto' ? { pricingMode: 'manual_fixed' } : {}),
+      },
+    }
+  })
 
   const updateSaveStatus = (resource, value) => {
     setSaveStatus((current) => ({ ...current, [resource]: value }))
@@ -317,8 +359,8 @@ export function AdminCatalogEntryPage() {
 
   const validatePrice = () => {
     const errors = {}
-    const wholesalePrice = parsePositiveMoney(priceForm.wholesalePrice)
-    const retailPrice = parseOptionalPositiveMoney(priceForm.retailPrice)
+    const wholesalePrice = parsePositiveMoney(priceForm.wholesalePrice, priceForm.currency)
+    const retailPrice = parseOptionalPositiveMoney(priceForm.retailPrice, priceForm.currency)
     if (!priceForm.market) errors.market = t.validation.marketRequired
     if (!priceForm.currency) errors.currency = t.validation.currencyRequired
     if (priceForm.market && priceForm.market !== 'KR') errors.market = t.validation.marketRequired
@@ -327,7 +369,29 @@ export function AdminCatalogEntryPage() {
     if (wholesalePrice == null) errors.wholesalePrice = t.validation.priceRequired
     if (priceForm.retailPrice !== '' && retailPrice == null) errors.retailPrice = t.validation.retailPriceInvalid
     if (Number(priceForm.moq || 0) < 1) errors.moq = t.validation.moqRequired
-    if (parseOptionalNonnegativeMoney(priceForm.minOrderAmount) == null) errors.minOrderAmount = t.validation.priceRequired
+    if (parseOptionalNonnegativeMoney(priceForm.minOrderAmount, priceForm.currency) == null) errors.minOrderAmount = t.validation.priceRequired
+    for (const market of priceMarketOrder) {
+      const entry = marketPriceForms[market]
+      if (!entry) continue
+      const currency = entry.currency
+      if (entry.pricingMode === 'unavailable') {
+        if (market !== 'GLOBAL') errors[`${market}Mode`] = t.validation.marketModeRequired
+        continue
+      }
+      if (entry.pricingMode === 'fx_auto') {
+        if (!autoPriceMarkets.has(market)) errors[`${market}Mode`] = t.validation.marketModeRequired
+        continue
+      }
+      if (entry.pricingMode !== 'manual_fixed') {
+        errors[`${market}Mode`] = t.validation.marketModeRequired
+        continue
+      }
+      if (!isValidMarketCurrencyPair(market, currency)) errors[`${market}Currency`] = t.validation.currencyRequired
+      if (parsePositiveMoney(entry.wholesalePrice, currency) == null) errors[`${market}WholesalePrice`] = t.validation.priceRequired
+      if (entry.retailPrice !== '' && parseOptionalPositiveMoney(entry.retailPrice, currency) == null) errors[`${market}RetailPrice`] = t.validation.retailPriceInvalid
+      if (Number(entry.moq || 0) < 1) errors[`${market}Moq`] = t.validation.moqRequired
+      if (parseOptionalNonnegativeMoney(entry.minOrderAmount, currency) == null) errors[`${market}MinOrderAmount`] = t.validation.priceRequired
+    }
     return errors
   }
 
@@ -439,25 +503,35 @@ export function AdminCatalogEntryPage() {
     market: priceForm.market,
     currency: priceForm.currency,
     wholesalePrice: parsePositiveMoney(priceForm.wholesalePrice),
-    retailPrice: parseOptionalPositiveMoney(priceForm.retailPrice),
+    retailPrice: parseOptionalPositiveMoney(priceForm.retailPrice, priceForm.currency),
     moq: Number(priceForm.moq || 1),
-    minOrderAmount: parseOptionalNonnegativeMoney(priceForm.minOrderAmount) ?? 0,
+    minOrderAmount: parseOptionalNonnegativeMoney(priceForm.minOrderAmount, priceForm.currency) ?? 0,
     isActive: priceForm.isActive,
   })
 
   const createPriceBookPayload = () => ({
     kr: {
-      wholesalePrice: parsePositiveMoney(priceForm.wholesalePrice),
-      retailPrice: parseOptionalPositiveMoney(priceForm.retailPrice),
+      wholesalePrice: parsePositiveMoney(priceForm.wholesalePrice, priceForm.currency),
+      retailPrice: parseOptionalPositiveMoney(priceForm.retailPrice, priceForm.currency),
       moq: Number(priceForm.moq || 1),
-      minOrderAmount: parseOptionalNonnegativeMoney(priceForm.minOrderAmount) ?? 0,
+      minOrderAmount: parseOptionalNonnegativeMoney(priceForm.minOrderAmount, priceForm.currency) ?? 0,
       isActive: priceForm.isActive,
     },
-    markets: [
-      { market: 'JP', currency: 'JPY', pricingMode: 'fx_auto' },
-      { market: 'US', currency: 'USD', pricingMode: 'fx_auto' },
-      { market: 'CN', currency: 'CNY', pricingMode: 'fx_auto' },
-    ],
+    markets: priceMarketOrder.flatMap((market) => {
+      const entry = marketPriceForms[market]
+      if (!entry || entry.pricingMode === 'unavailable') return []
+      if (entry.pricingMode === 'fx_auto') return [{ market, currency: entry.currency, pricingMode: 'fx_auto' }]
+      return [{
+        market,
+        currency: entry.currency,
+        pricingMode: 'manual_fixed',
+        wholesalePrice: parsePositiveMoney(entry.wholesalePrice, entry.currency),
+        retailPrice: parseOptionalPositiveMoney(entry.retailPrice, entry.currency),
+        moq: Number(entry.moq || 1),
+        minOrderAmount: parseOptionalNonnegativeMoney(entry.minOrderAmount, entry.currency) ?? 0,
+        isActive: entry.isActive,
+      }]
+    }),
   })
 
   const ensureProductCodeAvailable = async () => {
@@ -559,6 +633,7 @@ export function AdminCatalogEntryPage() {
     setCategoryForm(initialCategoryForm)
     setProductForm(initialProductForm)
     setPriceForm(initialPriceForm)
+    setMarketPriceForms(createInitialMarketPriceForms())
     setImages([])
     setUploadedImages([])
     setCreatedCategory(null)
@@ -733,6 +808,40 @@ export function AdminCatalogEntryPage() {
             </label>
             <label className="admin-check"><input checked={priceForm.isActive} onChange={(event) => setPriceField('isActive', event.target.checked)} type="checkbox" /> {t.price.active}</label>
           </div>
+          <div className="catalog-entry-market-prices">
+            {priceMarketOrder.map((market) => {
+              const entry = marketPriceForms[market]
+              const display = getMarketDisplay(market)
+              const step = getCurrencyInputStep(entry.currency)
+              const modeOptions = autoPriceMarkets.has(market)
+                ? ['fx_auto', 'manual_fixed']
+                : ['unavailable', 'manual_fixed']
+              return <article className="catalog-entry-market-card" key={market}>
+                <header>
+                  <span><img alt={display.label} className="admin-market-flag" src={display.flagSrc} /> {formatMarketLabel(market)} / {entry.currency}</span>
+                  <select aria-label={`${formatMarketLabel(market)} ${t.price.mode}`} value={entry.pricingMode} onChange={(event) => setMarketPriceField(market, 'pricingMode', event.target.value)}>
+                    {modeOptions.map((modeValue) => <option key={modeValue} value={modeValue}>{t.price.modes[modeValue]}</option>)}
+                  </select>
+                </header>
+                {fieldErrors[`${market}Mode`] && <small className="admin-field-error">{fieldErrors[`${market}Mode`]}</small>}
+                {entry.pricingMode === 'fx_auto' ? <p className="admin-muted">{t.price.autoNote}</p> : entry.pricingMode === 'unavailable' ? <p className="admin-muted">{t.price.unavailableNote}</p> : <div className="catalog-entry-market-grid">
+                  <label className="admin-search">{t.price.wholesale}<input inputMode="decimal" step={step} value={entry.wholesalePrice} onChange={(event) => setMarketPriceField(market, 'wholesalePrice', event.target.value)} placeholder={entry.currency === 'JPY' ? '1200' : '8.80'} />
+                    {fieldErrors[`${market}WholesalePrice`] && <small className="admin-field-error">{fieldErrors[`${market}WholesalePrice`]}</small>}
+                  </label>
+                  <label className="admin-search">{t.price.retail}<input inputMode="decimal" step={step} value={entry.retailPrice} onChange={(event) => setMarketPriceField(market, 'retailPrice', event.target.value)} placeholder={entry.currency === 'JPY' ? '1800' : '12.00'} />
+                    {fieldErrors[`${market}RetailPrice`] && <small className="admin-field-error">{fieldErrors[`${market}RetailPrice`]}</small>}
+                  </label>
+                  <label className="admin-search">{t.price.moq}<input min="1" type="number" value={entry.moq} onChange={(event) => setMarketPriceField(market, 'moq', event.target.value)} />
+                    {fieldErrors[`${market}Moq`] && <small className="admin-field-error">{fieldErrors[`${market}Moq`]}</small>}
+                  </label>
+                  <label className="admin-search">{t.price.minOrderAmount}<input inputMode="decimal" step={step} value={entry.minOrderAmount} onChange={(event) => setMarketPriceField(market, 'minOrderAmount', event.target.value)} placeholder="0" />
+                    {fieldErrors[`${market}MinOrderAmount`] && <small className="admin-field-error">{fieldErrors[`${market}MinOrderAmount`]}</small>}
+                  </label>
+                  <label className="admin-check"><input checked={entry.isActive} type="checkbox" onChange={(event) => setMarketPriceField(market, 'isActive', event.target.checked)} /> {t.price.active}</label>
+                </div>}
+              </article>
+            })}
+          </div>
         </section>
       </div>
 
@@ -754,6 +863,13 @@ export function AdminCatalogEntryPage() {
           <dt>{t.confirm.market}</dt><dd><img alt={getMarketDisplay(priceForm.market).label} className="admin-market-flag" src={getMarketDisplay(priceForm.market).flagSrc} title={priceForm.market} /></dd>
           <dt>{t.confirm.currency}</dt><dd>{priceForm.currency}</dd>
           <dt>{t.confirm.price}</dt><dd>{parsedWholesalePrice == null ? '-' : formatDisplayAmount(parsedWholesalePrice, priceForm.currency)}</dd>
+          <dt>{t.confirm.markets}</dt><dd>{priceMarketOrder.map((market) => {
+            const entry = marketPriceForms[market]
+            const value = entry.pricingMode === 'manual_fixed' && entry.wholesalePrice
+              ? formatDisplayAmount(parsePositiveMoney(entry.wholesalePrice, entry.currency), entry.currency)
+              : t.price.modes[entry.pricingMode]
+            return <span className="catalog-entry-summary-market" key={market}><img alt={getMarketDisplay(market).label} className="admin-market-flag" src={getMarketDisplay(market).flagSrc} /> {value}</span>
+          })}</dd>
         </dl>
         <div className="catalog-entry-status-list" aria-label={t.saveStatus.title}>
           {['category', 'product', 'images', 'price'].map((resource) => <p className={`catalog-entry-status ${saveStatus[resource]}`} key={resource}>

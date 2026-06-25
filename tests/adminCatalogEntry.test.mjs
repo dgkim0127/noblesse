@@ -60,6 +60,22 @@ test('unified catalog entry handles validation, conflicts, and protected errors'
   assert.match(page, /supportedMarkets/)
   assert.match(page, /supportedCurrencies/)
   assert.match(page, /isValidMarketCurrencyPair/)
+  assert.match(page, /priceMarketOrder = \['JP', 'US', 'CN', 'GLOBAL'\]/)
+  assert.match(page, /autoPriceMarkets = new Set\(\['JP', 'US', 'CN'\]\)/)
+  assert.match(page, /pricingMode: market === 'GLOBAL' \? 'unavailable' : 'fx_auto'/)
+})
+
+test('unified catalog entry supports per-market manual and automatic price book payloads', () => {
+  const page = readWorkspaceFile('src/pages/admin/AdminCatalogEntryPage.jsx')
+
+  assert.match(page, /setMarketPriceField/)
+  assert.match(page, /shouldSwitchManual/)
+  assert.match(page, /pricingMode: 'manual_fixed'/)
+  assert.match(page, /pricingMode: 'fx_auto'/)
+  assert.match(page, /entry\.pricingMode === 'unavailable'/)
+  assert.match(page, /markets: priceMarketOrder\.flatMap/)
+  assert.match(page, /market === 'GLOBAL'/)
+  assert.match(page, /t\.price\.modes\[entry\.pricingMode\]/)
 })
 
 test('unified catalog entry tracks partial saves and retry state', () => {
@@ -102,10 +118,17 @@ test('unified catalog entry copy exists for every admin locale', () => {
     assert.ok(copy.category.title)
     assert.ok(copy.product.title)
     assert.ok(copy.price.title)
+    assert.ok(copy.price.mode)
+    assert.ok(copy.price.modes.fx_auto)
+    assert.ok(copy.price.modes.manual_fixed)
+    assert.ok(copy.price.modes.unavailable)
+    assert.ok(copy.price.autoNote)
+    assert.ok(copy.price.unavailableNote)
     assert.ok(copy.images.title)
     assert.ok(copy.images.setPrimary)
     assert.ok(copy.confirm.title)
     assert.ok(copy.confirm.images)
+    assert.ok(copy.confirm.markets)
     assert.ok(copy.success.title)
     assert.ok(copy.errors.unauthorized)
     assert.ok(copy.errors.forbidden)
@@ -119,5 +142,6 @@ test('unified catalog entry copy exists for every admin locale', () => {
     assert.ok(copy.validation.productCodeInvalid)
     assert.ok(copy.validation.categoryNameConflict)
     assert.ok(copy.validation.imageRequired)
+    assert.ok(copy.validation.marketModeRequired)
   }
 })
