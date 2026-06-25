@@ -43,7 +43,10 @@ The workflow does not use approval drafts. Admins choose whether each foreign ma
 ## Concurrency And Idempotency
 
 - Evaluation takes a transaction-scoped advisory lock before scanning policies.
-- Run idempotency is keyed by trigger, optional product, provider, source effective time, and payload hash.
+- Rate-snapshot run idempotency is keyed by trigger, provider, source effective time, and payload hash.
+- Base-price-change run idempotency additionally includes the KR / KRW source price version so repeated KR edits against the same rate bundle still evaluate independently.
+- Mode-change run idempotency includes product, market, policy update version, source price version, and rate bundle identity.
+- Manual rechecks are repeatable and do not use a persistent run idempotency key.
 - Event idempotency is keyed by policy, action, rate, source baseline, and reference value.
 - Existing manual price conflicts are recorded as policy errors; automatic evaluation does not overwrite manual rows.
 - Source price observation and source price application are stored separately so reference updates do not look like published price applications.
@@ -95,12 +98,20 @@ The FX page shows:
 
 The UI is localized for KR, EN, JP, and CN.
 
+The guided catalog entry form lets admins choose market-level modes during product registration:
+
+- KR / KRW is always the manual source price.
+- JP / JPY, US / USD, and CN / CNY can be left as `fx_auto` or entered as `manual_fixed`.
+- GLOBAL / USD can be entered as `manual_fixed` or left unavailable. It cannot use `fx_auto`.
+
 ## Integrity
 
 - Money calculations use currency minor units.
 - Evaluation is transaction-managed.
 - Events are append-only.
 - Audit logs record sanitized action metadata.
+- Automatic evaluation validates source and published price ownership before any product price update.
+- Existing `fx_auto` price-book setup retries preserve `published_price_id`, last applied snapshots, status, and pause state while refreshing the KR source link.
 - Existing inquiries and quotes remain immutable snapshots.
 - Evaluator code must not update inquiry or quote tables.
 - Product registration writes KR / KRW as the manual source price and creates JP / JPY, US / USD, and CN / CNY `fx_auto` policies. GLOBAL remains manual only.

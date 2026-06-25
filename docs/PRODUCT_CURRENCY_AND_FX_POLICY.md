@@ -89,7 +89,19 @@ Automatic update rules:
 - Admin API calls cannot override the 5%, 15%, or 72h thresholds.
 - Evaluations require a complete KRW, JPY, USD, and CNY rate bundle from the same provider, effective time, and payload hash.
 - Paused policies and `manual_fixed` policies never mutate published prices.
-- Evaluations are protected by transaction advisory locking, run idempotency keys, and event idempotency keys.
+- Evaluations are protected by transaction advisory locking, source-aware run idempotency keys, and event idempotency keys.
+- Manual rechecks are intentionally repeatable. Base price changes and mode changes include source or policy version information in their run keys.
+- Automatic writes validate that linked source and published prices belong to the same product, target market, and target currency before mutating a price row.
+
+## Product Entry Price Modes
+
+Admin catalog entry supports explicit market-level setup:
+
+- KR / KRW: required manual source price.
+- JP / JPY, US / USD, CN / CNY: `fx_auto` by default, or `manual_fixed` when an admin enters a market price.
+- GLOBAL / USD: `manual_fixed` or unavailable only.
+
+Repeated setup with the same automatic market configuration must preserve existing published automatic prices and applied baselines.
 
 ## Inquiry And Quote Snapshots
 
@@ -101,6 +113,7 @@ Historic inquiries and quotes keep the original market, currency, unit amount, s
 - Automatic FX pricing hardening code and migration draft: Go
 - Admin automatic FX monitoring UI: Go
 - Product registration price-book binding: Go
+- Product registration per-market manual/auto mode selection: Go
 - Staging migration execution: No-Go
 - Live FX provider fetch: No-Go
 - Cloud Run Job deploy/execute: No-Go

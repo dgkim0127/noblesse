@@ -2064,3 +2064,23 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret/IAM mutation: No.
 - Production product price mutation: No.
 - Next gate: `APPROVE_FX_PROVIDER_SELECTION = YES`.
+
+## N39 FX Auto Final Hardening Follow-up
+
+- Scope: Final hardening before FX provider selection.
+- Job contract: Cloud Run Job path now calls the same fixed-threshold service contract as the API and does not pass threshold overrides from env or arguments.
+- Source-aware idempotency: `rate_snapshot`, `base_price_change`, `mode_change`, and repeatable `manual_recheck` semantics documented and covered by tests.
+- Product price ownership: Evaluator validates KR source price and published target price ownership before any automatic price update.
+- Repeated setup safety: Existing `fx_auto` price-book retries preserve published price links, status, pause state, and last applied baselines.
+- Catalog entry UI: KR manual source remains required; JP/US/CN can be automatic or manual; GLOBAL is manual or unavailable only.
+- Rate timestamp validation: FX snapshots reject incomplete bundles, future timestamps beyond skew, and fetched-before-source timestamps before persistence.
+- Migration draft: Trigger type `mode_change` added to unexecuted canonical and packaged schema drafts.
+- Migration execution: No.
+- DB direct access/psql: No.
+- External FX provider fetch: No.
+- Cloud Run Job deploy/execute: No.
+- Cloud Scheduler create: No.
+- Backend/Firebase deploy: No.
+- Secret/IAM mutation: No.
+- Real product price mutation: No.
+- Next gate: `APPROVE_FX_PROVIDER_SELECTION = YES`.
