@@ -1,4 +1,4 @@
-import { useLocalePath } from '../../utils/locale.js'
+import { resolveLocaleCopy, supportedLocales, taiwanLocale, toTaiwanTraditional, useLocalePath } from '../../utils/locale.js'
 
 const copy = {
   kr: {
@@ -2260,11 +2260,13 @@ for (const locale of Object.keys(adminFxAutoCopy)) {
   copy[locale].shell.nav.fx = adminFxAutoCopy[locale].nav
 }
 
-export const adminLocales = Object.keys(copy)
-export const adminCopy = copy
+copy[taiwanLocale] = toTaiwanTraditional(copy.cn)
+
+export const adminLocales = supportedLocales
+export const adminCopy = Object.fromEntries(supportedLocales.map((locale) => [locale, copy[locale]]))
 
 export function getAdminCopy(locale) {
-  return copy[locale] || copy.en
+  return resolveLocaleCopy(copy, locale, 'en')
 }
 
 export function useAdminCopy() {

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatAdminPriceBook } from '../config/currency'
 import { formatMoney } from '../utils/commerce'
-import { getLocalizedProductAlt, getLocalizedProductName, useLocalePath } from '../utils/locale'
+import { getLocalizedProductAlt, getLocalizedProductName, resolveLocaleCopy, useLocalePath } from '../utils/locale'
 
 const cardCopy = {
   kr: {
@@ -44,14 +44,14 @@ export function CatalogCard({ product }) {
   const { addInquiryItem, approvedPrice, getAdminPriceBooks, getPrice, isAdmin, isApproved } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const price = getPrice(product.productId)
-  const copy = cardCopy[locale] ?? cardCopy.kr
-  const adminPriceLabel = { kr: '관리자 가격', en: 'Admin prices', jp: '管理者価格', cn: '管理员价格' }[locale] ?? 'Admin prices'
+  const copy = resolveLocaleCopy(cardCopy, locale)
+  const adminPriceLabel = resolveLocaleCopy({ kr: '관리자 가격', en: 'Admin prices', jp: '管理者価格', cn: '管理员价格' }, locale, 'en')
   const productName = getLocalizedProductName(product, locale)
   const productAlt = getLocalizedProductAlt(product, locale)
   const canUseTradeTerms = isApproved && price
   const adminPriceBooks = isAdmin ? getAdminPriceBooks(product.productId) : []
   const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
-  const favoriteLabel = { kr: '좋아요', en: 'Favorite', jp: 'お気に入り', cn: '收藏' }[locale] ?? 'Favorite'
+  const favoriteLabel = resolveLocaleCopy({ kr: '좋아요', en: 'Favorite', jp: 'お気に入り', cn: '收藏' }, locale, 'en')
   return <article className="catalog-card">
     <div className="catalog-media">
       <Link className={`catalog-image tone-${product.tone}`} to={toLocalePath(`/products/${product.productId}`)} aria-label={productName}>

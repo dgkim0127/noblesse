@@ -14,14 +14,18 @@ export const localeDefaultCurrency = {
   kr: 'KRW',
   jp: 'JPY',
   en: 'USD',
+  'zh-TW': 'CNY',
   cn: 'CNY',
+  'zh-CN': 'CNY',
+  'zh-Hans': 'CNY',
+  chinese: 'CNY',
 }
 
 export const currencyLocale = {
   KRW: 'ko-KR',
   JPY: 'ja-JP',
   USD: 'en-US',
-  CNY: 'zh-CN',
+  CNY: 'zh-TW',
 }
 
 export const currencyMinorUnits = {

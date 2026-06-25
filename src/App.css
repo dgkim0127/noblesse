@@ -1375,8 +1375,8 @@ h6 {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 15'%3E%3Crect width='22' height='15' fill='%23fff'/%3E%3Ccircle cx='11' cy='7.5' r='4.3' fill='%23bc002d'/%3E%3C/svg%3E");
 }
 
-.flag-cn {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 15'%3E%3Crect width='22' height='15' fill='%23de2910'/%3E%3Cpath fill='%23ffde00' d='m4.1 2 .45 1.37h1.44l-1.16.84.44 1.38-1.17-.85-1.16.85.44-1.38-1.16-.84h1.44zM7.6 1.25l.18.55h.58l-.47.34.18.56-.47-.34-.47.34.18-.56-.47-.34h.58zM8.9 3.3l.18.55h.58l-.47.34.18.56-.47-.34-.47.34.18-.56-.47-.34h.58zM8.85 5.65l.18.55h.58l-.47.34.18.56-.47-.34-.47.34.18-.56-.47-.34h.58zM7.45 7.5l.18.55h.58l-.47.34.18.56-.47-.34-.47.34.18-.56-.47-.34h.58z'/%3E%3C/svg%3E");
+.flag-zh-TW {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 15'%3E%3Crect width='22' height='15' fill='%23fe0000'/%3E%3Crect width='9.5' height='7.5' fill='%23000095'/%3E%3Cg transform='translate(4.75 3.75)' fill='%23fff'%3E%3Cpath d='M0-2.95.34-1.18 1.48-2.58 1.13-.81 2.56-1.9 1.6-.37 3.33-.82 1.73.04 3.5.45 1.7.51 3.06 1.7 1.45.88 2.17 2.54.86 1.3.68 3.1 0 1.43-.68 3.1-.86 1.3-2.17 2.54-1.45.88-3.06 1.7-1.7.51-3.5.45-1.73.04-3.33-.82-1.6-.37-2.56-1.9-1.13-.81-1.48-2.58-.34-1.18Z'/%3E%3Ccircle r='1.16' fill='%23000095'/%3E%3Ccircle r='.78' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 .brand > span:last-child {

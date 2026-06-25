@@ -30,6 +30,7 @@ test('locale and buyer currency choose display currency deterministically', () =
   assert.equal(getDisplayCurrency({ locale: 'kr' }), 'KRW')
   assert.equal(getDisplayCurrency({ locale: 'jp' }), 'JPY')
   assert.equal(getDisplayCurrency({ locale: 'en' }), 'USD')
+  assert.equal(getDisplayCurrency({ locale: 'zh-TW' }), 'CNY')
   assert.equal(getDisplayCurrency({ locale: 'cn' }), 'CNY')
   assert.equal(getDisplayCurrency({ locale: 'kr', viewer: { currency: 'CNY', assignedMarket: 'CN' } }), 'CNY')
 })

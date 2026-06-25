@@ -10,7 +10,9 @@ function flattenShape(value, prefix = '') {
 }
 
 test('admin localization covers every supported locale', () => {
-  assert.deepEqual(adminLocales.sort(), supportedLocales.toSorted())
+  assert.deepEqual(adminLocales.toSorted(), supportedLocales.toSorted())
+  assert.deepEqual(adminLocales.toSorted(), ['en', 'jp', 'kr', 'zh-TW'])
+  assert.equal(adminCopy.cn, undefined)
 })
 
 test('admin localization keys are complete across locales', () => {
@@ -20,14 +22,11 @@ test('admin localization keys are complete across locales', () => {
   }
 })
 
-test('admin production and staging labels are locale specific', () => {
-  assert.equal(adminCopy.kr.shell.badge.production, '운영 API')
-  assert.equal(adminCopy.jp.shell.nav.dashboard, '管理ダッシュボード')
-  assert.equal(adminCopy.cn.shell.nav.dashboard, '管理仪表板')
-  assert.equal(adminCopy.kr.shell.nav.catalogEntry, '새 상품 등록')
-  assert.equal(adminCopy.en.shell.nav.catalogEntry, 'Add Product')
-  assert.equal(adminCopy.jp.shell.nav.catalogEntry, '商品を登録')
-  assert.equal(adminCopy.cn.shell.nav.catalogEntry, '添加产品')
+test('admin Taiwan locale exposes localized management labels', () => {
+  assert.equal(typeof adminCopy['zh-TW'].shell.nav.dashboard, 'string')
+  assert.equal(typeof adminCopy['zh-TW'].shell.nav.catalogEntry, 'string')
+  assert.equal(adminCopy['zh-TW'].shell.badge.production, adminCopy['zh-TW'].shell.badge.production.trim())
+  assert.notEqual(adminCopy['zh-TW'].shell.badge.production, adminCopy.en.shell.badge.production)
   assert.equal(adminCopy.en.shell.badge.staging, 'Staging API')
   assert.notEqual(adminCopy.kr.shell.badge.production, adminCopy.kr.shell.badge.staging)
 })

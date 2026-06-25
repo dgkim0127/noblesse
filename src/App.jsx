@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import './App.css'
 import { CommerceProvider } from './commerce/CommerceContext'
 import { AdminRoute } from './components/AdminRoute'
@@ -17,7 +17,7 @@ import { ProductDetailPage } from './pages/ProductDetailPage'
 import { ProductsPage } from './pages/ProductsPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { RequestQuotePage } from './pages/RequestQuotePage'
-import { buildLocalizedPath, supportedLocales } from './utils/locale'
+import { buildLocalizedPath, canonicalizeLocale, isLocalePathSegment, stripLocalePrefix } from './utils/locale'
 
 const lazyNamed = (loader, exportName) => lazy(() => loader().then((module) => ({ default: module[exportName] })))
 
@@ -49,12 +49,18 @@ function withAdminSuspense(element, permission) {
 
 function LegacyInquiryDetailRedirect() {
   const { locale, orderId } = useParams()
-  return <Navigate replace to={buildLocalizedPath(`/my-inquiries/${orderId}`, supportedLocales.includes(locale) ? locale : 'kr', Boolean(locale))} />
+  const canonicalLocale = isLocalePathSegment(locale) ? canonicalizeLocale(locale) : 'kr'
+  return <Navigate replace to={buildLocalizedPath(`/my-inquiries/${orderId}`, canonicalLocale, Boolean(locale))} />
 }
 
 function LocaleShell() {
   const { locale } = useParams()
-  if (!supportedLocales.includes(locale)) return <Navigate replace to="/" />
+  const location = useLocation()
+  if (!isLocalePathSegment(locale)) return <Navigate replace to="/" />
+  const canonicalLocale = canonicalizeLocale(locale)
+  if (locale !== canonicalLocale) {
+    return <Navigate replace to={buildLocalizedPath(`${stripLocalePrefix(location.pathname)}${location.search}${location.hash}`, canonicalLocale, true)} />
+  }
   return <StoreShell />
 }
 

@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { CatalogCard } from '../components/CatalogCard'
 import { useCommerce } from '../commerce/commerceStore'
 import { getCatalogFilterOptionLabel, loadCatalogFilterOptions, subscribeCatalogFilterOptions } from '../services/catalogFilterOptions'
-import { useLocalePath } from '../utils/locale'
+import { resolveLocaleCopy, useLocalePath } from '../utils/locale'
 
 const productPageCopy = {
   kr: {
@@ -279,7 +279,10 @@ const productFolderCopy = {
   },
 }
 
-const formatCategoryLabel = (categoryId, locale) => categoryLabels[locale]?.[categoryId] ?? categoryLabels.en[categoryId] ?? categoryId.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')
+const formatCategoryLabel = (categoryId, locale) => {
+  const labels = resolveLocaleCopy(categoryLabels, locale, 'en')
+  return labels?.[categoryId] ?? categoryLabels.en[categoryId] ?? categoryId.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')
+}
 
 const hiddenCategoryFilters = new Set(['14k-gold'])
 const hiddenMaterialFilters = new Set(['14K Gold'])
@@ -310,11 +313,15 @@ const materialLabels = {
   },
 }
 
-const formatMaterialLabel = (materialName, locale) => materialLabels[locale]?.[materialName] ?? materialLabels.en[materialName] ?? materialName
+const formatMaterialLabel = (materialName, locale) => {
+  const labels = resolveLocaleCopy(materialLabels, locale, 'en')
+  return labels?.[materialName] ?? materialLabels.en[materialName] ?? materialName
+}
 
 const formatFolderLabel = (folderId, locale) => {
   const decoded = decodeURIComponent(folderId)
-  return productFolderCopy[locale]?.folders?.[decoded]
+  const copy = resolveLocaleCopy(productFolderCopy, locale, 'en')
+  return copy?.folders?.[decoded]
     ?? productFolderCopy.en.folders[decoded]
     ?? decoded.split('-').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')
 }
@@ -328,9 +335,11 @@ export function ProductsPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [managedFilterOptions, setManagedFilterOptions] = useState(() => loadCatalogFilterOptions())
   const { locale, toLocalePath } = useLocalePath()
-  const copy = productPageCopy[locale] ?? productPageCopy.kr
-  const filterCopy = productFilterCopy[locale] ?? productFilterCopy.kr
-  const localeCollectionLabels = collectionLabels[locale] ?? collectionLabels.en
+  const copy = resolveLocaleCopy(productPageCopy, locale)
+  const filterCopy = resolveLocaleCopy(productFilterCopy, locale)
+  const localeCollectionLabels = resolveLocaleCopy(collectionLabels, locale, 'en')
+  const localeTagLabels = resolveLocaleCopy(tagLabels, locale, 'en')
+  const localeFilterLabelNames = resolveLocaleCopy(filterLabelNames, locale, 'en')
 
   useEffect(() => subscribeCatalogFilterOptions(setManagedFilterOptions), [])
 
@@ -405,11 +414,11 @@ export function ProductsPage() {
     collection && ['Collection', managedCollectionLabels.get(collection) ?? localeCollectionLabels[collection] ?? collection],
     material && ['Material', formatMaterialLabel(material, locale)],
     color && ['Color', color],
-    tag && ['Tag', tagLabels[locale]?.[tag] ?? tagLabels.en[tag] ?? tag],
+    tag && ['Tag', localeTagLabels?.[tag] ?? tagLabels.en[tag] ?? tag],
     q && ['Search', q],
   ].filter(Boolean)
 
-  const folderCopy = productFolderCopy[locale] ?? productFolderCopy.kr
+  const folderCopy = resolveLocaleCopy(productFolderCopy, locale)
   const buildProductPath = (filters = {}) => {
     const params = new URLSearchParams()
     Object.entries(filters).forEach(([key, value]) => {
@@ -494,7 +503,7 @@ export function ProductsPage() {
 
     {hasFilters && <div className="filter-summary">
       <div className="filter-chips">
-        {filterChips.map(([label, value]) => <span className="filter-chip" key={`${label}-${value}`}><b>{filterLabelNames[locale]?.[label] ?? label}:</b> {value}</span>)}
+        {filterChips.map(([label, value]) => <span className="filter-chip" key={`${label}-${value}`}><b>{localeFilterLabelNames?.[label] ?? label}:</b> {value}</span>)}
       </div>
       <Link className="clear-filters" to={toLocalePath('/products')}><X size={14} />{copy.clearFilters}</Link>
     </div>}

@@ -5,8 +5,7 @@ import { useCommerce } from '../commerce/commerceStore'
 import { formatAdminPriceBook } from '../config/currency'
 import { mockProducts } from '../data/catalog'
 import { formatMoney } from '../utils/commerce'
-import { useLocalePath } from '../utils/locale'
-import { getLocalizedProductAlt, getLocalizedProductName } from '../utils/locale'
+import { getLocalizedProductAlt, getLocalizedProductName, resolveLocaleCopy, useLocalePath } from '../utils/locale'
 
 const homeCopy = {
   kr: {
@@ -507,13 +506,19 @@ const homeShowcasePanels = [
 ]
 
 function getLocalizedValue(values, locale) {
-  return values[locale] ?? values.en ?? values.kr
+  return resolveLocaleCopy(values, locale, 'en') ?? values.en ?? values.kr
 }
 
 function _getCollectionTitle(collection, locale) {
-  if (locale === 'kr') return collection.titleKo
-  if (locale === 'jp') return collection.titleJa
-  if (locale === 'cn') return collectionTitleCn[collection.collectionId] ?? collection.titleEn
+  const contentLocale = resolveLocaleCopy({
+    kr: 'kr',
+    en: 'en',
+    jp: 'jp',
+    cn: 'cn',
+  }, locale, 'en')
+  if (contentLocale === 'kr') return collection.titleKo
+  if (contentLocale === 'jp') return collection.titleJa
+  if (contentLocale === 'cn') return resolveLocaleCopy({ cn: collectionTitleCn[collection.collectionId] ?? collection.titleEn }, locale, 'en')
   return collection.titleEn
 }
 
@@ -896,7 +901,7 @@ function HomeProductCard({ product, index, variant = 'default' }) {
   const cardImageSources = imageSources.length > 0 ? imageSources : [fallbackImage].filter(Boolean)
   const adminPriceBooks = isAdmin ? getAdminPriceBooks(product.productId) : []
   const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
-  const unavailablePriceLabel = { kr: '가격 미등록', en: 'Price unavailable', jp: '価格未登録', cn: '价格未登记' }[locale] ?? 'Price unavailable'
+  const unavailablePriceLabel = resolveLocaleCopy({ kr: '가격 미등록', en: 'Price unavailable', jp: '価格未登録', cn: '价格未登记' }, locale, 'en')
   const displayPrice = adminPriceBooks.length > 0
     ? null
     : isApproved && price
@@ -1123,7 +1128,7 @@ export function HomePage() {
   const [activeHomeSection, setActiveHomeSection] = useState(homeSectionNav[0].id)
   const { isApproved, products } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
-  const copy = homeCopy[locale] ?? homeCopy.kr
+  const copy = resolveLocaleCopy(homeCopy, locale)
   const homeSourceProducts = products.length > 0 ? products : mockProducts
   const homeProducts = homeSourceProducts.filter(isAllowedHomeProduct)
   const newProducts = _fillHomeSectionProducts(homeProducts.filter((product) => product.isNew), homeProducts)

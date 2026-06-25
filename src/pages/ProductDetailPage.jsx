@@ -5,7 +5,7 @@ import { CatalogCard } from '../components/CatalogCard'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatAdminPriceBook } from '../config/currency'
 import { formatMoney } from '../utils/commerce'
-import { getLocalizedProductAlt, getLocalizedProductDescription, getLocalizedProductName, useLocalePath } from '../utils/locale'
+import { getLocalizedProductAlt, getLocalizedProductDescription, getLocalizedProductName, resolveLocaleCopy, useLocalePath } from '../utils/locale'
 
 const normalizeQuantity = (rawQuantity, moq) => {
   const numeric = Number(rawQuantity)
@@ -170,7 +170,7 @@ const detailCopy = {
 
 function DetailImage({ product }) {
   const { locale } = useLocalePath()
-  const copy = detailCopy[locale] ?? detailCopy.kr
+  const copy = resolveLocaleCopy(detailCopy, locale)
   const productAlt = getLocalizedProductAlt(product, locale)
   const productName = getLocalizedProductName(product, locale)
 
@@ -227,8 +227,8 @@ export function ProductDetailPage() {
   const activeSize = product.sizes.includes(selectedSize) ? selectedSize : product.sizes[0] ?? ''
   const productName = getLocalizedProductName(product, locale)
   const description = getLocalizedProductDescription(product, locale) ?? ''
-  const copy = detailCopy[locale] ?? detailCopy.kr
-  const adminPriceLabel = { kr: '관리자 가격', en: 'Admin prices', jp: '管理者価格', cn: '管理员价格' }[locale] ?? 'Admin prices'
+  const copy = resolveLocaleCopy(detailCopy, locale)
+  const adminPriceLabel = resolveLocaleCopy({ kr: '관리자 가격', en: 'Admin prices', jp: '管理者価格', cn: '管理员价格' }, locale, 'en')
   const moqLabel = isApproved && price ? price.moq : primaryAdminPrice ? primaryAdminPrice.moq : copy.moqAfterReview
   const fallbackMoqLabel = !isApproved && !primaryAdminPrice && product.moqDefault ? copy.fallbackMoq(product.moqDefault) : ''
   const accessLink = viewerState === 'pending' ? '/approval-pending' : '/register'

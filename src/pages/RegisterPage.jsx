@@ -9,7 +9,7 @@ import {
   getAgreementSummaryForRegister,
   getInitialAgreements,
 } from '../services/agreementService'
-import { useLocalePath } from '../utils/locale'
+import { resolveLocaleCopy, useLocalePath } from '../utils/locale'
 
 const registerCopy = {
   kr: {
@@ -646,7 +646,7 @@ function _FieldGroup({ title, children }) {
 
 function AgreementDocument({ document, locale }) {
   const useEnglish = locale !== 'kr'
-  const localizedSections = localizedAgreementSections[document.key]?.[locale]
+  const localizedSections = resolveLocaleCopy(localizedAgreementSections[document.key], locale, 'en')
   const renderAgreementBody = (body) => {
     if (Array.isArray(body)) {
       return body.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
@@ -694,9 +694,10 @@ function AgreementDocument({ document, locale }) {
 }
 
 function AgreementRow({ agreement, checked, locale, onChange }) {
-  const metaCopy = agreementMetaCopy[locale] ?? agreementMetaCopy.kr
+  const metaCopy = resolveLocaleCopy(agreementMetaCopy, locale)
   const labelPrefix = agreement.required ? metaCopy.required : metaCopy.optional
-  const agreementLabel = agreementLabelsByLocale[locale]?.[agreement.key] ?? agreementLabelsByLocale.kr[agreement.key] ?? agreement.titleKo
+  const localeAgreementLabels = resolveLocaleCopy(agreementLabelsByLocale, locale)
+  const agreementLabel = localeAgreementLabels?.[agreement.key] ?? agreementLabelsByLocale.kr[agreement.key] ?? agreement.titleKo
 
   return <div className={`agreement-card agreement-row ${agreement.required ? 'required' : 'optional'}`}>
     <div className="agreement-row-main">
@@ -726,7 +727,7 @@ export function RegisterPage() {
   const navigate = useNavigate()
   const { dataMode, registerBuyer, setViewerState } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
-  const t = registerCopy[locale] ?? registerCopy.kr
+  const t = resolveLocaleCopy(registerCopy, locale)
   const [agreements, setAgreements] = useState(getInitialAgreements)
   const [registerStep, setRegisterStep] = useState('agreements')
   const [selectedCountry, setSelectedCountry] = useState('')
@@ -747,17 +748,17 @@ export function RegisterPage() {
   const requiredAccepted = agreements.age_confirmed === true && areRequiredAgreementsAccepted(agreements)
   const requiredAgreementKeys = registerAgreementSummaries.filter((agreement) => agreement.required).map((agreement) => agreement.key)
   const requiredAllAccepted = requiredAgreementKeys.every((key) => agreements[key] === true)
-  const profileFields = profileFieldsByLocale[locale] ?? profileFieldsByLocale.kr
-  const stepCopy = registerStepCopy[locale] ?? registerStepCopy.kr
-  const countryOptions = countryOptionsByLocale[locale] ?? countryOptionsByLocale.kr
-  const emailDomains = emailDomainsByLocale[locale] ?? emailDomainsByLocale.kr
-  const profileHelpers = profileHelperCopy[locale] ?? profileHelperCopy.kr
-  const passwordMismatch = passwordMismatchCopy[locale] ?? passwordMismatchCopy.kr
-  const passwordRuleLabels = passwordRuleLabelsByLocale[locale] ?? passwordRuleLabelsByLocale.kr
-  const passwordToggleLabels = passwordToggleLabelsByLocale[locale] ?? passwordToggleLabelsByLocale.kr
+  const profileFields = resolveLocaleCopy(profileFieldsByLocale, locale)
+  const stepCopy = resolveLocaleCopy(registerStepCopy, locale)
+  const countryOptions = resolveLocaleCopy(countryOptionsByLocale, locale)
+  const emailDomains = resolveLocaleCopy(emailDomainsByLocale, locale)
+  const profileHelpers = resolveLocaleCopy(profileHelperCopy, locale)
+  const passwordMismatch = resolveLocaleCopy(passwordMismatchCopy, locale)
+  const passwordRuleLabels = resolveLocaleCopy(passwordRuleLabelsByLocale, locale)
+  const passwordToggleLabels = resolveLocaleCopy(passwordToggleLabelsByLocale, locale)
   const countryOtherValue = countryOptions[countryOptions.length - 1]
   const customEmailDomainValue = emailDomains[emailDomains.length - 1]
-  const pageTitle = signupTitleByLocale[locale] ?? signupTitleByLocale.kr
+  const pageTitle = resolveLocaleCopy(signupTitleByLocale, locale)
   const filteredCountryOptions = countryOptions.filter((option) => option.toLowerCase().includes(countryQuery.trim().toLowerCase()))
   const duplicateStatusClass = duplicateStatus?.type === 'available' ? 'valid' : duplicateStatus ? 'invalid' : ''
   const passwordConfirmStatus = passwordConfirmValue ? (passwordValue === passwordConfirmValue ? 'valid' : 'invalid') : ''

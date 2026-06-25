@@ -3,7 +3,7 @@ import { ArrowRight, Eye, EyeOff, LogIn } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { getLoginErrorMessage } from '../services/authErrors'
-import { useLocalePath } from '../utils/locale'
+import { resolveLocaleCopy, useLocalePath } from '../utils/locale'
 
 const loginPageCopy = {
   kr: {
@@ -71,7 +71,7 @@ export function LoginPage() {
   const navigate = useNavigate()
   const { dataMode, setViewerState, signIn } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
-  const copy = loginPageCopy[locale] ?? loginPageCopy.kr
+  const copy = resolveLocaleCopy(loginPageCopy, locale)
   const isMockMode = dataMode === 'mock'
   const [loginNotice, setLoginNotice] = useState('')
   const [remember, setRemember] = useState(true)

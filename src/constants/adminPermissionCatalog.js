@@ -1,3 +1,5 @@
+import { resolveLocaleCopy } from '../utils/locale.js'
+
 export const delegableAdminPermissions = [
   'dashboard.read',
   'buyers.read',
@@ -98,5 +100,6 @@ export const adminPermissionLabels = {
 }
 
 export function getAdminPermissionLabel(permissionKey, locale = 'en') {
-  return adminPermissionLabels[locale]?.[permissionKey] || adminPermissionLabels.en[permissionKey] || permissionKey
+  const labels = resolveLocaleCopy(adminPermissionLabels, locale, 'en')
+  return labels?.[permissionKey] || adminPermissionLabels.en[permissionKey] || permissionKey
 }

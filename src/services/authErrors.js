@@ -1,3 +1,5 @@
+import { resolveLocaleCopy } from '../utils/locale.js'
+
 const loginErrorMessages = {
   kr: {
     config: 'Firebase 로그인 설정이 필요합니다.',
@@ -29,7 +31,7 @@ const invalidCredentialCodes = new Set([
 ])
 
 export function getLoginErrorMessage(error, locale = 'kr') {
-  const copy = loginErrorMessages[locale] || loginErrorMessages.kr
+  const copy = resolveLocaleCopy(loginErrorMessages, locale)
   const code = String(error?.code || '')
 
   if (code === 'CONFIGURATION_ERROR') return copy.config

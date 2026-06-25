@@ -4,7 +4,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import noblesseLogo from '../assets/noblesse-logo.png'
 import { useCommerce } from '../commerce/commerceStore'
 import { getLoginErrorMessage } from '../services/authErrors'
-import { supportedLocales, useLocalePath } from '../utils/locale'
+import { resolveLocaleCopy, supportedLocales, useLocalePath } from '../utils/locale'
 
 const searchHistoryKey = 'noblesse-search-history'
 const topMarqueeText = 'SILVER 925 & Surgical Piercing & Brass Piercing · 실버 & 써지컬 & 신주 피어싱 · Allergy-conscious materials · Since 2010'
@@ -14,7 +14,7 @@ const shellCopy = {
     account: '마이페이지',
     adminPreview: '관리자',
     clearHistory: '검색 기록 지우기',
-    countryLabels: { kr: '한국', en: '미국', jp: '일본', cn: '중국' },
+    countryLabels: { kr: '한국', en: '미국', jp: '일본', 'zh-TW': '대만' },
     footer: '국내·해외 B2B 거래처를 위한 프리미엄 피어싱 카탈로그',
     home: '홈',
     inquiryList: '문의 리스트',
@@ -60,7 +60,7 @@ const shellCopy = {
     account: 'My page',
     adminPreview: 'Admin',
     clearHistory: 'Clear history',
-    countryLabels: { kr: 'Korea', en: 'United States', jp: 'Japan', cn: 'China' },
+    countryLabels: { kr: 'Korea', en: 'United States', jp: 'Japan', 'zh-TW': 'Taiwan' },
     footer: 'Premium piercing catalog for domestic and international B2B buyers',
     home: 'Home',
     inquiryList: 'Inquiry list',
@@ -106,7 +106,7 @@ const shellCopy = {
     account: 'マイページ',
     adminPreview: '管理者',
     clearHistory: '検索履歴を削除',
-    countryLabels: { kr: '韓国', en: '米国', jp: '日本', cn: '中国' },
+    countryLabels: { kr: '韓国', en: '米国', jp: '日本', 'zh-TW': '台湾' },
     footer: '国内・海外B2B取引先向けプレミアムピアスカタログ',
     home: 'ホーム',
     inquiryList: 'お問い合わせリスト',
@@ -152,7 +152,7 @@ const shellCopy = {
     account: '我的页面',
     adminPreview: '管理员',
     clearHistory: '清除搜索记录',
-    countryLabels: { kr: '韩国', en: '美国', jp: '日本', cn: '中国' },
+    countryLabels: { kr: '韓國', en: '美國', jp: '日本', 'zh-TW': '台灣' },
     footer: '面向国内外B2B买家的高端穿孔商品目录',
     home: '首页',
     inquiryList: '咨询清单',
@@ -404,7 +404,7 @@ function AnimatedSearchPlaceholder({ text }) {
 function LanguageSwitch({ countryLabels, isCompact = false, languageSwitch, locale, toLanguagePath }) {
   const [isOpen, setIsOpen] = useState(false)
   const activeIndex = supportedLocales.indexOf(locale)
-  const activeCountry = countryLabels[locale]
+  const activeCountry = countryLabels[locale] ?? locale
   const switchClassName = `language-switch compact ${isCompact ? 'is-dropdown' : ''} ${isOpen ? 'is-open' : ''}`.trim()
 
   const closeMenu = () => setIsOpen(false)
@@ -429,11 +429,11 @@ function LanguageSwitch({ countryLabels, isCompact = false, languageSwitch, loca
     </button>
     <span className="language-switch-indicator" aria-hidden="true" />
     {supportedLocales.map((item) => <Link
-      aria-label={countryLabels[item]}
+      aria-label={countryLabels[item] ?? item}
       className={locale === item ? 'active' : ''}
       key={item}
       onClick={closeMenu}
-      title={countryLabels[item]}
+      title={countryLabels[item] ?? item}
       to={toLanguagePath(item)}
     >
       <span className={`flag-icon flag-${item}`} aria-hidden="true" />
@@ -502,11 +502,11 @@ export function StoreShell() {
     viewerState,
   } = useCommerce()
   const { locale, localeMeta, toLanguagePath, toLocalePath } = useLocalePath()
-  const copy = shellCopy[locale] ?? shellCopy.kr
-  const footer = footerInfo[locale] ?? footerInfo.kr
-  const loginCopy = loginModalCopy[locale] ?? loginModalCopy.kr
-  const compactViewerLabels = shellCompactViewerLabels[locale] ?? copy.viewerLabels
-  const sideCopy = sideMemberLabels[locale] ?? sideMemberLabels.kr
+  const copy = resolveLocaleCopy(shellCopy, locale)
+  const footer = resolveLocaleCopy(footerInfo, locale)
+  const loginCopy = resolveLocaleCopy(loginModalCopy, locale)
+  const compactViewerLabels = resolveLocaleCopy(shellCompactViewerLabels, locale) ?? copy.viewerLabels
+  const sideCopy = resolveLocaleCopy(sideMemberLabels, locale)
   const headerBrandName = localeMeta?.brandName ?? '귀족'
   const isCompactSearchOpen = compactSearchPhase === 'open'
   const isCompactSearchClosing = compactSearchPhase === 'closing'

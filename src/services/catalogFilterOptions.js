@@ -1,3 +1,5 @@
+import { getLocaleContentKey, localizeText } from '../utils/locale.js'
+
 const storageKey = 'noblesse.catalogFilterOptions.v1'
 export const catalogFilterOptionsEvent = 'noblesse:catalog-filter-options'
 
@@ -118,8 +120,9 @@ export function subscribeCatalogFilterOptions(callback) {
 
 export function getCatalogFilterOptionLabel(option, locale = 'kr') {
   if (!option) return ''
-  if (locale === 'kr') return option.labelKo || option.labelEn || option.id
-  if (locale === 'jp') return option.labelJa || option.labelEn || option.labelKo || option.id
-  if (locale === 'cn') return option.labelCn || option.labelEn || option.labelKo || option.id
+  const contentLocale = getLocaleContentKey(locale)
+  if (contentLocale === 'kr') return option.labelKo || option.labelEn || option.id
+  if (contentLocale === 'jp') return option.labelJa || option.labelEn || option.labelKo || option.id
+  if (contentLocale === 'cn') return localizeText(option.labelCn || option.labelEn || option.labelKo || option.id, locale)
   return option.labelEn || option.labelKo || option.id
 }
