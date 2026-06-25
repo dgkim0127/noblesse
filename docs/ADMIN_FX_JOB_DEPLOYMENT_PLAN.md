@@ -40,12 +40,22 @@ Rate snapshot and automatic evaluation:
 
 ## Provider State
 
-Manual JSON import is implemented for controlled operation. Official provider integration is disabled until provider selection is approved.
+Manual JSON import is implemented for controlled operation. Official provider integration remains disabled until adapter implementation is separately approved.
 
-Next provider gate:
+Provider selection decision:
+
+- ADR: `docs/adr/ADR-0040-fx-provider-selection.md`
+- Selected provider: `ExchangeRate-API`
+- Provider identifier: `exchangerate-api`
+- Required plan: paid plan with hourly update cadence and quota comfortably above the scheduled job volume
+- Expected scheduled volume: about 66 requests per month from the current weekday 09:10, 13:10, and 17:10 Asia/Seoul draft
+- Contract shape: request KRW as the provider base, require KRW/JPY/USD/CNY, convert provider target-per-KRW rates into Noblesse canonical `KRW_PER_UNIT`
+- Auth preference: server-side Bearer authorization through Secret Manager after a separate approval gate
+
+Next adapter gate:
 
 ```text
-APPROVE_FX_PROVIDER_SELECTION = YES
+APPROVE_FX_PROVIDER_ADAPTER_IMPLEMENTATION = YES
 ```
 
 ## Deployment Status
@@ -54,5 +64,6 @@ APPROVE_FX_PROVIDER_SELECTION = YES
 - Job execution: No
 - Scheduler creation: No
 - External provider fetch: No
+- Provider credential creation: No
 - DB migration execution: No
 - Secret/IAM mutation: No

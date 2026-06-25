@@ -2084,3 +2084,22 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Secret/IAM mutation: No.
 - Real product price mutation: No.
 - Next gate: `APPROVE_FX_PROVIDER_SELECTION = YES`.
+
+## N40 FX Provider Selection Follow-up
+
+- Scope: Documentation-only production FX provider selection.
+- Decision: Selected `ExchangeRate-API` as the primary provider for the first adapter implementation.
+- ADR: `docs/adr/ADR-0040-fx-provider-selection.md`.
+- Required plan: paid plan with hourly update cadence and quota above the expected scheduled and manual recheck volume.
+- Required currencies: KRW, JPY, USD, CNY.
+- Contract mapping: Provider KRW-base target rates must be converted into Noblesse canonical `KRW_PER_UNIT` snapshots.
+- Provider credential creation: No.
+- Live provider fetch: No.
+- Runtime adapter implementation: No.
+- Secret/IAM mutation: No.
+- Cloud Run Job deploy/execute: No.
+- Scheduler change: No.
+- Migration execution: No.
+- DB direct access/psql: No.
+- Product price mutation: No.
+- Next gate: `APPROVE_FX_PROVIDER_ADAPTER_IMPLEMENTATION = YES`.
