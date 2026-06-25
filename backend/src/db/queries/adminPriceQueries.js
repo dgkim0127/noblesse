@@ -200,13 +200,20 @@ async function upsertFxAutoPolicy(client, productId, marketConfig, sourcePrice) 
       )
       values ($1, $2, $3, 'fx_auto', $4, null, 'pending_rate', $5)
       on conflict (product_id, target_market, target_currency) do update
-        set pricing_mode = 'fx_auto',
-            source_price_id = excluded.source_price_id,
-            published_price_id = null,
-            status = 'pending_rate',
-            paused_at = null,
-            pause_reason = null,
-            latest_source_price_updated_at = excluded.latest_source_price_updated_at,
+        set pricing_mode = case
+              when product_price_policies.pricing_mode = 'fx_auto' then 'fx_auto'
+              else product_price_policies.pricing_mode
+            end,
+            source_price_id = case
+              when product_price_policies.pricing_mode = 'fx_auto' then excluded.source_price_id
+              else product_price_policies.source_price_id
+            end,
+            published_price_id = product_price_policies.published_price_id,
+            status = product_price_policies.status,
+            latest_source_price_updated_at = case
+              when product_price_policies.pricing_mode = 'fx_auto' then excluded.latest_source_price_updated_at
+              else product_price_policies.latest_source_price_updated_at
+            end,
             updated_at = now()
       returning *
     `,
@@ -439,7 +446,7 @@ export function createAdminPriceQueries(pool) {
           }
           const policy = await upsertFxAutoPolicy(client, productId, marketConfig, krRow);
           policies.push(policy);
-          autoPolicyCount += 1;
+          if (policy.pricing_mode === "fx_auto") autoPolicyCount += 1;
         }
 
         const auditResult = await client.query(

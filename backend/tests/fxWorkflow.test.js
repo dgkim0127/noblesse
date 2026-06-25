@@ -109,6 +109,32 @@ test("FX provider rejects unsupported and invalid rates", () => {
   }), /Unsupported/);
 });
 
+test("FX provider rejects incomplete or invalid timestamp bundles before persistence", () => {
+  const basePayload = {
+    provider: "manual",
+    baseCurrency: "KRW",
+    sourceEffectiveAt: freshNow.toISOString(),
+    fetchedAt: freshNow.toISOString(),
+    rates: { JPY: 9, USD: 1400, CNY: 193 }
+  };
+
+  assert.throws(() => normalizeFxProviderPayload({
+    ...basePayload,
+    rates: { JPY: 9, USD: 1400 }
+  }, { now: () => freshNow }), /Missing FX rate CNY/);
+  assert.throws(() => normalizeFxProviderPayload({
+    ...basePayload,
+    sourceEffectiveAt: "2026-06-24T00:01:00.000Z",
+    fetchedAt: "2026-06-24T00:00:00.000Z"
+  }, { now: () => freshNow }), /fetchedAt/);
+  assert.throws(() => normalizeFxProviderPayload({
+    ...basePayload,
+    sourceEffectiveAt: "2026-06-24T00:06:01.000Z",
+    fetchedAt: "2026-06-24T00:06:01.000Z"
+  }, { now: () => freshNow }), /future/);
+  assert.doesNotThrow(() => normalizeFxProviderPayload(basePayload, { now: () => freshNow }));
+});
+
 test("FX automatic pricing uses five percent deadband", () => {
   assert.equal(calculateDivergenceBps(100, 104.99), 499);
   assert.equal(calculateDivergenceBps(100, 105), 500);

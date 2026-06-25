@@ -292,6 +292,7 @@ test("N39 managed FX migration has additive schema and no transaction-control SQ
   assert.match(sqlText, /latest_source_price_updated_at timestamptz/i);
   assert.match(sqlText, /last_applied_source_price_updated_at timestamptz/i);
   assert.match(sqlText, /idempotency_key text/i);
+  assert.match(sqlText, /mode_change/i);
   assert.match(sqlText, /event_key text/i);
   assert.match(sqlText, /idx_fx_auto_price_runs_idempotency_key/i);
   assert.match(sqlText, /idx_fx_auto_price_events_event_key/i);
@@ -383,6 +384,7 @@ test("fresh install schema includes managed FX review workflow objects", () => {
     "latest_source_price_updated_at timestamptz",
     "last_applied_source_price_updated_at timestamptz",
     "idempotency_key text",
+    "mode_change",
     "event_key text",
     "idx_fx_auto_price_runs_idempotency_key",
     "idx_fx_auto_price_events_event_key"

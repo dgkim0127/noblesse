@@ -1,4 +1,4 @@
-import { evaluateFxAutoPolicy } from "../../fx/fxAutoPriceEngine.js";
+import { evaluateFxAutoPolicy, getFxAutoThresholds } from "../../fx/fxAutoPriceEngine.js";
 import { FX_PRICING_MODES } from "../../fx/fxAutoPricePolicy.js";
 
 function assertPool(pool) {
@@ -96,13 +96,23 @@ function mapPolicy(row) {
   };
 }
 
-function buildRunIdempotencyKey({ triggerType, productId, snapshotBundle }) {
-  return [
+function buildRunIdempotencyKey({ triggerType, productId, market, snapshotBundle, sourceVersion, policyVersion }) {
+  if (triggerType === "manual_recheck") return null;
+  const base = [
     triggerType,
     productId || "all",
     snapshotBundle?.provider || "no-provider",
     snapshotBundle?.sourceEffectiveAt || "no-source-effective-at",
     snapshotBundle?.payloadHash || "no-payload"
+  ];
+  if (triggerType === "base_price_change") {
+    base.push(sourceVersion || "no-source-version");
+  }
+  if (triggerType === "mode_change") {
+    base.push(market || "no-market", policyVersion || "no-policy-version", sourceVersion || "no-source-version");
+  }
+  return [
+    ...base
   ].join(":");
 }
 
@@ -154,6 +164,20 @@ async function loadLatestCompleteFxBundle(clientOrPool) {
     [key.provider, key.source_effective_at, key.payload_hash]
   );
   return buildSnapshotBundle(rows.rows);
+}
+
+async function loadKrwSourceVersion(client, productId) {
+  if (!productId) return null;
+  const result = await client.query(
+    `
+      select updated_at
+      from public.product_prices
+      where product_id = $1 and market = 'KR' and currency = 'KRW'
+      limit 1
+    `,
+    [productId]
+  );
+  return result.rows[0]?.updated_at || null;
 }
 
 function mapEvent(row) {
@@ -212,10 +236,20 @@ async function insertAudit(client, action, targetTable, targetId, beforeSnapshot
   return auditResult.rows[0].id;
 }
 
-async function runEvaluationTransaction(client, { triggerType, productId = null, thresholds, snapshotBundle = null, actor }) {
+async function runEvaluationTransaction(client, { triggerType, productId = null, market = null, policyVersion = null, thresholds, snapshotBundle = null, actor }) {
   await client.query("select pg_advisory_xact_lock(hashtext('noblesse.fx_auto_price_evaluation'))");
   const effectiveBundle = snapshotBundle || await loadLatestCompleteFxBundle(client);
-  const runIdempotencyKey = buildRunIdempotencyKey({ triggerType, productId, snapshotBundle: effectiveBundle });
+  const sourceVersion = ["base_price_change", "mode_change"].includes(triggerType)
+    ? await loadKrwSourceVersion(client, productId)
+    : null;
+  const runIdempotencyKey = buildRunIdempotencyKey({
+    triggerType,
+    productId,
+    market,
+    snapshotBundle: effectiveBundle,
+    sourceVersion,
+    policyVersion
+  });
   const runResult = await client.query(
     `
       insert into public.fx_auto_price_runs (
@@ -264,10 +298,16 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
         source.retail_price as source_retail_price,
         source.min_order_amount as source_min_order_amount,
         source.moq as source_moq,
+        source.product_id as source_product_id,
+        source.market as source_market,
+        source.currency as source_currency,
         source.updated_at as source_updated_at,
         published.wholesale_price as current_wholesale_price,
         published.retail_price as current_retail_price,
         published.min_order_amount as current_min_order_amount,
+        published.product_id as published_product_id,
+        published.market as published_market,
+        published.currency as published_currency,
         published.updated_at as published_updated_at,
         applied.rate_scaled as last_applied_rate_scaled
       from public.product_price_policies ppp
@@ -318,30 +358,72 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
       snapshotBundle: effectiveBundle,
       thresholds
     });
+    if (
+      sourcePrice &&
+      (
+        String(row.source_product_id) !== String(row.product_id) ||
+        row.source_market !== "KR" ||
+        row.source_currency !== "KRW"
+      )
+    ) {
+      evaluation.action = "error";
+      evaluation.status = "error";
+      evaluation.reason = "Source price ownership mismatch; automatic price was not applied";
+    }
+    if (
+      publishedPrice &&
+      (
+        String(row.published_product_id) !== String(row.product_id) ||
+        row.published_market !== row.target_market ||
+        row.published_currency !== row.target_currency
+      )
+    ) {
+      evaluation.action = "error";
+      evaluation.status = "error";
+      evaluation.reason = "Published price ownership mismatch; automatic price was not applied";
+    }
 
     let appliedPriceId = row.published_price_id;
     const shouldApply = row.pricing_mode === FX_PRICING_MODES.FX_AUTO && ["initial_created", "auto_updated"].includes(evaluation.action);
     let didApplyPrice = false;
     if (shouldApply && evaluation.reference?.wholesalePrice != null) {
       if (appliedPriceId) {
-        await client.query(
+        const ownedPrice = await client.query(
           `
-            update public.product_prices
-            set
-              wholesale_price = $2,
-              retail_price = $3,
-              min_order_amount = coalesce($4, min_order_amount),
-              updated_at = now()
+            select id
+            from public.product_prices
             where id = $1
+              and product_id = $2
+              and market = $3
+              and currency = $4
+            for update
           `,
-          [
-            appliedPriceId,
-            evaluation.reference.wholesalePrice,
-            evaluation.reference.retailPrice,
-            evaluation.reference.minOrderAmount
-          ]
+          [appliedPriceId, row.product_id, row.target_market, row.target_currency]
         );
-        didApplyPrice = true;
+        if (!ownedPrice.rows[0]) {
+          evaluation.action = "error";
+          evaluation.status = "error";
+          evaluation.reason = "Published price ownership mismatch; automatic price was not applied";
+        } else {
+          await client.query(
+            `
+              update public.product_prices
+              set
+                wholesale_price = $2,
+                retail_price = $3,
+                min_order_amount = coalesce($4, min_order_amount),
+                updated_at = now()
+              where id = $1
+            `,
+            [
+              appliedPriceId,
+              evaluation.reference.wholesalePrice,
+              evaluation.reference.retailPrice,
+              evaluation.reference.minOrderAmount
+            ]
+          );
+          didApplyPrice = true;
+        }
       } else {
         const insertPrice = await client.query(
           `
@@ -837,8 +919,19 @@ export function createAdminFxQueries(pool) {
           { productId, market, currency: input.currency, pricingMode: input.pricingMode },
           actor
         );
+        let evaluation = null;
+        if (input.pricingMode === FX_PRICING_MODES.FX_AUTO) {
+          evaluation = await runEvaluationTransaction(client, {
+            triggerType: "mode_change",
+            productId,
+            market,
+            policyVersion: upsertResult.rows[0].updated_at,
+            thresholds: getFxAutoThresholds(),
+            actor
+          });
+        }
         await client.query("commit");
-        return { policy: mapPolicy(upsertResult.rows[0]), auditLogId };
+        return { policy: mapPolicy(upsertResult.rows[0]), auditLogId, evaluation: evaluation?.run || null };
       } catch (error) {
         try {
           await client.query("rollback");
@@ -908,7 +1001,7 @@ export function createAdminFxQueries(pool) {
         const evaluation = await runEvaluationTransaction(client, {
           triggerType: "manual_recheck",
           productId: updated.rows[0].product_id,
-          thresholds: { updateThresholdBps: 500, circuitBreakerBps: 1500, maxRateAgeHours: 72 },
+          thresholds: getFxAutoThresholds(),
           actor
         });
         await client.query("commit");

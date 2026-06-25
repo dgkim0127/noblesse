@@ -430,3 +430,28 @@ test("PUT /api/admin/products/:productId/price-books creates KR manual source an
   assert.equal(response.body.data.policies.length, 3);
   assert.equal(response.body.data.autoPolicyCount, 3);
 });
+
+test("PUT /api/admin/products/:productId/price-books accepts mixed manual and automatic foreign markets", async () => {
+  const response = await request(createAppWithPrices(), "/api/admin/products/22222222-2222-4222-8222-222222222222/price-books", {
+    method: "PUT",
+    headers: {
+      authorization: "Bearer admin-token",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      kr: {
+        wholesalePrice: 12000,
+        moq: 20
+      },
+      markets: [
+        { market: "JP", currency: "JPY", pricingMode: "manual_fixed", wholesalePrice: 1250, moq: 20 },
+        { market: "US", currency: "USD", pricingMode: "fx_auto" },
+        { market: "CN", currency: "CNY", pricingMode: "fx_auto" },
+        { market: "GLOBAL", currency: "USD", pricingMode: "manual_fixed", wholesalePrice: "8.80", moq: 20 }
+      ]
+    })
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.data.autoPolicyCount, 2);
+});

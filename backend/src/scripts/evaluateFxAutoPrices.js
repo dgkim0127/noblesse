@@ -1,7 +1,6 @@
 import { getEnv } from "../config/env.js";
 import { createPool } from "../db/pool.js";
 import { createAdminFxQueries } from "../db/queries/adminFxQueries.js";
-import { getFxAutoThresholds } from "../fx/fxAutoPriceEngine.js";
 import { createAdminFxService } from "../services/adminFxService.js";
 
 export function assertFxAutoPriceJobAllowed(env = process.env) {
@@ -16,12 +15,7 @@ export async function runFxAutoPriceEvaluation({ env = process.env, pool } = {})
   const service = createAdminFxService({
     queries: createAdminFxQueries(effectivePool)
   });
-  const thresholds = getFxAutoThresholds({
-    updateThresholdBps: env.FX_AUTO_UPDATE_THRESHOLD_BPS,
-    circuitBreakerBps: env.FX_AUTO_CIRCUIT_BREAKER_BPS,
-    maxRateAgeHours: env.FX_MAX_RATE_AGE_HOURS
-  });
-  const result = await service.evaluateAll(thresholds, {
+  const result = await service.evaluateAll({}, {
     userId: null,
     role: "system",
     requestId: "fx-auto-price-job",

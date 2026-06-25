@@ -193,7 +193,7 @@ create table if not exists public.product_price_policies (
 
 create table if not exists public.fx_auto_price_runs (
   id uuid primary key default gen_random_uuid(),
-  trigger_type text not null check (trigger_type in ('rate_snapshot', 'base_price_change', 'manual_recheck')),
+  trigger_type text not null check (trigger_type in ('rate_snapshot', 'base_price_change', 'manual_recheck', 'mode_change')),
   provider text,
   source_effective_at timestamptz,
   payload_hash text,
