@@ -153,3 +153,29 @@ After this gate, the next step may activate the production FX fetch/evaluate wor
 - Secret payload access: No.
 - Scheduler change in preparation phase: No.
 - DB write in preparation phase: No.
+
+## N48 TWD No-write Canary
+
+- Code commit: `f442a0392fc0487165d714d3a38d91d286ba6005`.
+- Image digest: `sha256:b9685b25793613e40241ce5376dda31238ef911ccaa80d855ad3648af97edf63`.
+- Build ID: `22d4ceae-c750-4f4f-9078-433f49262675`.
+- Execution ID: `noblesse-fx-provider-check-prod-g2wpv`.
+- Exit status: succeeded.
+- Provider: `exchange_rate_api`.
+- Base: `KRW`.
+- Required currencies: `KRW`, `JPY`, `USD`, `TWD`.
+- Present currencies: `KRW`, `JPY`, `USD`, `TWD`.
+- Provider request count: 1.
+- Timestamp validation: passed.
+- Completeness validation: passed.
+- Supported currency validation: passed.
+- Rate direction validation: passed.
+- DB client initialized: No.
+- DB query: No.
+- Snapshot write: No.
+- Idempotency write: No.
+- Product mutation: No.
+- Price mutation: No.
+- Scheduler change: No.
+- Secret payload access: No.
+- Activation after canary: stopped at production migration validation.

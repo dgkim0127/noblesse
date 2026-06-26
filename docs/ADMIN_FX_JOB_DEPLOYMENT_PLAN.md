@@ -103,3 +103,30 @@ The activation gate changes the active fourth market from `CN` / `CNY` to `TW` /
 - Production Scheduler creation remains blocked until migration and one manual production FX execution pass.
 
 Activation evidence is tracked in `docs/FX_TW_MARKET_ACTIVATION_REPORT.md`.
+
+## N48 Taiwan Market Activation Result
+
+- Code commit: `f442a0392fc0487165d714d3a38d91d286ba6005`.
+- TWD no-write canary: passed.
+- No-write canary execution: `noblesse-fx-provider-check-prod-g2wpv`.
+- Production migration execution: `noblesse-production-tw-market-migration-vbl5k`.
+- Production migration result: failed before commit.
+- Production migration Job cleanup: deleted after failed execution to prevent accidental rerun.
+- Safe failure category: production schema prerequisite missing.
+- Production FX Job deploy: No.
+- Production FX Job execution: No.
+- Scheduler creation: No.
+- Secret payload access: No.
+- Direct DB connection or manual SQL: No.
+
+Current decision:
+
+```text
+STOPPED_TW_MIGRATION_VALIDATION_FAILED
+```
+
+Next gate:
+
+```text
+APPROVE_PRODUCTION_FX_SCHEMA_PREREQUISITE_RECOVERY = YES
+```

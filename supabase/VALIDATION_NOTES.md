@@ -2136,4 +2136,15 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Local backend tests: 322 passed.
 - Local frontend tests: 104 passed.
 - Lint/build: passed.
-- Cloud activation status: pending final execution evidence.
+- Code commit: `f442a0392fc0487165d714d3a38d91d286ba6005`.
+- TWD no-write canary: passed.
+- TWD no-write canary execution: `noblesse-fx-provider-check-prod-g2wpv`.
+- Production migration Job: `noblesse-production-tw-market-migration`.
+- Production migration execution: `noblesse-production-tw-market-migration-vbl5k`.
+- Production migration result: failed before commit.
+- Production migration Job cleanup: deleted after failed execution to prevent accidental rerun.
+- Safe failure category: production schema prerequisite missing.
+- Production FX Job deploy/execute: No.
+- Cloud Scheduler create: No.
+- Cloud activation status: `STOPPED_TW_MIGRATION_VALIDATION_FAILED`.
+- Next gate: `APPROVE_PRODUCTION_FX_SCHEMA_PREREQUISITE_RECOVERY = YES`.
