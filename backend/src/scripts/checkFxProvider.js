@@ -5,7 +5,7 @@ import {
   fetchOfficialFxRates
 } from "../fx/officialFxProvider.js";
 
-const requiredCurrencies = ["KRW", "JPY", "USD", "CNY"];
+const requiredCurrencies = ["KRW", "JPY", "USD", "TWD"];
 
 export async function runFxProviderCheck({ env = process.env, fetchImpl = globalThis.fetch, now } = {}) {
   let externalRequestCount = 0;

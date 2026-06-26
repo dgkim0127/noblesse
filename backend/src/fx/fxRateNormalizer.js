@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { CURRENCIES } from "../config/pricing.js";
 import { toRateScaled } from "./fxMath.js";
 
-const supportedRateCurrencies = ["KRW", "JPY", "USD", "CNY"];
+const supportedRateCurrencies = ["KRW", "JPY", "USD", "TWD"];
 
 const maxClockSkewMs = 5 * 60 * 1000;
 

@@ -59,8 +59,8 @@ function deriveMarket({ country, preferredLanguage }) {
   if (haystack.includes("japan") || haystack.includes("jp") || haystack.includes("日本")) {
     return { assignedMarket: "JP", currency: "JPY" };
   }
-  if (haystack.includes("china") || haystack.includes("cn") || haystack.includes("zh") || haystack.includes("chinese")) {
-    return { assignedMarket: "CN", currency: "CNY" };
+  if (haystack.includes("taiwan") || haystack.includes("tw") || haystack.includes("china") || haystack.includes("cn") || haystack.includes("zh") || haystack.includes("chinese")) {
+    return { assignedMarket: "TW", currency: "TWD" };
   }
   if (haystack.includes("us") || haystack.includes("united states") || haystack.includes("america")) {
     return { assignedMarket: "US", currency: "USD" };

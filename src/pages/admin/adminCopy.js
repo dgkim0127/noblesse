@@ -2060,7 +2060,7 @@ const adminFxAutoCopy = {
   kr: {
     nav: '자동 환율 가격',
     title: '자동 환율 가격',
-    description: 'KRW 기준 가격에서 JP/US/CN 공개 가격을 자동 계산하고 운영 상태를 확인합니다.',
+    description: 'KRW 기준 가격에서 JP/US/TW 공개 가격을 자동 계산하고 운영 상태를 확인합니다.',
     note: '관리자 승인 draft 없이 5% 이상 차이가 나면 자동 반영합니다. 15% 이상 환율 급변 또는 72시간 초과 환율은 차단됩니다.',
     policy: '가격 정책',
     reviewTitle: '자동 가격 정책',
@@ -2109,7 +2109,7 @@ const adminFxAutoCopy = {
   en: {
     nav: 'Auto FX Pricing',
     title: 'Auto FX Pricing',
-    description: 'Monitor automatic JP/US/CN prices calculated from the KRW source price.',
+    description: 'Monitor automatic JP/US/TW prices calculated from the KRW source price.',
     note: 'No approval drafts are used. Prices update automatically at 5% or more divergence, while 15% rate spikes and rates older than 72 hours are blocked.',
     policy: 'Policy',
     reviewTitle: 'Automatic pricing policy',
@@ -2158,7 +2158,7 @@ const adminFxAutoCopy = {
   jp: {
     nav: '自動為替価格',
     title: '自動為替価格',
-    description: 'KRW 基準価格から JP/US/CN の公開価格を自動計算し、運用状態を確認します。',
+    description: 'KRW 基準価格から JP/US/TW の公開価格を自動計算し、運用状態を確認します。',
     note: '承認用ドラフトは使いません。差分が5%以上なら自動反映し、15%以上の為替急変または72時間超過の為替はブロックします。',
     policy: '価格ポリシー',
     reviewTitle: '自動価格ポリシー',
@@ -2207,7 +2207,7 @@ const adminFxAutoCopy = {
   cn: {
     nav: '自动汇率价格',
     title: '自动汇率价格',
-    description: '基于 KRW 价格自动计算 JP/US/CN 公开价格，并查看运行状态。',
+    description: '基于 KRW 价格自动计算 JP/US/TW 公开价格，并查看运行状态。',
     note: '不再使用审批草稿。差异达到 5% 自动更新，汇率波动达到 15% 或汇率超过 72 小时会被阻止。',
     policy: '价格策略',
     reviewTitle: '自动价格策略',

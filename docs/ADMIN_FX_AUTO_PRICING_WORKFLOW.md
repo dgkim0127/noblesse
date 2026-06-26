@@ -12,12 +12,12 @@ The workflow does not use approval drafts. Admins choose whether each foreign ma
 
 - Admin-entered price.
 - FX changes never overwrite the published amount.
-- Allowed for JP / JPY, US / USD, CN / CNY, and GLOBAL / USD.
+- Allowed for JP / JPY, US / USD, TW / TWD, and GLOBAL / USD.
 - Required for KR / KRW and GLOBAL / USD.
 
 `fx_auto`:
 
-- Allowed only for JP / JPY, US / USD, and CN / CNY.
+- Allowed only for JP / JPY, US / USD, and TW / TWD.
 - Uses the KR / KRW source price.
 - Stores a real published foreign price only when a fresh rate bundle exists and safety gates pass.
 
@@ -29,7 +29,7 @@ The workflow does not use approval drafts. Admins choose whether each foreign ma
 - 72h stale protection: `source_effective_at` older than 72 hours blocks automatic price changes.
 - KR source price change: bypasses the 5% deadband but still respects stale-rate and circuit-breaker guards.
 - Thresholds are fixed server-side. Admin API requests cannot override 500 bps, 1500 bps, or 72h policy values.
-- Evaluation uses only a complete same-provider, same-`source_effective_at`, same-`payload_hash` bundle containing KRW, JPY, USD, and CNY.
+- Evaluation uses only a complete same-provider, same-`source_effective_at`, same-`payload_hash` bundle containing KRW, JPY, USD, and TWD.
 - `manual_fixed` policies update reference state for operator awareness but never mutate the published price.
 - Paused automatic policies expose current reference state but never apply price changes until resumed.
 
@@ -101,7 +101,7 @@ The UI is localized for KR, EN, JP, and CN.
 The guided catalog entry form lets admins choose market-level modes during product registration:
 
 - KR / KRW is always the manual source price.
-- JP / JPY, US / USD, and CN / CNY can be left as `fx_auto` or entered as `manual_fixed`.
+- JP / JPY, US / USD, and TW / TWD can be left as `fx_auto` or entered as `manual_fixed`.
 - GLOBAL / USD can be entered as `manual_fixed` or left unavailable. It cannot use `fx_auto`.
 
 ## Integrity
@@ -114,8 +114,9 @@ The guided catalog entry form lets admins choose market-level modes during produ
 - Existing `fx_auto` price-book setup retries preserve `published_price_id`, last applied snapshots, status, and pause state while refreshing the KR source link.
 - Existing inquiries and quotes remain immutable snapshots.
 - Evaluator code must not update inquiry or quote tables.
-- Product registration writes KR / KRW as the manual source price and creates JP / JPY, US / USD, and CN / CNY `fx_auto` policies. GLOBAL remains manual only.
-- Existing product prices are backfilled as `manual_fixed`; missing JP / JPY, US / USD, and CN / CNY policies are backfilled as pending `fx_auto` where a KR / KRW source exists.
+- Product registration writes KR / KRW as the manual source price and creates JP / JPY, US / USD, and TW / TWD `fx_auto` policies. GLOBAL remains manual only.
+- Existing product prices are backfilled as `manual_fixed`; missing JP / JPY, US / USD, and TW / TWD policies are backfilled as pending `fx_auto` where a KR / KRW source exists.
+- Legacy CN / CNY manual policies are not copied into TWD amounts. They create TW / TWD manual policies with no published price and `needs_input` status.
 
 ## No-Go Until Separate Approval
 

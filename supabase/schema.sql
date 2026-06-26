@@ -38,8 +38,8 @@ create table if not exists public.buyers (
   messenger_id text,
   sales_channel text,
   business_number text,
-  assigned_market text not null check (assigned_market in ('KR', 'JP', 'US', 'CN', 'GLOBAL')),
-  currency text not null check (currency in ('KRW', 'JPY', 'USD', 'CNY')),
+  assigned_market text not null check (assigned_market in ('KR', 'JP', 'US', 'TW', 'GLOBAL')),
+  currency text not null check (currency in ('KRW', 'JPY', 'USD', 'TWD')),
   discount_rate numeric(5,2) default 0,
   min_order_amount numeric(14,2) default 0,
   approved_at timestamptz,
@@ -126,8 +126,8 @@ create table if not exists public.products (
 create table if not exists public.product_prices (
   id uuid primary key default gen_random_uuid(),
   product_id uuid references public.products(id) on delete cascade,
-  market text not null check (market in ('KR', 'JP', 'US', 'CN', 'GLOBAL')),
-  currency text not null check (currency in ('KRW', 'JPY', 'USD', 'CNY')),
+  market text not null check (market in ('KR', 'JP', 'US', 'TW', 'GLOBAL')),
+  currency text not null check (currency in ('KRW', 'JPY', 'USD', 'TWD')),
   wholesale_price numeric(14,2) not null check (wholesale_price >= 0),
   retail_price numeric(14,2) check (retail_price is null or retail_price >= 0),
   moq integer not null default 1 check (moq > 0),
@@ -142,7 +142,7 @@ create table if not exists public.fx_rate_snapshots (
   id uuid primary key default gen_random_uuid(),
   provider text not null,
   base_currency text not null default 'KRW' check (base_currency = 'KRW'),
-  quote_currency text not null check (quote_currency in ('KRW', 'JPY', 'USD', 'CNY')),
+  quote_currency text not null check (quote_currency in ('KRW', 'JPY', 'USD', 'TWD')),
   krw_per_unit numeric(20,8) not null check (krw_per_unit > 0),
   rate_scaled bigint not null check (rate_scaled > 0),
   source_effective_at timestamptz not null,
@@ -155,12 +155,12 @@ create table if not exists public.fx_rate_snapshots (
 create table if not exists public.product_price_policies (
   id uuid primary key default gen_random_uuid(),
   product_id uuid not null references public.products(id) on delete cascade,
-  target_market text not null check (target_market in ('KR', 'JP', 'US', 'CN', 'GLOBAL')),
-  target_currency text not null check (target_currency in ('KRW', 'JPY', 'USD', 'CNY')),
+  target_market text not null check (target_market in ('KR', 'JP', 'US', 'TW', 'GLOBAL')),
+  target_currency text not null check (target_currency in ('KRW', 'JPY', 'USD', 'TWD')),
   pricing_mode text not null check (pricing_mode in ('manual_fixed', 'fx_auto')),
   source_price_id uuid references public.product_prices(id) on delete set null,
   published_price_id uuid references public.product_prices(id) on delete set null,
-  status text not null default 'pending_rate' check (status in ('pending_rate', 'active', 'held_deadband', 'updated', 'created', 'blocked_stale', 'blocked_spike', 'paused', 'error')),
+  status text not null default 'pending_rate' check (status in ('pending_rate', 'active', 'held_deadband', 'updated', 'created', 'needs_input', 'blocked_stale', 'blocked_spike', 'paused', 'error')),
   latest_reference_wholesale_price numeric(14,2),
   latest_reference_retail_price numeric(14,2),
   latest_reference_min_order_amount numeric(14,2),
@@ -179,12 +179,12 @@ create table if not exists public.product_price_policies (
     (target_market = 'KR' and target_currency = 'KRW') or
     (target_market = 'JP' and target_currency = 'JPY') or
     (target_market = 'US' and target_currency = 'USD') or
-    (target_market = 'CN' and target_currency = 'CNY') or
+    (target_market = 'TW' and target_currency = 'TWD') or
     (target_market = 'GLOBAL' and target_currency = 'USD')
   ),
   constraint product_price_policies_auto_market_check check (
     pricing_mode = 'manual_fixed'
-    or (pricing_mode = 'fx_auto' and target_market in ('JP', 'US', 'CN') and source_price_id is not null)
+    or (pricing_mode = 'fx_auto' and target_market in ('JP', 'US', 'TW') and source_price_id is not null)
   ),
   constraint product_price_policies_manual_only_market_check check (
     target_market not in ('KR', 'GLOBAL') or pricing_mode = 'manual_fixed'
@@ -220,8 +220,8 @@ create table if not exists public.fx_auto_price_events (
   run_id uuid references public.fx_auto_price_runs(id) on delete set null,
   policy_id uuid references public.product_price_policies(id) on delete set null,
   product_id uuid not null references public.products(id) on delete cascade,
-  target_market text not null check (target_market in ('KR', 'JP', 'US', 'CN', 'GLOBAL')),
-  target_currency text not null check (target_currency in ('KRW', 'JPY', 'USD', 'CNY')),
+  target_market text not null check (target_market in ('KR', 'JP', 'US', 'TW', 'GLOBAL')),
+  target_currency text not null check (target_currency in ('KRW', 'JPY', 'USD', 'TWD')),
   pricing_mode text not null check (pricing_mode in ('manual_fixed', 'fx_auto')),
   action text not null check (action in ('reference_updated', 'initial_created', 'auto_updated', 'held_deadband', 'manual_fixed', 'blocked_stale', 'blocked_spike', 'paused', 'error')),
   previous_wholesale_price numeric(14,2),
@@ -261,8 +261,8 @@ create table if not exists public.inquiries (
   id uuid primary key default gen_random_uuid(),
   inquiry_number text unique not null,
   buyer_id uuid references public.buyers(id),
-  market text not null check (market in ('KR', 'JP', 'US', 'CN', 'GLOBAL')),
-  currency text not null check (currency in ('KRW', 'JPY', 'USD', 'CNY')),
+  market text not null check (market in ('KR', 'JP', 'US', 'TW', 'GLOBAL')),
+  currency text not null check (currency in ('KRW', 'JPY', 'USD', 'TWD')),
   status text not null check (status in ('requested', 'checking', 'quoted', 'confirmed', 'cancelled')),
   total_items integer default 0 check (total_items >= 0),
   total_quantity integer default 0 check (total_quantity >= 0),
@@ -295,7 +295,7 @@ create table if not exists public.admin_quotes (
   inquiry_id uuid references public.inquiries(id) on delete cascade,
   status text not null check (status in ('draft', 'sent', 'accepted', 'cancelled')),
   confirmed_total numeric(14,2) default 0 check (confirmed_total >= 0),
-  currency text not null check (currency in ('KRW', 'JPY', 'USD', 'CNY')),
+  currency text not null check (currency in ('KRW', 'JPY', 'USD', 'TWD')),
   lead_time text,
   shipping_note text,
   admin_memo text,
@@ -346,7 +346,7 @@ create table if not exists public.catalog_files (
   title_en text,
   title_ja text,
   file_url text not null,
-  market text not null check (market in ('KR', 'JP', 'US', 'CN', 'GLOBAL')),
+  market text not null check (market in ('KR', 'JP', 'US', 'TW', 'GLOBAL')),
   price_included boolean default false,
   visible_to text not null check (visible_to in ('public', 'approved_only')),
   uploaded_at timestamptz default now(),

@@ -315,6 +315,40 @@ test("packaged managed FX migration matches canonical migration exactly", () => 
   assert.equal(packaged, canonical);
 });
 
+test("N48 Taiwan market migration enables TWD without copying legacy CNY prices", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260626_tw_market_fx_activation.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.match(sqlText, /assigned_market in \('KR', 'JP', 'US', 'TW', 'CN', 'GLOBAL'\)/i);
+  assert.match(sqlText, /currency in \('KRW', 'JPY', 'USD', 'TWD', 'CNY'\)/i);
+  assert.match(sqlText, /target_market = 'TW' and target_currency = 'TWD'/i);
+  assert.match(sqlText, /'needs_input'/i);
+  assert.match(sqlText, /select\s+legacy\.product_id,\s+'TW',\s+'TWD',\s+'manual_fixed'/i);
+  assert.match(sqlText, /select\s+kr\.product_id,\s+'TW',\s+'TWD',\s+'fx_auto'/i);
+  assert.match(sqlText, /published_price_id,\s+status,\s+latest_source_price_updated_at/i);
+  assert.match(sqlText, /prevent_legacy_cn_cny_market_writes/i);
+  assert.match(sqlText, /new\.quote_currency = 'CNY'/i);
+  assert.doesNotMatch(sqlText, /select[\s\S]+legacy[\s\S]+published_price_id[\s\S]+where legacy\.target_market = 'CN'/i);
+  assert.doesNotMatch(sqlText, /select[\s\S]+from public\.product_prices[\s\S]+market = 'CN'[\s\S]+wholesale_price/i);
+  assert.doesNotMatch(sqlText, /\bdrop\s+table\b|\btruncate\b|\bdelete\s+from\b/i);
+});
+
+test("packaged Taiwan market migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260626_tw_market_fx_activation.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260626_tw_market_fx_activation.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
 test("migration runner resolves packaged lifecycle migration path explicitly", () => {
   const resolved = resolveSchemaSqlPath({
     SCHEMA_SQL_PATH: "migrations/20260622_admin_rbac_account_lifecycle.sql"
@@ -377,7 +411,7 @@ test("fresh install schema includes managed FX review workflow objects", () => {
     "create table if not exists public.product_price_policies",
     "create table if not exists public.fx_auto_price_runs",
     "create table if not exists public.fx_auto_price_events",
-    "quote_currency text not null check (quote_currency in ('KRW', 'JPY', 'USD', 'CNY'))",
+    "quote_currency text not null check (quote_currency in ('KRW', 'JPY', 'USD', 'TWD'))",
     "pricing_mode text not null check (pricing_mode in ('manual_fixed', 'fx_auto'))",
     "update_threshold_bps integer not null default 500",
     "circuit_breaker_bps integer not null default 1500",
@@ -392,6 +426,7 @@ test("fresh install schema includes managed FX review workflow objects", () => {
     assert.match(schema, new RegExp(fragment.replace(/[()]/g, "\\$&"), "i"));
   }
   assert.doesNotMatch(schema, /fx_price_drafts|fx_review_runs|fx_managed/i);
+  assert.doesNotMatch(schema, /'CN'|'CNY'/i);
 });
 
 test("migration runner does not access Secret Manager or open real DB in tests", () => {

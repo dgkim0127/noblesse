@@ -16,7 +16,7 @@ const freshBundle = {
   rates: {
     USD: { id: "rate-usd", quoteCurrency: "USD", krwPerUnit: 1000, rateScaled: toRateScaled(1000), sourceEffectiveAt: "2026-06-24T00:00:00.000Z" },
     JPY: { id: "rate-jpy", quoteCurrency: "JPY", krwPerUnit: 10, rateScaled: toRateScaled(10), sourceEffectiveAt: "2026-06-24T00:00:00.000Z" },
-    CNY: { id: "rate-cny", quoteCurrency: "CNY", krwPerUnit: 200, rateScaled: toRateScaled(200), sourceEffectiveAt: "2026-06-24T00:00:00.000Z" }
+    TWD: { id: "rate-TWD", quoteCurrency: "TWD", krwPerUnit: 200, rateScaled: toRateScaled(200), sourceEffectiveAt: "2026-06-24T00:00:00.000Z" }
   }
 };
 
@@ -84,7 +84,7 @@ test("FX provider normalizes KRW per one foreign currency unit", () => {
     baseCurrency: "KRW",
     sourceEffectiveAt: freshNow.toISOString(),
     fetchedAt: freshNow.toISOString(),
-    rates: { JPY: 9.1, USD: 1400.5, CNY: 193.2 }
+    rates: { JPY: 9.1, USD: 1400.5, TWD: 193.2 }
   });
 
   assert.equal(snapshot.rates.KRW.rateScaled, toRateScaled(1));
@@ -99,13 +99,13 @@ test("FX provider rejects unsupported and invalid rates", () => {
     provider: "manual",
     baseCurrency: "KRW",
     sourceEffectiveAt: freshNow.toISOString(),
-    rates: { JPY: 9, USD: 1400, CNY: 0 }
+    rates: { JPY: 9, USD: 1400, TWD: 0 }
   }), /Invalid/);
   assert.throws(() => normalizeFxProviderPayload({
     provider: "manual",
     baseCurrency: "KRW",
     sourceEffectiveAt: freshNow.toISOString(),
-    rates: { JPY: 9, USD: 1400, CNY: 193, EUR: 1 }
+    rates: { JPY: 9, USD: 1400, TWD: 193, EUR: 1 }
   }), /Unsupported/);
 });
 
@@ -115,13 +115,13 @@ test("FX provider rejects incomplete or invalid timestamp bundles before persist
     baseCurrency: "KRW",
     sourceEffectiveAt: freshNow.toISOString(),
     fetchedAt: freshNow.toISOString(),
-    rates: { JPY: 9, USD: 1400, CNY: 193 }
+    rates: { JPY: 9, USD: 1400, TWD: 193 }
   };
 
   assert.throws(() => normalizeFxProviderPayload({
     ...basePayload,
     rates: { JPY: 9, USD: 1400 }
-  }, { now: () => freshNow }), /Missing FX rate CNY/);
+  }, { now: () => freshNow }), /Missing FX rate TWD/);
   assert.throws(() => normalizeFxProviderPayload({
     ...basePayload,
     sourceEffectiveAt: "2026-06-24T00:01:00.000Z",

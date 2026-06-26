@@ -4,7 +4,7 @@ import { AdminMoney, AdminPageHeader, AdminPagination, AdminPreviewNote } from '
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { useAdminCopy } from './adminCopy'
 
-const marketTabs = ['ALL', 'KR', 'JP', 'US', 'CN', 'GLOBAL']
+const marketTabs = ['ALL', 'KR', 'JP', 'US', 'TW', 'GLOBAL']
 const initialPriceForm = {
   productCode: '',
   market: 'KR',

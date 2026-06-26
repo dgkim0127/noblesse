@@ -17,7 +17,7 @@ export const FX_POLICY_STATUSES = [
   "error"
 ];
 
-export const FX_AUTO_TARGET_MARKETS = ["JP", "US", "CN"];
+export const FX_AUTO_TARGET_MARKETS = ["JP", "US", "TW"];
 export const FX_MANUAL_ONLY_MARKETS = ["KR", "GLOBAL"];
 
 export function getMarketCurrency(market) {
@@ -36,6 +36,6 @@ export function getDefaultPricingMode({ market, hasManualAmount }) {
 export function assertPricingModeAllowed({ market, currency, pricingMode }) {
   if (pricingMode === FX_PRICING_MODES.MANUAL_FIXED) return;
   if (pricingMode !== FX_PRICING_MODES.FX_AUTO || !isFxAutoAllowed(market, currency)) {
-    throw new Error("FX_AUTO is only allowed for JP/JPY, US/USD, and CN/CNY");
+    throw new Error("FX_AUTO is only allowed for JP/JPY, US/USD, and TW/TWD");
   }
 }

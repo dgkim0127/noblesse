@@ -13,15 +13,15 @@ test("buyer product price query requires exact market and currency", async () =>
 
   await createBuyerInquiryQueries(pool).listProductPrices({
     role: "buyer",
-    assignedMarket: "CN",
-    currency: "CNY"
+    assignedMarket: "TW",
+    currency: "TWD"
   });
 
   assert.equal(calls.length, 1);
   assert.match(calls[0].sql, /pp\.market = \$1/i);
   assert.match(calls[0].sql, /pp\.currency = \$2/i);
   assert.doesNotMatch(calls[0].sql, /pp\.currency = \$2\s+or\s+pp\.market = \$1/i);
-  assert.deepEqual(calls[0].params, ["CN", "CNY"]);
+  assert.deepEqual(calls[0].params, ["TW", "TWD"]);
 });
 
 test("createInquiry rolls back if a priced product is not the viewer exact price book", async () => {
@@ -35,7 +35,7 @@ test("createInquiry rolls back if a priced product is not the viewer exact price
             product_id: "product-1",
             product_code: "NB-001",
             name_en: "Product",
-            name_ko: "상품",
+            name_ko: "?�품",
             category_id: "category-1",
             material: "Surgical Steel",
             id: "price-1",
@@ -61,8 +61,8 @@ test("createInquiry rolls back if a priced product is not the viewer exact price
   const inquiry = await createBuyerInquiryQueries(pool).createInquiry(
     {
       buyerId: "buyer-1",
-      assignedMarket: "CN",
-      currency: "CNY",
+      assignedMarket: "TW",
+      currency: "TWD",
       discountRate: 0
     },
     {
@@ -77,7 +77,7 @@ test("createInquiry rolls back if a priced product is not the viewer exact price
   const priceQuery = calls.find((call) => /from public\.products p/i.test(call.sql));
   assert.match(priceQuery.sql, /pp\.market = \$2/i);
   assert.match(priceQuery.sql, /pp\.currency = \$3/i);
-  assert.deepEqual(priceQuery.params, ["NB-001", "CN", "CNY"]);
+  assert.deepEqual(priceQuery.params, ["NB-001", "TW", "TWD"]);
 });
 
 test("createInquiry stores discounted cents and subtotal without floating drift", async () => {
@@ -91,7 +91,7 @@ test("createInquiry stores discounted cents and subtotal without floating drift"
             product_id: "product-1",
             product_code: "NB-001",
             name_en: "Product One",
-            name_ko: "상품1",
+            name_ko: "?�품1",
             category_id: "category-1",
             material: "Surgical Steel",
             id: "price-1",
@@ -105,7 +105,7 @@ test("createInquiry stores discounted cents and subtotal without floating drift"
             product_id: "product-2",
             product_code: "NB-002",
             name_en: "Product Two",
-            name_ko: "상품2",
+            name_ko: "?�품2",
             category_id: "category-1",
             material: "Cubic",
             id: "price-2",

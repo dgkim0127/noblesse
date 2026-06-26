@@ -1,12 +1,12 @@
-export const MARKETS = ["KR", "JP", "US", "CN", "GLOBAL"];
+export const MARKETS = ["KR", "JP", "US", "TW", "GLOBAL"];
 
-export const CURRENCIES = ["KRW", "JPY", "USD", "CNY"];
+export const CURRENCIES = ["KRW", "JPY", "USD", "TWD"];
 
 export const CURRENCY_BY_MARKET = {
   KR: "KRW",
   JP: "JPY",
   US: "USD",
-  CN: "CNY",
+  TW: "TWD",
   GLOBAL: "USD"
 };
 
@@ -14,7 +14,7 @@ export const CURRENCY_MINOR_UNITS = {
   KRW: 0,
   JPY: 0,
   USD: 2,
-  CNY: 2
+  TWD: 2
 };
 
 export function validateMarketCurrencyPair(market, currency) {

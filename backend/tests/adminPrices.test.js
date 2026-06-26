@@ -137,12 +137,12 @@ test("GET /api/admin/prices rejects admins denied prices.read", async () => {
 });
 
 test("GET /api/admin/prices allows market and active filters", async () => {
-  const response = await request(createAppWithPrices(), "/api/admin/prices?market=CN&active=false", {
+  const response = await request(createAppWithPrices(), "/api/admin/prices?market=TW&active=false", {
     headers: { authorization: "Bearer admin-token" }
   });
 
   assert.equal(response.status, 200);
-  assert.equal(response.body.data.prices[0].market, "CN");
+  assert.equal(response.body.data.prices[0].market, "TW");
   assert.equal(response.body.data.prices[0].isActive, false);
 });
 
@@ -176,7 +176,7 @@ test("POST /api/admin/prices creates price row", async () => {
   assert.equal(response.body.data.auditLogId, "audit-create-1");
 });
 
-test("POST /api/admin/prices creates CNY price row", async () => {
+test("POST /api/admin/prices creates TWD price row", async () => {
   const response = await request(createAppWithPrices(), "/api/admin/prices", {
     method: "POST",
     headers: {
@@ -185,8 +185,8 @@ test("POST /api/admin/prices creates CNY price row", async () => {
     },
     body: JSON.stringify({
       productCode: "NB-001",
-      market: "CN",
-      currency: "CNY",
+      market: "TW",
+      currency: "TWD",
       wholesalePrice: 58.2,
       retailPrice: 89.9,
       moq: 20
@@ -194,8 +194,8 @@ test("POST /api/admin/prices creates CNY price row", async () => {
   });
 
   assert.equal(response.status, 201);
-  assert.equal(response.body.data.price.market, "CN");
-  assert.equal(response.body.data.price.currency, "CNY");
+  assert.equal(response.body.data.price.market, "TW");
+  assert.equal(response.body.data.price.currency, "TWD");
 });
 
 test("POST /api/admin/prices accepts exact money values including zero", async () => {
@@ -203,7 +203,7 @@ test("POST /api/admin/prices accepts exact money values including zero", async (
     { productCode: "NB-001", market: "KR", currency: "KRW", wholesalePrice: 12000, moq: 20 },
     { productCode: "NB-001", market: "JP", currency: "JPY", wholesalePrice: 1250, moq: 20 },
     { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: 2.01, moq: 20 },
-    { productCode: "NB-001", market: "CN", currency: "CNY", wholesalePrice: "58.20", moq: 20 },
+    { productCode: "NB-001", market: "TW", currency: "TWD", wholesalePrice: "58.20", moq: 20 },
     { productCode: "NB-001", market: "KR", currency: "KRW", wholesalePrice: 0, moq: 20 },
     { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: "0", moq: 20 }
   ]) {
@@ -222,8 +222,8 @@ test("POST /api/admin/prices accepts exact money values including zero", async (
 
 test("POST /api/admin/prices rejects invalid market currency pairs", async () => {
   for (const body of [
-    { productCode: "NB-001", market: "CN", currency: "JPY", wholesalePrice: 1200, moq: 20 },
-    { productCode: "NB-001", market: "JP", currency: "CNY", wholesalePrice: 58.2, moq: 20 },
+    { productCode: "NB-001", market: "TW", currency: "JPY", wholesalePrice: 1200, moq: 20 },
+    { productCode: "NB-001", market: "JP", currency: "TWD", wholesalePrice: 58.2, moq: 20 },
     { productCode: "NB-001", market: "KR", currency: "USD", wholesalePrice: 9.2, moq: 20 },
     { productCode: "NB-001", market: "US", currency: "KRW", wholesalePrice: 12000, moq: 20 }
   ]) {
@@ -246,7 +246,7 @@ test("POST /api/admin/prices rejects currency precision mismatches", async () =>
     { productCode: "NB-001", market: "KR", currency: "KRW", wholesalePrice: 1200.5, moq: 20 },
     { productCode: "NB-001", market: "JP", currency: "JPY", wholesalePrice: 1200.1, moq: 20 },
     { productCode: "NB-001", market: "US", currency: "USD", wholesalePrice: 8.123, moq: 20 },
-    { productCode: "NB-001", market: "CN", currency: "CNY", wholesalePrice: 58.234, moq: 20 }
+    { productCode: "NB-001", market: "TW", currency: "TWD", wholesalePrice: 58.234, moq: 20 }
   ]) {
     const response = await request(createAppWithPrices(), "/api/admin/prices", {
       method: "POST",
@@ -420,7 +420,7 @@ test("PUT /api/admin/products/:productId/price-books creates KR manual source an
       markets: [
         { market: "JP", currency: "JPY", pricingMode: "fx_auto" },
         { market: "US", currency: "USD", pricingMode: "fx_auto" },
-        { market: "CN", currency: "CNY", pricingMode: "fx_auto" }
+        { market: "TW", currency: "TWD", pricingMode: "fx_auto" }
       ]
     })
   });
@@ -446,7 +446,7 @@ test("PUT /api/admin/products/:productId/price-books accepts mixed manual and au
       markets: [
         { market: "JP", currency: "JPY", pricingMode: "manual_fixed", wholesalePrice: 1250, moq: 20 },
         { market: "US", currency: "USD", pricingMode: "fx_auto" },
-        { market: "CN", currency: "CNY", pricingMode: "fx_auto" },
+        { market: "TW", currency: "TWD", pricingMode: "fx_auto" },
         { market: "GLOBAL", currency: "USD", pricingMode: "manual_fixed", wholesalePrice: "8.80", moq: 20 }
       ]
     })

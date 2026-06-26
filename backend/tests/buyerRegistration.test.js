@@ -90,24 +90,24 @@ test("POST /api/buyer/register creates pending buyer profile from token identity
   assert.equal(response.body.meta.requestId, response.headers.get("x-request-id"));
 });
 
-test("POST /api/buyer/register maps China buyer to CN and CNY", async () => {
+test("POST /api/buyer/register maps Taiwan buyer to TW and TWD", async () => {
   const app = createRegisterApp();
   const response = await request(app, "/api/buyer/register", {
     method: "POST",
     headers: { ...authHeaders(), "content-type": "application/json" },
     body: JSON.stringify({
       email: "buyer@example.test",
-      companyName: "Noblesse Buyer CN",
+      companyName: "Noblesse Buyer TW",
       contactName: "Buyer Contact",
-      country: "China",
-      preferredLanguage: "cn",
+      country: "Taiwan",
+      preferredLanguage: "TW",
       phone: "010"
     })
   });
 
   assert.equal(response.status, 201);
-  assert.equal(response.body.data.profile.assignedMarket, "CN");
-  assert.equal(response.body.data.profile.currency, "CNY");
+  assert.equal(response.body.data.profile.assignedMarket, "TW");
+  assert.equal(response.body.data.profile.currency, "TWD");
 });
 
 test("POST /api/buyer/register rejects email that differs from Firebase token", async () => {

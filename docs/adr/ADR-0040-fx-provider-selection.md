@@ -6,9 +6,9 @@ Selected for implementation. Adapter code may be implemented and tested with fix
 
 ## Context
 
-Noblesse automatic FX pricing stores published buyer prices per market and currency. Buyer-facing pages never calculate live exchange rates. The automatic FX workflow needs a server-side provider for a complete KRW, JPY, USD, and CNY rate snapshot. The current internal contract stores canonical `KRW_PER_UNIT` rates with:
+Noblesse automatic FX pricing stores published buyer prices per market and currency. Buyer-facing pages never calculate live exchange rates. The automatic FX workflow needs a server-side provider for a complete KRW, JPY, USD, and TWD rate snapshot. The current internal contract stores canonical `KRW_PER_UNIT` rates with:
 
-- one complete same-provider bundle for `KRW`, `JPY`, `USD`, and `CNY`
+- one complete same-provider bundle for `KRW`, `JPY`, `USD`, and `TWD`
 - explicit `source_effective_at`
 - server-generated `fetched_at`
 - canonical `payload_hash`
@@ -23,7 +23,7 @@ This ADR selects the provider only. It does not implement an adapter and does no
 
 | Requirement | Result |
 | --- | --- |
-| KRW, JPY, USD, CNY coverage | Required |
+| KRW, JPY, USD, TWD coverage | Required |
 | Deterministic base/quote conversion | Required |
 | Official source/publication timestamp | Required |
 | Completeness and numeric validation | Required |
@@ -37,7 +37,7 @@ This ADR selects the provider only. It does not implement an adapter and does no
 
 | Provider | Hard-requirement result | Notes |
 | --- | --- | --- |
-| ExchangeRate-API | PASS | Provides standard pair/latest API, `time_last_update_unix`, `time_next_update_unix`, supported currencies including KRW/JPY/USD/CNY, documented auth including Bearer, paid commercial plans, and quota metadata. |
+| ExchangeRate-API | PASS | Provides standard pair/latest API, `time_last_update_unix`, `time_next_update_unix`, supported currencies including KRW/JPY/USD/TWD, documented auth including Bearer, paid commercial plans, and quota metadata. |
 | Open Exchange Rates | PASS with operational caveat | Strong docs, status page, timestamped latest/historical payloads, and broad currency coverage. API key is commonly passed as `app_id` query parameter, which creates higher log-redaction risk than Bearer auth. |
 | Currencylayer | CONDITIONAL | Official docs expose live quotes, timestamp, source currency, and paid plans. It commonly uses access key URL/query authentication and source-switching is plan-dependent, so it is less attractive for the current secret-handling requirement. |
 | Fixer / Exchangerates API | CONDITIONAL | Official docs expose timestamped EUR/base rates and symbols, but KRW base/source support and higher-refresh operating needs are plan-dependent. URL key handling and provider/package overlap are less clean for the first production adapter. |
@@ -49,8 +49,8 @@ Verified on 2026-06-25 using official provider documentation only. No live FX AP
 
 | Provider | Official evidence URLs | Currency coverage | Timestamp semantics | Commercial/plan evidence | Auth and operations | Result |
 | --- | --- | --- | --- | --- | --- | --- |
-| ExchangeRate-API | `https://www.exchangerate-api.com/docs/standard-requests`, `https://www.exchangerate-api.com/docs/supported-currencies`, `https://www.exchangerate-api.com/docs/authentication`, `https://www.exchangerate-api.com/`, `https://www.exchangerate-api.com/product/uptime`, `https://www.exchangerate-api.com/terms` | Official supported-currency docs list the currency table used by the API; KRW, JPY, USD, and CNY are supported. | Standard request responses document update fields including Unix/UTC update times and next update times. `time_last_update_unix` is treated only as the provider dataset update time. It is not a market observation time, central-bank publication time, or transaction execution time. | The official Plans section documents Pro with 60 minute updates and 30,000 requests per month; prices are checked-date values and must be reconfirmed before purchase. Terms cover service use and restrictions. | Authentication docs support Bearer authorization, which lets the adapter avoid putting the API key in URL query logs. Official uptime documentation describes provider monitoring/status history. | PASS |
-| Open Exchange Rates | `https://docs.openexchangerates.org/reference/latest-json`, `https://docs.openexchangerates.org/reference/historical-json`, `https://openexchangerates.org/currencies.json`, `https://openexchangerates.org/signup`, `https://status.openexchangerates.org/`, `https://openexchangerates.org/license` | Official currency list includes KRW, JPY, USD, and CNY. | Latest/historical API docs expose timestamped snapshots. | Signup/pricing and license pages define paid use. | Status page exists; auth is app id based and must be strongly redacted from URL logs. | PASS with caveat |
+| ExchangeRate-API | `https://www.exchangerate-api.com/docs/standard-requests`, `https://www.exchangerate-api.com/docs/supported-currencies`, `https://www.exchangerate-api.com/docs/authentication`, `https://www.exchangerate-api.com/`, `https://www.exchangerate-api.com/product/uptime`, `https://www.exchangerate-api.com/terms` | Official supported-currency docs list the currency table used by the API; KRW, JPY, USD, and TWD are supported. | Standard request responses document update fields including Unix/UTC update times and next update times. `time_last_update_unix` is treated only as the provider dataset update time. It is not a market observation time, central-bank publication time, or transaction execution time. | The official Plans section documents Pro with 60 minute updates and 30,000 requests per month; prices are checked-date values and must be reconfirmed before purchase. Terms cover service use and restrictions. | Authentication docs support Bearer authorization, which lets the adapter avoid putting the API key in URL query logs. Official uptime documentation describes provider monitoring/status history. | PASS |
+| Open Exchange Rates | `https://docs.openexchangerates.org/reference/latest-json`, `https://docs.openexchangerates.org/reference/historical-json`, `https://openexchangerates.org/currencies.json`, `https://openexchangerates.org/signup`, `https://status.openexchangerates.org/`, `https://openexchangerates.org/license` | Official currency list includes KRW, JPY, USD, and TWD. | Latest/historical API docs expose timestamped snapshots. | Signup/pricing and license pages define paid use. | Status page exists; auth is app id based and must be strongly redacted from URL logs. | PASS with caveat |
 | Currencylayer | `https://currencylayer.com/documentation`, `https://currencylayer.com/pricing`, `https://currencylayer.com/terms` | Official docs describe supported currency list and quote codes. | Live endpoint docs expose `timestamp`, `source`, and `quotes`. | Pricing/terms pages define paid use. | Query-string access key handling and plan-dependent source currency reduce fit. | CONDITIONAL |
 | Fixer / Exchangerates API | `https://exchangeratesapi.io/documentation/`, `https://exchangeratesapi.io/pricing/`, `https://exchangeratesapi.io/terms/` | Official docs expose symbols and base/latest endpoints. | Latest endpoint docs expose timestamped responses. | Pricing/terms pages define plan access. | Base switching, refresh rate, and URL key handling require stricter plan review. | CONDITIONAL |
 | OANDA Exchange Rates API | `https://exchange-rates-api.oanda.com/` | Commercial FX API is offered, but exact no-login currency/schema mapping was not fully verifiable for this gate. | UNKNOWN from public docs available in this review. | UNKNOWN exact price basis from public docs available in this review. | Likely enterprise-grade, but contract mapping evidence is insufficient without account docs. | CONDITIONAL |
@@ -82,9 +82,9 @@ ExchangeRate-API Pro: 60 minute update cadence and 30,000 requests per month, as
 Expected request volume:
 
 ```text
-Current schedule draft: weekdays 09:10, 13:10, and 17:10 Asia/Seoul.
-Expected scheduled requests: about 66 per month.
-Recommended planning allowance: 200-500 requests per month including manual rechecks, retries, and smoke diagnostics.
+Current schedule draft: weekdays 10:10 Asia/Seoul.
+Expected scheduled requests: about 22 per month.
+Recommended planning allowance: 100-300 requests per month including manual rechecks, retries, and smoke diagnostics.
 ```
 
 ## Rejected Alternatives
@@ -112,20 +112,20 @@ Mapping:
 | --- | --- |
 | `provider` | `exchange_rate_api` |
 | `baseCurrency` | Internal normalized value: `KRW` |
-| required quote currencies | `KRW`, `JPY`, `USD`, `CNY` |
+| required quote currencies | `KRW`, `JPY`, `USD`, `TWD` |
 | provider base currency | `base_code` must equal `KRW` |
 | `sourceEffectiveAt` | Convert `time_last_update_unix` to ISO. This is the provider dataset update time only. If needed for audit display, retain `time_last_update_utc` as provider metadata. |
 | `fetchedAt` | Server receive time after successful HTTPS response. Must be greater than or equal to `sourceEffectiveAt`. |
 | freshness | `now - sourceEffectiveAt <= 72h` |
 | future skew | `sourceEffectiveAt` and `fetchedAt` must not exceed server time by more than 5 minutes. |
-| completeness | `result` success, `base_code` KRW, `conversion_rates.KRW`, `.JPY`, `.USD`, `.CNY` all present and finite. |
+| completeness | `result` success, `base_code` KRW, `conversion_rates.KRW`, `.JPY`, `.USD`, `.TWD` all present and finite. |
 | numeric parsing | Reject null, missing, string-nonnumeric, zero, negative, NaN, and infinite values. |
 | KRW rate | `KRW_PER_UNIT(KRW) = 1` |
-| JPY/USD/CNY rate | Provider gives target units per 1 KRW; Noblesse stores KRW per 1 target unit, so `KRW_PER_UNIT(currency) = 1 / conversion_rates[currency]`. |
-| inverse-rate handling | Inversion is required for JPY, USD, and CNY. Reject zero before inversion. |
+| JPY/USD/TWD rate | Provider gives target units per 1 KRW; Noblesse stores KRW per 1 target unit, so `KRW_PER_UNIT(currency) = 1 / conversion_rates[currency]`. |
+| inverse-rate handling | Inversion is required for JPY, USD, and TWD. Reject zero before inversion. |
 | intermediate rounding | Do not round before conversion to scaled rate. Use decimal-safe logic in the adapter before handing values to `toRateScaled`. |
 | final rounding | Existing FX math and currency minor-unit helpers own final money rounding. |
-| payload hash | Canonical hash over provider id, `baseCurrency: KRW`, scaled KRW/JPY/USD/CNY rates, and `sourceEffectiveAt`; never include API keys. |
+| payload hash | Canonical hash over provider id, `baseCurrency: KRW`, scaled KRW/JPY/USD/TWD rates, and `sourceEffectiveAt`; never include API keys. |
 
 Error classification:
 
@@ -201,3 +201,13 @@ The current schedule needs about 66 provider requests per month. The selected Pr
 ```text
 APPROVE_FX_PROVIDER_CREDENTIAL_PROVISIONING = YES
 ```
+
+## N48 Taiwan Market Addendum
+
+The active fourth market changed from `CN` / `CNY` to `TW` / `TWD`.
+
+- Active required quote currencies: `KRW`, `JPY`, `USD`, `TWD`.
+- `CN` / `CNY` remains historical read-only and is not a required provider bundle member.
+- ExchangeRate-API remains the selected provider because the same KRW-base adapter pattern supports TWD coverage.
+- No provider plan upgrade or payment was approved for this addendum.
+- The adapter must ignore non-required extra provider currencies and must not persist raw provider payloads.

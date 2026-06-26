@@ -9,7 +9,7 @@ Supported markets and currencies:
 - KR / KRW
 - JP / JPY
 - US / USD
-- CN / CNY
+- TW / TWD
 - GLOBAL / USD
 
 KR / KRW is the source price for automatic foreign price policies. GLOBAL / USD remains manual only.
@@ -23,7 +23,7 @@ Rules:
 - KR buyer: KR / KRW only
 - JP buyer: JP / JPY only
 - US buyer: US / USD only
-- CN buyer: CN / CNY only
+- TW buyer: TW / TWD only
 - GLOBAL buyer: GLOBAL / USD only
 - Missing exact price: unavailable
 - Cross-market or same-currency fallback: prohibited
@@ -39,7 +39,7 @@ Currency minor units:
 - KRW: 0 decimals
 - JPY: 0 decimals
 - USD: 2 decimals
-- CNY: 2 decimals
+- TWD: 2 decimals
 
 Discounts, subtotals, and totals use minor-unit helpers. Scientific notation and unsafe money strings are rejected.
 
@@ -54,10 +54,10 @@ Discounts, subtotals, and totals use minor-unit helpers. Scientific notation and
 
 `fx_auto`:
 
-- Used for JP / JPY, US / USD, and CN / CNY when the foreign price is left empty or explicitly switched to automatic mode.
+- Used for JP / JPY, US / USD, and TW / TWD when the foreign price is left empty or explicitly switched to automatic mode.
 - Uses the KR / KRW source price and the latest fresh KRW-per-unit rate snapshot.
 - Creates or updates the stored foreign price without an approval draft when policy gates pass.
-- Product registration creates KR / KRW as the fixed source price, then binds JP / JPY, US / USD, and CN / CNY to automatic FX policies.
+- Product registration creates KR / KRW as the fixed source price, then binds JP / JPY, US / USD, and TW / TWD to automatic FX policies.
 
 Manual-only markets:
 
@@ -71,7 +71,7 @@ Rates use canonical `KRW_PER_UNIT`:
 - 1 KRW = 1 KRW
 - 1 JPY = KRW per one JPY
 - 1 USD = KRW per one USD
-- 1 CNY = KRW per one CNY
+- 1 TWD = KRW per one TWD
 
 Reference price:
 
@@ -87,7 +87,7 @@ Automatic update rules:
 - `source_effective_at` older than 72 hours: block automatic update and mark `blocked_stale`.
 - KR / KRW source price changes bypass the 5% deadband, but still respect stale-rate and spike protection.
 - Admin API calls cannot override the 5%, 15%, or 72h thresholds.
-- Evaluations require a complete KRW, JPY, USD, and CNY rate bundle from the same provider, effective time, and payload hash.
+- Evaluations require a complete KRW, JPY, USD, and TWD rate bundle from the same provider, effective time, and payload hash.
 - Paused policies and `manual_fixed` policies never mutate published prices.
 - Evaluations are protected by transaction advisory locking, source-aware run idempotency keys, and event idempotency keys.
 - Manual rechecks are intentionally repeatable. Base price changes and mode changes include source or policy version information in their run keys.
@@ -98,7 +98,7 @@ Automatic update rules:
 Admin catalog entry supports explicit market-level setup:
 
 - KR / KRW: required manual source price.
-- JP / JPY, US / USD, CN / CNY: `fx_auto` by default, or `manual_fixed` when an admin enters a market price.
+- JP / JPY, US / USD, TW / TWD: `fx_auto` by default, or `manual_fixed` when an admin enters a market price.
 - GLOBAL / USD: `manual_fixed` or unavailable only.
 
 Repeated setup with the same automatic market configuration must preserve existing published automatic prices and applied baselines.

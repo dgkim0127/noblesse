@@ -30,7 +30,7 @@ function successPayload(overrides = {}) {
       KRW: 1,
       USD: 1 / 1400,
       JPY: 150 / 1400,
-      CNY: 7 / 1400,
+      TWD: 7 / 1400,
       EUR: 1 / 1500
     },
     ...overrides
@@ -75,7 +75,7 @@ test("ExchangeRate-API adapter parses a valid success payload into canonical KRW
   assert.equal(snapshot.rates.KRW.rateScaled, toRateScaled(1));
   assert.equal(snapshot.rates.USD.rateScaled, toRateScaled(1400));
   assert.equal(snapshot.rates.JPY.rateScaled, toRateScaled(1400 / 150));
-  assert.equal(snapshot.rates.CNY.rateScaled, toRateScaled(1400 / 7));
+  assert.equal(snapshot.rates.TWD.rateScaled, toRateScaled(1400 / 7));
   assert.match(snapshot.payloadHash, /^[a-f0-9]{64}$/);
 });
 
@@ -161,7 +161,7 @@ test("ExchangeRate-API adapter rejects stale and future timestamps before snapsh
 });
 
 test("ExchangeRate-API adapter rejects missing or invalid required currencies and rates", () => {
-  for (const currency of ["KRW", "JPY", "USD", "CNY"]) {
+  for (const currency of ["KRW", "JPY", "USD", "TWD"]) {
     const conversionRates = { ...successPayload().conversion_rates };
     delete conversionRates[currency];
     assertCategory(() => normalizeExchangeRateApiPayload(successPayload({ conversion_rates: conversionRates }), { now: () => now }), "incomplete_payload");

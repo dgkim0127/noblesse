@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { formatCurrency, formatMarketLabel, getMarketDisplay, supportedCurrencies, supportedMarkets } from '../../config/currency.js'
+import { formatCurrency, formatMarketLabel, getMarketDisplay, marketCurrency, supportedCurrencies, supportedMarkets } from '../../config/currency.js'
 import { AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { useAdminCopy } from './adminCopy'
@@ -21,7 +21,8 @@ function formatBps(value) {
 }
 
 function FxRateCard({ rate, t }) {
-  const display = getMarketDisplay(rate.quoteCurrency === 'KRW' ? 'KR' : rate.quoteCurrency === 'JPY' ? 'JP' : rate.quoteCurrency === 'CNY' ? 'CN' : 'US')
+  const market = Object.keys(marketCurrency).find((key) => marketCurrency[key] === rate.quoteCurrency) || 'GLOBAL'
+  const display = getMarketDisplay(market)
   return <article className={`admin-fx-rate ${rate.isStale ? 'stale' : ''}`}>
     <div>
       <img alt={display.label} className="admin-market-flag" src={display.flagSrc} />
@@ -165,7 +166,7 @@ export function AdminFxPage() {
       <div className="admin-fx-market-list">
         {supportedMarkets.map((market) => {
           const display = getMarketDisplay(market)
-          const currency = market === 'KR' ? 'KRW' : market === 'JP' ? 'JPY' : market === 'CN' ? 'CNY' : 'USD'
+          const currency = marketCurrency[market] || 'USD'
           return <span key={market}><img alt={display.label} className="admin-market-flag" src={display.flagSrc} /> {market}/{supportedCurrencies.includes(currency) ? currency : 'USD'}</span>
         })}
       </div>

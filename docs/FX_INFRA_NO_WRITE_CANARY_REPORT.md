@@ -144,3 +144,12 @@ APPROVE_FX_PRODUCTION_ACTIVATION = YES
 ```
 
 After this gate, the next step may activate the production FX fetch/evaluate workflow. Scheduler creation, DB snapshot writes, and price mutations remain blocked until that separate activation gate.
+
+## N48 Taiwan Market Activation Preparation
+
+- Active required currencies changed to `KRW`, `JPY`, `USD`, and `TWD`.
+- `CN` / `CNY` remains historical read-only and is deprecated for new writes.
+- The previous N47B canary result remains evidence for provider authentication recovery only; a TWD no-write canary is required before production snapshot or price writes.
+- Secret payload access: No.
+- Scheduler change in preparation phase: No.
+- DB write in preparation phase: No.

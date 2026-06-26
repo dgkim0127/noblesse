@@ -42,25 +42,25 @@ test('buyer profile normalization keeps guest defaults and maps userId', () => {
 test('approved buyer requires exact assigned market and currency price', () => {
   const prices = [
     { productId: 'NB-001', market: 'JP', currency: 'JPY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 1200 },
-    { productId: 'NB-001', market: 'CN', currency: 'CNY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 58.2 },
+    { productId: 'NB-001', market: 'TW', currency: 'TWD', visibleTo: 'approved_only', isActive: true, wholesalePrice: 58.2 },
   ]
   const selected = selectProductPrice({
     prices,
     productId: 'NB-001',
     locale: 'kr',
-    viewer: { role: 'buyer', accountStatus: 'active', verificationStatus: 'approved', assignedMarket: 'JP', currency: 'CNY' },
+    viewer: { role: 'buyer', accountStatus: 'active', verificationStatus: 'approved', assignedMarket: 'JP', currency: 'TWD' },
   })
 
   assert.equal(selected.isAvailable, false)
   assert.equal(selected.price, null)
-  assert.equal(selected.displayCurrency, 'CNY')
+  assert.equal(selected.displayCurrency, 'TWD')
 })
 
 test('approved buyer exact market and currency price is available', () => {
   const selected = selectProductPrice({
     prices: [
       { productId: 'NB-001', market: 'JP', currency: 'JPY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 1200 },
-      { productId: 'NB-001', market: 'CN', currency: 'CNY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 58.2 },
+      { productId: 'NB-001', market: 'TW', currency: 'TWD', visibleTo: 'approved_only', isActive: true, wholesalePrice: 58.2 },
     ],
     productId: 'NB-001',
     locale: 'kr',
@@ -78,17 +78,17 @@ test('missing exact price is unavailable instead of using another market amount'
     prices: [{ productId: 'NB-001', market: 'US', currency: 'USD', visibleTo: 'approved_only', isActive: true, wholesalePrice: 10 }],
     productId: 'NB-001',
     locale: 'cn',
-    viewer: { role: 'buyer', accountStatus: 'active', verificationStatus: 'approved', assignedMarket: 'CN', currency: 'CNY' },
+    viewer: { role: 'buyer', accountStatus: 'active', verificationStatus: 'approved', assignedMarket: 'TW', currency: 'TWD' },
   })
 
   assert.equal(selected.isAvailable, false)
   assert.equal(selected.price, null)
-  assert.equal(selected.displayCurrency, 'CNY')
+  assert.equal(selected.displayCurrency, 'TWD')
 })
 
 test('frontend discount calculation preserves currency minor units', () => {
   assert.equal(getDiscountedPrice({ wholesalePrice: 9.99, currency: 'USD' }, 10), 8.99)
-  assert.equal(getDiscountedPrice({ wholesalePrice: 58.2, currency: 'CNY' }, 12), 51.22)
+  assert.equal(getDiscountedPrice({ wholesalePrice: 58.2, currency: 'TWD' }, 12), 51.22)
   assert.equal(getDiscountedPrice({ wholesalePrice: 12000, currency: 'KRW' }, 12), 10560)
   assert.equal(getDiscountedPrice({ wholesalePrice: 1200, currency: 'JPY' }, 12), 1056)
 })
@@ -112,7 +112,7 @@ test('buildInquirySnapshot rejects mixed currency rows', () => {
     inquiryId: 'INQ-001',
     inquiryRows: [
       { productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 1, market: 'US', currency: 'USD', priceSnapshot: 8.99, subtotal: 8.99 },
-      { productId: 'NB-002', productCode: 'NB-002', productName: 'Two', material: 'Cubic', color: '', size: '', moq: 1, quantity: 1, market: 'CN', currency: 'CNY', priceSnapshot: 51.22, subtotal: 51.22 },
+      { productId: 'NB-002', productCode: 'NB-002', productName: 'Two', material: 'Cubic', color: '', size: '', moq: 1, quantity: 1, market: 'TW', currency: 'TWD', priceSnapshot: 51.22, subtotal: 51.22 },
     ],
     requestMemo: '',
   })
@@ -164,7 +164,7 @@ test('buildInquirySnapshot rejects empty rows or missing buyer market currency',
   }), null)
 
   assert.equal(buildInquirySnapshot({
-    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'US', preferredLanguage: 'en', assignedMarket: 'US', currency: 'CNY' },
+    buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'US', preferredLanguage: 'en', assignedMarket: 'US', currency: 'TWD' },
     inquiryId: 'INQ-001',
     inquiryRows: [{ productId: 'NB-001', productCode: 'NB-001', productName: 'One', material: 'Steel', color: '', size: '', moq: 1, quantity: 1, market: 'US', currency: 'USD', priceSnapshot: 8.99, subtotal: 8.99 }],
     requestMemo: '',
@@ -188,7 +188,7 @@ test('buildInquirySnapshot sums same-currency cents without drift', () => {
   assert.deepEqual(snapshot.items.map((item) => [item.market, item.currency]), [['US', 'USD'], ['US', 'USD']])
 })
 
-test('buildInquirySnapshot accepts GLOBAL USD and CN CNY rows for matching buyers', () => {
+test('buildInquirySnapshot accepts GLOBAL USD and TW TWD rows for matching buyers', () => {
   const globalSnapshot = buildInquirySnapshot({
     buyer: { uid: 'buyer-1', companyName: 'Buyer', country: 'US', preferredLanguage: 'en', assignedMarket: 'GLOBAL', currency: 'USD' },
     inquiryId: 'INQ-001',
@@ -198,19 +198,19 @@ test('buildInquirySnapshot accepts GLOBAL USD and CN CNY rows for matching buyer
     requestMemo: '',
   })
   const cnSnapshot = buildInquirySnapshot({
-    buyer: { uid: 'buyer-2', companyName: 'Buyer', country: 'CN', preferredLanguage: 'cn', assignedMarket: 'CN', currency: 'CNY' },
+    buyer: { uid: 'buyer-2', companyName: 'Buyer', country: 'TW', preferredLanguage: 'TW', assignedMarket: 'TW', currency: 'TWD' },
     inquiryId: 'INQ-002',
     inquiryRows: [
-      { productId: 'NB-002', productCode: 'NB-002', productName: 'Two', material: 'Cubic', color: '', size: '', moq: 1, quantity: 1, market: 'CN', currency: 'CNY', priceSnapshot: 51.22, subtotal: 51.22 },
-      { productId: 'NB-003', productCode: 'NB-003', productName: 'Three', material: 'Pearl', color: '', size: '', moq: 1, quantity: 1, market: 'CN', currency: 'CNY', priceSnapshot: 102.44, subtotal: 102.44 },
+      { productId: 'NB-002', productCode: 'NB-002', productName: 'Two', material: 'Cubic', color: '', size: '', moq: 1, quantity: 1, market: 'TW', currency: 'TWD', priceSnapshot: 51.22, subtotal: 51.22 },
+      { productId: 'NB-003', productCode: 'NB-003', productName: 'Three', material: 'Pearl', color: '', size: '', moq: 1, quantity: 1, market: 'TW', currency: 'TWD', priceSnapshot: 102.44, subtotal: 102.44 },
     ],
     requestMemo: '',
   })
 
   assert.equal(globalSnapshot.market, 'GLOBAL')
   assert.equal(globalSnapshot.currency, 'USD')
-  assert.equal(cnSnapshot.market, 'CN')
-  assert.equal(cnSnapshot.currency, 'CNY')
+  assert.equal(cnSnapshot.market, 'TW')
+  assert.equal(cnSnapshot.currency, 'TWD')
   assert.equal(cnSnapshot.estimatedTotal, 153.66)
 })
 
@@ -233,14 +233,14 @@ test('admin price books preserve US and GLOBAL USD as separate market rows', () 
     { productId: 'NB-001', market: 'JP', currency: 'JPY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 1200 },
     { productId: 'NB-001', market: 'GLOBAL', currency: 'USD', visibleTo: 'approved_only', isActive: true, wholesalePrice: 9 },
     { productId: 'NB-001', market: 'US', currency: 'USD', visibleTo: 'approved_only', isActive: true, wholesalePrice: 8 },
-    { productId: 'NB-001', market: 'CN', currency: 'CNY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 58 },
+    { productId: 'NB-001', market: 'TW', currency: 'TWD', visibleTo: 'approved_only', isActive: true, wholesalePrice: 58 },
     { productId: 'NB-001', market: 'KR', currency: 'USD', visibleTo: 'approved_only', isActive: true, wholesalePrice: 1 },
     { productId: 'NB-002', market: 'KR', currency: 'KRW', visibleTo: 'approved_only', isActive: true, wholesalePrice: 20000 },
   ]
 
   const books = getAdminMarketPriceBooksForProduct(prices, 'NB-001')
 
-  assert.deepEqual(books.map((price) => price.currency), ['KRW', 'JPY', 'USD', 'CNY', 'USD'])
-  assert.deepEqual(books.map((price) => price.market), ['KR', 'JP', 'US', 'CN', 'GLOBAL'])
-  assert.deepEqual(getAdminPriceBooksForProduct(prices, 'NB-001').map((price) => price.market), ['KR', 'JP', 'US', 'CN', 'GLOBAL'])
+  assert.deepEqual(books.map((price) => price.currency), ['KRW', 'JPY', 'USD', 'TWD', 'USD'])
+  assert.deepEqual(books.map((price) => price.market), ['KR', 'JP', 'US', 'TW', 'GLOBAL'])
+  assert.deepEqual(getAdminPriceBooksForProduct(prices, 'NB-001').map((price) => price.market), ['KR', 'JP', 'US', 'TW', 'GLOBAL'])
 })

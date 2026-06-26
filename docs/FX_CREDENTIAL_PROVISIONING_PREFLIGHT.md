@@ -18,7 +18,7 @@ This preflight prepares the next approval gate for the ExchangeRate-API credenti
 - Public Chinese locale is `zh-TW`.
 - Legacy Chinese locale aliases still canonicalize to `zh-TW`.
 - Legacy path migration preserves nested paths, query strings, and hashes.
-- CN market and CNY pricing behavior remain unchanged.
+- At the time of this preflight, CN/CNY pricing behavior was unchanged. N48 supersedes this active market contract with TW/TWD while preserving legacy CN/CNY read compatibility.
 
 Verified example:
 
@@ -44,7 +44,7 @@ Contract status:
 
 - Standard endpoint remains v6-compatible for the existing adapter shape.
 - Bearer authorization remains documented.
-- KRW, JPY, USD, and CNY remain supported.
+- KRW, JPY, USD, and TWD remain supported for the active Noblesse bundle.
 - Response update timestamp fields remain documented.
 - Pro plan basis remains suitable for the planned Noblesse request volume.
 - Rates remain suitable only for catalog price management, not payment settlement or trading.
@@ -58,7 +58,7 @@ Current implementation:
 - Fixed origin: `https://v6.exchangerate-api.com`
 - Fixed path: `/v6/latest/KRW`
 - Auth mode: `Authorization: Bearer <server-side secret>`
-- Required currencies: KRW, JPY, USD, CNY
+- Required currencies: KRW, JPY, USD, TWD
 - Canonical internal rate: KRW per one quote-currency unit
 - Stale protection: 72 hours
 - Future timestamp skew protection: 5 minutes
@@ -115,3 +115,11 @@ The next step must not create Scheduler Jobs, execute provider fetches, run DB w
 ```text
 APPROVE_FX_CREDENTIAL_SECRET_CREATION = YES
 ```
+
+## N48 Taiwan Market Addendum
+
+- Active market/currency set changes from `CN` / `CNY` to `TW` / `TWD`.
+- Required provider currencies become `KRW`, `JPY`, `USD`, and `TWD`.
+- Existing secret container and version metadata remain valid; no secret payload is recorded here.
+- Provider free-plan status remains acceptable for the approved weekday once-daily schedule.
+- No payment, plan upgrade, Scheduler creation, DB write, or product price mutation is authorized by this addendum alone.

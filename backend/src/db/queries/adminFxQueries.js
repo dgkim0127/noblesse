@@ -129,7 +129,7 @@ function buildEventKey({ row, evaluation, sourcePrice }) {
 function buildSnapshotBundle(rows) {
   if (!rows.length) return null;
   const rates = Object.fromEntries(rows.map((row) => [row.quote_currency, mapRate(row)]));
-  const currencies = ["KRW", "JPY", "USD", "CNY"];
+  const currencies = ["KRW", "JPY", "USD", "TWD"];
   if (currencies.some((currency) => !rates[currency])) return null;
   return {
     provider: rows[0].provider,
@@ -144,7 +144,7 @@ async function loadLatestCompleteFxBundle(clientOrPool) {
     select provider, source_effective_at, payload_hash
     from public.fx_rate_snapshots
     where base_currency = 'KRW'
-      and quote_currency in ('KRW', 'JPY', 'USD', 'CNY')
+      and quote_currency in ('KRW', 'JPY', 'USD', 'TWD')
     group by provider, source_effective_at, payload_hash
     having count(distinct quote_currency) = 4
     order by source_effective_at desc, max(created_at) desc

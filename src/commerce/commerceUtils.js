@@ -213,7 +213,7 @@ export const getPriceForBuyer = (productPrices, productId, buyer, _isApproved) =
   selectProductPrice({ prices: productPrices, viewer: buyer, productId }).price
 )
 
-const marketPriceBookOrder = ['KR', 'JP', 'US', 'CN', 'GLOBAL']
+const marketPriceBookOrder = ['KR', 'JP', 'US', 'TW', 'GLOBAL']
 
 export const getAdminMarketPriceBooksForProduct = (productPrices, productId) => {
   const scopedPrices = (productPrices || []).filter((price) => (

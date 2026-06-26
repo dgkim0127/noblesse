@@ -60,8 +60,8 @@ test('unified catalog entry handles validation, conflicts, and protected errors'
   assert.match(page, /supportedMarkets/)
   assert.match(page, /supportedCurrencies/)
   assert.match(page, /isValidMarketCurrencyPair/)
-  assert.match(page, /priceMarketOrder = \['JP', 'US', 'CN', 'GLOBAL'\]/)
-  assert.match(page, /autoPriceMarkets = new Set\(\['JP', 'US', 'CN'\]\)/)
+  assert.match(page, /priceMarketOrder = \['JP', 'US', 'TW', 'GLOBAL'\]/)
+  assert.match(page, /autoPriceMarkets = new Set\(\['JP', 'US', 'TW'\]\)/)
   assert.match(page, /pricingMode: market === 'GLOBAL' \? 'unavailable' : 'fx_auto'/)
 })
 

@@ -1,12 +1,12 @@
-export const supportedMarkets = ['KR', 'JP', 'US', 'CN', 'GLOBAL']
+export const supportedMarkets = ['KR', 'JP', 'US', 'TW', 'GLOBAL']
 
-export const supportedCurrencies = ['KRW', 'JPY', 'USD', 'CNY']
+export const supportedCurrencies = ['KRW', 'JPY', 'USD', 'TWD']
 
 export const marketCurrency = {
   KR: 'KRW',
   JP: 'JPY',
   US: 'USD',
-  CN: 'CNY',
+  TW: 'TWD',
   GLOBAL: 'USD',
 }
 
@@ -14,39 +14,39 @@ export const localeDefaultCurrency = {
   kr: 'KRW',
   jp: 'JPY',
   en: 'USD',
-  'zh-TW': 'CNY',
-  cn: 'CNY',
-  'zh-CN': 'CNY',
-  'zh-Hans': 'CNY',
-  chinese: 'CNY',
+  'zh-TW': 'TWD',
+  cn: 'TWD',
+  'zh-CN': 'TWD',
+  'zh-Hans': 'TWD',
+  chinese: 'TWD',
 }
 
 export const currencyLocale = {
   KRW: 'ko-KR',
   JPY: 'ja-JP',
   USD: 'en-US',
-  CNY: 'zh-TW',
+  TWD: 'zh-TW',
 }
 
 export const currencyMinorUnits = {
   KRW: 0,
   JPY: 0,
   USD: 2,
-  CNY: 2,
+  TWD: 2,
 }
 
 export const adminCurrencyDisplay = {
-  KRW: { market: 'KR', symbol: '₩' },
-  JPY: { market: 'JP', symbol: '¥' },
+  KRW: { market: 'KR', symbol: '\u20a9' },
+  JPY: { market: 'JP', symbol: '\u00a5' },
   USD: { market: 'US', symbol: '$' },
-  CNY: { market: 'CN', symbol: '¥' },
+  TWD: { market: 'TW', symbol: 'NT$' },
 }
 
 export const marketDisplay = {
   KR: { flagSrc: '/flags/kr.svg', label: 'Korea' },
   JP: { flagSrc: '/flags/jp.svg', label: 'Japan' },
   US: { flagSrc: '/flags/us.svg', label: 'United States' },
-  CN: { flagSrc: '/flags/cn.svg', label: 'China' },
+  TW: { flagSrc: '/flags/tw.svg', label: 'Taiwan' },
   GLOBAL: { flagSrc: '/flags/global.svg', label: 'Global' },
 }
 

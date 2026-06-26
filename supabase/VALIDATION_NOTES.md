@@ -2123,3 +2123,17 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - DB direct access/psql: No.
 - Product price mutation: No.
 - Next gate: `APPROVE_FX_PROVIDER_CREDENTIAL_PROVISIONING = YES`.
+## N48 TW Market Migration And FX Activation
+
+- Scope: Replace active `CN` / `CNY` pricing and FX workflow with `TW` / `TWD`.
+- Historical `CN` / `CNY`: preserved read-only; no data deletion, no copy to TWD.
+- Active markets after code change: `KR`, `JP`, `US`, `TW`, `GLOBAL`.
+- Active currencies after code change: `KRW`, `JPY`, `USD`, `TWD`.
+- Manual legacy `CN` / `CNY` policies are represented as `TW` / `TWD` `needs_input` policies without copying numeric amounts.
+- Migration files: `20260626_tw_market_fx_activation.sql` in `supabase/migrations` and `backend/migrations`.
+- Secret values recorded: No.
+- Direct DB connection or manual SQL: No.
+- Local backend tests: 322 passed.
+- Local frontend tests: 104 passed.
+- Lint/build: passed.
+- Cloud activation status: pending final execution evidence.

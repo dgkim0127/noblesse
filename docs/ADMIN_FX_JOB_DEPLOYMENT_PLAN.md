@@ -25,13 +25,13 @@ The scripts fail closed without their explicit allow flags.
 
 Rate snapshot and automatic evaluation:
 
-- Cron: `10 9,13,17 * * 1-5`
+- Cron: `10 10 * * 1-5`
 - Timezone: `Asia/Seoul`
-- Meaning: weekdays 09:10, 13:10, and 17:10 KST
+- Meaning: weekdays 10:10 KST
 
 ## Runtime Policy
 
-- Import or fetch a complete KRW / JPY / USD / CNY rate bundle.
+- Import or fetch a complete KRW / JPY / USD / TWD rate bundle.
 - Store the rate snapshots idempotently.
 - Evaluate `fx_auto` policies after snapshot import.
 - Keep `manual_fixed` prices unchanged.
@@ -49,8 +49,8 @@ Provider selection decision:
 - Provider identifier: `exchange_rate_api`
 - Secret variable name: `EXCHANGE_RATE_API_KEY`
 - Required plan: Pro plan basis, 60 minute updates and 30,000 requests per month as checked on 2026-06-25
-- Expected scheduled volume: about 66 requests per month from the current weekday 09:10, 13:10, and 17:10 Asia/Seoul draft
-- Contract shape: request KRW as the provider base, require KRW/JPY/USD/CNY, convert provider target-per-KRW rates into Noblesse canonical `KRW_PER_UNIT`
+- Expected scheduled volume: about 22 requests per month from the current weekday 10:10 Asia/Seoul draft
+- Contract shape: request KRW as the provider base, require KRW/JPY/USD/TWD, convert provider target-per-KRW rates into Noblesse canonical `KRW_PER_UNIT`
 - Auth preference: server-side Bearer authorization through Secret Manager after a separate approval gate
 
 Next credential gate:
@@ -78,7 +78,7 @@ N46 confirmed secret version 1 is enabled, created the no-write Cloud Run Job, a
 
 N47 checked for corrected secret version 2 before updating the existing Job. Version 2 was not found, so the Job was not updated and no new execution was started.
 
-N47B confirmed secret version 2 is enabled, updated only the existing no-write Job secret binding to version 2, and executed the provider canary once. The execution succeeded with one provider request, KRW/JPY/USD/CNY validation, timestamp validation, and rate-direction validation. No DB write, snapshot write, price mutation, Scheduler creation, image rebuild, service account change, or IAM change was performed.
+N47B confirmed secret version 2 is enabled, updated only the existing no-write Job secret binding to version 2, and executed the provider canary once. The execution succeeded with one provider request, KRW/JPY/USD/TWD validation, timestamp validation, and rate-direction validation. No DB write, snapshot write, price mutation, Scheduler creation, image rebuild, service account change, or IAM change was performed.
 
 Report:
 
@@ -89,3 +89,17 @@ Next gate:
 ```text
 APPROVE_FX_PRODUCTION_ACTIVATION = YES
 ```
+
+## N48 Taiwan Market Activation Plan
+
+The activation gate changes the active fourth market from `CN` / `CNY` to `TW` / `TWD`.
+
+- Required provider bundle: `KRW`, `JPY`, `USD`, `TWD`.
+- Production FX schedule: `10 10 * * 1-5` in `Asia/Seoul`.
+- Expected request volume: about 22 scheduled provider requests per month.
+- `CN` / `CNY` rows remain historical read-only.
+- New `CN` / `CNY` writes are blocked by the N48 migration.
+- Production no-write TWD canary must pass before production DB writes.
+- Production Scheduler creation remains blocked until migration and one manual production FX execution pass.
+
+Activation evidence is tracked in `docs/FX_TW_MARKET_ACTIVATION_REPORT.md`.

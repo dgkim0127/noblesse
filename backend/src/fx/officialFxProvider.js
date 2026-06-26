@@ -8,7 +8,7 @@ export const EXCHANGE_RATE_API_ORIGIN = "https://v6.exchangerate-api.com";
 export const EXCHANGE_RATE_API_BASE_CURRENCY = "KRW";
 export const EXCHANGE_RATE_API_PATH = `/v6/latest/${EXCHANGE_RATE_API_BASE_CURRENCY}`;
 
-const requiredCurrencies = ["KRW", "JPY", "USD", "CNY"];
+const requiredCurrencies = ["KRW", "JPY", "USD", "TWD"];
 const providerTimeoutMs = 5000;
 const maxProviderBodyBytes = 128 * 1024;
 const maxClockSkewMs = 5 * 60 * 1000;
@@ -229,7 +229,7 @@ export function normalizeExchangeRateApiPayload(payload = {}, { now = () => new 
     rates: {
       JPY: krwPerUnit.JPY,
       USD: krwPerUnit.USD,
-      CNY: krwPerUnit.CNY
+      TWD: krwPerUnit.TWD
     }
   }, { now: nowDate });
 }

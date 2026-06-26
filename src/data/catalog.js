@@ -185,7 +185,7 @@ const markets = [
   { market: 'KR', currency: 'KRW', multiplier: 10, minOrderAmount: 300000 },
   { market: 'JP', currency: 'JPY', multiplier: 1, minOrderAmount: 30000 },
   { market: 'US', currency: 'USD', multiplier: 0.008, minOrderAmount: 250 },
-  { market: 'CN', currency: 'CNY', multiplier: 0.058, minOrderAmount: 1800 },
+  { market: 'TW', currency: 'TWD', multiplier: 0.023, minOrderAmount: 7200 },
   { market: 'GLOBAL', currency: 'USD', multiplier: 0.009, minOrderAmount: 300 },
 ]
 

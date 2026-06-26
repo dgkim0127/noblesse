@@ -40,8 +40,8 @@ const initialPriceForm = {
   isActive: true,
 }
 
-const priceMarketOrder = ['JP', 'US', 'CN', 'GLOBAL']
-const autoPriceMarkets = new Set(['JP', 'US', 'CN'])
+const priceMarketOrder = ['JP', 'US', 'TW', 'GLOBAL']
+const autoPriceMarkets = new Set(['JP', 'US', 'TW'])
 
 function createInitialMarketPriceForms() {
   return Object.fromEntries(priceMarketOrder.map((market) => [market, {

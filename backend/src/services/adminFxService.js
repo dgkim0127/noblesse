@@ -20,6 +20,7 @@ const POLICY_STATUSES = [
   "held_deadband",
   "updated",
   "created",
+  "needs_input",
   "blocked_stale",
   "blocked_spike",
   "paused",
@@ -93,7 +94,7 @@ function parseModeBody(body = {}, market) {
     "isActive"
   ]);
   const pricingMode = parseRequiredString(safeBody.pricingMode, { fieldName: "pricingMode", maxLength: 40 });
-  const currency = parseOptionalString(safeBody.currency, { maxLength: 3 }) || (market === "JP" ? "JPY" : market === "CN" ? "CNY" : market === "KR" ? "KRW" : "USD");
+  const currency = parseOptionalString(safeBody.currency, { maxLength: 3 }) || (market === "JP" ? "JPY" : market === "TW" ? "TWD" : market === "KR" ? "KRW" : "USD");
   if (!MARKETS.includes(market) || !CURRENCIES.includes(currency) || !validateMarketCurrencyPair(market, currency)) {
     throw validationError("Invalid market/currency pair");
   }
@@ -143,7 +144,7 @@ export function createAdminFxService({ queries, now = () => new Date() }) {
           updateThresholdBps: 500,
           circuitBreakerBps: 1500,
           maxRateAgeHours: 72,
-          autoMarkets: ["JP/JPY", "US/USD", "CN/CNY"],
+          autoMarkets: ["JP/JPY", "US/USD", "TW/TWD"],
           manualOnlyMarkets: ["KR/KRW", "GLOBAL/USD"],
           schedule: {
             rateSnapshotAndEvaluation: "10 9,13,17 * * 1-5 Asia/Seoul"

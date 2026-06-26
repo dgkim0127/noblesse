@@ -57,7 +57,7 @@ test("FX provider check canary is no-write and returns sanitized validation meta
             KRW: 1,
             JPY: 150 / 1400,
             USD: 1 / 1400,
-            CNY: 7 / 1400
+            TWD: 7 / 1400
           }
         });
       }
@@ -66,7 +66,7 @@ test("FX provider check canary is no-write and returns sanitized validation meta
 
   assert.equal(result.status, "completed");
   assert.equal(result.provider, "exchange_rate_api");
-  assert.deepEqual(result.requiredCurrencies, ["KRW", "JPY", "USD", "CNY"]);
+  assert.deepEqual(result.requiredCurrencies, ["KRW", "JPY", "USD", "TWD"]);
   assert.equal(result.timestampValidation, "passed");
   assert.equal(result.completenessValidation, "passed");
   assert.equal(result.rateDirectionValidation, "passed");

@@ -10,11 +10,6 @@ const currentDir = path.dirname(currentFile);
 const repoRoot = path.resolve(currentDir, "../../..");
 const backendRoot = path.resolve(currentDir, "../..");
 const defaultSchemaPath = path.join(repoRoot, "supabase", "schema.sql");
-const packagedMigrationPath = path.join(
-  backendRoot,
-  "migrations",
-  "20260622_admin_rbac_account_lifecycle.sql"
-);
 
 export function assertRunnerAllowed(source = process.env) {
   if (source.ALLOW_STAGING_SCHEMA_MIGRATION_RUNNER !== "true") {
@@ -23,7 +18,12 @@ export function assertRunnerAllowed(source = process.env) {
 }
 
 export function resolveSchemaSqlPath(source = process.env) {
-  if (source.SCHEMA_SQL_PATH === "migrations/20260622_admin_rbac_account_lifecycle.sql") {
+  if (source.SCHEMA_SQL_PATH?.startsWith("migrations/")) {
+    const packagedMigrationPath = path.resolve(backendRoot, source.SCHEMA_SQL_PATH);
+    const packagedRelative = path.relative(path.join(backendRoot, "migrations"), packagedMigrationPath);
+    if (packagedRelative.startsWith("..") || path.isAbsolute(packagedRelative)) {
+      throw new Error("SCHEMA_SQL_PATH migration must stay inside backend migrations.");
+    }
     return packagedMigrationPath;
   }
 
