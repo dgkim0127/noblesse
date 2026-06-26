@@ -70,9 +70,11 @@ APPROVE_FX_PROVIDER_CREDENTIAL_PROVISIONING = YES
 - DB migration execution: No
 - Secret/IAM mutation: Dedicated FX secret container and secret-level accessor prepared
 
-## N45 Partial Infrastructure Status
+## N45/N46 Infrastructure Status
 
-N45 added a no-write provider canary script and built an immutable backend image for it. The dedicated production FX runtime service account and Secret Manager container exist, but no API key version has been added and no Cloud Run FX Job has been created.
+N45 added a no-write provider canary script and built an immutable backend image for it. The dedicated production FX runtime service account and Secret Manager container exist.
+
+N46 confirmed secret version 1 is enabled, created the no-write Cloud Run Job, and executed it once. The execution failed with sanitized provider authentication status. No DB write, price mutation, Scheduler creation, or retry was performed.
 
 Report:
 
@@ -81,5 +83,5 @@ Report:
 Next gate:
 
 ```text
-APPROVE_FX_NO_WRITE_CANARY_CONTINUE = YES
+APPROVE_FX_PROVIDER_AUTH_RECOVERY = YES
 ```
