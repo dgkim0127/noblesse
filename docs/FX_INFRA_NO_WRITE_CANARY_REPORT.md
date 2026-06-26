@@ -2,9 +2,11 @@
 
 ## Status
 
-STOPPED_AUTH_FAILURE
+STOPPED_SECRET_VERSION_2_REQUIRED
 
 N45 prepared the no-write provider canary code path and the first production FX infrastructure pieces. N46 found secret version 1 enabled, created the no-write Cloud Run Job, and executed it exactly once. The canary reached the provider path but failed with a sanitized authentication category and HTTP 403. No second execution was attempted.
+
+N47 checked for a corrected secret version 2 before changing the Job. Secret version 2 was not found, so the Job binding was not updated and the canary was not re-executed.
 
 ## Baseline
 
@@ -41,6 +43,7 @@ N45 prepared the no-write provider canary code path and the first production FX 
   - `provider=exchange-rate-api`
 - Secret version: `1`
 - Secret version state: `ENABLED`
+- Secret version 2: Not found
 - Secret IAM: secret-level `roles/secretmanager.secretAccessor` for the FX runtime service account only
 - Project-level role grant for FX runtime service account: none observed
 
@@ -81,6 +84,17 @@ N45 prepared the no-write provider canary code path and the first production FX 
 - Raw provider payload logged: No
 - Full rate bundle logged: No
 
+## N47 Attempt
+
+- Baseline HEAD: `e75d6079aa21f1e3586f5948875dc0096cc7245c`
+- Secret version 2 metadata: Not found
+- Job update: No
+- New execution: No
+- Secret payload accessed: No
+- Secret value exposed: No
+- DB write: No
+- Scheduler change: No
+
 ## No-write Verification
 
 - Provider account creation by Codex: No
@@ -103,8 +117,9 @@ Use ExchangeRate-API and Google Cloud Console only. Do not paste the API key int
 1. Confirm the provider account and key are active.
 2. Confirm the selected plan supports Bearer authorization.
 3. If the key must be corrected, add a new numeric secret version through Google Cloud Console.
-4. Do not disable or destroy version 1 until a replacement version is validated.
-5. Do not report the key value, prefix, suffix, or hash.
+4. Confirm only that version `2` exists and is enabled.
+5. Do not disable or destroy version 1 until a replacement version is validated.
+6. Do not report the key value, prefix, suffix, or hash.
 
 ## Next Gate
 
@@ -112,4 +127,4 @@ Use ExchangeRate-API and Google Cloud Console only. Do not paste the API key int
 APPROVE_FX_PROVIDER_AUTH_RECOVERY = YES
 ```
 
-After this gate, the next step may diagnose the provider account/key state without exposing the key. A later rerun must be separately approved and must remain a one-time no-write canary.
+After this gate, the next step may retry the same recovery flow only after secret version 2 exists and is enabled. The rerun must remain a one-time no-write canary.

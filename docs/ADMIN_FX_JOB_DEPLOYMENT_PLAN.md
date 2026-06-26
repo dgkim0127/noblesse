@@ -76,6 +76,8 @@ N45 added a no-write provider canary script and built an immutable backend image
 
 N46 confirmed secret version 1 is enabled, created the no-write Cloud Run Job, and executed it once. The execution failed with sanitized provider authentication status. No DB write, price mutation, Scheduler creation, or retry was performed.
 
+N47 checked for corrected secret version 2 before updating the existing Job. Version 2 was not found, so the Job was not updated and no new execution was started.
+
 Report:
 
 - `docs/FX_INFRA_NO_WRITE_CANARY_REPORT.md`
