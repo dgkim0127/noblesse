@@ -2,11 +2,13 @@
 
 ## Status
 
-STOPPED_SECRET_VERSION_2_REQUIRED
+FX_INFRA_PROVISIONED_CANARY_PASSED_NO_WRITE
 
 N45 prepared the no-write provider canary code path and the first production FX infrastructure pieces. N46 found secret version 1 enabled, created the no-write Cloud Run Job, and executed it exactly once. The canary reached the provider path but failed with a sanitized authentication category and HTTP 403. No second execution was attempted.
 
 N47 checked for a corrected secret version 2 before changing the Job. Secret version 2 was not found, so the Job binding was not updated and the canary was not re-executed.
+
+N47B confirmed secret version 2 is enabled, updated only the existing Job secret binding from version 1 to version 2, and executed the no-write provider canary exactly once. The execution completed successfully with one provider request and no DB, snapshot, product, price, or Scheduler write path.
 
 ## Baseline
 
@@ -14,6 +16,7 @@ N47 checked for a corrected secret version 2 before changing the Job. Secret ver
 - Starting HEAD: `eb5e632c02e3a444e8113f8ac4b06a5834100d45`
 - Code commit for no-write canary: `b18bdf5032367c2c17d0223d8649b786357b620f`
 - N46 result documentation: this report update
+- N47B result documentation: this report update
 - Allowed untracked paths observed: `.firebase/`, `.prod-webapp-snapshot/`
 
 ## Prepared Code Path
@@ -41,9 +44,8 @@ N47 checked for a corrected secret version 2 before changing the Job. Secret ver
   - `env=production`
   - `purpose=fx-provider-api-key`
   - `provider=exchange-rate-api`
-- Secret version: `1`
-- Secret version state: `ENABLED`
-- Secret version 2: Not found
+- Secret version 1 final state: `DISABLED`
+- Secret version 2 final state: `ENABLED`
 - Secret IAM: secret-level `roles/secretmanager.secretAccessor` for the FX runtime service account only
 - Project-level role grant for FX runtime service account: none observed
 
@@ -54,7 +56,7 @@ N47 checked for a corrected secret version 2 before changing the Job. Secret ver
 - Command: `npm`
 - Args: `run`, `fx:provider-check`
 - Secret env: `EXCHANGE_RATE_API_KEY`
-- Secret binding: `noblesse-production-exchange-rate-api-key:1`
+- Secret binding: `noblesse-production-exchange-rate-api-key:2`
 - Tasks: 1
 - Parallelism: 1
 - Max retries: 0
@@ -84,6 +86,27 @@ N47 checked for a corrected secret version 2 before changing the Job. Secret ver
 - Raw provider payload logged: No
 - Full rate bundle logged: No
 
+## N47B Successful Canary
+
+- Execution ID: `noblesse-fx-provider-check-prod-dcgfg`
+- Execution count in gate: 1
+- Exit status: succeeded
+- Provider: `exchange_rate_api`
+- Base: `KRW`
+- Required currencies: `KRW`, `JPY`, `USD`, `CNY`
+- Present currencies: `KRW`, `JPY`, `USD`, `CNY`
+- Source effective at: `2026-06-26T00:00:01.000Z`
+- Fetched at: `2026-06-26T03:17:45.702Z`
+- Timestamp validation: passed
+- Completeness validation: passed
+- Supported currency validation: passed
+- Rate direction validation: passed
+- Provider request count: 1
+- Credential leakage: No
+- Authorization header leakage: No
+- Raw provider payload logged: No
+- Full rate bundle logged: No
+
 ## N47 Attempt
 
 - Baseline HEAD: `e75d6079aa21f1e3586f5948875dc0096cc7245c`
@@ -101,10 +124,10 @@ N47 checked for a corrected secret version 2 before changing the Job. Secret ver
 - API key seen by Codex: No
 - Secret payload accessed: No
 - Cloud Scheduler created or enabled: No
-- DB client initialized: No evidence in code path or logs
-- DB connection attempted: No evidence in code path or logs
-- DB query: No evidence in code path or logs
-- DB transaction: No evidence in code path or logs
+- DB client initialized: No
+- DB connection attempted: No evidence in Job config, code path, or logs
+- DB query: No
+- DB transaction: No evidence in Job config, code path, or logs
 - Rate snapshot write: No
 - Idempotency write: No
 - Product mutation: No
@@ -112,19 +135,12 @@ N47 checked for a corrected secret version 2 before changing the Job. Secret ver
 
 ## Operator Handoff
 
-Use ExchangeRate-API and Google Cloud Console only. Do not paste the API key into chat, terminal, files, screenshots, or Git.
-
-1. Confirm the provider account and key are active.
-2. Confirm the selected plan supports Bearer authorization.
-3. If the key must be corrected, add a new numeric secret version through Google Cloud Console.
-4. Confirm only that version `2` exists and is enabled.
-5. Do not disable or destroy version 1 until a replacement version is validated.
-6. Do not report the key value, prefix, suffix, or hash.
+Provider authentication recovery is complete. The Job remains pinned to numeric secret version `2`. Secret version `1` is disabled and was not destroyed. Do not paste the API key into chat, terminal, files, screenshots, or Git.
 
 ## Next Gate
 
 ```text
-APPROVE_FX_PROVIDER_AUTH_RECOVERY = YES
+APPROVE_FX_PRODUCTION_ACTIVATION = YES
 ```
 
-After this gate, the next step may retry the same recovery flow only after secret version 2 exists and is enabled. The rerun must remain a one-time no-write canary.
+After this gate, the next step may activate the production FX fetch/evaluate workflow. Scheduler creation, DB snapshot writes, and price mutations remain blocked until that separate activation gate.

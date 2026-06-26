@@ -78,6 +78,8 @@ N46 confirmed secret version 1 is enabled, created the no-write Cloud Run Job, a
 
 N47 checked for corrected secret version 2 before updating the existing Job. Version 2 was not found, so the Job was not updated and no new execution was started.
 
+N47B confirmed secret version 2 is enabled, updated only the existing no-write Job secret binding to version 2, and executed the provider canary once. The execution succeeded with one provider request, KRW/JPY/USD/CNY validation, timestamp validation, and rate-direction validation. No DB write, snapshot write, price mutation, Scheduler creation, image rebuild, service account change, or IAM change was performed.
+
 Report:
 
 - `docs/FX_INFRA_NO_WRITE_CANARY_REPORT.md`
@@ -85,5 +87,5 @@ Report:
 Next gate:
 
 ```text
-APPROVE_FX_PROVIDER_AUTH_RECOVERY = YES
+APPROVE_FX_PRODUCTION_ACTIVATION = YES
 ```
