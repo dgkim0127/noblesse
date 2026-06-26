@@ -34,6 +34,13 @@ test("FX rate fetch job supports only fixed provider wiring without URL credenti
   assert.doesNotMatch(source, /FX_AUTO_UPDATE_THRESHOLD_BPS|FX_AUTO_CIRCUIT_BREAKER_BPS|FX_MAX_RATE_AGE_HOURS/);
 });
 
+test("FX production evaluation excludes legacy CN/CNY policies from write paths", () => {
+  const querySource = readFileSync(join(process.cwd(), "src", "db", "queries", "adminFxQueries.js"), "utf8");
+
+  assert.match(querySource, /ppp\.target_market <> 'CN'/);
+  assert.match(querySource, /ppp\.target_currency <> 'CNY'/);
+});
+
 test("FX provider check canary is no-write and returns sanitized validation metadata", async () => {
   const source = readFileSync(join(process.cwd(), "src", "scripts", "checkFxProvider.js"), "utf8");
   assert.doesNotMatch(source, /createPool|createAdminFxQueries|createAdminFxService|importProviderSnapshot|evaluateAll/);

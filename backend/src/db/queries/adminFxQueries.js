@@ -316,6 +316,8 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
       left join public.product_prices published on published.id = ppp.published_price_id
       left join public.fx_rate_snapshots applied on applied.id = ppp.last_applied_rate_snapshot_id
       where ppp.pricing_mode in ('manual_fixed', 'fx_auto')
+        and ppp.target_market <> 'CN'
+        and ppp.target_currency <> 'CNY'
         and ($1::uuid is null or ppp.product_id = $1)
       for update of ppp
     `,
