@@ -8,6 +8,7 @@
     "bootstrap:staging-e2e-accounts": "node src/scripts/bootstrapStagingE2eAccounts.js",
     "bootstrap:production-uat-accounts": "node src/scripts/bootstrapProductionUatAccounts.js",
     "bootstrap:production-admin-account": "node src/scripts/bootstrapProductionAdminAccount.js",
+    "fx:provider-check": "node src/scripts/checkFxProvider.js",
     "fx:fetch-rate-snapshots": "node src/scripts/fetchFxRateSnapshots.js",
     "fx:evaluate-auto-prices": "node src/scripts/evaluateFxAutoPrices.js",
     "test": "node --test tests/*.test.js"
