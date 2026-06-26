@@ -179,3 +179,19 @@ After this gate, the next step may activate the production FX fetch/evaluate wor
 - Scheduler change: No.
 - Secret payload access: No.
 - Activation after canary: stopped at production migration validation.
+
+## N49 Production Activation Follow-up
+
+- The successful N48 TWD no-write canary result was reused; the provider adapter contract did not change.
+- Production prerequisite migration execution: `noblesse-production-fx-schema-prereq-migration-9cwkd`.
+- Production TW migration retry execution: `noblesse-production-tw-market-migration-28rzp`.
+- Production FX Job: `noblesse-fx-auto-prod`.
+- Production FX Job image digest: `sha256:cd40d5bed3e61e1ff46d2f9105f7f171edc8029f09664b6d36c578ded1336280`.
+- Production FX manual execution after recovery: `noblesse-fx-auto-prod-sqv98`.
+- Required currencies: `KRW`, `JPY`, `USD`, `TWD`.
+- Snapshot write: Yes, active four-currency bundle only.
+- Product or price mutation: No automatic create/update in the successful run; evaluation held existing eligible rows.
+- Legacy `CN` / `CNY` write path: blocked and then excluded from automatic evaluation.
+- Scheduler: `noblesse-fx-auto-prod-weekdays`, weekdays 10:10 KST.
+- Secret payload access: No.
+- Raw provider payload logged: No.

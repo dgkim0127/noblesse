@@ -130,3 +130,32 @@ Next gate:
 ```text
 APPROVE_PRODUCTION_FX_SCHEMA_PREREQUISITE_RECOVERY = YES
 ```
+
+## N49 Production Deployment Result
+
+- Recovery commit: `c91403ea4bee030f9634038396cbdfc41779c109`.
+- Safe code fix: legacy `CN` / `CNY` policies are excluded from automatic evaluation write paths.
+- Production prerequisite migration execution: `noblesse-production-fx-schema-prereq-migration-9cwkd`.
+- Production TW migration retry execution: `noblesse-production-tw-market-migration-28rzp`.
+- Production FX Job: `noblesse-fx-auto-prod`.
+- Production FX image build ID: `689a5000-2788-4004-8348-e365b07139d2`.
+- Production FX image digest: `sha256:cd40d5bed3e61e1ff46d2f9105f7f171edc8029f09664b6d36c578ded1336280`.
+- Runtime service account: `noblesse-fx-job-prod@pors-piercing-pos.iam.gserviceaccount.com`.
+- FX secret version: numeric version `2`.
+- DB secret version: numeric version `1`.
+- Successful manual execution: `noblesse-fx-auto-prod-sqv98`.
+- Manual execution count after image recovery: 1.
+- Successful run aggregate: snapshot writes 4; evaluated 4; created 0; updated 0; held 3; blocked 0; errors 0.
+- Scheduler: `noblesse-fx-auto-prod-weekdays`.
+- Scheduler cron: `10 10 * * 1-5`.
+- Scheduler timezone: `Asia/Seoul`.
+- Scheduler service account: `noblesse-fx-scheduler-prod@pors-piercing-pos.iam.gserviceaccount.com`.
+- Invoker scope: Job-level `roles/run.invoker` only.
+- Direct DB connection or manual SQL: No.
+- Secret payload access: No.
+
+Current state:
+
+```text
+TW_FX_PRODUCTION_ACTIVE_FREE_DAILY
+```

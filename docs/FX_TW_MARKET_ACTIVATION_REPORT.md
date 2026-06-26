@@ -74,3 +74,58 @@ Next gate:
 ```text
 APPROVE_PRODUCTION_FX_SCHEMA_PREREQUISITE_RECOVERY = YES
 ```
+
+## N49 Recovery And Production Activation
+
+- Decision: `ACTIVE`.
+- Schema recovery code fix: `c91403ea4bee030f9634038396cbdfc41779c109`.
+- Safe root cause: production was missing the prerequisite FX snapshot workflow relation before the TW activation migration.
+- Prerequisite migration Job: `noblesse-production-fx-schema-prereq-migration`.
+- Prerequisite migration execution: `noblesse-production-fx-schema-prereq-migration-9cwkd`.
+- Prerequisite migration result: succeeded and committed.
+- Prerequisite migration cleanup: one-time Job deleted after success.
+- TW migration retry Job: `noblesse-production-tw-market-migration`.
+- TW migration retry execution: `noblesse-production-tw-market-migration-28rzp`.
+- TW migration retry result: succeeded and committed.
+- TW migration cleanup: one-time Job deleted after success.
+- Direct SQL outside the approved migration runner: No.
+- Secret payload access: No.
+
+## N49 Production FX Job
+
+- Production FX image build ID: `689a5000-2788-4004-8348-e365b07139d2`.
+- Production FX image digest: `sha256:cd40d5bed3e61e1ff46d2f9105f7f171edc8029f09664b6d36c578ded1336280`.
+- Production FX Job: `noblesse-fx-auto-prod`.
+- Runtime service account: `noblesse-fx-job-prod@pors-piercing-pos.iam.gserviceaccount.com`.
+- FX secret version: `noblesse-production-exchange-rate-api-key:2`.
+- DB secret version: numeric production DB secret version `1`.
+- Job generation after image-only recovery: `2`.
+- Manual execution after recovery: `noblesse-fx-auto-prod-sqv98`.
+- Manual execution result: succeeded, exit 0.
+- Snapshot writes: 4 active currencies.
+- Evaluation aggregate: evaluated 4, created 0, updated 0, held 3, blocked 0, error 0.
+- Legacy `CN` / `CNY` changed: 0.
+- Manual records changed: 0.
+- Unexpected mutations: 0.
+
+The first production FX Job execution before the code fix stopped safely with the category `CN/CNY writes are deprecated`. The follow-up code fix excludes legacy `CN` / `CNY` policies from automatic evaluation write paths while preserving historical read compatibility.
+
+## N49 Scheduler
+
+- Cloud Scheduler API: enabled after the successful manual production run.
+- Scheduler name: `noblesse-fx-auto-prod-weekdays`.
+- State: `ENABLED`.
+- Cron: `10 10 * * 1-5`.
+- Timezone: `Asia/Seoul`.
+- Next scheduled run at creation time: `2026-06-29T01:10:00Z`.
+- Scheduler service account: `noblesse-fx-scheduler-prod@pors-piercing-pos.iam.gserviceaccount.com`.
+- Invoker scope: `roles/run.invoker` on `noblesse-fx-auto-prod` only.
+- Retry max duration: `0s`.
+- Project-wide `run.invoker` grant: No.
+- Project-wide `secretAccessor` grant: No.
+
+Final production state:
+
+```text
+TW_FX_PRODUCTION_ACTIVE_FREE_DAILY
+```

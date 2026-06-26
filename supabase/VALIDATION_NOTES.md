@@ -2148,3 +2148,23 @@ Do not record `DATABASE_URL`, password, host, port, username, or other connectio
 - Cloud Scheduler create: No.
 - Cloud activation status: `STOPPED_TW_MIGRATION_VALIDATION_FAILED`.
 - Next gate: `APPROVE_PRODUCTION_FX_SCHEMA_PREREQUISITE_RECOVERY = YES`.
+
+## N49 FX Schema Recovery And TW Production Activation
+
+- Scope: recover the missing production FX schema prerequisite, retry TW activation, deploy the production FX Job, execute it once, and create the weekday Scheduler.
+- Code fix commit: `c91403ea4bee030f9634038396cbdfc41779c109`.
+- Code fix: legacy `CN` / `CNY` policies are excluded from automatic evaluation write paths.
+- Prerequisite migration execution: `noblesse-production-fx-schema-prereq-migration-9cwkd`.
+- TW migration retry execution: `noblesse-production-tw-market-migration-28rzp`.
+- Production FX image digest: `sha256:cd40d5bed3e61e1ff46d2f9105f7f171edc8029f09664b6d36c578ded1336280`.
+- Production FX Job: `noblesse-fx-auto-prod`.
+- Successful production FX execution: `noblesse-fx-auto-prod-sqv98`.
+- Snapshot writes: 4 active currencies.
+- Evaluation aggregate: evaluated 4, created 0, updated 0, held 3, blocked 0, error 0.
+- Legacy `CN` / `CNY` changed: 0.
+- Scheduler: `noblesse-fx-auto-prod-weekdays`, `10 10 * * 1-5`, `Asia/Seoul`.
+- Scheduler invoker scope: `noblesse-fx-auto-prod` Job only.
+- Direct DB connection or manual SQL: No.
+- Secret payload access: No.
+- Raw provider payload recorded: No.
+- Production state: `TW_FX_PRODUCTION_ACTIVE_FREE_DAILY`.
