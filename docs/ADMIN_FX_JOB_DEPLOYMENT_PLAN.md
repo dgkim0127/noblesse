@@ -65,7 +65,21 @@ APPROVE_FX_PROVIDER_CREDENTIAL_PROVISIONING = YES
 - Job execution: No
 - Scheduler creation: No
 - External provider fetch: No
-- Provider credential creation: No
+- Provider credential creation: Secret container created, secret version pending operator input
 - Production activation: No
 - DB migration execution: No
-- Secret/IAM mutation: No
+- Secret/IAM mutation: Dedicated FX secret container and secret-level accessor prepared
+
+## N45 Partial Infrastructure Status
+
+N45 added a no-write provider canary script and built an immutable backend image for it. The dedicated production FX runtime service account and Secret Manager container exist, but no API key version has been added and no Cloud Run FX Job has been created.
+
+Report:
+
+- `docs/FX_INFRA_NO_WRITE_CANARY_REPORT.md`
+
+Next gate:
+
+```text
+APPROVE_FX_NO_WRITE_CANARY_CONTINUE = YES
+```
