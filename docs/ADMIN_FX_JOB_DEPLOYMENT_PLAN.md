@@ -171,3 +171,18 @@ TW_FX_PRODUCTION_ACTIVE_FREE_DAILY
 - No sensitive credential value or raw provider payload was recorded in docs.
 - Scheduler remained enabled; no pause or rollback was performed.
 - Follow-up: add richer scheduled-run observability for explicit provider request count, `sourceEffectiveAt`, `fetchedAt`, and skipped/noop/legacy-excluded counters.
+
+## N53 Observability Hardening Deployment
+
+- Source SHA: `40779df5e7338d72a8885beb4495dfb9200bc364`.
+- Build ID: `ec67fad5-ec6f-442e-a25e-4fb8d6de4cd7`.
+- Image digest: `sha256:8ade166e8b17d3351f870520fb1214d702d2ad42b602f06fa17357e2a8519da1`.
+- No-write Job image update: `noblesse-fx-provider-check-prod`, image digest only.
+- Production FX Job image update: `noblesse-fx-auto-prod`, image digest only.
+- Preserved settings: service accounts, command/args, secret versions, DB secret binding, Cloud SQL attachment, task count, retries, timeout, and Scheduler.
+- Scheduler state: `ENABLED`, `10 10 * * 1-5`, `Asia/Seoul`, retry max duration `0s`.
+- No-write execution after update: `noblesse-fx-provider-check-prod-dfncj`.
+- No-write validation: provider request count `1`, source and fetch timestamps emitted, required currencies `KRW`, `JPY`, `USD`, `TWD`, timestamp/completeness/rate-direction validations passed, DB initialized false.
+- Production FX manual execution: No.
+- Next production validation: inspect the next scheduled `noblesse-fx-auto-prod` execution for `fx_provider_result` and `fx_evaluation_summary`.
+- Security: no API key value, secret payload, DB URL, authorization header value, raw provider response, full rate bundle, or product/price dump is recorded.

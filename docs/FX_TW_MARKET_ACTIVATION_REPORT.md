@@ -150,3 +150,23 @@ TW_FX_PRODUCTION_ACTIVE_FREE_DAILY
 - Security check: no API key value, secret payload, DB credential, service account credential JSON, authorization header, or raw provider response was copied into repo/docs.
 - Scheduler action: remained enabled; no pause was required.
 - Observability follow-up: scheduled execution logs expose aggregate write counts but do not emit explicit `sourceEffectiveAt`, `fetchedAt`, skipped/noop/legacy-excluded counts, or a provider request count field.
+
+## N53 FX Observability Hardening
+
+- Decision: `PASS`.
+- Source SHA: `40779df5e7338d72a8885beb4495dfb9200bc364`.
+- Build ID: `ec67fad5-ec6f-442e-a25e-4fb8d6de4cd7`.
+- Image digest: `sha256:8ade166e8b17d3351f870520fb1214d702d2ad42b602f06fa17357e2a8519da1`.
+- Updated Jobs: `noblesse-fx-provider-check-prod`, `noblesse-fx-auto-prod`.
+- Changed Cloud Run field: image digest only.
+- Structured provider fields: `providerRequestCount`, `sourceEffectiveAt`, `fetchedAt`, `sourceAgeSeconds`, `requiredCurrencies`, validation statuses, runtime job metadata.
+- Structured evaluation fields: `skipped`, `noop`, `legacyExcluded`, `aggregateSum`, `aggregateMatchesEvaluated`, and mutation guard counters.
+- Aggregate equation: `evaluated = created + updated + held + blocked + skipped + noop + legacyExcluded + error`.
+- No-write validation execution: `noblesse-fx-provider-check-prod-dfncj`.
+- No-write validation result: passed, one provider request, required currencies `KRW`, `JPY`, `USD`, `TWD`, DB initialization false, no snapshot/product/price mutation.
+- Production FX manual execution: No.
+- Scheduler: `noblesse-fx-auto-prod-weekdays` remained enabled and unchanged.
+- Secret payload access: No.
+- Direct DB connection or manual SQL: No.
+- Credential or raw provider payload recorded in docs: No.
+- Follow-up: verify the new production aggregate fields after the next scheduled execution.
