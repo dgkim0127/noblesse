@@ -2,6 +2,7 @@ import { getEnv } from "../config/env.js";
 import { createPool } from "../db/pool.js";
 import { createAdminFxQueries } from "../db/queries/adminFxQueries.js";
 import { createAdminFxService } from "../services/adminFxService.js";
+import { createFxEvaluationSummaryLog } from "../fx/fxObservability.js";
 
 export function assertFxAutoPriceJobAllowed(env = process.env) {
   if (env.ALLOW_FX_AUTO_PRICE_JOB !== "true") {
@@ -30,6 +31,7 @@ export async function runFxAutoPriceEvaluation({ env = process.env, pool } = {})
     heldCount: result.run?.heldCount ?? 0,
     blockedCount: result.run?.blockedCount ?? 0,
     errorCount: result.run?.errorCount ?? 0,
+    terminalCounters: result.terminalCounters,
     auditLogIdReturned: Boolean(result.auditLogId)
   };
 }
@@ -39,14 +41,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     .then((result) => {
       console.log(JSON.stringify({
         status: "completed",
-        runCreated: result.runCreated,
-        evaluatedCount: result.evaluatedCount,
-        createdCount: result.createdCount,
-        updatedCount: result.updatedCount,
-        heldCount: result.heldCount,
-        blockedCount: result.blockedCount,
-        errorCount: result.errorCount,
-        auditLogIdReturned: result.auditLogIdReturned
+        ...createFxEvaluationSummaryLog(result)
       }));
     })
     .catch((error) => {

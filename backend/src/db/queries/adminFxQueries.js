@@ -1,5 +1,6 @@
 import { evaluateFxAutoPolicy, getFxAutoThresholds } from "../../fx/fxAutoPriceEngine.js";
 import { FX_PRICING_MODES } from "../../fx/fxAutoPricePolicy.js";
+import { buildTerminalCounters, buildTerminalCountersFromRun } from "../../fx/fxObservability.js";
 
 function assertPool(pool) {
   if (!pool) {
@@ -61,6 +62,21 @@ function mapRun(row) {
     completedAt: row.completed_at,
     createdAt: row.created_at
   };
+}
+
+function classifyEvaluationBucket(row, evaluation) {
+  if (evaluation.status === "created") return "created";
+  if (evaluation.status === "updated") return "updated";
+  if (evaluation.status === "held_deadband") return "held";
+  if (evaluation.status?.startsWith("blocked") || evaluation.status === "paused") return "blocked";
+  if (evaluation.status === "error") return "error";
+  if (
+    row.pricing_mode === FX_PRICING_MODES.MANUAL_FIXED ||
+    ["manual_fixed", "reference_updated"].includes(evaluation.action)
+  ) {
+    return "skipped";
+  }
+  return "noop";
 }
 
 function mapPolicy(row) {
@@ -284,9 +300,21 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
       "select * from public.fx_auto_price_runs where idempotency_key = $1 limit 1",
       [runIdempotencyKey]
     );
-    return { run: mapRun(existingRun.rows[0]), auditLogId: null, skipped: true };
+    const run = mapRun(existingRun.rows[0]);
+    return { run, auditLogId: null, skipped: true, terminalCounters: buildTerminalCountersFromRun(run) };
   }
   const run = runResult.rows[0];
+  const legacyResult = await client.query(
+    `
+      select count(*)::int as legacy_excluded_count
+      from public.product_price_policies ppp
+      where ppp.pricing_mode in ('manual_fixed', 'fx_auto')
+        and (ppp.target_market = 'CN' or ppp.target_currency = 'CNY')
+        and ($1::uuid is null or ppp.product_id = $1)
+    `,
+    [productId]
+  );
+  const legacyExcludedCount = Number(legacyResult.rows[0]?.legacy_excluded_count || 0);
 
   const policyResult = await client.query(
     `
@@ -324,7 +352,17 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
     [productId]
   );
 
-  const counters = { evaluated: 0, created: 0, updated: 0, held: 0, blocked: 0, error: 0 };
+  const counters = {
+    evaluated: legacyExcludedCount,
+    created: 0,
+    updated: 0,
+    held: 0,
+    blocked: 0,
+    skipped: 0,
+    noop: 0,
+    legacyExcluded: legacyExcludedCount,
+    error: 0
+  };
   for (const row of policyResult.rows) {
     counters.evaluated += 1;
     const policy = {
@@ -465,11 +503,7 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
       }
     }
 
-    if (evaluation.status === "created") counters.created += 1;
-    else if (evaluation.status === "updated") counters.updated += 1;
-    else if (evaluation.status === "held_deadband") counters.held += 1;
-    else if (evaluation.status?.startsWith("blocked")) counters.blocked += 1;
-    else if (evaluation.status === "error") counters.error += 1;
+    counters[classifyEvaluationBucket(row, evaluation)] += 1;
 
     await client.query(
       `
@@ -575,6 +609,7 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
     `,
     [run.id, counters.evaluated, counters.created, counters.updated, counters.held, counters.blocked, counters.error]
   );
+  const terminalCounters = buildTerminalCounters(counters);
 
   const auditLogId = await insertAudit(
     client,
@@ -585,7 +620,7 @@ async function runEvaluationTransaction(client, { triggerType, productId = null,
     counters,
     actor
   );
-  return { run: mapRun(completedResult.rows[0]), auditLogId };
+  return { run: mapRun(completedResult.rows[0]), auditLogId, terminalCounters };
 }
 
 export function createAdminFxQueries(pool) {

@@ -3,6 +3,7 @@ import { createAdminFxQueries } from "../db/queries/adminFxQueries.js";
 import { getEnv } from "../config/env.js";
 import { createAdminFxService } from "../services/adminFxService.js";
 import { getFxProviderSnapshot } from "../fx/fxProvider.js";
+import { createFxProviderResultLog } from "../fx/fxObservability.js";
 
 export function assertFxRateFetchAllowed(env = process.env) {
   if (env.ALLOW_FX_RATE_FETCH_JOB !== "true") {
@@ -10,12 +11,17 @@ export function assertFxRateFetchAllowed(env = process.env) {
   }
 }
 
-export async function runFxRateSnapshotImport({ env = process.env, pool, fetchImpl, now } = {}) {
+export async function runFxRateSnapshotImport({ env = process.env, pool, fetchImpl = globalThis.fetch, now, logger = console.log } = {}) {
   assertFxRateFetchAllowed(env);
   const provider = env.FX_PROVIDER || "manual";
   if (provider === "manual" && !env.FX_MANUAL_PAYLOAD_JSON) {
     throw new Error("FX_MANUAL_PAYLOAD_JSON is required for manual FX import.");
   }
+  let providerRequestCount = 0;
+  const countedFetch = async (...args) => {
+    providerRequestCount += 1;
+    return fetchImpl(...args);
+  };
 
   const effectivePool = pool || createPool(getEnv());
   const service = createAdminFxService({
@@ -25,9 +31,17 @@ export async function runFxRateSnapshotImport({ env = process.env, pool, fetchIm
     provider,
     payload: env.FX_MANUAL_PAYLOAD_JSON,
     env,
-    fetchImpl,
+    fetchImpl: countedFetch,
     now
   });
+  const providerLog = createFxProviderResultLog(snapshot, {
+    mode: "production",
+    providerRequestCount,
+    env,
+    now,
+    dbInitialized: true
+  });
+  logger(JSON.stringify(providerLog));
   const result = await service.importProviderSnapshot(
     snapshot,
     {
@@ -40,7 +54,8 @@ export async function runFxRateSnapshotImport({ env = process.env, pool, fetchIm
 
   return {
     insertedCount: result.insertedCount,
-    auditLogIdReturned: Boolean(result.auditLogId)
+    auditLogIdReturned: Boolean(result.auditLogId),
+    providerResult: providerLog
   };
 }
 

@@ -4,6 +4,7 @@ import { join } from "node:path";
 import test from "node:test";
 import { assertFxAutoPriceJobAllowed } from "../src/scripts/evaluateFxAutoPrices.js";
 import { runFxProviderCheck } from "../src/scripts/checkFxProvider.js";
+import { buildTerminalCounters, createFxEvaluationSummaryLog } from "../src/fx/fxObservability.js";
 
 test("FX auto price job guard is fail-closed", () => {
   assert.throws(() => assertFxAutoPriceJobAllowed({}), /disabled/);
@@ -77,7 +78,13 @@ test("FX provider check canary is no-write and returns sanitized validation meta
   assert.equal(result.timestampValidation, "passed");
   assert.equal(result.completenessValidation, "passed");
   assert.equal(result.rateDirectionValidation, "passed");
-  assert.equal(result.externalRequestCount, 1);
+  assert.equal(result.event, "fx_provider_result");
+  assert.equal(result.mode, "no_write");
+  assert.equal(result.providerRequestCount, 1);
+  assert.equal(result.sourceEffectiveAt, new Date(sourceUnix * 1000).toISOString());
+  assert.equal(result.fetchedAt, now.toISOString());
+  assert.equal(typeof result.sourceAgeSeconds, "number");
+  assert.equal(result.dbInitialized, false);
   assert.equal(result.dbClientInitialized, false);
   assert.equal(result.dbQuery, false);
   assert.equal(result.snapshotWritten, false);
@@ -85,4 +92,62 @@ test("FX provider check canary is no-write and returns sanitized validation meta
   assert.equal(result.productMutation, false);
   assert.equal(result.priceMutation, false);
   assert.doesNotMatch(JSON.stringify(result), /test-key|Bearer|Authorization|conversion_rates/i);
+});
+
+test("FX evaluation summary emits balanced terminal buckets without sensitive data", () => {
+  const terminalCounters = buildTerminalCounters({
+    evaluated: 4,
+    created: 0,
+    updated: 0,
+    held: 3,
+    blocked: 0,
+    skipped: 1,
+    noop: 0,
+    legacyExcluded: 0,
+    error: 0
+  });
+
+  const summary = createFxEvaluationSummaryLog({
+    terminalCounters,
+    runCreated: true,
+    auditLogId: "audit-1"
+  }, {
+    env: {
+      CLOUD_RUN_JOB: "noblesse-fx-auto-prod",
+      CLOUD_RUN_EXECUTION: "execution-1"
+    }
+  });
+
+  assert.equal(summary.event, "fx_evaluation_summary");
+  assert.equal(summary.evaluated, 4);
+  assert.equal(summary.held, 3);
+  assert.equal(summary.skipped, 1);
+  assert.equal(summary.noop, 0);
+  assert.equal(summary.legacyExcluded, 0);
+  assert.equal(summary.aggregateSum, 4);
+  assert.equal(summary.aggregateMatchesEvaluated, true);
+  assert.equal(summary.manualChanged, 0);
+  assert.equal(summary.legacyCnCnyChanged, 0);
+  assert.equal(summary.ownershipMismatchChanged, 0);
+  assert.equal(summary.unexpectedMutations, 0);
+  assert.equal(summary.jobName, "noblesse-fx-auto-prod");
+  assert.equal(summary.executionId, "execution-1");
+  assert.equal(summary.auditLogIdReturned, true);
+  assert.doesNotMatch(JSON.stringify(summary), /postgres:\/\/|DATABASE_URL|password|Authorization|Bearer|conversion_rates/i);
+});
+
+test("FX evaluation summary surfaces aggregate mismatch for observability", () => {
+  const terminalCounters = buildTerminalCounters({
+    evaluated: 4,
+    created: 0,
+    updated: 0,
+    held: 3,
+    blocked: 0,
+    skipped: 0,
+    noop: 0,
+    legacyExcluded: 0,
+    error: 0
+  });
+  assert.equal(terminalCounters.aggregateSum, 3);
+  assert.equal(terminalCounters.aggregateMatchesEvaluated, false);
 });

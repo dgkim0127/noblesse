@@ -4,13 +4,12 @@ import {
   EXCHANGE_RATE_API_PROVIDER_ID,
   fetchOfficialFxRates
 } from "../fx/officialFxProvider.js";
-
-const requiredCurrencies = ["KRW", "JPY", "USD", "TWD"];
+import { FX_REQUIRED_CURRENCIES, createFxProviderResultLog } from "../fx/fxObservability.js";
 
 export async function runFxProviderCheck({ env = process.env, fetchImpl = globalThis.fetch, now } = {}) {
-  let externalRequestCount = 0;
+  let providerRequestCount = 0;
   const countedFetch = async (...args) => {
-    externalRequestCount += 1;
+    providerRequestCount += 1;
     return fetchImpl(...args);
   };
 
@@ -20,25 +19,32 @@ export async function runFxProviderCheck({ env = process.env, fetchImpl = global
     now
   });
 
-  const presentCurrencies = requiredCurrencies.filter((currency) => snapshot.rates?.[currency]);
-  const rateDirectionValid = requiredCurrencies.every((currency) => {
-    const rate = snapshot.rates?.[currency];
-    return rate?.currency === currency && Number.isFinite(rate.krwPerUnit) && rate.krwPerUnit > 0;
+  const providerLog = createFxProviderResultLog(snapshot, {
+    mode: "no_write",
+    providerRequestCount,
+    env,
+    now,
+    dbInitialized: false
   });
 
   return {
+    event: providerLog.event,
     status: "completed",
     provider: EXCHANGE_RATE_API_PROVIDER_ID,
+    mode: providerLog.mode,
+    providerRequestCount,
     baseCurrency: EXCHANGE_RATE_API_BASE_CURRENCY,
-    requiredCurrencies,
-    presentCurrencies,
-    sourceEffectiveAt: snapshot.sourceEffectiveAt,
-    fetchedAt: snapshot.fetchedAt,
-    timestampValidation: "passed",
-    completenessValidation: presentCurrencies.length === requiredCurrencies.length ? "passed" : "failed",
-    rateDirectionValidation: rateDirectionValid ? "passed" : "failed",
-    supportedCurrencyValidation: requiredCurrencies.every((currency) => CURRENCIES.includes(currency)) ? "passed" : "failed",
-    externalRequestCount,
+    requiredCurrencies: [...FX_REQUIRED_CURRENCIES],
+    sourceEffectiveAt: providerLog.sourceEffectiveAt,
+    fetchedAt: providerLog.fetchedAt,
+    sourceAgeSeconds: providerLog.sourceAgeSeconds,
+    timestampValidation: providerLog.timestampValidation,
+    completenessValidation: providerLog.completenessValidation,
+    rateDirectionValidation: providerLog.rateDirectionValidation,
+    supportedCurrencyValidation: FX_REQUIRED_CURRENCIES.every((currency) => CURRENCIES.includes(currency)) ? "passed" : "failed",
+    jobName: providerLog.jobName,
+    executionId: providerLog.executionId,
+    dbInitialized: false,
     dbClientInitialized: false,
     dbQuery: false,
     snapshotWritten: false,
@@ -54,7 +60,7 @@ function sanitizeError(error) {
     category: error?.category || "provider_check_failed",
     retryable: Boolean(error?.retryable),
     statusCode: Number.isInteger(error?.status) ? error.status : null,
-    externalRequestCount: Number.isInteger(error?.externalRequestCount) ? error.externalRequestCount : null
+    providerRequestCount: Number.isInteger(error?.providerRequestCount) ? error.providerRequestCount : null
   };
 }
 
