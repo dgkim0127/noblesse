@@ -23,6 +23,14 @@ const allowedAgreementKeys = new Set([
   "privacy_policy"
 ]);
 
+const requiredAgreementVersions = {
+  terms_of_service: "terms-v1.0",
+  buyer_terms: "buyer-terms-v1.0",
+  privacy_collection_use: "privacy-v1.0"
+};
+
+const requiredAgreementKeys = Object.keys(requiredAgreementVersions);
+
 function assertNoUnknownFields(input) {
   Object.keys(input || {}).forEach((key) => {
     if (!allowedFields.has(key)) {
@@ -69,16 +77,35 @@ function deriveMarket({ country, preferredLanguage }) {
 }
 
 function normalizeAgreements(agreements) {
-  if (!Array.isArray(agreements)) return [];
+  if (!Array.isArray(agreements)) {
+    throw validationError("Required agreement consent is missing", "AGREEMENTS_REQUIRED");
+  }
 
-  return agreements
-    .map((agreement) => ({
-      agreementKey: cleanText(agreement.agreementKey || agreement.key, 80),
+  const normalized = agreements.map((agreement) => {
+    const agreementKey = cleanText(agreement?.agreementKey || agreement?.key, 80);
+    if (!allowedAgreementKeys.has(agreementKey)) {
+      throw validationError("Unsupported agreement key");
+    }
+    return {
+      agreementKey,
       version: cleanText(agreement.version, 80),
       required: agreement.required !== false,
       accepted: agreement.accepted === true
-    }))
-    .filter((agreement) => allowedAgreementKeys.has(agreement.agreementKey));
+    };
+  });
+
+  const byKey = new Map(normalized.map((agreement) => [agreement.agreementKey, agreement]));
+  for (const key of requiredAgreementKeys) {
+    const agreement = byKey.get(key);
+    if (!agreement || agreement.version !== requiredAgreementVersions[key]) {
+      throw validationError("Required agreement consent is missing", "REQUIRED_AGREEMENT_MISSING");
+    }
+    if (agreement.accepted !== true) {
+      throw validationError("Required agreement consent must be accepted", "REQUIRED_AGREEMENT_NOT_ACCEPTED");
+    }
+  }
+
+  return normalized;
 }
 
 function normalizeInput(input = {}) {

@@ -32,8 +32,8 @@ export function unsupportedMediaType(message = "Unsupported media type") {
   return new ApiError(415, "UNSUPPORTED_MEDIA_TYPE", message);
 }
 
-export function validationError(message = "Invalid request") {
-  return new ApiError(400, "VALIDATION_ERROR", message);
+export function validationError(message = "Invalid request", code = "VALIDATION_ERROR") {
+  return new ApiError(400, code, message);
 }
 
 export function internalError(message = "Internal server error") {
