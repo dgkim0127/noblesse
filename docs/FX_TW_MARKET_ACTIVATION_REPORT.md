@@ -129,3 +129,24 @@ Final production state:
 ```text
 TW_FX_PRODUCTION_ACTIVE_FREE_DAILY
 ```
+
+## N52 First Scheduled FX Execution Check
+
+- Decision: `PASS`.
+- Check time: 2026-06-29 after the 10:10 KST Scheduler window.
+- Scheduler: `noblesse-fx-auto-prod-weekdays`, state `ENABLED`.
+- Scheduler invocation: found at `2026-06-29T01:10:00.803251Z`, HTTP status 200.
+- Scheduled execution: `noblesse-fx-auto-prod-fwx4l`.
+- Trigger source: `noblesse-fx-scheduler-prod@pors-piercing-pos.iam.gserviceaccount.com`.
+- Execution result: completed successfully, task count 1, succeeded count 1, failed count 0, task attempt 0.
+- Runtime service account: `noblesse-fx-job-prod@pors-piercing-pos.iam.gserviceaccount.com`.
+- FX image digest: `sha256:cd40d5bed3e61e1ff46d2f9105f7f171edc8029f09664b6d36c578ded1336280`.
+- FX secret version: `noblesse-production-exchange-rate-api-key:2`.
+- Snapshot result: completed, inserted count 4, audit log returned.
+- Evaluation result: completed, evaluated 4, created 0, updated 0, held 3, blocked 0, errors 0, audit log returned.
+- Legacy CN/CNY changed: 0.
+- Manual records changed: 0.
+- Unexpected mutations: 0.
+- Security check: no API key value, secret payload, DB credential, service account credential JSON, authorization header, or raw provider response was copied into repo/docs.
+- Scheduler action: remained enabled; no pause was required.
+- Observability follow-up: scheduled execution logs expose aggregate write counts but do not emit explicit `sourceEffectiveAt`, `fetchedAt`, skipped/noop/legacy-excluded counts, or a provider request count field.

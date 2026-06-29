@@ -159,3 +159,15 @@ Current state:
 ```text
 TW_FX_PRODUCTION_ACTIVE_FREE_DAILY
 ```
+
+## N52 First Scheduled Execution
+
+- First scheduled run after activation was observed on 2026-06-29 at the 10:10 KST Scheduler window.
+- Scheduler invocation returned HTTP 200 and created execution `noblesse-fx-auto-prod-fwx4l`.
+- Execution completed successfully with one task, zero failed tasks, and task attempt 0.
+- Snapshot import completed with 4 active currency rows inserted.
+- Auto evaluation completed with evaluated 4, created 0, updated 0, held 3, blocked 0, errors 0.
+- No legacy CN/CNY, manual, ownership mismatch, or unexpected mutation signal was observed in the available aggregate logs.
+- No sensitive credential value or raw provider payload was recorded in docs.
+- Scheduler remained enabled; no pause or rollback was performed.
+- Follow-up: add richer scheduled-run observability for explicit provider request count, `sourceEffectiveAt`, `fetchedAt`, and skipped/noop/legacy-excluded counters.
