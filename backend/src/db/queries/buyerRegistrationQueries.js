@@ -18,8 +18,8 @@ function mapBuyerProfile(row) {
   };
 }
 
-function isMissingLifecycleColumnError(error) {
-  return error?.code === "42703" && /account_status|verification_status/i.test(error?.message || "");
+function isMissingCompatibleColumnError(error) {
+  return error?.code === "42703" && /account_status|verification_status|submitted_at/i.test(error?.message || "");
 }
 
 export function createBuyerRegistrationQueries(pool) {
@@ -175,10 +175,10 @@ export function createBuyerRegistrationQueries(pool) {
                 sales_channel,
                 business_number,
                 assigned_market,
-                currency,
-                submitted_at
+                currency
+                ${columnSupport.hasBuyerSubmittedAt ? ", submitted_at" : ""}
               )
-              values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now())
+              values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12${columnSupport.hasBuyerSubmittedAt ? ", now()" : ""})
               on conflict (user_id) do update set
                 company_name = excluded.company_name,
                 contact_name = excluded.contact_name,
@@ -190,9 +190,8 @@ export function createBuyerRegistrationQueries(pool) {
                 sales_channel = excluded.sales_channel,
                 business_number = excluded.business_number,
                 assigned_market = excluded.assigned_market,
-                currency = excluded.currency,
-                submitted_at = now(),
-                updated_at = now()
+                currency = excluded.currency
+                ${columnSupport.hasBuyerSubmittedAt ? ", submitted_at = now(), updated_at = now()" : ""}
               returning
                 id as buyer_id,
                 user_id,
@@ -203,7 +202,7 @@ export function createBuyerRegistrationQueries(pool) {
                 assigned_market,
                 currency,
                 null::text as verification_status,
-                submitted_at
+                ${columnSupport.hasBuyerSubmittedAt ? "submitted_at" : "null::timestamptz as submitted_at"}
             `,
             [
               user.id,
@@ -292,20 +291,45 @@ export function createBuyerRegistrationQueries(pool) {
         }
       };
 
-      try {
-        return await registerWithColumnSupport({
+      const attempts = [
+        {
           hasAccountStatus: true,
-          hasVerificationStatus: true
-        });
-      } catch (error) {
-        if (!isMissingLifecycleColumnError(error)) {
-          throw error;
-        }
-        return registerWithColumnSupport({
+          hasVerificationStatus: true,
+          hasBuyerSubmittedAt: true
+        },
+        {
           hasAccountStatus: false,
-          hasVerificationStatus: false
-        });
+          hasVerificationStatus: false,
+          hasBuyerSubmittedAt: true
+        },
+        {
+          hasAccountStatus: false,
+          hasVerificationStatus: false,
+          hasBuyerSubmittedAt: false
+        }
+      ];
+
+      let lastCompatibleColumnError = null;
+      for (const attempt of attempts) {
+        try {
+          return await registerWithColumnSupport(attempt);
+        } catch (error) {
+          if (!isMissingCompatibleColumnError(error)) {
+            throw error;
+          }
+          lastCompatibleColumnError = error;
+        }
       }
+
+      if (lastCompatibleColumnError) {
+        throw lastCompatibleColumnError;
+      }
+
+      return registerWithColumnSupport({
+        hasAccountStatus: false,
+        hasVerificationStatus: false,
+        hasBuyerSubmittedAt: false
+      });
     }
   };
 }

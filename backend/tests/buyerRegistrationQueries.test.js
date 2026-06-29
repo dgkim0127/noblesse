@@ -27,7 +27,7 @@ const input = {
   ]
 };
 
-function createPool({ hasAccountStatus, hasVerificationStatus }) {
+function createPool({ hasAccountStatus, hasVerificationStatus, hasBuyerSubmittedAt = true }) {
   const calls = [];
   const client = {
     async query(sql, params = []) {
@@ -43,6 +43,11 @@ function createPool({ hasAccountStatus, hasVerificationStatus }) {
       }
       if (!hasVerificationStatus && /\bverification_status\b/i.test(compactSql) && !/null::text as verification_status/i.test(compactSql)) {
         const error = new Error('column "verification_status" does not exist');
+        error.code = "42703";
+        throw error;
+      }
+      if (!hasBuyerSubmittedAt && /\bsubmitted_at\b/i.test(compactSql) && !/null::timestamptz as submitted_at/i.test(compactSql)) {
+        const error = new Error('column "submitted_at" does not exist');
         error.code = "42703";
         throw error;
       }
@@ -73,7 +78,7 @@ function createPool({ hasAccountStatus, hasVerificationStatus }) {
             assigned_market: input.assignedMarket,
             currency: input.currency,
             verification_status: hasVerificationStatus ? "pending" : null,
-            submitted_at: new Date("2026-06-29T00:00:00Z")
+            submitted_at: hasBuyerSubmittedAt ? new Date("2026-06-29T00:00:00Z") : null
           }]
         };
       }
@@ -124,6 +129,30 @@ test("buyer registration query falls back when lifecycle columns are absent", as
   assert.match(mutationSql, /null::text as account_status/i);
   assert.match(mutationSql, /null::text as verification_status/i);
   assert.equal(calls.filter((call) => String(call.sql).trim() === "rollback").length, 1);
+  assert.equal(calls.some((call) => String(call.sql).trim() === "commit"), true);
+});
+
+test("buyer registration query falls back when buyer submitted timestamp is absent", async () => {
+  const { calls, pool } = createPool({
+    hasAccountStatus: false,
+    hasVerificationStatus: false,
+    hasBuyerSubmittedAt: false
+  });
+  const queries = createBuyerRegistrationQueries(pool);
+
+  const result = await queries.registerBuyer(identity, input);
+  const commitIndex = calls.findIndex((call) => String(call.sql).trim() === "commit");
+  const finalAttemptSql = calls
+    .slice(calls.findLastIndex((call, index) => index < commitIndex && String(call.sql).trim() === "begin"), commitIndex)
+    .map((call) => String(call.sql))
+    .join("\n");
+
+  assert.equal(result.profile.accountStatus, "active");
+  assert.equal(result.profile.verificationStatus, "pending");
+  assert.equal(result.profile.submittedAt, null);
+  assert.match(finalAttemptSql, /null::timestamptz as submitted_at/i);
+  assert.doesNotMatch(finalAttemptSql, /submitted_at = now\(\)/i);
+  assert.equal(calls.filter((call) => String(call.sql).trim() === "rollback").length, 2);
   assert.equal(calls.some((call) => String(call.sql).trim() === "commit"), true);
 });
 
