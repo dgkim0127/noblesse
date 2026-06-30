@@ -225,3 +225,75 @@ Required seed data still needed:
 - Decision: STOPPED_ADMIN_CATALOG_WRITE_UNAVAILABLE
 - Stop reason: the current production admin session is authenticated but does not have the catalog.write permission required to render the product creation form.
 - Next gate: grant catalog.write through the approved admin-permission workflow or use an approved production admin account with catalog.write, then rerun the product seed canary approval.
+
+## N59 Execution Attempt
+- Task: N59-CATALOG-WRITE-PERMISSION-AND-PRODUCT-DETAIL-CANARY-1
+- Starting HEAD: 20fd7ea92c2aac65788a09a7d4cb022665af8027
+- origin/main: 20fd7ea92c2aac65788a09a7d4cb022665af8027
+- Working tree before attempt: clean
+- Operator-approved productCode: NB-4WAY-GREEN-CLOVER-BARBELL
+- Category: 바벨
+- Published target: Yes
+- Options: 오알, 핑크, 골드
+- KR price target: 1800 KRW manual
+- JP/US/TW price target: fx_auto from 1800 KRW
+- CN/CNY active price book target: No
+
+### N59 Permission Model Audit
+- App-level permission workflow found: Yes
+- Permission model: admin role plus admin_permission_overrides
+- Delegable permission relevant to this task: catalog.write
+- Existing management UI/API found: /admin/team and /api/admin/admins/:userId/permission-overrides/:permissionKey
+- Grant authority required by UI/API: owner admin with admins.manage
+- Direct SQL required: No
+- Cloud IAM required: No
+- Token/cookie extraction required: No
+- Additional permissions identified as potentially needed: none before category existence is known
+
+### N59 Admin Access Check
+- Production admin team URL checked: https://noblesse.web.app/kr/admin/team
+- Current production browser session authenticated: No
+- Permission workflow used: No
+- catalog.write granted: No
+- Product creation form visible: No
+- Stop screen: 관리자 권한이 필요합니다
+- Credential printed/logged: No
+- Token/cookie extracted: No
+- Browser saved password: No
+- Password rotation follow-up required: Yes
+
+### N59 Image Check
+- Uploaded ZIP found: Yes
+- ZIP extraction: OK
+- Expected image files present: Yes
+- Image decode: 6 of 6 OK
+- Image dimensions: 1200 x 1200 each
+- Image storage mutation: Not executed
+
+### N59 API Canary Before Mutation
+- GET /api/catalog/products: 200
+- Production product count: 0
+- GET /api/catalog/products/NB-4WAY-GREEN-CLOVER-BARBELL: 404
+
+### N59 Safety Result
+- Product created: No
+- Category created: No
+- Image uploaded: No
+- Price book created: No
+- Direct SQL used: No
+- DB migration applied: No
+- Backend deployed: No
+- Firebase Hosting deployed: No
+- FX Job changed: No
+- FX Job manually executed: No
+- Scheduler changed: No
+- Secret/IAM changed: No
+- Production order/payment data created: No
+- N56 canary buyer approved: No
+- CNY numeric copied to TWD: No
+- Legacy CN/CNY active price book created: No
+
+### N59 Decision
+- Decision: STOPPED_ADMIN_LOGIN_FAILED
+- Stop reason: the approved app-level permission workflow exists, but the current production browser session is not authenticated, so catalog.write cannot be granted and product creation cannot proceed.
+- Next gate: operator logs into https://noblesse.web.app with an owner admin account that has admins.manage, then rerun APPROVE_CATALOG_WRITE_PERMISSION_AND_PRODUCT_DETAIL_CANARY = YES.
