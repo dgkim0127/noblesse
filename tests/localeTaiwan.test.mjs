@@ -27,8 +27,10 @@ test('legacy Chinese locale identifiers migrate to zh-TW', () => {
     assert.equal(getLocaleContentKey(legacyLocale), 'cn')
   }
   assert.equal(getLocaleFromPathname('/cn/products'), 'zh-TW')
+  assert.equal(getLocaleFromPathname('/zh-TW/products/NB-4WAY-GREEN-CLOVER-BARBELL'), 'zh-TW')
   assert.equal(getLocaleFromPathname('/zh-CN/register'), 'zh-TW')
   assert.equal(buildLocalizedPath('/products?tag=new', 'cn', true), '/zh-TW/products?tag=new')
+  assert.equal(buildLocalizedPath('/products/NB-4WAY-GREEN-CLOVER-BARBELL', 'zh-TW', true), '/zh-TW/products/NB-4WAY-GREEN-CLOVER-BARBELL')
   assert.equal(languagePreferenceKey, 'noblesse:locale')
 })
 

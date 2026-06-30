@@ -17,7 +17,7 @@ import { ProductDetailPage } from './pages/ProductDetailPage'
 import { ProductsPage } from './pages/ProductsPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { RequestQuotePage } from './pages/RequestQuotePage'
-import { buildLocalizedPath, canonicalizeLocale, isLocalePathSegment, stripLocalePrefix } from './utils/locale'
+import { buildLocalizedPath, canonicalizeLocale, isLocalePathSegment, stripLocalePrefix, taiwanLocale } from './utils/locale'
 
 const lazyNamed = (loader, exportName) => lazy(() => loader().then((module) => ({ default: module[exportName] })))
 
@@ -70,6 +70,7 @@ function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/products" element={<ProductsPage />} />
       <Route path="/products/:productId" element={<ProductDetailPage />} />
+      <Route path={`/${taiwanLocale}/products/:productId`} element={<ProductDetailPage />} />
       <Route path="/inquiry-list" element={<InquiryListPage />} />
       <Route path="/request-quote" element={<RequestQuotePage />} />
       <Route path="/my-inquiries" element={<MyInquiriesPage />} />
