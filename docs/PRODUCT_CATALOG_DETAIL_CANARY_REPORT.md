@@ -503,3 +503,54 @@ Required seed data still needed:
 - Place the approved product image ZIP under operator-input/ and rerun the fast-track approval.
 - Required ZIP source: 4-way green clover barbell product image package with six 1200x1200 images.
 - Next gate: APPROVE_RBAC_OWNER_CATALOG_PRODUCT_FAST_TRACK = YES
+
+## N67C Fast-track Preflight Stop
+- Task: N67C-RBAC-OWNER-CATALOG-PRODUCT-FAST-TRACK-1
+- Starting HEAD: 564e5bbb45dcf63edb6eaf0bfd7004b17695d2d2
+- Decision: STOPPED_PRODUCT_IMAGE_SOURCE_MISSING
+- Stop stage: product ZIP precheck before cloud, DB, IAM, migration, or owner recovery mutation
+- C:\noblesse-main-work used as Git repository: Yes
+- D:\noblesse-primary-work used as read-only ZIP source only: Yes
+- D:\noblesse-primary-work git operations: No
+- Expected ZIP source directory: D:\noblesse-primary-work\operator-input
+- ZIP source directory status: Missing
+- Product ZIP committed: No
+- Extracted images committed: No
+
+### N67C Safety Evidence
+- /api/health: 200
+- /api/catalog/products: 200
+- Product count: 0
+- /api/admin/me no token: 401
+- NB-4WAY-GREEN-CLOVER-BARBELL detail: 404
+- Production Cloud SQL backup: enabled
+- Production Cloud SQL PITR: enabled
+- Production Cloud SQL deletion protection: enabled
+- FX Scheduler: noblesse-fx-auto-prod-weekdays
+- FX Scheduler state: ENABLED
+- FX Scheduler cron: 10 10 * * 1-5
+- FX secret version: 2 enabled
+- N63 failed owner recovery Job rerun: No
+- New migration Job created: No
+- New owner recovery Job created: No
+- New product seed Job created: No
+
+### N67C Mutation Result
+- RBAC/lifecycle migration executed: No
+- Owner recovery executed: No
+- Temporary Firebase Auth Viewer revoked: No
+- catalog.write granted: No
+- Product created: No
+- Category created: No
+- Image uploaded: No
+- Price-book created: No
+- Buyer approved: No
+- Direct SQL used: No
+- Secret/IAM changed in N67C: No
+- FX/Scheduler changed: No
+
+### N67C Next Step
+- Create D:\noblesse-primary-work\operator-input.
+- Place the approved product ZIP in that directory.
+- Rerun the fast-track approval after the ZIP is present.
+- Next gate: APPROVE_RBAC_OWNER_CATALOG_PRODUCT_FAST_TRACK = YES
