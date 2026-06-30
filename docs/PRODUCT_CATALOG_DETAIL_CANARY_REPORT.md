@@ -356,3 +356,50 @@ Required seed data still needed:
 - Revoke method if recovery later succeeds: use recovered owner session in /kr/admin/team; secondary path requires a separately approved audited revoke Job.
 - Rollback performed: No owner was granted, so no revoke was performed.
 - Next gate: approve production owner schema recovery or schema compatibility diagnosis before owner recovery is retried. Do not rerun the owner recovery Job without a new explicit approval.
+
+## N64 Owner Schema Compatibility Diagnosis
+- Task: N64-OWNER-SCHEMA-COMPATIBILITY-AND-RECOVERY-1
+- Starting HEAD: 76038bf841fa42372465b6a33423f5402c93bcf5
+- Diagnosis code commit: 9d2591ecdf976e1f6e569d64711a160654ad6a25
+- Diagnosis Job: noblesse-owner-schema-diagnosis-once
+- Diagnosis execution: noblesse-owner-schema-diagnosis-once-6trlf
+- Diagnosis image digest: sha256:f6515fad50d943f6afa9b6c5a0d9b72d7a5bc27e534be1251011ac25e1acf2b1
+- Diagnosis transaction: read-only
+- Diagnosis retry count: 0
+- Diagnosis Job cleanup: deleted after evidence capture
+
+### N64 Schema Result
+- users role/status/auth_uid surface: present
+- users account_status column: missing
+- buyers verification_status column: missing
+- admin_profiles table: missing
+- admin_permission_overrides table: missing
+- app_schema_migrations table: present
+- RBAC/lifecycle migration row: not applied
+- Existing unrelated migration rows: present
+- Active approved admin aggregate count: 2
+- Active approved owner aggregate count: 0
+- Sanitized category: MISSING_RBAC_OWNER_MIGRATION
+
+### N64 Decision
+- Selected path: C - stopped before mutation
+- Stop reason: the committed RBAC prerequisite migration exists, but it includes users/buyers lifecycle backfill and therefore is not safe to apply under this task's no buyer/customer data change and no historical data rewrite boundaries.
+- Legacy owner support selected: No. The legacy users.role/status surface can authenticate admins, but it cannot represent owner/admins.manage semantics required by the current admin permission model.
+- Owner recovery retried: No
+- Owner granted: No
+- Explicit admins.manage grant: No
+- catalog.write granted: No
+- Other permissions granted: No
+- Product created: No
+- Category created: No
+- Image uploaded: No
+- Price-book created: No
+- N56 canary buyer approved: No
+- FX changed: No
+- Secret/IAM changed: No
+- Direct SQL used: No
+- DB URL/secret/password/token recorded: No
+- Password rotation status: Pending manual rotation before product catalog work continues
+- Rollback performed: No owner was granted, so no revoke was performed.
+- Revoke method if future recovery succeeds: use recovered owner session in /kr/admin/team; secondary path requires a separately approved audited revoke Job.
+- Next gate: approve a production RBAC/lifecycle schema migration recovery with explicit buyer lifecycle backfill acceptance, or approve a separate owner-schema-only migration design before owner recovery is retried.
