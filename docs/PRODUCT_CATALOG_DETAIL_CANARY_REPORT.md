@@ -754,3 +754,59 @@ Required seed data still needed:
 - Production state: OWNER_RECOVERED, CATALOG_WRITE_READY, PRODUCT_DETAIL_OPERATIONAL
 - Password rotation status: pending_after_recovery
 - Next: catalog image/content polish and admin buyer approval workflow verification.
+
+## N69 Product Detail Route and FX Finalization
+
+- Date: 2026-06-30 KST
+- Starting commit: `bb61a40bc4de691a3218f7686d8bf0a1fcb65c49`
+- Route fix commit: `b5bcd4a8cf0acc6538040cb155943eea6e8309df`
+- Firebase Hosting target: `noblesse`
+- Firebase Hosting deploy: completed once; backend deploy was not run
+- Route fix: explicit canonical `/zh-TW/products/:productId` product detail route added
+- Regression coverage: Taiwan locale product detail path and localized path generation covered
+
+### N69 API Verification
+
+- GET `/api/health`: 200
+- GET `/api/catalog/products`: 200
+- GET `/api/catalog/products/NB-4WAY-GREEN-CLOVER-BARBELL`: 200
+- Product code: `NB-4WAY-GREEN-CLOVER-BARBELL`
+- Public detail image references: present
+- Public guest price behavior: approved-only prices are not exposed
+- CN/CNY active signal: absent
+- Internal cost, supplier/private fields, DB secret/config: not exposed
+
+### N69 Frontend Canary
+
+- `/products/NB-4WAY-GREEN-CLOVER-BARBELL`: detail renders after catalog load
+- `/zh-TW/products/NB-4WAY-GREEN-CLOVER-BARBELL`: detail renders with `documentElement.lang = zh-TW`
+- `/cn/products/NB-4WAY-GREEN-CLOVER-BARBELL?ref=legacy#details`: canonicalizes to `/zh-TW/...` and preserves query/hash
+- `/products/NB-NONEXISTENT-PRODUCT-0000`: not-found state renders
+- Product title/code visible: Yes
+- Product images visible: Yes
+- TWD public state: visible as approval/pending copy, not as guest price
+- CN/CNY active option visible: No
+- Console errors: 0
+- Horizontal overflow: No
+
+### N69 FX Manual Finalization
+
+- Manual FX Job executed: Yes, exactly once
+- Job: `noblesse-fx-auto-prod`
+- Execution ID: `noblesse-fx-auto-prod-w9znl`
+- Execution result: succeeded
+- Task result: one succeeded task, zero failed tasks observed
+- Provider request count: not emitted in available execution logs
+- Snapshot/evaluation aggregate counters: not emitted in available execution logs
+- Public product API still hides approved-only JP/US/TW prices for guests
+- Scheduler changed: No
+- Secret Manager changed: No
+- IAM changed: No
+- Direct DB connection or manual SQL: No
+- CN/CNY mutation signal: No
+- Unexpected product/category/image mutation: No
+
+### N69 Decision
+
+- Decision: PRODUCT_DETAIL_OPERATIONAL
+- Remaining security follow-up: password rotation status remains `pending_after_recovery` until confirmed complete.

@@ -200,3 +200,20 @@ TW_FX_PRODUCTION_ACTIVE_FREE_DAILY
 - Manual, legacy CN/CNY, ownership mismatch, and unexpected mutation counters: 0.
 - Scheduler paused: No.
 - FX Job, Scheduler, Secret Manager, IAM, DB schema, product catalog data, product prices, and catalog permissions changed in N60: No.
+
+## N69 Manual Product Detail Price Finalization
+
+- Date: 2026-06-30 KST
+- Reason: finalize product detail route verification after the N68 product seed and confirm FX auto path remains operational.
+- Manual execution count in N69: 1
+- Job: `noblesse-fx-auto-prod`
+- Execution: `noblesse-fx-auto-prod-w9znl`
+- Result: succeeded with one task and zero failed tasks observed.
+- Command/env overrides: No
+- Scheduler invocation or configuration change: No
+- Secret Manager change: No
+- IAM change: No
+- Direct DB connection or manual SQL: No
+- Public product API behavior after run: approved-only JP/US/TW prices remain hidden from guest detail responses.
+- Legacy CN/CNY activation signal: absent.
+- Follow-up: scheduled-run observability remains the source for provider request and aggregate counter evidence when logs emit `fx_provider_result` and `fx_evaluation_summary`.
