@@ -620,3 +620,137 @@ Required seed data still needed:
 ### N67D Next Step
 - Use an owner-safe RBAC migration path that does not auto-grant owner before explicit target recovery, or provide evidence that the existing migration's automatic owner backfill would target only the approved owner account.
 - Next gate: approve an owner-safe RBAC/lifecycle migration variant or a read-only preflight proving the committed migration cannot auto-owner a non-target account.
+
+## N68 Owner-safe RBAC, Owner Recovery, and First Product Canary
+- Task: N68-OWNER-SAFE-RBAC-MIGRATION-OWNER-CATALOG-PRODUCT-1
+- Starting HEAD: 901fedb18986e259cf2b8dab47e4e7cd34d593a9
+- Final code HEAD before report: 70320e5b690323edebafeacb7275f1fbf20364c5
+- Repository used for Git: C:\noblesse-main-work
+- D:\noblesse-primary-work usage: read-only ZIP source only
+- Product ZIP committed: No
+- Extracted images committed: No
+
+### N68 Product Image Precheck
+- Approved ZIP source found: Yes
+- Expected image files present: Yes
+- Image count: 6
+- Image decode: 6 of 6 OK
+- Image dimensions: 1200 x 1200 each
+- Sensitive file/string scan in ZIP payload: No matches
+- Public product code: NB-4WAY-GREEN-CLOVER-BARBELL
+
+### N68 Unsafe Migration Diagnosis
+- Original migration reviewed: backend/migrations/20260622_admin_rbac_account_lifecycle.sql
+- Auto-owner branch exists: Yes
+- Active approved admin aggregate before owner recovery: 2
+- Owner count before owner recovery: 0
+- Unsafe before target owner: Yes
+- Decision: isolate owner-safe schema bootstrap before running the original migration.
+
+### N68 Owner-safe Bootstrap
+- Code added: Yes
+- Code commit: c58b2aa fix(admin): add owner-safe rbac bootstrap
+- Owner-safe bootstrap image digest recorded in Cloud Build: Yes
+- Job: noblesse-owner-safe-rbac-bootstrap-once
+- Execution ID: noblesse-owner-safe-rbac-bootstrap-once-4zfn6
+- Execution result: Succeeded
+- Direct SQL used from local terminal: No
+- Owner count after bootstrap: 0
+- Product/catalog changed by bootstrap: No
+- Buyer approval changed by bootstrap: No
+
+### N68 Owner Recovery
+- Audit-log fix commit: 70320e5 fix(admin): stabilize owner recovery audit log
+- Successful owner recovery job: noblesse-owner-recovery-once-v4
+- Successful owner recovery execution: noblesse-owner-recovery-once-v4-6w27d
+- Sanitized category: OWNER_ADMIN_RECOVERY_COMPLETE
+- Grant: owner
+- Explicit admins.manage override: No
+- Owner count after recovery: 1
+- Owner target: approved target account
+- Transaction committed: Yes
+- Audit logged: Yes
+- Previous failed one-time owner recovery jobs cleanup: deleted after successful recovery evidence was recorded
+
+### N68 Original Migration Alignment
+- Original RBAC/lifecycle migration applied after owner existed: Yes
+- Migration job: noblesse-rbac-lifecycle-migration-once-n68
+- Migration execution: noblesse-rbac-lifecycle-migration-once-n68-nrwrm
+- Migration result: Succeeded
+- Migration transaction: committed
+- Verification job: noblesse-rbac-lifecycle-verify-n68
+- Verification execution: noblesse-rbac-lifecycle-verify-n68-mzc4q
+- Checksum matched: Yes
+- Owner count after migration: 1
+- Permission override count: 0
+- Unrelated migration applied: No
+
+### N68 Temporary IAM
+- Temporary Firebase Auth Viewer existed before owner recovery: Yes
+- Temporary Firebase Auth Viewer revoked after owner recovery: Yes
+- Broad IAM granted: No
+- Service account key created: No
+
+### N68 Product Seed
+- Product seed method: existing backend admin/service path in one-time Cloud Run Job
+- Seed image v1 result: failed before mutation due seed script fail-closed guard false positive
+- Seed v1 product/category/image/price mutation: No
+- Seed image v2 result: succeeded
+- Seed job: noblesse-product-seed-n68-once-v2
+- Seed execution: noblesse-product-seed-n68-once-v2-jkh9z
+- Sanitized category: PRODUCT_SEED_COMPLETE
+- Product created: Yes
+- Product code: NB-4WAY-GREEN-CLOVER-BARBELL
+- Category created: Yes
+- Image count: 6
+- KR price created: Yes
+- JP/US/TW fx_auto policy count: 3
+- CN/CNY active: No
+- CNY copied to TWD: No
+- Job cleanup: deleted after evidence capture, including the pre-mutation v1 guard-failure Job
+
+### N68 API Canary
+- GET /api/catalog/products: 200
+- Product count after seed: 1
+- Seeded product appears in list: Yes
+- GET /api/catalog/products/NB-4WAY-GREEN-CLOVER-BARBELL: 200
+- Missing product route: 404
+- Detail image references: 6
+- Internal cost exposed: No
+- DB secret/config exposed: No
+- Legacy CN/CNY signal exposed: No
+- Public guest price behavior: price not exposed in detail API response
+
+### N68 Frontend Canary
+- /products/NB-4WAY-GREEN-CLOVER-BARBELL: detail renders
+- /cn/products/NB-4WAY-GREEN-CLOVER-BARBELL?ref=legacy#details: detail renders
+- /zh-TW/products/NB-4WAY-GREEN-CLOVER-BARBELL: current app routing falls back to home, so /cn remains the compatibility route
+- /products/NB-NONEXISTENT-PRODUCT-0000: not-found behavior renders
+- Product title/code visible on supported detail routes: Yes
+- Product images visible on supported detail routes: Yes
+- Category visible on supported detail routes: Yes
+- Price block: public guest policy does not expose approved-only price
+- TWD status: fx_auto policy created; public guest route does not expose approved-only price
+- CN/CNY active option visible: No
+- Console errors: 0
+- Horizontal overflow: No
+
+### N68 Safety Result
+- Direct SQL used: No
+- DB URL/password/token/cookie output: No
+- Secret payload changed: No
+- Secret payload read: No
+- Firebase Auth user deleted: No
+- Buyer approved: No
+- Order/payment data created: No
+- FX Job manually executed: No
+- Scheduler changed: No
+- Backend service updated: No
+- Firebase Hosting deployed: No
+- Temporary files committed: No
+
+### N68 Decision
+- Decision: PRODUCT_DETAIL_OPERATIONAL_TWD_PENDING_NEXT_FX_RUN
+- Production state: OWNER_RECOVERED, CATALOG_WRITE_READY, PRODUCT_DETAIL_OPERATIONAL
+- Password rotation status: pending_after_recovery
+- Next: catalog image/content polish and admin buyer approval workflow verification.
