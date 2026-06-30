@@ -33,6 +33,30 @@ test("login identifier query fails closed for duplicate local-parts", async () =
   assert.equal(await queries.findActiveLoginEmailByIdentifier("admin"), null);
 });
 
+test("login identifier query falls back when account_status column is absent", async () => {
+  const calls = [];
+  const queries = createLoginIdentifierQueries({
+    async query(sql, params) {
+      calls.push({ sql, params });
+      if (calls.length === 1) {
+        const error = new Error('column "account_status" does not exist');
+        error.code = "42703";
+        throw error;
+      }
+      return { rows: [{ email: "admin@example.test" }] };
+    }
+  });
+
+  const email = await queries.findActiveLoginEmailByIdentifier("Admin");
+
+  assert.equal(email, "admin@example.test");
+  assert.equal(calls.length, 2);
+  assert.match(calls[0].sql, /account_status/);
+  assert.doesNotMatch(calls[1].sql, /account_status/);
+  assert.match(calls[1].sql, /status <> 'blocked'/);
+  assert.deepEqual(calls[1].params, ["admin"]);
+});
+
 test("login identifier service rejects unsafe input and password fields", async () => {
   const service = createLoginIdentifierService({
     queries: {
