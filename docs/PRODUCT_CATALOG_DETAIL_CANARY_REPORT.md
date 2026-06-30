@@ -164,3 +164,64 @@ Required seed data still needed:
 - Decision: STOPPED_ADMIN_PRODUCT_CREATE_UNAVAILABLE
 - Stop reason: the approved production product data and image ZIP are available, but the current browser environment does not expose an approved production admin session capable of catalog write actions.
 - Next gate: operator logs into https://noblesse.web.app with an approved production admin account that has catalog.write, then rerun APPROVE_PRODUCT_CATALOG_SEED_AND_DETAIL_CANARY = YES.
+
+## N58D Execution Attempt
+- Task: N58D-PRODUCT-CATALOG-ADMIN-CREDENTIAL-SEED-AND-DETAIL-CANARY-1
+- Starting HEAD: 93a9fc670c149ef5edb70762440138c4ec55b729
+- origin/main: 93a9fc670c149ef5edb70762440138c4ec55b729
+- Working tree before attempt: clean
+- Operator-approved productCode: NB-4WAY-GREEN-CLOVER-BARBELL
+- Category: 바벨
+- Published target: Yes
+- Options: 오알, 핑크, 골드
+- KR price target: 1800 KRW manual
+- JP/US/TW price target: fx_auto from 1800 KRW
+- CN/CNY active price book target: No
+
+### N58D Admin Access Check
+- Production admin URL checked: https://noblesse.web.app/kr/admin/catalog/new
+- Production admin session present: Yes
+- Production admin API mode: 운영 API
+- catalog.write permission available: No
+- Product creation form visible: No
+- Stop screen: 권한이 필요합니다
+- Credential printed/logged: No
+- Token/cookie extracted: No
+- Browser saved password: No
+- Password rotation follow-up required: Yes
+
+### N58D Image Check
+- Uploaded ZIP found: Yes
+- ZIP extraction: OK
+- Expected image files present: Yes
+- Image decode: 6 of 6 OK
+- Image dimensions: 1200 x 1200 each
+- Image storage mutation: Not executed
+
+### N58D API Canary Before Mutation
+- GET /api/catalog/products: 200
+- Production product count: 0
+- GET /api/catalog/products/NB-4WAY-GREEN-CLOVER-BARBELL: 404
+
+### N58D Safety Result
+- Product created: No
+- Category created: No
+- Image uploaded: No
+- Price book created: No
+- Direct SQL used: No
+- DB migration applied: No
+- Backend deployed: No
+- Firebase Hosting deployed: No
+- FX Job changed: No
+- FX Job manually executed: No
+- Scheduler changed: No
+- Secret/IAM changed: No
+- Production order/payment data created: No
+- N56 canary buyer approved: No
+- CNY numeric copied to TWD: No
+- Legacy CN/CNY active price book created: No
+
+### N58D Decision
+- Decision: STOPPED_ADMIN_CATALOG_WRITE_UNAVAILABLE
+- Stop reason: the current production admin session is authenticated but does not have the catalog.write permission required to render the product creation form.
+- Next gate: grant catalog.write through the approved admin-permission workflow or use an approved production admin account with catalog.write, then rerun the product seed canary approval.
