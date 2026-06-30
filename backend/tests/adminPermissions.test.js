@@ -210,6 +210,87 @@ test("admin list query falls back when account_status column is absent", async (
   assert.match(calls[1].sql, /case when u\.status = 'blocked'/);
 });
 
+test("admin access query falls back when admin profile table is absent", async () => {
+  const calls = [];
+  const client = {
+    async query(sql, params) {
+      calls.push({ sql, params });
+      if (calls.length === 1) {
+        const error = new Error('relation "public.admin_profiles" does not exist');
+        error.code = "42P01";
+        throw error;
+      }
+      if (/from public\.users u/i.test(sql)) {
+        return {
+          rowCount: 1,
+          rows: [{
+            user_id: "admin-1",
+            email: "admin@example.test",
+            role: "admin",
+            status: "approved",
+            account_status: "active",
+            admin_role: "operator"
+          }]
+        };
+      }
+      return { rowCount: 0, rows: [] };
+    },
+    release() {}
+  };
+  const queries = createAdminAccessQueries({
+    async connect() {
+      return client;
+    }
+  });
+
+  const admin = await queries.getAdminUserByAuthUid("admin-uid");
+
+  assert.equal(admin.adminRole, "operator");
+  assert.equal(admin.accountStatus, "active");
+  assert.match(calls[0].sql, /admin_profiles/);
+  assert.ok(calls.some((call) => !/admin_profiles/.test(call.sql)));
+});
+
+test("admin access query falls back when permission overrides table is absent", async () => {
+  const calls = [];
+  const client = {
+    async query(sql, params) {
+      calls.push({ sql, params });
+      if (/from public\.users u/i.test(sql)) {
+        return {
+          rowCount: 1,
+          rows: [{
+            user_id: "admin-1",
+            email: "admin@example.test",
+            role: "admin",
+            status: "approved",
+            account_status: "active",
+            admin_role: "operator"
+          }]
+        };
+      }
+      if (/from public\.admin_permission_overrides/i.test(sql)) {
+        const error = new Error('relation "public.admin_permission_overrides" does not exist');
+        error.code = "42P01";
+        throw error;
+      }
+      return { rowCount: 0, rows: [] };
+    },
+    release() {}
+  };
+  const queries = createAdminAccessQueries({
+    async connect() {
+      return client;
+    }
+  });
+
+  const admin = await queries.getAdminUserByAuthUid("admin-uid");
+
+  assert.equal(admin.adminRole, "operator");
+  assert.deepEqual(admin.permissionOverrides, []);
+  assert.ok(admin.permissions.includes("dashboard.read"));
+});
+
 test("requirePermission returns 403 and image parser is not called when catalog.write is missing", async () => {
   let parserCalled = false;
   const app = express();
