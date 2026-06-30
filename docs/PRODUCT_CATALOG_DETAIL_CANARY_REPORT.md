@@ -554,3 +554,69 @@ Required seed data still needed:
 - Place the approved product ZIP in that directory.
 - Rerun the fast-track approval after the ZIP is present.
 - Next gate: APPROVE_RBAC_OWNER_CATALOG_PRODUCT_FAST_TRACK = YES
+
+## N67D Fast-track Safety Stop
+- Task: N67D-RBAC-OWNER-CATALOG-PRODUCT-FAST-TRACK-1
+- Starting HEAD: a784ce77ff853b4263fd838fc6bc526a6be0c41c
+- origin/main: a784ce77ff853b4263fd838fc6bc526a6be0c41c
+- Decision: STOPPED_UNSAFE_MIGRATION_SCOPE
+- Stop stage: migration source review before production DB mutation
+- C:\noblesse-main-work used as Git repository: Yes
+- D:\noblesse-primary-work used as read-only ZIP source only: Yes
+- D:\noblesse-primary-work git operations: No
+
+### N67D Image Precheck
+- Approved ZIP source found: Yes
+- ZIP source path: D:\noblesse-primary-work\operator-input
+- ZIP copied to temporary validation folder only: Yes
+- Expected image files present: Yes
+- Image count: 6
+- Image decode: 6 of 6 OK
+- Image dimensions: 1200 x 1200 each
+- Sensitive file/string scan in ZIP payload: No matches
+- Product ZIP committed: No
+- Extracted images committed: No
+
+### N67D Production Preflight Evidence
+- /api/health: 200
+- /api/catalog/products: 200
+- Product count: 0
+- /api/admin/me no token: 401
+- NB-4WAY-GREEN-CLOVER-BARBELL detail: 404
+- Production Cloud SQL state: RUNNABLE
+- Production Cloud SQL backup: enabled
+- Production Cloud SQL PITR: enabled
+- Production Cloud SQL deletion protection: enabled
+- FX Scheduler: noblesse-fx-auto-prod-weekdays
+- FX Scheduler state: ENABLED
+- FX Scheduler cron: 10 10 * * 1-5
+- FX secret version: 2 enabled
+- N63 failed owner recovery Job rerun: No
+- New migration Job created: No
+- New owner recovery Job created: No
+- New product seed Job created: No
+
+### N67D Migration Scope Review
+- Required migration file reviewed: backend/migrations/20260622_admin_rbac_account_lifecycle.sql
+- Additive schema scope found: users account_status, buyers verification_status lifecycle fields, admin_profiles, admin_permission_overrides, indexes, constraints, and triggers.
+- Safety conflict found: the migration can automatically backfill one active approved admin as owner when admin_profiles is empty and no owner exists.
+- N67D required post-migration invariant: owner count before explicit owner recovery = 0.
+- Reason for stop: applying the committed migration could create an owner before the approved target-owner recovery step, which would violate the exact owner-recovery sequence and could grant owner to an unverified non-target admin.
+
+### N67D Mutation Result
+- RBAC/lifecycle migration executed: No
+- Owner recovery executed: No
+- Temporary Firebase Auth Viewer revoked: No
+- catalog.write granted: No
+- Product created: No
+- Category created: No
+- Image uploaded: No
+- Price-book created: No
+- Buyer approved: No
+- Direct SQL used: No
+- Secret/IAM changed in N67D: No
+- FX/Scheduler changed: No
+
+### N67D Next Step
+- Use an owner-safe RBAC migration path that does not auto-grant owner before explicit target recovery, or provide evidence that the existing migration's automatic owner backfill would target only the approved owner account.
+- Next gate: approve an owner-safe RBAC/lifecycle migration variant or a read-only preflight proving the committed migration cannot auto-owner a non-target account.
