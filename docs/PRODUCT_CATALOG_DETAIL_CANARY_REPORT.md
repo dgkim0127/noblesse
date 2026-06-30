@@ -403,3 +403,61 @@ Required seed data still needed:
 - Rollback performed: No owner was granted, so no revoke was performed.
 - Revoke method if future recovery succeeds: use recovered owner session in /kr/admin/team; secondary path requires a separately approved audited revoke Job.
 - Next gate: approve a production RBAC/lifecycle schema migration recovery with explicit buyer lifecycle backfill acceptance, or approve a separate owner-schema-only migration design before owner recovery is retried.
+
+## N66 Owner Target Validation IAM Fix
+- Task: N66-OWNER-TARGET-FIREBASE-AUTH-VIEWER-IAM-FIX-1
+- Starting HEAD: c5012207f1a98a3b40f83d34b70059a52da7f0eb
+- Runtime service account: noblesse-production-runtime@pors-piercing-pos.iam.gserviceaccount.com
+- IAM grant: roles/firebaseauth.viewer
+- IAM scope: project pors-piercing-pos
+- Required capability: firebaseauth.users.get
+- Broad Firebase/Auth/Admin role granted: No
+- Service account key created: No
+- Target masked identifier: t***n
+- Target account type: operator-controlled production admin account
+- Canary account used: No
+- Password rotation status: pending_after_recovery
+
+### N66 Validation Execution
+- Validation Job: noblesse-owner-target-validation-once-v2
+- Image digest: sha256:de92123d644c8229468f99c992d52fc565931b3c1413d8e63a2e6ac721aaaa77
+- Execution ID: noblesse-owner-target-validation-once-v2-ppnb8
+- Exit status: Succeeded
+- Retry count: 0
+- Job cleanup: deleted after evidence capture
+- Firebase Auth lookup: succeeded
+- DB correlation: read-only transaction
+- Sanitized category: OWNER_TARGET_READY
+- Target matched exactly one: Yes
+- Target eligible for owner recovery: Yes
+- Target already owner: No
+- DB write performed: No
+
+### N66 Safety Result
+- RBAC/lifecycle migration applied: No
+- Owner granted: No
+- catalog.write granted: No
+- Product created: No
+- Category created: No
+- Image uploaded: No
+- Price-book created: No
+- Buyer approved: No
+- FX changed: No
+- Scheduler changed: No
+- Secret Manager changed: No
+- Direct SQL used: No
+- Password/token/cookie/DB credential recorded: No
+- Temporary Firebase Auth Viewer retained: Yes
+- Revoke follow-up: revoke roles/firebaseauth.viewer from the runtime service account after the owner recovery job no longer needs Firebase Auth lookup.
+
+### N66 Smoke
+- /api/health: 200
+- /api/catalog/products: 200
+- Product count: 0
+- /api/admin/me no token: 401
+- NB-4WAY-GREEN-CLOVER-BARBELL detail: 404
+
+### N66 Decision
+- Decision: OWNER_TARGET_VALIDATED
+- Stop reason: target validation is complete, but this task intentionally does not run RBAC/lifecycle migration or owner recovery.
+- Next gate: APPROVE_RBAC_LIFECYCLE_MIGRATION_AND_OWNER_RECOVERY = YES
