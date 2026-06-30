@@ -19,7 +19,20 @@ function hasProductionRuntimeMarker(source = {}) {
   return markers.some((value) => value === "production" || value.includes("prod"));
 }
 
-function isUnsafeCanaryIdentifier(identifier) {
+const approvedTargetAccountType = "operator-controlled production admin account";
+
+function isApprovedExplicitTarget(source, identifier) {
+  return (
+    identifier === "testadmin" &&
+    String(source.TARGET_ACCOUNT_TYPE || "").trim() === approvedTargetAccountType &&
+    source.CANARY_ACCOUNT_USED === "NO"
+  );
+}
+
+function isUnsafeCanaryIdentifier(identifier, source = {}) {
+  if (isApprovedExplicitTarget(source, identifier)) {
+    return false;
+  }
   return /(^|[^a-z0-9])(canary|n56|prod[-_]?uat|production[-_]?uat|staging|testbuyer|testadmin)([^a-z0-9]|$)/i.test(
     identifier
   );
@@ -53,7 +66,7 @@ export function validateOwnerAdminRecoveryEnv(source = process.env) {
   if (targetIdentifier.length > 254 || /[\s"'`]/.test(targetIdentifier)) {
     return { ok: false, category: "INVALID_TARGET_IDENTIFIER" };
   }
-  if (isUnsafeCanaryIdentifier(targetIdentifier)) {
+  if (isUnsafeCanaryIdentifier(targetIdentifier, source)) {
     return { ok: false, category: "UNSAFE_OWNER_TARGET" };
   }
 

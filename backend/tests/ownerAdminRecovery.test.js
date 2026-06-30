@@ -107,6 +107,19 @@ test("owner recovery env rejects canary or test target patterns", () => {
   assert.deepEqual(result, { ok: false, category: "UNSAFE_OWNER_TARGET" });
 });
 
+test("owner recovery env allows explicitly approved production testadmin target", () => {
+  const result = validateOwnerAdminRecoveryEnv(
+    productionSource({
+      TARGET_OWNER_IDENTIFIER: "testadmin",
+      TARGET_ACCOUNT_TYPE: "operator-controlled production admin account",
+      CANARY_ACCOUNT_USED: "NO"
+    })
+  );
+
+  assert.equal(result.ok, true);
+  assert.equal(result.targetIdentifier, "testadmin");
+});
+
 test("owner recovery service stops on unknown target before Firebase lookup", async () => {
   const { calls, service } = createService({
     targetResult: {

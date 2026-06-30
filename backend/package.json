@@ -10,6 +10,7 @@
     "bootstrap:production-admin-account": "node src/scripts/bootstrapProductionAdminAccount.js",
     "diagnose:owner-schema": "node src/scripts/diagnoseOwnerSchema.js",
     "recover:owner-admin": "node src/scripts/recoverOwnerAdminAccount.js",
+    "validate:owner-target": "node src/scripts/validateOwnerTarget.js",
     "fx:provider-check": "node src/scripts/checkFxProvider.js",
     "fx:fetch-rate-snapshots": "node src/scripts/fetchFxRateSnapshots.js",
     "fx:evaluate-auto-prices": "node src/scripts/evaluateFxAutoPrices.js",
