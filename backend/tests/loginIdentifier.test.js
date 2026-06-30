@@ -143,3 +143,65 @@ test("POST /api/auth/resolve-login-identifier maps unknown ID to generic auth fa
   assert.equal(response.status, 401);
   assert.equal(response.body.error.code, "UNAUTHORIZED");
 });
+
+test("malformed JSON maps to safe bad request without changing auth route behavior", async () => {
+  const app = createApp({
+    env: { nodeEnv: "test", isProduction: false, allowedOrigins: [] },
+    services: {
+      auth: createLoginIdentifierService({
+        queries: {
+          async findActiveLoginEmailByIdentifier() {
+            return null;
+          }
+        }
+      }),
+      catalog: {
+        async listProducts() {
+          return [];
+        }
+      }
+    }
+  });
+  const errors = [];
+  const originalError = console.error;
+  console.error = (...args) => {
+    errors.push(args);
+  };
+  try {
+    const malformedResponse = await request(app, "/api/auth/resolve-login-identifier", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: '{"identifier":'
+    });
+
+    assert.equal(malformedResponse.status, 400);
+    assert.equal(malformedResponse.body.error.code, "INVALID_JSON");
+    assert.match(malformedResponse.body.error.requestId, /.+/);
+    assert.doesNotMatch(JSON.stringify(malformedResponse.body), /SyntaxError|stack|identifier|password|token|secret/i);
+    assert.equal(errors.length, 0);
+
+    const unknownResponse = await request(app, "/api/auth/resolve-login-identifier", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ identifier: "missing" })
+    });
+    assert.equal(unknownResponse.status, 401);
+    assert.equal(unknownResponse.body.error.code, "UNAUTHORIZED");
+
+    const buyerResponse = await request(app, "/api/buyer/me");
+    assert.equal(buyerResponse.status, 401);
+    assert.equal(buyerResponse.body.error.code, "UNAUTHORIZED");
+
+    const adminResponse = await request(app, "/api/admin/me");
+    assert.equal(adminResponse.status, 401);
+    assert.equal(adminResponse.body.error.code, "UNAUTHORIZED");
+
+    const healthResponse = await request(app, "/api/health");
+    assert.equal(healthResponse.status, 200);
+
+    const catalogResponse = await request(app, "/api/catalog/products");
+    assert.equal(catalogResponse.status, 200);
+  } finally {
+    console.error = originalError;
+  }
+});
