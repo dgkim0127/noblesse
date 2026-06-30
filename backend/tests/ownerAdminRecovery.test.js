@@ -417,6 +417,13 @@ test("owner recovery mutation grants owner role only and writes audit log", asyn
   assert.equal(texts.includes("begin"), true);
   assert.equal(texts.some((text) => text.startsWith("insert into public.admin_profiles")), true);
   assert.equal(texts.some((text) => text.startsWith("insert into public.audit_logs")), true);
+  const auditCall = fake.calls.find((call) =>
+    String(call.sql).toLowerCase().startsWith("insert into public.audit_logs")
+  );
+  assert.match(auditCall.sql, /target_id,\s*before_snapshot/i);
+  assert.match(auditCall.sql, /values \(\$1, 'system'.*\$5, \$2::jsonb/is);
+  assert.equal(auditCall.params.length, 5);
+  assert.equal(auditCall.params[4], String(targetUserId));
   assert.equal(texts.some((text) => text.includes("admin_permission_overrides")), false);
   assert.equal(texts.some((text) => text.includes("catalog.write")), false);
   assert.equal(texts.includes("commit"), true);

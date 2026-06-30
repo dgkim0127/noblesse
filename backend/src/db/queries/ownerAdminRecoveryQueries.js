@@ -189,13 +189,14 @@ export function createOwnerAdminRecoveryQueries(pool) {
                 actor_user_id, actor_role, action, target_table, target_id,
                 before_snapshot, after_snapshot, request_id
               )
-              values ($1, 'system', 'admin.owner_recovery.break_glass', 'users', $1::text, $2::jsonb, $3::jsonb, $4)
+              values ($1, 'system', 'admin.owner_recovery.break_glass', 'users', $5, $2::jsonb, $3::jsonb, $4)
             `,
             [
               targetUserId,
               { adminRole: previousAdminRole },
               { adminRole: "owner", reason: recoveryReason },
-              `owner-recovery-${Date.now()}`
+              `owner-recovery-${Date.now()}`,
+              String(targetUserId)
             ]
           );
         }
