@@ -170,3 +170,29 @@ TW_FX_PRODUCTION_ACTIVE_FREE_DAILY
 - Direct DB connection or manual SQL: No.
 - Credential or raw provider payload recorded in docs: No.
 - Follow-up: verify the new production aggregate fields after the next scheduled execution.
+
+## N60 Scheduled Observability Verification
+
+- Decision: `PASS`.
+- Scheduled window: 2026-06-30 10:10 KST.
+- Scheduler: `noblesse-fx-auto-prod-weekdays`, state `ENABLED`.
+- Scheduler cron/timezone: `10 10 * * 1-5`, `Asia/Seoul`.
+- Scheduler service account: `noblesse-fx-scheduler-prod@pors-piercing-pos.iam.gserviceaccount.com`.
+- Scheduled execution: `noblesse-fx-auto-prod-gzrkh`.
+- Execution result: succeeded, task count 1, succeeded count 1, task attempt 0.
+- Runtime service account: `noblesse-fx-job-prod@pors-piercing-pos.iam.gserviceaccount.com`.
+- FX image digest: `sha256:8ade166e8b17d3351f870520fb1214d702d2ad42b602f06fa17357e2a8519da1`.
+- FX secret version: numeric version `2`.
+- Provider structured event: `fx_provider_result`.
+- Provider request count: 1.
+- Required currencies: `KRW`, `JPY`, `USD`, `TWD`.
+- Source and fetch timestamps: present.
+- Timestamp, completeness, and rate-direction validation: passed.
+- Evaluation structured event: `fx_evaluation_summary`.
+- Aggregate equation matched: Yes.
+- Manual records changed: 0.
+- Legacy CN/CNY changed: 0.
+- Ownership mismatch changed: 0.
+- Unexpected mutations: 0.
+- Scheduler action: No pause required.
+- Security: no API key, authorization header, secret payload, DB credential, service account JSON, raw provider response, full rate bundle, or customer/product dump was recorded.

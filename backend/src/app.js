@@ -16,11 +16,13 @@ import { createAdminProductQueries } from "./db/queries/adminProductQueries.js";
 import { createAdminQuoteQueries } from "./db/queries/adminQuoteQueries.js";
 import { createBuyerInquiryQueries } from "./db/queries/buyerInquiryQueries.js";
 import { createBuyerRegistrationQueries } from "./db/queries/buyerRegistrationQueries.js";
+import { createLoginIdentifierQueries } from "./db/queries/loginIdentifierQueries.js";
 import * as catalogQueries from "./db/queries/catalogQueries.js";
 import * as buyerQueries from "./db/queries/buyerQueries.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { requestId } from "./middleware/requestId.js";
 import { createAdminRoutes } from "./routes/adminRoutes.js";
+import { createAuthRoutes } from "./routes/authRoutes.js";
 import { createBuyerRoutes } from "./routes/buyerRoutes.js";
 import { createCatalogRoutes } from "./routes/catalogRoutes.js";
 import { createHealthRoutes } from "./routes/healthRoutes.js";
@@ -42,6 +44,7 @@ import { createBuyerInquiryService } from "./services/buyerInquiryService.js";
 import { createBuyerRegistrationService } from "./services/buyerRegistrationService.js";
 import { createBuyerService } from "./services/buyerService.js";
 import { createCatalogService } from "./services/catalogService.js";
+import { createLoginIdentifierService } from "./services/loginIdentifierService.js";
 
 function buildCorsOptions(env) {
   if (!env.allowedOrigins.length) {
@@ -92,6 +95,11 @@ export function createApp(options = {}) {
       options.services?.buyerInquiries ||
       createBuyerInquiryService({
         queries: options.queries?.buyerInquiries || createBuyerInquiryQueries(pool)
+      }),
+    auth:
+      options.services?.auth ||
+      createLoginIdentifierService({
+        queries: options.queries?.auth || createLoginIdentifierQueries(pool)
       }),
     admin: {
       access:
@@ -170,6 +178,7 @@ export function createApp(options = {}) {
   app.use(express.json({ limit: "1mb" }));
 
   app.use("/api/health", createHealthRoutes());
+  app.use("/api/auth", createAuthRoutes({ loginIdentifierService: services.auth }));
   app.use("/api/catalog", createCatalogRoutes({ catalogService: services.catalog, mediaService }));
   app.use(
     "/api/buyer",

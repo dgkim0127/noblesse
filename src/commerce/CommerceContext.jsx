@@ -233,7 +233,7 @@ export function CommerceProvider({ children }) {
     setAuthError('')
 
     try {
-      const credential = await signInWithCredentials(identifier, password, { remember })
+      const credential = await signInWithCredentials(identifier, password, { remember, apiBaseUrl: runtimeConfig.apiBaseUrl })
       const token = await getUserIdToken(credential.user, true)
       const nextState = await loadAuthenticatedCommerceState({
         apiBaseUrl: runtimeConfig.apiBaseUrl,

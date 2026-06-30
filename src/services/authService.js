@@ -7,8 +7,8 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth'
-import { auth, hasFirebaseConfig } from '../firebase'
-import { normalizeSignInIdentifier } from './authIdentifiers'
+import { auth, hasFirebaseConfig } from '../firebase.js'
+import { resolveEmailForSignIn } from './loginIdentifierResolver.js'
 
 function requireAuth() {
   if (!hasFirebaseConfig || !auth) {
@@ -32,10 +32,10 @@ export function subscribeAuthState(onChange) {
   return onAuthStateChanged(auth, onChange)
 }
 
-export async function signInWithCredentials(identifier, password, { remember = true } = {}) {
+export async function signInWithCredentials(identifier, password, { remember = true, apiBaseUrl = '/api' } = {}) {
   const clientAuth = requireAuth()
-  const email = normalizeSignInIdentifier(identifier)
   const safePassword = String(password || '')
+  const email = await resolveEmailForSignIn(identifier, { apiBaseUrl })
 
   if (!email || !safePassword) {
     const error = new Error('ID and password are required.')

@@ -9,8 +9,8 @@ const loginPageCopy = {
   kr: {
     eyebrow: '거래처 로그인',
     summary: '승인된 거래처는 거래 조건, 견적 리스트, 견적 요청 기능을 사용할 수 있습니다. 견적 요청은 최종 주문이 아닙니다.',
-    identifier: '아이디',
-    identifierPlaceholder: '아이디',
+    identifier: '아이디 또는 이메일',
+    identifierPlaceholder: '아이디 또는 이메일을 입력하세요',
     password: '비밀번호',
     passwordPlaceholder: '비밀번호',
     autoLogin: '자동 로그인',
@@ -23,8 +23,8 @@ const loginPageCopy = {
   en: {
     eyebrow: 'Buyer login',
     summary: 'Approved buyers can view trade terms, inquiry lists, and request quotes. Quote requests are not final orders.',
-    identifier: 'ID',
-    identifierPlaceholder: 'ID',
+    identifier: 'ID or email',
+    identifierPlaceholder: 'Enter ID or email',
     password: 'Password',
     passwordPlaceholder: 'Password',
     autoLogin: 'Auto login',
@@ -37,8 +37,8 @@ const loginPageCopy = {
   jp: {
     eyebrow: '取引先ログイン',
     summary: '承認済みの取引先は、取引条件、見積もりリスト、見積もり依頼機能を利用できます。見積もり依頼は最終注文ではありません。',
-    identifier: 'ID',
-    identifierPlaceholder: 'ID',
+    identifier: 'ID またはメール',
+    identifierPlaceholder: 'ID またはメールを入力',
     password: 'パスワード',
     passwordPlaceholder: 'パスワード',
     autoLogin: '自動ログイン',
@@ -51,8 +51,8 @@ const loginPageCopy = {
   cn: {
     eyebrow: '客户登录',
     summary: '已批准的客户可以查看交易条件、询价列表并提交报价请求。报价请求不是最终订单。',
-    identifier: 'ID',
-    identifierPlaceholder: 'ID',
+    identifier: 'ID 或电子邮箱',
+    identifierPlaceholder: '请输入 ID 或电子邮箱',
     password: '密码',
     passwordPlaceholder: '密码',
     autoLogin: '自动登录',

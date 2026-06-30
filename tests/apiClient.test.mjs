@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createBuyerApi } from "../src/api/buyerApi.js";
+import { createAuthApi } from "../src/api/authApi.js";
 import { createApiClient } from "../src/api/client.js";
 import { createCatalogApi } from "../src/api/catalogApi.js";
 import { ApiClientError } from "../src/api/errors.js";
@@ -208,6 +209,28 @@ test("buyer API calls price and inquiry endpoints with token", async () => {
   assert.equal(calls[4].options.method, "POST");
   assert.equal(calls[4].options.token, "buyer-token");
   assert.equal(calls[4].options.body.companyName, "Buyer Company");
+});
+
+test("auth API resolves login identifier without sending password", async () => {
+  const calls = [];
+  const authApi = createAuthApi({
+    async apiFetch(path, options) {
+      calls.push({ path, options });
+      return { data: { data: { email: "admin@example.test" } } };
+    }
+  });
+
+  const email = await authApi.resolveLoginIdentifier("admin");
+
+  assert.equal(email, "admin@example.test");
+  assert.deepEqual(calls, [{
+    path: "/auth/resolve-login-identifier",
+    options: {
+      method: "POST",
+      body: { identifier: "admin" }
+    }
+  }]);
+  assert.equal("password" in calls[0].options.body, false);
 });
 
 test("catalog adapter does not invent protected price fields", async () => {

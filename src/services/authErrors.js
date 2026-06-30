@@ -3,7 +3,7 @@ import { resolveLocaleCopy } from '../utils/locale.js'
 const loginErrorMessages = {
   kr: {
     config: 'Firebase 로그인 설정이 필요합니다.',
-    invalidCredentials: '아이디 또는 비밀번호를 확인해주세요.',
+    invalidCredentials: '아이디 또는 비밀번호를 확인해 주세요.',
     fallback: '로그인에 실패했습니다. 계정을 확인해주세요.',
   },
   en: {
@@ -26,6 +26,8 @@ const loginErrorMessages = {
 const invalidCredentialCodes = new Set([
   'auth/invalid-credential',
   'auth/invalid-email',
+  'VALIDATION_ERROR',
+  'UNAUTHORIZED',
   'auth/user-not-found',
   'auth/wrong-password',
 ])

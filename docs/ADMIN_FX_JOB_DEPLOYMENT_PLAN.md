@@ -186,3 +186,17 @@ TW_FX_PRODUCTION_ACTIVE_FREE_DAILY
 - Production FX manual execution: No.
 - Next production validation: inspect the next scheduled `noblesse-fx-auto-prod` execution for `fx_provider_result` and `fx_evaluation_summary`.
 - Security: no API key value, secret payload, DB URL, authorization header value, raw provider response, full rate bundle, or product/price dump is recorded.
+
+## N60 Scheduled Production Verification
+
+- Latest scheduled production run verified after N53 observability hardening: Yes.
+- Execution: `noblesse-fx-auto-prod-gzrkh`.
+- Trigger source: Cloud Scheduler service account.
+- Result: succeeded with one task and zero failed tasks.
+- Image digest matched N53 observability image: Yes.
+- Provider request count: 1.
+- Required currencies: `KRW`, `JPY`, `USD`, `TWD`.
+- Evaluation aggregate matched terminal counters: Yes.
+- Manual, legacy CN/CNY, ownership mismatch, and unexpected mutation counters: 0.
+- Scheduler paused: No.
+- FX Job, Scheduler, Secret Manager, IAM, DB schema, product catalog data, product prices, and catalog permissions changed in N60: No.
