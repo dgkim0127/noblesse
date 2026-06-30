@@ -297,3 +297,62 @@ Required seed data still needed:
 - Decision: STOPPED_ADMIN_LOGIN_FAILED
 - Stop reason: the approved app-level permission workflow exists, but the current production browser session is not authenticated, so catalog.write cannot be granted and product creation cannot proceed.
 - Next gate: operator logs into https://noblesse.web.app with an owner admin account that has admins.manage, then rerun APPROVE_CATALOG_WRITE_PERMISSION_AND_PRODUCT_DETAIL_CANARY = YES.
+
+## N63 Owner Admin Break-glass Recovery Attempt
+- Task: N63-OWNER-ADMIN-BREAK-GLASS-RECOVERY-1
+- Starting HEAD: 0cbd1482003a3aad3b14269a99ea6e6d0ed0de62
+- Code commit: 974d199ecb2a46c1c598f8e64fd61ad4c2b4430a
+- Target masked identifier: d***7
+- Target account type: operator-controlled production admin account
+- Canary account used: No
+- Password exposed previously: Yes
+- Password rotation status: Pending manual rotation after recovery
+
+### N63 Implementation
+- Recovery script added: Yes
+- Existing script reused: Existing production admin bootstrap was inspected but not reused because it does not set the app-level owner role.
+- Grant attempted: owner
+- Explicit admins.manage grant: No
+- catalog.write granted: No
+- Other permissions granted: No
+- Unsupported schema behavior: fail closed
+- Direct SQL used: No
+- Secret/IAM changed: No
+
+### N63 Validation
+- Targeted tests: Passed
+- Backend tests: Passed, 379 passed
+- Lint: Passed
+- Production build: Passed
+- git diff --check: Passed
+- Secret/DB URL/private key/service account scan: No sensitive values recorded in changed files
+
+### N63 Execution
+- One-time Job: noblesse-owner-recovery-once
+- Image digest: sha256:28346b9c645706df49940221f17941a7281196dcba423360b8b2028b2e391dd1
+- Execution ID: noblesse-owner-recovery-once-rz8pl
+- Exit status: Failed, exit code 1
+- Retry count: 0
+- Job deleted/disabled: No, retained after failure for evidence
+- DB secret version: noblesse-production-database-url:1
+- Sanitized result category: OWNER_RECOVERY_SCHEMA_UNSUPPORTED
+
+### N63 Post-check
+- /api/health: 200
+- /api/catalog/products: 200
+- Product count: 0
+- /api/admin/me no token: 401
+- Target product detail: 404
+- Product created: No
+- Category created: No
+- Image uploaded: No
+- Price-book created: No
+- N56 canary buyer approved: No
+- FX changed: No
+
+### N63 Decision
+- Decision: STOPPED_OWNER_RECOVERY_SCHEMA_AMBIGUOUS
+- Stop reason: the reviewed owner recovery job failed closed because the production runtime schema did not expose the expected admin_profiles owner surface.
+- Revoke method if recovery later succeeds: use recovered owner session in /kr/admin/team; secondary path requires a separately approved audited revoke Job.
+- Rollback performed: No owner was granted, so no revoke was performed.
+- Next gate: approve production owner schema recovery or schema compatibility diagnosis before owner recovery is retried. Do not rerun the owner recovery Job without a new explicit approval.
