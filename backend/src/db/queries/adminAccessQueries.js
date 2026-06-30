@@ -57,6 +57,17 @@ function mapAdmin(row, overrides = []) {
   };
 }
 
+function isMissingAccountStatusColumn(error) {
+  return error?.code === "42703" && /account_status/i.test(error?.message || "");
+}
+
+function accountStatusSelect(hasAccountStatus) {
+  if (!hasAccountStatus) {
+    return "case when u.status = 'blocked' then 'blocked' else 'active' end as account_status";
+  }
+  return "coalesce(u.account_status, case when u.status = 'blocked' then 'blocked' else 'active' end) as account_status";
+}
+
 function mapAuditLog(row) {
   return {
     id: row.id,
@@ -86,29 +97,60 @@ export function createAdminAccessQueries(pool) {
     return result.rows.map(mapOverride);
   }
 
+  async function getAdminUserByAuthUidWithAccountStatus(client, authUid, hasAccountStatus) {
+    return client.query(
+      `
+        select
+          u.id as user_id,
+          u.auth_uid,
+          u.email,
+          u.role,
+          u.status,
+          ${accountStatusSelect(hasAccountStatus)},
+          coalesce(ap.admin_role, 'operator') as admin_role,
+          u.created_at,
+          u.updated_at
+        from public.users u
+        left join public.admin_profiles ap on ap.user_id = u.id
+        where u.auth_uid = $1
+        limit 1
+      `,
+      [authUid]
+    );
+  }
+
+  async function listAdminsWithAccountStatus(hasAccountStatus) {
+    return pool.query(
+      `
+        select
+          u.id as user_id,
+          u.email,
+          u.role,
+          u.status,
+          ${accountStatusSelect(hasAccountStatus)},
+          coalesce(ap.admin_role, 'operator') as admin_role,
+          u.created_at,
+          u.updated_at
+        from public.users u
+        left join public.admin_profiles ap on ap.user_id = u.id
+        where u.role = 'admin'
+        order by u.created_at desc
+        limit 200
+      `
+    );
+  }
+
   return {
     async getAdminUserByAuthUid(authUid) {
       const client = await pool.connect();
       try {
-        const result = await client.query(
-          `
-            select
-              u.id as user_id,
-              u.auth_uid,
-              u.email,
-              u.role,
-              u.status,
-              coalesce(u.account_status, case when u.status = 'blocked' then 'blocked' else 'active' end) as account_status,
-              coalesce(ap.admin_role, 'operator') as admin_role,
-              u.created_at,
-              u.updated_at
-            from public.users u
-            left join public.admin_profiles ap on ap.user_id = u.id
-            where u.auth_uid = $1
-            limit 1
-          `,
-          [authUid]
-        );
+        let result;
+        try {
+          result = await getAdminUserByAuthUidWithAccountStatus(client, authUid, true);
+        } catch (error) {
+          if (!isMissingAccountStatusColumn(error)) throw error;
+          result = await getAdminUserByAuthUidWithAccountStatus(client, authUid, false);
+        }
         if (!result.rowCount) return null;
         const overrides = await getActiveOverrides(client, result.rows[0].user_id);
         return mapAdmin(result.rows[0], overrides);
@@ -118,24 +160,13 @@ export function createAdminAccessQueries(pool) {
     },
 
     async listAdmins() {
-      const adminsResult = await pool.query(
-        `
-          select
-            u.id as user_id,
-            u.email,
-            u.role,
-            u.status,
-            coalesce(u.account_status, case when u.status = 'blocked' then 'blocked' else 'active' end) as account_status,
-            coalesce(ap.admin_role, 'operator') as admin_role,
-            u.created_at,
-            u.updated_at
-          from public.users u
-          left join public.admin_profiles ap on ap.user_id = u.id
-          where u.role = 'admin'
-          order by u.created_at desc
-          limit 200
-        `
-      );
+      let adminsResult;
+      try {
+        adminsResult = await listAdminsWithAccountStatus(true);
+      } catch (error) {
+        if (!isMissingAccountStatusColumn(error)) throw error;
+        adminsResult = await listAdminsWithAccountStatus(false);
+      }
       if (!adminsResult.rowCount) return [];
       const userIds = adminsResult.rows.map((row) => row.user_id);
       const overridesResult = await pool.query(

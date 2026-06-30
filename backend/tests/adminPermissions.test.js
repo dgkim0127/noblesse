@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createRequireAdmin } from "../src/auth/requireAdmin.js";
 import { resolveAdminPermissions } from "../src/auth/adminPermissions.js";
+import { createAdminAccessQueries } from "../src/db/queries/adminAccessQueries.js";
 import { createAdminRoutes } from "../src/routes/adminRoutes.js";
 import { createAdminAccessService } from "../src/services/adminAccessService.js";
 import { errorHandler } from "../src/middleware/errorHandler.js";
@@ -127,6 +128,86 @@ test("GET /api/admin/me returns the server-verified admin access context", async
   assert.equal(response.status, 200);
   assert.equal(response.body.data.adminRole, "operator");
   assert.deepEqual(response.body.data.permissions, ["dashboard.read"]);
+});
+
+test("admin access query falls back when account_status column is absent", async () => {
+  const calls = [];
+  const client = {
+    async query(sql, params) {
+      calls.push({ sql, params });
+      if (calls.length === 1) {
+        const error = new Error('column "account_status" does not exist');
+        error.code = "42703";
+        throw error;
+      }
+      if (/from public\.users u/i.test(sql)) {
+        return {
+          rowCount: 1,
+          rows: [{
+            user_id: "admin-1",
+            email: "admin@example.test",
+            role: "admin",
+            status: "approved",
+            account_status: "active",
+            admin_role: "operator"
+          }]
+        };
+      }
+      return { rowCount: 0, rows: [] };
+    },
+    release() {}
+  };
+  const queries = createAdminAccessQueries({
+    async connect() {
+      return client;
+    }
+  });
+
+  const admin = await queries.getAdminUserByAuthUid("admin-uid");
+
+  assert.equal(admin.accountStatus, "active");
+  assert.equal(admin.adminRole, "operator");
+  assert.equal(calls.length, 3);
+  assert.match(calls[0].sql, /u\.account_status/);
+  assert.doesNotMatch(calls[1].sql, /u\.account_status/);
+  assert.match(calls[1].sql, /case when u\.status = 'blocked'/);
+});
+
+test("admin list query falls back when account_status column is absent", async () => {
+  const calls = [];
+  const queries = createAdminAccessQueries({
+    async query(sql, params) {
+      calls.push({ sql, params });
+      if (calls.length === 1) {
+        const error = new Error('column "account_status" does not exist');
+        error.code = "42703";
+        throw error;
+      }
+      if (/from public\.users u/i.test(sql)) {
+        return {
+          rowCount: 1,
+          rows: [{
+            user_id: "admin-1",
+            email: "admin@example.test",
+            role: "admin",
+            status: "approved",
+            account_status: "active",
+            admin_role: "operator"
+          }]
+        };
+      }
+      return { rowCount: 0, rows: [] };
+    }
+  });
+
+  const admins = await queries.listAdmins();
+
+  assert.equal(admins.length, 1);
+  assert.equal(admins[0].accountStatus, "active");
+  assert.equal(calls.length, 3);
+  assert.match(calls[0].sql, /u\.account_status/);
+  assert.doesNotMatch(calls[1].sql, /u\.account_status/);
+  assert.match(calls[1].sql, /case when u\.status = 'blocked'/);
 });
 
 test("requirePermission returns 403 and image parser is not called when catalog.write is missing", async () => {
