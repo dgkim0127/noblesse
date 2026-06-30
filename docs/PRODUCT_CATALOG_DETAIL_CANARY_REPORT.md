@@ -461,3 +461,45 @@ Required seed data still needed:
 - Decision: OWNER_TARGET_VALIDATED
 - Stop reason: target validation is complete, but this task intentionally does not run RBAC/lifecycle migration or owner recovery.
 - Next gate: APPROVE_RBAC_LIFECYCLE_MIGRATION_AND_OWNER_RECOVERY = YES
+
+## N67 Fast-track Preflight Stop
+- Task: N67-RBAC-OWNER-CATALOG-PRODUCT-FAST-TRACK-1
+- Starting HEAD: c8e89706bf5c81bd140d46d7944a49c18654ce43
+- Decision: STOPPED_PRODUCT_IMAGE_SOURCE_MISSING
+- Stop stage: preflight before production DB mutation
+- Approved target owner account: t***n
+- Target owner validation from N66: OWNER_TARGET_VALIDATED
+- RBAC/lifecycle migration executed: No
+- Owner recovery executed: No
+- catalog.write granted: No
+- Product/category/image/price-book created: No
+- Direct SQL used: No
+- Secret/IAM changed in N67: No
+- Temporary Firebase Auth Viewer state: retained from N66 for the next owner recovery attempt
+
+### N67 Preflight Evidence
+- /api/health: 200
+- /api/catalog/products: 200
+- Product count: 0
+- /api/admin/me no token: 401
+- NB-4WAY-GREEN-CLOVER-BARBELL detail: 404
+- FX Scheduler: noblesse-fx-auto-prod-weekdays
+- FX Scheduler state: ENABLED
+- FX Scheduler cron: 10 10 * * 1-5
+- FX secret version: 2 enabled
+- Production Cloud SQL backup: enabled
+- Production Cloud SQL PITR: enabled
+- Production Cloud SQL deletion protection: enabled
+
+### N67 Source Review
+- Required migration file: backend/migrations/20260622_admin_rbac_account_lifecycle.sql
+- Migration scope reviewed: users lifecycle fields, buyers lifecycle fields, admin_profiles, admin_permission_overrides, indexes, constraints, triggers, and migration history through the approved runner.
+- Buyer lifecycle backfill: explicitly approved by N67 but not executed because product image source was missing.
+- Product seed image source expected under: operator-input/
+- Image source status: missing
+- Repo ZIP search result: no matching ZIP found outside ignored build/cache folders.
+
+### N67 Next Step
+- Place the approved product image ZIP under operator-input/ and rerun the fast-track approval.
+- Required ZIP source: 4-way green clover barbell product image package with six 1200x1200 images.
+- Next gate: APPROVE_RBAC_OWNER_CATALOG_PRODUCT_FAST_TRACK = YES
