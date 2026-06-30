@@ -9,6 +9,7 @@
     "bootstrap:production-uat-accounts": "node src/scripts/bootstrapProductionUatAccounts.js",
     "bootstrap:production-admin-account": "node src/scripts/bootstrapProductionAdminAccount.js",
     "diagnose:owner-schema": "node src/scripts/diagnoseOwnerSchema.js",
+    "bootstrap:owner-safe-rbac-schema": "node src/scripts/applyOwnerSafeRbacSchema.js",
     "recover:owner-admin": "node src/scripts/recoverOwnerAdminAccount.js",
     "validate:owner-target": "node src/scripts/validateOwnerTarget.js",
     "fx:provider-check": "node src/scripts/checkFxProvider.js",
