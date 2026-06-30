@@ -108,3 +108,59 @@ Required seed data still needed:
 - Decision: STOPPED_ADMIN_PRODUCT_CREATE_UNAVAILABLE
 - Stop reason: the approved production product data and image ZIP are available, but the active production admin path in this Codex/browser session lacks the permission needed to create catalog data.
 - Next gate: grant or use an approved production admin session with catalog write permission, then rerun APPROVE_PRODUCT_CATALOG_SEED_AND_DETAIL_CANARY = YES.
+
+## N58B Execution Attempt
+- Task: N58B-PRODUCT-CATALOG-SEED-AND-DETAIL-CANARY-EXECUTE-1
+- Starting HEAD: c96292ba90c6565d03e23296b50316c9473c744c
+- origin/main: c96292ba90c6565d03e23296b50316c9473c744c
+- Working tree before attempt: clean
+- Operator-approved productCode: NB-4WAY-GREEN-CLOVER-BARBELL
+- Category: 바벨
+- Published target: Yes
+- Options: 오알, 핑크, 골드
+- KR price target: 1800 KRW manual
+- JP/US/TW price target: fx_auto from 1800 KRW
+- CN/CNY active price book target: No
+
+### N58B Image Check
+- Uploaded ZIP found: Yes
+- ZIP extraction: OK
+- Expected image files present: Yes
+- Image decode: 6 of 6 OK
+- Image dimensions: 1200 x 1200 each
+- Image storage mutation: Not executed
+
+### N58B Admin Flow Check
+- Existing admin API/UI flow exists for category creation, product creation, image upload, and KR/JP/US/TW price-book setup.
+- Local preview admin route state: blocked by missing Firebase client configuration in the local preview runtime.
+- Production admin route state: login required; no approved production admin session was available in the in-app browser.
+- Current admin session can create product: No
+- IAM/role/permission mutation: Not allowed and not performed
+
+### N58B API Canary Before Mutation
+- GET /api/catalog/products: 200
+- Production product count: 0
+- GET /api/catalog/products/NB-4WAY-GREEN-CLOVER-BARBELL: 404
+
+### N58B Safety Result
+- Product created: No
+- Category created: No
+- Image uploaded: No
+- Price book created: No
+- Direct SQL used: No
+- DB migration applied: No
+- Backend deployed: No
+- Firebase Hosting deployed: No
+- FX Job changed: No
+- FX Job manually executed: No
+- Scheduler changed: No
+- Secret/IAM changed: No
+- Production order/payment data created: No
+- N56 canary buyer approved: No
+- CNY numeric copied to TWD: No
+- Legacy CN/CNY active price book created: No
+
+### N58B Decision
+- Decision: STOPPED_ADMIN_PRODUCT_CREATE_UNAVAILABLE
+- Stop reason: the approved production product data and image ZIP are available, but the current browser environment does not expose an approved production admin session capable of catalog write actions.
+- Next gate: operator logs into https://noblesse.web.app with an approved production admin account that has catalog.write, then rerun APPROVE_PRODUCT_CATALOG_SEED_AND_DETAIL_CANARY = YES.
