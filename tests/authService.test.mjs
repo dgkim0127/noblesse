@@ -46,3 +46,31 @@ test('ID sign-in maps empty resolver response to generic Firebase credential fai
     { code: 'auth/invalid-credential' }
   )
 })
+
+test('ID sign-in can fall back to a configured default email domain', async () => {
+  const email = await resolveEmailForSignIn('dgkim0127', {
+    fallbackEmailDomains: ['gmail.com'],
+    async resolveLoginIdentifier() {
+      const error = new Error('not found')
+      error.status = 401
+      error.code = 'UNAUTHORIZED'
+      throw error
+    }
+  })
+
+  assert.equal(email, 'dgkim0127@gmail.com')
+})
+
+test('ID sign-in does not fall back for network resolver failures', async () => {
+  await assert.rejects(
+    () => resolveEmailForSignIn('dgkim0127', {
+      fallbackEmailDomains: ['gmail.com'],
+      async resolveLoginIdentifier() {
+        const error = new Error('network unavailable')
+        error.code = 'NETWORK_ERROR'
+        throw error
+      }
+    }),
+    { code: 'NETWORK_ERROR' }
+  )
+})

@@ -35,7 +35,10 @@ export function subscribeAuthState(onChange) {
 export async function signInWithCredentials(identifier, password, { remember = true, apiBaseUrl = '/api' } = {}) {
   const clientAuth = requireAuth()
   const safePassword = String(password || '')
-  const email = await resolveEmailForSignIn(identifier, { apiBaseUrl })
+  const email = await resolveEmailForSignIn(identifier, {
+    apiBaseUrl,
+    fallbackEmailDomains: ['gmail.com']
+  })
 
   if (!email || !safePassword) {
     const error = new Error('ID and password are required.')
