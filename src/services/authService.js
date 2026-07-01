@@ -75,7 +75,30 @@ export async function getUserIdToken(user, forceRefresh = false) {
   return user.getIdToken(forceRefresh)
 }
 
-export async function getCurrentUserIdToken(forceRefresh = false) {
-  if (!isAuthConfigured() || !auth.currentUser) return ''
-  return getUserIdToken(auth.currentUser, forceRefresh)
+function waitForCurrentUser(timeoutMs = 3000) {
+  return new Promise((resolve) => {
+    if (!isAuthConfigured()) {
+      resolve(null)
+      return
+    }
+
+    let unsubscribe = () => {}
+    const timeoutId = setTimeout(() => {
+      unsubscribe()
+      resolve(auth.currentUser || null)
+    }, timeoutMs)
+
+    unsubscribe = onAuthStateChanged(auth, (user) => {
+      clearTimeout(timeoutId)
+      unsubscribe()
+      resolve(user)
+    })
+  })
+}
+
+export async function getCurrentUserIdToken(forceRefresh = false, { waitForAuth = true, timeoutMs = 3000 } = {}) {
+  if (!isAuthConfigured()) return ''
+  if (auth.currentUser) return getUserIdToken(auth.currentUser, forceRefresh)
+  const user = waitForAuth ? await waitForCurrentUser(timeoutMs) : null
+  return getUserIdToken(user, forceRefresh)
 }
