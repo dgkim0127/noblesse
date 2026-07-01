@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { ClipboardList, Headphones, Heart, Mail } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
@@ -901,21 +901,6 @@ const isAllowedHomeProduct = (product) => (
   && !['14k-gold', 'titanium'].includes(product.categoryId)
 )
 
-const _fillHomeSectionProducts = (preferredProducts, allProducts, limit = homeSectionLimit) => {
-  const picked = []
-  const seen = new Set()
-
-  for (const product of [...preferredProducts, ...allProducts]) {
-    if (!isAllowedHomeProduct(product)) continue
-    if (!product || seen.has(product.productId)) continue
-    picked.push(product)
-    seen.add(product.productId)
-    if (picked.length >= limit) break
-  }
-
-  return picked
-}
-
 const weeklyDemandSamples = [
   { inquiries: 17155, checks: 287 },
   { inquiries: 57070, checks: 1642 },
@@ -1199,27 +1184,43 @@ function ProductSection({ products, sectionId, title, note }) {
   const [activeTab, setActiveTab] = useState(0)
   const [tabMotionKey, setTabMotionKey] = useState(0)
 
-  if (products.length === 0) return null
-
   const sectionSubtabs = homeSectionSubtabs[sectionId]?.[locale] ?? homeSectionSubtabs[sectionId]?.en ?? []
   const sectionTabFilters = homeSectionTabFilters[sectionId] ?? []
+  const visibleSubtabs = sectionTabFilters.length > 0
+    ? sectionSubtabs
+      .map((label, index) => ({
+        filter: sectionTabFilters[index],
+        label,
+      }))
+      .filter((tab) => tab.filter && products.some((product) => productMatchesTabFilter(product, tab.filter)))
+    : sectionSubtabs.map((label, index) => ({
+      filter: sectionTabFilters[index],
+      label,
+    }))
   const viewAll = homeSectionViewAll[sectionId]
   const isLoopSection = sectionId === 'weekly-pick'
-  const activeTabFilter = sectionTabFilters[activeTab] ?? null
+  const resolvedActiveTab = Math.min(activeTab, Math.max(visibleSubtabs.length - 1, 0))
+  const activeTabFilter = sectionTabFilters.length > 0
+    ? visibleSubtabs[resolvedActiveTab]?.filter ?? null
+    : null
   const filteredProducts = activeTabFilter
     ? products.filter((product) => productMatchesTabFilter(product, activeTabFilter))
     : products
-  const safeProducts = sectionTabFilters.length > 0
-    ? _fillHomeSectionProducts(filteredProducts, products, homeSectionProductLimit[sectionId])
-    : filteredProducts.length > 0 ? filteredProducts : products
-  const sectionProducts = safeProducts.slice(0, homeSectionProductLimit[sectionId] ?? homeSectionLimit)
+  const sectionProducts = filteredProducts.slice(0, homeSectionProductLimit[sectionId] ?? homeSectionLimit)
   const renderProducts = isLoopSection ? [...sectionProducts, ...sectionProducts] : sectionProducts
+
+  useEffect(() => {
+    if (activeTab !== resolvedActiveTab) setActiveTab(resolvedActiveTab)
+  }, [activeTab, resolvedActiveTab])
+
   const handleTabClick = (index) => {
     if (index === activeTab) return
 
     setActiveTab(index)
     setTabMotionKey((current) => current + 1)
   }
+
+  if (products.length === 0 || sectionProducts.length === 0) return null
 
   if (isLoopSection) {
     const [featureProduct, ...supportProducts] = sectionProducts
@@ -1255,8 +1256,8 @@ function ProductSection({ products, sectionId, title, note }) {
       <ScrambleText as="h2" persistKey={`product-section-title-${sectionId}`}>{title}</ScrambleText>
       {note ? <p>{note}</p> : null}
     </div>
-    {sectionSubtabs.length > 0 ? <div className="home-section-subtabs" aria-label={`${title} categories`}>
-      {sectionSubtabs.map((tab, index) => <button className={index === activeTab ? 'is-active' : undefined} key={tab} type="button" onClick={() => handleTabClick(index)}>{tab}</button>)}
+    {visibleSubtabs.length > 0 ? <div className="home-section-subtabs" aria-label={`${title} categories`}>
+      {visibleSubtabs.map((tab, index) => <button className={index === resolvedActiveTab ? 'is-active' : undefined} key={tab.label} type="button" onClick={() => handleTabClick(index)}>{tab.label}</button>)}
     </div> : null}
     <div className={`home-product-grid${isLoopSection ? ' is-looping' : ''}${sectionTabFilters.length > 0 ? ' has-tab-motion' : ''}`} key={`${sectionId}-${tabMotionKey}`}>
       {renderProducts.map((product, index) => <HomeProductCard key={`${product.productId}-${index}`} product={product} index={index} variant={sectionId} />)}
@@ -1372,17 +1373,31 @@ export function HomePage() {
   const copy = resolveLocaleCopy(homeCopy, locale)
   const homeSourceProducts = products.length > 0 ? products : mockProducts
   const homeProducts = homeSourceProducts.filter(isAllowedHomeProduct)
-  const newProducts = _fillHomeSectionProducts(homeProducts.filter((product) => product.isNew), homeProducts)
-  const weeklyProducts = _fillHomeSectionProducts(homeProducts.filter((product) => product.isBest), homeProducts)
-  const piercingCatalogProducts = _fillHomeSectionProducts(
-    homeProducts.filter((product) => ['piercing', 'barbell', 'labret', 'nose-piercing', 'belly-ring'].includes(product.categoryId)),
-    homeProducts,
-    homeSectionProductLimit['piercing-catalog'],
-  )
-  const steadySelectionProducts = _fillHomeSectionProducts(
-    homeProducts.filter((product) => product.material.includes('Silver') || product.collectionIds.includes('minimal-piercing-line') || product.collectionIds.includes('premium-cubic-line')),
-    homeProducts,
-  )
+  const newProducts = homeProducts.filter((product) => product.isNew)
+  const weeklyProducts = homeProducts.filter((product) => product.isBest)
+  const piercingCatalogProducts = homeProducts.filter((product) => (
+    ['piercing', 'barbell', 'labret', 'nose-piercing', 'belly-ring'].includes(product.categoryId)
+  ))
+  const steadySelectionProducts = homeProducts.filter((product) => (
+    product.material.includes('Silver')
+    || product.collectionIds?.includes('minimal-piercing-line')
+    || product.collectionIds?.includes('premium-cubic-line')
+  ))
+  const activeHomeSectionNav = useMemo(() => homeSectionNav.filter((item) => {
+    if (item.id === 'new-arrival') return newProducts.length > 0
+    if (item.id === 'weekly-pick') return weeklyProducts.length > 0
+    if (item.id === 'buyer-selection') return buyerConceptPanels.length > 0
+    if (item.id === 'piercing-catalog') return piercingCatalogProducts.length > 0
+    if (item.id === 'steady-selection') return steadySelectionProducts.length > 0
+    return true
+  }), [
+    newProducts.length,
+    weeklyProducts.length,
+    piercingCatalogProducts.length,
+    steadySelectionProducts.length,
+  ])
+  const activeHomeSectionIds = activeHomeSectionNav.map((item) => item.id).join('|')
+  const firstActiveHomeSectionId = activeHomeSectionNav[0]?.id ?? homeSectionNav[0].id
   const showcaseLoopPanels = [...homeShowcasePanels, ...homeShowcasePanels, ...homeShowcasePanels]
 
   const replayProductSectionReveal = (section) => {
@@ -1480,6 +1495,12 @@ export function HomePage() {
   }, [alignShowcaseGapToCenter, getShowcaseStep])
 
   useEffect(() => {
+    if (!activeHomeSectionNav.some((item) => item.id === activeHomeSection)) {
+      setActiveHomeSection(firstActiveHomeSectionId)
+    }
+  }, [activeHomeSection, activeHomeSectionIds, activeHomeSectionNav, firstActiveHomeSectionId])
+
+  useEffect(() => {
     const root = document.querySelector('main')
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -1566,12 +1587,12 @@ export function HomePage() {
       setIsSectionNavFixed(window.scrollY >= sectionNavTriggerRef.current)
 
       const activeOffset = fixedTop() + 120
-      const currentSection = homeSectionNav.reduce((current, item) => {
+      const currentSection = activeHomeSectionNav.reduce((current, item) => {
         const section = document.getElementById(`home-${item.id}`)
         if (!section) return current
 
         return section.getBoundingClientRect().top <= activeOffset ? item.id : current
-      }, homeSectionNav[0].id)
+      }, firstActiveHomeSectionId)
 
       setActiveHomeSection(currentSection)
     }
@@ -1589,7 +1610,7 @@ export function HomePage() {
       window.removeEventListener('scroll', updateSectionNavPosition)
       window.removeEventListener('resize', resetSectionNavTrigger)
     }
-  }, [])
+  }, [activeHomeSectionIds, activeHomeSectionNav, firstActiveHomeSectionId])
 
   const handleShowcasePointerDown = (event) => {
     if (event.button !== undefined && event.button !== 0) return
@@ -1694,13 +1715,13 @@ export function HomePage() {
 
     <div className={`home-section-nav-anchor${isSectionNavFixed ? ' is-fixed' : ''}`} ref={sectionNavAnchorRef}>
       <div className="home-section-nav" aria-label="홈 제품 섹션 이동">
-        {homeSectionNav.map((item) => <button key={item.id} className={activeHomeSection === item.id ? 'is-active' : undefined} type="button" onClick={() => scrollToHomeSection(item.id)}>
+        {activeHomeSectionNav.map((item) => <button key={item.id} className={activeHomeSection === item.id ? 'is-active' : undefined} type="button" onClick={() => scrollToHomeSection(item.id)}>
           {item.labels[locale] ?? item.labels.en}
         </button>)}
       </div>
     </div>
     {isSectionNavFixed ? <div className="home-section-nav-fixed" aria-label="고정 제품 섹션 이동">
-      {homeSectionNav.map((item) => <button key={item.id} className={activeHomeSection === item.id ? 'is-active' : undefined} type="button" onClick={() => scrollToHomeSection(item.id)}>
+      {activeHomeSectionNav.map((item) => <button key={item.id} className={activeHomeSection === item.id ? 'is-active' : undefined} type="button" onClick={() => scrollToHomeSection(item.id)}>
         {item.labels[locale] ?? item.labels.en}
       </button>)}
     </div> : null}
