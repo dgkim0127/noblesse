@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import test from 'node:test'
+
+const root = process.cwd()
+
+function readWorkspaceFile(path) {
+  return readFileSync(join(root, path), 'utf8')
+}
+
+test('home header does not expose a cart-style inquiry icon', () => {
+  const shell = readWorkspaceFile('src/components/StoreShell.jsx')
+  const styles = readWorkspaceFile('src/App.css')
+
+  assert.doesNotMatch(shell, /function InquiryListIcon/)
+  assert.doesNotMatch(shell, /inquiry-list-svg/)
+  assert.doesNotMatch(shell, /inquiry-icon-action/)
+  assert.doesNotMatch(styles, /\.inquiry-icon-action/)
+})
+
+test('admin my-inquiries header action opens the admin inquiry queue', () => {
+  const shell = readWorkspaceFile('src/components/StoreShell.jsx')
+
+  assert.match(shell, /const myInquiriesPath = isAdmin \? '\/admin\/inquiries' : '\/my-inquiries'/)
+  assert.match(shell, /<IconAction className="header-side-icon" label=\{sideCopy\.myInquiries\} to=\{toLocalePath\(myInquiriesPath\)\}><Clock3 size=\{17\} \/><\/IconAction>/)
+})
+
+test('logged-in header has an explicit sign-out action that returns home', () => {
+  const shell = readWorkspaceFile('src/components/StoreShell.jsx')
+
+  assert.match(shell, /import \{[^}]*LogOut[^}]*\} from 'lucide-react'/)
+  assert.match(shell, /const handleHeaderSignOut = async \(\) => \{[\s\S]*await signOut\(\)[\s\S]*navigate\(toLocalePath\('\/'\)\)[\s\S]*\}/)
+  assert.match(shell, /\{!isGuest && <IconAction label=\{copy\.logout\} onClick=\{handleHeaderSignOut\}><LogOut size=\{18\} \/><\/IconAction>\}/)
+})

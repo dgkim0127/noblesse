@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ChevronDown, Clock3, Eye, EyeOff, Heart, Search, ShieldCheck, UserRound, X } from 'lucide-react'
+import { ChevronDown, Clock3, Eye, EyeOff, Heart, LogOut, Search, ShieldCheck, UserRound, X } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import noblesseLogo from '../assets/noblesse-logo.png'
 import { useCommerce } from '../commerce/commerceStore'
@@ -20,6 +20,7 @@ const shellCopy = {
     inquiryList: '문의 리스트',
     languageSwitch: '언어 설정',
     login: '로그인',
+    logout: '로그아웃',
     noHistory: '최근 검색 기록이 없습니다.',
     pending: '확인 중',
     productList: '상품 목록',
@@ -66,6 +67,7 @@ const shellCopy = {
     inquiryList: 'Inquiry list',
     languageSwitch: 'Language settings',
     login: 'Login',
+    logout: 'Logout',
     noHistory: 'No recent searches yet.',
     pending: 'Under review',
     productList: 'Product list',
@@ -112,6 +114,7 @@ const shellCopy = {
     inquiryList: 'お問い合わせリスト',
     languageSwitch: '言語設定',
     login: 'ログイン',
+    logout: 'ログアウト',
     noHistory: '最近の検索履歴はありません。',
     pending: '確認中',
     productList: '商品一覧',
@@ -158,6 +161,7 @@ const shellCopy = {
     inquiryList: '咨询清单',
     languageSwitch: '语言设置',
     login: '登录',
+    logout: '登出',
     noHistory: '暂无最近搜索。',
     pending: '确认中',
     productList: '商品列表',
@@ -453,13 +457,6 @@ function IconAction({ children, label, onClick, to, className = '' }) {
   </NavLink>
 }
 
-function InquiryListIcon() {
-  return <svg aria-hidden="true" className="inquiry-list-svg" fill="none" height="18" viewBox="0 0 24 24" width="18">
-    <path d="M4 5h2.2l2.1 9.2a2 2 0 0 0 2 1.6h7.5a2 2 0 0 0 1.9-1.4l1.2-4.4H8" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-    <path d="M10 20h.01M18 20h.01" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
-  </svg>
-}
-
 export function StoreShell() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -491,7 +488,6 @@ export function StoreShell() {
     dataError,
     dataMode,
     dataStatus,
-    inquiryItems,
     isAdmin,
     isApproved,
     isGuest,
@@ -499,6 +495,7 @@ export function StoreShell() {
     runtimeConfig,
     setViewerState,
     signIn,
+    signOut,
     viewerState,
   } = useCommerce()
   const { locale, localeMeta, toLanguagePath, toLocalePath } = useLocalePath()
@@ -771,6 +768,13 @@ export function StoreShell() {
     navigate(toLocalePath('/register'))
   }
 
+  const handleHeaderSignOut = async () => {
+    await signOut()
+    setIsSearchOpen(false)
+    closeCompactSearch()
+    navigate(toLocalePath('/'))
+  }
+
   const brandHomeLabel = `${headerBrandName} home`
   const topMarqueeStyle = isMarqueeCollapsed
     ? { height: 0, maxHeight: 0, opacity: 0, pointerEvents: 'none', transform: 'translateY(-100%)' }
@@ -790,6 +794,7 @@ export function StoreShell() {
     : undefined
 
   const shouldRenderCompactSearch = isCompactSearchOpen || isCompactSearchClosing
+  const myInquiriesPath = isAdmin ? '/admin/inquiries' : '/my-inquiries'
 
   return <div className={`site-shell ${usesHomeStyleHeader ? 'home-image-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isSideLayout ? 'has-side-layout' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''} ${isPreviewBarHidden ? 'has-preview-hidden' : 'has-preview-visible'}`.trim()}>
     <div className={`top-marquee ${isMarqueeCollapsed ? 'is-collapsed' : ''}`} style={topMarqueeStyle} aria-label={`${headerBrandName} material notice`}>
@@ -869,12 +874,10 @@ export function StoreShell() {
               ? <>
                 <IconAction className="header-login-icon-action" label={copy.login} onClick={openLoginModal}><UserRound size={17} /></IconAction>
                 <IconAction className="header-side-icon" label={sideCopy.myInquiries} onClick={openLoginRequiredModal}><Clock3 size={17} /></IconAction>
-                <IconAction className="header-side-icon" label={sideCopy.inquiryList} onClick={openLoginRequiredModal}><InquiryListIcon /></IconAction>
                 <IconAction className="header-my-action" label={copy.account} onClick={openLoginRequiredModal}>{sideCopy.my}</IconAction>
               </>
               : <>
-                <IconAction className="header-side-icon" label={sideCopy.myInquiries} to={toLocalePath('/my-inquiries')}><Clock3 size={17} /></IconAction>
-                <IconAction className="header-side-icon" label={sideCopy.inquiryList} to={toLocalePath('/inquiry-list')}><InquiryListIcon /></IconAction>
+                <IconAction className="header-side-icon" label={sideCopy.myInquiries} to={toLocalePath(myInquiriesPath)}><Clock3 size={17} /></IconAction>
                 <IconAction className="header-my-action" label={copy.account} to={toLocalePath('/account')}>{sideCopy.my}</IconAction>
               </>}
           </>}
@@ -884,16 +887,13 @@ export function StoreShell() {
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}
           {isApproved && <>
-            <IconAction className={`inquiry-icon-action ${inquiryItems.length > 0 ? 'has-items' : ''}`} label={copy.inquiryList} to={toLocalePath('/inquiry-list')}>
-              <InquiryListIcon />
-              <b>{inquiryItems.length}</b>
-            </IconAction>
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}
           {isAdmin && <>
             <IconAction label={copy.adminPreview} to={toLocalePath('/admin')}><ShieldCheck size={18} /></IconAction>
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}
+          {!isGuest && <IconAction label={copy.logout} onClick={handleHeaderSignOut}><LogOut size={18} /></IconAction>}
           <button className={`icon-action compact-search-action ${isCompactSearchOpen ? 'active' : ''}`} type="button" aria-label={copy.search} title={copy.search} onClick={toggleCompactSearch}><Search size={18} /></button>
           <LanguageSwitch countryLabels={copy.countryLabels} isCompact={isHeaderCompact} languageSwitch={copy.languageSwitch} locale={locale} toLanguagePath={toLanguagePath} />
         </nav>
