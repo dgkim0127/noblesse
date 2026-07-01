@@ -663,12 +663,22 @@ export function AdminCatalogEntryPage() {
     />
     <AdminPreviewNote>{t.note}</AdminPreviewNote>
 
+    <ol className="catalog-entry-progress" aria-label={t.saveStatus.title}>
+      {['category', 'product', 'images', 'price'].map((resource, index) => <li className={saveStatus[resource]} key={resource}>
+        <span>{index + 1}</span>
+        <strong>{t.saveStatus[resource]}</strong>
+      </li>)}
+    </ol>
+
     <section className="catalog-entry-layout">
       <div className="catalog-entry-form-stack">
         <section className="admin-card catalog-entry-section">
-          <div>
-            <p className="eyebrow">{t.sections.categoryEyebrow}</p>
-            <h2>{t.category.title}</h2>
+          <div className="catalog-entry-section-heading">
+            <span className="catalog-entry-step-badge">1</span>
+            <div>
+              <p className="eyebrow">{t.sections.categoryEyebrow}</p>
+              <h2>{t.category.title}</h2>
+            </div>
           </div>
           <div className="admin-filter-tabs">
             <button className={mode === 'existing' ? 'active' : ''} disabled={Boolean(createdCategory || createdProduct || createdPrice)} type="button" onClick={() => selectMode('existing')}>{t.category.useExisting}</button>
@@ -700,9 +710,12 @@ export function AdminCatalogEntryPage() {
         </section>
 
         <section className="admin-card catalog-entry-section">
-          <div>
-            <p className="eyebrow">{t.sections.productEyebrow}</p>
-            <h2>{t.product.title}</h2>
+          <div className="catalog-entry-section-heading">
+            <span className="catalog-entry-step-badge">2</span>
+            <div>
+              <p className="eyebrow">{t.sections.productEyebrow}</p>
+              <h2>{t.product.title}</h2>
+            </div>
           </div>
           <div className="catalog-entry-grid">
             <label className="admin-search">{t.product.code}<input maxLength="80" value={productForm.code} onChange={(event) => setProductField('code', event.target.value)} placeholder="NB-001" />
@@ -723,10 +736,13 @@ export function AdminCatalogEntryPage() {
         </section>
 
         <section className="admin-card catalog-entry-section">
-          <div>
-            <p className="eyebrow">{t.sections.imageEyebrow}</p>
-            <h2>{t.images.title}</h2>
-            <p className="admin-muted">{t.images.description}</p>
+          <div className="catalog-entry-section-heading">
+            <span className="catalog-entry-step-badge">3</span>
+            <div>
+              <p className="eyebrow">{t.sections.imageEyebrow}</p>
+              <h2>{t.images.title}</h2>
+              <p className="admin-muted">{t.images.description}</p>
+            </div>
           </div>
           <div
             className={`catalog-entry-dropzone ${isDropActive ? 'active' : ''}`}
@@ -780,9 +796,12 @@ export function AdminCatalogEntryPage() {
         </section>
 
         <section className="admin-card catalog-entry-section">
-          <div>
-            <p className="eyebrow">{t.sections.priceEyebrow}</p>
-            <h2>{t.price.title}</h2>
+          <div className="catalog-entry-section-heading">
+            <span className="catalog-entry-step-badge">4</span>
+            <div>
+              <p className="eyebrow">{t.sections.priceEyebrow}</p>
+              <h2>{t.price.title}</h2>
+            </div>
           </div>
           <div className="catalog-entry-grid">
             <label className="admin-search">{t.price.market}<select value={priceForm.market} onChange={(event) => {
