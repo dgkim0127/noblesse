@@ -22,9 +22,9 @@ export function createLoginIdentifierQueries(pool) {
             from public.users
             where lower(split_part(email, '@', 1)) = $1
               and email is not null
-              and role in ('admin', 'buyer')
+              and role in ('owner', 'admin', 'buyer')
               and (
-                (role = 'admin' and status = 'approved')
+                (role in ('owner', 'admin') and status = 'approved')
                 or (role = 'buyer' and status in ('pending', 'approved'))
               )
               and coalesce(account_status, 'active') = 'active'
@@ -41,9 +41,9 @@ export function createLoginIdentifierQueries(pool) {
             from public.users
             where lower(split_part(email, '@', 1)) = $1
               and email is not null
-              and role in ('admin', 'buyer')
+              and role in ('owner', 'admin', 'buyer')
               and (
-                (role = 'admin' and status = 'approved')
+                (role in ('owner', 'admin') and status = 'approved')
                 or (role = 'buyer' and status in ('pending', 'approved'))
               )
               and status <> 'blocked'

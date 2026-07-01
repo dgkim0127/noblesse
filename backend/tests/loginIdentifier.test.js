@@ -5,7 +5,7 @@ import { createLoginIdentifierQueries } from "../src/db/queries/loginIdentifierQ
 import { createLoginIdentifierService } from "../src/services/loginIdentifierService.js";
 import { request } from "./testClient.js";
 
-test("login identifier query resolves one active email local-part", async () => {
+test("login identifier query resolves one active owner/admin/buyer email local-part", async () => {
   const calls = [];
   const queries = createLoginIdentifierQueries({
     async query(sql, params) {
@@ -19,8 +19,23 @@ test("login identifier query resolves one active email local-part", async () => 
   assert.equal(email, "admin@example.test");
   assert.deepEqual(calls[0].params, ["admin"]);
   assert.match(calls[0].sql, /split_part\(email, '@', 1\)/);
+  assert.match(calls[0].sql, /role in \('owner', 'admin', 'buyer'\)/);
+  assert.match(calls[0].sql, /role in \('owner', 'admin'\) and status = 'approved'/);
   assert.match(calls[0].sql, /coalesce\(account_status, 'active'\) = 'active'/);
   assert.match(calls[0].sql, /limit 2/i);
+});
+
+test("login identifier query allows approved owner local-part", async () => {
+  const queries = createLoginIdentifierQueries({
+    async query(sql, params) {
+      assert.deepEqual(params, ["owner"]);
+      assert.match(sql, /role in \('owner', 'admin', 'buyer'\)/);
+      assert.match(sql, /role in \('owner', 'admin'\) and status = 'approved'/);
+      return { rows: [{ email: "owner@example.test" }] };
+    }
+  });
+
+  assert.equal(await queries.findActiveLoginEmailByIdentifier("owner"), "owner@example.test");
 });
 
 test("login identifier query fails closed for duplicate local-parts", async () => {
@@ -53,6 +68,8 @@ test("login identifier query falls back when account_status column is absent", a
   assert.equal(calls.length, 2);
   assert.match(calls[0].sql, /account_status/);
   assert.doesNotMatch(calls[1].sql, /account_status/);
+  assert.match(calls[1].sql, /role in \('owner', 'admin', 'buyer'\)/);
+  assert.match(calls[1].sql, /role in \('owner', 'admin'\) and status = 'approved'/);
   assert.match(calls[1].sql, /status <> 'blocked'/);
   assert.deepEqual(calls[1].params, ["admin"]);
 });
