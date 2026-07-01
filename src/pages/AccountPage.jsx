@@ -1,5 +1,5 @@
 import { BadgeCheck, Clock3, LogOut, Mail, ShieldCheck, UserRound } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatMoney } from '../utils/commerce'
 import { useLocalePath } from '../utils/locale'
@@ -22,6 +22,9 @@ export function AccountPage() {
   const navigate = useNavigate()
   const { buyer, buyerAccess, isAdmin, isApproved, isGuest, isPending, signOut, viewerState } = useCommerce()
   const { toLocalePath } = useLocalePath()
+
+  if (isAdmin) return <Navigate replace to={toLocalePath('/admin')} />
+
   const minimumRequestAmount = !isApproved ? '확인 후 볼 수 있음' : formatMoney(buyer.minOrderAmount, buyer.currency)
   const profileRows = [
     ['현재 접근 상태', viewerState],
