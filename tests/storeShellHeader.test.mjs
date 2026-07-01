@@ -33,3 +33,11 @@ test('logged-in header has an explicit sign-out action that returns home', () =>
   assert.match(shell, /const handleHeaderSignOut = async \(\) => \{[\s\S]*await signOut\(\)[\s\S]*navigate\(toLocalePath\('\/'\)\)[\s\S]*\}/)
   assert.match(shell, /\{!isGuest && <IconAction label=\{copy\.logout\} onClick=\{handleHeaderSignOut\}><LogOut size=\{18\} \/><\/IconAction>\}/)
 })
+
+test('header icon actions do not show browser title tooltips', () => {
+  const shell = readWorkspaceFile('src/components/StoreShell.jsx')
+
+  assert.doesNotMatch(shell, /title=\{label\}/)
+  assert.doesNotMatch(shell, /title=\{copy\.search\}/)
+  assert.match(shell, /aria-label=\{label\}/)
+})

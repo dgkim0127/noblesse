@@ -447,12 +447,12 @@ function LanguageSwitch({ countryLabels, isCompact = false, languageSwitch, loca
 
 function IconAction({ children, label, onClick, to, className = '' }) {
   if (onClick) {
-    return <button aria-label={label} className={`icon-action ${className}`} title={label} type="button" onClick={onClick}>
+    return <button aria-label={label} className={`icon-action ${className}`} type="button" onClick={onClick}>
       {children}
     </button>
   }
 
-  return <NavLink aria-label={label} className={`icon-action ${className}`} title={label} to={to}>
+  return <NavLink aria-label={label} className={`icon-action ${className}`} to={to}>
     {children}
   </NavLink>
 }
@@ -894,7 +894,7 @@ export function StoreShell() {
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}
           {!isGuest && <IconAction label={copy.logout} onClick={handleHeaderSignOut}><LogOut size={18} /></IconAction>}
-          <button className={`icon-action compact-search-action ${isCompactSearchOpen ? 'active' : ''}`} type="button" aria-label={copy.search} title={copy.search} onClick={toggleCompactSearch}><Search size={18} /></button>
+          <button className={`icon-action compact-search-action ${isCompactSearchOpen ? 'active' : ''}`} type="button" aria-label={copy.search} onClick={toggleCompactSearch}><Search size={18} /></button>
           <LanguageSwitch countryLabels={copy.countryLabels} isCompact={isHeaderCompact} languageSwitch={copy.languageSwitch} locale={locale} toLanguagePath={toLanguagePath} />
         </nav>
       </div>
