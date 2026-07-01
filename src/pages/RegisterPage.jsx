@@ -637,6 +637,134 @@ const localizedAgreementSections = {
   },
 }
 
+const localizedAgreementDetailOverrides = {
+  terms_of_service: {
+    en: [
+      ['Article 1 Purpose', 'These terms define the conditions for Noblesse sign-up, buyer review, product catalog browsing, quote inquiry, and related B2B guidance services.'],
+      ['Article 2 Definitions', ['User means any visitor or member who accesses the site or uses the service.', 'Member means an individual or business representative who submits information through the sign-up process and uses the Noblesse catalog or inquiry service.', 'Approved buyer means a member whose trade eligibility has been reviewed by Noblesse and who may access member pricing, MOQ guidance, and quote inquiry features.', 'Quote inquiry means a request for trade review based on products, options, quantities, and notes. It is not a final trade confirmation.']],
+      ['Article 3 Effect and Revision', ['These terms are displayed during sign-up or within the connected site screens and take effect when a member agrees and proceeds with sign-up.', 'Noblesse may revise these terms according to operational policy, service structure, applicable law, security standards, or trade procedure changes.', 'Material changes may be announced through the site, member screen, email, or another reasonable notice method.']],
+      ['Article 4 Services Provided', ['Noblesse may provide product images, product names, product codes, materials, colors, sizes, MOQ, categories, collections, catalog guidance, member status notices, and quote inquiry features.', 'The service is a B2B catalog and inquiry flow for trade review. It is not intended for immediate trade confirmation.']],
+      ['Article 5 Member Obligations', ['Members must submit accurate information and must not use false, third-party, or unverifiable information.', 'Members must manage their ID and password responsibly and must not transfer, share, or allow another person to use their account.', 'Members must not disclose or commercially use product information, member pricing, quote contents, or internal trade terms without prior consent from Noblesse.']],
+      ['Article 6 Product Information and Trade Terms', ['Product images and descriptions are catalog information for trade review and may differ depending on photography, display environment, production timing, and supply conditions.', 'Member pricing, market pricing, MOQ, inventory, lead time, shipping terms, and export availability may be provided only to approved members or after manager review.', 'Information shown on the site or in inquiry screens is reference information and final terms are confirmed separately by Noblesse.']],
+      ['Article 7 Nature of Quote Inquiry', ['A quote inquiry is a request for Noblesse to review selected products and quantities.', 'Submitting a quote inquiry does not create a final transaction, contract, or shipping obligation.', 'Final price, available quantity, production availability, lead time, and shipping terms are guided after manager review.']],
+      ['Article 8 Prohibited Conduct and Restrictions', ['Submitting false information, using another person account, abnormal access, unauthorized collection of site information, unauthorized copying of images or descriptions, unauthorized sharing of member prices, system misuse, or interference with service operation is prohibited.', 'If such conduct is confirmed, Noblesse may restrict service use, change member status, cancel approval, or hold inquiry processing without prior notice.']],
+      ['Article 9 Privacy and Notices', ['Noblesse processes personal information necessary for sign-up, buyer review, inquiry response, and quote guidance according to the applicable consent and privacy policy.', 'Questions about sign-up, terms, privacy, catalog, or quote inquiries may be submitted through the site guidance or the designated contact channel.']],
+    ],
+    jp: [
+      ['第1条 目的', '本規約は、貴族の会員登録、バイヤー審査、商品カタログ閲覧、見積お問い合わせ、および関連するB2B案内サービスの利用条件を定めます。'],
+      ['第2条 用語の定義', ['利用者とは、サイトにアクセスし、またはサービスを利用するすべての訪問者および会員をいいます。', '会員とは、会員登録手続を通じて情報を提出し、貴族のカタログおよびお問い合わせサービスを利用する個人または事業者担当者をいいます。', '承認バイヤーとは、貴族が取引可能性を確認した後、会員価格、MOQ、見積お問い合わせなど一部機能へのアクセスを許可した会員をいいます。', '見積お問い合わせとは、商品、オプション、数量、メモを基準に取引検討を依頼する手続であり、最終取引確定ではありません。']],
+      ['第3条 効力および変更', ['本規約は会員登録時またはサイト内の連携画面に表示され、会員が同意して登録手続を進めた時点で効力を生じます。', '貴族は運営方針、サービス構成、法令、セキュリティ基準、取引手続の変更に応じて本規約を改定することがあります。', '重要な変更は、サイト、会員画面、メール、その他合理的な方法で案内されることがあります。']],
+      ['第4条 サービスの提供', ['貴族は商品画像、商品名、商品コード、素材、カラー、サイズ、MOQ、カテゴリー、コレクション、カタログ案内、会員状態案内、見積お問い合わせ機能を提供することがあります。', '本サービスはB2B取引検討のためのカタログおよびお問い合わせ機能であり、即時取引確定を目的としません。']],
+      ['第5条 会員の義務', ['会員は正確な情報を提出し、虚偽、第三者、または確認困難な情報を使用してはなりません。', '会員はIDおよびパスワードを責任をもって管理し、アカウントを譲渡、共有、または第三者に使用させてはなりません。', '会員は貴族の事前同意なく、商品情報、会員価格、見積内容、内部取引条件を開示または商業的に利用してはなりません。']],
+      ['第6条 商品情報および取引条件', ['商品画像および説明は取引検討のためのカタログ情報であり、撮影環境、表示環境、生産時期、供給状況によって実物と異なる場合があります。', '会員価格、市場別価格、MOQ、在庫、納期、配送条件、輸出可否は承認会員または担当者確認後に案内されることがあります。', 'サイトまたはお問い合わせ画面に表示される情報は参考情報であり、最終条件は貴族が別途確認します。']],
+      ['第7条 見積お問い合わせの性格', ['見積お問い合わせは、会員が選択した商品と数量について貴族に検討を依頼する手続です。', '見積お問い合わせの受付のみで最終取引、契約、配送義務は発生しません。', '最終価格、可能数量、生産可否、納期、配送条件は担当者確認後に案内されます。']],
+      ['第8条 禁止行為および制限', ['虚偽情報の提出、第三者アカウントの使用、異常アクセス、サイト情報の無断収集、画像または説明の無断複製、会員価格の無断共有、システムの不正利用、サービス運営の妨害は禁止されます。', '該当行為が確認された場合、貴族は事前通知なくサービス利用制限、会員状態変更、承認取消、またはお問い合わせ処理の保留を行うことがあります。']],
+      ['第9条 個人情報および通知', ['貴族は会員登録、バイヤー審査、お問い合わせ対応、見積案内に必要な個人情報を、該当する同意および個人情報処理方針に従って処理します。', '会員登録、規約、個人情報、カタログ、見積お問い合わせに関する質問は、サイト案内または指定された連絡窓口を通じて受け付けます。']],
+    ],
+    cn: [
+      ['第1條 目的', '本條款規範貴族會員註冊、買家審核、商品目錄瀏覽、報價詢問及相關 B2B 說明服務的使用條件。'],
+      ['第2條 用語定義', ['使用者是指連線至本網站或使用服務的所有訪客與會員。', '會員是指透過會員註冊程序提交資料，並使用貴族目錄及詢問服務的個人或事業負責人。', '已核准買家是指貴族確認交易資格後，允許存取會員價格、MOQ、報價詢問等部分功能的會員。', '報價詢問是以商品、選項、數量與備註為基準，請求貴族進行交易審核的程序，並非最終交易確認。']],
+      ['第3條 效力與變更', ['本條款於會員註冊或網站連接畫面中顯示，會員同意並進行註冊程序時生效。', '貴族得依營運政策、服務結構、法令、資安標準或交易流程變更修訂本條款。', '重要變更得透過網站、會員畫面、電子郵件或其他合理方式通知。']],
+      ['第4條 服務提供', ['貴族得提供商品圖片、商品名稱、商品代碼、材質、顏色、尺寸、MOQ、分類、系列、目錄說明、會員狀態說明及報價詢問功能。', '本服務為 B2B 交易審核用目錄及詢問功能，並非即時交易成立服務。']],
+      ['第5條 會員義務', ['會員應提交正確資料，不得使用不實、第三方或難以確認的資料。', '會員應負責管理 ID 與密碼，不得轉讓、分享或允許他人使用帳戶。', '未經貴族事前同意，會員不得揭露或商業使用商品資訊、會員價格、報價內容或內部交易條件。']],
+      ['第6條 商品資訊與交易條件', ['商品圖片與說明為交易審核用目錄資訊，可能因拍攝環境、顯示環境、生產時點與供應狀況而與實物不同。', '會員價格、市場別價格、MOQ、庫存、交期、配送條件與出口可否，得僅向已核准會員或經負責人確認後提供。', '網站或詢問畫面中顯示的資訊為參考資訊，最終條件由貴族另行確認。']],
+      ['第7條 報價詢問性質', ['報價詢問是會員針對所選商品與數量請求貴族審核的程序。', '僅提交報價詢問不會產生最終交易、契約或配送義務。', '最終價格、可供應數量、生產可否、交期與配送條件由負責人確認後提供。']],
+      ['第8條 禁止行為與限制', ['禁止提交不實資料、使用他人帳戶、異常存取、未經授權蒐集網站資訊、未經授權複製圖片或說明、未經授權分享會員價格、濫用系統或妨礙服務運作。', '如確認上述行為，貴族得不經事前通知限制服務使用、變更會員狀態、取消核准或保留詢問處理。']],
+      ['第9條 個人資訊與通知', ['貴族依相關同意及隱私政策，處理會員註冊、買家審核、詢問回覆及報價說明所需的個人資訊。', '會員註冊、條款、個人資訊、目錄或報價詢問相關問題，可透過網站說明或指定聯絡管道提出。']],
+    ],
+  },
+  buyer_terms: {
+    en: [
+      ['Article 1 Purpose', 'These terms define detailed standards for Noblesse wholesale buyer review, member price access, MOQ, quote inquiry, and trade terms guidance.'],
+      ['Article 2 Buyer Review', ['Noblesse reviews wholesale buyer eligibility based on company name, contact person, contact details, country or region, sales channel, business type, interested products, and potential trading fit.', 'Review is not automatic approval and proceeds through manager review.']],
+      ['Article 3 Member Status and Access', ['Member status may be divided into guest, under review, approved buyer, and admin.', 'Members under review may browse the product catalog, but member price, quote inquiry, and trade terms guidance may be limited.']],
+      ['Article 4 Pricing, MOQ, and Options', ['Member price and market-specific price may be shown only to approved buyers.', 'MOQ may vary depending on product, material, color, size, production condition, and market supply policy.', 'Prices may vary depending on currency, country, market, supply terms, export availability, exchange rates, and production conditions.']],
+      ['Article 5 Quote Inquiry and Accuracy', ['Quote inquiry is a request for review of selected products and quantities and is not a final transaction or contract.', 'Members must submit accurate information required for buyer review.', 'Approval or quote guidance may be delayed when submitted information is false, incomplete, unreachable, or difficult to verify.']],
+      ['Article 6 Price Information Protection', ['Member pricing, market pricing, quote contents, and supply terms are information provided for approved buyer trade review.', 'Members must not share, disclose, or externally use price information or quote contents without prior consent from Noblesse.']],
+      ['Article 7 Approval Cancellation and Restrictions', 'If inaccurate information, unauthorized price sharing, service misuse, or conduct that harms trade order is confirmed, Noblesse may hold member status, cancel approval, or restrict service use.'],
+    ],
+    jp: [
+      ['第1条 目的', '本条件は、貴族の卸バイヤー審査、会員価格へのアクセス、MOQ、見積お問い合わせ、取引条件案内に関する詳細基準を定めます。'],
+      ['第2条 バイヤー審査', ['貴族は会社名、担当者、連絡先、国・地域、販売チャネル、業態、関心商品、取引適合性を基準に卸バイヤー資格を審査します。', '審査は自動承認ではなく、担当者確認を経て進められます。']],
+      ['第3条 会員状態およびアクセス', ['会員状態はゲスト、審査中、承認バイヤー、管理者などに区分されることがあります。', '審査中の会員は商品カタログを閲覧できますが、会員価格、見積お問い合わせ、取引条件案内は制限される場合があります。']],
+      ['第4条 価格、MOQ、およびオプション', ['会員価格および市場別価格は承認バイヤーにのみ表示されることがあります。', 'MOQは商品、素材、カラー、サイズ、生産状況、市場供給方針により異なる場合があります。', '価格は通貨、国、市場、供給条件、輸出可否、為替、製造状況により変動する場合があります。']],
+      ['第5条 見積お問い合わせと情報の正確性', ['見積お問い合わせは選択した商品と数量に対する検討依頼であり、最終取引または契約ではありません。', '会員はバイヤー審査に必要な正確な情報を提出しなければなりません。', '提出情報が虚偽、不完全、連絡不能、または確認困難な場合、承認または見積案内が遅延することがあります。']],
+      ['第6条 価格情報の保護', ['会員価格、市場別価格、見積内容、供給条件は承認バイヤーの取引検討のために提供される情報です。', '会員は貴族の事前同意なく、価格情報または見積内容を共有、開示、外部利用してはなりません。']],
+      ['第7条 承認取消および制限', '不正確な情報、無断の価格共有、サービスの不正利用、または取引秩序を害する行為が確認された場合、貴族は会員状態の保留、承認取消、またはサービス利用制限を行うことがあります。'],
+    ],
+    cn: [
+      ['第1條 目的', '本條件規範貴族批發買家審核、會員價格存取、MOQ、報價詢問與交易條件說明的詳細標準。'],
+      ['第2條 買家審核', ['貴族依公司名稱、負責人、聯絡方式、國家或地區、銷售通路、營業型態、關注商品與交易適合性審核批發買家資格。', '審核並非自動核准，將由負責人確認後進行。']],
+      ['第3條 會員狀態與存取', ['會員狀態可分為訪客、審核中、已核准買家、管理者等。', '審核中的會員可瀏覽商品目錄，但會員價格、報價詢問及交易條件說明可能受限。']],
+      ['第4條 價格、MOQ 與選項', ['會員價格與市場別價格得僅向已核准買家顯示。', 'MOQ 可能依商品、材質、顏色、尺寸、生產狀況與市場供應政策而不同。', '價格可能依幣別、國家、市場、供應條件、出口可否、匯率與生產狀況而變動。']],
+      ['第5條 報價詢問與資訊正確性', ['報價詢問是針對所選商品與數量的審核請求，並非最終交易或契約。', '會員應提交買家審核所需的正確資訊。', '如提交資訊不實、不完整、無法聯絡或難以確認，核准或報價說明可能延遲。']],
+      ['第6條 價格資訊保護', ['會員價格、市場別價格、報價內容與供應條件，是提供給已核准買家進行交易審核的資訊。', '未經貴族事前同意，會員不得分享、揭露或對外使用價格資訊或報價內容。']],
+      ['第7條 核准取消與限制', '如確認不正確資訊、未經授權分享價格、濫用服務或損害交易秩序的行為，貴族得保留會員狀態、取消核准或限制服務使用。'],
+    ],
+  },
+  privacy_collection_use: {
+    en: [
+      ['[Required] Personal Information Collection and Use Consent', {
+        type: 'table',
+        columns: ['Purpose', 'Items', 'Retention Period'],
+        rows: [
+          ['Sign-up and identity confirmation', 'ID, password, contact person name, contact details', 'Until withdrawal or purpose is achieved'],
+          ['Buyer review and member status guidance', 'Company name, country or region, sales channel, interested products, inquiry notes', 'Until withdrawal or buyer review purpose is achieved'],
+          ['Quote inquiry response and trade terms guidance', 'Contact details, inquiry products, quantity, request memo, manager response record', 'Until inquiry processing is completed and internal record retention period expires'],
+          ['Misuse prevention and service stability', 'Access logs, usage records, member status change records', 'Period required by applicable law or internal security standards'],
+        ],
+      }],
+      ['Processing and Safeguards', ['Personal information is processed only within the scope necessary for sign-up review, buyer review, inquiry response, record management, and misuse prevention.', 'After the purpose is achieved, information is deleted or separately stored unless retention is required by law, dispute response, or security standards.', 'If required consent is refused, membership request and quote inquiry processing may be limited.']],
+    ],
+    jp: [
+      ['【必須】個人情報の収集・利用同意', {
+        type: 'table',
+        columns: ['目的', '項目', '保有期間'],
+        rows: [
+          ['会員登録および本人確認', 'ID、パスワード、担当者名、連絡先', '退会または目的達成時まで'],
+          ['バイヤー審査および会員状態案内', '会社名、国・地域、販売チャネル、関心商品、お問い合わせ内容', '退会またはバイヤー審査目的達成時まで'],
+          ['見積お問い合わせ対応および取引条件案内', '連絡先、お問い合わせ商品、数量、依頼メモ、担当者対応記録', 'お問い合わせ処理完了後、内部記録保管期間まで'],
+          ['不正利用防止およびサービス安定性確保', 'アクセス記録、利用記録、会員状態変更記録', '関連法令または内部セキュリティ基準に基づく期間'],
+        ],
+      }],
+      ['処理および保護原則', ['個人情報は、会員登録審査、バイヤー審査、お問い合わせ対応、記録管理、不正利用防止に必要な範囲でのみ処理されます。', '目的達成後は、法令、紛争対応、セキュリティ基準上の保管が必要な場合を除き、削除または分離保管されます。', '必須同意を拒否する場合、会員申請および見積お問い合わせ処理が制限されることがあります。']],
+    ],
+    cn: [
+      ['【必填】個人資訊蒐集及使用同意', {
+        type: 'table',
+        columns: ['目的', '項目', '保存期間'],
+        rows: [
+          ['會員註冊與本人識別', 'ID、密碼、負責人姓名、聯絡方式', '會員退出或目的達成時為止'],
+          ['買家審核與會員狀態說明', '公司名稱、國家或地區、銷售通路、關注商品、詢問內容', '會員退出或買家審核目的達成時為止'],
+          ['報價詢問回覆與交易條件說明', '聯絡方式、詢問商品、數量、請求備註、負責人回覆紀錄', '詢問處理完成後至內部紀錄保存期間為止'],
+          ['防止不當使用與維持服務穩定', '存取紀錄、使用紀錄、會員狀態變更紀錄', '依相關法令或內部資安標準所需期間'],
+        ],
+      }],
+      ['處理與保護原則', ['個人資訊僅於會員註冊審核、買家審核、詢問回覆、紀錄管理、防止不當使用所需範圍內處理。', '目的達成後，除法令、爭議處理或資安標準要求保存外，將刪除或分離保存。', '如拒絕必填同意，會員申請及報價詢問處理可能受到限制。']],
+    ],
+  },
+  marketing_updates: {
+    en: [
+      ['Article 1 Purpose', 'Noblesse may send new product, catalog, collection, material, event, and buyer guide updates to members who consent.'],
+      ['Article 2 Delivery Channels', 'Updates may be delivered by email, message, messenger, or service notification depending on the contact information submitted by the member.'],
+      ['Article 3 Optional Consent', 'Marketing update consent is optional and refusal does not limit membership request or required service use.'],
+      ['Article 4 Opt-out', 'Members may withdraw marketing consent at any time through the service screen or contact channel.'],
+    ],
+    jp: [
+      ['第1条 目的', '貴族は同意した会員に対し、新商品、カタログ、コレクション、素材、イベント、バイヤー向け案内を送信することがあります。'],
+      ['第2条 送信方法', '案内は、会員が提出した連絡先情報に応じて、メール、メッセージ、メッセンジャー、サービス通知などで送信されることがあります。'],
+      ['第3条 任意同意', 'マーケティング案内の受信同意は任意であり、拒否しても会員申請または必須サービス利用は制限されません。'],
+      ['第4条 受信停止', '会員はサービス画面または連絡窓口を通じて、いつでもマーケティング同意を撤回できます。'],
+    ],
+    cn: [
+      ['第1條 目的', '貴族得向同意的會員發送新品、目錄、系列、材質、活動及買家說明。'],
+      ['第2條 發送方式', '通知得依會員提交的聯絡資訊，透過電子郵件、訊息、通訊軟體或服務通知等方式發送。'],
+      ['第3條 選填同意', '行銷通知同意為選填，拒絕不會限制會員申請或必要服務使用。'],
+      ['第4條 取消接收', '會員可透過服務畫面或聯絡管道，隨時撤回行銷同意。'],
+    ],
+  },
+}
+
 function _FieldGroup({ title, children }) {
   return <fieldset className="form-section">
     <legend>{title}</legend>
@@ -646,7 +774,9 @@ function _FieldGroup({ title, children }) {
 
 function AgreementDocument({ document, locale }) {
   const useEnglish = locale !== 'kr'
-  const localizedSections = resolveLocaleCopy(localizedAgreementSections[document.key], locale, 'en')
+  const localizedSections =
+    resolveLocaleCopy(localizedAgreementDetailOverrides[document.key], locale) ??
+    resolveLocaleCopy(localizedAgreementSections[document.key], locale, 'en')
   const renderAgreementBody = (body) => {
     if (Array.isArray(body)) {
       return body.map((paragraph) => <p key={paragraph}>{paragraph}</p>)

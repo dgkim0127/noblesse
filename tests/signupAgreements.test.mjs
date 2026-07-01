@@ -53,3 +53,25 @@ test('legacy cn signup route canonicalizes to Taiwan Chinese signup behavior', (
   assert.match(appSource, /<Route path="\/:locale" element=\{<LocaleShell \/>\}>/)
   assert.match(appSource, /<Route path="register" element=\{<RegisterPage \/>\} \/>/)
 })
+
+test('register agreement details use localized article and table structure outside Korean', () => {
+  const source = readWorkspaceFile('src/pages/RegisterPage.jsx')
+
+  assert.match(source, /const localizedAgreementDetailOverrides = \{/)
+  assert.match(source, /resolveLocaleCopy\(localizedAgreementDetailOverrides\[document\.key\], locale\)/)
+  assert.match(source, /\?\?\s*resolveLocaleCopy\(localizedAgreementSections\[document\.key\], locale, 'en'\)/)
+
+  assert.match(source, /Article 1 Purpose/)
+  assert.match(source, /第1条 目的/)
+  assert.match(source, /第1條 目的/)
+  assert.match(source, /Article 7 Nature of Quote Inquiry/)
+  assert.match(source, /第7条 見積お問い合わせの性格/)
+  assert.match(source, /第7條 報價詢問性質/)
+
+  assert.match(source, /Personal Information Collection and Use Consent/)
+  assert.match(source, /個人情報の収集・利用同意/)
+  assert.match(source, /個人資訊蒐集及使用同意/)
+  assert.match(source, /columns: \['Purpose', 'Items', 'Retention Period'\]/)
+  assert.match(source, /columns: \['目的', '項目', '保有期間'\]/)
+  assert.match(source, /columns: \['目的', '項目', '保存期間'\]/)
+})
