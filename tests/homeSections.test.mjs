@@ -18,7 +18,7 @@ test('home product sections do not backfill empty merchandising slots with unrel
   assert.match(page, /if \(products\.length === 0 \|\| sectionProducts\.length === 0\) return null/)
 })
 
-test('home navigation only includes sections with visible content', () => {
+test('home navigation keeps all merch slots visible and disables empty sections', () => {
   const page = readWorkspaceFile('src/pages/HomePage.jsx')
 
   assert.match(page, /const activeHomeSectionNav = useMemo\(\(\) => homeSectionNav\.filter/)
@@ -26,7 +26,10 @@ test('home navigation only includes sections with visible content', () => {
   assert.match(page, /if \(item\.id === 'weekly-pick'\) return weeklyProducts\.length > 0/)
   assert.match(page, /if \(item\.id === 'piercing-catalog'\) return piercingCatalogProducts\.length > 0/)
   assert.match(page, /if \(item\.id === 'steady-selection'\) return steadySelectionProducts\.length > 0/)
-  assert.match(page, /\{activeHomeSectionNav\.map\(\(item\) => <button/)
+  assert.match(page, /const homeSectionNavItems = useMemo/)
+  assert.match(page, /isDisabled: !activeIds\.has\(item\.id\)/)
+  assert.match(page, /\{homeSectionNavItems\.map\(\(item\) => <button/)
+  assert.match(page, /disabled=\{item\.isDisabled\}/)
 })
 
 test('home section tabs hide empty taxonomy filters instead of showing blank panels', () => {

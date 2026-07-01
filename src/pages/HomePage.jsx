@@ -1396,6 +1396,13 @@ export function HomePage() {
     piercingCatalogProducts.length,
     steadySelectionProducts.length,
   ])
+  const homeSectionNavItems = useMemo(() => {
+    const activeIds = new Set(activeHomeSectionNav.map((item) => item.id))
+    return homeSectionNav.map((item) => ({
+      ...item,
+      isDisabled: !activeIds.has(item.id),
+    }))
+  }, [activeHomeSectionNav])
   const activeHomeSectionIds = activeHomeSectionNav.map((item) => item.id).join('|')
   const firstActiveHomeSectionId = activeHomeSectionNav[0]?.id ?? homeSectionNav[0].id
   const showcaseLoopPanels = [...homeShowcasePanels, ...homeShowcasePanels, ...homeShowcasePanels]
@@ -1715,13 +1722,13 @@ export function HomePage() {
 
     <div className={`home-section-nav-anchor${isSectionNavFixed ? ' is-fixed' : ''}`} ref={sectionNavAnchorRef}>
       <div className="home-section-nav" aria-label="홈 제품 섹션 이동">
-        {activeHomeSectionNav.map((item) => <button key={item.id} className={activeHomeSection === item.id ? 'is-active' : undefined} type="button" onClick={() => scrollToHomeSection(item.id)}>
+        {homeSectionNavItems.map((item) => <button key={item.id} aria-disabled={item.isDisabled ? 'true' : undefined} className={`${activeHomeSection === item.id ? 'is-active' : ''}${item.isDisabled ? ' is-disabled' : ''}`.trim() || undefined} disabled={item.isDisabled} type="button" onClick={() => scrollToHomeSection(item.id)}>
           {item.labels[locale] ?? item.labels.en}
         </button>)}
       </div>
     </div>
     {isSectionNavFixed ? <div className="home-section-nav-fixed" aria-label="고정 제품 섹션 이동">
-      {activeHomeSectionNav.map((item) => <button key={item.id} className={activeHomeSection === item.id ? 'is-active' : undefined} type="button" onClick={() => scrollToHomeSection(item.id)}>
+      {homeSectionNavItems.map((item) => <button key={item.id} aria-disabled={item.isDisabled ? 'true' : undefined} className={`${activeHomeSection === item.id ? 'is-active' : ''}${item.isDisabled ? ' is-disabled' : ''}`.trim() || undefined} disabled={item.isDisabled} type="button" onClick={() => scrollToHomeSection(item.id)}>
         {item.labels[locale] ?? item.labels.en}
       </button>)}
     </div> : null}
