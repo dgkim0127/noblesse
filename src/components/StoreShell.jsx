@@ -460,7 +460,6 @@ function IconAction({ children, label, onClick, to, className = '' }) {
 export function StoreShell() {
   const navigate = useNavigate()
   const location = useLocation()
-  const navRef = useRef(null)
   const searchRef = useRef(null)
   const headerSearchInputRef = useRef(null)
   const compactSearchRef = useRef(null)
@@ -482,9 +481,7 @@ export function StoreShell() {
   const [loginModalNotice, setLoginModalNotice] = useState('')
   const [isAutoLoginEnabled, setIsAutoLoginEnabled] = useState(true)
   const [isLoginPasswordVisible, setIsLoginPasswordVisible] = useState(false)
-  const [navIndicator, setNavIndicator] = useState({ left: 0, ready: false, width: 0 })
   const {
-    buyerAccess,
     dataError,
     dataMode,
     dataStatus,
@@ -515,37 +512,6 @@ export function StoreShell() {
     ? normalizedPathname.slice(firstPathSegment.length + 1) || '/'
     : normalizedPathname
   const usesHomeStyleHeader = isHomeImageRoute || pathnameWithoutLocale === '/products' || pathnameWithoutLocale.startsWith('/products/')
-
-  useEffect(() => {
-    const nav = navRef.current
-    if (!nav) return undefined
-
-    const syncIndicator = () => {
-      const active = nav.querySelector('a.active')
-      if (!active) {
-        setNavIndicator((current) => ({ ...current, ready: false }))
-        return
-      }
-
-      const navRect = nav.getBoundingClientRect()
-      const activeRect = active.getBoundingClientRect()
-      setNavIndicator({
-        left: activeRect.left - navRect.left + nav.scrollLeft,
-        ready: true,
-        width: activeRect.width,
-      })
-    }
-
-    const frame = window.requestAnimationFrame(syncIndicator)
-    window.addEventListener('resize', syncIndicator)
-    nav.addEventListener('scroll', syncIndicator, { passive: true })
-
-    return () => {
-      window.cancelAnimationFrame(frame)
-      window.removeEventListener('resize', syncIndicator)
-      nav.removeEventListener('scroll', syncIndicator)
-    }
-  }, [buyerAccess.canRequestQuote, isPending, location.pathname, locale])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -946,20 +912,6 @@ export function StoreShell() {
             <p>{copy.noRecentViewed}</p>
           </section>
         </div>
-      </div>}
-
-      {isPending && <div className="header-lower" style={compactHeaderCollapseStyle}>
-        <nav className="header-nav" ref={navRef} aria-label={copy.mainNav}>
-          <span
-            aria-hidden="true"
-            className={`header-nav-indicator ${navIndicator.ready ? 'ready' : ''}`}
-            style={{
-              transform: `translateX(${navIndicator.left}px)`,
-              width: `${navIndicator.width}px`,
-            }}
-          />
-          {isPending && <NavLink to={toLocalePath('/approval-pending')}>{copy.pending}</NavLink>}
-        </nav>
       </div>}
 
       {isMockMode && !isPreviewBarHidden && <div className="preview-bar" style={compactHeaderCollapseStyle}>

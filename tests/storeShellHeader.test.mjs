@@ -41,3 +41,10 @@ test('header icon actions do not show browser title tooltips', () => {
   assert.doesNotMatch(shell, /title=\{copy\.search\}/)
   assert.match(shell, /aria-label=\{label\}/)
 })
+
+test('pending state does not render a visible header status strip', () => {
+  const shell = readWorkspaceFile('src/components/StoreShell.jsx')
+
+  assert.doesNotMatch(shell, /\{isPending && <div className="header-lower"/)
+  assert.doesNotMatch(shell, /<NavLink to=\{toLocalePath\('\/approval-pending'\)\}>\{copy\.pending\}<\/NavLink>/)
+})
