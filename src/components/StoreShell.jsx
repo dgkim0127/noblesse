@@ -505,6 +505,7 @@ export function StoreShell() {
   const isCompactSearchOpen = compactSearchPhase === 'open'
   const isCompactSearchClosing = compactSearchPhase === 'closing'
   const isMockMode = dataMode === 'mock'
+  const shouldShowPreviewControls = false
   const normalizedPathname = location.pathname.replace(/\/+$/, '') || '/'
   const isHomeImageRoute = normalizedPathname === '/' || supportedLocales.some((item) => normalizedPathname === `/${item}`)
   const firstPathSegment = normalizedPathname.split('/')[1]
@@ -915,7 +916,7 @@ export function StoreShell() {
         </div>
       </div>}
 
-      {isMockMode && !isPreviewBarHidden && <div className="preview-bar" style={compactHeaderCollapseStyle}>
+      {shouldShowPreviewControls && isMockMode && !isPreviewBarHidden && <div className="preview-bar" style={compactHeaderCollapseStyle}>
         <span>
           <span className="viewer-label-full">{copy.viewerLabels[viewerState]}</span>
           <span className="viewer-label-compact">{compactViewerLabels[viewerState]}</span>
@@ -985,7 +986,7 @@ export function StoreShell() {
         </div>
       </section>
     </div>}
-    {isMockMode && <button
+    {shouldShowPreviewControls && isMockMode && <button
       className={`preview-bar-hide ${isPreviewBarHidden ? 'is-hidden-state' : ''}`}
       type="button"
       aria-label={isPreviewBarHidden ? 'Show mock preview bar' : 'Hide mock preview bar'}

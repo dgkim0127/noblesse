@@ -48,3 +48,11 @@ test('pending state does not render a visible header status strip', () => {
   assert.doesNotMatch(shell, /\{isPending && <div className="header-lower"/)
   assert.doesNotMatch(shell, /<NavLink to=\{toLocalePath\('\/approval-pending'\)\}>\{copy\.pending\}<\/NavLink>/)
 })
+
+test('mock preview controls are not rendered in the storefront shell', () => {
+  const shell = readWorkspaceFile('src/components/StoreShell.jsx')
+
+  assert.match(shell, /const shouldShowPreviewControls = false/)
+  assert.match(shell, /\{shouldShowPreviewControls && isMockMode && !isPreviewBarHidden && <div className="preview-bar"/)
+  assert.match(shell, /\{shouldShowPreviewControls && isMockMode && <button/)
+})
