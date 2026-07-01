@@ -69,6 +69,12 @@ function App() {
     <Route element={<StoreShell />}>
       <Route path="/" element={<HomePage />} />
       <Route path="/products" element={<ProductsPage />} />
+      <Route path="/collections/:collectionId" element={<ProductsPage />} />
+      <Route path="/piercing/:piercingType" element={<ProductsPage />} />
+      <Route path="/material/:baseMaterial" element={<ProductsPage />} />
+      <Route path="/material/:baseMaterial/piercing/:piercingType" element={<ProductsPage />} />
+      <Route path="/shape/:shape" element={<ProductsPage />} />
+      <Route path="/shape/:shape/piercing/:piercingType" element={<ProductsPage />} />
       <Route path="/products/:productId" element={<ProductDetailPage />} />
       <Route path={`/${taiwanLocale}/products/:productId`} element={<ProductDetailPage />} />
       <Route path="/inquiry-list" element={<InquiryListPage />} />
@@ -104,6 +110,12 @@ function App() {
     <Route path="/:locale" element={<LocaleShell />}>
       <Route index element={<HomePage />} />
       <Route path="products" element={<ProductsPage />} />
+      <Route path="collections/:collectionId" element={<ProductsPage />} />
+      <Route path="piercing/:piercingType" element={<ProductsPage />} />
+      <Route path="material/:baseMaterial" element={<ProductsPage />} />
+      <Route path="material/:baseMaterial/piercing/:piercingType" element={<ProductsPage />} />
+      <Route path="shape/:shape" element={<ProductsPage />} />
+      <Route path="shape/:shape/piercing/:piercingType" element={<ProductsPage />} />
       <Route path="products/:productId" element={<ProductDetailPage />} />
       <Route path="inquiry-list" element={<InquiryListPage />} />
       <Route path="request-quote" element={<RequestQuotePage />} />

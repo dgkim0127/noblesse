@@ -1,3 +1,5 @@
+import { createProductTaxonomy } from './productTaxonomy.js'
+
 const timestamp = '2026-06-01T00:00:00.000Z'
 
 export const mockUsers = {
@@ -150,6 +152,8 @@ const collectionIdsByIndex = [
 
 export const mockProducts = productSeeds.map(([nameEn, nameKo, nameJa, categoryId, material, colors, sizes, tone], index) => {
   const productId = `NB-${String(index + 1).padStart(3, '0')}`
+  const collectionIds = collectionIdsByIndex[index]
+  const taxonomy = createProductTaxonomy({ categoryId, material, collectionIds, index })
   return {
     productId,
     code: productId,
@@ -157,8 +161,18 @@ export const mockProducts = productSeeds.map(([nameEn, nameKo, nameJa, categoryI
     nameEn,
     nameJa,
     categoryId,
-    collectionIds: collectionIdsByIndex[index],
+    collectionIds,
     material,
+    taxonomy,
+    productGroup: taxonomy.productGroup,
+    piercingType: taxonomy.piercingType,
+    baseMaterial: taxonomy.baseMaterial,
+    allSurgical: taxonomy.allSurgical,
+    decorationMaterials: taxonomy.decorationMaterials,
+    structures: taxonomy.structures,
+    styles: taxonomy.styles,
+    shapes: taxonomy.shapes,
+    saleType: taxonomy.saleType,
     colors,
     sizes,
     moqDefault: [20, 12, 16, 8][index % 4],

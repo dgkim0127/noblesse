@@ -4,8 +4,9 @@ import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatAdminPriceBook } from '../config/currency'
 import { mockProducts } from '../data/catalog'
+import { homeTaxonomyLinks } from '../data/productTaxonomy'
 import { formatMoney } from '../utils/commerce'
-import { getLocalizedProductAlt, getLocalizedProductName, resolveLocaleCopy, useLocalePath } from '../utils/locale'
+import { getLocaleContentKey, getLocalizedProductAlt, getLocalizedProductName, resolveLocaleCopy, useLocalePath } from '../utils/locale'
 
 const homeCopy = {
   kr: {
@@ -138,60 +139,60 @@ const homeCopy = {
     brandNoteText: '大きな商品画像、素材とオプション、最小数量、わかりやすいお問い合わせフローを提供します。',
   },
   cn: {
-    eyebrow: '国内外B2B商品目录',
-    title: '贵族',
-    lead: '面向国内外B2B买家的贵族商品目录。',
-    note: '查看商品信息、最小数量、材质和选项后，请提交贸易咨询。',
+    eyebrow: '國內外B2B商品目錄',
+    title: '貴族',
+    lead: '面向國內外B2B買家的貴族商品目錄。',
+    note: '查看商品資訊、最小數量、材質和選項後，請提交貿易諮詢。',
     viewCatalog: '查看商品',
-    access: '贸易咨询',
-    pending: '查看确认状态',
-    approved: '咨询清单',
-    admin: '管理员',
-    buyerStripGuest: '面向国内外B2B买家的商品目录',
-    buyerStripPending: '贸易信息确认中',
-    buyerStripApproved: '可提供交易条件',
-    buyerStripGuestNote: '交易条件和报价将在工作人员确认后提供。',
-    buyerStripApprovedNote: '可查看负责地区的交易条件。',
-    quickTitle: '快速分类',
-    quickNote: '从常见穿孔款式开始浏览。',
-    collectionsTitle: '推荐系列',
-    collectionsNote: '按地区偏好整理的品牌精选。',
-    browseProducts: '浏览商品',
+    access: '貿易諮詢',
+    pending: '查看確認状態',
+    approved: '諮詢清單',
+    admin: '管理員',
+    buyerStripGuest: '面向國內外B2B買家的商品目錄',
+    buyerStripPending: '貿易資訊確認中',
+    buyerStripApproved: '可提供交易條件',
+    buyerStripGuestNote: '交易條件和報價將在工作人員確認後提供。',
+    buyerStripApprovedNote: '可查看负責地區的交易條件。',
+    quickTitle: '快速分類',
+    quickNote: '從常见穿孔款式開始瀏覽。',
+    collectionsTitle: '推薦系列',
+    collectionsNote: '按地區偏好整理的品牌精選。',
+    browseProducts: '瀏覽商品',
     stylesLabel: '款式',
-    featuredTitle: '推荐穿孔',
-    featuredNote: '适合贵族目录的精选款式。',
+    featuredTitle: '推薦穿孔',
+    featuredNote: '適合貴族目錄的精選款式。',
     newTitle: '新品上架',
-    newNote: '为下一轮选品准备的新款穿孔。',
-    exportTitle: '出口热选',
-    exportNote: '适合出口咨询的推荐款式。',
+    newNote: '為下一轮選品準備的新款穿孔。',
+    exportTitle: '出口熱選',
+    exportNote: '適合出口諮詢的推薦款式。',
     viewAll: '查看全部',
-    campaignEyebrow: '贵族 Signature',
-    campaignTitle: '贵族 Signature',
-    campaignNote: '为国内外贸易咨询精选的穿孔风格。',
-    campaignCta: '咨询交易条件',
-    recentTitle: '最近浏览',
-    recentNote: '最近查看的商品稍后会显示在这里。',
-    supportTitle: '贸易咨询支持',
-    supportNote: 'Email、KakaoTalk、WhatsApp 咨询渠道正在准备中。',
-    supportSmall: '工作人员确认后，将提供报价和交易条件。',
-    companyTitle: '公司信息',
-    companyNote: '贵族',
-    companySmall: '国内外B2B穿孔商品目录 / 贸易咨询支持',
-    brandNoteTitle: '面向国内外B2B买家设计',
-    brandNoteText: '提供大图商品展示、材质和选项、最小数量以及清晰的咨询流程。',
+    campaignEyebrow: '貴族 Signature',
+    campaignTitle: '貴族 Signature',
+    campaignNote: '為國內外貿易諮詢精選的穿孔風格。',
+    campaignCta: '諮詢交易條件',
+    recentTitle: '最近瀏覽',
+    recentNote: '最近查看的商品稍後會顯示在这里。',
+    supportTitle: '貿易諮詢支持',
+    supportNote: 'Email、KakaoTalk、WhatsApp 諮詢渠道正在準備中。',
+    supportSmall: '工作人員確認後，將提供報價和交易條件。',
+    companyTitle: '公司資訊',
+    companyNote: '貴族',
+    companySmall: '國內外B2B穿孔商品目錄 / 貿易諮詢支持',
+    brandNoteTitle: '面向國內外B2B買家設计',
+    brandNoteText: '提供大圖商品展示、材質和選項、最小數量以及清晰的諮詢流程。',
   },
 }
 
 const _quickCategories = [
   { key: 'new', query: '?tag=new', labels: { kr: '신상품', en: 'New', jp: '新商品', cn: '新品' } },
-  { key: 'best', query: '?tag=best', labels: { kr: '베스트', en: 'Best', jp: 'ベスト', cn: '热选' } },
-  { key: 'ring', query: '?category=piercing', labels: { kr: '링', en: 'Ring', jp: 'リング', cn: '环' } },
-  { key: 'barbell', query: '?category=barbell', labels: { kr: '바벨', en: 'Barbell', jp: 'バーベル', cn: '杠铃' } },
-  { key: 'labret', query: '?category=labret', labels: { kr: '라블렛', en: 'Labret', jp: 'ラブレット', cn: '唇钉' } },
-  { key: 'silver', query: '?color=Silver', labels: { kr: '실버', en: 'Silver', jp: 'シルバー', cn: '银色' } },
+  { key: 'best', query: '?tag=best', labels: { kr: '베스트', en: 'Best', jp: 'ベスト', cn: '熱選' } },
+  { key: 'ring', query: '?category=piercing', labels: { kr: '링', en: 'Ring', jp: 'リング', cn: '環' } },
+  { key: 'barbell', query: '?category=barbell', labels: { kr: '바벨', en: 'Barbell', jp: 'バーベル', cn: '槓鈴' } },
+  { key: 'labret', query: '?category=labret', labels: { kr: '라블렛', en: 'Labret', jp: 'ラブレット', cn: '唇釘' } },
+  { key: 'silver', query: '?color=Silver', labels: { kr: '실버', en: 'Silver', jp: 'シルバー', cn: '銀色' } },
   { key: 'gold', query: '?color=Gold', labels: { kr: '골드', en: 'Gold', jp: 'ゴールド', cn: '金色' } },
-  { key: 'titanium', query: '?material=Titanium', labels: { kr: '티타늄', en: 'Titanium', jp: 'チタン', cn: '钛钢' } },
-  { key: 'steel', query: '?material=Surgical%20Steel', labels: { kr: '써지컬 스틸', en: 'Surgical Steel', jp: 'サージカルステンレス', cn: '医用钢' } },
+  { key: 'titanium', query: '?material=Titanium', labels: { kr: '티타늄', en: 'Titanium', jp: 'チタン', cn: '鈦鋼' } },
+  { key: 'steel', query: '?material=Surgical%20Steel', labels: { kr: '써지컬 스틸', en: 'Surgical Steel', jp: 'サージカルステンレス', cn: '医用鋼' } },
 ]
 
 const _collectionCopy = {
@@ -199,37 +200,37 @@ const _collectionCopy = {
     kr: '일본 지역 취향에 맞춘 정제된 셀렉션입니다.',
     en: 'A refined selection for Japan-area buyers.',
     jp: '日本地域の好みに合わせたセレクションです。',
-    cn: '适合日本地区偏好的精选系列。',
+    cn: '適合日本地區偏好的精選系列。',
   },
   'us-buyer-picks': {
     kr: '미국 지역을 위한 깔끔한 스타일과 회전율 높은 피어싱입니다.',
     en: 'Clean, easy-to-select piercing styles for US-area buyers.',
     jp: '米国地域に向けたクリーンで回転率の高いスタイルです。',
-    cn: '适合美国地区的简洁高周转款式。',
+    cn: '適合美國地區的簡洁高週轉款式。',
   },
   'minimal-piercing-line': {
     kr: '데일리 진열에 어울리는 미니멀 피어싱 라인입니다.',
     en: 'Minimal piercing line for daily merchandising.',
     jp: 'デイリー陳列に合うミニマルピアスラインです。',
-    cn: '适合日常陈列的极简穿孔系列。',
+    cn: '適合日常陈列的极簡穿孔系列。',
   },
   'premium-cubic-line': {
     kr: '빛 반사가 선명한 프리미엄 큐빅 스타일입니다.',
     en: 'Premium cubic styles with bright reflection.',
     jp: '輝きがきれいなプレミアムキュービックラインです。',
-    cn: '光泽清晰的高端锆石款式。',
+    cn: '光泽清晰的高端鋯石款式。',
   },
   'export-best-items': {
     kr: '수출 상담에 적합한 Noblesse 핵심 상품입니다.',
     en: 'Core Noblesse items for export sourcing.',
     jp: '輸出相談に適したNoblesseの中心商品です。',
-    cn: '适合出口采购咨询的核心商品。',
+    cn: '適合出口採購諮詢的核心商品。',
   },
   'new-arrivals': {
     kr: '다음 셀렉션을 위한 신규 입고 스타일입니다.',
     en: 'New arrivals prepared for the next selection.',
     jp: '次のセレクションに向けた新入荷スタイルです。',
-    cn: '为下一轮选品准备的新款。',
+    cn: '為下一轮選品準備的新款。',
   },
 }
 
@@ -249,19 +250,19 @@ const heroBanners = [
       kr: '티타늄 라블렛 라인',
       en: 'Titanium Labret Line',
       jp: 'チタンラブレットライン',
-      cn: '钛钢唇钉系列',
+      cn: '鈦鋼唇釘系列',
     },
     eyebrow: {
       kr: '노블레스 추천',
       en: 'Noblesse Picks',
       jp: '貴族セレクト',
-      cn: '贵族精选',
+      cn: '貴族精選',
     },
     text: {
       kr: '거래처 문의에 적합한 티타늄 라블렛 추천 라인',
       en: 'Recommended titanium labret styles for trade inquiries.',
       jp: '取引先お問い合わせに適したチタンラブレット推薦ライン。',
-      cn: '适合贸易咨询的钛钢唇钉推荐系列。',
+      cn: '適合貿易諮詢的鈦鋼唇釘推薦系列。',
     },
     to: '/products?material=Titanium',
     image: 'https://images.unsplash.com/photo-1671644730555-916aa8d8157f?auto=format&fit=crop&crop=faces&w=900&h=1350&q=86',
@@ -272,19 +273,19 @@ const heroBanners = [
       kr: '프리미엄 큐빅 피어싱',
       en: 'Premium Cubic Piercing',
       jp: 'プレミアムキュービックピアス',
-      cn: '高级锆石穿孔饰品',
+      cn: '高級鋯石穿孔飾品',
     },
     eyebrow: {
       kr: '큐빅 컬렉션',
       en: 'Cubic Collection',
       jp: 'キュービックコレクション',
-      cn: '锆石系列',
+      cn: '鋯石系列',
     },
     text: {
       kr: '큐빅과 오팔 디테일 중심의 피어싱 셀렉션',
       en: 'A piercing selection focused on cubic and opal details.',
       jp: 'キュービックとオパールポイント中心のピアスセレクション。',
-      cn: '以锆石与欧泊细节为中心的穿孔饰品选择。',
+      cn: '以鋯石與歐泊細節為中心的穿孔飾品選擇。',
     },
     to: '/products?collection=premium-cubic-line',
     image: 'https://images.unsplash.com/photo-1602722872368-0cfc00f748ff?auto=format&fit=crop&crop=faces&w=900&h=1350&q=86',
@@ -301,13 +302,13 @@ const heroBanners = [
       kr: '골드 에디트',
       en: 'Gold Edit',
       jp: 'ゴールドエディット',
-      cn: '金色精选',
+      cn: '金色精選',
     },
     text: {
       kr: '작고 고급스러운 14K 골드 피어싱 카탈로그',
       en: 'A refined catalog of tiny 14K gold piercing styles.',
       jp: '小さく上品な14Kゴールドピアスカタログ。',
-      cn: '精致小巧的14K金穿孔饰品目录。',
+      cn: '精致小巧的14K金穿孔飾品目錄。',
     },
     to: '/products?material=14K%20Gold',
     image: 'https://images.unsplash.com/photo-1701777892740-88419a701472?auto=format&fit=crop&crop=entropy&w=900&h=1350&q=86',
@@ -318,19 +319,19 @@ const heroBanners = [
       kr: '수출 베스트 아이템',
       en: 'Export Best Items',
       jp: '輸出ベストアイテム',
-      cn: '出口热选单品',
+      cn: '出口熱選單品',
     },
     eyebrow: {
       kr: 'B2B 셀렉션',
       en: 'B2B Selection',
       jp: 'B2Bセレクション',
-      cn: 'B2B精选',
+      cn: 'B2B精選',
     },
     text: {
       kr: '해외 지역용 수출 추천 베스트 아이템',
       en: 'Export-ready best items for global sourcing.',
       jp: '海外地域向けの輸出推薦ベストアイテム。',
-      cn: '适合海外地区采购的出口推荐单品。',
+      cn: '適合海外地區採購的出口推薦單品。',
     },
     to: '/products?collection=export-best-items',
     image: 'https://images.unsplash.com/photo-1690126889953-a100f54b619e?auto=format&fit=crop&crop=faces&w=900&h=1350&q=86',
@@ -338,23 +339,129 @@ const heroBanners = [
 ]
 
 const homeSectionNav = [
-  { id: 'new-arrival', label: '신상품' },
-  { id: 'weekly-pick', label: '주간 추천' },
-  { id: 'buyer-selection', label: '바이어 셀렉션' },
-  { id: 'piercing-catalog', label: 'Piercing' },
-  { id: 'steady-selection', label: '스테디 셀렉션' },
+  {
+    id: 'new-arrival',
+    labels: { kr: '신상품', en: 'New Arrival', jp: '新商品', cn: '新品' },
+  },
+  {
+    id: 'weekly-pick',
+    labels: { kr: '주간 추천', en: 'Weekly Best', jp: '週間ベスト', cn: '每週精選' },
+  },
+  {
+    id: 'buyer-selection',
+    labels: { kr: '바이어 셀렉션', en: 'Buyer Selection', jp: 'バイヤーセレクション', cn: '買家精選' },
+  },
+  {
+    id: 'piercing-catalog',
+    labels: { kr: '피어싱', en: 'Piercing', jp: 'ピアス', cn: '穿孔' },
+  },
+  {
+    id: 'steady-selection',
+    labels: { kr: '스테디 셀렉션', en: 'Steady Selection', jp: '定番セレクション', cn: '常青精選' },
+  },
 ]
 
 const homeCategoryChips = [
-  { icon: 'surgical', label: '써지컬 피어싱', to: '/products?material=Surgical%20Steel' },
-  { icon: 'silver', label: '실버 925', to: '/products?material=Silver%20925' },
-  { icon: 'ring', label: '링 피어싱', to: '/products?q=ring' },
-  { icon: 'cubic', label: '큐빅 피어싱', to: '/products?q=cubic' },
-  { icon: 'ribbon', label: '리본 아이템', to: '/products?q=ribbon' },
-  { icon: 'butterfly', label: '나비 아이템', to: '/products?q=butterfly' },
+  {
+    key: 'silver-925',
+    icon: 'silver',
+    labels: { kr: '실버925', en: 'Silver 925', jp: 'シルバー925', cn: '925銀' },
+    to: homeTaxonomyLinks.silver925,
+  },
+  {
+    key: 'brass-barbell',
+    icon: 'surgical',
+    labels: { kr: '바벨(신주)', en: 'Brass Barbell', jp: '真鍮バーベル', cn: '黄銅槓鈴' },
+    to: homeTaxonomyLinks.brassBarbell,
+  },
+  {
+    key: 'drop-antique',
+    icon: null,
+    labels: { kr: '드롭&엔틱', en: 'Drop & Antique', jp: 'ドロップ&アンティーク', cn: '垂墜&複古' },
+    to: homeTaxonomyLinks.dropAntique,
+  },
+  {
+    key: 'all-surgical',
+    icon: 'surgical',
+    emoji: '⚕️',
+    labels: { kr: '올써지컬', en: 'All Surgical', jp: 'オールサージカル', cn: '全医用鋼' },
+    to: homeTaxonomyLinks.allSurgical,
+  },
+  {
+    key: 'pearl-acrylic',
+    icon: null,
+    labels: { kr: '진주&아크릴', en: 'Pearl & Acrylic', jp: 'パール&アクリル', cn: '珍珠&亞克力' },
+    to: homeTaxonomyLinks.pearlAcrylic,
+  },
+  {
+    key: 'mirrorball-stone',
+    icon: null,
+    labels: { kr: '미러볼&스톤', en: 'Mirror Ball & Stone', jp: 'ミラーボール&ストーン', cn: '鏡面球&宝石' },
+    to: homeTaxonomyLinks.mirrorballStone,
+  },
+  {
+    key: 'ring',
+    icon: 'ring',
+    emoji: '⭕',
+    labels: { kr: '링', en: 'Ring', jp: 'リング', cn: '環' },
+    to: homeTaxonomyLinks.ring,
+  },
+  {
+    key: 'flower',
+    icon: 'butterfly',
+    emoji: '🌸',
+    labels: { kr: '꽃', en: 'Flower', jp: '花', cn: '花' },
+    to: homeTaxonomyLinks.flower,
+  },
+  {
+    key: 'butterfly',
+    icon: 'butterfly',
+    emoji: '🦋',
+    labels: { kr: '나비', en: 'Butterfly', jp: '蝶', cn: '蝴蝶' },
+    to: homeTaxonomyLinks.butterfly,
+  },
+  {
+    key: 'heart',
+    icon: 'ribbon',
+    emoji: '💗',
+    labels: { kr: '하트', en: 'Heart', jp: 'ハート', cn: '愛心' },
+    to: homeTaxonomyLinks.heart,
+  },
+  {
+    key: 'star',
+    icon: 'cubic',
+    emoji: '⭐',
+    labels: { kr: '별', en: 'Star', jp: '星', cn: '星星' },
+    to: homeTaxonomyLinks.star,
+  },
+  {
+    key: 'moon',
+    icon: 'ring',
+    emoji: '🌙',
+    labels: { kr: '달', en: 'Moon', jp: '月', cn: '月亮' },
+    to: homeTaxonomyLinks.moon,
+  },
+  {
+    key: 'ribbon',
+    icon: 'ribbon',
+    emoji: '🎀',
+    labels: { kr: '리본', en: 'Ribbon', jp: 'リボン', cn: '蝴蝶結' },
+    to: homeTaxonomyLinks.ribbon,
+  },
+  {
+    key: 'spark',
+    icon: 'cubic',
+    emoji: '✨',
+    labels: { kr: '스파크', en: 'Spark', jp: 'スパーク', cn: '闪耀' },
+    to: homeTaxonomyLinks.spark,
+  },
 ]
 
-function CategoryChipIcon({ type }) {
+function CategoryChipIcon({ emoji, type }) {
+  if (emoji) {
+    return <span aria-hidden="true" className="home-category-emoji">{emoji}</span>
+  }
+
   if (type === 'surgical') {
     return <svg aria-hidden="true" className="home-category-svg icon-surgical" viewBox="0 0 32 32">
       <circle cx="8" cy="16" r="4.4" />
@@ -414,7 +521,7 @@ const homeShowcasePanels = [
       kr: '프리미엄 큐빅 피어싱',
       en: 'Premium Cubic Piercing',
       jp: 'プレミアムキュービックピアス',
-      cn: '高级锆石穿孔饰品',
+      cn: '高級鋯石穿孔飾品',
     },
     eyebrow: {
       kr: 'NEW',
@@ -426,7 +533,7 @@ const homeShowcasePanels = [
       kr: '빛 반사가 살아나는 큐빅 중심의 셀렉션',
       en: 'A cubic-focused selection with clear light reflection.',
       jp: '光の反射が映えるキュービック中心のセレクション。',
-      cn: '以清晰光泽为重点的锆石精选。',
+      cn: '以清晰光泽為重点的鋯石精選。',
     },
     to: '/products?collection=premium-cubic-line',
     image: 'https://images.unsplash.com/photo-1602722872368-0cfc00f748ff?auto=format&fit=crop&crop=faces&w=900&h=1350&q=86',
@@ -438,7 +545,7 @@ const homeShowcasePanels = [
       kr: '수출 베스트 아이템',
       en: 'Export Best Items',
       jp: '輸出ベストアイテム',
-      cn: '出口热选单品',
+      cn: '出口熱選單品',
     },
     eyebrow: {
       kr: 'TRADE',
@@ -450,7 +557,7 @@ const homeShowcasePanels = [
       kr: '해외 거래처 상담에 맞춘 대표 라인',
       en: 'Representative lines for global trade inquiries.',
       jp: '海外取引先の相談に合わせた代表ライン。',
-      cn: '适合海外贸易咨询的代表系列。',
+      cn: '適合海外貿易諮詢的代表系列。',
     },
     to: '/products?collection=export-best-items',
     image: 'https://images.unsplash.com/photo-1690126889953-a100f54b619e?auto=format&fit=crop&crop=faces&w=900&h=1350&q=86',
@@ -462,7 +569,7 @@ const homeShowcasePanels = [
       kr: '실버 데일리 피어싱',
       en: 'Silver Daily Piercing',
       jp: 'シルバーデイリーピアス',
-      cn: '银色日常穿孔饰品',
+      cn: '銀色日常穿孔飾品',
     },
     eyebrow: {
       kr: 'SILVER',
@@ -474,7 +581,7 @@ const homeShowcasePanels = [
       kr: '데일리 카탈로그에 어울리는 실버 피어싱 셀렉션',
       en: 'Silver piercing selection for daily catalog styling.',
       jp: 'デイリーカタログに合うシルバーピアスセレクション。',
-      cn: '适合日常目录搭配的银色穿孔饰品精选。',
+      cn: '適合日常目錄搭配的銀色穿孔飾品精選。',
     },
     image: 'https://images.unsplash.com/photo-1722410180651-efd51636f260?auto=format&fit=crop&crop=faces&w=900&h=1350&q=86',
     to: '/products?material=Silver%20925',
@@ -486,7 +593,7 @@ const homeShowcasePanels = [
       kr: '링 피어싱 라인',
       en: 'Ring Piercing Line',
       jp: 'リングピアスライン',
-      cn: '环形穿孔系列',
+      cn: '環形穿孔系列',
     },
     eyebrow: {
       kr: 'RING',
@@ -498,7 +605,7 @@ const homeShowcasePanels = [
       kr: '착용 이미지 중심으로 확인하는 링 피어싱 라인',
       en: 'Ring piercing line focused on worn-image styling.',
       jp: '着用イメージ中心で確認するリングピアスライン。',
-      cn: '以佩戴图为中心查看的环形穿孔系列。',
+      cn: '以佩戴圖為中心查看的環形穿孔系列。',
     },
     image: 'https://images.unsplash.com/photo-1653227907864-560dce4c252d?auto=format&fit=crop&crop=entropy&w=900&h=1350&q=86',
     to: '/products?q=ring',
@@ -664,16 +771,26 @@ const homeSectionProductLimit = {
 }
 
 const homeSectionSubtabs = {
-  'piercing-catalog': ['볼피어싱', '링피어싱', '라블렛', '드롭/투핀', '귀걸이형'],
-  'steady-selection': ['데일리 실버', '미니 큐빅', '베이직 링', '하트/리본', '스테디 바벨'],
+  'piercing-catalog': {
+    kr: ['볼피어싱', '링피어싱', '라블렛', '드롭/투핀', '귀걸이형'],
+    en: ['Ball Piercing', 'Ring Piercing', 'Labret', 'Drop / Two-pin', 'Earring Type'],
+    jp: ['ボールピアス', 'リングピアス', 'ラブレット', 'ドロップ / ツーピン', 'イヤリングタイプ'],
+    cn: ['球形穿孔', '環形穿孔', '唇釘', '垂墜 / 雙针', '耳飾款'],
+  },
+  'steady-selection': {
+    kr: ['데일리 실버', '미니 큐빅', '베이직 링', '하트/리본', '스테디 바벨'],
+    en: ['Daily Silver', 'Mini Cubic', 'Basic Ring', 'Heart / Ribbon', 'Steady Barbell'],
+    jp: ['デイリーシルバー', 'ミニキュービック', 'ベーシックリング', 'ハート / リボン', '定番バーベル'],
+    cn: ['日常銀飾', '迷你鋯石', '基础環形', '愛心 / 蝴蝶結', '常青槓鈴'],
+  },
 }
 
 const piercingCatalogTabFilters = [
-  { label: '볼피어싱', categoryIds: ['piercing', 'cubic', 'pearl', 'surgical-steel'] },
-  { label: '링피어싱', categoryIds: ['belly-ring'] },
-  { label: '라블렛', categoryIds: ['labret'] },
-  { label: '드롭/투핀', categoryIds: ['barbell'] },
-  { label: '귀걸이형', categoryIds: ['earrings'] },
+  { categoryIds: ['piercing', 'cubic', 'pearl', 'surgical-steel'] },
+  { categoryIds: ['belly-ring'] },
+  { categoryIds: ['labret'] },
+  { categoryIds: ['barbell'] },
+  { categoryIds: ['earrings'] },
 ]
 
 const homeSectionTabFilters = {
@@ -698,10 +815,84 @@ const productMatchesTabFilter = (product, filter) => {
 }
 
 const homeSectionViewAll = {
-  'new-arrival': { label: '신상품 더보기', to: '/products?collection=new-arrivals' },
-  'weekly-pick': { label: '주간 추천 더보기', to: '/products?sort=best' },
-  'piercing-catalog': { label: '피어싱 더 보기', to: '/products?category=piercing' },
-  'steady-selection': { label: '스테디 더보기', to: '/products?collection=steady' },
+  'new-arrival': {
+    labels: { kr: '신상품 더보기', en: 'View New Arrivals', jp: '新商品をもっと見る', cn: '查看更多新品' },
+    to: '/products?collection=new-arrivals',
+  },
+  'weekly-pick': {
+    labels: { kr: '주간 추천 더보기', en: 'View Weekly Best', jp: '週間ベストをもっと見る', cn: '查看更多每週精選' },
+    to: '/products?sort=best',
+  },
+  'piercing-catalog': {
+    labels: { kr: '피어싱 더보기', en: 'View Piercing', jp: 'ピアスをもっと見る', cn: '查看更多穿孔' },
+    to: '/products?category=piercing',
+  },
+  'steady-selection': {
+    labels: { kr: '스테디 더보기', en: 'View Steady Selection', jp: '定番をもっと見る', cn: '查看更多常青精選' },
+    to: '/products?collection=steady',
+  },
+}
+
+const homeProductSectionCopy = {
+  kr: {
+    newTitle: '신상품',
+    newNote: '새롭게 준비한 신규 라인과 이번 주 추천 아이템입니다.',
+    weeklyTitle: 'WEEKLY BEST',
+    weeklyNote: '이번 주 거래처 문의가 모인 스타일을 한눈에 정리했습니다.',
+    piercingTitle: '피어싱',
+    piercingNote: '피어싱=귀족, 더이상 말이 필요한가요?',
+    steadyTitle: '스테디 셀렉션',
+    steadyNote: '꾸준히 찾는 데일리 라인을 모았습니다.',
+  },
+  en: {
+    newTitle: 'New Arrival',
+    newNote: 'New lines and recommended pieces prepared for this week.',
+    weeklyTitle: 'Weekly Best',
+    weeklyNote: 'A focused edit of styles drawing buyer inquiries this week.',
+    piercingTitle: 'Piercing',
+    piercingNote: 'Piercing = Noblesse. Need we say more?',
+    steadyTitle: 'Steady Selection',
+    steadyNote: 'Daily lines buyers keep coming back for.',
+  },
+  jp: {
+    newTitle: '新商品',
+    newNote: '今週のために用意した新しいラインとおすすめアイテムです。',
+    weeklyTitle: '週間ベスト',
+    weeklyNote: '今週の取引先お問い合わせが集まったスタイルをまとめました。',
+    piercingTitle: 'ピアス',
+    piercingNote: 'ピアス＝貴族。これ以上の説明が必要ですか？',
+    steadyTitle: '定番セレクション',
+    steadyNote: '毎日選ばれる定番ラインを集めました。',
+  },
+  cn: {
+    newTitle: '新品',
+    newNote: '本週準備的新品系列和推薦單品。',
+    weeklyTitle: '每週精選',
+    weeklyNote: '整理本週買家諮詢較多的重点款式。',
+    piercingTitle: '穿孔',
+    piercingNote: '穿孔 = 貴族，还需要更多说明吗？',
+    steadyTitle: '常青精選',
+    steadyNote: '汇集買家持续選擇的日常系列。',
+  },
+}
+
+const homeBuyerCollectionCopy = {
+  kr: {
+    title: '바이어 셀렉션',
+    note: '국내·해외 거래처 상담 흐름에 맞춰 정리한 B2B 컨셉 보드입니다.',
+  },
+  en: {
+    title: 'Buyer Selection',
+    note: 'B2B concept boards arranged for domestic and global buyer consultations.',
+  },
+  jp: {
+    title: 'バイヤーセレクション',
+    note: '国内外の取引先相談に合わせて整理したB2Bコンセプトボードです。',
+  },
+  cn: {
+    title: '買家精選',
+    note: '根據國內外客戶洽談流程整理的 B2B 概念看板。',
+  },
 }
 
 const isAllowedHomeProduct = (product) => (
@@ -743,22 +934,22 @@ const buyerConceptPanels = [
       kr: '거래처 상담 라인',
       en: 'Buyer Consultation Line',
       jp: '取引先相談ライン',
-      cn: '客户洽谈系列',
+      cn: '客戶洽談系列',
     },
     text: {
       kr: '신규 거래처가 소재와 스타일을 빠르게 검토하기 좋은 대표 구성을 모았습니다.',
       en: 'A representative board for reviewing materials and styles quickly.',
       jp: '素材とスタイルをすばやく確認できる取引先向け構成です。',
-      cn: '适合客户快速确认材质与风格的代表组合。',
+      cn: '適合客戶快速確認材質與風格的代表組合。',
     },
     tags: {
       kr: ['MOQ 협의', '소재 제안', '샘플 상담'],
       en: ['MOQ Review', 'Material Guide', 'Sample Talk'],
       jp: ['MOQ相談', '素材提案', 'サンプル相談'],
-      cn: ['MOQ 协商', '材质建议', '样品咨询'],
+      cn: ['MOQ 協商', '材質建議', '樣品諮詢'],
     },
     image: 'https://images.unsplash.com/photo-1722410180651-efd51636f260?auto=format&fit=crop&crop=faces&w=1200&h=1200&q=86',
-    to: '/products?collection=buyer-consultation',
+    to: '/collections/buyer-consultation',
   },
   {
     key: 'jp-market-curation',
@@ -767,22 +958,22 @@ const buyerConceptPanels = [
       kr: 'JP 지역 추천 구성',
       en: 'JP Market Curation',
       jp: 'JP地域おすすめ構成',
-      cn: 'JP 地区推荐组合',
+      cn: 'JP 地區推薦組合',
     },
     text: {
       kr: '작고 선명한 실버·큐빅 라인을 중심으로 상담하기 좋은 셀렉션입니다.',
       en: 'A compact silver and cubic-focused curation for JP market talks.',
       jp: '小ぶりなシルバーとキュービックを中心にした相談向けセレクションです。',
-      cn: '以小巧银色与锆石系列为主的 JP 市场洽谈组合。',
+      cn: '以小巧銀色與鋯石系列為主的 JP 市場洽談組合。',
     },
     tags: {
       kr: ['JP 상담', '데일리 라인', '재입고 제안'],
       en: ['JP Inquiry', 'Daily Line', 'Restock'],
       jp: ['JP相談', 'デイリー', '再入荷提案'],
-      cn: ['JP 咨询', '日常系列', '补货建议'],
+      cn: ['JP 諮詢', '日常系列', '补货建議'],
     },
     image: 'https://images.unsplash.com/photo-1602722872368-0cfc00f748ff?auto=format&fit=crop&crop=faces&w=1200&h=1200&q=86',
-    to: '/products?market=JP',
+    to: '/collections/japan-buyer-picks',
   },
   {
     key: 'export-sample-kit',
@@ -791,22 +982,22 @@ const buyerConceptPanels = [
       kr: '수출 샘플 보드',
       en: 'Export Sample Board',
       jp: '輸出サンプルボード',
-      cn: '出口样品板',
+      cn: '出口樣品板',
     },
     text: {
       kr: '상담용 대표 이미지와 샘플 구성을 함께 확인하는 B2B 보드입니다.',
       en: 'A B2B board pairing sample sets with representative imagery.',
       jp: '代表画像とサンプル構成を一緒に確認するB2Bボードです。',
-      cn: '可同时确认代表图片与样品组合的 B2B 看板。',
+      cn: '可同時確認代表圖片與樣品組合的 B2B 看板。',
     },
     tags: {
       kr: ['수출 추천', '이미지 상담', '대표 구성'],
       en: ['Export Pick', 'Image Review', 'Core Set'],
       jp: ['輸出提案', '画像相談', '代表構成'],
-      cn: ['出口推荐', '图片确认', '核心组合'],
+      cn: ['出口推薦', '圖片確認', '核心組合'],
     },
     image: 'https://images.unsplash.com/photo-1690126889953-a100f54b619e?auto=format&fit=crop&crop=faces&w=1200&h=1200&q=86',
-    to: '/products?collection=export-best-items',
+    to: '/collections/export-best-items',
   },
   {
     key: 'steady-reorder',
@@ -821,16 +1012,16 @@ const buyerConceptPanels = [
       kr: '계절을 크게 타지 않는 기본 라인으로 반복 상담에 적합합니다.',
       en: 'Stable everyday lines designed for repeat buyer discussions.',
       jp: '季節を問わず継続相談しやすい定番ラインです。',
-      cn: '不太受季节影响，适合持续洽谈的基础系列。',
+      cn: '不太受季節影响，適合持续洽談的基础系列。',
     },
     tags: {
       kr: ['스테디', '기본 구성', '거래처용'],
       en: ['Steady', 'Core Line', 'For Buyers'],
       jp: ['定番', '基本構成', '取引先向け'],
-      cn: ['常备', '基础组合', '客户用'],
+      cn: ['常備', '基础組合', '客戶用'],
     },
     image: 'https://images.unsplash.com/photo-1653227907864-560dce4c252d?auto=format&fit=crop&crop=entropy&w=1200&h=1200&q=86',
-    to: '/products?collection=steady',
+    to: '/collections/steady',
   },
   {
     key: 'display-board',
@@ -839,22 +1030,22 @@ const buyerConceptPanels = [
       kr: '매장 진열 제안',
       en: 'Display Board Proposal',
       jp: '売場ディスプレイ提案',
-      cn: '陈列展示建议',
+      cn: '陈列展示建議',
     },
     text: {
       kr: '진열과 촬영 컷을 함께 고려한 상담용 이미지 중심 구성입니다.',
       en: 'Image-led curation for merchandising and catalog display talks.',
       jp: '陳列と撮影イメージを合わせて提案する構成です。',
-      cn: '兼顾陈列与拍摄效果的图片导向组合。',
+      cn: '兼顾陈列與拍攝效果的圖片導向組合。',
     },
     tags: {
       kr: ['진열 제안', '촬영 컷', '카탈로그용'],
       en: ['Display', 'Photo Set', 'Catalog'],
       jp: ['陳列提案', '撮影カット', 'カタログ用'],
-      cn: ['陈列建议', '拍摄图', '目录用'],
+      cn: ['陈列建議', '拍攝圖', '目錄用'],
     },
     image: 'https://images.unsplash.com/photo-1701777892740-88419a701472?auto=format&fit=crop&crop=faces&w=1200&h=1200&q=86',
-    to: '/products?collection=display-board',
+    to: '/collections/display-board',
   },
   {
     key: 'material-match',
@@ -863,26 +1054,44 @@ const buyerConceptPanels = [
       kr: '소재별 상담 보드',
       en: 'Material Match Board',
       jp: '素材別相談ボード',
-      cn: '材质洽谈看板',
+      cn: '材質洽談看板',
     },
     text: {
       kr: '써지컬, 실버, 큐빅 등 거래처가 비교하기 쉬운 소재 중심 구성입니다.',
       en: 'Material-led comparison board for buyer-side selection.',
       jp: 'サージカル、シルバー、キュービックを比較しやすい構成です。',
-      cn: '便于客户比较外科钢、银、锆石等材质。',
+      cn: '便於客戶比較外科鋼、銀、鋯石等材質。',
     },
     tags: {
       kr: ['소재 비교', '가격 상담', '라인 제안'],
       en: ['Material', 'Price Talk', 'Line Plan'],
       jp: ['素材比較', '価格相談', 'ライン提案'],
-      cn: ['材质比较', '价格洽谈', '系列建议'],
+      cn: ['材質比較', '價格洽談', '系列建議'],
     },
     image: 'https://images.unsplash.com/photo-1671644730555-916aa8d8157f?auto=format&fit=crop&crop=faces&w=1200&h=1200&q=86',
-    to: '/products?collection=material-match',
+    to: '/collections/material-match',
   },
 ]
 
 const getWeeklyDemand = (index) => weeklyDemandSamples[index % weeklyDemandSamples.length]
+
+const formatWeeklyDemand = (weeklyDemand, locale) => {
+  if (!weeklyDemand || weeklyDemand.inquiries < 10000) return null
+
+  const contentLocale = getLocaleContentKey(locale)
+  const count = weeklyDemand.inquiries.toLocaleString(contentLocale === 'kr' ? 'ko-KR' : undefined)
+  if (contentLocale === 'en') return `Quote requests ${count}+`
+  if (contentLocale === 'jp') return `見積依頼 ${count}件+`
+  if (contentLocale === 'cn') return `詢價請求 ${count}+`
+  return `견적 요청 ${count}+`
+}
+
+const priceAfterApprovalLabel = {
+  kr: '승인 후 가격 확인 가능',
+  en: 'Price available after approval',
+  jp: '承認後に価格を確認できます',
+  cn: '審核後可查看價格',
+}
 
 function HomeProductCard({ product, index, variant = 'default' }) {
   const { addInquiryItem, approvedPrice, getAdminPriceBooks, getPrice, isAdmin, isApproved, viewerState } = useCommerce()
@@ -901,14 +1110,15 @@ function HomeProductCard({ product, index, variant = 'default' }) {
   const cardImageSources = imageSources.length > 0 ? imageSources : [fallbackImage].filter(Boolean)
   const adminPriceBooks = isAdmin ? getAdminPriceBooks(product.productId) : []
   const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
-  const unavailablePriceLabel = resolveLocaleCopy({ kr: '가격 미등록', en: 'Price unavailable', jp: '価格未登録', cn: '价格未登记' }, locale, 'en')
+  const unavailablePriceLabel = resolveLocaleCopy({ kr: '가격 미등록', en: 'Price unavailable', jp: '価格未登録', cn: '價格未登記' }, locale, 'en')
   const displayPrice = adminPriceBooks.length > 0
     ? null
     : isApproved && price
     ? formatMoney(approvedPrice(product.productId), price.currency)
-    : isApproved ? unavailablePriceLabel : '승인 후 가격 확인 가능'
+    : isApproved ? unavailablePriceLabel : resolveLocaleCopy(priceAfterApprovalLabel, locale, 'en')
   const statusLabel = product.isNew ? 'NEW' : product.isBest ? 'BEST' : 'B2B'
   const weeklyDemand = variant === 'weekly-pick' ? getWeeklyDemand(index) : null
+  const weeklyDemandText = weeklyDemand ? formatWeeklyDemand(weeklyDemand, locale) : null
 
   const handleFavoriteClick = (event) => {
     event.preventDefault()
@@ -972,8 +1182,8 @@ function HomeProductCard({ product, index, variant = 'default' }) {
     <div className="home-product-info">
       <Link to={toLocalePath(`/products/${product.productId}`)}>
         <strong>{productName}</strong>
-        {weeklyDemand ? <span className="home-product-demand">
-          {`누적 문의 ${weeklyDemand.inquiries.toLocaleString('ko-KR')}건+ · 확인 ${weeklyDemand.checks.toLocaleString('ko-KR')}회`}
+        {weeklyDemandText ? <span className="home-product-demand">
+          {weeklyDemandText}
         </span> : null}
         <small>{product.material}</small>
       </Link>
@@ -985,12 +1195,13 @@ function HomeProductCard({ product, index, variant = 'default' }) {
 }
 
 function ProductSection({ products, sectionId, title, note }) {
+  const { locale, toLocalePath } = useLocalePath()
   const [activeTab, setActiveTab] = useState(0)
   const [tabMotionKey, setTabMotionKey] = useState(0)
 
   if (products.length === 0) return null
 
-  const sectionSubtabs = homeSectionSubtabs[sectionId] ?? []
+  const sectionSubtabs = homeSectionSubtabs[sectionId]?.[locale] ?? homeSectionSubtabs[sectionId]?.en ?? []
   const sectionTabFilters = homeSectionTabFilters[sectionId] ?? []
   const viewAll = homeSectionViewAll[sectionId]
   const isLoopSection = sectionId === 'weekly-pick'
@@ -1010,6 +1221,35 @@ function ProductSection({ products, sectionId, title, note }) {
     setTabMotionKey((current) => current + 1)
   }
 
+  if (isLoopSection) {
+    const [featureProduct, ...supportProducts] = sectionProducts
+    const weeklySupportProducts = supportProducts.slice(0, 4)
+
+    return <section className={`section-wrap product-feature-section section-${sectionId}`} id={`home-${sectionId}`}>
+      <div className="weekly-edit-inner">
+        <div className="home-product-section-title weekly-edit-title">
+          <span>NOBLESSE WEEKLY EDIT</span>
+          <ScrambleText as="h2" persistKey={`product-section-title-${sectionId}`}>{title}</ScrambleText>
+          {note ? <p>{note}</p> : null}
+        </div>
+        <div className="weekly-edit-board">
+          {featureProduct ? <div className="weekly-edit-feature">
+            <HomeProductCard product={featureProduct} index={0} variant={sectionId} />
+          </div> : null}
+          <div className="weekly-edit-side">
+            <p>{homeProductSectionCopy[locale]?.weeklyNote ?? homeProductSectionCopy.en.weeklyNote}</p>
+            <div className="weekly-edit-list">
+              {weeklySupportProducts.map((product, index) => <HomeProductCard key={product.productId} product={product} index={index + 1} variant={sectionId} />)}
+            </div>
+          </div>
+        </div>
+        {viewAll ? <Link className="home-section-more weekly-edit-more" to={toLocalePath(viewAll.to)}>
+          <span>{viewAll.labels?.[locale] ?? viewAll.labels?.en}</span>
+        </Link> : null}
+      </div>
+    </section>
+  }
+
   return <section className={`section-wrap product-feature-section section-${sectionId}`} id={`home-${sectionId}`}>
     <div className="home-product-section-title">
       <ScrambleText as="h2" persistKey={`product-section-title-${sectionId}`}>{title}</ScrambleText>
@@ -1021,14 +1261,15 @@ function ProductSection({ products, sectionId, title, note }) {
     <div className={`home-product-grid${isLoopSection ? ' is-looping' : ''}${sectionTabFilters.length > 0 ? ' has-tab-motion' : ''}`} key={`${sectionId}-${tabMotionKey}`}>
       {renderProducts.map((product, index) => <HomeProductCard key={`${product.productId}-${index}`} product={product} index={index} variant={sectionId} />)}
     </div>
-    {viewAll ? <Link className="home-section-more" to={viewAll.to}>
-      <span>{viewAll.label}</span>
+    {viewAll ? <Link className="home-section-more" to={toLocalePath(viewAll.to)}>
+      <span>{viewAll.labels?.[locale] ?? viewAll.labels?.en}</span>
     </Link> : null}
   </section>
 }
 
 function BuyerCollectionSection() {
   const { locale, toLocalePath } = useLocalePath()
+  const copy = homeBuyerCollectionCopy[locale] ?? homeBuyerCollectionCopy.en
   const marqueeViewportRef = useRef(null)
   const panels = [...buyerConceptPanels, ...buyerConceptPanels, ...buyerConceptPanels]
 
@@ -1085,8 +1326,8 @@ function BuyerCollectionSection() {
     <div className="buyer-collection-heading">
       <span className="buyer-heading-spark" aria-hidden="true">✦</span>
       <div>
-        <ScrambleText as="h2" persistKey="buyer-concept-title">바이어 셀렉션</ScrambleText>
-        <p>국내·해외 거래처 상담 흐름에 맞춰 정리한 B2B 컨셉 보드입니다.</p>
+        <ScrambleText as="h2" persistKey="buyer-concept-title">{copy.title}</ScrambleText>
+        <p>{copy.note}</p>
       </div>
     </div>
     <div className="buyer-concept-viewport" ref={marqueeViewportRef}>
@@ -1358,12 +1599,13 @@ export function HomePage() {
 
     showcaseDragRef.current = {
       didDrag: false,
+      hasCapture: false,
       isDragging: true,
+      pointerId: event.pointerId,
       scrollLeft: scroller.scrollLeft,
       startX: event.clientX,
     }
     setIsShowcaseDragging(true)
-    event.currentTarget.setPointerCapture?.(event.pointerId)
   }
 
   const handleShowcasePointerMove = (event) => {
@@ -1373,7 +1615,13 @@ export function HomePage() {
     if (!drag.isDragging || !scroller) return
 
     const deltaX = event.clientX - drag.startX
-    if (Math.abs(deltaX) > 4) drag.didDrag = true
+    if (Math.abs(deltaX) <= 6) return
+
+    drag.didDrag = true
+    if (!drag.hasCapture) {
+      event.currentTarget.setPointerCapture?.(event.pointerId)
+      drag.hasCapture = true
+    }
 
     scroller.scrollLeft = drag.scrollLeft - deltaX
     event.preventDefault()
@@ -1384,7 +1632,9 @@ export function HomePage() {
 
     showcaseDragRef.current.isDragging = false
     setIsShowcaseDragging(false)
-    event.currentTarget.releasePointerCapture?.(event.pointerId)
+    if (showcaseDragRef.current.hasCapture) {
+      event.currentTarget.releasePointerCapture?.(showcaseDragRef.current.pointerId ?? event.pointerId)
+    }
 
     const scroller = showcaseScrollerRef.current
     const step = getShowcaseStep()
@@ -1435,9 +1685,9 @@ export function HomePage() {
         </div>
       </div>
       <div className="home-showcase-categories" aria-label="피어싱 카테고리">
-        {homeCategoryChips.map((category) => <Link key={category.label} to={toLocalePath(category.to)}>
-          <CategoryChipIcon type={category.icon} />
-          <b>{category.label}</b>
+        {homeCategoryChips.map((category) => <Link className={!category.icon && !category.emoji ? 'is-text-only' : undefined} key={category.key ?? category.icon} to={toLocalePath(category.to)}>
+          <CategoryChipIcon emoji={category.emoji} type={category.icon} />
+          <b>{category.labels[locale] ?? category.labels.en}</b>
         </Link>)}
       </div>
     </section>
@@ -1445,21 +1695,21 @@ export function HomePage() {
     <div className={`home-section-nav-anchor${isSectionNavFixed ? ' is-fixed' : ''}`} ref={sectionNavAnchorRef}>
       <div className="home-section-nav" aria-label="홈 제품 섹션 이동">
         {homeSectionNav.map((item) => <button key={item.id} className={activeHomeSection === item.id ? 'is-active' : undefined} type="button" onClick={() => scrollToHomeSection(item.id)}>
-          {item.label}
+          {item.labels[locale] ?? item.labels.en}
         </button>)}
       </div>
     </div>
     {isSectionNavFixed ? <div className="home-section-nav-fixed" aria-label="고정 제품 섹션 이동">
       {homeSectionNav.map((item) => <button key={item.id} className={activeHomeSection === item.id ? 'is-active' : undefined} type="button" onClick={() => scrollToHomeSection(item.id)}>
-        {item.label}
+        {item.labels[locale] ?? item.labels.en}
       </button>)}
     </div> : null}
 
-    <ProductSection products={newProducts} sectionId="new-arrival" title="NEW" note="새롭게 준비한 신규 라인과 이번 주 추천 아이템입니다." />
-    <ProductSection products={weeklyProducts} sectionId="weekly-pick" title="WEEKLY BEST" />
+    <ProductSection products={newProducts} sectionId="new-arrival" title={homeProductSectionCopy[locale]?.newTitle ?? homeProductSectionCopy.en.newTitle} note={homeProductSectionCopy[locale]?.newNote ?? homeProductSectionCopy.en.newNote} />
+    <ProductSection products={weeklyProducts} sectionId="weekly-pick" title={homeProductSectionCopy[locale]?.weeklyTitle ?? homeProductSectionCopy.en.weeklyTitle} note={homeProductSectionCopy[locale]?.weeklyNote ?? homeProductSectionCopy.en.weeklyNote} />
     <BuyerCollectionSection />
-    <ProductSection products={piercingCatalogProducts} sectionId="piercing-catalog" title="Piercing" note="피어싱=귀족, 더이상 말이 필요한가요?" />
-    <ProductSection products={steadySelectionProducts} sectionId="steady-selection" title="스테디 셀렉션" note="꾸준히 찾는 데일리 라인을 모았습니다." />
+    <ProductSection products={piercingCatalogProducts} sectionId="piercing-catalog" title={homeProductSectionCopy[locale]?.piercingTitle ?? homeProductSectionCopy.en.piercingTitle} note={homeProductSectionCopy[locale]?.piercingNote ?? homeProductSectionCopy.en.piercingNote} />
+    <ProductSection products={steadySelectionProducts} sectionId="steady-selection" title={homeProductSectionCopy[locale]?.steadyTitle ?? homeProductSectionCopy.en.steadyTitle} note={homeProductSectionCopy[locale]?.steadyNote ?? homeProductSectionCopy.en.steadyNote} />
 
     <section className="campaign-banner">
       <div>
