@@ -1358,7 +1358,7 @@ const catalogEntryCopy = {
       visible: '공개 상태',
     },
     price: {
-      title: '3단계 — 가격',
+      title: '4단계 — 가격',
       market: '시장',
       currency: '통화',
       wholesale: '가격',
@@ -1457,7 +1457,7 @@ const catalogEntryCopy = {
       visible: 'Visible',
     },
     price: {
-      title: 'Step 3 — Price',
+      title: 'Step 4 — Price',
       market: 'Market',
       currency: 'Currency',
       wholesale: 'Price',
@@ -1556,7 +1556,7 @@ const catalogEntryCopy = {
       visible: '公開状態',
     },
     price: {
-      title: 'ステップ3 — 価格',
+      title: 'ステップ4 — 価格',
       market: '市場',
       currency: '通貨',
       wholesale: '価格',
@@ -1655,7 +1655,7 @@ const catalogEntryCopy = {
       visible: '公开状态',
     },
     price: {
-      title: '第 3 步 — 价格',
+      title: '第 4 步 — 价格',
       market: '市场',
       currency: '货币',
       wholesale: '价格',
