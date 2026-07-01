@@ -54,6 +54,18 @@ test('legacy cn signup route canonicalizes to Taiwan Chinese signup behavior', (
   assert.match(appSource, /<Route path="register" element=\{<RegisterPage \/>\} \/>/)
 })
 
+test('register phone field stores a country-aware international number', () => {
+  const source = readWorkspaceFile('src/pages/RegisterPage.jsx')
+
+  assert.match(source, /const phoneProfilesByCountryIndex = \[/)
+  assert.match(source, /dialCode: '\+82'/)
+  assert.match(source, /dialCode: '\+81'/)
+  assert.match(source, /dialCode: '\+886'/)
+  assert.match(source, /name="phoneLocal"/)
+  assert.match(source, /<input name="phone" type="hidden" value=\{normalizedPhoneValue\} \/>/)
+  assert.match(source, /phone: formData\.get\('phone'\)/)
+})
+
 test('register agreement details use localized article and table structure outside Korean', () => {
   const source = readWorkspaceFile('src/pages/RegisterPage.jsx')
 

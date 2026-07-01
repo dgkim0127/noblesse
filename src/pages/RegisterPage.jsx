@@ -344,6 +344,59 @@ const countryOptionsByLocale = {
   cn: ['韩国', '日本', '中国', '美国', '加拿大', '台湾', '香港', '新加坡', '泰国', '越南', '菲律宾', '印度尼西亚', '马来西亚', '澳大利亚', '英国', '法国', '德国', '其他'],
 }
 
+const phoneProfilesByCountryIndex = [
+  { dialCode: '+82', placeholder: '010-1234-5678', dropLeadingZero: true },
+  { dialCode: '+81', placeholder: '090-1234-5678', dropLeadingZero: true },
+  { dialCode: '+86', placeholder: '138-0013-8000' },
+  { dialCode: '+1', placeholder: '201-555-0123' },
+  { dialCode: '+1', placeholder: '416-555-0123' },
+  { dialCode: '+886', placeholder: '0912-345-678', dropLeadingZero: true },
+  { dialCode: '+852', placeholder: '9123-4567' },
+  { dialCode: '+65', placeholder: '8123-4567' },
+  { dialCode: '+66', placeholder: '081-234-5678', dropLeadingZero: true },
+  { dialCode: '+84', placeholder: '090-123-4567', dropLeadingZero: true },
+  { dialCode: '+63', placeholder: '0917-123-4567', dropLeadingZero: true },
+  { dialCode: '+62', placeholder: '0812-3456-7890', dropLeadingZero: true },
+  { dialCode: '+60', placeholder: '012-345-6789', dropLeadingZero: true },
+  { dialCode: '+61', placeholder: '0412-345-678', dropLeadingZero: true },
+  { dialCode: '+44', placeholder: '07123-456789', dropLeadingZero: true },
+  { dialCode: '+33', placeholder: '06-12-34-56-78', dropLeadingZero: true },
+  { dialCode: '+49', placeholder: '0151-23456789', dropLeadingZero: true },
+  { dialCode: '+', placeholder: '+00 000 000 000', custom: true },
+]
+
+const phoneHelperCopy = {
+  kr: {
+    hint: ({ dialCode, example }) => `국가번호 ${dialCode}와 함께 저장됩니다. 예: ${example}`,
+    customCode: '국가번호',
+  },
+  en: {
+    hint: ({ dialCode, example }) => `Saved with country code ${dialCode}. Example: ${example}`,
+    customCode: 'Country code',
+  },
+  jp: {
+    hint: ({ dialCode, example }) => `国番号 ${dialCode} を付けて保存されます。例: ${example}`,
+    customCode: '国番号',
+  },
+  cn: {
+    hint: ({ dialCode, example }) => `会连同国家代码 ${dialCode} 一起保存。例：${example}`,
+    customCode: '国家代码',
+  },
+}
+
+const getPhoneProfile = (countryOptions, selectedCountry) => {
+  const selectedIndex = countryOptions.findIndex((option) => option === selectedCountry)
+  return phoneProfilesByCountryIndex[selectedIndex >= 0 ? selectedIndex : 0] ?? phoneProfilesByCountryIndex[0]
+}
+
+const normalizePhoneLocalValue = (value) => String(value || '').replace(/[^\d\s-]/g, '').replace(/\s{2,}/g, ' ')
+
+const formatInternationalPhone = (profile, dialCode, value) => {
+  let digits = String(value || '').replace(/\D/g, '')
+  if (profile.dropLeadingZero) digits = digits.replace(/^0+/, '')
+  return digits ? `${dialCode} ${digits}` : ''
+}
+
 const profileHelperCopy = {
   kr: {
     attachment: '사업자등록증 또는 회사 사진. 현재는 서버 저장 없이 담당자 확인 안내용입니다.',
@@ -864,6 +917,8 @@ export function RegisterPage() {
   const [countryQuery, setCountryQuery] = useState('')
   const [countryOpen, setCountryOpen] = useState(false)
   const [emailDomain, setEmailDomain] = useState('')
+  const [phoneLocalValue, setPhoneLocalValue] = useState('')
+  const [customPhoneDialCode, setCustomPhoneDialCode] = useState('+')
   const [passwordValue, setPasswordValue] = useState('')
   const [passwordConfirmValue, setPasswordConfirmValue] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -888,6 +943,10 @@ export function RegisterPage() {
   const passwordToggleLabels = resolveLocaleCopy(passwordToggleLabelsByLocale, locale)
   const countryOtherValue = countryOptions[countryOptions.length - 1]
   const customEmailDomainValue = emailDomains[emailDomains.length - 1]
+  const phoneProfile = getPhoneProfile(countryOptions, selectedCountry)
+  const phoneDialCode = phoneProfile.custom ? customPhoneDialCode : phoneProfile.dialCode
+  const phoneHelpers = resolveLocaleCopy(phoneHelperCopy, locale)
+  const normalizedPhoneValue = formatInternationalPhone(phoneProfile, phoneDialCode, phoneLocalValue)
   const pageTitle = resolveLocaleCopy(signupTitleByLocale, locale)
   const filteredCountryOptions = countryOptions.filter((option) => option.toLowerCase().includes(countryQuery.trim().toLowerCase()))
   const duplicateStatusClass = duplicateStatus?.type === 'available' ? 'valid' : duplicateStatus ? 'invalid' : ''
@@ -1108,6 +1167,38 @@ export function RegisterPage() {
           required
           type="text"
         />}
+      </label>
+    }
+
+    if (name === 'phone') {
+      return <label className={`register-phone-field ${fieldClass}`.trim()} key={name}>
+        {label}
+        <span className="register-phone-control">
+          {phoneProfile.custom ? <input
+            aria-label={phoneHelpers.customCode}
+            className="register-phone-code-input"
+            inputMode="tel"
+            onChange={(event) => setCustomPhoneDialCode(event.target.value.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, ''))}
+            pattern="^\+\d{1,4}$"
+            placeholder="+00"
+            required
+            type="text"
+            value={customPhoneDialCode}
+          /> : <span className="register-phone-code">{phoneDialCode}</span>}
+          <input
+            autoComplete="tel-national"
+            inputMode="tel"
+            name="phoneLocal"
+            onChange={(event) => setPhoneLocalValue(normalizePhoneLocalValue(event.target.value))}
+            pattern="[0-9\s-]{6,20}"
+            placeholder={phoneProfile.placeholder || placeholder}
+            required
+            type="tel"
+            value={phoneLocalValue}
+          />
+          <input name="phone" type="hidden" value={normalizedPhoneValue} />
+        </span>
+        <small className="field-helper">{phoneHelpers.hint({ dialCode: phoneDialCode, example: `${phoneDialCode} ${phoneProfile.placeholder}` })}</small>
       </label>
     }
 

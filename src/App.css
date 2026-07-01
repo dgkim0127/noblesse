@@ -6253,6 +6253,42 @@ h6 {
   line-height: 1.45;
 }
 
+.register-phone-field {
+  min-width: 0;
+}
+
+.register-phone-control {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 8px;
+}
+
+.register-phone-code,
+.register-phone-code-input {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 74px;
+  border: 1px solid #f0dfe5;
+  border-radius: 8px;
+  padding: 0 12px;
+  color: var(--noblesse-sub);
+  background: #fff8fa;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.auth-form .register-phone-code-input {
+  width: 74px;
+  padding: 12px 10px;
+  text-align: center;
+}
+
+.register-phone-control input[name="phoneLocal"] {
+  min-width: 0;
+}
+
 .password-label-row {
   display: flex;
   align-items: center;
