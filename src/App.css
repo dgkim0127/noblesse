@@ -942,6 +942,45 @@ h6 {
   overflow-wrap: anywhere;
 }
 
+.admin-market-summary {
+  align-items: center;
+  background: rgba(255, 143, 169, 0.14);
+  border-radius: 999px;
+  color: var(--navy);
+  display: inline-flex;
+  font-size: 0.9rem;
+  font-weight: 900;
+  gap: 8px;
+  justify-content: center;
+  min-height: 34px;
+  padding: 7px 12px;
+  width: fit-content;
+}
+
+.admin-market-summary.compact {
+  background: transparent;
+  justify-content: flex-start;
+  min-height: 0;
+  padding: 0;
+}
+
+.admin-market-summary .admin-market-flag {
+  height: 15px;
+  width: 22px;
+}
+
+.admin-permission-note {
+  background: rgba(42, 36, 87, 0.07);
+  border: 1px dashed rgba(42, 36, 87, 0.22);
+  border-radius: 12px;
+  color: var(--navy);
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.55;
+  margin: 0;
+  padding: 10px 12px;
+}
+
 .admin-buyer-meta {
   align-content: start;
   display: grid;

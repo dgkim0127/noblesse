@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useAdminAccess } from '../../components/AdminAccessContext'
+import { adminCurrencyDisplay, getMarketDisplay } from '../../config/currency'
 import { AdminLink, AdminPageHeader, AdminPagination, AdminPreviewNote, AdminStatus } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy, getAdminStatusLabel, useAdminCopy } from './adminCopy'
@@ -12,6 +13,19 @@ const accountStatuses = ['active', 'blocked']
 function formatDate(value) {
   if (!value) return '-'
   return new Date(value).toLocaleDateString('ko-KR')
+}
+
+function getBuyerMarketSummary(buyer) {
+  const market = buyer.assignedMarket || adminCurrencyDisplay[buyer.currency]?.market || 'GLOBAL'
+  const currency = buyer.currency || 'USD'
+  const marketMeta = getMarketDisplay(market)
+  const currencySymbol = adminCurrencyDisplay[currency]?.symbol || currency
+  return {
+    country: buyer.country || marketMeta.label,
+    currencySymbol,
+    flagLabel: marketMeta.label,
+    flagSrc: marketMeta.flagSrc,
+  }
 }
 
 export function AdminBuyersPage() {
@@ -110,7 +124,7 @@ export function AdminBuyersPage() {
           {t.common.set} {getAdminStatusLabel(t, nextStatus)}
         </button>)}
       </div>}
-      {!canReview && !canSuspend && <p className="admin-empty">{t.buyers.note}</p>}
+      {!canReview && !canSuspend && <p className="admin-permission-note">상태 변경 권한이 필요합니다. 거래처 승인 변경은 buyers.review, 계정 차단/해제는 buyers.suspend 권한이 있어야 합니다.</p>}
     </div>
   }
 
@@ -131,9 +145,15 @@ export function AdminBuyersPage() {
 
     <section className="admin-card">
       {buyers.length > 0 ? <div className="admin-buyer-list">
-        {buyers.map((buyer) => <article className="admin-buyer-card" key={buyer.id}>
+        {buyers.map((buyer) => {
+          const marketSummary = getBuyerMarketSummary(buyer)
+          return <article className="admin-buyer-card" key={buyer.id}>
           <div className="admin-buyer-card-main">
-            <span className="admin-preview-badge">{buyer.assignedMarket || buyer.country || '-'}</span>
+            <span className="admin-market-summary">
+              <span>{marketSummary.country}</span>
+              <img alt={marketSummary.flagLabel} className="admin-market-flag" src={marketSummary.flagSrc} />
+              <strong>{marketSummary.currencySymbol}</strong>
+            </span>
             <h2>{buyer.companyName || t.buyers.buyerAccount}</h2>
             <p>{buyer.contactName || '-'}</p>
             <p className="admin-buyer-email">{buyer.email || '-'}</p>
@@ -142,16 +162,18 @@ export function AdminBuyersPage() {
             </div>
           </div>
           <dl className="admin-buyer-meta">
-            <dt>{t.fields.country}</dt><dd>{buyer.country || '-'}</dd>
-            <dt>{t.fields.language}</dt><dd>{buyer.preferredLanguage || '-'}</dd>
-            <dt>{t.fields.market}</dt><dd>{buyer.assignedMarket || '-'}</dd>
-            <dt>{t.fields.currency}</dt><dd>{buyer.currency || '-'}</dd>
+            <dt>거래 기준</dt><dd><span className="admin-market-summary compact">
+              <span>{marketSummary.country}</span>
+              <img alt={marketSummary.flagLabel} className="admin-market-flag" src={marketSummary.flagSrc} />
+              <strong>{marketSummary.currencySymbol}</strong>
+            </span></dd>
             <dt>{t.buyers.waitingDays || '대기일'}</dt><dd>{buyer.waitingDays ?? '-'}</dd>
             <dt>{t.buyers.inquiryCount || '문의'}</dt><dd>{buyer.inquiryCount ?? 0}</dd>
             <dt>{t.common.createdAt}</dt><dd>{formatDate(buyer.createdAt)}</dd>
           </dl>
           {renderStatusActions(buyer)}
-        </article>)}
+        </article>
+        })}
       </div> : <p className="admin-empty">{t.buyers.empty}</p>}
       <AdminPagination
         disabled={status === 'loading'}
