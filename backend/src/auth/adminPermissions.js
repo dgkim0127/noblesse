@@ -31,6 +31,7 @@ export const ADMIN_ROLE_PERMISSIONS = {
   operator: [
     "dashboard.read",
     "buyers.read",
+    "buyers.review",
     "inquiries.read",
     "inquiries.manage",
     "catalog.read",

@@ -18,6 +18,8 @@ test("admin permission matrix grants owner all permissions and operator limited 
 
   assert.equal(owner.permissions.includes("admins.manage"), true);
   assert.equal(owner.permissions.includes("prices.write"), true);
+  assert.equal(operator.permissions.includes("buyers.review"), true);
+  assert.equal(operator.permissions.includes("buyers.suspend"), false);
   assert.equal(operator.permissions.includes("catalog.write"), true);
   assert.equal(operator.permissions.includes("prices.write"), false);
 });
