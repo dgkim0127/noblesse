@@ -4,6 +4,7 @@ import { AdminLink, AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { useAdminCopy } from './adminCopy'
 import { formatCurrency, formatMarketLabel, getCurrencyInputStep, getMarketDisplay, isValidMarketCurrencyPair, marketCurrency, supportedCurrencies, supportedMarkets } from '../../config/currency.js'
+import { getDimensionLabel, getTaxonomyLabel, taxonomyDimensions } from '../../data/productTaxonomy.js'
 import { useLocalePath } from '../../utils/locale'
 
 const maxImageCount = 8
@@ -25,11 +26,53 @@ const initialProductForm = {
   nameEn: '',
   description: '',
   material: '',
+  colorsText: '',
+  sizesText: '',
+  badge: '',
   moqDefault: '1',
   isVisible: true,
   isExportAvailable: true,
   isNew: true,
   isBest: false,
+}
+
+const initialTaxonomyForm = {
+  productGroup: 'piercing',
+  piercingType: 'ball',
+  baseMaterial: '',
+  allSurgical: false,
+  decorationMaterials: [],
+  structures: [],
+  styles: [],
+  shapes: [],
+  saleType: 'single',
+}
+
+const initialSpecForm = {
+  gauge: '',
+  length: '',
+  ballSize: '',
+  barThickness: '',
+  unit: 'mm',
+}
+
+const initialDetailForm = {
+  headline: '',
+  body: '',
+  care: '',
+  fit: '',
+  decoration: '',
+}
+
+const initialHomePlacementForm = {
+  showInSnap: false,
+  showInNewArrivals: true,
+  showInWeeklyPick: false,
+  showInBuyerSelection: false,
+  showInPiercing: false,
+  showInSteadySelection: false,
+  homeNote: '',
+  sortPriority: '0',
 }
 
 const initialPriceForm = {
@@ -135,6 +178,25 @@ function parseOptionalNonnegativeMoney(value, currency = 'KRW') {
   return number
 }
 
+function parseDelimitedList(value) {
+  return String(value || '')
+    .split(/[,/\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function compactObject(input) {
+  return Object.fromEntries(Object.entries(input).filter(([, value]) => {
+    if (Array.isArray(value)) return value.length > 0
+    if (typeof value === 'boolean') return true
+    return value !== undefined && value !== null && String(value).trim() !== ''
+  }))
+}
+
+function toggleArrayValue(values, value) {
+  return values.includes(value) ? values.filter((item) => item !== value) : [...values, value]
+}
+
 function formatDisplayAmount(value, currency) {
   const number = Number(value)
   if (!Number.isFinite(number)) return '-'
@@ -215,7 +277,7 @@ function buildImagesFormData(images, productName) {
 export function AdminCatalogEntryPage() {
   const adminCopy = useAdminCopy()
   const t = adminCopy.catalogEntry
-  const { toLocalePath } = useLocalePath()
+  const { locale, toLocalePath } = useLocalePath()
   const navigate = useNavigate()
   const mutate = useAdminApiMutation()
   const imageInputRef = useRef(null)
@@ -224,6 +286,10 @@ export function AdminCatalogEntryPage() {
   const [selectedCategoryKey, setSelectedCategoryKey] = useState('')
   const [categoryForm, setCategoryForm] = useState(initialCategoryForm)
   const [productForm, setProductForm] = useState(initialProductForm)
+  const [taxonomyForm, setTaxonomyForm] = useState(initialTaxonomyForm)
+  const [specForm, setSpecForm] = useState(initialSpecForm)
+  const [detailForm, setDetailForm] = useState(initialDetailForm)
+  const [homePlacementForm, setHomePlacementForm] = useState(initialHomePlacementForm)
   const [priceForm, setPriceForm] = useState(initialPriceForm)
   const [marketPriceForms, setMarketPriceForms] = useState(createInitialMarketPriceForms)
   const [images, setImages] = useState([])
@@ -259,6 +325,12 @@ export function AdminCatalogEntryPage() {
     productForm.code ||
     productForm.nameEn ||
     productForm.description ||
+    productForm.colorsText ||
+    productForm.sizesText ||
+    JSON.stringify(taxonomyForm) !== JSON.stringify(initialTaxonomyForm) ||
+    Object.values(specForm).some(Boolean) ||
+    Object.values(detailForm).some(Boolean) ||
+    Object.values(homePlacementForm).some((value) => value === true || (typeof value === 'string' && value && value !== '0')) ||
     priceForm.wholesalePrice ||
     Object.values(marketPriceForms).some((entry) => entry.pricingMode === 'manual_fixed' || entry.wholesalePrice) ||
     categoryForm.categoryId ||
@@ -291,6 +363,11 @@ export function AdminCatalogEntryPage() {
     ...(field === 'categoryId' && !current.slug ? { slug: slugify(value) } : {}),
   }))
   const setProductField = (field, value) => setProductForm((current) => ({ ...current, [field]: value }))
+  const setTaxonomyField = (field, value) => setTaxonomyForm((current) => ({ ...current, [field]: value }))
+  const toggleTaxonomyValue = (field, value) => setTaxonomyForm((current) => ({ ...current, [field]: toggleArrayValue(current[field] || [], value) }))
+  const setSpecField = (field, value) => setSpecForm((current) => ({ ...current, [field]: value }))
+  const setDetailField = (field, value) => setDetailForm((current) => ({ ...current, [field]: value }))
+  const setHomePlacementField = (field, value) => setHomePlacementForm((current) => ({ ...current, [field]: value }))
   const setPriceField = (field, value) => setPriceForm((current) => ({ ...current, [field]: value }))
   const setMarketPriceField = (market, field, value) => setMarketPriceForms((current) => {
     const entry = current[market]
@@ -348,6 +425,7 @@ export function AdminCatalogEntryPage() {
     else if (!isValidProductCode(productCode)) errors.code = t.validation.productCodeInvalid
     if (!productForm.nameEn.trim()) errors.productName = t.validation.productNameRequired
     if (Number(productForm.moqDefault || 0) < 1) errors.moqDefault = t.validation.moqRequired
+    if (homePlacementForm.sortPriority && !Number.isInteger(Number(homePlacementForm.sortPriority))) errors.sortPriority = t.validation.sortPriorityInvalid
     return errors
   }
 
@@ -491,10 +569,21 @@ export function AdminCatalogEntryPage() {
     categoryKey,
     material: productForm.material.trim() || undefined,
     moqDefault: Number(productForm.moqDefault || 1),
-    colors: [],
-    sizes: [],
+    colors: parseDelimitedList(productForm.colorsText),
+    sizes: parseDelimitedList(productForm.sizesText),
     imageSet: {},
     imageAlt: {},
+    taxonomy: compactObject({
+      ...taxonomyForm,
+      allSurgical: Boolean(taxonomyForm.allSurgical),
+    }),
+    specs: compactObject(specForm),
+    detailContent: compactObject(detailForm),
+    homePlacement: compactObject({
+      ...homePlacementForm,
+      sortPriority: Number(homePlacementForm.sortPriority || 0),
+    }),
+    badge: productForm.badge.trim() || undefined,
     isVisible: productForm.isVisible,
     isExportAvailable: productForm.isExportAvailable,
     isNew: productForm.isNew,
@@ -636,6 +725,10 @@ export function AdminCatalogEntryPage() {
     setSelectedCategoryKey('')
     setCategoryForm(initialCategoryForm)
     setProductForm(initialProductForm)
+    setTaxonomyForm(initialTaxonomyForm)
+    setSpecForm(initialSpecForm)
+    setDetailForm(initialDetailForm)
+    setHomePlacementForm(initialHomePlacementForm)
     setPriceForm(initialPriceForm)
     setMarketPriceForms(createInitialMarketPriceForms())
     setImages([])
@@ -658,6 +751,29 @@ export function AdminCatalogEntryPage() {
   const saveButtonLabel = isSaving ? t.saving : Object.values(saveStatus).includes('error') ? t.retryFailed : t.save
   const saveDisabled = isSaving || (!images.length && !uploadedImages.length)
   const priceInputStep = getCurrencyInputStep(priceForm.currency)
+  const getTaxonomyValues = (key) => taxonomyDimensions.find((dimension) => dimension.key === key)?.values || []
+  const renderSingleTaxonomy = (key) => <div className="catalog-taxonomy-row" key={key}>
+    <strong>{getDimensionLabel(key, locale)}</strong>
+    <div>
+      {getTaxonomyValues(key).map((value) => <button
+        className={taxonomyForm[key] === value ? 'active' : ''}
+        key={value}
+        type="button"
+        onClick={() => setTaxonomyField(key, value)}
+      >{getTaxonomyLabel(key, value, locale)}</button>)}
+    </div>
+  </div>
+  const renderMultiTaxonomy = (key) => <div className="catalog-taxonomy-row" key={key}>
+    <strong>{getDimensionLabel(key, locale)}</strong>
+    <div>
+      {getTaxonomyValues(key).map((value) => <button
+        className={(taxonomyForm[key] || []).includes(value) ? 'active' : ''}
+        key={value}
+        type="button"
+        onClick={() => toggleTaxonomyValue(key, value)}
+      >{getTaxonomyLabel(key, value, locale)}</button>)}
+    </div>
+  </div>
 
   return <>
     <AdminPageHeader
@@ -731,6 +847,9 @@ export function AdminCatalogEntryPage() {
             <label className="admin-search wide">{t.product.description}<textarea value={productForm.description} onChange={(event) => setProductField('description', event.target.value)} placeholder={t.product.descriptionPlaceholder} /></label>
             <label className="admin-search">{t.product.category}<input value={categorySummary} readOnly /></label>
             <label className="admin-search">{t.product.material}<input value={productForm.material} onChange={(event) => setProductField('material', event.target.value)} placeholder={t.product.material} /></label>
+            <label className="admin-search">{t.attributes.colors}<input value={productForm.colorsText} onChange={(event) => setProductField('colorsText', event.target.value)} placeholder={t.attributes.colorsPlaceholder} /></label>
+            <label className="admin-search">{t.attributes.sizes}<input value={productForm.sizesText} onChange={(event) => setProductField('sizesText', event.target.value)} placeholder={t.attributes.sizesPlaceholder} /></label>
+            <label className="admin-search">{t.attributes.badge}<input value={productForm.badge} onChange={(event) => setProductField('badge', event.target.value)} placeholder="NEW, BEST, HOT" /></label>
             <label className="admin-search">{t.product.moq}<input min="1" value={productForm.moqDefault} onChange={(event) => setProductField('moqDefault', event.target.value)} type="number" />
               {fieldErrors.moqDefault && <small className="admin-field-error">{fieldErrors.moqDefault}</small>}
             </label>
@@ -744,6 +863,59 @@ export function AdminCatalogEntryPage() {
         <section className="admin-card catalog-entry-section">
           <div className="catalog-entry-section-heading">
             <span className="catalog-entry-step-badge">3</span>
+            <div>
+              <p className="eyebrow">{t.attributes.eyebrow}</p>
+              <h2>{t.attributes.title}</h2>
+              <p className="admin-muted">{t.attributes.description}</p>
+            </div>
+          </div>
+          <div className="catalog-taxonomy-editor">
+            {renderSingleTaxonomy('productGroup')}
+            {renderSingleTaxonomy('piercingType')}
+            {renderSingleTaxonomy('baseMaterial')}
+            <div className="catalog-taxonomy-row">
+              <strong>{getDimensionLabel('allSurgical', locale)}</strong>
+              <div>
+                <button className={taxonomyForm.allSurgical ? 'active' : ''} type="button" onClick={() => setTaxonomyField('allSurgical', !taxonomyForm.allSurgical)}>
+                  {getTaxonomyLabel('allSurgical', 'true', locale)}
+                </button>
+              </div>
+            </div>
+            {renderMultiTaxonomy('decorationMaterials')}
+            {renderMultiTaxonomy('structures')}
+            {renderMultiTaxonomy('styles')}
+            {renderMultiTaxonomy('shapes')}
+            {renderSingleTaxonomy('saleType')}
+          </div>
+          <div className="catalog-entry-grid catalog-entry-detail-grid">
+            <label className="admin-search">{t.attributes.gauge}<input value={specForm.gauge} onChange={(event) => setSpecField('gauge', event.target.value)} placeholder="16G" /></label>
+            <label className="admin-search">{t.attributes.length}<input value={specForm.length} onChange={(event) => setSpecField('length', event.target.value)} placeholder="6" /></label>
+            <label className="admin-search">{t.attributes.ballSize}<input value={specForm.ballSize} onChange={(event) => setSpecField('ballSize', event.target.value)} placeholder="4" /></label>
+            <label className="admin-search">{t.attributes.barThickness}<input value={specForm.barThickness} onChange={(event) => setSpecField('barThickness', event.target.value)} placeholder="1.2" /></label>
+            <label className="admin-search">{t.attributes.unit}<input value={specForm.unit} onChange={(event) => setSpecField('unit', event.target.value)} placeholder="mm" /></label>
+            <label className="admin-search wide">{t.attributes.detailHeadline}<input value={detailForm.headline} onChange={(event) => setDetailField('headline', event.target.value)} placeholder={t.attributes.detailHeadlinePlaceholder} /></label>
+            <label className="admin-search wide">{t.attributes.detailBody}<textarea value={detailForm.body} onChange={(event) => setDetailField('body', event.target.value)} placeholder={t.attributes.detailBodyPlaceholder} /></label>
+            <label className="admin-search">{t.attributes.care}<input value={detailForm.care} onChange={(event) => setDetailField('care', event.target.value)} placeholder={t.attributes.carePlaceholder} /></label>
+            <label className="admin-search">{t.attributes.fit}<input value={detailForm.fit} onChange={(event) => setDetailField('fit', event.target.value)} placeholder={t.attributes.fitPlaceholder} /></label>
+            <label className="admin-search">{t.attributes.decoration}<input value={detailForm.decoration} onChange={(event) => setDetailField('decoration', event.target.value)} placeholder={t.attributes.decorationPlaceholder} /></label>
+          </div>
+          <div className="catalog-entry-home-placement">
+            <strong>{t.attributes.homePlacement}</strong>
+            <div>
+              {['showInSnap', 'showInNewArrivals', 'showInWeeklyPick', 'showInBuyerSelection', 'showInPiercing', 'showInSteadySelection'].map((field) => <label className="admin-check" key={field}>
+                <input checked={Boolean(homePlacementForm[field])} onChange={(event) => setHomePlacementField(field, event.target.checked)} type="checkbox" /> {t.attributes[field]}
+              </label>)}
+            </div>
+            <label className="admin-search wide">{t.attributes.homeNote}<input value={homePlacementForm.homeNote} onChange={(event) => setHomePlacementField('homeNote', event.target.value)} placeholder={t.attributes.homeNotePlaceholder} /></label>
+            <label className="admin-search">{t.attributes.sortPriority}<input value={homePlacementForm.sortPriority} onChange={(event) => setHomePlacementField('sortPriority', event.target.value)} type="number" />
+              {fieldErrors.sortPriority && <small className="admin-field-error">{fieldErrors.sortPriority}</small>}
+            </label>
+          </div>
+        </section>
+
+        <section className="admin-card catalog-entry-section">
+          <div className="catalog-entry-section-heading">
+            <span className="catalog-entry-step-badge">4</span>
             <div>
               <p className="eyebrow">{t.sections.imageEyebrow}</p>
               <h2>{t.images.title}</h2>
@@ -803,7 +975,7 @@ export function AdminCatalogEntryPage() {
 
         <section className="admin-card catalog-entry-section">
           <div className="catalog-entry-section-heading">
-            <span className="catalog-entry-step-badge">4</span>
+            <span className="catalog-entry-step-badge">5</span>
             <div>
               <p className="eyebrow">{t.sections.priceEyebrow}</p>
               <h2>{t.price.title}</h2>

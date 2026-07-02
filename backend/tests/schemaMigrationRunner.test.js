@@ -349,6 +349,36 @@ test("packaged Taiwan market migration matches canonical migration exactly", () 
   assert.equal(packaged, canonical);
 });
 
+test("N73 product catalog attribute detail migration is additive", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260702_product_catalog_attribute_details.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.match(sqlText, /add column if not exists taxonomy jsonb not null default '\{\}'::jsonb/i);
+  assert.match(sqlText, /add column if not exists specs jsonb not null default '\{\}'::jsonb/i);
+  assert.match(sqlText, /add column if not exists detail_content jsonb not null default '\{\}'::jsonb/i);
+  assert.match(sqlText, /add column if not exists home_placement jsonb not null default '\{\}'::jsonb/i);
+  assert.match(sqlText, /add column if not exists badge text/i);
+  assert.match(sqlText, /idx_products_taxonomy_gin/i);
+  assert.match(sqlText, /idx_products_home_placement_gin/i);
+  assert.doesNotMatch(sqlText, /\bdrop\b|\btruncate\b|\bdelete\s+from\b|\brename\b/i);
+});
+
+test("packaged product catalog attribute detail migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260702_product_catalog_attribute_details.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260702_product_catalog_attribute_details.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
 test("migration runner resolves packaged lifecycle migration path explicitly", () => {
   const resolved = resolveSchemaSqlPath({
     SCHEMA_SQL_PATH: "migrations/20260622_admin_rbac_account_lifecycle.sql"
@@ -427,6 +457,22 @@ test("fresh install schema includes managed FX review workflow objects", () => {
   }
   assert.doesNotMatch(schema, /fx_price_drafts|fx_review_runs|fx_managed/i);
   assert.doesNotMatch(schema, /'CN'|'CNY'/i);
+});
+
+test("fresh install schema includes product catalog attribute detail fields", () => {
+  const schema = readFileSync(join(process.cwd(), "..", "supabase", "schema.sql"), "utf8");
+
+  for (const fragment of [
+    "taxonomy jsonb not null default '{}'::jsonb",
+    "specs jsonb not null default '{}'::jsonb",
+    "detail_content jsonb not null default '{}'::jsonb",
+    "home_placement jsonb not null default '{}'::jsonb",
+    "badge text",
+    "idx_products_taxonomy_gin",
+    "idx_products_home_placement_gin"
+  ]) {
+    assert.match(schema, new RegExp(fragment.replace(/[{}()[\]]/g, "\\$&"), "i"));
+  }
 });
 
 test("migration runner does not access Secret Manager or open real DB in tests", () => {

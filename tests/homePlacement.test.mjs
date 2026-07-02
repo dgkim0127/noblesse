@@ -38,3 +38,29 @@ test('weekly best requires explicit merchandising flag', () => {
 
   assert.equal(selectWeeklyBestProducts([weeklyProduct])[0].productId, firstProduct.productId)
 })
+
+test('explicit home placement controls section membership and sort order', () => {
+  const weeklyProduct = {
+    ...firstProduct,
+    productId: 'WEEKLY',
+    isBest: false,
+    homePlacement: { showInWeeklyPick: true, sortPriority: 2 },
+  }
+  const firstWeeklyProduct = {
+    ...firstProduct,
+    productId: 'FIRST-WEEKLY',
+    isBest: false,
+    homePlacement: { showInWeeklyPick: true, sortPriority: 1 },
+  }
+  const hiddenBestProduct = {
+    ...firstProduct,
+    productId: 'HIDDEN-BEST',
+    isBest: true,
+    homePlacement: { showInWeeklyPick: false, sortPriority: 0 },
+  }
+
+  assert.deepEqual(
+    selectWeeklyBestProducts([weeklyProduct, hiddenBestProduct, firstWeeklyProduct]).map((product) => product.productId),
+    ['FIRST-WEEKLY', 'WEEKLY']
+  )
+})

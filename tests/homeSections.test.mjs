@@ -18,7 +18,8 @@ test('home product sections do not backfill empty merchandising slots with unrel
   assert.match(page, /const newProducts = selectNewArrivalProducts\(homeProducts, homeSectionProductLimit\['new-arrival'\]\)/)
   assert.match(page, /const weeklyProducts = selectWeeklyBestProducts\(homeProducts\)/)
   assert.match(placement, /return dataMode === 'mock' \? mockProducts : \[\]/)
-  assert.match(placement, /filter\(\(product\) => Boolean\(product\.isBest\)\)/)
+  assert.match(placement, /hasExplicitPlacement\(products, 'showInWeeklyPick'\)/)
+  assert.match(placement, /product\.homePlacement\?\.showInWeeklyPick === true : Boolean\(product\.isBest\)/)
   assert.match(page, /if \(products\.length === 0 \|\| sectionProducts\.length === 0\) return null/)
 })
 

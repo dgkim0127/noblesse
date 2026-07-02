@@ -40,6 +40,11 @@ const productWriteFields = [
   "origin",
   "imageSet",
   "imageAlt",
+  "taxonomy",
+  "specs",
+  "detailContent",
+  "homePlacement",
+  "badge",
   "isVisible",
   "isExportAvailable",
   "isNew",
@@ -62,6 +67,17 @@ function parseObject(value, fieldName) {
     throw validationError(`${fieldName} must be an object`);
   }
   return value;
+}
+
+function parseOptionalObject(value, fieldName) {
+  if (value === undefined) return undefined;
+  return parseObject(value, fieldName);
+}
+
+function parseOptionalBadge(value) {
+  const badge = parseOptionalString(value, { maxLength: 40 });
+  if (!badge) return badge;
+  return badge.toUpperCase().replace(/[^A-Z0-9_-]/g, "");
 }
 
 function parseInteger(value, fieldName, { min = 0 } = {}) {
@@ -89,6 +105,11 @@ function parseProductBody(body = {}, { partial = false } = {}) {
     origin: parseOptionalString(safeBody.origin, { maxLength: 20 }),
     imageSet: parseObject(safeBody.imageSet, "imageSet"),
     imageAlt: parseObject(safeBody.imageAlt, "imageAlt"),
+    taxonomy: parseOptionalObject(safeBody.taxonomy, "taxonomy"),
+    specs: parseOptionalObject(safeBody.specs, "specs"),
+    detailContent: parseOptionalObject(safeBody.detailContent, "detailContent"),
+    homePlacement: parseOptionalObject(safeBody.homePlacement, "homePlacement"),
+    badge: parseOptionalBadge(safeBody.badge),
     isVisible: parseBooleanLike(safeBody.isVisible, "isVisible"),
     isExportAvailable: parseBooleanLike(safeBody.isExportAvailable, "isExportAvailable"),
     isNew: parseBooleanLike(safeBody.isNew, "isNew"),
@@ -106,6 +127,10 @@ function parseProductBody(body = {}, { partial = false } = {}) {
     parsed.origin = parsed.origin || "KR";
     parsed.imageSet = parsed.imageSet || {};
     parsed.imageAlt = parsed.imageAlt || {};
+    parsed.taxonomy = parsed.taxonomy || {};
+    parsed.specs = parsed.specs || {};
+    parsed.detailContent = parsed.detailContent || {};
+    parsed.homePlacement = parsed.homePlacement || {};
     parsed.isVisible = parsed.isVisible ?? false;
     parsed.isExportAvailable = parsed.isExportAvailable ?? true;
     parsed.isNew = parsed.isNew ?? false;

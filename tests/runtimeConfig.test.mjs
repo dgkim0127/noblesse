@@ -44,6 +44,17 @@ test('api product adapter preserves public catalog fields without protected pric
     sizes: ['6mm'],
     moqDefault: 20,
     imageSet: { card: '/card.webp' },
+    taxonomy: {
+      productGroup: 'piercing',
+      piercingType: 'ball',
+      baseMaterial: 'surgical',
+      structures: ['barbell'],
+      shapes: ['clover'],
+    },
+    specs: { gauge: '16G', length: '6', unit: 'mm' },
+    detailContent: { headline: 'Clover barbell', care: 'Keep dry' },
+    homePlacement: { showInWeeklyPick: true, sortPriority: 1 },
+    badge: 'NEW',
     isNew: true,
     price: 1000,
     priceSnapshot: 500,
@@ -54,6 +65,15 @@ test('api product adapter preserves public catalog fields without protected pric
   assert.equal(product.code, 'NB-001')
   assert.equal(product.isVisible, true)
   assert.equal(product.isNew, true)
+  assert.equal(product.productGroup, 'piercing')
+  assert.equal(product.piercingType, 'ball')
+  assert.equal(product.baseMaterial, 'surgical')
+  assert.deepEqual(product.structures, ['barbell'])
+  assert.deepEqual(product.shapes, ['clover'])
+  assert.equal(product.specs.gauge, '16G')
+  assert.equal(product.detailContent.care, 'Keep dry')
+  assert.equal(product.homePlacement.showInWeeklyPick, true)
+  assert.equal(product.badge, 'NEW')
   assert.equal('price' in product, false)
   assert.equal('priceSnapshot' in product, false)
   assert.equal('wholesalePrice' in product, false)

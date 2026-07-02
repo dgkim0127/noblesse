@@ -16,8 +16,12 @@ function isVisibleProduct(product) {
 }
 
 function getSortOrder(product) {
-  const sortOrder = Number(product?.sortOrder)
+  const sortOrder = Number(product?.homePlacement?.sortPriority ?? product?.sortOrder)
   return Number.isFinite(sortOrder) ? sortOrder : 0
+}
+
+function hasExplicitPlacement(products = [], key) {
+  return products.some((product) => product?.homePlacement?.[key] === true)
 }
 
 function getTimestamp(product) {
@@ -40,7 +44,9 @@ export function selectAllowedHomeProducts(products = []) {
 }
 
 export function selectNewArrivalProducts(products = [], limit = 12) {
+  const explicit = hasExplicitPlacement(products, 'showInNewArrivals')
   return selectAllowedHomeProducts(products)
+    .filter((product) => (explicit ? product.homePlacement?.showInNewArrivals === true : true))
     .map((product, index) => ({ index, product }))
     .sort((left, right) => (
       Number(Boolean(right.product.isNew)) - Number(Boolean(left.product.isNew))
@@ -53,7 +59,10 @@ export function selectNewArrivalProducts(products = [], limit = 12) {
 }
 
 export function selectWeeklyBestProducts(products = []) {
-  return selectAllowedHomeProducts(products).filter((product) => Boolean(product.isBest))
+  const explicit = hasExplicitPlacement(products, 'showInWeeklyPick')
+  return selectAllowedHomeProducts(products)
+    .filter((product) => explicit ? product.homePlacement?.showInWeeklyPick === true : Boolean(product.isBest))
+    .sort((left, right) => getSortOrder(left) - getSortOrder(right))
 }
 
 export function isPiercingHomeProduct(product) {
@@ -63,12 +72,17 @@ export function isPiercingHomeProduct(product) {
 }
 
 export function selectPiercingCatalogProducts(products = []) {
-  return selectAllowedHomeProducts(products).filter(isPiercingHomeProduct)
+  const explicit = hasExplicitPlacement(products, 'showInPiercing')
+  return selectAllowedHomeProducts(products)
+    .filter((product) => explicit ? product.homePlacement?.showInPiercing === true : isPiercingHomeProduct(product))
+    .sort((left, right) => getSortOrder(left) - getSortOrder(right))
 }
 
 export function selectSteadySelectionProducts(products = []) {
-  return selectAllowedHomeProducts(products).filter((product) => (
-    product.material?.includes('Silver')
-    || product.collectionIds?.some((collectionId) => steadyCollectionIds.has(collectionId))
-  ))
+  const explicit = hasExplicitPlacement(products, 'showInSteadySelection')
+  return selectAllowedHomeProducts(products)
+    .filter((product) => explicit
+      ? product.homePlacement?.showInSteadySelection === true
+      : product.material?.includes('Silver') || product.collectionIds?.some((collectionId) => steadyCollectionIds.has(collectionId)))
+    .sort((left, right) => getSortOrder(left) - getSortOrder(right))
 }

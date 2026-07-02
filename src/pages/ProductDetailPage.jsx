@@ -228,6 +228,12 @@ export function ProductDetailPage() {
   const productName = getLocalizedProductName(product, locale)
   const description = getLocalizedProductDescription(product, locale) ?? ''
   const copy = resolveLocaleCopy(detailCopy, locale)
+  const detailFieldCopy = resolveLocaleCopy({
+    kr: { specs: '제품 사양', care: '관리 안내', fit: '착용 안내', decoration: '장식 상세' },
+    en: { specs: 'Specifications', care: 'Care note', fit: 'Fit note', decoration: 'Decoration detail' },
+    jp: { specs: '商品仕様', care: 'ケア案内', fit: '着用案内', decoration: '装飾詳細' },
+    cn: { specs: '商品規格', care: '保養說明', fit: '配戴說明', decoration: '裝飾細節' },
+  }, locale, 'en')
   const adminPriceLabel = resolveLocaleCopy({ kr: '관리자 가격', en: 'Admin prices', jp: '管理者価格', cn: '管理员价格' }, locale, 'en')
   const moqLabel = isApproved && price ? price.moq : primaryAdminPrice ? primaryAdminPrice.moq : copy.moqAfterReview
   const fallbackMoqLabel = !isApproved && !primaryAdminPrice && product.moqDefault ? copy.fallbackMoq(product.moqDefault) : ''
@@ -235,6 +241,14 @@ export function ProductDetailPage() {
   const accessLabel = viewerState === 'pending' ? copy.reviewStatus : copy.requestAccess
   const canUseTradeTerms = isApproved && price
   const currentQuantity = normalizeQuantity(quantity, moq)
+  const productSpecs = product.specs || {}
+  const productDetailContent = product.detailContent || {}
+  const specEntries = [
+    ['Gauge', productSpecs.gauge],
+    ['Length', productSpecs.length ? `${productSpecs.length}${productSpecs.unit || ''}` : ''],
+    ['Ball', productSpecs.ballSize ? `${productSpecs.ballSize}${productSpecs.unit || ''}` : ''],
+    ['Bar', productSpecs.barThickness ? `${productSpecs.barThickness}${productSpecs.unit || ''}` : ''],
+  ].filter(([, value]) => value)
 
   const updateQuantity = (nextQuantity) => setQuantity(normalizeQuantity(nextQuantity, moq))
   const addSelectedItem = () => addInquiryItem(product.productId, { color: activeColor, size: activeSize }, currentQuantity)
@@ -258,6 +272,20 @@ export function ProductDetailPage() {
           <div><dt>{copy.origin}</dt><dd>{product.origin}</dd></div>
           <div><dt>{copy.exportAvailable}</dt><dd>{product.isExportAvailable ? copy.exportYes : copy.exportNo}</dd></div>
         </dl>
+
+        {(productDetailContent.headline || productDetailContent.body || productDetailContent.care || productDetailContent.fit || productDetailContent.decoration || specEntries.length > 0) ? <section className="catalog-detail-content">
+          {productDetailContent.headline && <h2>{productDetailContent.headline}</h2>}
+          {productDetailContent.body && <p>{productDetailContent.body}</p>}
+          {specEntries.length > 0 && <dl className="detail-specs">
+            <dt>{detailFieldCopy.specs}</dt>
+            {specEntries.map(([label, value]) => <dd key={label}><span>{label}</span> {value}</dd>)}
+          </dl>}
+          <ul>
+            {productDetailContent.decoration && <li><strong>{detailFieldCopy.decoration}</strong> {productDetailContent.decoration}</li>}
+            {productDetailContent.fit && <li><strong>{detailFieldCopy.fit}</strong> {productDetailContent.fit}</li>}
+            {productDetailContent.care && <li><strong>{detailFieldCopy.care}</strong> {productDetailContent.care}</li>}
+          </ul>
+        </section> : null}
 
         {adminPriceBooks.length > 0 ? <div className="detail-price admin-price-books">
           <small>{adminPriceLabel}</small>

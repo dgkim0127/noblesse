@@ -111,6 +111,11 @@ create table if not exists public.products (
   origin text default 'KR',
   image_set jsonb default '{}'::jsonb,
   image_alt jsonb default '{}'::jsonb,
+  taxonomy jsonb not null default '{}'::jsonb,
+  specs jsonb not null default '{}'::jsonb,
+  detail_content jsonb not null default '{}'::jsonb,
+  home_placement jsonb not null default '{}'::jsonb,
+  badge text,
   is_visible boolean default true,
   is_export_available boolean default true,
   is_new boolean default false,
@@ -459,6 +464,8 @@ create index if not exists idx_products_is_new on public.products(is_new);
 create index if not exists idx_products_is_best on public.products(is_best);
 create index if not exists idx_products_colors_gin on public.products using gin(colors);
 create index if not exists idx_products_sizes_gin on public.products using gin(sizes);
+create index if not exists idx_products_taxonomy_gin on public.products using gin(taxonomy);
+create index if not exists idx_products_home_placement_gin on public.products using gin(home_placement);
 create index if not exists idx_product_prices_product_market on public.product_prices(product_id, market);
 create index if not exists idx_product_prices_market_active on public.product_prices(market, is_active);
 create index if not exists idx_product_prices_currency on public.product_prices(currency);

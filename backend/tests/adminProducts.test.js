@@ -4,7 +4,7 @@ import { createApp } from "../src/app.js";
 import { createAdminProductService } from "../src/services/adminProductService.js";
 import { request } from "./testClient.js";
 
-function createAppWithProducts() {
+function createAppWithProducts({ onCreateProduct, onUpdateProduct } = {}) {
   const productId = "11111111-1111-4111-8111-111111111111";
   return createApp({
     env: { nodeEnv: "test", isProduction: false, allowedOrigins: [] },
@@ -25,6 +25,7 @@ function createAppWithProducts() {
               ];
             },
             async createProduct(input) {
+              onCreateProduct?.(input);
               if (input.code === "NB-DUP") return { conflict: "product_code" };
               if (input.categoryKey === "missing") return { missingCategory: true };
               return {
@@ -38,6 +39,7 @@ function createAppWithProducts() {
               };
             },
             async updateProduct(id, input) {
+              onUpdateProduct?.(input);
               if (id !== productId) return null;
               if (input.categoryKey === "missing") return { missingCategory: true };
               return {
@@ -106,6 +108,45 @@ test("POST /api/admin/products creates product through admin API", async () => {
   assert.equal(response.body.data.auditLogId, "audit-create-1");
 });
 
+test("POST /api/admin/products accepts catalog attributes and detail metadata", async () => {
+  let capturedInput;
+  const response = await request(createAppWithProducts({ onCreateProduct: (input) => { capturedInput = input; } }), "/api/admin/products", {
+    method: "POST",
+    headers: {
+      authorization: "Bearer admin-token",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      code: "NB-ATTR",
+      nameEn: "Attribute Product",
+      colors: ["Gold", "Silver"],
+      sizes: ["6mm"],
+      imageSet: {},
+      imageAlt: {},
+      taxonomy: {
+        productGroup: "piercing",
+        piercingType: "ball",
+        baseMaterial: "surgical",
+        allSurgical: true,
+        shapes: ["clover"]
+      },
+      specs: { gauge: "16G", length: "6", unit: "mm" },
+      detailContent: { headline: "Clover barbell", care: "Keep dry" },
+      homePlacement: { showInPiercing: true, sortPriority: 2 },
+      badge: "new drop",
+      isVisible: true
+    })
+  });
+
+  assert.equal(response.status, 201);
+  assert.deepEqual(capturedInput.taxonomy.shapes, ["clover"]);
+  assert.equal(capturedInput.taxonomy.allSurgical, true);
+  assert.equal(capturedInput.specs.gauge, "16G");
+  assert.equal(capturedInput.detailContent.care, "Keep dry");
+  assert.equal(capturedInput.homePlacement.showInPiercing, true);
+  assert.equal(capturedInput.badge, "NEWDROP");
+});
+
 test("POST /api/admin/products rejects duplicate product code", async () => {
   const response = await request(createAppWithProducts(), "/api/admin/products", {
     method: "POST",
@@ -140,6 +181,36 @@ test("PATCH /api/admin/products/:productId updates product metadata", async () =
   assert.equal(response.status, 200);
   assert.equal(response.body.data.product.nameEn, "Updated Product");
   assert.equal(response.body.data.auditLogId, "audit-update-1");
+});
+
+test("PATCH /api/admin/products/:productId updates only provided catalog detail fields", async () => {
+  let capturedInput;
+  const response = await request(
+    createAppWithProducts({ onUpdateProduct: (input) => { capturedInput = input; } }),
+    "/api/admin/products/11111111-1111-4111-8111-111111111111",
+    {
+      method: "PATCH",
+      headers: {
+        authorization: "Bearer admin-token",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        taxonomy: { structures: ["barbell"] },
+        specs: { ballSize: "4", unit: "mm" },
+        detailContent: { fit: "Lobe and helix" },
+        homePlacement: { showInWeeklyPick: true },
+        badge: "best"
+      })
+    }
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(capturedInput.taxonomy, { structures: ["barbell"] });
+  assert.deepEqual(capturedInput.specs, { ballSize: "4", unit: "mm" });
+  assert.deepEqual(capturedInput.detailContent, { fit: "Lobe and helix" });
+  assert.deepEqual(capturedInput.homePlacement, { showInWeeklyPick: true });
+  assert.equal(capturedInput.badge, "BEST");
+  assert.equal("imageSet" in capturedInput, false);
 });
 
 test("PATCH /api/admin/products/:productId rejects protected price fields", async () => {

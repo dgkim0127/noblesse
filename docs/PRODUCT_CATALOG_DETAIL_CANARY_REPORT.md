@@ -827,3 +827,16 @@ Required seed data still needed:
 - Local validation: frontend tests, lint, and production build passed; the build emitted only the existing Vite large chunk warning.
 - Dist security scan: no database URL, service credential, or private key patterns found; the only localhost string is a React Router URL construction fallback, not an API endpoint.
 - Direct SQL, DB console edit, Secret/IAM change, FX Job run, Scheduler change, product price mutation, buyer approval change: No.
+
+## N73 Catalog Attribute Detail Editor Rework
+
+- Date: 2026-07-02 KST
+- Starting commit: `459095b0c88d830c9ded5a8e6bf042922ad99792`
+- Target product: `NB-4WAY-GREEN-CLOVER-BARBELL`
+- Data model: additive product columns for `taxonomy`, `specs`, `detail_content`, `home_placement`, and `badge`; no product deletion or price policy change.
+- Admin UI: unified catalog entry form now captures taxonomy/filter attributes, color and size notes, specs, detail copy, image alt/order, and home placement flags.
+- Public UI: catalog adapter exposes safe public metadata for filters/detail rendering without exposing protected prices or internal cost fields.
+- Home placement: explicit product placement flags can control home sections; empty merchandising slots are not backfilled with unrelated products.
+- Validation: frontend tests, backend tests, lint, and production build passed locally.
+- Dist security scan: no database URL, service credential, private key, staging secret, or test account patterns found; Firebase SDK localhost fallback string is not an API endpoint.
+- Direct SQL, DB console edit, Secret/IAM change, FX Job run, Scheduler change, product creation, product deletion, buyer approval change: No.

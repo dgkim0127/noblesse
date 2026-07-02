@@ -6463,6 +6463,57 @@ h6 {
   color: var(--noblesse-sub);
 }
 
+.catalog-entry-detail-grid {
+  margin-top: 18px;
+}
+
+.catalog-entry-home-placement {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  border: 1px solid rgb(42 35 79 / 10%);
+  border-radius: 8px;
+  padding: 16px;
+  background: rgb(255 255 255 / 72%);
+}
+
+.catalog-entry-home-placement > strong {
+  color: var(--noblesse-sub);
+}
+
+.catalog-entry-home-placement > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.catalog-detail-content {
+  margin: 24px 0;
+  border: 1px solid #ece4df;
+  border-radius: 8px;
+  padding: 18px;
+  background: #fffaf8;
+}
+
+.catalog-detail-content h2 {
+  margin: 0 0 8px;
+  color: var(--noblesse-sub);
+  font-size: 18px;
+}
+
+.catalog-detail-content p,
+.catalog-detail-content li {
+  color: #746c7a;
+  line-height: 1.7;
+}
+
+.catalog-detail-content ul {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding-left: 18px;
+}
+
 @media (max-width: 760px) {
   .site-shell.product-list-shell .header-main {
     width: min(100% - 24px, 720px);
