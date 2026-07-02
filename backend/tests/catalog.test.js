@@ -15,6 +15,16 @@ function createCatalogMock() {
   ];
 
   return {
+    async listBanners() {
+      return [
+        {
+          bannerId: "home-main-01",
+          titleEn: "Noblesse snap",
+          desktopImageUrl: "https://cdn.example.test/snap.webp",
+          isVisible: true
+        }
+      ];
+    },
     async listProducts() {
       return products;
     },
@@ -37,6 +47,19 @@ test("GET /api/catalog/products returns product list", async () => {
   assert.equal(response.status, 200);
   assert.equal(response.body.products.length, 1);
   assert.equal(response.body.products[0].code, "NB-001");
+});
+
+test("GET /api/catalog/banners returns visible home banners", async () => {
+  const app = createApp({
+    env: { nodeEnv: "test", isProduction: false, allowedOrigins: [] },
+    services: { catalog: createCatalogMock() }
+  });
+
+  const response = await request(app, "/api/catalog/banners");
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.banners.length, 1);
+  assert.equal(response.body.banners[0].bannerId, "home-main-01");
 });
 
 test("GET /api/catalog/products/:productCode returns product detail", async () => {

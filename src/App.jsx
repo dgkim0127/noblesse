@@ -28,6 +28,7 @@ function AdminPageFallback() {
 
 const AdminAnalyticsPage = lazyNamed(() => import('./pages/admin/AdminAnalyticsPage'), 'AdminAnalyticsPage')
 const AdminBuyerDetailPage = lazyNamed(() => import('./pages/admin/AdminBuyerDetailPage'), 'AdminBuyerDetailPage')
+const AdminBannersPage = lazyNamed(() => import('./pages/admin/AdminBannersPage'), 'AdminBannersPage')
 const AdminBuyersPage = lazyNamed(() => import('./pages/admin/AdminBuyersPage'), 'AdminBuyersPage')
 const AdminCatalogEntryPage = lazyNamed(() => import('./pages/admin/AdminCatalogEntryPage'), 'AdminCatalogEntryPage')
 const AdminCategoriesPage = lazyNamed(() => import('./pages/admin/AdminCategoriesPage'), 'AdminCategoriesPage')
@@ -90,6 +91,7 @@ function App() {
         <Route path="buyers" element={withAdminSuspense(<AdminBuyersPage />, 'buyers.read')} />
         <Route path="buyers/:buyerId" element={withAdminSuspense(<AdminBuyerDetailPage />, 'buyers.read')} />
         <Route path="catalog/new" element={withAdminSuspense(<AdminCatalogEntryPage />, 'catalog.write')} />
+        <Route path="banners" element={withAdminSuspense(<AdminBannersPage />, 'catalog.write')} />
         <Route path="products" element={withAdminSuspense(<AdminProductsPage />, 'catalog.read')} />
         <Route path="categories" element={withAdminSuspense(<AdminCategoriesPage />, 'catalog.read')} />
         <Route path="prices" element={withAdminSuspense(<AdminPricesPage />, 'prices.read')} />
@@ -130,6 +132,7 @@ function App() {
         <Route path="buyers" element={withAdminSuspense(<AdminBuyersPage />, 'buyers.read')} />
         <Route path="buyers/:buyerId" element={withAdminSuspense(<AdminBuyerDetailPage />, 'buyers.read')} />
         <Route path="catalog/new" element={withAdminSuspense(<AdminCatalogEntryPage />, 'catalog.write')} />
+        <Route path="banners" element={withAdminSuspense(<AdminBannersPage />, 'catalog.write')} />
         <Route path="products" element={withAdminSuspense(<AdminProductsPage />, 'catalog.read')} />
         <Route path="categories" element={withAdminSuspense(<AdminCategoriesPage />, 'catalog.read')} />
         <Route path="prices" element={withAdminSuspense(<AdminPricesPage />, 'prices.read')} />

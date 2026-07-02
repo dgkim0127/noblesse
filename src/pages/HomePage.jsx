@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { ClipboardList, Headphones, Heart, Mail } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { createCatalogApi } from '../api/catalogApi'
+import { createApiClient } from '../api/client'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatAdminPriceBook } from '../config/currency'
+import { getRuntimeConfig } from '../config/runtimeConfig'
 import { mockProducts } from '../data/catalog'
 import { homeTaxonomyLinks } from '../data/productTaxonomy'
 import { formatMoney } from '../utils/commerce'
@@ -614,6 +617,43 @@ const homeShowcasePanels = [
 
 function getLocalizedValue(values, locale) {
   return resolveLocaleCopy(values, locale, 'en') ?? values.en ?? values.kr
+}
+
+function resolveBannerPath(banner) {
+  const value = String(banner.linkValue || '').trim()
+  if (banner.linkType === 'product' && value) return `/products/${encodeURIComponent(value)}`
+  if (banner.linkType === 'collection' && value) return `/collections/${encodeURIComponent(value)}`
+  if (banner.linkType === 'path' && value.startsWith('/')) return value
+  if (banner.linkType === 'url' && value.startsWith('/')) return value
+  return '/products'
+}
+
+function toShowcasePanel(banner, index) {
+  const fallbackTitle = banner.bannerId || `showcase-${index + 1}`
+  return {
+    key: banner.bannerId || banner.id || `managed-showcase-${index}`,
+    label: banner.bannerId ? String(banner.bannerId).replace(/[-_]+/g, ' ').toUpperCase() : undefined,
+    title: {
+      kr: banner.titleKo || banner.titleEn || fallbackTitle,
+      en: banner.titleEn || banner.titleKo || fallbackTitle,
+      jp: banner.titleJa || banner.titleEn || banner.titleKo || fallbackTitle,
+      cn: banner.titleEn || banner.titleKo || banner.titleJa || fallbackTitle,
+    },
+    eyebrow: {
+      kr: 'NOBLESSE',
+      en: 'NOBLESSE',
+      jp: 'NOBLESSE',
+      cn: 'NOBLESSE',
+    },
+    text: {
+      kr: banner.subtitleKo || banner.subtitleEn || '',
+      en: banner.subtitleEn || banner.subtitleKo || '',
+      jp: banner.subtitleJa || banner.subtitleEn || banner.subtitleKo || '',
+      cn: banner.subtitleEn || banner.subtitleKo || banner.subtitleJa || '',
+    },
+    image: banner.desktopImageUrl || banner.mobileImageUrl,
+    to: resolveBannerPath(banner),
+  }
 }
 
 function _getCollectionTitle(collection, locale) {
@@ -1370,6 +1410,8 @@ export function HomePage() {
   const [activeHomeSection, setActiveHomeSection] = useState(homeSectionNav[0].id)
   const { isApproved, products } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
+  const runtimeConfig = useMemo(() => getRuntimeConfig(), [])
+  const [managedShowcasePanels, setManagedShowcasePanels] = useState([])
   const copy = resolveLocaleCopy(homeCopy, locale)
   const homeSourceProducts = products.length > 0 ? products : mockProducts
   const homeProducts = homeSourceProducts.filter(isAllowedHomeProduct)
@@ -1405,7 +1447,32 @@ export function HomePage() {
   }, [activeHomeSectionNav])
   const activeHomeSectionIds = activeHomeSectionNav.map((item) => item.id).join('|')
   const firstActiveHomeSectionId = activeHomeSectionNav[0]?.id ?? homeSectionNav[0].id
-  const showcaseLoopPanels = [...homeShowcasePanels, ...homeShowcasePanels, ...homeShowcasePanels]
+  const activeShowcasePanels = managedShowcasePanels.length > 0 ? managedShowcasePanels : homeShowcasePanels
+  const showcaseLoopPanels = [...activeShowcasePanels, ...activeShowcasePanels, ...activeShowcasePanels]
+
+  useEffect(() => {
+    if (!runtimeConfig.isConfigured || runtimeConfig.dataMode !== 'api') return undefined
+
+    let isMounted = true
+    const api = createCatalogApi(createApiClient({ baseUrl: runtimeConfig.apiBaseUrl }))
+
+    api.getCatalogBanners()
+      .then((banners) => {
+        if (!isMounted) return
+        const panels = banners
+          .filter((banner) => banner?.desktopImageUrl || banner?.mobileImageUrl)
+          .slice(0, 6)
+          .map(toShowcasePanel)
+        setManagedShowcasePanels(panels)
+      })
+      .catch(() => {
+        if (isMounted) setManagedShowcasePanels([])
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [runtimeConfig])
 
   const replayProductSectionReveal = (section) => {
     const cards = Array.from(section.querySelectorAll('.home-product-card'))
@@ -1666,7 +1733,7 @@ export function HomePage() {
 
     const scroller = showcaseScrollerRef.current
     const step = getShowcaseStep()
-    const loopWidth = step * homeShowcasePanels.length
+    const loopWidth = step * activeShowcasePanels.length
 
     if (scroller && step && scroller.scrollLeft >= loopWidth) {
       scroller.scrollLeft -= loopWidth
@@ -1698,7 +1765,7 @@ export function HomePage() {
           const bannerTitle = getLocalizedValue(banner.title, locale)
           const bannerEyebrow = getLocalizedValue(banner.eyebrow, locale)
           const bannerText = getLocalizedValue(banner.text, locale)
-          const label = ['NEW', 'HOT', 'TRADE', 'BEST', 'SILVER', 'RING'][index % homeShowcasePanels.length]
+          const label = banner.label || ['NEW', 'HOT', 'TRADE', 'BEST', 'SILVER', 'RING'][index % activeShowcasePanels.length]
 
           return <Link className="home-showcase-panel" key={`${banner.key}-${index}`} onClick={handleShowcaseClick} to={toLocalePath(banner.to)}>
             <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} width="900" />

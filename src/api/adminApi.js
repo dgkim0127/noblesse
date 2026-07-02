@@ -124,6 +124,26 @@ export function createAdminApi(apiClient) {
       }))
     },
 
+    async getBanners(params = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/banners${buildQuery(params)}`, { token: requireToken(token) }))
+    },
+
+    async createBanner(input = {}, token) {
+      return unwrap(await apiClient.apiFetch('/admin/banners', {
+        method: 'POST',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async updateBanner(bannerId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/banners/${encodeURIComponent(bannerId)}`, {
+        method: 'PATCH',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
     async getCategories(params = {}, token) {
       return unwrap(await apiClient.apiFetch(`/admin/categories${buildQuery(params)}`, { token: requireToken(token) }))
     },

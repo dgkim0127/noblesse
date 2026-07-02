@@ -26,6 +26,14 @@ export function createCatalogRoutes({ catalogService, mediaService }) {
   );
 
   router.get(
+    "/banners",
+    asyncRoute(async (req, res) => {
+      const banners = await catalogService.listBanners();
+      res.json({ banners });
+    })
+  );
+
+  router.get(
     "/media/:mediaKey",
     asyncRoute(async (req, res) => {
       const objectKey = decodeMediaKey(req.params.mediaKey);

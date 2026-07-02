@@ -17,6 +17,11 @@ export function createCatalogService({ pool, queries }) {
       return products.map(stripProtectedFields);
     },
 
+    async listBanners() {
+      if (!queries.listVisibleBanners) return [];
+      return queries.listVisibleBanners(pool, { limit: 6 });
+    },
+
     async getProductByCode(productCode) {
       const product = await queries.getVisibleProductByCode(pool, productCode);
       if (!product) {

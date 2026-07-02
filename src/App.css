@@ -1031,6 +1031,53 @@ h6 {
   resize: vertical;
 }
 
+.admin-banner-form {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-form-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-form-grid label {
+  color: var(--admin-muted);
+  display: grid;
+  font-size: 0.78rem;
+  font-weight: 800;
+  gap: 6px;
+}
+
+.admin-form-grid input,
+.admin-form-grid select {
+  background: #fff;
+  border: 1px solid rgba(42, 36, 87, 0.16);
+  border-radius: 12px;
+  color: var(--navy);
+  font: inherit;
+  min-height: 42px;
+  padding: 9px 12px;
+}
+
+.admin-form-grid input:disabled {
+  background: rgba(42, 36, 87, 0.05);
+  color: var(--admin-muted);
+}
+
+@media (max-width: 980px) {
+  .admin-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .admin-filter-row {
   display: flex;
   flex-wrap: wrap;

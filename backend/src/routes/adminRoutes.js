@@ -258,6 +258,43 @@ export function createAdminRoutes({
   );
 
   router.get(
+    "/banners",
+    requireAdmin,
+    can("catalog.read"),
+    asyncRoute(async (req, res) => {
+      const result = await services.banners.listBanners(req.query, req.adminViewer);
+      res.json({
+        data: { banners: result.banners },
+        meta: withRequestId(req, result.meta)
+      });
+    })
+  );
+
+  router.post(
+    "/banners",
+    requireAdmin,
+    can("catalog.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.banners.createBanner(req.body, req.adminViewer);
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.patch(
+    "/banners/:bannerId",
+    requireAdmin,
+    can("catalog.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.banners.updateBanner(
+        req.params.bannerId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
     "/categories",
     requireAdmin,
     can("catalog.read"),

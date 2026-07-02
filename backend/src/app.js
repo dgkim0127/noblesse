@@ -7,6 +7,7 @@ import { createPostgresViewerLoader, createRequireFirebaseIdentity, createRequir
 import { createPool } from "./db/pool.js";
 import { createAdminBuyerQueries } from "./db/queries/adminBuyerQueries.js";
 import { createAdminAccessQueries } from "./db/queries/adminAccessQueries.js";
+import { createAdminBannerQueries, listVisibleBanners } from "./db/queries/bannerQueries.js";
 import { createAdminCategoryQueries } from "./db/queries/adminCategoryQueries.js";
 import { createAdminDashboardQueries } from "./db/queries/adminDashboardQueries.js";
 import { createAdminInquiryQueries } from "./db/queries/adminInquiryQueries.js";
@@ -28,6 +29,7 @@ import { createCatalogRoutes } from "./routes/catalogRoutes.js";
 import { createHealthRoutes } from "./routes/healthRoutes.js";
 import { createAdminBuyerService } from "./services/adminBuyerService.js";
 import { createAdminAccessService } from "./services/adminAccessService.js";
+import { createAdminBannerService } from "./services/adminBannerService.js";
 import { createAdminCategoryService } from "./services/adminCategoryService.js";
 import { createAdminDashboardService } from "./services/adminDashboardService.js";
 import { createAdminInquiryService } from "./services/adminInquiryService.js";
@@ -82,7 +84,7 @@ export function createApp(options = {}) {
       options.services?.catalog ||
       createCatalogService({
         pool,
-        queries: options.queries?.catalog || catalogQueries
+        queries: options.queries?.catalog || { ...catalogQueries, listVisibleBanners }
       }),
     buyer: options.services?.buyer || createBuyerService(),
     buyerRegistration:
@@ -127,6 +129,11 @@ export function createApp(options = {}) {
         options.services?.admin?.categories ||
         createAdminCategoryService({
           queries: options.queries?.admin?.categories || createAdminCategoryQueries(pool)
+        }),
+      banners:
+        options.services?.admin?.banners ||
+        createAdminBannerService({
+          queries: options.queries?.admin?.banners || createAdminBannerQueries(pool)
         }),
       prices:
         adminPriceService,

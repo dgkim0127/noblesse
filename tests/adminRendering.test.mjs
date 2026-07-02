@@ -11,6 +11,7 @@ function readWorkspaceFile(path) {
 
 const adminRoutePages = [
   'src/pages/admin/AdminAnalyticsPage.jsx',
+  'src/pages/admin/AdminBannersPage.jsx',
   'src/pages/admin/AdminBuyerDetailPage.jsx',
   'src/pages/admin/AdminBuyersPage.jsx',
   'src/pages/admin/AdminCatalogEntryPage.jsx',
@@ -33,6 +34,7 @@ test('admin shell keeps child routes mounted through the outlet', () => {
   assert.match(routes, /<Route path="admin" element=\{<AdminRoute><AdminShell \/><\/AdminRoute>\}>/)
   assert.match(routes, /<Route index element=\{withAdminSuspense\(<AdminDashboardPage \/>, 'dashboard\.read'\)\}/)
   assert.match(routes, /<Route path="catalog\/new" element=\{withAdminSuspense\(<AdminCatalogEntryPage \/>, 'catalog\.write'\)\}/)
+  assert.match(routes, /<Route path="banners" element=\{withAdminSuspense\(<AdminBannersPage \/>, 'catalog\.write'\)\}/)
   assert.match(routes, /<Route path="fx" element=\{withAdminSuspense\(<AdminFxPage \/>, 'prices\.read'\)\}/)
 })
 

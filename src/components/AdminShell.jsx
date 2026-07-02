@@ -5,6 +5,7 @@ import {
   Gauge,
   Gem,
   Handshake,
+  Images,
   Landmark,
   LayoutDashboard,
   PlusCircle,
@@ -36,6 +37,7 @@ const adminNavGroups = [
     key: 'catalog',
     items: [
       { key: 'catalogEntry', path: '/admin/catalog/new', icon: PlusCircle, permission: 'catalog.write' },
+      { key: 'banners', path: '/admin/banners', icon: Images, permission: 'catalog.write' },
       { key: 'products', path: '/admin/products', icon: Gem, permission: 'catalog.read' },
       { key: 'categories', path: '/admin/categories', icon: Tags, permission: 'catalog.read' },
       { key: 'prices', path: '/admin/prices', icon: Tags, permission: 'prices.read' },

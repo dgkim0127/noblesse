@@ -250,3 +250,21 @@ test('admin product and category writes call protected admin routes', async () =
   assert.equal(calls[0].options.body.code, 'NB-999')
   assert.equal(calls[3].options.body.isVisible, false)
 })
+
+test('admin banner methods call protected home snap routes', async () => {
+  const { calls, client } = createMockApiClient({ data: { banners: [] } })
+  const adminApi = createAdminApi(client)
+
+  await adminApi.getBanners({ visible: true, q: 'home' }, 'admin-token')
+  await adminApi.createBanner({ bannerId: 'home-main-01', titleEn: 'Snap', desktopImageUrl: 'https://cdn.example.test/snap.webp' }, 'admin-token')
+  await adminApi.updateBanner('11111111-1111-4111-8111-111111111111', { isVisible: false }, 'admin-token')
+
+  assert.deepEqual(calls.map((call) => `${call.options.method || 'GET'} ${call.path}`), [
+    'GET /admin/banners?visible=true&q=home',
+    'POST /admin/banners',
+    'PATCH /admin/banners/11111111-1111-4111-8111-111111111111',
+  ])
+  assert.equal(calls[0].options.token, 'admin-token')
+  assert.equal(calls[1].options.body.bannerId, 'home-main-01')
+  assert.deepEqual(calls[2].options.body, { isVisible: false })
+})
