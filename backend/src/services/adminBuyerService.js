@@ -53,10 +53,17 @@ export function createAdminBuyerService({ queries }) {
     async listBuyers(filters = {}, adminViewer) {
       const parsed = parseBuyerFilters(filters);
       const buyers = await queries.listBuyers(parsed, { adminViewer });
+      const statusCounts = queries.countBuyersByStatus
+        ? await queries.countBuyersByStatus(parsed, { adminViewer })
+        : null;
       const safeBuyers = canReadSensitive(adminViewer) ? buyers : buyers.map(maskSensitiveBuyerFields);
+      const meta = createPaginationMeta(parsed, undefined, buyers.length);
+      if (statusCounts) {
+        meta.statusCounts = statusCounts;
+      }
       return {
         buyers: slicePageRows(safeBuyers, parsed),
-        meta: createPaginationMeta(parsed, undefined, buyers.length)
+        meta
       };
     },
 

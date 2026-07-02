@@ -167,6 +167,9 @@ export function createAdminBuyerQueries(pool) {
               $4::text is null
               or b.company_name ilike $4
               or b.contact_name ilike $4
+              or u.email ilike $4
+              or b.country ilike $4
+              or b.assigned_market ilike $4
             )
           order by b.created_at desc
           limit $5 offset $6
@@ -182,6 +185,57 @@ export function createAdminBuyerQueries(pool) {
         ]
       );
       return result.rows.map(mapBuyer);
+    },
+
+    async countBuyersByStatus(filters) {
+      assertPool(pool);
+      const result = await pool.query(
+        `
+          select
+            count(*)::int as all_count,
+            count(*) filter (where verification_status = 'draft')::int as draft_count,
+            count(*) filter (where verification_status = 'pending')::int as pending_count,
+            count(*) filter (where verification_status = 'approved')::int as approved_count,
+            count(*) filter (where verification_status = 'rejected')::int as rejected_count,
+            count(*) filter (where verification_status = 'suspended')::int as suspended_count,
+            count(*) filter (where account_status = 'blocked')::int as blocked_count,
+            count(*) filter (where account_status = 'active')::int as active_count
+          from (
+            select
+              coalesce(u.account_status, case when u.status = 'blocked' then 'blocked' else 'active' end) as account_status,
+              coalesce(b.verification_status, case when u.status = 'blocked' then 'suspended' else u.status end) as verification_status
+            from public.buyers b
+            join public.users u on u.id = b.user_id
+            where u.role = 'buyer'
+              and ($1::text is null or b.assigned_market = $1)
+              and ($2::text is null or b.country = $2)
+              and (
+                $3::text is null
+                or b.company_name ilike $3
+                or b.contact_name ilike $3
+                or u.email ilike $3
+                or b.country ilike $3
+                or b.assigned_market ilike $3
+              )
+          ) scoped_buyers
+        `,
+        [
+          filters.market || null,
+          filters.country || null,
+          filters.q ? `%${filters.q}%` : null
+        ]
+      );
+      const row = result.rows[0] || {};
+      return {
+        all: Number(row.all_count || 0),
+        draft: Number(row.draft_count || 0),
+        pending: Number(row.pending_count || 0),
+        approved: Number(row.approved_count || 0),
+        rejected: Number(row.rejected_count || 0),
+        suspended: Number(row.suspended_count || 0),
+        blocked: Number(row.blocked_count || 0),
+        active: Number(row.active_count || 0)
+      };
     },
 
     async getBuyerById(buyerId) {

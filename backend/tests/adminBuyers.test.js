@@ -21,6 +21,18 @@ function createAppWithBuyers() {
                 status: filters.status || "pending"
               }));
             },
+            async countBuyersByStatus() {
+              return {
+                all: 3,
+                draft: 0,
+                pending: 1,
+                approved: 1,
+                rejected: 0,
+                suspended: 1,
+                blocked: 0,
+                active: 3
+              };
+            },
             async getBuyerById(id) {
               if (id !== buyerId) return null;
               return {
@@ -70,6 +82,16 @@ test("GET /api/admin/buyers returns buyers list", async () => {
   assert.equal(response.body.meta.offset, 0);
   assert.equal(response.body.meta.nextOffset, 20);
   assert.equal(response.body.meta.nextCursor, "20");
+  assert.deepEqual(response.body.meta.statusCounts, {
+    all: 3,
+    draft: 0,
+    pending: 1,
+    approved: 1,
+    rejected: 0,
+    suspended: 1,
+    blocked: 0,
+    active: 3
+  });
 });
 
 test("GET /api/admin/buyers trims lookahead row for paginated lists", async () => {

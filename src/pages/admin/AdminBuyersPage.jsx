@@ -45,6 +45,13 @@ function getBuyerAccountLabel(t, buyer) {
   return getAdminStatusLabel(t, status)
 }
 
+function getFilterCount(meta, tab) {
+  const count = meta?.statusCounts?.[tab]
+  if (count === undefined || count === null) return null
+  const number = Number(count)
+  return Number.isFinite(number) ? number : null
+}
+
 export function AdminBuyersPage() {
   const t = useAdminCopy()
   const { admin, hasPermission } = useAdminAccess()
@@ -188,7 +195,13 @@ export function AdminBuyersPage() {
     <div className="admin-toolbar">
       <label className="admin-search">{t.buyers.searchLabel}<input value={query} onChange={(event) => resetPage(setQuery)(event.target.value)} placeholder={t.buyers.searchPlaceholder} /></label>
       <div className="admin-filter-tabs">
-        {filterTabs.map((tab) => <button aria-pressed={filter === tab} className={filter === tab ? 'active' : ''} key={tab} type="button" onClick={() => resetPage(setFilter)(tab)}>{tab === 'all' ? t.common.all : getAdminStatusLabel(t, tab)}</button>)}
+        {filterTabs.map((tab) => {
+          const count = getFilterCount(meta, tab)
+          return <button aria-pressed={filter === tab} className={filter === tab ? 'active' : ''} key={tab} type="button" onClick={() => resetPage(setFilter)(tab)}>
+            <span>{tab === 'all' ? t.common.all : getAdminStatusLabel(t, tab)}</span>
+            {count !== null && <span className="admin-filter-count">{count}</span>}
+          </button>
+        })}
       </div>
     </div>
     {message && <p className="admin-inline-message">{message}</p>}
