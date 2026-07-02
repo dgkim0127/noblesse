@@ -120,7 +120,7 @@ const copy = {
     buyers: {
       title: '거래처 승인',
       description: 'B2B 거래처 계정을 검토하고 신뢰된 백엔드 API로 승인 상태를 관리합니다.',
-      note: '거래처 상태 변경은 서버 관리자 작업입니다. 프론트엔드 상태만으로는 관리자 권한이 부여되지 않습니다.',
+      note: '이 화면의 버튼으로 거래처 심사와 로그인 상태를 서버 관리자 API에 바로 반영할 수 있습니다. 권한이 없으면 필요한 권한이 안내됩니다.',
       searchLabel: '거래처 검색',
       searchPlaceholder: '회사, 담당자, 국가 또는 시장',
       setStatus: '{status}',
@@ -467,7 +467,7 @@ copy.en = {
   buyers: {
     title: 'Buyer Approval',
     description: 'Review B2B buyer accounts and update approval state through the trusted backend API.',
-    note: 'Buyer status changes are server-side admin actions. Frontend state does not grant admin access.',
+    note: 'Use the buttons on this page to update buyer review and login status through the server admin API. If access is missing, the required permission is shown.',
     searchLabel: 'Search buyers',
     searchPlaceholder: 'Company, contact, country, or market',
     setStatus: '{status}',
@@ -810,7 +810,7 @@ copy.jp = {
   buyers: {
     title: '取引先承認',
     description: 'B2B取引先アカウントを確認し、信頼済みバックエンドAPIで承認状態を管理します。',
-    note: '取引先状態の変更はサーバー側の管理操作です。フロントエンド状態だけでは管理権限は付与されません。',
+    note: 'この画面のボタンから、取引先審査とログイン状態をサーバー管理APIに反映できます。権限がない場合は必要な権限を表示します。',
     searchLabel: '取引先検索',
     searchPlaceholder: '会社、担当者、国、または市場',
     setStatus: '{status}',
@@ -1153,7 +1153,7 @@ copy.cn = {
   buyers: {
     title: '客户审批',
     description: '查看 B2B 客户账户，并通过可信后端 API 更新审批状态。',
-    note: '客户状态变更是服务器端管理员操作。前端状态不会授予管理员权限。',
+    note: '可使用本页按钮通过服务器管理员 API 更新客户审核和登录状态。权限不足时会显示所需权限。',
     searchLabel: '搜索客户',
     searchPlaceholder: '公司、联系人、国家或市场',
     setStatus: '{status}',
