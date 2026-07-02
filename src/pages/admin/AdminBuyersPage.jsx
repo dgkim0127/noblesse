@@ -23,6 +23,9 @@ function getBuyerLoginId(buyer) {
 }
 
 function getStatusActionLabel(t, status) {
+  if (t.buyers.statusActions?.[status]) {
+    return t.buyers.statusActions[status]
+  }
   return formatAdminCopy(t.buyers.setStatus || '{status}', {
     status: getAdminStatusLabel(t, status),
   })
@@ -97,7 +100,7 @@ export function AdminBuyersPage() {
 
     return <div className="admin-buyer-status-panel">
       <div className="admin-buyer-status-row">
-        <span>{t.buyers.verificationStatus || '거래처 상태'}</span>
+        <span>{t.buyers.reviewStatus || t.buyers.verificationStatus || '거래처 심사'}</span>
         <AdminStatus status={currentVerification} />
       </div>
       {canReview && <div className="admin-actions tight">
@@ -111,7 +114,7 @@ export function AdminBuyersPage() {
         </button>)}
       </div>}
       <div className="admin-buyer-status-row">
-        <span>{t.buyers.accountStatus || '계정 상태'}</span>
+        <span>{t.buyers.loginStatus || t.buyers.accountStatus || '로그인'}</span>
         <AdminStatus status={currentAccount} />
       </div>
       {canSuspend && <div className="admin-actions tight">
