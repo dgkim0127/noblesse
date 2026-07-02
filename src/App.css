@@ -900,6 +900,93 @@ h6 {
   font-size: 0.9rem;
 }
 
+.admin-buyer-list {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-buyer-card {
+  align-items: stretch;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(42, 36, 87, 0.1);
+  border-radius: 16px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(220px, 1fr) minmax(300px, 1.2fr) minmax(260px, 0.9fr);
+  padding: 16px;
+}
+
+.admin-buyer-card-main,
+.admin-buyer-status-panel {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.admin-buyer-card-main {
+  align-content: start;
+}
+
+.admin-buyer-card-main h2 {
+  font-size: 1.12rem;
+  margin: 0;
+}
+
+.admin-buyer-card-main p {
+  color: var(--admin-muted);
+  font-weight: 800;
+  margin: 0;
+}
+
+.admin-buyer-email {
+  overflow-wrap: anywhere;
+}
+
+.admin-buyer-meta {
+  align-content: start;
+  display: grid;
+  gap: 8px 12px;
+  grid-template-columns: minmax(88px, 0.72fr) minmax(0, 1fr);
+  margin: 0;
+  min-width: 0;
+}
+
+.admin-buyer-meta dt,
+.admin-buyer-status-row span {
+  color: var(--admin-muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-buyer-meta dd {
+  color: var(--navy);
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-buyer-status-panel {
+  background: rgba(255, 143, 169, 0.08);
+  border: 1px solid rgba(255, 143, 169, 0.18);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.admin-buyer-status-row {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.admin-buyer-status-panel .admin-actions.tight {
+  display: flex;
+}
+
 .admin-status {
   background: rgba(42, 36, 87, 0.08);
   border-radius: 999px;
@@ -1178,6 +1265,10 @@ h6 {
   .admin-grid.compact,
   .admin-analytics-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-buyer-card {
+    grid-template-columns: 1fr;
   }
 }
 

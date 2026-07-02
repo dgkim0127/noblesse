@@ -2468,5 +2468,5 @@ export function getAdminRuntimeKind(runtimeConfig) {
 }
 
 export function getAdminStatusLabel(t, status) {
-  return t.statuses.inquiry[status] || t.statuses.buyer[status] || t.statuses.quote[status] || t.statuses.visibility[status] || status
+  return t.statuses.inquiry[status] || t.statuses.buyer[status] || t.statuses.quote[status] || t.statuses.visibility[status] || t.common[status] || status
 }

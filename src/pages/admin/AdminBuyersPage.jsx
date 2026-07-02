@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import { useAdminAccess } from '../../components/AdminAccessContext'
-import { AdminPageHeader, AdminPagination, AdminPreviewNote, AdminStatus } from './AdminPageParts'
+import { AdminLink, AdminPageHeader, AdminPagination, AdminPreviewNote, AdminStatus } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy, getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
 const filterTabs = ['all', 'draft', 'pending', 'approved', 'rejected', 'suspended', 'blocked']
 const pageSize = 20
+const verificationStatuses = ['pending', 'approved', 'rejected', 'suspended']
+const accountStatuses = ['active', 'blocked']
 
 function formatDate(value) {
   if (!value) return '-'
@@ -19,7 +21,7 @@ export function AdminBuyersPage() {
   const [query, setQuery] = useState('')
   const [offset, setOffset] = useState(0)
   const [refreshKey, setRefreshKey] = useState(0)
-  const [savingBuyerId, setSavingBuyerId] = useState('')
+  const [savingAction, setSavingAction] = useState('')
   const [message, setMessage] = useState('')
   const filters = useMemo(() => ({
     verificationStatus: ['draft', 'pending', 'approved', 'rejected', 'suspended'].includes(filter) ? filter : '',
@@ -39,8 +41,8 @@ export function AdminBuyersPage() {
     setOffset(0)
   }
 
-  const updateStatus = async (buyerId, nextStatus) => {
-    setSavingBuyerId(buyerId)
+  const updateVerificationStatus = async (buyerId, nextStatus) => {
+    setSavingAction(`${buyerId}:verification:${nextStatus}`)
     setMessage('')
     try {
       await mutate((api, token) => api.updateBuyerVerification(buyerId, {
@@ -52,8 +54,64 @@ export function AdminBuyersPage() {
     } catch (error) {
       setMessage(error?.message || t.buyers.updateFailed)
     } finally {
-      setSavingBuyerId('')
+      setSavingAction('')
     }
+  }
+
+  const updateAccountStatus = async (buyerId, nextStatus) => {
+    setSavingAction(`${buyerId}:account:${nextStatus}`)
+    setMessage('')
+    try {
+      await mutate((api, token) => api.updateBuyerAccountStatus(buyerId, {
+        accountStatus: nextStatus,
+        reason: nextStatus === 'blocked' ? 'Updated by admin account review' : undefined,
+      }, token))
+      setMessage(formatAdminCopy(t.buyers.updated, { status: getAdminStatusLabel(t, nextStatus) }))
+      setRefreshKey((current) => current + 1)
+    } catch (error) {
+      setMessage(error?.message || t.buyers.updateFailed)
+    } finally {
+      setSavingAction('')
+    }
+  }
+
+  const renderStatusActions = (buyer) => {
+    const currentVerification = buyer.verificationStatus || buyer.status
+    const currentAccount = buyer.accountStatus || 'active'
+    const canReview = hasPermission('buyers.review')
+    const canSuspend = hasPermission('buyers.suspend')
+
+    return <div className="admin-buyer-status-panel">
+      <div className="admin-buyer-status-row">
+        <span>{t.buyers.verificationStatus || '거래처 상태'}</span>
+        <AdminStatus status={currentVerification} />
+      </div>
+      {canReview && <div className="admin-actions tight">
+        {verificationStatuses.filter((item) => item !== currentVerification).map((nextStatus) => <button
+          disabled={savingAction === `${buyer.id}:verification:${nextStatus}`}
+          key={nextStatus}
+          type="button"
+          onClick={() => updateVerificationStatus(buyer.id, nextStatus)}
+        >
+          {t.common.set} {getAdminStatusLabel(t, nextStatus)}
+        </button>)}
+      </div>}
+      <div className="admin-buyer-status-row">
+        <span>{t.buyers.accountStatus || '계정 상태'}</span>
+        <AdminStatus status={currentAccount} />
+      </div>
+      {canSuspend && <div className="admin-actions tight">
+        {accountStatuses.filter((item) => item !== currentAccount).map((nextStatus) => <button
+          disabled={savingAction === `${buyer.id}:account:${nextStatus}`}
+          key={nextStatus}
+          type="button"
+          onClick={() => updateAccountStatus(buyer.id, nextStatus)}
+        >
+          {t.common.set} {getAdminStatusLabel(t, nextStatus)}
+        </button>)}
+      </div>}
+      {!canReview && !canSuspend && <p className="admin-empty">{t.buyers.note}</p>}
+    </div>
   }
 
   return <>
@@ -72,44 +130,35 @@ export function AdminBuyersPage() {
     {message && <p className="admin-inline-message">{message}</p>}
 
     <section className="admin-card">
-      <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead><tr><th>{t.fields.companyName}</th><th>{t.fields.contactName}</th><th>{t.fields.email}</th><th>{t.fields.country}</th><th>{t.fields.language}</th><th>{t.fields.market}</th><th>{t.fields.currency}</th><th>{t.common.status}</th><th>{t.buyers.accountStatus || 'Account'}</th><th>{t.buyers.waitingDays || 'Waiting'}</th><th>{t.buyers.inquiryCount || 'Inquiries'}</th><th>{t.common.createdAt}</th><th>{t.common.actions}</th></tr></thead>
-          <tbody>{buyers.map((buyer) => <tr key={buyer.id}>
-            <td>{buyer.companyName || '-'}</td>
-            <td>{buyer.contactName || '-'}</td>
-            <td>{buyer.email || '-'}</td>
-            <td>{buyer.country || '-'}</td>
-            <td>{buyer.preferredLanguage || '-'}</td>
-            <td>{buyer.assignedMarket || '-'}</td>
-            <td>{buyer.currency || '-'}</td>
-            <td><AdminStatus status={buyer.verificationStatus || buyer.status} /></td>
-            <td><AdminStatus status={buyer.accountStatus || 'active'} /></td>
-            <td>{buyer.waitingDays ?? '-'}</td>
-            <td>{buyer.inquiryCount ?? 0}</td>
-            <td>{formatDate(buyer.createdAt)}</td>
-            <td>
-              <div className="admin-actions tight">
-                {hasPermission('buyers.review') && ['pending', 'approved', 'rejected', 'suspended'].filter((item) => item !== (buyer.verificationStatus || buyer.status)).map((nextStatus) => <button
-                  disabled={savingBuyerId === buyer.id}
-                  key={nextStatus}
-                  type="button"
-                  onClick={() => updateStatus(buyer.id, nextStatus)}
-                >
-                  {t.common.set} {getAdminStatusLabel(t, nextStatus)}
-                </button>)}
-              </div>
-            </td>
-          </tr>)}</tbody>
-        </table>
-        {buyers.length === 0 && <p className="admin-empty">{t.buyers.empty}</p>}
-        <AdminPagination
-          disabled={status === 'loading'}
-          meta={meta}
-          onNext={() => setOffset(Number(meta?.nextOffset ?? offset + pageSize))}
-          onPrevious={() => setOffset(Math.max(0, offset - pageSize))}
-        />
-      </div>
+      {buyers.length > 0 ? <div className="admin-buyer-list">
+        {buyers.map((buyer) => <article className="admin-buyer-card" key={buyer.id}>
+          <div className="admin-buyer-card-main">
+            <span className="admin-preview-badge">{buyer.assignedMarket || buyer.country || '-'}</span>
+            <h2>{buyer.companyName || t.buyers.buyerAccount}</h2>
+            <p>{buyer.contactName || '-'}</p>
+            <p className="admin-buyer-email">{buyer.email || '-'}</p>
+            <div className="admin-actions tight">
+              <AdminLink to={`/admin/buyers/${buyer.id}`}>{t.common.view}</AdminLink>
+            </div>
+          </div>
+          <dl className="admin-buyer-meta">
+            <dt>{t.fields.country}</dt><dd>{buyer.country || '-'}</dd>
+            <dt>{t.fields.language}</dt><dd>{buyer.preferredLanguage || '-'}</dd>
+            <dt>{t.fields.market}</dt><dd>{buyer.assignedMarket || '-'}</dd>
+            <dt>{t.fields.currency}</dt><dd>{buyer.currency || '-'}</dd>
+            <dt>{t.buyers.waitingDays || '대기일'}</dt><dd>{buyer.waitingDays ?? '-'}</dd>
+            <dt>{t.buyers.inquiryCount || '문의'}</dt><dd>{buyer.inquiryCount ?? 0}</dd>
+            <dt>{t.common.createdAt}</dt><dd>{formatDate(buyer.createdAt)}</dd>
+          </dl>
+          {renderStatusActions(buyer)}
+        </article>)}
+      </div> : <p className="admin-empty">{t.buyers.empty}</p>}
+      <AdminPagination
+        disabled={status === 'loading'}
+        meta={meta}
+        onNext={() => setOffset(Number(meta?.nextOffset ?? offset + pageSize))}
+        onPrevious={() => setOffset(Math.max(0, offset - pageSize))}
+      />
     </section>
   </>
 }
