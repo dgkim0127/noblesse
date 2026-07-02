@@ -5,6 +5,14 @@ import { useCommerce } from '../commerce/commerceStore'
 import { formatAdminPriceBook } from '../config/currency'
 import { mockProducts } from '../data/catalog'
 import { homeTaxonomyLinks } from '../data/productTaxonomy'
+import {
+  getHomeSourceProducts,
+  selectAllowedHomeProducts,
+  selectNewArrivalProducts,
+  selectPiercingCatalogProducts,
+  selectSteadySelectionProducts,
+  selectWeeklyBestProducts,
+} from '../services/homePlacement'
 import { formatMoney } from '../utils/commerce'
 import { getLocaleContentKey, getLocalizedProductAlt, getLocalizedProductName, resolveLocaleCopy, useLocalePath } from '../utils/locale'
 
@@ -895,12 +903,6 @@ const homeBuyerCollectionCopy = {
   },
 }
 
-const isAllowedHomeProduct = (product) => (
-  product
-  && !/(14K|Titanium)/i.test(product.material ?? '')
-  && !['14k-gold', 'titanium'].includes(product.categoryId)
-)
-
 const weeklyDemandSamples = [
   { inquiries: 17155, checks: 287 },
   { inquiries: 57070, checks: 1642 },
@@ -1368,21 +1370,15 @@ export function HomePage() {
   const [isShowcaseDragging, setIsShowcaseDragging] = useState(false)
   const [isSectionNavFixed, setIsSectionNavFixed] = useState(false)
   const [activeHomeSection, setActiveHomeSection] = useState(homeSectionNav[0].id)
-  const { isApproved, products } = useCommerce()
+  const { dataMode, isApproved, products } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const copy = resolveLocaleCopy(homeCopy, locale)
-  const homeSourceProducts = products.length > 0 ? products : mockProducts
-  const homeProducts = homeSourceProducts.filter(isAllowedHomeProduct)
-  const newProducts = homeProducts.filter((product) => product.isNew)
-  const weeklyProducts = homeProducts.filter((product) => product.isBest)
-  const piercingCatalogProducts = homeProducts.filter((product) => (
-    ['piercing', 'barbell', 'labret', 'nose-piercing', 'belly-ring'].includes(product.categoryId)
-  ))
-  const steadySelectionProducts = homeProducts.filter((product) => (
-    product.material.includes('Silver')
-    || product.collectionIds?.includes('minimal-piercing-line')
-    || product.collectionIds?.includes('premium-cubic-line')
-  ))
+  const homeSourceProducts = getHomeSourceProducts({ products, mockProducts, dataMode })
+  const homeProducts = selectAllowedHomeProducts(homeSourceProducts)
+  const newProducts = selectNewArrivalProducts(homeProducts, homeSectionProductLimit['new-arrival'])
+  const weeklyProducts = selectWeeklyBestProducts(homeProducts)
+  const piercingCatalogProducts = selectPiercingCatalogProducts(homeProducts)
+  const steadySelectionProducts = selectSteadySelectionProducts(homeProducts)
   const activeHomeSectionNav = useMemo(() => homeSectionNav.filter((item) => {
     if (item.id === 'new-arrival') return newProducts.length > 0
     if (item.id === 'weekly-pick') return weeklyProducts.length > 0

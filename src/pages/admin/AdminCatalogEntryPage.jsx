@@ -28,6 +28,8 @@ const initialProductForm = {
   moqDefault: '1',
   isVisible: true,
   isExportAvailable: true,
+  isNew: true,
+  isBest: false,
 }
 
 const initialPriceForm = {
@@ -495,6 +497,8 @@ export function AdminCatalogEntryPage() {
     imageAlt: {},
     isVisible: productForm.isVisible,
     isExportAvailable: productForm.isExportAvailable,
+    isNew: productForm.isNew,
+    isBest: productForm.isBest,
     descriptionEn: productForm.description.trim() || undefined,
   })
 
@@ -732,6 +736,8 @@ export function AdminCatalogEntryPage() {
             </label>
             <label className="admin-check"><input checked={productForm.isVisible} onChange={(event) => setProductField('isVisible', event.target.checked)} type="checkbox" /> {t.product.visible}</label>
             <label className="admin-check"><input checked={productForm.isExportAvailable} onChange={(event) => setProductField('isExportAvailable', event.target.checked)} type="checkbox" /> {t.product.active}</label>
+            <label className="admin-check"><input checked={productForm.isNew} onChange={(event) => setProductField('isNew', event.target.checked)} type="checkbox" /> {t.product.newArrival}</label>
+            <label className="admin-check"><input checked={productForm.isBest} onChange={(event) => setProductField('isBest', event.target.checked)} type="checkbox" /> {t.product.weeklyBest}</label>
           </div>
         </section>
 

@@ -1956,6 +1956,20 @@ for (const locale of Object.keys(catalogEntryUnifiedCopy)) {
   Object.assign(entry.errors, extra.imageErrors)
 }
 
+const catalogEntryPlacementCopy = {
+  kr: { newArrival: '신상품 노출', weeklyBest: '주간 추천 표시' },
+  en: { newArrival: 'Show in New Arrivals', weeklyBest: 'Mark as Weekly Best' },
+  jp: { newArrival: '新商品に表示', weeklyBest: '週間おすすめに表示' },
+  cn: { newArrival: '新品區顯示', weeklyBest: '標記為本週推薦' },
+}
+
+for (const locale of Object.keys(catalogEntryPlacementCopy)) {
+  const entry = copy[locale].catalogEntry
+  const placement = catalogEntryPlacementCopy[locale]
+  entry.product.newArrival = placement.newArrival
+  entry.product.weeklyBest = placement.weeklyBest
+}
+
 const catalogEntryMarketPriceCopy = {
   kr: {
     mode: '가격 방식',

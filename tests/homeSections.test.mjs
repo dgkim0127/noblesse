@@ -11,10 +11,14 @@ function readWorkspaceFile(path) {
 
 test('home product sections do not backfill empty merchandising slots with unrelated products', () => {
   const page = readWorkspaceFile('src/pages/HomePage.jsx')
+  const placement = readWorkspaceFile('src/services/homePlacement.js')
 
   assert.doesNotMatch(page, /_fillHomeSectionProducts/)
-  assert.match(page, /const newProducts = homeProducts\.filter\(\(product\) => product\.isNew\)/)
-  assert.match(page, /const weeklyProducts = homeProducts\.filter\(\(product\) => product\.isBest\)/)
+  assert.match(page, /getHomeSourceProducts\(\{ products, mockProducts, dataMode \}\)/)
+  assert.match(page, /const newProducts = selectNewArrivalProducts\(homeProducts, homeSectionProductLimit\['new-arrival'\]\)/)
+  assert.match(page, /const weeklyProducts = selectWeeklyBestProducts\(homeProducts\)/)
+  assert.match(placement, /return dataMode === 'mock' \? mockProducts : \[\]/)
+  assert.match(placement, /filter\(\(product\) => Boolean\(product\.isBest\)\)/)
   assert.match(page, /if \(products\.length === 0 \|\| sectionProducts\.length === 0\) return null/)
 })
 

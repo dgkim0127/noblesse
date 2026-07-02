@@ -810,3 +810,20 @@ Required seed data still needed:
 
 - Decision: PRODUCT_DETAIL_OPERATIONAL
 - Remaining security follow-up: password rotation status remains `pending_after_recovery` until confirmed complete.
+
+## N72 Catalog Home Placement and Product Display
+
+- Date: 2026-07-02 KST
+- Starting commit: `2d3d5fcdcb18e15548d7aecc725fb71ecf560337`
+- Product code: `NB-4WAY-GREEN-CLOVER-BARBELL`
+- Production API state observed: public catalog returns the product as `categoryId=barbell`, `isNew=true`, `isBest=false`, with image references present.
+- Home placement rule: production/API mode does not backfill empty real catalog sections with mock products.
+- New Arrivals rule: latest allowed published products are selected, with explicit `isNew` products sorted first.
+- Piercing rule: piercing category sections include barbell products.
+- Weekly Best rule: product appears only when `isBest=true`; the first product remains absent by default.
+- Buyer Selection / Hero rule: still editorial/static and not auto-filled from the product catalog.
+- Steady Selection rule: selected from silver/steady collection rules; the first barbell product remains absent by default.
+- CN/CNY active market signal: not exposed by the public product API.
+- Local validation: frontend tests, lint, and production build passed; the build emitted only the existing Vite large chunk warning.
+- Dist security scan: no database URL, service credential, or private key patterns found; the only localhost string is a React Router URL construction fallback, not an API endpoint.
+- Direct SQL, DB console edit, Secret/IAM change, FX Job run, Scheduler change, product price mutation, buyer approval change: No.
