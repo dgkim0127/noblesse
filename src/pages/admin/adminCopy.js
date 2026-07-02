@@ -90,6 +90,8 @@ const copy = {
       buyer: {
         pending: '대기',
         approved: '승인',
+        rejected: '반려',
+        suspended: '거래 중지',
         blocked: '차단',
       },
       quote: {
@@ -119,6 +121,7 @@ const copy = {
       note: '거래처 상태 변경은 서버 관리자 작업입니다. 프론트엔드 상태만으로는 관리자 권한이 부여되지 않습니다.',
       searchLabel: '거래처 검색',
       searchPlaceholder: '회사, 담당자, 국가 또는 시장',
+      setStatus: '{status}으로 변경',
       updated: '거래처 상태가 {status}(으)로 변경되었습니다.',
       updateFailed: '거래처 상태를 변경할 수 없습니다.',
       empty: '거래처가 없습니다.',
@@ -422,6 +425,8 @@ copy.en = {
     buyer: {
       pending: 'Pending',
       approved: 'Approved',
+      rejected: 'Rejected',
+      suspended: 'Suspended',
       blocked: 'Blocked',
     },
     quote: {
@@ -451,6 +456,7 @@ copy.en = {
     note: 'Buyer status changes are server-side admin actions. Frontend state does not grant admin access.',
     searchLabel: 'Search buyers',
     searchPlaceholder: 'Company, contact, country, or market',
+    setStatus: 'Set {status}',
     updated: 'Buyer status updated to {status}.',
     updateFailed: 'Unable to update buyer status.',
     empty: 'No buyers found.',
@@ -750,6 +756,8 @@ copy.jp = {
     buyer: {
       pending: '保留',
       approved: '承認済み',
+      rejected: '否認',
+      suspended: '停止',
       blocked: 'ブロック',
     },
     quote: {
@@ -779,6 +787,7 @@ copy.jp = {
     note: '取引先状態の変更はサーバー側の管理操作です。フロントエンド状態だけでは管理権限は付与されません。',
     searchLabel: '取引先検索',
     searchPlaceholder: '会社、担当者、国、または市場',
+    setStatus: '{status}に変更',
     updated: '取引先状態を {status} に変更しました。',
     updateFailed: '取引先状態を変更できません。',
     empty: '取引先がありません。',
@@ -1078,6 +1087,8 @@ copy.cn = {
     buyer: {
       pending: '待审核',
       approved: '已批准',
+      rejected: '已拒绝',
+      suspended: '已暂停',
       blocked: '已停用',
     },
     quote: {
@@ -1107,6 +1118,7 @@ copy.cn = {
     note: '客户状态变更是服务器端管理员操作。前端状态不会授予管理员权限。',
     searchLabel: '搜索客户',
     searchPlaceholder: '公司、联系人、国家或市场',
+    setStatus: '改为{status}',
     updated: '客户状态已更新为 {status}。',
     updateFailed: '无法更新客户状态。',
     empty: '没有客户。',

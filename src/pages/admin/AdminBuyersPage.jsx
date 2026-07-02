@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { useAdminAccess } from '../../components/AdminAccessContext'
-import { adminCurrencyDisplay, getMarketDisplay } from '../../config/currency'
 import { AdminLink, AdminPageHeader, AdminPagination, AdminPreviewNote, AdminStatus } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy, getAdminStatusLabel, useAdminCopy } from './adminCopy'
@@ -15,17 +14,18 @@ function formatDate(value) {
   return new Date(value).toLocaleDateString('ko-KR')
 }
 
-function getBuyerMarketSummary(buyer) {
-  const market = buyer.assignedMarket || adminCurrencyDisplay[buyer.currency]?.market || 'GLOBAL'
-  const currency = buyer.currency || 'USD'
-  const marketMeta = getMarketDisplay(market)
-  const currencySymbol = adminCurrencyDisplay[currency]?.symbol || currency
-  return {
-    country: buyer.country || marketMeta.label,
-    currencySymbol,
-    flagLabel: marketMeta.label,
-    flagSrc: marketMeta.flagSrc,
-  }
+function getBuyerCountry(buyer) {
+  return buyer.country || buyer.assignedMarket || '-'
+}
+
+function getBuyerLoginId(buyer) {
+  return buyer.email?.split('@')?.[0] || buyer.companyName || '-'
+}
+
+function getStatusActionLabel(t, status) {
+  return formatAdminCopy(t.buyers.setStatus || '{status}', {
+    status: getAdminStatusLabel(t, status),
+  })
 }
 
 export function AdminBuyersPage() {
@@ -107,7 +107,7 @@ export function AdminBuyersPage() {
           type="button"
           onClick={() => updateVerificationStatus(buyer.id, nextStatus)}
         >
-          {t.common.set} {getAdminStatusLabel(t, nextStatus)}
+          {getStatusActionLabel(t, nextStatus)}
         </button>)}
       </div>}
       <div className="admin-buyer-status-row">
@@ -121,7 +121,7 @@ export function AdminBuyersPage() {
           type="button"
           onClick={() => updateAccountStatus(buyer.id, nextStatus)}
         >
-          {t.common.set} {getAdminStatusLabel(t, nextStatus)}
+          {getStatusActionLabel(t, nextStatus)}
         </button>)}
       </div>}
       {!canReview && !canSuspend && <p className="admin-permission-note">상태 변경 권한이 필요합니다. 거래처 승인 변경은 buyers.review, 계정 차단/해제는 buyers.suspend 권한이 있어야 합니다.</p>}
@@ -146,27 +146,19 @@ export function AdminBuyersPage() {
     <section className="admin-card">
       {buyers.length > 0 ? <div className="admin-buyer-list">
         {buyers.map((buyer) => {
-          const marketSummary = getBuyerMarketSummary(buyer)
+          const buyerCountry = getBuyerCountry(buyer)
+          const buyerLoginId = getBuyerLoginId(buyer)
           return <article className="admin-buyer-card" key={buyer.id}>
           <div className="admin-buyer-card-main">
-            <span className="admin-market-summary">
-              <span>{marketSummary.country}</span>
-              <img alt={marketSummary.flagLabel} className="admin-market-flag" src={marketSummary.flagSrc} />
-              <strong>{marketSummary.currencySymbol}</strong>
-            </span>
-            <h2>{buyer.companyName || t.buyers.buyerAccount}</h2>
-            <p>{buyer.contactName || '-'}</p>
+            <h2>{buyerLoginId} - {buyer.contactName || '-'}</h2>
+            <p>{buyer.companyName || t.buyers.buyerAccount}</p>
             <p className="admin-buyer-email">{buyer.email || '-'}</p>
             <div className="admin-actions tight">
               <AdminLink to={`/admin/buyers/${buyer.id}`}>{t.common.view}</AdminLink>
             </div>
           </div>
           <dl className="admin-buyer-meta">
-            <dt>거래 기준</dt><dd><span className="admin-market-summary compact">
-              <span>{marketSummary.country}</span>
-              <img alt={marketSummary.flagLabel} className="admin-market-flag" src={marketSummary.flagSrc} />
-              <strong>{marketSummary.currencySymbol}</strong>
-            </span></dd>
+            <dt>국가</dt><dd><span className="admin-buyer-country">{buyerCountry}</span></dd>
             <dt>{t.buyers.waitingDays || '대기일'}</dt><dd>{buyer.waitingDays ?? '-'}</dd>
             <dt>{t.buyers.inquiryCount || '문의'}</dt><dd>{buyer.inquiryCount ?? 0}</dd>
             <dt>{t.common.createdAt}</dt><dd>{formatDate(buyer.createdAt)}</dd>

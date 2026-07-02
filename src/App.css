@@ -942,6 +942,11 @@ h6 {
   overflow-wrap: anywhere;
 }
 
+.admin-buyer-country {
+  color: var(--navy);
+  font-weight: 900;
+}
+
 .admin-market-summary {
   align-items: center;
   background: rgba(255, 143, 169, 0.14);
