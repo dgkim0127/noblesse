@@ -47,7 +47,7 @@ function getBuyerAccountLabel(t, buyer) {
 
 export function AdminBuyersPage() {
   const t = useAdminCopy()
-  const { hasPermission } = useAdminAccess()
+  const { admin, hasPermission } = useAdminAccess()
   const [filter, setFilter] = useState('all')
   const [query, setQuery] = useState('')
   const [offset, setOffset] = useState(0)
@@ -106,11 +106,35 @@ export function AdminBuyersPage() {
     }
   }
 
+  const promoteBuyerToOperator = async (buyer) => {
+    if (!buyer.email) {
+      setMessage('운영자로 지정하려면 거래처 이메일이 필요합니다.')
+      return
+    }
+    const label = `${getBuyerLoginId(buyer)} - ${buyer.contactName || buyer.companyName || buyer.email}`
+    if (!window.confirm(`${label} 계정을 운영자로 지정할까요? 운영자는 관리자 화면에 접근할 수 있습니다.`)) return
+    setSavingAction(`${buyer.id}:promote-operator`)
+    setMessage('')
+    try {
+      await mutate((api, token) => api.promoteUserToAdmin({
+        email: buyer.email,
+        adminRole: 'operator',
+      }, token))
+      setMessage('운영자로 지정했습니다. 운영자 권한은 관리자 화면의 운영자 메뉴에서 확인할 수 있습니다.')
+      setRefreshKey((current) => current + 1)
+    } catch (error) {
+      setMessage(error?.message || '운영자로 지정할 수 없습니다.')
+    } finally {
+      setSavingAction('')
+    }
+  }
+
   const renderStatusActions = (buyer) => {
     const currentVerification = buyer.verificationStatus || buyer.status
     const currentAccount = buyer.accountStatus || 'active'
     const canReview = hasPermission('buyers.review')
     const canSuspend = hasPermission('buyers.suspend')
+    const canPromoteOperator = admin?.adminRole === 'owner' && hasPermission('admins.manage')
 
     return <div className="admin-buyer-status-panel">
       <div className="admin-buyer-status-row">
@@ -141,7 +165,16 @@ export function AdminBuyersPage() {
           {getStatusActionLabel(t, nextStatus)}
         </button>)}
       </div>}
-      {!canReview && !canSuspend && <p className="admin-permission-note">상태 변경 권한이 필요합니다. 거래처 승인 변경은 buyers.review, 계정 차단/해제는 buyers.suspend 권한이 있어야 합니다.</p>}
+      {canPromoteOperator && <div className="admin-actions tight">
+        <button
+          disabled={savingAction === `${buyer.id}:promote-operator`}
+          type="button"
+          onClick={() => promoteBuyerToOperator(buyer)}
+        >
+          운영자로 지정
+        </button>
+      </div>}
+      {!canReview && !canSuspend && !canPromoteOperator && <p className="admin-permission-note">상태 변경 또는 운영자 지정 권한이 필요합니다. 거래처 승인 변경은 buyers.review, 계정 차단/해제는 buyers.suspend, 운영자 지정은 admins.manage 권한이 있어야 합니다.</p>}
     </div>
   }
 

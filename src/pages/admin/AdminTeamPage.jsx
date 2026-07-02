@@ -14,6 +14,7 @@ export function AdminTeamPage() {
   const [editingUserId, setEditingUserId] = useState('')
   const [editingMode, setEditingMode] = useState('')
   const [draft, setDraft] = useState({ adminRole: 'operator', permissionKey: 'buyers.read', effect: 'allow', reason: '', expiresAt: '' })
+  const [promoteDraft, setPromoteDraft] = useState({ email: '', adminRole: 'operator' })
   const [message, setMessage] = useState('')
   const { data, error, status } = useAdminApiResource((api, token) => api.getAdmins(token), [refreshKey])
   const mutate = useAdminApiMutation()
@@ -114,9 +115,51 @@ export function AdminTeamPage() {
     }
   }
 
+  const promoteUserToAdmin = async () => {
+    const email = promoteDraft.email.trim()
+    if (!email) {
+      setMessage(copy.promoteEmailRequired || 'Email is required.')
+      return
+    }
+    if (!window.confirm(copy.promoteConfirm || 'Assign this user as an operator?')) return
+    setMessage('')
+    try {
+      await mutate((api, token) => api.promoteUserToAdmin({
+        email,
+        adminRole: promoteDraft.adminRole,
+      }, token))
+      setMessage(copy.promoteSaved || 'User was assigned as an admin operator.')
+      setPromoteDraft({ email: '', adminRole: 'operator' })
+      setRefreshKey((current) => current + 1)
+    } catch (error) {
+      setMessage(error?.message || copy.saveFailed || 'Unable to assign operator access.')
+    }
+  }
+
   return <section className="admin-stack">
     <AdminPageHeader eyebrow={copy.eyebrow} title={copy.title} description={copy.body} />
     {message && <p className="admin-inline-message">{message}</p>}
+    {canManage && <section className="admin-card">
+      <h2>{copy.promoteTitle || 'Assign operator'}</h2>
+      <p className="admin-muted">{copy.promoteDescription || 'Owner admins can assign an existing user or buyer account to the internal operator team.'}</p>
+      <div className="admin-edit-panel">
+        <label>{copy.email}
+          <input
+            value={promoteDraft.email}
+            onChange={(event) => setPromoteDraft((current) => ({ ...current, email: event.target.value }))}
+            placeholder="buyer@example.com"
+            type="email"
+          />
+        </label>
+        <label>{copy.role}
+          <select value={promoteDraft.adminRole} onChange={(event) => setPromoteDraft((current) => ({ ...current, adminRole: event.target.value }))}>
+            <option value="operator">{t.shell.roles?.operator || 'Operator'}</option>
+            <option value="manager">{t.shell.roles?.manager || 'Manager'}</option>
+          </select>
+        </label>
+        <button disabled={!promoteDraft.email.trim()} type="button" onClick={promoteUserToAdmin}>{copy.promoteAction || 'Assign operator'}</button>
+      </div>
+    </section>}
     <section className="admin-card">
       {admins.length === 0
         ? <p>{copy.empty}</p>

@@ -425,6 +425,9 @@ test("governance writes require owner role even when admins.manage is present", 
       async updateAdminRole() {
         throw new Error("query should not be called");
       },
+      async promoteUserToAdmin() {
+        throw new Error("query should not be called");
+      },
       async upsertPermissionOverride() {
         throw new Error("query should not be called");
       }
@@ -442,6 +445,10 @@ test("governance writes require owner role even when admins.manage is present", 
     /Owner admin access required/
   );
   await assert.rejects(
+    () => service.promoteUserToAdmin({ email: "buyer@example.test", adminRole: "operator" }, managerWithForgedPermission),
+    /Owner admin access required/
+  );
+  await assert.rejects(
     () => service.upsertPermissionOverride(
       userId,
       "admins.read",
@@ -449,6 +456,44 @@ test("governance writes require owner role even when admins.manage is present", 
       managerWithForgedPermission
     ),
     /Owner admin access required/
+  );
+});
+
+test("owner can promote an existing buyer account to operator or manager only", async () => {
+  let captured = null;
+  const service = createAdminAccessService({
+    queries: {
+      async promoteUserToAdmin(input, adminViewer) {
+        captured = { input, adminViewer };
+        return {
+          userId: "buyer-user-1",
+          email: input.email,
+          role: "admin",
+          status: "approved",
+          accountStatus: "active",
+          adminRole: input.adminRole,
+          permissions: []
+        };
+      }
+    }
+  });
+  const adminViewer = { userId: "owner-1", adminRole: "owner", permissions: ["admins.manage"] };
+
+  const result = await service.promoteUserToAdmin({
+    email: " Buyer@Example.Test ",
+    adminRole: "operator"
+  }, adminViewer);
+
+  assert.equal(captured.input.email, "buyer@example.test");
+  assert.equal(captured.input.adminRole, "operator");
+  assert.equal(result.admin.role, "admin");
+  await assert.rejects(
+    () => service.promoteUserToAdmin({ email: "buyer@example.test", adminRole: "owner" }, adminViewer),
+    /role editor/
+  );
+  await assert.rejects(
+    () => service.promoteUserToAdmin({ email: "not-an-email", adminRole: "operator" }, adminViewer),
+    /Invalid email/
   );
 });
 
@@ -460,6 +505,9 @@ test("admin access query SQL uses existing audit target columns", () => {
   assert.doesNotMatch(source, /entity_type/);
   assert.doesNotMatch(source, /entity_id/);
   assert.match(source, /admin\.permission_override\.upsert/);
+  assert.match(source, /admin\.user\.promote/);
+  assert.match(source, /insert into public\.admin_profiles \(user_id, admin_role\)/);
+  assert.match(source, /set role = 'admin'/);
   assert.match(source, /on conflict \(user_id, permission_key\)/);
   assert.match(source, /changedFields/);
 });

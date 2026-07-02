@@ -9,6 +9,22 @@ function parseAdminRole(value) {
   return value;
 }
 
+function parsePromotedAdminRole(value = "operator") {
+  const adminRole = parseAdminRole(value);
+  if (!["operator", "manager"].includes(adminRole)) {
+    throw validationError("Use the admin team role editor to assign owner access");
+  }
+  return adminRole;
+}
+
+function parseEmail(value) {
+  const email = parseRequiredString(value, { fieldName: "email", maxLength: 320 }).toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw validationError("Invalid email");
+  }
+  return email;
+}
+
 function parseOverride(input = {}) {
   const safe = rejectUnknownFields(input, ["permissionKey", "effect", "reason", "expiresAt"]);
   if (!PERMISSIONS.includes(safe.permissionKey)) {
@@ -84,6 +100,17 @@ export function createAdminAccessService({ queries }) {
       if (!result) throw notFound("Admin user not found");
       if (result.lastOwner) throw conflict("At least one owner admin is required");
       return result;
+    },
+
+    async promoteUserToAdmin(body = {}, adminViewer) {
+      assertOwnerGovernance(adminViewer);
+      const safe = rejectUnknownFields(body, ["email", "adminRole"]);
+      const email = parseEmail(safe.email);
+      const adminRole = parsePromotedAdminRole(safe.adminRole || "operator");
+      const result = await queries.promoteUserToAdmin({ email, adminRole }, adminViewer);
+      if (!result) throw notFound("User not found");
+      if (result.ownerProtected) throw conflict("Owner admin cannot be changed by this action");
+      return { admin: result };
     },
 
     async replacePermissionOverrides(userId, body = {}, adminViewer) {

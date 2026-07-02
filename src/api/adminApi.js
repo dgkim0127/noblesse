@@ -283,6 +283,14 @@ export function createAdminApi(apiClient) {
       }))
     },
 
+    async promoteUserToAdmin(input = {}, token) {
+      return unwrap(await apiClient.apiFetch('/admin/admins/promote', {
+        method: 'POST',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
     async replacePermissionOverrides(userId, overrides = [], token) {
       return unwrap(await apiClient.apiFetch(`/admin/admins/${encodeURIComponent(userId)}/permission-overrides`, {
         method: 'PUT',

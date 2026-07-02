@@ -33,6 +33,7 @@ test('admin api exposes access, buyer lifecycle, team, and audit methods', () =>
     'updateBuyerAccountStatus',
     'getAdmins',
     'updateAdminRole',
+    'promoteUserToAdmin',
     'replacePermissionOverrides',
     'upsertPermissionOverride',
     'deletePermissionOverride',
@@ -87,6 +88,8 @@ test('admin team page protects owner-only role and override controls', () => {
   assert.match(page, /startRoleEdit\(row\)/)
   assert.match(page, /startOverrideEdit\(row/)
   assert.match(page, /window\.confirm/)
+  assert.match(page, /promoteUserToAdmin/)
+  assert.match(page, /promoteDraft/)
   assert.match(page, /upsertPermissionOverride/)
   assert.doesNotMatch(page, /replacePermissionOverrides\(userId, \[\{/)
   assert.match(api, /\/permission-overrides\/\$\{encodeURIComponent\(permissionKey\)\}/)
@@ -119,6 +122,9 @@ test('admin buyer pages separate account and verification status', () => {
   assert.match(buyersPage, /updateBuyerAccountStatus/)
   assert.match(buyersPage, /hasPermission\('buyers\.review'\)/)
   assert.match(buyersPage, /hasPermission\('buyers\.suspend'\)/)
+  assert.match(buyersPage, /hasPermission\('admins\.manage'\)/)
+  assert.match(buyersPage, /promoteBuyerToOperator/)
+  assert.match(buyersPage, /promoteUserToAdmin/)
   assert.match(detailPage, /verificationStatus/)
   assert.match(detailPage, /accountStatus/)
   assert.match(detailPage, /buyers\.sensitive\.read/)

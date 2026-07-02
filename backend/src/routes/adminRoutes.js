@@ -50,6 +50,16 @@ export function createAdminRoutes({
     })
   );
 
+  router.post(
+    "/admins/promote",
+    requireAdmin,
+    can("admins.manage"),
+    asyncRoute(async (req, res) => {
+      const data = await services.access.promoteUserToAdmin(req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
   router.patch(
     "/admins/:userId/role",
     requireAdmin,

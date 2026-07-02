@@ -291,6 +291,88 @@ export function createAdminAccessQueries(pool) {
       }
     },
 
+    async promoteUserToAdmin({ email, adminRole }, adminViewer) {
+      const client = await pool.connect();
+      try {
+        await client.query("begin");
+        const currentUser = await client.query(
+          `
+            select id as user_id, email, role, status, coalesce(account_status, 'active') as account_status, created_at, updated_at
+            from public.users
+            where lower(email) = lower($1)
+            for update
+          `,
+          [email]
+        );
+        if (!currentUser.rowCount) {
+          await client.query("rollback");
+          return null;
+        }
+        const user = currentUser.rows[0];
+        const currentProfile = await client.query(
+          "select admin_role from public.admin_profiles where user_id = $1 for update",
+          [user.user_id]
+        );
+        if (currentProfile.rows[0]?.admin_role === "owner") {
+          await client.query("rollback");
+          return { ownerProtected: true };
+        }
+        const updatedUser = await client.query(
+          `
+            update public.users
+            set role = 'admin',
+                status = 'approved',
+                account_status = 'active',
+                updated_at = now()
+            where id = $1
+            returning id as user_id, email, role, status, coalesce(account_status, 'active') as account_status, created_at, updated_at
+          `,
+          [user.user_id]
+        );
+        const updatedProfile = await client.query(
+          `
+            insert into public.admin_profiles (user_id, admin_role)
+            values ($1, $2)
+            on conflict (user_id)
+            do update set admin_role = excluded.admin_role, updated_at = now()
+            returning user_id, admin_role
+          `,
+          [user.user_id, adminRole]
+        );
+        await client.query(
+          `
+            insert into public.audit_logs (
+              actor_user_id, actor_role, action, target_table, target_id,
+              before_snapshot, after_snapshot, request_id
+            )
+            values ($1, 'admin', 'admin.user.promote', 'users', $2, $3::jsonb, $4::jsonb, $5)
+          `,
+          [
+            adminViewer.userId,
+            user.user_id,
+            {
+              role: user.role,
+              status: user.status,
+              accountStatus: user.account_status,
+              adminRole: currentProfile.rows[0]?.admin_role || null
+            },
+            { role: "admin", status: "approved", accountStatus: "active", adminRole },
+            adminViewer.requestId
+          ]
+        );
+        await client.query("commit");
+        return mapAdmin({
+          ...updatedUser.rows[0],
+          admin_role: updatedProfile.rows[0].admin_role
+        });
+      } catch (error) {
+        await client.query("rollback");
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+
     async replacePermissionOverrides(userId, overrides, adminViewer) {
       const client = await pool.connect();
       try {

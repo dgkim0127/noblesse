@@ -231,6 +231,25 @@ test('admin product visibility update uses PATCH and isVisible body only', async
   assert.equal(result.data.auditLogId, 'audit-1')
 })
 
+test('admin owner promotion posts email and admin role to governance route', async () => {
+  const { calls, client } = createMockApiClient({ data: { admin: { email: 'buyer@example.test', adminRole: 'operator' } } })
+  const adminApi = createAdminApi(client)
+
+  const result = await adminApi.promoteUserToAdmin({
+    email: 'buyer@example.test',
+    adminRole: 'operator',
+  }, 'admin-token')
+
+  assert.equal(calls[0].path, '/admin/admins/promote')
+  assert.equal(calls[0].options.method, 'POST')
+  assert.equal(calls[0].options.token, 'admin-token')
+  assert.deepEqual(calls[0].options.body, {
+    email: 'buyer@example.test',
+    adminRole: 'operator',
+  })
+  assert.equal(result.data.admin.adminRole, 'operator')
+})
+
 test('admin product and category writes call protected admin routes', async () => {
   const { calls, client } = createMockApiClient({ data: { auditLogId: 'audit-1' } })
   const adminApi = createAdminApi(client)
