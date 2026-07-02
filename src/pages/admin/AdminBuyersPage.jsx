@@ -22,6 +22,12 @@ function getBuyerLoginId(buyer) {
   return buyer.email?.split('@')?.[0] || buyer.companyName || '-'
 }
 
+function getBuyerTitle(buyer) {
+  const name = buyer.contactName || '-'
+  const company = buyer.companyName || '-'
+  return `${company} - ${name}`
+}
+
 function getStatusActionLabel(t, status) {
   if (t.buyers.statusActions?.[status]) {
     return t.buyers.statusActions[status]
@@ -39,10 +45,13 @@ function formatDiscountRate(value) {
 
 function getBuyerAccountLabel(t, buyer) {
   const status = buyer.accountStatus || 'active'
+  const label = getAdminStatusLabel(t, status)
   if (status === 'active') {
-    return `${getAdminStatusLabel(t, status)} (DC ${formatDiscountRate(buyer.discountRate)}%)`
+    const discountRate = Number(buyer.discountRate || 0)
+    if (!Number.isFinite(discountRate) || discountRate <= 0) return label
+    return `${label} (DC ${formatDiscountRate(discountRate)}%)`
   }
-  return getAdminStatusLabel(t, status)
+  return label
 }
 
 function getFilterCount(meta, tab) {
@@ -115,11 +124,11 @@ export function AdminBuyersPage() {
 
   const promoteBuyerToOperator = async (buyer) => {
     if (!buyer.email) {
-      setMessage('운영자로 지정하려면 거래처 이메일이 필요합니다.')
+      setMessage(t.buyers.promoteNeedsEmail || '운영자로 지정하려면 회원 이메일이 필요합니다.')
       return
     }
-    const label = `${getBuyerLoginId(buyer)} - ${buyer.contactName || buyer.companyName || buyer.email}`
-    if (!window.confirm(`${label} 계정을 운영자로 지정할까요? 운영자는 관리자 화면에 접근할 수 있습니다.`)) return
+    const label = getBuyerTitle(buyer)
+    if (!window.confirm(formatAdminCopy(t.buyers.promoteConfirm || '{buyer} 회원을 운영자로 지정할까요?', { buyer: label }))) return
     setSavingAction(`${buyer.id}:promote-operator`)
     setMessage('')
     try {
@@ -127,10 +136,10 @@ export function AdminBuyersPage() {
         email: buyer.email,
         adminRole: 'operator',
       }, token))
-      setMessage('운영자로 지정했습니다. 운영자 권한은 관리자 화면의 운영자 메뉴에서 확인할 수 있습니다.')
+      setMessage(t.buyers.promoteSuccess || '운영자로 지정했습니다. 운영자 권한은 회원 > 운영 메뉴에서 확인할 수 있습니다.')
       setRefreshKey((current) => current + 1)
     } catch (error) {
-      setMessage(error?.message || '운영자로 지정할 수 없습니다.')
+      setMessage(error?.message || t.buyers.promoteFailed || '운영자로 지정할 수 없습니다.')
     } finally {
       setSavingAction('')
     }
@@ -178,10 +187,10 @@ export function AdminBuyersPage() {
           type="button"
           onClick={() => promoteBuyerToOperator(buyer)}
         >
-          운영자로 지정
+          {t.buyers.promoteOperator || '운영자로 지정'}
         </button>
       </div>}
-      {!canReview && !canSuspend && !canPromoteOperator && <p className="admin-permission-note">상태 변경 또는 운영자 지정 권한이 필요합니다. 거래처 승인 변경은 buyers.review, 계정 차단/해제는 buyers.suspend, 운영자 지정은 admins.manage 권한이 있어야 합니다.</p>}
+      {!canPromoteOperator && <p className="admin-permission-note">{t.buyers.promotePermissionNote || '운영자 지정은 최고 관리자 권한이 필요합니다.'}</p>}
     </div>
   }
 
@@ -213,8 +222,8 @@ export function AdminBuyersPage() {
           const buyerLoginId = getBuyerLoginId(buyer)
           return <article className="admin-buyer-card" key={buyer.id}>
           <div className="admin-buyer-card-main">
-            <h2>{buyerLoginId} - {buyer.contactName || '-'}</h2>
-            <p>{buyer.companyName || t.buyers.buyerAccount}</p>
+            <h2>{getBuyerTitle(buyer)}</h2>
+            <p>{formatAdminCopy(t.buyers.loginIdLine || '아이디 {loginId}', { loginId: buyerLoginId })}</p>
             <p className="admin-buyer-email">{buyer.email || '-'}</p>
             <div className="admin-actions tight">
               <AdminLink to={`/admin/buyers/${buyer.id}`}>{t.common.view}</AdminLink>

@@ -27,9 +27,15 @@ const adminNavGroups = [
   {
     key: 'operations',
     items: [
-      { key: 'buyers', path: '/admin/buyers', icon: Handshake, permission: 'buyers.read' },
       { key: 'inquiries', path: '/admin/inquiries', icon: FileText, permission: 'inquiries.read' },
       { key: 'quotes', path: '/admin/quotes', icon: ClipboardList, permission: 'quotes.read' },
+    ],
+  },
+  {
+    key: 'members',
+    items: [
+      { key: 'team', path: '/admin/team', icon: UsersRound, permission: 'admins.read' },
+      { key: 'buyers', path: '/admin/buyers', icon: Handshake, permission: 'buyers.read' },
     ],
   },
   {
@@ -49,7 +55,6 @@ const adminNavGroups = [
   {
     key: 'governance',
     items: [
-      { key: 'team', path: '/admin/team', icon: UsersRound, permission: 'admins.read' },
       { key: 'audit', path: '/admin/audit', icon: ShieldCheck, permission: 'audit.read' },
     ],
   },
@@ -58,6 +63,7 @@ const adminNavGroups = [
 const fallbackGroups = {
   overview: 'Overview',
   operations: 'Operations',
+  members: 'Members',
   catalog: 'Catalog',
   insights: 'Insights',
   governance: 'Governance',
@@ -91,7 +97,7 @@ export function AdminShell() {
             <p>{t.shell.groups?.[group.key] || fallbackGroups[group.key]}</p>
             {visibleItems.map(({ end, icon: Icon, key, path }) => <NavLink end={end} key={path} to={toLocalePath(path)}>
               <Icon size={17} />
-              <span>{t.shell.nav[key]}</span>
+              <span>{t.shell.nav[key] || key}</span>
             </NavLink>)}
           </div>
         })}

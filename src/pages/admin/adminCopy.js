@@ -2130,6 +2130,67 @@ for (const locale of Object.keys(adminAccessConsoleCopy)) {
   copy[locale].audit = adminAccessConsoleCopy[locale].audit
 }
 
+const adminMemberManagementCopy = {
+  kr: {
+    groups: { members: '회원' },
+    nav: { team: '운영', buyers: '거래처' },
+    buyers: {
+      loginIdLine: '아이디 {loginId}',
+      promoteOperator: '운영자로 지정',
+      promoteNeedsEmail: '운영자로 지정하려면 회원 이메일이 필요합니다.',
+      promoteConfirm: '{buyer} 회원을 운영자로 지정할까요?',
+      promoteSuccess: '운영자로 지정했습니다. 회원 > 운영 메뉴에서 확인할 수 있습니다.',
+      promoteFailed: '운영자로 지정할 수 없습니다.',
+      promotePermissionNote: '운영자 지정은 최고 관리자 권한이 필요합니다.',
+    },
+  },
+  en: {
+    groups: { members: 'Members' },
+    nav: { team: 'Operators', buyers: 'Buyers' },
+    buyers: {
+      loginIdLine: 'ID {loginId}',
+      promoteOperator: 'Assign operator',
+      promoteNeedsEmail: 'A member email is required to assign an operator.',
+      promoteConfirm: 'Assign {buyer} as an operator?',
+      promoteSuccess: 'Assigned as an operator. Review it under Members > Operators.',
+      promoteFailed: 'Unable to assign operator.',
+      promotePermissionNote: 'Only the owner administrator can assign operators.',
+    },
+  },
+  jp: {
+    groups: { members: '会員' },
+    nav: { team: '運営', buyers: '取引先' },
+    buyers: {
+      loginIdLine: 'ID {loginId}',
+      promoteOperator: '運営者に指定',
+      promoteNeedsEmail: '運営者に指定するには会員メールが必要です。',
+      promoteConfirm: '{buyer} を運営者に指定しますか？',
+      promoteSuccess: '運営者に指定しました。会員 > 運営で確認できます。',
+      promoteFailed: '運営者に指定できません。',
+      promotePermissionNote: '運営者の指定には最高管理者権限が必要です。',
+    },
+  },
+  cn: {
+    groups: { members: '会员' },
+    nav: { team: '运营', buyers: '客户' },
+    buyers: {
+      loginIdLine: 'ID {loginId}',
+      promoteOperator: '设为运营',
+      promoteNeedsEmail: '设为运营需要会员邮箱。',
+      promoteConfirm: '要将 {buyer} 设为运营吗？',
+      promoteSuccess: '已设为运营。可在会员 > 运营中确认。',
+      promoteFailed: '无法设为运营。',
+      promotePermissionNote: '只有最高管理员可以指定运营。',
+    },
+  },
+}
+
+for (const locale of Object.keys(adminMemberManagementCopy)) {
+  Object.assign(copy[locale].shell.groups, adminMemberManagementCopy[locale].groups)
+  Object.assign(copy[locale].shell.nav, adminMemberManagementCopy[locale].nav)
+  Object.assign(copy[locale].buyers, adminMemberManagementCopy[locale].buyers)
+}
+
 const adminFxAutoCopy = {
   kr: {
     nav: '자동 환율 가격',

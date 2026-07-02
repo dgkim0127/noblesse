@@ -9,9 +9,11 @@ test('admin shell groups navigation and hides links by permission', () => {
 
   assert.match(shell, /adminNavGroups/)
   assert.match(shell, /operations/)
+  assert.match(shell, /members/)
   assert.match(shell, /governance/)
   assert.match(shell, /hasPermission\(item\.permission\)/)
   assert.match(shell, /\/admin\/team/)
+  assert.match(shell, /\/admin\/buyers/)
   assert.match(shell, /\/admin\/audit/)
 })
 
@@ -51,6 +53,9 @@ test('admin access copy covers every locale', () => {
     assert.match(copy, new RegExp(`${locale}: \\{[\\s\\S]*team:`))
     assert.match(copy, new RegExp(`${locale}: \\{[\\s\\S]*audit:`))
   }
+  assert.match(copy, /adminMemberManagementCopy/)
+  assert.match(copy, /members: 'Members'/)
+  assert.match(copy, /members: '회원'/)
 })
 
 test('admin dashboard renders RBAC lifecycle summary sections', () => {
@@ -116,10 +121,12 @@ test('admin buyer pages separate account and verification status', () => {
   assert.match(buyersPage, /admin-buyer-card/)
   assert.match(buyersPage, /getBuyerCountry/)
   assert.match(buyersPage, /getBuyerLoginId/)
+  assert.match(buyersPage, /getBuyerTitle/)
   assert.match(buyersPage, /admin-buyer-country/)
   assert.match(buyersPage, /admin-permission-note/)
   assert.match(buyersPage, /statusCounts/)
   assert.match(buyersPage, /admin-filter-count/)
+  assert.match(buyersPage, /discountRate <= 0/)
   assert.match(buyersPage, /updateBuyerVerification/)
   assert.match(buyersPage, /updateBuyerAccountStatus/)
   assert.match(buyersPage, /hasPermission\('buyers\.review'\)/)
