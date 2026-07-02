@@ -31,6 +31,20 @@ function getStatusActionLabel(t, status) {
   })
 }
 
+function formatDiscountRate(value) {
+  const number = Number(value || 0)
+  if (!Number.isFinite(number)) return '0'
+  return String(Math.round(number * 100) / 100)
+}
+
+function getBuyerAccountLabel(t, buyer) {
+  const status = buyer.accountStatus || 'active'
+  if (status === 'active') {
+    return `${getAdminStatusLabel(t, status)} (DC ${formatDiscountRate(buyer.discountRate)}%)`
+  }
+  return getAdminStatusLabel(t, status)
+}
+
 export function AdminBuyersPage() {
   const t = useAdminCopy()
   const { hasPermission } = useAdminAccess()
@@ -115,7 +129,7 @@ export function AdminBuyersPage() {
       </div>}
       <div className="admin-buyer-status-row">
         <span>{t.buyers.loginStatus || t.buyers.accountStatus || '로그인'}</span>
-        <AdminStatus status={currentAccount} />
+        <span className={`admin-status ${currentAccount}`}>{getBuyerAccountLabel(t, buyer)}</span>
       </div>
       {canSuspend && <div className="admin-actions tight">
         {accountStatuses.filter((item) => item !== currentAccount).map((nextStatus) => <button
@@ -141,7 +155,7 @@ export function AdminBuyersPage() {
     <div className="admin-toolbar">
       <label className="admin-search">{t.buyers.searchLabel}<input value={query} onChange={(event) => resetPage(setQuery)(event.target.value)} placeholder={t.buyers.searchPlaceholder} /></label>
       <div className="admin-filter-tabs">
-        {filterTabs.map((tab) => <button className={filter === tab ? 'active' : ''} key={tab} type="button" onClick={() => resetPage(setFilter)(tab)}>{tab === 'all' ? t.common.all : getAdminStatusLabel(t, tab)}</button>)}
+        {filterTabs.map((tab) => <button aria-pressed={filter === tab} className={filter === tab ? 'active' : ''} key={tab} type="button" onClick={() => resetPage(setFilter)(tab)}>{tab === 'all' ? t.common.all : getAdminStatusLabel(t, tab)}</button>)}
       </div>
     </div>
     {message && <p className="admin-inline-message">{message}</p>}
