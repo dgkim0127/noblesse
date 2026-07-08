@@ -66,7 +66,7 @@ test('taxonomy breadcrumbs preserve entry basis while extra filters become chips
   const chips = getAppliedTaxonomyChips(filters, 'kr')
 
   assert.equal(breadcrumbs[1].label, '나비 아이템')
-  assert.match(title, /써지컬 스틸/)
+  assert.match(title, /볼 피어싱/)
   assert.ok(chips.some((chip) => chip.key === 'baseMaterial' && chip.value === 'surgical'))
 })
 

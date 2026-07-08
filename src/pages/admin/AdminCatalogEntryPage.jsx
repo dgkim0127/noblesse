@@ -24,6 +24,7 @@ const initialCategoryForm = {
 const initialProductForm = {
   code: '',
   nameEn: '',
+  nameKo: '',
   description: '',
   material: '',
   colorsText: '',
@@ -51,14 +52,32 @@ const initialTaxonomyForm = {
 const initialSpecForm = {
   gauge: '',
   length: '',
+  barLength: '',
+  postLength: '',
   ballSize: '',
+  charmSize: '',
+  totalLength: '',
+  innerDiameter: '',
   barThickness: '',
   unit: 'mm',
+  specNote: '',
+  decorationType: '',
+  decorationColor: '',
+  decorationSize: '',
+  decorationCount: '',
+  settingMethod: '',
+  decorationNote: '',
 }
 
 const initialDetailForm = {
   headline: '',
   body: '',
+  description: '',
+  materialInfo: '',
+  sizeGuide: '',
+  careGuide: '',
+  exchangeNotice: '',
+  wholesaleNotice: '',
   care: '',
   fit: '',
   decoration: '',
@@ -183,6 +202,15 @@ function parseDelimitedList(value) {
     .split(/[,/\n]/)
     .map((item) => item.trim())
     .filter(Boolean)
+}
+
+const positiveSpecFields = new Set(['length', 'barLength', 'postLength', 'ballSize', 'charmSize', 'totalLength', 'innerDiameter', 'barThickness', 'decorationSize'])
+
+function isOptionalPositiveNumber(value) {
+  const text = String(value || '').trim()
+  if (!text) return true
+  const number = Number(text)
+  return Number.isFinite(number) && number > 0
 }
 
 function compactObject(input) {
@@ -324,6 +352,7 @@ export function AdminCatalogEntryPage() {
     images.length ||
     productForm.code ||
     productForm.nameEn ||
+    productForm.nameKo ||
     productForm.description ||
     productForm.colorsText ||
     productForm.sizesText ||
@@ -424,7 +453,11 @@ export function AdminCatalogEntryPage() {
     else if (productCode.length > 80) errors.code = t.validation.productCodeInvalid
     else if (!isValidProductCode(productCode)) errors.code = t.validation.productCodeInvalid
     if (!productForm.nameEn.trim()) errors.productName = t.validation.productNameRequired
+    if (productForm.isVisible && !productForm.nameKo.trim()) errors.productNameKo = t.validation.productNameKoRequired
     if (Number(productForm.moqDefault || 0) < 1) errors.moqDefault = t.validation.moqRequired
+    for (const field of positiveSpecFields) {
+      if (!isOptionalPositiveNumber(specForm[field])) errors[field] = t.validation.specPositiveInvalid
+    }
     if (homePlacementForm.sortPriority && !Number.isInteger(Number(homePlacementForm.sortPriority))) errors.sortPriority = t.validation.sortPriorityInvalid
     return errors
   }
@@ -566,6 +599,7 @@ export function AdminCatalogEntryPage() {
   const createProductPayload = (categoryKey) => ({
     code: productCode,
     nameEn: productForm.nameEn.trim(),
+    nameKo: productForm.nameKo.trim() || undefined,
     categoryKey,
     material: productForm.material.trim() || undefined,
     moqDefault: Number(productForm.moqDefault || 1),
@@ -589,6 +623,7 @@ export function AdminCatalogEntryPage() {
     isNew: productForm.isNew,
     isBest: productForm.isBest,
     descriptionEn: productForm.description.trim() || undefined,
+    descriptionKo: detailForm.description.trim() || productForm.description.trim() || undefined,
   })
 
   const createPricePayload = () => ({
@@ -641,7 +676,7 @@ export function AdminCatalogEntryPage() {
     if (!productId) {
       throw Object.assign(new Error(t.validation.imageUploadNeedsProduct), { field: 'images' })
     }
-    const formData = buildImagesFormData(images, productForm.nameEn.trim())
+    const formData = buildImagesFormData(images, productForm.nameKo.trim() || productForm.nameEn.trim())
     const result = await mutate((api, token) => api.uploadProductImages(productId, formData, token))
     setUploadedImages(result.data?.images || [])
     if (result.data?.product) setCreatedProduct(result.data.product)
@@ -679,7 +714,7 @@ export function AdminCatalogEntryPage() {
         activeResource = 'product'
         updateSaveStatus('product', 'saving')
         const productResult = await mutate((api, token) => api.createProduct(createProductPayload(categoryKey), token))
-        product = productResult.data?.product || { code: productCode, nameEn: productForm.nameEn.trim() }
+        product = productResult.data?.product || { code: productCode, nameEn: productForm.nameEn.trim(), nameKo: productForm.nameKo.trim() }
         setCreatedProduct(product)
         updateSaveStatus('product', 'success')
       }
@@ -774,6 +809,16 @@ export function AdminCatalogEntryPage() {
       >{getTaxonomyLabel(key, value, locale)}</button>)}
     </div>
   </div>
+  const editorProgressItems = [
+    t.progress.category,
+    t.progress.product,
+    t.progress.classification,
+    t.progress.specs,
+    t.progress.detail,
+    t.progress.images,
+    t.progress.price,
+    t.progress.placement,
+  ]
 
   return <>
     <AdminPageHeader
@@ -782,6 +827,13 @@ export function AdminCatalogEntryPage() {
       actions={<><AdminLink to="/admin/products">{t.productList}</AdminLink></>}
     />
     <AdminPreviewNote>{t.note}</AdminPreviewNote>
+
+    <ol className="catalog-editor-progress" aria-label={t.progress.title}>
+      {editorProgressItems.map((label, index) => <li key={label}>
+        <span>{index + 1}</span>
+        <strong>{label}</strong>
+      </li>)}
+    </ol>
 
     <ol className="catalog-entry-progress" aria-label={t.saveStatus.title}>
       {['category', 'product', 'images', 'price'].map((resource, index) => <li className={saveStatus[resource]} key={resource}>
@@ -844,6 +896,9 @@ export function AdminCatalogEntryPage() {
             <label className="admin-search">{t.product.name}<input value={productForm.nameEn} onChange={(event) => setProductField('nameEn', event.target.value)} placeholder={t.product.name} />
               {fieldErrors.productName && <small className="admin-field-error">{fieldErrors.productName}</small>}
             </label>
+            <label className="admin-search">{t.product.nameKo}<input value={productForm.nameKo} onChange={(event) => setProductField('nameKo', event.target.value)} placeholder={t.product.nameKoPlaceholder} />
+              {fieldErrors.productNameKo && <small className="admin-field-error">{fieldErrors.productNameKo}</small>}
+            </label>
             <label className="admin-search wide">{t.product.description}<textarea value={productForm.description} onChange={(event) => setProductField('description', event.target.value)} placeholder={t.product.descriptionPlaceholder} /></label>
             <label className="admin-search">{t.product.category}<input value={categorySummary} readOnly /></label>
             <label className="admin-search">{t.product.material}<input value={productForm.material} onChange={(event) => setProductField('material', event.target.value)} placeholder={t.product.material} /></label>
@@ -870,6 +925,10 @@ export function AdminCatalogEntryPage() {
             </div>
           </div>
           <div className="catalog-taxonomy-editor">
+            <div className="catalog-entry-subheading">
+              <strong>{t.attributes.classificationTitle}</strong>
+              <span>{t.attributes.classificationDescription}</span>
+            </div>
             {renderSingleTaxonomy('productGroup')}
             {renderSingleTaxonomy('piercingType')}
             {renderSingleTaxonomy('baseMaterial')}
@@ -888,19 +947,66 @@ export function AdminCatalogEntryPage() {
             {renderSingleTaxonomy('saleType')}
           </div>
           <div className="catalog-entry-grid catalog-entry-detail-grid">
+            <div className="catalog-entry-subheading wide">
+              <strong>{t.attributes.optionsSpecsTitle}</strong>
+              <span>{t.attributes.optionsSpecsDescription}</span>
+            </div>
             <label className="admin-search">{t.attributes.gauge}<input value={specForm.gauge} onChange={(event) => setSpecField('gauge', event.target.value)} placeholder="16G" /></label>
-            <label className="admin-search">{t.attributes.length}<input value={specForm.length} onChange={(event) => setSpecField('length', event.target.value)} placeholder="6" /></label>
-            <label className="admin-search">{t.attributes.ballSize}<input value={specForm.ballSize} onChange={(event) => setSpecField('ballSize', event.target.value)} placeholder="4" /></label>
-            <label className="admin-search">{t.attributes.barThickness}<input value={specForm.barThickness} onChange={(event) => setSpecField('barThickness', event.target.value)} placeholder="1.2" /></label>
+            <label className="admin-search">{t.attributes.length}<input value={specForm.length} onChange={(event) => setSpecField('length', event.target.value)} placeholder="6" />
+              {fieldErrors.length && <small className="admin-field-error">{fieldErrors.length}</small>}
+            </label>
+            <label className="admin-search">{t.attributes.barLength}<input value={specForm.barLength} onChange={(event) => setSpecField('barLength', event.target.value)} placeholder="6" />
+              {fieldErrors.barLength && <small className="admin-field-error">{fieldErrors.barLength}</small>}
+            </label>
+            <label className="admin-search">{t.attributes.postLength}<input value={specForm.postLength} onChange={(event) => setSpecField('postLength', event.target.value)} placeholder="6" />
+              {fieldErrors.postLength && <small className="admin-field-error">{fieldErrors.postLength}</small>}
+            </label>
+            <label className="admin-search">{t.attributes.ballSize}<input value={specForm.ballSize} onChange={(event) => setSpecField('ballSize', event.target.value)} placeholder="4" />
+              {fieldErrors.ballSize && <small className="admin-field-error">{fieldErrors.ballSize}</small>}
+            </label>
+            <label className="admin-search">{t.attributes.charmSize}<input value={specForm.charmSize} onChange={(event) => setSpecField('charmSize', event.target.value)} placeholder="4" />
+              {fieldErrors.charmSize && <small className="admin-field-error">{fieldErrors.charmSize}</small>}
+            </label>
+            <label className="admin-search">{t.attributes.totalLength}<input value={specForm.totalLength} onChange={(event) => setSpecField('totalLength', event.target.value)} placeholder="12" />
+              {fieldErrors.totalLength && <small className="admin-field-error">{fieldErrors.totalLength}</small>}
+            </label>
+            <label className="admin-search">{t.attributes.innerDiameter}<input value={specForm.innerDiameter} onChange={(event) => setSpecField('innerDiameter', event.target.value)} placeholder="8" />
+              {fieldErrors.innerDiameter && <small className="admin-field-error">{fieldErrors.innerDiameter}</small>}
+            </label>
+            <label className="admin-search">{t.attributes.barThickness}<input value={specForm.barThickness} onChange={(event) => setSpecField('barThickness', event.target.value)} placeholder="1.2" />
+              {fieldErrors.barThickness && <small className="admin-field-error">{fieldErrors.barThickness}</small>}
+            </label>
             <label className="admin-search">{t.attributes.unit}<input value={specForm.unit} onChange={(event) => setSpecField('unit', event.target.value)} placeholder="mm" /></label>
+            <label className="admin-search wide">{t.attributes.specNote}<input value={specForm.specNote} onChange={(event) => setSpecField('specNote', event.target.value)} placeholder={t.attributes.specNotePlaceholder} /></label>
+            <label className="admin-search">{t.attributes.decorationType}<input value={specForm.decorationType} onChange={(event) => setSpecField('decorationType', event.target.value)} placeholder={t.attributes.decorationTypePlaceholder} /></label>
+            <label className="admin-search">{t.attributes.decorationColor}<input value={specForm.decorationColor} onChange={(event) => setSpecField('decorationColor', event.target.value)} placeholder={t.attributes.decorationColorPlaceholder} /></label>
+            <label className="admin-search">{t.attributes.decorationSize}<input value={specForm.decorationSize} onChange={(event) => setSpecField('decorationSize', event.target.value)} placeholder="3" />
+              {fieldErrors.decorationSize && <small className="admin-field-error">{fieldErrors.decorationSize}</small>}
+            </label>
+            <label className="admin-search">{t.attributes.decorationCount}<input value={specForm.decorationCount} onChange={(event) => setSpecField('decorationCount', event.target.value)} placeholder="4" /></label>
+            <label className="admin-search">{t.attributes.settingMethod}<input value={specForm.settingMethod} onChange={(event) => setSpecField('settingMethod', event.target.value)} placeholder={t.attributes.settingMethodPlaceholder} /></label>
+            <label className="admin-search wide">{t.attributes.decorationNote}<input value={specForm.decorationNote} onChange={(event) => setSpecField('decorationNote', event.target.value)} placeholder={t.attributes.decorationNotePlaceholder} /></label>
+            <div className="catalog-entry-subheading wide">
+              <strong>{t.attributes.detailPageTitle}</strong>
+              <span>{t.attributes.detailPageDescription}</span>
+            </div>
             <label className="admin-search wide">{t.attributes.detailHeadline}<input value={detailForm.headline} onChange={(event) => setDetailField('headline', event.target.value)} placeholder={t.attributes.detailHeadlinePlaceholder} /></label>
             <label className="admin-search wide">{t.attributes.detailBody}<textarea value={detailForm.body} onChange={(event) => setDetailField('body', event.target.value)} placeholder={t.attributes.detailBodyPlaceholder} /></label>
+            <label className="admin-search wide">{t.attributes.descriptionDetail}<textarea value={detailForm.description} onChange={(event) => setDetailField('description', event.target.value)} placeholder={t.attributes.descriptionDetailPlaceholder} /></label>
+            <label className="admin-search wide">{t.attributes.materialInfo}<textarea value={detailForm.materialInfo} onChange={(event) => setDetailField('materialInfo', event.target.value)} placeholder={t.attributes.materialInfoPlaceholder} /></label>
+            <label className="admin-search">{t.attributes.sizeGuide}<input value={detailForm.sizeGuide} onChange={(event) => setDetailField('sizeGuide', event.target.value)} placeholder={t.attributes.sizeGuidePlaceholder} /></label>
+            <label className="admin-search">{t.attributes.careGuide}<input value={detailForm.careGuide} onChange={(event) => setDetailField('careGuide', event.target.value)} placeholder={t.attributes.careGuidePlaceholder} /></label>
+            <label className="admin-search wide">{t.attributes.exchangeNotice}<textarea value={detailForm.exchangeNotice} onChange={(event) => setDetailField('exchangeNotice', event.target.value)} placeholder={t.attributes.exchangeNoticePlaceholder} /></label>
+            <label className="admin-search wide">{t.attributes.wholesaleNotice}<textarea value={detailForm.wholesaleNotice} onChange={(event) => setDetailField('wholesaleNotice', event.target.value)} placeholder={t.attributes.wholesaleNoticePlaceholder} /></label>
             <label className="admin-search">{t.attributes.care}<input value={detailForm.care} onChange={(event) => setDetailField('care', event.target.value)} placeholder={t.attributes.carePlaceholder} /></label>
             <label className="admin-search">{t.attributes.fit}<input value={detailForm.fit} onChange={(event) => setDetailField('fit', event.target.value)} placeholder={t.attributes.fitPlaceholder} /></label>
             <label className="admin-search">{t.attributes.decoration}<input value={detailForm.decoration} onChange={(event) => setDetailField('decoration', event.target.value)} placeholder={t.attributes.decorationPlaceholder} /></label>
           </div>
           <div className="catalog-entry-home-placement">
-            <strong>{t.attributes.homePlacement}</strong>
+            <div className="catalog-entry-subheading">
+              <strong>{t.attributes.placementTitle}</strong>
+              <span>{t.attributes.placementDescription}</span>
+            </div>
             <div>
               {['showInSnap', 'showInNewArrivals', 'showInWeeklyPick', 'showInBuyerSelection', 'showInPiercing', 'showInSteadySelection'].map((field) => <label className="admin-check" key={field}>
                 <input checked={Boolean(homePlacementForm[field])} onChange={(event) => setHomePlacementField(field, event.target.checked)} type="checkbox" /> {t.attributes[field]}

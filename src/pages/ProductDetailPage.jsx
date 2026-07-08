@@ -364,13 +364,218 @@ const detailCopy = {
   },
 }
 
-const getDetailCopy = (contentLocale) => detailCopy[contentLocale] ?? detailCopy.en
+const cleanDetailCopy = {
+  en: detailCopy.en,
+  kr: {
+    ...detailCopy.en,
+    addToInquiry: '견적 리스트에 담기',
+    adminPriceBooks: '관리자 가격표',
+    approvalRequired: '승인 후 가격 확인 가능',
+    assuranceAssetsBody: '상세 이미지와 등록 사양을 기준으로 견적 검토를 진행합니다.',
+    assuranceAssetsTitle: '바이어 자료',
+    assuranceMarketBody: '국내외 B2B 거래 검토를 위한 카탈로그 상품입니다.',
+    assuranceMarketTitle: '거래 검토 가능',
+    assuranceMoqBody: '승인된 거래처에게만 MOQ와 가격 기준을 안내합니다.',
+    assuranceMoqTitle: '승인 후 MOQ 안내',
+    assuranceQcBody: '출고 전 상품 상태와 사양은 견적 단계에서 다시 확인합니다.',
+    assuranceQcTitle: '사양 확인',
+    available: '가능',
+    back: '상품 목록으로',
+    buyerOnly: '승인된 거래처만 가격과 MOQ를 확인할 수 있습니다.',
+    buyerPoint: '바이어 포인트',
+    buyerPointBodyOne: '소재, 색상, 사이즈 정보를 견적 요청 전에 한 화면에서 확인합니다.',
+    buyerPointBodyThree: '선택 옵션과 수량은 견적 리스트에서 다시 조정할 수 있습니다.',
+    buyerPointBodyTwo: '승인된 거래처에게만 가격과 MOQ 기준을 노출합니다.',
+    buyerPointTitleOne: '간단한 검토',
+    buyerPointTitleThree: '견적 흐름 유지',
+    buyerPointTitleTwo: '승인 기반 가격',
+    category: '카테고리',
+    categoryProducts: '같은 분류의 상품',
+    categoryView: '카테고리 보기',
+    color: '색상',
+    colors: '색상',
+    description: '상품 정보',
+    emptyRelated: '같은 분류에 표시할 상품이 아직 없습니다.',
+    exportAvailability: '수출 가능 여부',
+    gallery: '상품 이미지',
+    guide: '안내',
+    leadTime: '리드타임',
+    material: '소재',
+    materialGuide: '소재 안내',
+    materialHeadline: '소재 기준은 명확하게 안내합니다.',
+    materialGuideText: (material) => `${material} 기준으로 등록된 상품입니다. 도금, 마감, 국가별 표기 기준은 견적 확인 단계에서 다시 확인해 주세요.`,
+    moqAfterReview: '승인 후 안내',
+    noImage: '등록된 상품 이미지가 없습니다.',
+    notFound: '상품을 찾을 수 없습니다.',
+    origin: '원산지',
+    priceUnavailable: '등록된 승인 가격이 없습니다.',
+    productCode: '상품 코드',
+    productInfo: '상품 정보',
+    quantity: '수량',
+    quantityNote: (moq) => `수량은 MOQ 단위로 조정됩니다. 기준 단위: ${moq} pcs`,
+    quoteNotice: '견적 안내',
+    quoteStepConfirm: '조건 확정',
+    quoteStepConfirmBody: '최종 조건은 담당자 확인 후 안내합니다.',
+    quoteStepReceive: '기준 확인',
+    quoteStepReceiveBody: '가격, 재고, 납기, 포장 조건을 확인합니다.',
+    quoteStepSelect: '상품 선택',
+    quoteStepSelectBody: '색상, 사이즈, 수량을 선택해 견적 검토를 요청합니다.',
+    quoteWorkflow: '견적 진행 방식',
+    quoteWorkflowLead: '이 페이지는 B2B 견적 요청을 위한 상품 검토 도구입니다.',
+    quoteNoticeText: '견적 요청은 최종 거래 확정이 아닙니다. Noblesse가 재고, 납기, 공급 조건을 확인한 뒤 최종 견적 기준을 안내합니다.',
+    requestAccess: '거래처 승인 요청',
+    reviewStatus: '승인 상태 보기',
+    selectedImage: '선택된 이미지',
+    shippingNotice: '출고 안내',
+    shippingNoticeText: '출고 일정, 포장, 교환 가능 여부는 견적 검토 이후 상품 상태와 거래 조건에 따라 별도로 안내합니다.',
+    size: '사이즈',
+    sizeGuide: '사이즈 가이드',
+    sizeGuideText: '피어싱 사이즈와 착용감은 디자인과 측정 방식에 따라 달라질 수 있습니다. 견적 요청 전 상세 규격을 확인해 주세요.',
+    sizes: '사이즈',
+    specification: '상세 사양',
+    specificationIntro: '견적 검토에는 장식 문구보다 등록된 구조와 사양을 사용합니다.',
+    sectionDelivery: '출고 안내',
+    sectionMaterial: '소재 안내',
+    sectionOverview: '개요',
+    sectionSpecification: '상세 사양',
+    quietDetailHeadline: '작은 피어싱도 한눈에 검토할 수 있게 정리했습니다.',
+    quietDetailLead: '이미지, 소재, 옵션, 견적 안내를 분리해 바이어가 필요한 정보를 빠르게 확인할 수 있습니다.',
+    statusGuest: '회원가입 후 거래처 승인을 요청하면 가격과 견적 기능을 사용할 수 있습니다.',
+    statusPending: '거래처 정보 확인 중입니다. 승인 후 가격과 견적 리스트 기능이 열립니다.',
+    thumbnail: '썸네일',
+    unavailable: '불가',
+    viewLarge: '큰 이미지 보기',
+    wholesale: '도매 기준',
+    gauge: '게이지',
+    length: '길이',
+    barLength: '바 길이',
+    postLength: '포스트 길이',
+    ballSize: '볼 사이즈',
+    charmSize: '장식 사이즈',
+    totalLength: '전체 길이',
+    innerDiameter: '내경',
+    barThickness: '바 두께',
+    decorationType: '장식 타입',
+    decorationColor: '장식 색상',
+    decorationSize: '장식 크기',
+    decorationCount: '장식 수량',
+    settingMethod: '세팅 방식',
+    specNote: '사양 메모',
+  },
+  jp: {
+    ...detailCopy.en,
+    addToInquiry: '見積リストに追加',
+    adminPriceBooks: '管理者価格表',
+    approvalRequired: '承認後に価格確認可能',
+    category: 'カテゴリー',
+    colors: 'カラー',
+    exportAvailability: '輸出可否',
+    material: '素材',
+    origin: '原産地',
+    productCode: '商品コード',
+    productInfo: '商品情報',
+    quoteNotice: '見積案内',
+    requestAccess: '取引先承認を申請',
+    reviewStatus: '承認状況を見る',
+    sectionDelivery: '出荷案内',
+    sectionMaterial: '素材案内',
+    sectionOverview: '概要',
+    sectionSpecification: '詳細仕様',
+    specification: '詳細仕様',
+    specificationIntro: '見積検討には装飾的な説明ではなく登録された仕様を使用します。',
+    statusGuest: '会員登録後、取引先承認を申請すると価格と見積機能を利用できます。',
+    statusPending: '取引先情報を確認中です。承認後に価格と見積リスト機能が利用できます。',
+    quietDetailHeadline: '小さなピアスも一目で確認できるよう整理しました。',
+    quietDetailLead: '画像、素材、オプション、見積案内を分け、必要な情報を素早く確認できます。',
+    materialHeadline: '素材基準を明確に案内します。',
+    materialGuideText: (material) => `${material}基準で登録された商品です。メッキ、仕上げ、国別表記基準は見積確認時に再確認してください。`,
+    quoteWorkflow: '見積の流れ',
+    quoteWorkflowLead: 'このページはB2B見積依頼のための商品確認ツールです。',
+    quoteNoticeText: '見積依頼は最終取引の確定ではありません。Noblesseが在庫、納期、供給条件を確認した後、最終見積基準を案内します。',
+    shippingNoticeText: '出荷日程、包装、交換可否は見積確認後、商品状態と取引条件に応じて別途案内します。',
+    sizeGuideText: 'ピアスのサイズと着用感はデザインや測定方法により異なります。見積依頼前に詳細仕様をご確認ください。',
+    gauge: 'ゲージ',
+    length: '長さ',
+    barLength: 'バー長さ',
+    postLength: 'ポスト長さ',
+    ballSize: 'ボールサイズ',
+    charmSize: 'チャームサイズ',
+    totalLength: '全長',
+    innerDiameter: '内径',
+    barThickness: 'バー太さ',
+    decorationType: '装飾タイプ',
+    decorationColor: '装飾カラー',
+    decorationSize: '装飾サイズ',
+    decorationCount: '装飾数',
+    settingMethod: 'セッティング方式',
+    specNote: '仕様メモ',
+  },
+  cn: {
+    ...detailCopy.en,
+    addToInquiry: '加入詢價清單',
+    adminPriceBooks: '管理者價格表',
+    approvalRequired: '核准後可查看價格',
+    category: '分類',
+    colors: '顏色',
+    exportAvailability: '出口可否',
+    material: '材質',
+    origin: '產地',
+    productCode: '商品代碼',
+    productInfo: '商品資訊',
+    quoteNotice: '詢價說明',
+    requestAccess: '申請買家核准',
+    reviewStatus: '查看核准狀態',
+    sectionDelivery: '出貨說明',
+    sectionMaterial: '材質說明',
+    sectionOverview: '概要',
+    sectionSpecification: '詳細規格',
+    specification: '詳細規格',
+    specificationIntro: '詢價判斷以登錄的結構與規格為準，而不是裝飾文案。',
+    statusGuest: '註冊並申請買家核准後，即可使用價格與詢價功能。',
+    statusPending: '買家資料審核中。核准後即可使用價格與詢價清單功能。',
+    quietDetailHeadline: '小型耳飾也能一眼完成買家檢視。',
+    quietDetailLead: '圖片、材質、選項與詢價說明分區呈現，方便買家快速確認重點。',
+    materialHeadline: '材質標準清楚標示。',
+    materialGuideText: (material) => `此商品以 ${material} 登錄。鍍層、表面處理與各市場標示要求，請於詢價確認階段再次確認。`,
+    quoteWorkflow: '詢價流程',
+    quoteWorkflowLead: '本頁是 B2B 詢價用的商品檢視工具。',
+    quoteNoticeText: '詢價請求並非最終交易確認。Noblesse 會確認庫存、交期與供應條件後，再提供最終報價基準。',
+    shippingNoticeText: '出貨時程、包裝與交換可否，將於詢價確認後依商品狀態與交易條件另行說明。',
+    sizeGuideText: '耳飾尺寸與配戴感會因設計與測量方式而異。詢價前請確認登錄的詳細規格。',
+    gauge: '規格',
+    length: '長度',
+    barLength: '桿長',
+    postLength: '針長',
+    ballSize: '球尺寸',
+    charmSize: '吊飾尺寸',
+    totalLength: '全長',
+    innerDiameter: '內徑',
+    barThickness: '桿厚',
+    decorationType: '裝飾類型',
+    decorationColor: '裝飾顏色',
+    decorationSize: '裝飾尺寸',
+    decorationCount: '裝飾數量',
+    settingMethod: '鑲嵌方式',
+    specNote: '規格備註',
+  },
+}
+
+const getDetailCopy = (contentLocale) => cleanDetailCopy[contentLocale] ?? cleanDetailCopy.en
 
 const asList = (value) => (Array.isArray(value) ? value.filter(Boolean) : [])
 
 const joinList = (value) => {
   const list = asList(value)
   return list.length > 0 ? list.join(' / ') : ''
+}
+
+const isPresentSpec = (value) => value !== undefined && value !== null && String(value).trim() !== ''
+
+const withUnit = (value, unit = 'mm') => {
+  if (!isPresentSpec(value)) return ''
+  const text = String(value).trim()
+  if (!text || /[a-zA-Z가-힣ぁ-んァ-ヶ一-龯]/.test(text)) return text
+  return `${text}${unit || ''}`
 }
 
 const buildGalleryImages = (product, productAlt, copy) => {
@@ -521,6 +726,12 @@ export function ProductDetailPage() {
   const activeSize = sizes.includes(selectedSize) ? selectedSize : sizes[0] ?? ''
   const productSpecs = product.specs || {}
   const productDetailContent = product.detailContent || {}
+  const specUnit = productSpecs.unit || 'mm'
+  const overviewBody = productDetailContent.description || productDetailContent.body || description || copy.quietDetailLead
+  const materialGuideBody = productDetailContent.materialInfo || (product.material ? copy.materialGuideText(product.material) : '')
+  const sizeGuideBody = productDetailContent.sizeGuide || copy.sizeGuideText
+  const shippingNoticeBody = productDetailContent.exchangeNotice || copy.shippingNoticeText
+  const quoteWorkflowLead = productDetailContent.wholesaleNotice || copy.quoteWorkflowLead
   const currentQuantity = normalizeQuantity(quantity, visibleMoq || 1)
   const accessLink = viewerState === 'pending' ? '/approval-pending' : '/register'
   const accessLabel = viewerState === 'pending' ? copy.reviewStatus : copy.requestAccess
@@ -538,10 +749,21 @@ export function ProductDetailPage() {
   ].filter(([, value]) => value !== undefined && value !== null && value !== '')
 
   const specificationRows = [
-    ['Gauge', productSpecs.gauge],
-    ['Length', productSpecs.length ? `${productSpecs.length}${productSpecs.unit || ''}` : ''],
-    ['Ball', productSpecs.ballSize ? `${productSpecs.ballSize}${productSpecs.unit || ''}` : ''],
-    ['Bar', productSpecs.barThickness ? `${productSpecs.barThickness}${productSpecs.unit || ''}` : ''],
+    [copy.gauge, productSpecs.gauge],
+    [copy.length, withUnit(productSpecs.length, specUnit)],
+    [copy.barLength, withUnit(productSpecs.barLength, specUnit)],
+    [copy.postLength, withUnit(productSpecs.postLength, specUnit)],
+    [copy.ballSize, withUnit(productSpecs.ballSize, specUnit)],
+    [copy.charmSize, withUnit(productSpecs.charmSize, specUnit)],
+    [copy.totalLength, withUnit(productSpecs.totalLength, specUnit)],
+    [copy.innerDiameter, withUnit(productSpecs.innerDiameter, specUnit)],
+    [copy.barThickness, withUnit(productSpecs.barThickness, specUnit)],
+    [copy.decorationType, productSpecs.decorationType],
+    [copy.decorationColor, productSpecs.decorationColor],
+    [copy.decorationSize, withUnit(productSpecs.decorationSize, specUnit)],
+    [copy.decorationCount, productSpecs.decorationCount],
+    [copy.settingMethod, productSpecs.settingMethod],
+    [copy.specNote, productSpecs.specNote || productSpecs.decorationNote],
   ].filter(([, value]) => value)
 
   const addSelectedItem = () => addInquiryItem(product.productId, { color: activeColor, size: activeSize }, currentQuantity)
@@ -626,7 +848,7 @@ export function ProductDetailPage() {
       <div className="pd-editorial-copy">
         <p className="pd-editorial-eyebrow">{copy.quietDetailEyebrow}</p>
         <h2>{productDetailContent.headline || copy.quietDetailHeadline}</h2>
-        <p>{productDetailContent.body || description || copy.quietDetailLead}</p>
+        <p>{overviewBody}</p>
       </div>
       <div className="pd-overview-grid">
         <div className="pd-overview-media">
@@ -671,7 +893,7 @@ export function ProductDetailPage() {
       <div className="pd-material-copy">
         <p className="pd-editorial-eyebrow">{copy.materialGuide}</p>
         <h2>{copy.materialHeadline}</h2>
-        {product.material && <p>{copy.materialGuideText(product.material)}</p>}
+        {materialGuideBody && <p>{materialGuideBody}</p>}
       </div>
       <div className="pd-material-cards">
         {product.material && <article><span>{product.material}</span><strong>{copy.material}</strong></article>}
@@ -683,13 +905,13 @@ export function ProductDetailPage() {
     <section className="pd-editorial pd-delivery-section" id="pd-delivery">
       <div className="pd-section-heading">
         <div><p>{copy.wholesale}</p><h2>{copy.quoteWorkflow}</h2></div>
-        <span>{copy.quoteWorkflowLead}</span>
+        <span>{quoteWorkflowLead}</span>
       </div>
       <div className="pd-process-grid">
         <article><strong>01</strong><h3>{copy.quoteStepSelect}</h3><p>{copy.quoteStepSelectBody}</p></article>
         <article><strong>02</strong><h3>{copy.quoteStepReceive}</h3><p>{copy.quoteStepReceiveBody}</p></article>
         <article><strong>03</strong><h3>{copy.quoteStepConfirm}</h3><p>{copy.quoteStepConfirmBody}</p></article>
-        <article><strong>04</strong><h3>{copy.shippingNotice}</h3><p>{copy.shippingNoticeText}</p></article>
+        <article><strong>04</strong><h3>{copy.shippingNotice}</h3><p>{shippingNoticeBody}</p>{sizeGuideBody && <small>{sizeGuideBody}</small>}</article>
       </div>
     </section>
 

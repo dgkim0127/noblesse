@@ -840,3 +840,14 @@ Required seed data still needed:
 - Validation: frontend tests, backend tests, lint, and production build passed locally.
 - Dist security scan: no database URL, service credential, private key, staging secret, or test account patterns found; Firebase SDK localhost fallback string is not an API endpoint.
 - Direct SQL, DB console edit, Secret/IAM change, FX Job run, Scheduler change, product creation, product deletion, buyer approval change: No.
+
+## N74 Catalog Attribute Detail Editor Rework
+
+- Date: 2026-07-08 KST
+- Scope: frontend/admin editor and public detail copy/typography only; no backend schema or production data mutation.
+- Admin UI: catalog entry now exposes a clearer long-form editor for basic product names, taxonomy/filter attributes, option/spec fields, decoration notes, detail page copy, image metadata, prices, home placement, and review/save state.
+- Product detail: localized copy and responsive type sizing were refined for KR, EN, JP, and Traditional Chinese detail routes.
+- Taxonomy: labels are normalized for supported locales so operator-facing choices and public filter/detail copy do not show mojibake.
+- Validation: optional numeric spec fields must be positive when entered; unknown real specs can remain blank and are not shown publicly as fake data.
+- Direct settlement wording: direct-buy/payment/cart-style language remains excluded from the production build.
+- Backend deploy, DB migration, direct SQL, Secret/IAM change, FX Job run, Scheduler change, product creation/deletion, buyer approval change: No.

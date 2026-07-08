@@ -224,11 +224,24 @@ flowchart LR
 | Product image | Operational | Image metadata is present |
 | Price book | Operational | Admin route exists |
 | FX snapshot/run | Operational | FX route and automation exist |
-| Product attributes | Partial | Needs stronger editing and detail coverage |
-| Product options | Partial | Needs size/color/material variant structure cleanup |
+| Product attributes | Operational | Admin catalog entry captures structured taxonomy/filter metadata |
+| Product options | Operational | Admin catalog entry captures color, size/spec, decoration, and placement metadata |
 | Inquiry | Partial/operational | Buyer and admin routes exist |
 | Quote | Partial/operational | Admin quote route exists |
 | Direct settlement | Out of scope | Should not be added to current B2B catalog flow |
+
+## Catalog Attribute Operations
+
+N74 adds a production-safe catalog editor surface for product metadata that supports public filter and detail page rendering without changing price policy or activating inactive markets.
+
+| Area | Operational rule |
+| --- | --- |
+| Taxonomy | Product group, piercing type, material, decoration, structure, style, shape, sale type, and status use allowlisted labels |
+| Options/specs | Color options, size/spec fields, decoration notes, and unit-aware values are captured as structured product metadata |
+| Detail content | Product description, material guide, size guide, care guide, exchange notice, and wholesale notice are editable copy fields |
+| Images | Existing image upload flow remains the media source; alt text/order metadata can support public detail display |
+| Placement | Home section flags and badge/sort fields remain explicit merchandising controls; empty sections are not backfilled |
+| Prices | KR/JP/US/TW price behavior is unchanged; CN/CNY remains inactive |
 
 ## Operations Boundary
 

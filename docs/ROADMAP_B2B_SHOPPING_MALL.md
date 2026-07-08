@@ -136,6 +136,23 @@ If a future back-office order or settlement workflow is needed, it should be des
 
 ## Next Recommended Task
 
-`N74-CATALOG-ATTRIBUTE-DETAIL-EDITOR-REWORK`
+`Post-N74 product operations hardening`
 
-Goal: make product attribute/detail editing in admin reliable enough to support real catalog data entry and polished product detail pages.
+N74 completed the first reliable product attribute/detail editor surface. The next product operations work should focus on real operator workflow testing and any remaining edit/update flows, not on adding public settlement.
+
+Completed in N74:
+
+| Area | Result |
+| --- | --- |
+| Admin catalog entry | Long-form product editor now includes Korean name, taxonomy, options/specs, detail copy, image metadata, pricing, placement, and review sections |
+| Public detail page | Product detail copy and responsive typography were cleaned for KR/EN/JP/TW routes |
+| Taxonomy labels | Public/admin labels were normalized for KR, EN, JP, and Traditional Chinese surfaces |
+| Validation | Optional numeric spec fields reject invalid non-positive values while unknown real specs can stay blank |
+
+Remaining recommended follow-up:
+
+| Area | Next step |
+| --- | --- |
+| Existing product edit | Confirm whether operators need a full edit screen for already-created products |
+| Real catalog data | Fill only confirmed material, gauge, size, and decoration data supplied by the operator |
+| Product inquiry MVP | Build the quote-request workflow after catalog data entry is stable |

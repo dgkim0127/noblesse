@@ -28,6 +28,8 @@ test('unified catalog entry form reuses existing admin API calls and backend ima
   assert.match(page, /api\.uploadProductImages\(productId, formData, token\)/)
   assert.match(page, /api\.createPrice\(/)
   assert.match(page, /descriptionEn: productForm\.description\.trim\(\) \|\| undefined/)
+  assert.match(page, /nameKo: productForm\.nameKo\.trim\(\) \|\| undefined/)
+  assert.match(page, /descriptionKo: detailForm\.description\.trim\(\) \|\| productForm\.description\.trim\(\) \|\| undefined/)
   assert.match(page, /colors: parseDelimitedList\(productForm\.colorsText\)/)
   assert.match(page, /sizes: parseDelimitedList\(productForm\.sizesText\)/)
   assert.match(page, /taxonomy: compactObject/)
@@ -46,6 +48,9 @@ test('unified catalog entry form is not a step switching wizard', () => {
   const page = readWorkspaceFile('src/pages/admin/AdminCatalogEntryPage.jsx')
 
   assert.match(page, /catalog-entry-layout/)
+  assert.match(page, /catalog-editor-progress/)
+  assert.match(page, /t\.progress\.classification/)
+  assert.match(page, /t\.progress\.placement/)
   assert.match(page, /catalog-entry-summary-panel/)
   assert.doesNotMatch(page, /stepIndex|goNext|goPrevious|currentStep|admin-workflow/)
 })
@@ -72,6 +77,9 @@ test('unified catalog entry handles validation, conflicts, and protected errors'
   assert.match(page, /priceMarketOrder = \['JP', 'US', 'TW', 'GLOBAL'\]/)
   assert.match(page, /autoPriceMarkets = new Set\(\['JP', 'US', 'TW'\]\)/)
   assert.match(page, /pricingMode: market === 'GLOBAL' \? 'unavailable' : 'fx_auto'/)
+  assert.match(page, /productNameKoRequired/)
+  assert.match(page, /specPositiveInvalid/)
+  assert.match(page, /positiveSpecFields/)
 })
 
 test('unified catalog entry supports per-market manual and automatic price book payloads', () => {
@@ -124,10 +132,16 @@ test('unified catalog entry copy exists for every admin locale', () => {
     const copy = adminCopy[locale].catalogEntry
 
     assert.ok(copy.title)
+    assert.ok(copy.progress.category)
+    assert.ok(copy.progress.placement)
     assert.ok(copy.category.title)
     assert.ok(copy.product.title)
+    assert.ok(copy.product.nameKo)
     assert.ok(copy.attributes.title)
+    assert.ok(copy.attributes.classificationTitle)
     assert.ok(copy.attributes.colors)
+    assert.ok(copy.attributes.barLength)
+    assert.ok(copy.attributes.materialInfo)
     assert.ok(copy.attributes.homePlacement)
     assert.ok(copy.attributes.showInWeeklyPick)
     assert.ok(copy.attributes.detailBody)
@@ -159,6 +173,8 @@ test('unified catalog entry copy exists for every admin locale', () => {
     assert.ok(copy.validation.categoryNameConflict)
     assert.ok(copy.validation.imageRequired)
     assert.ok(copy.validation.marketModeRequired)
+    assert.ok(copy.validation.productNameKoRequired)
+    assert.ok(copy.validation.specPositiveInvalid)
     assert.ok(copy.validation.sortPriorityInvalid)
   }
 })
