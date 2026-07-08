@@ -1,15 +1,10 @@
 import {
   ChevronLeft,
   ChevronRight,
-  FileText,
   Images,
   LockKeyhole,
   Minus,
-  PackageCheck,
   Plus,
-  Ruler,
-  ShieldCheck,
-  Truck,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -35,9 +30,26 @@ const detailCopy = {
     addToInquiry: '견적 리스트에 담기',
     adminPriceBooks: '관리자 가격표',
     approvalRequired: '승인 후 가격 확인 가능',
+    assuranceAssetsBody: '상세 이미지와 등록 사양을 기준으로 견적 검토를 진행합니다.',
+    assuranceAssetsTitle: '바이어 자료',
+    assuranceMarketBody: '국내와 해외 B2B 거래 검토를 위한 카탈로그 상품입니다.',
+    assuranceMarketTitle: '거래 검토 가능',
+    assuranceMoqBody: '승인된 거래처에게만 MOQ와 가격 기준을 안내합니다.',
+    assuranceMoqTitle: '승인 후 MOQ 안내',
+    assuranceQcBody: '출고 전 상품 상태와 사양은 견적 단계에서 다시 확인합니다.',
+    assuranceQcTitle: '사양 확인',
     available: '가능',
     back: '상품 목록으로',
+    badgesExportReady: 'EXPORT READY',
+    badgesNew: 'NEW',
     buyerOnly: '승인된 거래처만 가격과 MOQ를 확인할 수 있습니다.',
+    buyerPoint: '바이어 포인트',
+    buyerPointBodyOne: '소재, 색상, 사이즈 정보를 견적 요청 전에 한 화면에서 확인합니다.',
+    buyerPointBodyThree: '선택 옵션과 수량은 견적 리스트에서 다시 조정할 수 있습니다.',
+    buyerPointBodyTwo: '승인된 거래처에게만 가격과 MOQ 기준을 노출합니다.',
+    buyerPointTitleOne: '간단한 검토',
+    buyerPointTitleThree: '견적 흐름 유지',
+    buyerPointTitleTwo: '승인 기반 가격',
     category: '카테고리',
     categoryProducts: '같은 분류의 상품',
     categoryView: '카테고리 보기',
@@ -51,6 +63,7 @@ const detailCopy = {
     leadTime: '리드타임',
     material: '소재',
     materialGuide: '소재 안내',
+    materialHeadline: '소재 정보는 안전한 약속보다 정확한 기준을 우선합니다.',
     materialGuideText: (material) => `${material} 기준으로 등록된 상품입니다. 도금, 마감, 라벨 기준은 견적 확인 단계에서 담당자와 다시 확인해 주세요.`,
     moq: 'MOQ',
     moqAfterReview: '승인 후 안내',
@@ -63,6 +76,14 @@ const detailCopy = {
     quantity: '수량',
     quantityNote: (moq) => `수량은 MOQ 단위로 조정됩니다. 기준 단위: ${moq} pcs`,
     quoteNotice: '견적 안내',
+    quoteStepConfirm: '견적 확정',
+    quoteStepConfirmBody: '최종 조건은 담당자 확인 후 안내됩니다.',
+    quoteStepReceive: '견적 기준 확인',
+    quoteStepReceiveBody: '가격, 재고, 납기, 포장 조건을 확인합니다.',
+    quoteStepSelect: '견적 리스트에 담기',
+    quoteStepSelectBody: '색상, 사이즈, 수량을 선택해 견적 검토를 요청합니다.',
+    quoteWorkflow: '견적 진행 방식',
+    quoteWorkflowLead: '이 페이지는 B2B 견적 요청을 위한 상품 검토 도구입니다.',
     quoteNoticeText: '견적 요청은 최종 거래 확정이 아닙니다. Noblesse가 재고, 납기, 공급 조건을 확인한 뒤 최종 견적 기준을 안내합니다.',
     requestAccess: '거래처 승인 요청',
     reviewStatus: '승인 상태 보기',
@@ -74,6 +95,14 @@ const detailCopy = {
     sizeGuideText: '피어싱 사이즈와 착용감은 디자인과 측정 방식에 따라 달라질 수 있습니다. 견적 요청 전 상세 규격을 확인해 주세요.',
     sizes: '사이즈',
     specification: '상세 사양',
+    specificationIntro: '견적 검토에는 장식 문구보다 등록된 구조화 사양을 사용합니다.',
+    sectionDelivery: '출고 안내',
+    sectionMaterial: '소재 안내',
+    sectionOverview: '개요',
+    sectionSpecification: '상세 사양',
+    quietDetailEyebrow: 'THE QUIET DETAIL',
+    quietDetailHeadline: '작은 피어싱도 한눈에 검토할 수 있게 정리했습니다.',
+    quietDetailLead: '이미지, 소재, 옵션, 견적 안내를 분리해 바이어가 필요한 정보를 빠르게 확인할 수 있습니다.',
     statusGuest: '회원가입 후 거래처 승인을 요청하면 가격과 견적 기능을 사용할 수 있습니다.',
     statusPending: '거래처 정보 확인 중입니다. 승인 후 가격과 견적 리스트 기능이 열립니다.',
     thumbnail: '썸네일',
@@ -85,9 +114,26 @@ const detailCopy = {
     addToInquiry: 'Add to Inquiry List',
     adminPriceBooks: 'Admin price books',
     approvalRequired: 'Price available after approval',
+    assuranceAssetsBody: 'Detail images and registered specifications support quote review.',
+    assuranceAssetsTitle: 'Buyer assets',
+    assuranceMarketBody: 'Catalog-ready for domestic and overseas B2B review.',
+    assuranceMarketTitle: 'Market ready',
+    assuranceMoqBody: 'MOQ and price basis are shared only with approved buyers.',
+    assuranceMoqTitle: 'Approval-based MOQ',
+    assuranceQcBody: 'Product condition and specifications are checked again during quote review.',
+    assuranceQcTitle: 'Spec check',
     available: 'Available',
     back: 'Back to products',
+    badgesExportReady: 'EXPORT READY',
+    badgesNew: 'NEW',
     buyerOnly: 'Only approved buyers can view price and MOQ.',
+    buyerPoint: 'Buyer point',
+    buyerPointBodyOne: 'Review material, color, and size information before requesting a quote.',
+    buyerPointBodyThree: 'Selected options and quantity can be adjusted again in the Inquiry List.',
+    buyerPointBodyTwo: 'Price and MOQ are shown only to approved buyers.',
+    buyerPointTitleOne: 'Easy review',
+    buyerPointTitleThree: 'Quote-first flow',
+    buyerPointTitleTwo: 'Approval-based price',
     category: 'Category',
     categoryProducts: 'More in this category',
     categoryView: 'View category',
@@ -101,6 +147,7 @@ const detailCopy = {
     leadTime: 'Lead time',
     material: 'Material',
     materialGuide: 'Material guide',
+    materialHeadline: 'Material information without unsafe promises.',
     materialGuideText: (material) => `This product is registered with ${material}. Finish, plating, and destination labeling requirements should be confirmed during quote review.`,
     moq: 'MOQ',
     moqAfterReview: 'Shared after approval',
@@ -113,6 +160,14 @@ const detailCopy = {
     quantity: 'Quantity',
     quantityNote: (moq) => `Quantity is adjusted by MOQ units. Unit: ${moq} pcs`,
     quoteNotice: 'Quote notice',
+    quoteStepConfirm: 'Confirm quote',
+    quoteStepConfirmBody: 'Final terms are guided after staff review.',
+    quoteStepReceive: 'Review quote basis',
+    quoteStepReceiveBody: 'Price, stock, lead time, and packaging terms are checked.',
+    quoteStepSelect: 'Add to Inquiry List',
+    quoteStepSelectBody: 'Select finish, size, and quantity to request quote review.',
+    quoteWorkflow: 'Quote workflow',
+    quoteWorkflowLead: 'This page is a B2B quote-request product review tool.',
     quoteNoticeText: 'A Request Quote is not a final trade confirmation. Noblesse reviews stock, lead time, and trade terms before sending the final quote basis.',
     requestAccess: 'Request buyer access',
     reviewStatus: 'View approval status',
@@ -124,6 +179,14 @@ const detailCopy = {
     sizeGuideText: 'Piercing size and fit can vary by design and measurement method. Please check the registered specification before requesting a quote.',
     sizes: 'Sizes',
     specification: 'Specification',
+    specificationIntro: 'Use structured data rather than decorative copy for quote decisions.',
+    sectionDelivery: 'Delivery',
+    sectionMaterial: 'Material guide',
+    sectionOverview: 'Overview',
+    sectionSpecification: 'Specification',
+    quietDetailEyebrow: 'THE QUIET DETAIL',
+    quietDetailHeadline: 'A compact product, organized for quick buyer review.',
+    quietDetailLead: 'Images, material, options, and quote guidance are separated so buyers can scan what matters.',
     statusGuest: 'Request buyer approval after registration to use prices and quote tools.',
     statusPending: 'Your buyer profile is under review. Price and Inquiry List tools open after approval.',
     thumbnail: 'thumbnail',
@@ -135,9 +198,26 @@ const detailCopy = {
     addToInquiry: '見積リストに追加',
     adminPriceBooks: '管理者価格表',
     approvalRequired: '承認後に価格を確認できます',
+    assuranceAssetsBody: '詳細画像と登録仕様をもとに見積確認を進めます。',
+    assuranceAssetsTitle: 'バイヤー資料',
+    assuranceMarketBody: '国内外B2B取引の検討に対応するカタログ商品です。',
+    assuranceMarketTitle: '取引検討可能',
+    assuranceMoqBody: 'MOQと価格基準は承認済み取引先にのみ案内されます。',
+    assuranceMoqTitle: '承認後MOQ案内',
+    assuranceQcBody: '出荷前の商品状態と仕様は見積段階で再確認します。',
+    assuranceQcTitle: '仕様確認',
     available: '可能',
     back: '商品一覧へ戻る',
+    badgesExportReady: 'EXPORT READY',
+    badgesNew: 'NEW',
     buyerOnly: '承認済み取引先のみ価格とMOQを確認できます。',
+    buyerPoint: 'バイヤーポイント',
+    buyerPointBodyOne: '素材、カラー、サイズ情報を見積依頼前に確認できます。',
+    buyerPointBodyThree: '選択したオプションと数量は見積リストで再調整できます。',
+    buyerPointBodyTwo: '価格とMOQは承認済み取引先にのみ表示されます。',
+    buyerPointTitleOne: '確認しやすい構成',
+    buyerPointTitleThree: '見積中心の流れ',
+    buyerPointTitleTwo: '承認制価格',
     category: 'カテゴリー',
     categoryProducts: '同じカテゴリーの商品',
     categoryView: 'カテゴリーを見る',
@@ -151,6 +231,7 @@ const detailCopy = {
     leadTime: 'リードタイム',
     material: '素材',
     materialGuide: '素材ガイド',
+    materialHeadline: '素材情報は過度な約束より正確な基準を優先します。',
     materialGuideText: (material) => `この商品は${material}として登録されています。仕上げ、メッキ、販売国の表示条件は見積確認時に担当者へご確認ください。`,
     moq: 'MOQ',
     moqAfterReview: '承認後に案内',
@@ -163,6 +244,14 @@ const detailCopy = {
     quantity: '数量',
     quantityNote: (moq) => `数量はMOQ単位で調整されます。基準単位: ${moq} pcs`,
     quoteNotice: '見積案内',
+    quoteStepConfirm: '見積確定',
+    quoteStepConfirmBody: '最終条件は担当者確認後に案内されます。',
+    quoteStepReceive: '見積基準確認',
+    quoteStepReceiveBody: '価格、在庫、納期、包装条件を確認します。',
+    quoteStepSelect: '見積リストに追加',
+    quoteStepSelectBody: 'カラー、サイズ、数量を選択して見積確認を依頼します。',
+    quoteWorkflow: '見積の流れ',
+    quoteWorkflowLead: 'このページはB2B見積依頼のための商品確認ツールです。',
     quoteNoticeText: '見積依頼は最終注文や決済ではありません。Noblesseが在庫、納期、取引条件を確認したうえで最終見積基準を案内します。',
     requestAccess: '取引先承認を申請',
     reviewStatus: '承認状況を見る',
@@ -174,6 +263,14 @@ const detailCopy = {
     sizeGuideText: 'ピアスのサイズや着用感はデザインと測定方法により異なる場合があります。見積依頼前に登録仕様をご確認ください。',
     sizes: 'サイズ',
     specification: '詳細仕様',
+    specificationIntro: '見積判断には装飾的なコピーより登録済みの構造化仕様を使用します。',
+    sectionDelivery: '出荷案内',
+    sectionMaterial: '素材ガイド',
+    sectionOverview: '概要',
+    sectionSpecification: '詳細仕様',
+    quietDetailEyebrow: 'THE QUIET DETAIL',
+    quietDetailHeadline: '小さなピアスも一目で確認できるよう整理しました。',
+    quietDetailLead: '画像、素材、オプション、見積案内を分けて、必要な情報をすばやく確認できます。',
     statusGuest: '会員登録後に取引先承認を申請すると、価格と見積機能を利用できます。',
     statusPending: '取引先情報を確認中です。承認後に価格と見積リスト機能が利用できます。',
     thumbnail: 'サムネイル',
@@ -185,9 +282,26 @@ const detailCopy = {
     addToInquiry: '加入詢價清單',
     adminPriceBooks: '管理員價格表',
     approvalRequired: '核准後可查看價格',
+    assuranceAssetsBody: '以詳細圖片與登錄規格作為詢價審核依據。',
+    assuranceAssetsTitle: '買家資料',
+    assuranceMarketBody: '適用於台灣與海外 B2B 交易審核的型錄商品。',
+    assuranceMarketTitle: '可供交易審核',
+    assuranceMoqBody: 'MOQ 與價格基準僅提供給已核准買家。',
+    assuranceMoqTitle: '核准後 MOQ',
+    assuranceQcBody: '出貨前會於詢價階段再次確認商品狀態與規格。',
+    assuranceQcTitle: '規格確認',
     available: '可支援',
     back: '返回商品列表',
+    badgesExportReady: 'EXPORT READY',
+    badgesNew: 'NEW',
     buyerOnly: '只有核准的買家可以查看價格與 MOQ。',
+    buyerPoint: '買家重點',
+    buyerPointBodyOne: '詢價前可集中確認材質、顏色與尺寸資訊。',
+    buyerPointBodyThree: '選擇的選項與數量可在詢價清單中再次調整。',
+    buyerPointBodyTwo: '價格與 MOQ 僅對已核准買家顯示。',
+    buyerPointTitleOne: '容易檢視',
+    buyerPointTitleThree: '以詢價為中心',
+    buyerPointTitleTwo: '核准制價格',
     category: '分類',
     categoryProducts: '同分類商品',
     categoryView: '查看分類',
@@ -201,6 +315,7 @@ const detailCopy = {
     leadTime: '交期',
     material: '材質',
     materialGuide: '材質說明',
+    materialHeadline: '材質資訊以準確基準優先，不做不安全承諾。',
     materialGuideText: (material) => `此商品以 ${material} 登錄。電鍍、表面處理與目的市場標示要求，請於詢價確認時與負責人再次確認。`,
     moq: 'MOQ',
     moqAfterReview: '核准後提供',
@@ -213,6 +328,14 @@ const detailCopy = {
     quantity: '數量',
     quantityNote: (moq) => `數量會依 MOQ 單位調整。基準單位：${moq} pcs`,
     quoteNotice: '詢價說明',
+    quoteStepConfirm: '確認報價',
+    quoteStepConfirmBody: '最終條件由負責人確認後提供。',
+    quoteStepReceive: '確認詢價基準',
+    quoteStepReceiveBody: '確認價格、庫存、交期與包裝條件。',
+    quoteStepSelect: '加入詢價清單',
+    quoteStepSelectBody: '選擇顏色、尺寸與數量後請求詢價審核。',
+    quoteWorkflow: '詢價流程',
+    quoteWorkflowLead: '本頁是 B2B 詢價商品檢視工具。',
     quoteNoticeText: '詢價請求不是最終訂單或付款。Noblesse 會確認庫存、交期與交易條件後，再提供最終報價基準。',
     requestAccess: '申請買家核准',
     reviewStatus: '查看核准狀態',
@@ -224,6 +347,14 @@ const detailCopy = {
     sizeGuideText: '穿孔飾品的尺寸與配戴感可能依設計與測量方式不同。詢價前請確認登錄規格。',
     sizes: '尺寸',
     specification: '詳細規格',
+    specificationIntro: '詢價判斷使用結構化規格，而非裝飾性文案。',
+    sectionDelivery: '出貨說明',
+    sectionMaterial: '材質說明',
+    sectionOverview: '概要',
+    sectionSpecification: '詳細規格',
+    quietDetailEyebrow: 'THE QUIET DETAIL',
+    quietDetailHeadline: '小尺寸飾品也能快速完成買家檢視。',
+    quietDetailLead: '將圖片、材質、選項與詢價說明分開，讓買家快速掌握重點。',
     statusGuest: '註冊後申請買家核准，即可使用價格與詢價功能。',
     statusPending: '買家資料審核中。核准後即可使用價格與詢價清單功能。',
     thumbnail: '縮圖',
@@ -291,13 +422,21 @@ function ProductGallery({ copy, product, productAlt }) {
   }, [images])
 
   const selectedImage = images.find((image) => image.src === selectedSrc) || images[0] || null
+  const secondaryImages = images.filter((image) => image.src !== selectedImage?.src).slice(0, 2)
 
-  return <section className="pd-gallery" aria-label={copy.gallery}>
-    <figure className={`pd-main-image tone-${product.tone}`}>
-      {selectedImage
-        ? <img src={selectedImage.src} alt={selectedImage.alt} loading="eager" width="1200" height="1200" onError={(event) => { event.currentTarget.hidden = true }} />
-        : <div className="pd-image-placeholder"><Images size={32} /><span>{copy.noImage}</span></div>}
-    </figure>
+  return <section className={`pd-gallery ${secondaryImages.length > 0 ? 'has-side-images' : 'is-single'}`} aria-label={copy.gallery}>
+    <div className="pd-gallery-grid">
+      <figure className={`pd-main-image tone-${product.tone}`}>
+        {selectedImage
+          ? <img src={selectedImage.src} alt={selectedImage.alt} loading="eager" width="1200" height="1200" onError={(event) => { event.currentTarget.hidden = true }} />
+          : <div className="pd-image-placeholder"><Images size={32} /><span>{copy.noImage}</span></div>}
+      </figure>
+      {secondaryImages.length > 0 && <div className="pd-side-images" aria-hidden="true">
+        {secondaryImages.map((image) => <figure className="pd-side-image" key={`side-${image.id}`}>
+          <img src={image.src} alt="" loading="lazy" width="600" height="600" onError={(event) => { event.currentTarget.hidden = true }} />
+        </figure>)}
+      </div>}
+    </div>
     {images.length > 1 && <div className="pd-thumbs" role="list" aria-label={copy.thumbnail}>
       {images.map((image) => <button
         aria-label={image.label}
@@ -323,14 +462,6 @@ function OptionButtons({ label, options, selected, onSelect }) {
       {safeOptions.map((option) => <button className={selected === option ? 'pd-option-button is-active' : 'pd-option-button'} key={option} type="button" onClick={() => onSelect(option)}>{option}</button>)}
     </div>
   </div>
-}
-
-function DetailSection({ children, icon, title }) {
-  if (!children) return null
-  return <article className="pd-info-card">
-    <div className="pd-info-card-head">{icon}<h2>{title}</h2></div>
-    {children}
-  </article>
 }
 
 export function ProductDetailPage() {
@@ -427,6 +558,10 @@ export function ProductDetailPage() {
       <ProductGallery copy={copy} product={product} productAlt={productAlt} />
 
       <aside className="pd-panel" aria-label={copy.productInfo}>
+        <div className="pd-badges">
+          <span>{copy.badgesNew}</span>
+          {product.isExportAvailable && <span>{copy.badgesExportReady}</span>}
+        </div>
         <p className="pd-eyebrow">{copy.productCode} {product.code}</p>
         <h1>{productName}</h1>
         {product.nameEn && product.nameEn !== productName && <p className="pd-alt-name">{product.nameEn}</p>}
@@ -474,46 +609,88 @@ export function ProductDetailPage() {
     </section>
 
     <section className="pd-assurance-strip" aria-label={copy.guide}>
-      <span><FileText size={18} />{copy.productInfo}</span>
-      <span><ShieldCheck size={18} />{copy.buyerOnly}</span>
-      <span><PackageCheck size={18} />{copy.wholesale}</span>
-      <span><Truck size={18} />{copy.quoteNotice}</span>
+      <article><strong>{copy.assuranceMoqTitle}</strong><span>{copy.assuranceMoqBody}</span></article>
+      <article><strong>{copy.assuranceMarketTitle}</strong><span>{copy.assuranceMarketBody}</span></article>
+      <article><strong>{copy.assuranceAssetsTitle}</strong><span>{copy.assuranceAssetsBody}</span></article>
+      <article><strong>{copy.assuranceQcTitle}</strong><span>{copy.assuranceQcBody}</span></article>
     </section>
 
-    <section className="pd-info-sections">
-      {(productDetailContent.headline || productDetailContent.body || productDetailContent.decoration || productDetailContent.fit || productDetailContent.care || description) && <DetailSection icon={<FileText size={19} />} title={copy.productInfo}>
-        {productDetailContent.headline && <h3>{productDetailContent.headline}</h3>}
-        {(productDetailContent.body || description) && <p>{productDetailContent.body || description}</p>}
-        {(productDetailContent.decoration || productDetailContent.fit || productDetailContent.care) && <ul>
-          {productDetailContent.decoration && <li>{productDetailContent.decoration}</li>}
-          {productDetailContent.fit && <li>{productDetailContent.fit}</li>}
-          {productDetailContent.care && <li>{productDetailContent.care}</li>}
-        </ul>}
-      </DetailSection>}
+    <nav className="pd-section-nav" aria-label={copy.productInfo}>
+      <a href="#pd-overview">{copy.sectionOverview}</a>
+      <a href="#pd-specification">{copy.sectionSpecification}</a>
+      <a href="#pd-material">{copy.sectionMaterial}</a>
+      <a href="#pd-delivery">{copy.sectionDelivery}</a>
+    </nav>
 
-      <DetailSection icon={<Ruler size={19} />} title={copy.specification}>
+    <section className="pd-editorial pd-overview" id="pd-overview">
+      <div className="pd-editorial-copy">
+        <p className="pd-editorial-eyebrow">{copy.quietDetailEyebrow}</p>
+        <h2>{productDetailContent.headline || copy.quietDetailHeadline}</h2>
+        <p>{productDetailContent.body || description || copy.quietDetailLead}</p>
+      </div>
+      <div className="pd-overview-grid">
+        <div className="pd-overview-media">
+          {product.imageSet?.card || product.imageSet?.detail
+            ? <img src={product.imageSet.card || product.imageSet.detail} alt={productAlt} loading="lazy" />
+            : <div className="pd-image-placeholder"><Images size={30} /><span>{copy.noImage}</span></div>}
+        </div>
+        <article className="pd-overview-note">
+          <span>01 / FORM</span>
+          <h3>{productDetailContent.decoration || copy.buyerPointTitleOne}</h3>
+          <p>{productDetailContent.fit || copy.buyerPointBodyOne}</p>
+        </article>
+      </div>
+      <div className="pd-buyer-points" aria-label={copy.buyerPoint}>
+        <p>{copy.buyerPoint}</p>
+        <article><strong>01</strong><h3>{copy.buyerPointTitleOne}</h3><span>{copy.buyerPointBodyOne}</span></article>
+        <article><strong>02</strong><h3>{copy.buyerPointTitleTwo}</h3><span>{copy.buyerPointBodyTwo}</span></article>
+        <article><strong>03</strong><h3>{copy.buyerPointTitleThree}</h3><span>{copy.buyerPointBodyThree}</span></article>
+      </div>
+    </section>
+
+    <section className="pd-editorial pd-specification-section" id="pd-specification">
+      <div className="pd-section-heading">
+        <div><p>{copy.productInfo}</p><h2>{copy.specification}</h2></div>
+        <span>{copy.specificationIntro}</span>
+      </div>
+      <div className="pd-spec-layout">
+        <div className="pd-spec-image">
+          {product.imageSet?.detail || product.imageSet?.card
+            ? <img src={product.imageSet.detail || product.imageSet.card} alt={productAlt} loading="lazy" />
+            : <div className="pd-image-placeholder"><Images size={30} /><span>{copy.noImage}</span></div>}
+        </div>
         <dl className="pd-spec-table">
           {productInfoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
           {visibleMoq && <div><dt>{copy.moq}</dt><dd>{visibleMoq} pcs</dd></div>}
           {specificationRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
         </dl>
-      </DetailSection>
+      </div>
+    </section>
 
-      {product.material && <DetailSection icon={<ShieldCheck size={19} />} title={copy.materialGuide}>
-        <p>{copy.materialGuideText(product.material)}</p>
-      </DetailSection>}
+    <section className="pd-editorial pd-material-section" id="pd-material">
+      <div className="pd-material-copy">
+        <p className="pd-editorial-eyebrow">{copy.materialGuide}</p>
+        <h2>{copy.materialHeadline}</h2>
+        {product.material && <p>{copy.materialGuideText(product.material)}</p>}
+      </div>
+      <div className="pd-material-cards">
+        {product.material && <article><span>{product.material}</span><strong>{copy.material}</strong></article>}
+        {joinList(colors) && <article><span>{joinList(colors)}</span><strong>{copy.colors}</strong></article>}
+        {copy.quoteNotice && <article><span>QC</span><strong>{copy.assuranceQcTitle}</strong></article>}
+      </div>
+    </section>
 
-      <DetailSection icon={<PackageCheck size={19} />} title={copy.quoteNotice}>
-        <p>{copy.quoteNoticeText}</p>
-      </DetailSection>
-
-      <DetailSection icon={<Truck size={19} />} title={copy.shippingNotice}>
-        <p>{copy.shippingNoticeText}</p>
-      </DetailSection>
-
-      <DetailSection icon={<Ruler size={19} />} title={copy.sizeGuide}>
-        <p>{copy.sizeGuideText}</p>
-      </DetailSection>
+    <section className="pd-editorial pd-delivery-section" id="pd-delivery">
+      <div className="pd-section-heading">
+        <div><p>{copy.wholesale}</p><h2>{copy.quoteWorkflow}</h2></div>
+        <span>{copy.quoteWorkflowLead}</span>
+      </div>
+      <div className="pd-process-grid">
+        <article><strong>01</strong><h3>{copy.quoteStepSelect}</h3><p>{copy.quoteStepSelectBody}</p></article>
+        <article><strong>02</strong><h3>{copy.quoteStepReceive}</h3><p>{copy.quoteStepReceiveBody}</p></article>
+        <article><strong>03</strong><h3>{copy.quoteStepConfirm}</h3><p>{copy.quoteStepConfirmBody}</p></article>
+        <article><strong>04</strong><h3>{copy.shippingNotice}</h3><p>{copy.shippingNoticeText}</p></article>
+      </div>
     </section>
 
     <section className="pd-related">
