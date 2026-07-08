@@ -54,3 +54,5 @@ This index was produced from read-only route, source, and API inspection.
 No production deploy, runtime config change, data mutation, manual FX execution, or database migration is part of this documentation task.
 
 N74 save/load canary note: one hidden canary product save was attempted through the production admin editor. Product and image steps completed, price save stopped on missing admin permission. Existing public product data remained unchanged.
+
+N74P price permission recovery note: the exact missing permission is `prices.write` on the product price-book save route. It is delegable through the existing owner-governed admin permission override path, but no permission was changed in the current run because the owner governance UI/session could not be safely confirmed before mutation.

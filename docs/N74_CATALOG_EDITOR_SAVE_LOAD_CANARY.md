@@ -65,3 +65,54 @@ Result: unchanged.
 1. Confirm whether the current owner/admin should receive the narrow permission needed by the price writer.
 2. Add or expose an admin product edit/reopen screen so taxonomy, specs, detail copy, and home placement can be reloaded field-by-field after save.
 3. Repeat the canary only after the price permission gap is intentionally resolved.
+
+## N74P Price Permission Recovery Preflight
+
+Date: 2026-07-08
+
+Repository: `D:\noblesse-main-work`
+Branch: `main`
+HEAD: `24ceb8c8cf7829630b062c4c78058645af5dbf39`
+
+### Permission Finding
+
+The blocked price step maps to the existing admin price-book endpoint:
+
+- `PUT /api/admin/products/:productId/price-books`
+- Route guard: `prices.write`
+- Permission source: `backend/src/auth/adminPermissions.js`
+- Delegation status: `prices.write` is delegable; governance permissions such as `admins.manage` and `settings.manage` are non-delegable.
+
+The minimum recovery is therefore an `allow` override for `prices.write` on the intended canary operator/admin account. Broader roles such as owner, broad admin permissions, IAM, Secret Manager, Firebase custom claims, direct SQL, or database console changes are not required for this specific blocker.
+
+### Safe Grant Path
+
+The existing safe mutation path is the admin governance API/UI:
+
+- `PUT /api/admin/admins/:userId/permission-overrides/:permissionKey`
+- Required acting principal: current owner admin with `admins.manage`
+- Allowed target permission: `prices.write`
+- Required reason: a non-empty reason string
+
+This task did not complete the permission grant because the production admin team page could not be observed or operated reliably from the current browser-control session after opening `/kr/admin/team`. Without confirming the acting session and target admin row in the existing UI, applying the override would require guessing an account identifier or using a lower-level path, both of which are outside the approved safe-recovery boundary.
+
+Decision: `STOPPED_PRICE_PERMISSION_REQUIRES_OWNER_GOVERNANCE_SESSION`
+
+### Canary Retry
+
+The hidden canary product state was visible in the existing catalog editor session before the team-page check. The price retry was not executed because the `prices.write` grant was not safely confirmed first.
+
+No canary product was published, no existing product was changed, no direct database connection or SQL was used, no secret/IAM/Firebase custom claim was changed, and no backend or Firebase deploy was performed.
+
+### Next Safe Step
+
+Use an owner admin session that can access `/kr/admin/team`, then add only this override to the intended operator/admin account:
+
+| Field | Value |
+| --- | --- |
+| Permission | `prices.write` |
+| Effect | `allow` |
+| Reason | `N74P price save canary recovery` |
+| Expiry | Optional; set only if operations policy requires it |
+
+After the override is confirmed in the admin UI, retry only the failed price step for hidden canary `NB-CANARY-EDITOR-SAVELOAD-001` and re-check that the canary remains absent from public list/detail routes.

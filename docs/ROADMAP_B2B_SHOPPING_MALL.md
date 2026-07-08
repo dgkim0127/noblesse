@@ -155,7 +155,7 @@ Remaining recommended follow-up:
 | Area | Next step |
 | --- | --- |
 | Existing product edit | Confirm whether operators need a full edit screen for already-created products |
-| Price writer permission | Resolve the narrow admin permission needed for product price book save from the catalog editor |
+| Price writer permission | Grant only `prices.write` through an owner-governed admin permission override, then retry the hidden N74 canary price step |
 | Field-level reload QA | Add or expose an edit/reopen path so taxonomy, specs, detail copy, images, placement, and price fields can be checked after save |
 | Real catalog data | Fill only confirmed material, gauge, size, and decoration data supplied by the operator |
 | Product inquiry MVP | Build the quote-request workflow after catalog data entry is stable |
