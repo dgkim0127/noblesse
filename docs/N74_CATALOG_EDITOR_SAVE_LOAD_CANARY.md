@@ -173,3 +173,57 @@ Use an authenticated owner admin session that can render `/kr/admin/team`, then 
 | Target | Intended canary operator/admin account |
 
 Next gate: `APPROVE_OWNER_GOVERNANCE_PRICE_PERMISSION_SESSION = YES` with a confirmed owner session that can access `/kr/admin/team`.
+
+## N74P3 Owner Team Access Diagnosis
+
+Date: 2026-07-08
+
+Repository: `D:\noblesse-main-work`
+Branch: `main`
+HEAD: `1995e23e38995bb5c2e2402627b70c1ebd67af67`
+
+### Read-Only Finding
+
+The team management page is intentionally guarded before render:
+
+- Route: `/admin/team` and `/:locale/admin/team`
+- Frontend route guard: `admins.read`
+- Backend list route: `GET /api/admin/admins` requires `admins.read`
+- Governance mutations require `admins.manage`
+- Server-side governance writes additionally require `adminRole = owner`
+- `prices.write` is present in the delegable permission catalog
+
+The current production browser session was logged in and showed the redacted active admin account, but the admin shell role label rendered as operator and `/kr/admin/team` rendered the additional-permission fallback instead of the team table or owner controls.
+
+Observed browser result:
+
+| Check | Result |
+| --- | --- |
+| Logged-in admin shell | Yes |
+| Visible role label | operator |
+| Team table rendered | No |
+| Assign-operator controls rendered | No |
+| Permission fallback rendered | Yes |
+| Browser token/cookie/localStorage extraction | No |
+| Safe `/api/admin/me` read | Attempted through browser context; unavailable without credential extraction |
+
+### Classification
+
+Decision: `OWNER_PERMISSION_NOT_GRANTED`
+
+The code path does not show a team-page gate bug. Owner sessions should resolve `admins.read` and `admins.manage`; non-owner sessions cannot view the team table or change permission overrides. Because the visible session is the expected production administrator identity but resolves as operator in the UI, the blocker is that the production admin profile is not currently represented as owner/admins.manage in the admin permission model.
+
+No `prices.write` override was applied, no canary was retried, no product was mutated, no SQL/DB console was used, no IAM/Secret/Firebase custom claim was changed, and no deploy was performed.
+
+### Next Safe Step
+
+Run a separately approved owner/admin profile recovery using the existing audited governance model, then return to the original narrow grant:
+
+| Target | Value |
+| --- | --- |
+| Acting account | intended production owner admin |
+| Required role | `owner` |
+| Required governance permission | `admins.manage` |
+| Later narrow override | `prices.write = allow` for the intended canary operator/admin account |
+
+Next gate: `APPROVE_OWNER_ADMIN_PROFILE_RECOVERY = YES`
