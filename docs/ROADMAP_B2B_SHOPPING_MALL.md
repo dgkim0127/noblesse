@@ -155,7 +155,7 @@ Remaining recommended follow-up:
 | Area | Next step |
 | --- | --- |
 | Existing product edit | Confirm whether operators need a full edit screen for already-created products |
-| Price writer permission | Still blocked because the intended production administrator currently renders as operator and cannot open `/kr/admin/team`; recover the owner/admin profile first, then grant only `prices.write` through the owner-governed permission override and retry the hidden N74 canary price step |
+| Price writer permission | Still blocked because the intended production administrator currently renders as operator and cannot open `/kr/admin/team`; the existing owner recovery script is available, but its Firebase user lookup requires a narrowly approved temporary Firebase Auth Viewer IAM fix before owner recovery can run. After owner recovery, grant only `prices.write` through the owner-governed permission override and retry the hidden N74 canary price step |
 | Field-level reload QA | Add or expose an edit/reopen path so taxonomy, specs, detail copy, images, placement, and price fields can be checked after save |
 | Real catalog data | Fill only confirmed material, gauge, size, and decoration data supplied by the operator |
 | Product inquiry MVP | Build the quote-request workflow after catalog data entry is stable |

@@ -227,3 +227,53 @@ Run a separately approved owner/admin profile recovery using the existing audite
 | Later narrow override | `prices.write = allow` for the intended canary operator/admin account |
 
 Next gate: `APPROVE_OWNER_ADMIN_PROFILE_RECOVERY = YES`
+
+## N74P4 Owner Admin Profile Recovery Preflight
+
+Date: 2026-07-08
+
+Repository: `D:\noblesse-main-work`
+Branch: `main`
+HEAD: `f7774d446aa72021115e3b5506863ae6b1d6ae74`
+
+### Approved Recovery Path
+
+The existing recovery path was found and reviewed:
+
+- Script: `backend/src/scripts/recoverOwnerAdminAccount.js`
+- Service: `backend/src/services/ownerAdminRecoveryService.js`
+- Queries: `backend/src/db/queries/ownerAdminRecoveryQueries.js`
+- Package script: `npm run recover:owner-admin`
+
+The path is fail-closed and requires `NOBLESSE_OWNER_ADMIN_RECOVERY_ALLOW=YES`, a production runtime marker, and `TARGET_OWNER_IDENTIFIER`. It rejects password input, rejects canary/test targets, checks that the target is a single active approved admin account, verifies the Firebase user is enabled, and mutates only `admin_profiles.admin_role = owner` after matching the Firebase UID to `users.auth_uid` in a transaction.
+
+The sanitized script result intentionally does not include email, UID, token, password, or database connection details. The script also reports `explicitAdminsManageGrant=false`, `catalogWriteGranted=false`, and `otherPermissionsGranted=false`, so it does not grant `prices.write`.
+
+### Stop Reason
+
+Decision: `STOPPED_OWNER_RECOVERY_REQUIRES_SECRET_OR_IAM_APPROVAL`
+
+Read-only IAM inspection showed the production runtime service account currently has `roles/cloudsql.client`, but no `roles/firebaseauth.viewer` binding was found. The owner recovery script requires Firebase Admin user lookup before any DB mutation, which requires `firebaseauth.users.get`.
+
+Because the current approval allows limited owner profile mutation but does not approve IAM changes, the recovery Job was not created and the owner recovery script was not executed.
+
+| Check | Result |
+| --- | --- |
+| Target account identified | Yes, redacted intended production admin |
+| Existing safe recovery script found | Yes |
+| Direct SQL required | No |
+| Firebase user lookup required | Yes |
+| Runtime Firebase Auth Viewer present | No |
+| Recovery Job created | No |
+| Recovery Job executed | No |
+| Owner profile mutated | No |
+| `prices.write` granted | No |
+| Canary price retry | No |
+
+No Secret value was accessed, no IAM role was changed, no Cloud Run Service was updated, no backend or Firebase deploy was performed, no direct DB connection or SQL was used, no product/buyer/inquiry data was changed, and no token/cookie/localStorage value was extracted.
+
+### Next Safe Step
+
+Approve a narrowly scoped temporary Firebase Auth Viewer grant for the production runtime service account, run the existing owner recovery Job exactly once, then revoke the temporary role after success or failure.
+
+Next gate: `APPROVE_OWNER_RECOVERY_FIREBASE_AUTH_VIEWER_IAM_FIX = YES`
