@@ -1,0 +1,52 @@
+# Noblesse Operations Index
+
+Date: 2026-07-08
+
+This index points operators and implementers to the current site map, QA evidence, and roadmap.
+
+## Current Baseline
+
+| Item | Value |
+| --- | --- |
+| Active repository | `D:\noblesse-main-work` |
+| Branch | `main` |
+| Baseline HEAD | `81c5d80f0a2daf0dc9bf091b46e107d4b89ec1d3` |
+| Production URL | `https://noblesse.web.app` |
+| Canonical Taiwan route | `zh-TW` |
+
+## Core Documents
+
+| Document | Purpose |
+| --- | --- |
+| `docs/SITE_OPERATIONS_MAP.md` | Route, API, admin, home, and data model map |
+| `docs/QA_SITE_WIDE_AUDIT.md` | Read-only browser and API QA evidence |
+| `docs/ROADMAP_B2B_SHOPPING_MALL.md` | Staged roadmap for B2B catalog operations |
+| `docs/OPS_INDEX.md` | Entry point for operations docs |
+
+## Operator Quick Map
+
+| Need | Where to start |
+| --- | --- |
+| Check public route health | `docs/QA_SITE_WIDE_AUDIT.md` |
+| Understand route ownership | `docs/SITE_OPERATIONS_MAP.md` |
+| Plan next admin feature | `docs/ROADMAP_B2B_SHOPPING_MALL.md` |
+| Confirm B2B terminology | `docs/SITE_OPERATIONS_MAP.md` |
+| Work on product attributes | Next task `N74-CATALOG-ATTRIBUTE-DETAIL-EDITOR-REWORK` |
+
+## Production Read-Only Smoke
+
+| Check | Expected |
+| --- | --- |
+| Home | 200 and renders |
+| Product list | 200 and renders |
+| Seed product detail | 200 and renders |
+| Missing product | Not-found state |
+| Health API | 200 |
+| Catalog API | 200 |
+| Buyer/Admin profile without auth | 401 |
+
+## No-Mutation Confirmation
+
+This index was produced from read-only route, source, and API inspection.
+
+No production deploy, runtime config change, data mutation, manual FX execution, or database migration is part of this documentation task.
