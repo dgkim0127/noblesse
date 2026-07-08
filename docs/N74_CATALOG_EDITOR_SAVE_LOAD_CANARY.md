@@ -116,3 +116,60 @@ Use an owner admin session that can access `/kr/admin/team`, then add only this 
 | Expiry | Optional; set only if operations policy requires it |
 
 After the override is confirmed in the admin UI, retry only the failed price step for hidden canary `NB-CANARY-EDITOR-SAVELOAD-001` and re-check that the canary remains absent from public list/detail routes.
+
+## N74P2 Owner Governance Session Attempt
+
+Date: 2026-07-08
+
+Repository: `D:\noblesse-main-work`
+Branch: `main`
+HEAD: `410545785bdaea6f593154da48ec78e2b555c0c6`
+
+### Attempted Scope
+
+The approved recovery was limited to the existing owner governance UI/API path:
+
+- Grant only `prices.write = allow` to the intended canary operator/admin account.
+- Retry only the failed price-book save for hidden canary `NB-CANARY-EDITOR-SAVELOAD-001`.
+- Keep the canary hidden, inactive, unpublished, and absent from home placement.
+
+### Result
+
+The production browser session was on `/kr/admin/team`, but the rendered page showed the admin access fallback instead of the team management controls:
+
+- Current admin session visible: redacted `dgkim0127@...`
+- Team management content: not rendered
+- Visible blocker: additional admin API permission required
+- Owner governance controls: not available
+- `prices.write` override applied: No
+- Canary price retry executed: No
+
+Applying the override without the owner governance UI would require guessing a target account identifier, extracting browser credentials, using a lower-level backend call outside the rendered owner workflow, or using direct database/SQL recovery. Those paths were outside the approved boundary for this task.
+
+Decision: `STOPPED_OWNER_GOVERNANCE_SESSION_LACKS_TEAM_ACCESS`
+
+### Read-Only Safety Check
+
+After stopping before mutation, public API checks were read-only:
+
+| Check | Result |
+| --- | --- |
+| Seed product detail | 200 |
+| Seed product hash | `58f6f661afab553f381d6232f92cdc8da83928858ff1a2fe6d96b9106069c9db` |
+| Canary public detail | 404 |
+| Canary in public product list | No |
+
+No existing product was changed, no canary was published, no direct DB connection or SQL was used, no Secret/IAM/Firebase custom claim was changed, no backend or Firebase deploy was performed, and no token/cookie/localStorage value was extracted.
+
+### Next Safe Step
+
+Use an authenticated owner admin session that can render `/kr/admin/team`, then apply only this override through the existing UI:
+
+| Field | Value |
+| --- | --- |
+| Permission | `prices.write` |
+| Effect | `allow` |
+| Reason | `N74P2 prices.write canary retry` |
+| Target | Intended canary operator/admin account |
+
+Next gate: `APPROVE_OWNER_GOVERNANCE_PRICE_PERMISSION_SESSION = YES` with a confirmed owner session that can access `/kr/admin/team`.
