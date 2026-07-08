@@ -20,6 +20,7 @@ This index points operators and implementers to the current site map, QA evidenc
 | --- | --- |
 | `docs/SITE_OPERATIONS_MAP.md` | Route, API, admin, home, and data model map |
 | `docs/QA_SITE_WIDE_AUDIT.md` | Read-only browser and API QA evidence |
+| `docs/N74_CATALOG_EDITOR_SAVE_LOAD_CANARY.md` | Controlled admin catalog editor save/load canary evidence |
 | `docs/ROADMAP_B2B_SHOPPING_MALL.md` | Staged roadmap for B2B catalog operations |
 | `docs/OPS_INDEX.md` | Entry point for operations docs |
 
@@ -32,6 +33,7 @@ This index points operators and implementers to the current site map, QA evidenc
 | Plan next admin feature | `docs/ROADMAP_B2B_SHOPPING_MALL.md` |
 | Confirm B2B terminology | `docs/SITE_OPERATIONS_MAP.md` |
 | Work on product attributes | Next task `N74-CATALOG-ATTRIBUTE-DETAIL-EDITOR-REWORK` |
+| Check catalog editor save/load status | `docs/N74_CATALOG_EDITOR_SAVE_LOAD_CANARY.md` |
 
 ## Production Read-Only Smoke
 
@@ -50,3 +52,5 @@ This index points operators and implementers to the current site map, QA evidenc
 This index was produced from read-only route, source, and API inspection.
 
 No production deploy, runtime config change, data mutation, manual FX execution, or database migration is part of this documentation task.
+
+N74 save/load canary note: one hidden canary product save was attempted through the production admin editor. Product and image steps completed, price save stopped on missing admin permission. Existing public product data remained unchanged.

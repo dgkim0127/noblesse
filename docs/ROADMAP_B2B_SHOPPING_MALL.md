@@ -148,11 +148,14 @@ Completed in N74:
 | Public detail page | Product detail copy and responsive typography were cleaned for KR/EN/JP/TW routes |
 | Taxonomy labels | Public/admin labels were normalized for KR, EN, JP, and Traditional Chinese surfaces |
 | Validation | Optional numeric spec fields reject invalid non-positive values while unknown real specs can stay blank |
+| Save/load canary | Production editor can create hidden product and image records, but price save is blocked by current operator permission |
 
 Remaining recommended follow-up:
 
 | Area | Next step |
 | --- | --- |
 | Existing product edit | Confirm whether operators need a full edit screen for already-created products |
+| Price writer permission | Resolve the narrow admin permission needed for product price book save from the catalog editor |
+| Field-level reload QA | Add or expose an edit/reopen path so taxonomy, specs, detail copy, images, placement, and price fields can be checked after save |
 | Real catalog data | Fill only confirmed material, gauge, size, and decoration data supplied by the operator |
 | Product inquiry MVP | Build the quote-request workflow after catalog data entry is stable |
