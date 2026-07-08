@@ -277,3 +277,70 @@ No Secret value was accessed, no IAM role was changed, no Cloud Run Service was 
 Approve a narrowly scoped temporary Firebase Auth Viewer grant for the production runtime service account, run the existing owner recovery Job exactly once, then revoke the temporary role after success or failure.
 
 Next gate: `APPROVE_OWNER_RECOVERY_FIREBASE_AUTH_VIEWER_IAM_FIX = YES`
+
+## N74P4B Owner Recovery Firebase Auth Viewer IAM Fix
+
+Date: 2026-07-08
+
+Repository: `D:\noblesse-main-work`
+Branch: `main`
+HEAD: `e06e0ba769a9a1e756d5e03618e0eb615dfe938e`
+
+### Temporary IAM and Recovery Execution
+
+The production runtime service account was temporarily granted only `roles/firebaseauth.viewer` so the existing owner recovery script could perform the required Firebase Admin user lookup. The role was confirmed before execution and revoked after the recovery flow completed.
+
+| Item | Result |
+| --- | --- |
+| Runtime principal | `serviceAccount:noblesse-production-runtime@pors-piercing-pos.iam.gserviceaccount.com` |
+| Temporary role | `roles/firebaseauth.viewer` |
+| IAM grant count | 1 |
+| Recovery Job | `noblesse-owner-admin-profile-recovery-n74p4b` |
+| Job create count | 1 |
+| Job execute count | 1 |
+| Execution ID | `noblesse-owner-admin-profile-recovery-n74p4b-jk2xg` |
+| Execution result | Succeeded, exit 0 |
+| Recovery category | `OWNER_ADMIN_RECOVERY_COMPLETE` |
+| Firebase target found/enabled | Yes |
+| Owner ready | Yes |
+| Transaction committed | Yes |
+| Job deleted | Yes |
+| IAM revoke count | 1 |
+| Firebase Auth Viewer after cleanup | Absent |
+
+The sanitized recovery output did not include the target email, Firebase UID, token, password, database URL, host, user, database name, SQL parameters, or secret values.
+
+### Team Access and Permission State
+
+The production browser session rendered `/kr/admin/team` with the admin team page and owner/admin navigation visible. The team table and role editor rendered, confirming that owner governance access was restored.
+
+The role editor did not expose a `prices.write` override in the observed owner rows because owner overrides are protected. Source inspection still confirms `prices.write` exists in the frontend permission catalog and backend admin permission matrix, but this task did not grant it and did not retry the canary price save.
+
+| Check | Result |
+| --- | --- |
+| `/kr/admin/team` rendered | Yes |
+| Admin shell rendered | Yes |
+| Owner/team signals rendered | Yes |
+| Horizontal overflow | No |
+| Login configuration error | No |
+| `prices.write` granted | No |
+| Canary price retry | No |
+
+### Public Safety Checks
+
+The seed product public API remained unchanged from the prior canary baseline hash, and the hidden canary product remained absent from public catalog surfaces.
+
+| Check | Result |
+| --- | --- |
+| Seed product API status | 200 |
+| Seed product SHA-256 | `58f6f661afab553f381d6232f92cdc8da83928858ff1a2fe6d96b9106069c9db` |
+| Hidden canary detail route | 404 |
+| Product list contains hidden canary | No |
+
+No Secret value was accessed, no direct DB connection or manual SQL was used, no Firebase custom claim was edited, no Cloud Run Service or Firebase Hosting deploy was performed, no product, buyer, inquiry, order, FX, or scheduler mutation was performed, and no token/cookie/localStorage value was extracted.
+
+### Next Safe Step
+
+Use the restored owner/team access to grant only `prices.write = allow` through the existing owner-governed admin permission path, then retry only the failed hidden canary price save.
+
+Next gate: `APPROVE_OWNER_GOVERNANCE_PRICE_PERMISSION_SESSION = YES`
