@@ -809,15 +809,15 @@ export function AdminCatalogEntryPage() {
       >{getTaxonomyLabel(key, value, locale)}</button>)}
     </div>
   </div>
-  const editorProgressItems = [
-    t.progress.category,
-    t.progress.product,
-    t.progress.classification,
-    t.progress.specs,
-    t.progress.detail,
-    t.progress.images,
-    t.progress.price,
-    t.progress.placement,
+  const editorStepLinks = [
+    { id: 'catalog-entry-category', label: t.progress.category },
+    { id: 'catalog-entry-product', label: t.progress.product },
+    { id: 'catalog-entry-attributes', label: t.progress.classification },
+    { id: 'catalog-entry-attributes', label: t.progress.specs },
+    { id: 'catalog-entry-attributes', label: t.progress.detail },
+    { id: 'catalog-entry-images', label: t.progress.images },
+    { id: 'catalog-entry-price', label: t.progress.price },
+    { id: 'catalog-entry-attributes', label: t.progress.placement },
   ]
 
   return <>
@@ -829,9 +829,11 @@ export function AdminCatalogEntryPage() {
     <AdminPreviewNote>{t.note}</AdminPreviewNote>
 
     <ol className="catalog-editor-progress" aria-label={t.progress.title}>
-      {editorProgressItems.map((label, index) => <li key={label}>
-        <span>{index + 1}</span>
-        <strong>{label}</strong>
+      {editorStepLinks.map((step, index) => <li key={`${step.id}-${index}`}>
+        <a href={`#${step.id}`}>
+          <span>{index + 1}</span>
+          <strong>{step.label}</strong>
+        </a>
       </li>)}
     </ol>
 
@@ -844,7 +846,7 @@ export function AdminCatalogEntryPage() {
 
     <section className="catalog-entry-layout">
       <div className="catalog-entry-form-stack">
-        <section className="admin-card catalog-entry-section">
+        <section className="admin-card catalog-entry-section" id="catalog-entry-category">
           <div className="catalog-entry-section-heading">
             <span className="catalog-entry-step-badge">1</span>
             <div>
@@ -881,7 +883,7 @@ export function AdminCatalogEntryPage() {
           </div>}
         </section>
 
-        <section className="admin-card catalog-entry-section">
+        <section className="admin-card catalog-entry-section" id="catalog-entry-product">
           <div className="catalog-entry-section-heading">
             <span className="catalog-entry-step-badge">2</span>
             <div>
@@ -915,7 +917,7 @@ export function AdminCatalogEntryPage() {
           </div>
         </section>
 
-        <section className="admin-card catalog-entry-section">
+        <section className="admin-card catalog-entry-section" id="catalog-entry-attributes">
           <div className="catalog-entry-section-heading">
             <span className="catalog-entry-step-badge">3</span>
             <div>
@@ -1019,7 +1021,7 @@ export function AdminCatalogEntryPage() {
           </div>
         </section>
 
-        <section className="admin-card catalog-entry-section">
+        <section className="admin-card catalog-entry-section" id="catalog-entry-images">
           <div className="catalog-entry-section-heading">
             <span className="catalog-entry-step-badge">4</span>
             <div>
@@ -1079,7 +1081,7 @@ export function AdminCatalogEntryPage() {
           </div>
         </section>
 
-        <section className="admin-card catalog-entry-section">
+        <section className="admin-card catalog-entry-section" id="catalog-entry-price">
           <div className="catalog-entry-section-heading">
             <span className="catalog-entry-step-badge">5</span>
             <div>

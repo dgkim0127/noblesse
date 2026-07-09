@@ -44,6 +44,11 @@ const adminNavGroups = [
       { key: 'catalogEntry', path: '/admin/catalog/new', icon: PlusCircle, permission: 'catalog.write' },
       { key: 'products', path: '/admin/products', icon: Gem, permission: 'catalog.read' },
       { key: 'categories', path: '/admin/categories', icon: Tags, permission: 'catalog.read' },
+    ],
+  },
+  {
+    key: 'pricing',
+    items: [
       { key: 'prices', path: '/admin/prices', icon: Tags, permission: 'prices.read' },
       { key: 'fx', path: '/admin/fx', icon: Landmark, permission: 'prices.read' },
     ],
@@ -65,6 +70,7 @@ const fallbackGroups = {
   operations: 'Operations',
   members: 'Members',
   catalog: 'Catalog',
+  pricing: 'Pricing',
   insights: 'Insights',
   governance: 'Governance',
 }
