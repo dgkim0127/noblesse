@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ChevronDown, Clock3, Eye, EyeOff, Heart, LogOut, Search, ShieldCheck, UserRound, X } from 'lucide-react'
+import { ChevronDown, ClipboardList, Clock3, Eye, EyeOff, Heart, LogOut, Search, ShieldCheck, UserRound, X } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import noblesseLogo from '../assets/noblesse-logo.png'
 import { useCommerce } from '../commerce/commerceStore'
@@ -17,7 +17,7 @@ const shellCopy = {
     countryLabels: { kr: '한국', en: '미국', jp: '일본', 'zh-TW': '대만' },
     footer: '국내·해외 B2B 거래처를 위한 프리미엄 피어싱 카탈로그',
     home: '홈',
-    inquiryList: '문의 리스트',
+    inquiryList: '견적 리스트',
     languageSwitch: '언어 설정',
     login: '로그인',
     logout: '로그아웃',
@@ -64,7 +64,7 @@ const shellCopy = {
     countryLabels: { kr: 'Korea', en: 'United States', jp: 'Japan', 'zh-TW': 'Taiwan' },
     footer: 'Premium piercing catalog for domestic and international B2B buyers',
     home: 'Home',
-    inquiryList: 'Inquiry list',
+    inquiryList: 'Inquiry List',
     languageSwitch: 'Language settings',
     login: 'Login',
     logout: 'Logout',
@@ -111,7 +111,7 @@ const shellCopy = {
     countryLabels: { kr: '韓国', en: '米国', jp: '日本', 'zh-TW': '台湾' },
     footer: '国内・海外B2B取引先向けプレミアムピアスカタログ',
     home: 'ホーム',
-    inquiryList: 'お問い合わせリスト',
+    inquiryList: '見積リスト',
     languageSwitch: '言語設定',
     login: 'ログイン',
     logout: 'ログアウト',
@@ -158,7 +158,7 @@ const shellCopy = {
     countryLabels: { kr: '韓國', en: '美國', jp: '日本', 'zh-TW': '台灣' },
     footer: '面向国内外B2B买家的高端穿孔商品目录',
     home: '首页',
-    inquiryList: '咨询清单',
+    inquiryList: '詢價清單',
     languageSwitch: '语言设置',
     login: '登录',
     logout: '登出',
@@ -317,7 +317,7 @@ const loginModalCopy = {
   kr: {
     title: '거래처 로그인',
     heading: 'LOGIN',
-    description: '확인된 거래처는 거래 조건, 문의 리스트, 견적 문의 기능을 사용할 수 있습니다. 견적 문의는 최종 주문이 아닙니다.',
+    description: '확인된 거래처는 거래 조건, 견적 리스트, 견적 요청 기능을 사용할 수 있습니다. 견적 요청은 최종 주문이 아닙니다.',
     email: '아이디 또는 이메일',
     password: '비밀번호',
     emailPlaceholder: '아이디 또는 이메일을 입력하세요',
@@ -384,13 +384,9 @@ const readSearchHistory = () => {
 }
 
 function AnimatedBrandName({ ariaHidden = false, text }) {
-  const characters = Array.from(text)
-
-  return <span className="brand-name-window" aria-hidden={ariaHidden ? 'true' : undefined} aria-label={ariaHidden ? undefined : text}>
+  return <span className="brand-name-window brand-name-static" aria-hidden={ariaHidden ? 'true' : undefined} aria-label={ariaHidden ? undefined : text}>
     <span className="brand-name-slot" key={text} aria-hidden="true">
-      {characters.map((char, index) => <span className="brand-name-char" key={`${text}-${index}-${char}`} style={{ '--char-index': index }}>
-        {char === ' ' ? '\u00A0' : char}
-      </span>)}
+      {text}
     </span>
   </span>
 }
@@ -763,6 +759,7 @@ export function StoreShell() {
 
   const shouldRenderCompactSearch = isCompactSearchOpen || isCompactSearchClosing
   const myInquiriesPath = isAdmin ? '/admin/inquiries' : '/my-inquiries'
+  const inquiryListPath = '/inquiry-list'
 
   return <div className={`site-shell ${isHomeImageRoute ? 'home-image-shell' : ''} ${usesHomeStyleHeader ? 'product-list-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isSideLayout ? 'has-side-layout' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''} ${isPreviewBarHidden ? 'has-preview-hidden' : 'has-preview-visible'}`.trim()}>
     <div className={`top-marquee ${isMarqueeCollapsed ? 'is-collapsed' : ''}`} style={topMarqueeStyle} aria-label={`${headerBrandName} material notice`}>
@@ -845,20 +842,25 @@ export function StoreShell() {
                 <IconAction className="header-my-action" label={copy.account} onClick={openLoginRequiredModal}>{sideCopy.my}</IconAction>
               </>
               : <>
+                {isAdmin && <IconAction className="header-side-icon" label={copy.adminPreview} to={toLocalePath('/admin')}><ShieldCheck size={17} /></IconAction>}
+                {isApproved && <IconAction className="header-side-icon" label={sideCopy.inquiryList} to={toLocalePath(inquiryListPath)}><ClipboardList size={17} /></IconAction>}
                 <IconAction className="header-side-icon" label={sideCopy.myInquiries} to={toLocalePath(myInquiriesPath)}><Clock3 size={17} /></IconAction>
                 <IconAction className="header-my-action" label={copy.account} to={toLocalePath('/account')}>{sideCopy.my}</IconAction>
               </>}
           </>}
           {isGuest && !usesHomeStyleHeader && <IconAction label={copy.login} onClick={openLoginModal}><UserRound size={18} /></IconAction>}
-          {isPending && <>
+          {!usesHomeStyleHeader && isPending && <>
             <IconAction label={copy.pending} to={toLocalePath('/approval-pending')}><Clock3 size={18} /></IconAction>
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}
-          {isApproved && <>
+          {!usesHomeStyleHeader && isApproved && <>
+            <IconAction label={sideCopy.inquiryList} to={toLocalePath(inquiryListPath)}><ClipboardList size={18} /></IconAction>
+            <IconAction label={sideCopy.myInquiries} to={toLocalePath(myInquiriesPath)}><Clock3 size={18} /></IconAction>
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}
-          {isAdmin && <>
+          {!usesHomeStyleHeader && isAdmin && <>
             <IconAction label={copy.adminPreview} to={toLocalePath('/admin')}><ShieldCheck size={18} /></IconAction>
+            <IconAction label={sideCopy.myInquiries} to={toLocalePath(myInquiriesPath)}><Clock3 size={18} /></IconAction>
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}
           {!isGuest && <IconAction label={copy.logout} onClick={handleHeaderSignOut}><LogOut size={18} /></IconAction>}

@@ -23,9 +23,9 @@ function getBuyerLoginId(buyer) {
 }
 
 function getBuyerTitle(buyer) {
-  const name = buyer.contactName || '-'
-  const company = buyer.companyName || '-'
-  return `${company} - ${name}`
+  const loginId = getBuyerLoginId(buyer)
+  const name = buyer.contactName || buyer.companyName || '-'
+  return `${loginId} - ${name}`
 }
 
 function getStatusActionLabel(t, status) {
@@ -223,7 +223,7 @@ export function AdminBuyersPage() {
           return <article className="admin-buyer-card" key={buyer.id}>
           <div className="admin-buyer-card-main">
             <h2>{getBuyerTitle(buyer)}</h2>
-            <p>{formatAdminCopy(t.buyers.loginIdLine || '아이디 {loginId}', { loginId: buyerLoginId })}</p>
+            <p>{buyer.companyName || formatAdminCopy(t.buyers.loginIdLine || '아이디 {loginId}', { loginId: buyerLoginId })}</p>
             <p className="admin-buyer-email">{buyer.email || '-'}</p>
             <div className="admin-actions tight">
               <AdminLink to={`/admin/buyers/${buyer.id}`}>{t.common.view}</AdminLink>

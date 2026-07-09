@@ -641,6 +641,12 @@ h6 {
   min-width: 0;
 }
 
+.brand-name-static .brand-name-slot {
+  animation: none;
+  transform: none;
+  opacity: 1;
+}
+
 .brand-name-char {
   display: inline-block;
   font-size: 1.08em;

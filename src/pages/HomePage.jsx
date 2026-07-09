@@ -25,7 +25,7 @@ const homeCopy = {
     viewCatalog: '카탈로그 보기',
     access: '거래 문의하기',
     pending: '확인 상태 보기',
-    approved: '문의 리스트',
+    approved: '견적 리스트',
     admin: '관리자',
     buyerStripGuest: '국내·해외 거래처용 카탈로그',
     buyerStripPending: '거래처 정보 확인 중이에요',
