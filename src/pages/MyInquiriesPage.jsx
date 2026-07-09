@@ -194,7 +194,7 @@ export function MyInquiriesPage() {
   }
 
   return <main className="content">
-    <div className="page-title"><div><p>My Inquiries</p><h1>Quote inquiry history</h1></div></div>
+    <div className="page-title"><div><p>My Inquiries</p><h1>Quote request history</h1></div></div>
     <div className="status-tabs">{statusTabs.map((status) => <button className={statusFilter === status ? 'active' : ''} key={status} type="button" onClick={() => setStatusFilter(status)}>{status === 'all' ? 'All' : statusLabel[status]}</button>)}</div>
     {refreshStatus === 'loading' && <p className="auth-notice" role="status">Refreshing inquiry history from the backend API...</p>}
     {refreshStatus === 'error' && <p className="auth-notice" role="alert">{refreshError}</p>}
@@ -208,6 +208,6 @@ export function MyInquiriesPage() {
           <b>{formatMoney(item.estimatedTotal || 0, item.currency || buyer.currency)}</b>
         </Link>
       })}</div>
-      : <section className="empty"><h2>No inquiry records found.</h2><p>Create a quote inquiry from the Inquiry List after selecting approved buyer products.</p><Link className="secondary-action" to={toLocalePath('/products')}>Product List</Link></section>}
+      : <section className="empty"><h2>No inquiry records found.</h2><p>Create a quote request from the Inquiry List after selecting approved buyer products.</p><Link className="secondary-action" to={toLocalePath('/products')}>Product List</Link></section>}
   </main>
 }

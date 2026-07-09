@@ -10,7 +10,7 @@ test('product detail keeps Noblesse inquiry wording and avoids direct purchase C
 
   assert.match(source, /Add to Inquiry List/)
   assert.match(source, /Request quote for this product/)
-  assert.match(source, /이 상품으로 견적 문의/)
+  assert.match(source, /이 상품으로 견적 요청/)
   assert.match(source, /商品詢價/)
   assert.doesNotMatch(source, /Buy Now|Checkout|Payment|Order Now|Add to Cart|장바구니|바로 구매|결제/)
 })

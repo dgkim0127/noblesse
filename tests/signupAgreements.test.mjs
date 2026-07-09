@@ -76,8 +76,8 @@ test('register agreement details use localized article and table structure outsi
   assert.match(source, /Article 1 Purpose/)
   assert.match(source, /第1条 目的/)
   assert.match(source, /第1條 目的/)
-  assert.match(source, /Article 7 Nature of Quote Inquiry/)
-  assert.match(source, /第7条 見積お問い合わせの性格/)
+  assert.match(source, /Article 7 Nature of Quote Request/)
+  assert.match(source, /第7条 見積依頼の性格/)
   assert.match(source, /第7條 報價詢問性質/)
 
   assert.match(source, /Personal Information Collection and Use Consent/)
