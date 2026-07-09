@@ -6,6 +6,10 @@ const toneByMaterial = [
   ['cubic', 'opal'],
 ]
 
+function normalizeStringArray(value) {
+  return Array.isArray(value) ? value.filter(Boolean) : []
+}
+
 function inferTone(product) {
   const text = `${product?.material || ''} ${product?.nameEn || ''}`.toLowerCase()
   return toneByMaterial.find(([needle]) => text.includes(needle))?.[1] || 'silver'
@@ -25,10 +29,10 @@ export function adaptApiProduct(product) {
     categoryId: product.categoryId || 'uncategorized',
     categoryNameKo: product.categoryNameKo || '',
     categoryNameEn: product.categoryNameEn || '',
-    collectionIds: Array.isArray(product.collectionIds) ? product.collectionIds : [],
+    collectionIds: normalizeStringArray(product.collectionIds),
     material: product.material || '',
-    colors: Array.isArray(product.colors) ? product.colors : [],
-    sizes: Array.isArray(product.sizes) ? product.sizes : [],
+    colors: normalizeStringArray(product.colors),
+    sizes: normalizeStringArray(product.sizes),
     moqDefault: product.moqDefault || 1,
     leadTime: product.leadTime || '',
     origin: product.origin || '',
@@ -39,10 +43,10 @@ export function adaptApiProduct(product) {
     piercingType: product.taxonomy?.piercingType || product.piercingType || undefined,
     baseMaterial: product.taxonomy?.baseMaterial || product.baseMaterial || undefined,
     allSurgical: Boolean(product.taxonomy?.allSurgical ?? product.allSurgical),
-    decorationMaterials: Array.isArray(product.taxonomy?.decorationMaterials) ? product.taxonomy.decorationMaterials : product.decorationMaterials || [],
-    structures: Array.isArray(product.taxonomy?.structures) ? product.taxonomy.structures : product.structures || [],
-    styles: Array.isArray(product.taxonomy?.styles) ? product.taxonomy.styles : product.styles || [],
-    shapes: Array.isArray(product.taxonomy?.shapes) ? product.taxonomy.shapes : product.shapes || [],
+    decorationMaterials: Array.isArray(product.taxonomy?.decorationMaterials) ? product.taxonomy.decorationMaterials : normalizeStringArray(product.decorationMaterials),
+    structures: Array.isArray(product.taxonomy?.structures) ? product.taxonomy.structures : normalizeStringArray(product.structures),
+    styles: Array.isArray(product.taxonomy?.styles) ? product.taxonomy.styles : normalizeStringArray(product.styles),
+    shapes: Array.isArray(product.taxonomy?.shapes) ? product.taxonomy.shapes : normalizeStringArray(product.shapes),
     saleType: product.taxonomy?.saleType || product.saleType || undefined,
     specs: product.specs || {},
     detailContent: product.detailContent || {},
@@ -57,6 +61,7 @@ export function adaptApiProduct(product) {
     descriptionEn: product.descriptionEn || product.descriptionKo || '',
     descriptionJa: product.descriptionJa || product.descriptionEn || product.descriptionKo || '',
     descriptionCn: product.descriptionCn || product.descriptionEn || product.descriptionKo || '',
+    searchKeywords: normalizeStringArray(product.searchKeywords),
     createdAt: product.createdAt || null,
     updatedAt: product.updatedAt || null,
     tone: product.tone || inferTone(product),

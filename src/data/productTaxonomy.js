@@ -428,6 +428,10 @@ const materialMap = {
   Acrylic: 'acrylic',
 }
 
+const barbellCategoryIds = new Set(['barbell'])
+const piercingCategoryIds = new Set(['piercing', 'barbell', 'labret', 'nose-piercing', 'belly-ring'])
+const ringCategoryIds = new Set(['nose-piercing', 'belly-ring'])
+
 const mockTaxonomySeeds = [
   { baseMaterial: 'surgical', structures: ['barbell', 'basic_barbell'], styles: ['plain'], shapes: ['sphere'], saleType: 'single' },
   { baseMaterial: 'titanium', structures: ['internal'], decorationMaterials: ['cubic', 'synthetic_gem'], styles: ['cubic_setting'], shapes: ['heart'], saleType: 'single' },
@@ -483,16 +487,25 @@ export function createProductTaxonomy({ categoryId, material, collectionIds = []
 }
 
 export function getProductTaxonomy(product) {
-  return product.taxonomy || {
-    productGroup: product.productGroup || 'piercing',
-    piercingType: product.piercingType || 'ball',
-    baseMaterial: product.baseMaterial || materialMap[product.material] || 'other',
-    allSurgical: Boolean(product.allSurgical),
-    decorationMaterials: product.decorationMaterials || [],
-    structures: product.structures || [],
-    styles: product.styles || [],
-    shapes: product.shapes || [],
-    saleType: product.saleType || 'single',
+  const taxonomy = product?.taxonomy && typeof product.taxonomy === 'object' ? product.taxonomy : {}
+  const categoryId = product?.categoryId || ''
+  const structures = [...asArray(taxonomy.structures || product?.structures)]
+
+  if (barbellCategoryIds.has(categoryId) && !structures.includes('barbell')) {
+    structures.push('barbell')
+  }
+
+  return {
+    productGroup: taxonomy.productGroup || product?.productGroup || (piercingCategoryIds.has(categoryId) ? 'piercing' : undefined),
+    piercingType: taxonomy.piercingType || product?.piercingType || (ringCategoryIds.has(categoryId) ? 'ring' : undefined),
+    baseMaterial: taxonomy.baseMaterial || product?.baseMaterial || materialMap[product?.material],
+    allSurgical: Boolean(taxonomy.allSurgical ?? product?.allSurgical),
+    decorationMaterials: asArray(taxonomy.decorationMaterials || product?.decorationMaterials),
+    partType: asArray(taxonomy.partType || product?.partType),
+    structures,
+    styles: asArray(taxonomy.styles || product?.styles),
+    shapes: asArray(taxonomy.shapes || product?.shapes),
+    saleType: taxonomy.saleType || product?.saleType,
   }
 }
 

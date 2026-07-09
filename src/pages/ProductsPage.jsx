@@ -11,6 +11,7 @@ import {
   taxonomyLabels,
 } from '../data/productTaxonomy'
 import { getCatalogFilterOptionLabel, loadCatalogFilterOptions, subscribeCatalogFilterOptions } from '../services/catalogFilterOptions'
+import { productMatchesCatalogSearch } from '../services/productSearch'
 import { getLocaleContentKey, useLocalePath } from '../utils/locale'
 
 const _productPageCopy = {
@@ -1068,8 +1069,6 @@ const getFilterOptionLabel = (option, locale) => (
   || option.label
 )
 
-const hasText = (value, query) => String(value ?? '').toLowerCase().includes(query)
-
 const getKrWholesalePrice = (productPrices, productId) => {
   const price = (productPrices || []).find((item) => item.productId === productId && item.market === 'KR' && item.currency === 'KRW' && item.isActive !== false)
   return Number.isFinite(Number(price?.wholesalePrice)) ? Number(price.wholesalePrice) : null
@@ -1140,15 +1139,7 @@ export function ProductsPage() {
       if (max !== null && price > max) return false
     }
 
-    if (!normalizedQuery) return true
-
-    return [
-      product.code,
-      product.nameKo,
-      product.nameEn,
-      product.nameJa,
-      product.material,
-    ].some((value) => hasText(value, normalizedQuery))
+    return productMatchesCatalogSearch(product, normalizedQuery)
   })
 
   const sortedProducts = [...filtered].sort((a, b) => {
