@@ -500,3 +500,38 @@ Public safety checks after deployment still show the seed product route returns 
 Decision: `PRICES_WRITE_CONTROL_VISIBLE_TARGET_OPERATOR_REQUIRED`
 
 The remaining blocker is target identity, not control availability. The live team page currently shows owner rows; no non-owner operator or manager target was identified for a narrow `prices.write` grant. Do not grant `prices.write` or retry the hidden canary price save until the target operator/admin account is explicitly identified.
+
+## N74P5 Owner Canary Price Save Retry Fast
+
+Date: 2026-07-09
+
+Current baseline `b0570d2eb2d84ce395c480ff23ac0d41580081c8` was verified equal to `origin/main`. The working tree had no tracked or staged diff; only local untracked cache/input folders were present.
+
+This run was approved to retry only the hidden canary KR price save through an existing owner browser session, without granting `prices.write` to another account and without creating a new canary product. Both available browser sessions were checked. `/kr/admin/prices` and `/kr/admin/team` rendered the fail-closed admin gate (`관리자 권한이 필요합니다`) instead of the owner/admin UI, so the price form was not reachable and no price save request was submitted.
+
+Public safety checks still show the seed product route returns 200, the hidden canary detail route returns 404, and the public product list does not include the hidden canary. Source inspection confirmed the admin price routes are still guarded by `prices.write`; this run did not change permissions or attempt any alternate write path.
+
+Decision: `STOPPED_OWNER_SESSION_NOT_AVAILABLE_FOR_PRICE_RETRY`
+
+| Check | Result |
+| --- | --- |
+| Current HEAD | `b0570d2eb2d84ce395c480ff23ac0d41580081c8` |
+| HEAD equals `origin/main` | Yes |
+| Tracked or staged diff before docs | No |
+| Hidden canary target | `NB-CANARY-EDITOR-SAVELOAD-001` |
+| Intended KR price | `1800` |
+| Owner/admin price page reachable | No |
+| Price save request submitted | No |
+| Price reload verified | No |
+| Seed product API status | 200 |
+| Hidden canary detail route | 404 |
+| Product list contains hidden canary | No |
+| Permission grant | No |
+| Product created or changed | No |
+| Canary published or placed on home | No |
+| Direct SQL or DB console | No |
+| Secret/IAM/Firebase custom claim change | No |
+| Backend deploy | No |
+| Firebase Hosting deploy | No |
+
+Next safe action: sign in as the restored owner/admin account in the browser session, then retry only the hidden canary KR price save. If the owner/admin UI renders but price save still returns an authorization error, classify that separately as `STOPPED_OWNER_PRICE_SAVE_STILL_DENIED`.

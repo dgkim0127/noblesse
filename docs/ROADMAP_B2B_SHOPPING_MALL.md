@@ -155,7 +155,7 @@ Remaining recommended follow-up:
 | Area | Next step |
 | --- | --- |
 | Existing product edit | Confirm whether operators need a full edit screen for already-created products |
-| Price writer permission | Owner recovery is complete and `/kr/admin/team` now renders the governance page. N74PX made the existing delegable `prices.write` permission visible in an owner-only read-only catalog and deployed that frontend-only control fix to Hosting target `noblesse`. `prices.write` has still not been granted because no non-owner operator/admin target was identified, and the hidden canary price step has not been retried. N75 remains blocked until the exact target account is identified, a separately approved owner-governed `prices.write` grant succeeds, and the hidden N74 canary price save is retried successfully |
+| Price writer permission | Owner recovery is complete and N74PX made the existing delegable `prices.write` permission visible in an owner-only read-only catalog. N74P5 then attempted a no-grant owner-session retry, but both available browser sessions rendered the fail-closed admin gate before the price form, so the hidden canary price save request was not submitted. N75 remains blocked until an active owner/admin browser session can retry the hidden N74 canary KR price save, or a separately approved owner-governed grant path is used for an explicit non-owner target |
 | Field-level reload QA | Add or expose an edit/reopen path so taxonomy, specs, detail copy, images, placement, and price fields can be checked after save |
 | Real catalog data | Fill only confirmed material, gauge, size, and decoration data supplied by the operator |
 | Product inquiry MVP | Build the quote-request workflow after catalog data entry is stable |
