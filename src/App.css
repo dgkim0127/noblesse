@@ -14130,10 +14130,79 @@ h6 {
   cursor: pointer;
 }
 
+.pd-primary-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
 .pd-secondary-action {
   border: 1px solid var(--noblesse-sub);
   color: var(--noblesse-sub);
   background: #fff;
+}
+
+.pd-direct-inquiry-form {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid rgba(42, 35, 79, 0.1);
+  padding-top: 14px;
+}
+
+.pd-direct-inquiry-form label {
+  color: var(--noblesse-sub);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.pd-direct-inquiry-form textarea {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  border: 1px solid #eadfdd;
+  border-radius: 10px;
+  padding: 12px 13px;
+  color: var(--noblesse-sub);
+  font: inherit;
+  line-height: 1.55;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.pd-direct-inquiry-form textarea:focus {
+  border-color: var(--noblesse-main);
+  outline: 2px solid rgba(255, 143, 169, 0.22);
+}
+
+.pd-direct-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pd-direct-feedback {
+  display: grid;
+  gap: 6px;
+  border-radius: 10px;
+  padding: 12px 13px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.pd-direct-feedback a {
+  width: fit-content;
+  color: var(--noblesse-sub);
+  font-weight: 900;
+}
+
+.pd-direct-feedback.is-success {
+  border: 1px solid #c9ebdb;
+  color: #194f34;
+  background: #eefaf4;
+}
+
+.pd-direct-feedback.is-error {
+  border: 1px solid #ffcbd6;
+  color: var(--noblesse-sub);
+  background: #fff1f4;
 }
 
 .pd-access-box svg {
@@ -14292,6 +14361,10 @@ h6 {
 
   .pd-assurance-strip,
   .pd-admin-price-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-direct-actions {
     grid-template-columns: 1fr;
   }
 

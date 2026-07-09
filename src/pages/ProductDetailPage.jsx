@@ -9,6 +9,7 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { CatalogCard } from '../components/CatalogCard'
+import { getInquiryKey, getInquiryRoutePath } from '../commerce/inquiryKeys'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatAdminPriceBook } from '../config/currency'
 import { formatMoney } from '../utils/commerce'
@@ -560,7 +561,62 @@ const cleanDetailCopy = {
   },
 }
 
-const getDetailCopy = (contentLocale) => cleanDetailCopy[contentLocale] ?? cleanDetailCopy.en
+const directInquiryCopy = {
+  en: {
+    directInquiryError: 'Unable to send this quote request. Please check the selected options and buyer approval status.',
+    directInquiryMemo: 'Request note',
+    directInquiryMemoPlaceholder: 'Add quantity, finish, lead time, or other details for the Noblesse team to review.',
+    directInquirySubmit: 'Request quote for this product',
+    directInquirySubmitting: 'Sending request...',
+    directInquirySuccess: 'Your product quote request has been received.',
+    directInquiryTitle: 'Product quote request',
+    inquiryRef: 'Inquiry number',
+    inquiryStatus: 'Status',
+    viewInquiry: 'View my inquiry',
+  },
+  kr: {
+    directInquiryError: '이 상품 견적 문의를 보낼 수 없습니다. 선택 항목과 거래처 승인 상태를 확인해 주세요.',
+    directInquiryMemo: '요청 메모',
+    directInquiryMemoPlaceholder: '필요한 수량, 색상, 납기나 확인할 내용을 적어주세요.',
+    directInquirySubmit: '이 상품으로 견적 문의',
+    directInquirySubmitting: '문의 접수 중...',
+    directInquirySuccess: '상품 견적 문의가 접수되었습니다.',
+    directInquiryTitle: '상품 견적 문의',
+    inquiryRef: '문의 번호',
+    inquiryStatus: '상태',
+    viewInquiry: '내 견적 요청 보기',
+  },
+  jp: {
+    directInquiryError: 'この商品の見積依頼を送信できません。選択内容とバイヤー承認状態を確認してください。',
+    directInquiryMemo: '依頼メモ',
+    directInquiryMemoPlaceholder: '必要数量、カラー、納期、確認したい内容を入力してください。',
+    directInquirySubmit: 'この商品で見積依頼',
+    directInquirySubmitting: '依頼を送信中...',
+    directInquirySuccess: '商品の見積依頼を受け付けました。',
+    directInquiryTitle: '商品の見積依頼',
+    inquiryRef: '依頼番号',
+    inquiryStatus: '状態',
+    viewInquiry: '見積依頼を見る',
+  },
+  cn: {
+    directInquiryError: '無法送出此商品詢價。請確認選項與買家審核狀態。',
+    directInquiryMemo: '詢價備註',
+    directInquiryMemoPlaceholder: '請填寫需要數量、顏色、交期或希望確認的內容。',
+    directInquirySubmit: '以此商品送出詢價',
+    directInquirySubmitting: '正在送出詢價...',
+    directInquirySuccess: '商品詢價已送出。',
+    directInquiryTitle: '商品詢價',
+    inquiryRef: '詢價編號',
+    inquiryStatus: '狀態',
+    viewInquiry: '查看我的詢價',
+  },
+}
+
+const getDetailCopy = (contentLocale) => ({
+  ...cleanDetailCopy.en,
+  ...(cleanDetailCopy[contentLocale] ?? cleanDetailCopy.en),
+  ...(directInquiryCopy[contentLocale] ?? directInquiryCopy.en),
+})
 
 const asList = (value) => (Array.isArray(value) ? value.filter(Boolean) : [])
 
@@ -681,6 +737,7 @@ export function ProductDetailPage() {
     isAdmin,
     isApproved,
     products,
+    submitProductInquiry,
     viewerState,
   } = useCommerce()
   const { contentLocale, locale, toLocalePath } = useLocalePath()
@@ -699,6 +756,10 @@ export function ProductDetailPage() {
   const canViewAdminPrices = Boolean(isAdmin && adminPriceBooks.length > 0)
   const visibleMoq = canUseTradeTerms ? price.moq : canViewAdminPrices ? adminPriceBooks[0]?.moq : null
   const [quantity, setQuantity] = useState(visibleMoq || 1)
+  const [directMemo, setDirectMemo] = useState('')
+  const [directStatus, setDirectStatus] = useState('idle')
+  const [directError, setDirectError] = useState('')
+  const [directInquiry, setDirectInquiry] = useState(null)
 
   useEffect(() => {
     setSelectedColor(product?.colors?.[0] ?? '')
@@ -708,6 +769,13 @@ export function ProductDetailPage() {
   useEffect(() => {
     if (visibleMoq) setQuantity(visibleMoq)
   }, [visibleMoq])
+
+  useEffect(() => {
+    setDirectMemo('')
+    setDirectStatus('idle')
+    setDirectError('')
+    setDirectInquiry(null)
+  }, [product?.productId])
 
   if (dataStatus === 'loading') {
     return <main className="content pd-page"><div className="empty">Loading product details...</div></main>
@@ -768,6 +836,28 @@ export function ProductDetailPage() {
 
   const addSelectedItem = () => addInquiryItem(product.productId, { color: activeColor, size: activeSize }, currentQuantity)
   const updateQuantity = (nextQuantity) => setQuantity(normalizeQuantity(nextQuantity, visibleMoq || 1))
+  const submitSelectedProductInquiry = async () => {
+    if (!canUseTradeTerms || directStatus === 'submitting') return
+    setDirectStatus('submitting')
+    setDirectError('')
+    setDirectInquiry(null)
+    try {
+      const inquiry = await submitProductInquiry({
+        productId: product.productId,
+        option: { color: activeColor, size: activeSize },
+        quantity: currentQuantity,
+        requestMemo: directMemo.trim(),
+      })
+      if (!inquiry) {
+        throw new Error('PRODUCT_INQUIRY_NOT_CREATED')
+      }
+      setDirectInquiry(inquiry)
+      setDirectStatus('success')
+    } catch {
+      setDirectStatus('error')
+      setDirectError(copy.directInquiryError)
+    }
+  }
 
   return <main className="content pd-page">
     <nav className="pd-breadcrumb" aria-label="Breadcrumb">
@@ -820,7 +910,37 @@ export function ProductDetailPage() {
             </div>
             <small>{copy.quantityNote(visibleMoq)}</small>
           </div>
-          <button className="pd-primary-action" type="button" onClick={addSelectedItem}><Plus size={17} />{copy.addToInquiry}</button>
+          <div className="pd-direct-inquiry-form" id="pd-inquiry-form">
+            <label htmlFor="pd-direct-inquiry-memo">{copy.directInquiryTitle}</label>
+            <textarea
+              id="pd-direct-inquiry-memo"
+              maxLength={1000}
+              onChange={(event) => setDirectMemo(event.target.value)}
+              placeholder={copy.directInquiryMemoPlaceholder}
+              rows={4}
+              value={directMemo}
+            />
+            <div className="pd-direct-actions">
+              <button className="pd-secondary-action" type="button" onClick={addSelectedItem}><Plus size={17} />{copy.addToInquiry}</button>
+              <button
+                className="pd-primary-action"
+                disabled={directStatus === 'submitting'}
+                type="button"
+                onClick={submitSelectedProductInquiry}
+              >
+                {directStatus === 'submitting' ? copy.directInquirySubmitting : copy.directInquirySubmit}
+              </button>
+            </div>
+            {directStatus === 'success' && directInquiry && <div className="pd-direct-feedback is-success" role="status">
+              <strong>{copy.directInquirySuccess}</strong>
+              <span>{copy.inquiryRef}: {getInquiryKey(directInquiry) || '-'}</span>
+              {directInquiry.status && <span>{copy.inquiryStatus}: {directInquiry.status}</span>}
+              <Link to={toLocalePath(getInquiryRoutePath(directInquiry))}>{copy.viewInquiry}</Link>
+            </div>}
+            {directStatus === 'error' && <div className="pd-direct-feedback is-error" role="alert">
+              {directError || copy.directInquiryError}
+            </div>}
+          </div>
         </div> : <div className="pd-access-box">
           <LockKeyhole size={20} />
           <strong>{canViewAdminPrices ? copy.adminPriceBooks : copy.approvalRequired}</strong>
@@ -927,7 +1047,7 @@ export function ProductDetailPage() {
 
     <div className="pd-mobile-action" aria-label={copy.quoteNotice}>
       {canUseTradeTerms
-        ? <button className="pd-primary-action" type="button" onClick={addSelectedItem}><Plus size={17} />{copy.addToInquiry}</button>
+        ? <a className="pd-primary-action" href="#pd-inquiry-form">{copy.directInquirySubmit}</a>
         : !canViewAdminPrices && <Link className="pd-secondary-action" to={toLocalePath(accessLink)}>{accessLabel}</Link>}
     </div>
   </main>

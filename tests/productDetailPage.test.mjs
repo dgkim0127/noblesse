@@ -9,8 +9,9 @@ test('product detail keeps Noblesse inquiry wording and avoids direct purchase C
   const source = readSource('src/pages/ProductDetailPage.jsx')
 
   assert.match(source, /Add to Inquiry List/)
-  assert.match(source, /견적 리스트에 담기/)
-  assert.match(source, /승인 후 가격 확인 가능/)
+  assert.match(source, /Request quote for this product/)
+  assert.match(source, /이 상품으로 견적 문의/)
+  assert.match(source, /商品詢價/)
   assert.doesNotMatch(source, /Buy Now|Checkout|Payment|Order Now|Add to Cart|장바구니|바로 구매|결제/)
 })
 
@@ -21,6 +22,19 @@ test('product detail gates buyer price and MOQ behind approved buyer or admin pr
   assert.match(source, /const canViewAdminPrices = Boolean\(isAdmin && adminPriceBooks\.length > 0\)/)
   assert.match(source, /const visibleMoq = canUseTradeTerms \? price\.moq : canViewAdminPrices \? adminPriceBooks\[0\]\?\.moq : null/)
   assert.match(source, /!canViewAdminPrices && <Link className="pd-secondary-action"/)
+})
+
+test('product detail can submit a direct product inquiry through the commerce helper', () => {
+  const source = readSource('src/pages/ProductDetailPage.jsx')
+  const commerce = readSource('src/commerce/CommerceContext.jsx')
+
+  assert.match(source, /submitProductInquiry/)
+  assert.match(source, /submitSelectedProductInquiry/)
+  assert.match(source, /requestMemo: directMemo\.trim\(\)/)
+  assert.match(source, /getInquiryRoutePath\(directInquiry\)/)
+  assert.match(commerce, /const submitProductInquiry = async/)
+  assert.match(commerce, /buyerApi\.createInquiry/)
+  assert.match(commerce, /productCode: product\.code/)
 })
 
 test('product detail uses scoped pd layout and related products are selected from relevant product signals', () => {
@@ -38,4 +52,5 @@ test('product detail uses scoped pd layout and related products are selected fro
   assert.match(styles, /\.pd-hero/)
   assert.match(styles, /\.pd-editorial/)
   assert.match(styles, /\.pd-mobile-action/)
+  assert.match(styles, /\.pd-direct-inquiry-form/)
 })

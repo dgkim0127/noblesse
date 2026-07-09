@@ -392,6 +392,53 @@ export function CommerceProvider({ children }) {
     return inquiry
   }
 
+  const submitProductInquiry = async ({ productId, option = {}, quantity: rawQuantity, requestMemo = '' } = {}) => {
+    const product = products.find((candidate) => candidate.productId === productId || candidate.code === productId)
+    if (!isApproved || !product) return null
+    const price = getPrice(product.productId)
+    if (!price) return null
+    const selectedOption = getDefaultOption(product, option)
+    const quantity = normalizeQuantity(rawQuantity, price.moq)
+
+    if (!isMockMode) {
+      const token = await getCurrentUserIdToken()
+      const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+      const buyerApi = createBuyerApi(apiClient)
+      const result = await buyerApi.createInquiry({
+        requestMemo,
+        items: [{
+          productCode: product.code,
+          color: selectedOption.color,
+          size: selectedOption.size,
+          quantity,
+        }],
+      }, token)
+      const inquiry = result.data?.inquiry
+      if (inquiry) {
+        setInquiries((current) => upsertInquiry(current, inquiry))
+      }
+      return inquiry || null
+    }
+
+    const singleRow = buildInquiryRows(
+      [{ productId: product.productId, color: selectedOption.color, size: selectedOption.size, quantity }],
+      products,
+      buyer,
+      isApproved,
+      productPrices,
+    )
+    const inquiry = buildInquirySnapshot({
+      inquiryRows: singleRow,
+      buyer,
+      requestMemo,
+      inquiryId: formatInquiryId(),
+    })
+    if (inquiry) {
+      setInquiries((current) => upsertInquiry(current, inquiry))
+    }
+    return inquiry
+  }
+
   return <CommerceContext.Provider value={{
     addInquiryItem,
     approvedPrice,
@@ -420,6 +467,7 @@ export function CommerceProvider({ children }) {
     setViewerState,
     signIn,
     signOut,
+    submitProductInquiry,
     submitRequestQuote,
     totalQuantity,
     updateInquiryQuantity,

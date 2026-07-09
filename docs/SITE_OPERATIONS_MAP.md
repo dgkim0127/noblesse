@@ -133,6 +133,7 @@ Current public seeded product observed through API:
 | Product image | Uses product `imageSet` | Present for the seeded product |
 | Product title and code | Uses catalog API product fields | Present |
 | Approval price panel | Shows approval-based guidance for guest/pending | Must not reveal approved buyer pricing to unapproved users |
+| Product inquiry request | Approved buyer can submit the current product selection to `POST /buyer/inquiries` | Reuses existing inquiry model and status workflow |
 | Detail sections | Editorial/specification/material/quote sections | Present, but typography and long-locale layout need polish |
 | Related products | Category-related area exists | Sparse because only one public product exists |
 
@@ -195,7 +196,9 @@ API base: `https://noblesse.web.app/api`
 | Product detail | `GET /catalog/products/:code` | 200 for seeded product |
 | Missing product | `GET /catalog/products/:code` | 404 for nonexistent product |
 | Buyer profile | `GET /buyer/me` | 401 without authentication |
+| Buyer inquiry create | `POST /buyer/inquiries` | Protected; approved buyers only |
 | Admin profile | `GET /admin/me` | 401 without authentication |
+| Admin inquiries | `GET /admin/inquiries`, `PATCH /admin/inquiries/:id/status` | Protected admin workflow |
 | Login identifier | `POST /auth/resolve-login-identifier` | 401 for unauthenticated smoke input |
 
 ```mermaid

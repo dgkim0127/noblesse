@@ -98,7 +98,8 @@ Needed:
 
 | Feature | Notes |
 | --- | --- |
-| Multi-product inquiry | Use Inquiry List as the source |
+| Single-product inquiry | Implemented on product detail by reusing the existing inquiry create API for approved buyers |
+| Multi-product inquiry | Existing Inquiry List remains the source |
 | Quantity and option capture | Keep product option data structured |
 | Admin quote response | Respond with price, availability, lead time, and notes |
 | Buyer history | My Inquiries shows submitted and responded requests |
