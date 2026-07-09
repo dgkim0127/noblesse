@@ -148,14 +148,14 @@ Completed in N74:
 | Public detail page | Product detail copy and responsive typography were cleaned for KR/EN/JP/TW routes |
 | Taxonomy labels | Public/admin labels were normalized for KR, EN, JP, and Traditional Chinese surfaces |
 | Validation | Optional numeric spec fields reject invalid non-positive values while unknown real specs can stay blank |
-| Save/load canary | Production editor can create hidden product and image records, but price save is blocked by current operator permission |
+| Save/load canary | Production editor can create hidden product and image records; owner-session retry verified the hidden canary KR price row reloads as `KRW 1800` while remaining absent from public product routes |
 
 Remaining recommended follow-up:
 
 | Area | Next step |
 | --- | --- |
 | Existing product edit | Confirm whether operators need a full edit screen for already-created products |
-| Price writer permission | Owner recovery is complete and N74PX made the existing delegable `prices.write` permission visible in an owner-only read-only catalog. N74P5 then attempted a no-grant owner-session retry, but both available browser sessions rendered the fail-closed admin gate before the price form, so the hidden canary price save request was not submitted. N75 remains blocked until an active owner/admin browser session can retry the hidden N74 canary KR price save, or a separately approved owner-governed grant path is used for an explicit non-owner target |
+| Price writer permission | Owner recovery is complete and N74PX made the existing delegable `prices.write` permission visible. N74P5B used the active owner browser session to submit the hidden N74 canary KR price save exactly once and reload-verify `KRW 1800`; no permission grant was needed in that run |
 | Field-level reload QA | Add or expose an edit/reopen path so taxonomy, specs, detail copy, images, placement, and price fields can be checked after save |
 | Real catalog data | Fill only confirmed material, gauge, size, and decoration data supplied by the operator |
 | Product inquiry MVP | Build the quote-request workflow after catalog data entry is stable |

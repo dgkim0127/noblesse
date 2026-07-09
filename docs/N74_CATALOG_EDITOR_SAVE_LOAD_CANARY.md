@@ -535,3 +535,43 @@ Decision: `STOPPED_OWNER_SESSION_NOT_AVAILABLE_FOR_PRICE_RETRY`
 | Firebase Hosting deploy | No |
 
 Next safe action: sign in as the restored owner/admin account in the browser session, then retry only the hidden canary KR price save. If the owner/admin UI renders but price save still returns an authorization error, classify that separately as `STOPPED_OWNER_PRICE_SAVE_STILL_DENIED`.
+
+## N74P5B Owner Session Canary Price Save Retry
+
+Date: 2026-07-09
+
+Current baseline `85083138fe835b89429305c03ebfd7ba519ec80e` was verified equal to `origin/main`. The working tree had no tracked or staged diff; only local untracked cache/input folders were present.
+
+The active browser session rendered `/kr/admin/team` with owner/team controls and `prices.write` visible, then rendered `/kr/admin/prices` without the fail-closed admin gate. The hidden canary KR price save was submitted exactly once through the production admin price UI for product code `NB-CANARY-EDITOR-SAVELOAD-001`, market `KR`, currency `KRW`, wholesale price `1800`, MOQ `1`.
+
+The price page reported that the price row was created. After a page reload, the row remained visible as `NB-CANARY-EDITOR-SAVELOAD-001` / `KRW` / `₩1,800` / `approved_only`.
+
+Public safety checks after the retry still show the seed product route returns 200, the hidden canary detail route returns 404, and the public product list does not include the hidden canary. The seed product response hash remained `58f6f661afab553f381d6232f92cdc8da83928858ff1a2fe6d96b9106069c9db`.
+
+Decision: `CATALOG_PRICE_SAVELOAD_VERIFIED`
+
+| Check | Result |
+| --- | --- |
+| Current HEAD | `85083138fe835b89429305c03ebfd7ba519ec80e` |
+| HEAD equals `origin/main` | Yes |
+| Tracked or staged diff before docs | No |
+| Owner/admin team page reachable | Yes |
+| Owner/admin price page reachable | Yes |
+| Fail-closed admin gate | No |
+| Hidden canary target | `NB-CANARY-EDITOR-SAVELOAD-001` |
+| Price save request submitted | Yes, exactly once |
+| Saved market/currency/price | `KR` / `KRW` / `1800` |
+| Price reload verified | Yes |
+| Seed product API status | 200 |
+| Seed product hash after retry | `58f6f661afab553f381d6232f92cdc8da83928858ff1a2fe6d96b9106069c9db` |
+| Hidden canary detail route | 404 |
+| Product list contains hidden canary | No |
+| Product created or changed | No new product; only the approved canary price row was created |
+| Canary published or placed on home | No |
+| Permission grant | No |
+| Direct SQL or DB console | No |
+| Secret/IAM/Firebase custom claim change | No |
+| Backend deploy | No |
+| Firebase Hosting deploy | No |
+
+N75 product-detail and catalog workflow work is unblocked from the N74 save/load canary perspective.
