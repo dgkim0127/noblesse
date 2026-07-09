@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ChevronDown, ClipboardList, Clock3, Eye, EyeOff, Heart, LogOut, Search, ShieldCheck, UserRound, X } from 'lucide-react'
+import { ChevronDown, Clock3, Eye, EyeOff, Heart, LogOut, Search, ShieldCheck, ShoppingCart, UserRound, X } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import noblesseLogo from '../assets/noblesse-logo.png'
 import { useCommerce } from '../commerce/commerceStore'
@@ -453,6 +453,17 @@ function IconAction({ children, label, onClick, to, className = '' }) {
   </NavLink>
 }
 
+function InquiryListHeaderAction({ count, label, size = 18, to }) {
+  const safeCount = Number.isFinite(count) ? count : 0
+  const badgeLabel = safeCount > 99 ? '99+' : String(safeCount)
+  const ariaLabel = safeCount > 0 ? `${label} ${badgeLabel}` : label
+
+  return <IconAction className="inquiry-list-header-action" label={ariaLabel} to={to}>
+    <ShoppingCart size={size} />
+    {safeCount > 0 && <span className="inquiry-list-count" aria-hidden="true">{badgeLabel}</span>}
+  </IconAction>
+}
+
 export function StoreShell() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -489,6 +500,7 @@ export function StoreShell() {
     setViewerState,
     signIn,
     signOut,
+    inquiryRows,
     viewerState,
   } = useCommerce()
   const { locale, localeMeta, toLanguagePath, toLocalePath } = useLocalePath()
@@ -510,6 +522,7 @@ export function StoreShell() {
     : normalizedPathname
   const isProductBrowsingRoute = /^\/(?:products|collections|piercing|material|shape)(?:\/|$)/.test(pathnameWithoutLocale)
   const usesHomeStyleHeader = isHomeImageRoute || isProductBrowsingRoute
+  const inquiryListCount = Array.isArray(inquiryRows) ? inquiryRows.length : 0
 
   useEffect(() => {
     const handleScroll = () => {
@@ -843,7 +856,7 @@ export function StoreShell() {
               </>
               : <>
                 {isAdmin && <IconAction className="header-side-icon" label={copy.adminPreview} to={toLocalePath('/admin')}><ShieldCheck size={17} /></IconAction>}
-                {isApproved && <IconAction className="header-side-icon" label={sideCopy.inquiryList} to={toLocalePath(inquiryListPath)}><ClipboardList size={17} /></IconAction>}
+                {isApproved && <InquiryListHeaderAction count={inquiryListCount} label={sideCopy.inquiryList} size={17} to={toLocalePath(inquiryListPath)} />}
                 <IconAction className="header-side-icon" label={sideCopy.myInquiries} to={toLocalePath(myInquiriesPath)}><Clock3 size={17} /></IconAction>
                 <IconAction className="header-my-action" label={copy.account} to={toLocalePath('/account')}>{sideCopy.my}</IconAction>
               </>}
@@ -854,7 +867,7 @@ export function StoreShell() {
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}
           {!usesHomeStyleHeader && isApproved && <>
-            <IconAction label={sideCopy.inquiryList} to={toLocalePath(inquiryListPath)}><ClipboardList size={18} /></IconAction>
+            <InquiryListHeaderAction count={inquiryListCount} label={sideCopy.inquiryList} to={toLocalePath(inquiryListPath)} />
             <IconAction label={sideCopy.myInquiries} to={toLocalePath(myInquiriesPath)}><Clock3 size={18} /></IconAction>
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}

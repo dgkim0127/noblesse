@@ -2286,6 +2286,7 @@ h6 {
 
 .header-actions a,
 .icon-action {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -13834,6 +13835,30 @@ h6 {
   gap: 4px;
   color: var(--noblesse-sub);
   text-decoration: none;
+}
+
+.inquiry-list-header-action {
+  overflow: visible;
+}
+
+.inquiry-list-count {
+  position: absolute;
+  top: 1px;
+  right: -2px;
+  display: inline-grid;
+  min-width: 17px;
+  height: 17px;
+  place-items: center;
+  border: 2px solid #fffaf7;
+  border-radius: 999px;
+  padding: 0 4px;
+  color: #fff;
+  background: var(--noblesse-main);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 6px 14px rgb(255 143 169 / 26%);
+  pointer-events: none;
 }
 
 .pd-breadcrumb span::before {

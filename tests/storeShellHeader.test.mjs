@@ -9,14 +9,16 @@ function readWorkspaceFile(path) {
   return readFileSync(join(root, path), 'utf8')
 }
 
-test('home header does not expose a cart-style inquiry icon', () => {
+test('header renders the inquiry list as a cart-style action with an item count', () => {
   const shell = readWorkspaceFile('src/components/StoreShell.jsx')
   const styles = readWorkspaceFile('src/App.css')
 
-  assert.doesNotMatch(shell, /function InquiryListIcon/)
-  assert.doesNotMatch(shell, /inquiry-list-svg/)
-  assert.doesNotMatch(shell, /inquiry-icon-action/)
-  assert.doesNotMatch(styles, /\.inquiry-icon-action/)
+  assert.match(shell, /ShoppingCart/)
+  assert.match(shell, /function InquiryListHeaderAction/)
+  assert.match(shell, /className="inquiry-list-header-action"/)
+  assert.match(shell, /className="inquiry-list-count"/)
+  assert.match(styles, /\.inquiry-list-header-action/)
+  assert.match(styles, /\.inquiry-list-count/)
 })
 
 test('admin my-inquiries header action opens the admin inquiry queue', () => {
