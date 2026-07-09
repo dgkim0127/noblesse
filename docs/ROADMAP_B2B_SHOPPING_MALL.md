@@ -155,7 +155,7 @@ Remaining recommended follow-up:
 | Area | Next step |
 | --- | --- |
 | Existing product edit | Confirm whether operators need a full edit screen for already-created products |
-| Price writer permission | Owner recovery is complete and `/kr/admin/team` now renders the governance page. `prices.write` has still not been granted, and the hidden canary price step has not been retried. Next step is a separately approved owner-governed `prices.write` override only, followed by retrying the hidden N74 canary price save |
+| Price writer permission | Owner recovery is complete and `/kr/admin/team` now renders the governance page. `prices.write` has still not been granted, and the hidden canary price step has not been retried. N75 remains blocked until a separately approved owner-governed `prices.write` grant succeeds and the hidden N74 canary price save is retried successfully |
 | Field-level reload QA | Add or expose an edit/reopen path so taxonomy, specs, detail copy, images, placement, and price fields can be checked after save |
 | Real catalog data | Fill only confirmed material, gauge, size, and decoration data supplied by the operator |
 | Product inquiry MVP | Build the quote-request workflow after catalog data entry is stable |

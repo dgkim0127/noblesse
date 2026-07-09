@@ -344,3 +344,92 @@ No Secret value was accessed, no direct DB connection or manual SQL was used, no
 Use the restored owner/team access to grant only `prices.write = allow` through the existing owner-governed admin permission path, then retry only the failed hidden canary price save.
 
 Next gate: `APPROVE_OWNER_GOVERNANCE_PRICE_PERMISSION_SESSION = YES`
+
+## N74P4B Retry 2 Owner Recovery Firebase Auth Viewer IAM Fix
+
+Date: 2026-07-09
+
+Repository: `D:\noblesse-main-work`
+Branch: `main`
+Starting HEAD: `0fcbe7d4fe81561076d259d5be7b6a9b172405a7`
+
+### Baseline Change Inspection
+
+The expected baseline moved from `e06e0ba769a9a1e756d5e03618e0eb615dfe938e` to `0fcbe7d4fe81561076d259d5be7b6a9b172405a7`.
+
+| Check | Result |
+| --- | --- |
+| Commit range | `e06e0ba..0fcbe7d` |
+| Commits inspected | `0fcbe7d docs(admin): record owner recovery iam fix` |
+| Changed files | `docs/N74_CATALOG_EDITOR_SAVE_LOAD_CANARY.md`, `docs/OPS_INDEX.md`, `docs/ROADMAP_B2B_SHOPPING_MALL.md` |
+| Change type | Docs-only owner recovery record |
+| Unexpected auth/IAM/backend/runtime/permission code changes | No |
+| Safe to continue | Yes |
+
+### Temporary IAM, Recovery Execution, and Cleanup
+
+`roles/firebaseauth.viewer` was temporarily granted only to the production runtime service account so the existing owner recovery path could perform its Firebase Auth user lookup. The existing Cloud Run Job wrapper path ran once, then the one-time Job was deleted and the temporary IAM role was revoked.
+
+| Item | Result |
+| --- | --- |
+| Project | `pors-piercing-pos` |
+| Runtime principal | `serviceAccount:noblesse-production-runtime@pors-piercing-pos.iam.gserviceaccount.com` |
+| Firebase Auth Viewer before | Absent |
+| Temporary role granted | `roles/firebaseauth.viewer` |
+| Other IAM roles changed | No |
+| Recovery Job | `noblesse-owner-admin-profile-recovery-n74p4b-retry2` |
+| Execution ID | `noblesse-owner-admin-profile-recovery-n74p4b-retry2-q2mtz` |
+| Execution result | Succeeded, exit 0 |
+| Target owner account | Identified from approved recovery path, redacted |
+| Job deleted | Yes |
+| Temporary role revoked | Yes |
+| Firebase Auth Viewer after cleanup | Absent |
+
+The recovery path remained the existing `backend/src/scripts/recoverOwnerAdminAccount.js` flow through the audited owner recovery service. No password, token, cookie, Firebase UID, database URL, SQL parameter, Secret value, or private email was recorded.
+
+### Team Access Verification
+
+The production browser session rendered `/kr/admin/team` after recovery. The admin shell, owner/equivalent role text, team table, and permission override UI rendered with zero captured console errors and no horizontal overflow.
+
+The live page did not expose a visible `prices.write` override control during this retry because the observed admin rows were owner rows and owner overrides are protected by the existing UI. Source inspection still confirms `prices.write` exists in the frontend delegable permission catalog and backend admin permission matrix, but the live control visibility requirement was not satisfied without making an out-of-scope admin mutation.
+
+Decision: `STOPPED_PRICES_WRITE_CONTROL_MISSING_AFTER_OWNER_RECOVERY`
+
+| Check | Result |
+| --- | --- |
+| `/kr/admin/team` rendered | Yes |
+| Admin shell rendered | Yes |
+| Current user role owner/equivalent | Yes |
+| Team table rendered | Yes |
+| Permission override UI rendered | Yes |
+| `prices.write` visible in live control | No |
+| `prices.write` present in source permission catalog | Yes |
+| Console errors | 0 |
+| Horizontal overflow | No |
+
+### Public Safety Checks
+
+The seed product remained unchanged and the hidden canary stayed hidden after recovery.
+
+| Check | Result |
+| --- | --- |
+| Seed product API status | 200 |
+| Seed product SHA-256 | `58f6f661afab553f381d6232f92cdc8da83928858ff1a2fe6d96b9106069c9db` |
+| Hidden canary detail route | 404 |
+| Product list contains hidden canary | No |
+| `prices.write` granted | No |
+| Canary price retry | No |
+| Product mutation | No |
+| Buyer mutation | No |
+| Inquiry mutation | No |
+| Order/payment mutation | No |
+| FX Job execution | No |
+| Scheduler change | No |
+| Direct SQL or DB console | No |
+| Secret value access | No |
+| Backend deploy | No |
+| Firebase Hosting deploy | No |
+
+### Next Gate
+
+`N74P5-GRANT-PRICES-WRITE-AND-CANARY-PRICE-RETRY` remains blocked until a visible owner-governed `prices.write` grant path is available for a non-owner target account or another approved, audited path is provided. Do not retry the hidden canary price save before that gate succeeds.
