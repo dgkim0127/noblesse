@@ -986,6 +986,54 @@ h6 {
   padding: 10px 12px;
 }
 
+.admin-permission-catalog {
+  gap: 16px;
+}
+
+.admin-section-kicker {
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+
+.admin-permission-options {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.admin-permission-option {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(42, 36, 87, 0.1);
+  border-radius: 12px;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 12px;
+}
+
+.admin-permission-option strong {
+  color: var(--navy);
+  font-size: 0.88rem;
+}
+
+.admin-permission-option code {
+  color: var(--admin-muted);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.admin-permission-option.is-highlighted {
+  background: rgba(255, 143, 169, 0.16);
+  border-color: rgba(255, 143, 169, 0.42);
+  box-shadow: 0 12px 30px rgba(255, 143, 169, 0.12);
+}
+
 .admin-buyer-meta {
   align-content: start;
   display: grid;

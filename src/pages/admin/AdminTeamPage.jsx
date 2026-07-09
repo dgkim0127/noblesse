@@ -32,6 +32,7 @@ export function AdminTeamPage() {
   if (shouldShowAdminApiState(status)) return <AdminApiState error={error} status={status} />
 
   const admins = data?.admins || []
+  const highlightedPermissionKey = 'prices.write'
   const startRoleEdit = (row) => {
     setEditingUserId(row.userId)
     setEditingMode('role')
@@ -158,6 +159,22 @@ export function AdminTeamPage() {
           </select>
         </label>
         <button disabled={!promoteDraft.email.trim()} type="button" onClick={promoteUserToAdmin}>{copy.promoteAction || 'Assign operator'}</button>
+      </div>
+    </section>}
+    {canManage && <section className="admin-card admin-permission-catalog" aria-labelledby="admin-permission-catalog-title">
+      <div>
+        <p className="admin-section-kicker">{copy.delegablePermissionsEyebrow || 'Owner controlled'}</p>
+        <h2 id="admin-permission-catalog-title">{copy.delegablePermissionsTitle || 'Delegable permissions'}</h2>
+        <p className="admin-muted">{copy.delegablePermissionsDescription || 'These are the exact permission keys an owner can grant to operator or manager accounts. Owner rows remain protected from overrides.'}</p>
+      </div>
+      <div className="admin-permission-options" aria-label={copy.delegablePermissionsTitle || 'Delegable permissions'}>
+        {delegableAdminPermissions.map((item) => {
+          const isPricePermission = item === highlightedPermissionKey
+          return <span className={`admin-permission-option${isPricePermission ? ' is-highlighted' : ''}`} key={item}>
+            <strong>{getAdminPermissionLabel(item, locale)}</strong>
+            <code>{item}</code>
+          </span>
+        })}
       </div>
     </section>}
     <section className="admin-card">

@@ -471,3 +471,32 @@ Decision: `STOPPED_PRICES_WRITE_CONTROL_MISSING_AFTER_OWNER_RECOVERY`
 | Direct SQL, DB console, Secret value access, backend deploy, Firebase deploy | No |
 
 Next gate remains `N74P5-GRANT-PRICES-WRITE-AND-CANARY-PRICE-RETRY`.
+
+## N74PX Prices.write Control Visibility Fix
+
+Date: 2026-07-09
+
+Current baseline `e4ab49576fdea7601e0d248159a6174e648051fa` was verified clean except allowed untracked local folders. Source inspection confirmed `prices.write` was already present in the frontend delegable permission catalog and backend permission matrix, and the price-book route still requires `prices.write`.
+
+The live `/kr/admin/team` blocker was a control visibility gap: the override selector only rendered inside non-owner row editing, while the observed live team rows were owner rows and owner overrides are intentionally protected. A frontend-only owner-visible delegable permission catalog was added so `prices.write` is visible without granting broader permissions or changing the backend authorization model.
+
+| Check | Result |
+| --- | --- |
+| Frontend tests | 144 passed |
+| Lint | Passed |
+| Production build guard | Passed |
+| Dist sensitive/staging scan | No targeted secret or staging identifiers found |
+| Firebase Hosting deploy | `hosting:noblesse` only, 1 time |
+| `/kr/admin/team` post-deploy | `prices.write` visible as `가격 작성 / prices.write` |
+| Backend deploy | No |
+| IAM change | No |
+| Secret value access | No |
+| Direct SQL or DB console | No |
+| `prices.write` granted | No |
+| Canary price retry | No |
+
+Public safety checks after deployment still show the seed product route returns 200, the hidden canary detail route returns 404, and the public product list does not include the hidden canary. The seed product response hash remained `71c2b77a6bbd9974d92016ee36731120c2aea647b032f6728bdda554cd719057` across the frontend-only deploy.
+
+Decision: `PRICES_WRITE_CONTROL_VISIBLE_TARGET_OPERATOR_REQUIRED`
+
+The remaining blocker is target identity, not control availability. The live team page currently shows owner rows; no non-owner operator or manager target was identified for a narrow `prices.write` grant. Do not grant `prices.write` or retry the hidden canary price save until the target operator/admin account is explicitly identified.

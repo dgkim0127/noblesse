@@ -155,7 +155,7 @@ Remaining recommended follow-up:
 | Area | Next step |
 | --- | --- |
 | Existing product edit | Confirm whether operators need a full edit screen for already-created products |
-| Price writer permission | Owner recovery is complete and `/kr/admin/team` now renders the governance page. Current-main recheck at `7c3b296d65afee53e906840a4a5f02a648f66da0` confirmed the temporary Firebase Auth Viewer role remains revoked and `prices.write` has still not been granted. The hidden canary price step has not been retried. N75 remains blocked until a separately approved owner-governed `prices.write` grant succeeds and the hidden N74 canary price save is retried successfully |
+| Price writer permission | Owner recovery is complete and `/kr/admin/team` now renders the governance page. N74PX made the existing delegable `prices.write` permission visible in an owner-only read-only catalog and deployed that frontend-only control fix to Hosting target `noblesse`. `prices.write` has still not been granted because no non-owner operator/admin target was identified, and the hidden canary price step has not been retried. N75 remains blocked until the exact target account is identified, a separately approved owner-governed `prices.write` grant succeeds, and the hidden N74 canary price save is retried successfully |
 | Field-level reload QA | Add or expose an edit/reopen path so taxonomy, specs, detail copy, images, placement, and price fields can be checked after save |
 | Real catalog data | Fill only confirmed material, gauge, size, and decoration data supplied by the operator |
 | Product inquiry MVP | Build the quote-request workflow after catalog data entry is stable |
