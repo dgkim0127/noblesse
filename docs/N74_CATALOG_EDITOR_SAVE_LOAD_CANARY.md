@@ -433,3 +433,41 @@ The seed product remained unchanged and the hidden canary stayed hidden after re
 ### Next Gate
 
 `N74P5-GRANT-PRICES-WRITE-AND-CANARY-PRICE-RETRY` remains blocked until a visible owner-governed `prices.write` grant path is available for a non-owner target account or another approved, audited path is provided. Do not retry the hidden canary price save before that gate succeeds.
+
+## N74P4B Current-Main-2 Recheck
+
+Date: 2026-07-09
+
+The current `origin/main` baseline is `7c3b296d65afee53e906840a4a5f02a648f66da0`. The working tree had no tracked or staged diff; only allowed untracked folders were present. Recent commits since the previous recovery run were docs-only owner recovery records in this file, `docs/OPS_INDEX.md`, and `docs/ROADMAP_B2B_SHOPPING_MALL.md`.
+
+Because the approved owner recovery had already completed and was recorded in the current baseline, this recheck did not repeat the temporary IAM grant or rerun the recovery Job. Read-only Cloud inspection confirmed the production runtime service account currently retains only `roles/cloudsql.client`; `roles/firebaseauth.viewer` is absent after cleanup, and the retry-2 one-time recovery Job is absent.
+
+The live `/kr/admin/team` page still renders the admin shell, owner/equivalent role text, team table, and role edit controls with zero captured console logs and no horizontal overflow. The live `prices.write` control is still not visible because the observed rows are owner rows and owner overrides are protected.
+
+Decision: `STOPPED_PRICES_WRITE_CONTROL_MISSING_AFTER_OWNER_RECOVERY`
+
+| Check | Result |
+| --- | --- |
+| Current HEAD | `7c3b296d65afee53e906840a4a5f02a648f66da0` |
+| HEAD equals `origin/main` | Yes |
+| Tracked or staged diff | No |
+| Recent unexpected code/auth/IAM/backend/runtime changes | No |
+| Temporary IAM grant repeated | No |
+| Recovery Job rerun | No |
+| Firebase Auth Viewer after cleanup | Absent |
+| `/kr/admin/team` rendered | Yes |
+| Team table rendered | Yes |
+| Permission override UI rendered | Yes |
+| `prices.write` visible in live control | No |
+| Console logs | 0 |
+| Horizontal overflow | No |
+| Seed product API status | 200 |
+| Seed product SHA-256 | `58f6f661afab553f381d6232f92cdc8da83928858ff1a2fe6d96b9106069c9db` |
+| Hidden canary detail route | 404 |
+| Product list contains hidden canary | No |
+| `prices.write` granted | No |
+| Canary price retry | No |
+| Product, buyer, inquiry, order/payment, FX, scheduler mutation | No |
+| Direct SQL, DB console, Secret value access, backend deploy, Firebase deploy | No |
+
+Next gate remains `N74P5-GRANT-PRICES-WRITE-AND-CANARY-PRICE-RETRY`.
