@@ -12,6 +12,8 @@ test('authenticated commerce state loads admin catalog prices through admin read
   assert.match(source, /const adminApi = createAdminApi\(apiClient\)/)
   assert.match(source, /async function loadAdminProductPrices\(adminApi, token\)/)
   assert.match(source, /adminApi\.getPrices\(\{\s*active: true,\s*limit: adminPricePageLimit,\s*offset,\s*\}, token\)/)
+  assert.match(source, /productId: price\.productCode \|\| price\.productId/)
+  assert.match(source, /sourceProductId: price\.productId/)
   assert.match(source, /if \(isApprovedProfile\) \{[\s\S]*?buyerApi\.getProductPrices\(token\)[\s\S]*?\} else if \(isAdminProfile\) \{[\s\S]*?loadAdminProductPrices\(adminApi, token\)/)
   assert.doesNotMatch(source, /if \(isApprovedProfile \|\| isAdminProfile\) \{[\s\S]*?buyerApi\.getProductPrices\(token\)/)
   assert.match(source, /<CommerceContext\.Provider value=\{\{[\s\S]*?productPrices,/)

@@ -51,7 +51,11 @@ async function loadAdminProductPrices(adminApi, token) {
       limit: adminPricePageLimit,
       offset,
     }, token)
-    const pagePrices = result.data?.prices || []
+    const pagePrices = (result.data?.prices || []).map((price) => ({
+      ...price,
+      productId: price.productCode || price.productId,
+      sourceProductId: price.productId,
+    }))
 
     prices.push(...pagePrices)
 
