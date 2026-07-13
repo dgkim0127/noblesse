@@ -72,19 +72,19 @@ export function AdminAnalyticsPage() {
     <section className="admin-layout two">
       <article className="admin-card">
         <h2>{t.analytics.inquiryStatus}</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.common.status}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.statusRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
+        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.common.status}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.statusRows.map((row) => <tr key={row.label}><td data-label={t.common.status}>{row.label}</td><td data-label={t.common.count}>{row.count}</td></tr>)}</tbody></table></div>
       </article>
       <article className="admin-card">
         <h2>{t.analytics.markets}</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.fields.market}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.marketRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
+        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.fields.market}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.marketRows.map((row) => <tr key={row.label}><td data-label={t.fields.market}>{row.label}</td><td data-label={t.common.count}>{row.count}</td></tr>)}</tbody></table></div>
       </article>
       <article className="admin-card">
         <h2>{t.analytics.buyerStatus}</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.common.status}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.buyerRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
+        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.common.status}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.buyerRows.map((row) => <tr key={row.label}><td data-label={t.common.status}>{row.label}</td><td data-label={t.common.count}>{row.count}</td></tr>)}</tbody></table></div>
       </article>
       <article className="admin-card">
         <h2>{t.analytics.productVisibility}</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.analytics.visibility}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.productRows.map((row) => <tr key={row.label}><td>{row.label}</td><td>{row.count}</td></tr>)}</tbody></table></div>
+        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.analytics.visibility}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.productRows.map((row) => <tr key={row.label}><td data-label={t.analytics.visibility}>{row.label}</td><td data-label={t.common.count}>{row.count}</td></tr>)}</tbody></table></div>
       </article>
     </section>
   </>

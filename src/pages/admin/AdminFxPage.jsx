@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { formatCurrency, formatMarketLabel, getMarketDisplay, marketCurrency, supportedCurrencies, supportedMarkets } from '../../config/currency.js'
-import { AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
+import { AdminConfirmDialog, AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { useAdminCopy } from './adminCopy'
 
@@ -38,6 +38,9 @@ export function AdminFxPage() {
   const [statusFilter, setStatusFilter] = useState('')
   const [message, setMessage] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
+  const [pauseTarget, setPauseTarget] = useState(null)
+  const [pauseReason, setPauseReason] = useState('')
+  const [pauseBusy, setPauseBusy] = useState(false)
   const filters = useMemo(() => ({ status: statusFilter }), [statusFilter])
   const statusResource = useAdminApiResource((api, token) => api.getFxStatus(token), [refreshKey])
   const ratesResource = useAdminApiResource((api, token) => api.getFxRates(token), [refreshKey])
@@ -65,13 +68,24 @@ export function AdminFxPage() {
     refresh()
   }
 
-  const pausePrice = async (policyId) => {
-    const reason = window.prompt(t.fx.pauseReason)
-    if (!reason?.trim()) return
+  const requestPausePrice = (policyId) => {
+    setPauseTarget(policyId)
+    setPauseReason('')
+  }
+
+  const pausePrice = async () => {
+    if (!pauseTarget || !pauseReason.trim()) return
+    setPauseBusy(true)
     setMessage('')
-    await mutate((api, token) => api.pauseFxPrice(policyId, { reason: reason.trim() }, token))
-    setMessage(t.fx.paused)
-    refresh()
+    try {
+      await mutate((api, token) => api.pauseFxPrice(pauseTarget, { reason: pauseReason.trim() }, token))
+      setMessage(t.fx.paused)
+      setPauseTarget(null)
+      setPauseReason('')
+      refresh()
+    } finally {
+      setPauseBusy(false)
+    }
   }
 
   const resumePrice = async (policyId) => {
@@ -138,20 +152,20 @@ export function AdminFxPage() {
           <tbody>{prices.map((price) => {
             const market = getMarketDisplay(price.targetMarket)
             return <tr key={price.id}>
-              <td>{price.productCode || price.productNameEn || price.productNameKo || '-'}</td>
-              <td><img alt={market.label} className="admin-market-flag" src={market.flagSrc} title={formatMarketLabel(price.targetMarket)} /></td>
-              <td>{price.targetCurrency}</td>
-              <td>{t.fx.modes[price.pricingMode] || price.pricingMode}</td>
-              <td>{price.currentWholesalePrice == null ? '-' : formatCurrency(price.currentWholesalePrice, price.targetCurrency, { showCode: true })}</td>
-              <td>{price.latestReferenceWholesalePrice == null ? '-' : formatCurrency(price.latestReferenceWholesalePrice, price.targetCurrency, { showCode: true })}</td>
-              <td>{formatBps(price.divergenceBps)}</td>
-              <td>{formatDateTime(price.lastAppliedAt)}</td>
-              <td>{t.fx.statuses[price.status] || price.status}</td>
-              <td>
+              <td data-label={t.fields.productCode}>{price.productCode || price.productNameEn || price.productNameKo || '-'}</td>
+              <td data-label={t.fields.market}><img alt={market.label} className="admin-market-flag" src={market.flagSrc} title={formatMarketLabel(price.targetMarket)} /></td>
+              <td data-label={t.fields.currency}>{price.targetCurrency}</td>
+              <td data-label={t.fx.mode}>{t.fx.modes[price.pricingMode] || price.pricingMode}</td>
+              <td data-label={t.fx.publishedPrice}>{price.currentWholesalePrice == null ? '-' : formatCurrency(price.currentWholesalePrice, price.targetCurrency, { showCode: true })}</td>
+              <td data-label={t.fx.referencePrice}>{price.latestReferenceWholesalePrice == null ? '-' : formatCurrency(price.latestReferenceWholesalePrice, price.targetCurrency, { showCode: true })}</td>
+              <td data-label={t.fx.divergence}>{formatBps(price.divergenceBps)}</td>
+              <td data-label={t.fx.lastAutoUpdate}>{formatDateTime(price.lastAppliedAt)}</td>
+              <td data-label={t.common.status}>{t.fx.statuses[price.status] || price.status}</td>
+              <td data-label={t.common.actions}>
                 <div className="admin-actions tight">
                   {price.status === 'paused'
                     ? <button type="button" onClick={() => resumePrice(price.id)}>{t.fx.resume}</button>
-                    : <button type="button" onClick={() => pausePrice(price.id)}>{t.fx.pause}</button>}
+                    : <button type="button" onClick={() => requestPausePrice(price.id)}>{t.fx.pause}</button>}
                 </div>
               </td>
             </tr>
@@ -171,5 +185,25 @@ export function AdminFxPage() {
         })}
       </div>
     </section>
+    <AdminConfirmDialog
+      busy={pauseBusy}
+      confirmDisabled={!pauseReason.trim()}
+      confirmLabel={t.fx.pause}
+      description={t.fx.pauseReason}
+      open={Boolean(pauseTarget)}
+      title={t.fx.pause}
+      onCancel={() => {
+        if (!pauseBusy) {
+          setPauseTarget(null)
+          setPauseReason('')
+        }
+      }}
+      onConfirm={pausePrice}
+    >
+      <label className="admin-dialog-field">
+        <span>{t.fx.pauseReason}</span>
+        <textarea rows="3" value={pauseReason} onChange={(event) => setPauseReason(event.target.value)} />
+      </label>
+    </AdminConfirmDialog>
   </>
 }

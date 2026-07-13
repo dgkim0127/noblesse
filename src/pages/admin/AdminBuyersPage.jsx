@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useAdminAccess } from '../../components/AdminAccessContext'
-import { AdminLink, AdminPageHeader, AdminPagination, AdminPreviewNote, AdminStatus } from './AdminPageParts'
+import { AdminConfirmDialog, AdminLink, AdminPageHeader, AdminPagination, AdminPreviewNote, AdminStatus } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy, getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
@@ -70,6 +70,7 @@ export function AdminBuyersPage() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [savingAction, setSavingAction] = useState('')
   const [message, setMessage] = useState('')
+  const [promoteTarget, setPromoteTarget] = useState(null)
   const filters = useMemo(() => ({
     verificationStatus: ['draft', 'pending', 'approved', 'rejected', 'suspended'].includes(filter) ? filter : '',
     accountStatus: filter === 'blocked' ? 'blocked' : '',
@@ -122,13 +123,17 @@ export function AdminBuyersPage() {
     }
   }
 
-  const promoteBuyerToOperator = async (buyer) => {
+  const requestBuyerPromotion = (buyer) => {
     if (!buyer.email) {
       setMessage(t.buyers.promoteNeedsEmail || '운영자로 지정하려면 회원 이메일이 필요합니다.')
       return
     }
-    const label = getBuyerTitle(buyer)
-    if (!window.confirm(formatAdminCopy(t.buyers.promoteConfirm || '{buyer} 회원을 운영자로 지정할까요?', { buyer: label }))) return
+    setPromoteTarget(buyer)
+  }
+
+  const promoteBuyerToOperator = async () => {
+    const buyer = promoteTarget
+    if (!buyer?.email) return
     setSavingAction(`${buyer.id}:promote-operator`)
     setMessage('')
     try {
@@ -138,6 +143,7 @@ export function AdminBuyersPage() {
       }, token))
       setMessage(t.buyers.promoteSuccess || '운영자로 지정했습니다. 운영자 권한은 회원 > 운영 메뉴에서 확인할 수 있습니다.')
       setRefreshKey((current) => current + 1)
+      setPromoteTarget(null)
     } catch (error) {
       setMessage(error?.message || t.buyers.promoteFailed || '운영자로 지정할 수 없습니다.')
     } finally {
@@ -185,7 +191,7 @@ export function AdminBuyersPage() {
         <button
           disabled={savingAction === `${buyer.id}:promote-operator`}
           type="button"
-          onClick={() => promoteBuyerToOperator(buyer)}
+          onClick={() => requestBuyerPromotion(buyer)}
         >
           {t.buyers.promoteOperator || '운영자로 지정'}
         </button>
@@ -246,5 +252,14 @@ export function AdminBuyersPage() {
         onPrevious={() => setOffset(Math.max(0, offset - pageSize))}
       />
     </section>
+    <AdminConfirmDialog
+      busy={Boolean(promoteTarget && savingAction === `${promoteTarget.id}:promote-operator`)}
+      confirmLabel={t.buyers.promoteOperator || '운영자로 지정'}
+      description={promoteTarget ? formatAdminCopy(t.buyers.promoteConfirm || '{buyer} 회원을 운영자로 지정할까요?', { buyer: getBuyerTitle(promoteTarget) }) : ''}
+      open={Boolean(promoteTarget)}
+      title={t.buyers.promoteOperator || '운영자로 지정'}
+      onCancel={() => !savingAction && setPromoteTarget(null)}
+      onConfirm={promoteBuyerToOperator}
+    />
   </>
 }

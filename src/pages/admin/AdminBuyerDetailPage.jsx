@@ -131,13 +131,13 @@ export function AdminBuyerDetailPage() {
         <table className="admin-table">
           <thead><tr><th>{t.inquiries.inquiryNumber}</th><th>{t.common.status}</th><th>{t.inquiries.totalItems}</th><th>{t.inquiries.totalQuantity}</th><th>{t.inquiries.estimatedTotal}</th><th>{t.fields.created}</th><th>{t.common.actions}</th></tr></thead>
           <tbody>{recentInquiries.map((inquiry) => <tr key={inquiry.id}>
-            <td>{inquiry.inquiryNumber}</td>
-            <td><AdminStatus status={inquiry.status} /></td>
-            <td>{inquiry.totalItems}</td>
-            <td>{inquiry.totalQuantity}</td>
-            <td><AdminMoney value={inquiry.estimatedTotal || 0} currency={inquiry.currency || buyer.currency || 'USD'} /></td>
-            <td>{formatDate(inquiry.createdAt)}</td>
-            <td><AdminLink to={`/admin/inquiries/${inquiry.id}`}>{t.common.view}</AdminLink></td>
+            <td data-label={t.inquiries.inquiryNumber}>{inquiry.inquiryNumber}</td>
+            <td data-label={t.common.status}><AdminStatus status={inquiry.status} /></td>
+            <td data-label={t.inquiries.totalItems}>{inquiry.totalItems}</td>
+            <td data-label={t.inquiries.totalQuantity}>{inquiry.totalQuantity}</td>
+            <td data-label={t.inquiries.estimatedTotal}><AdminMoney value={inquiry.estimatedTotal || 0} currency={inquiry.currency || buyer.currency || 'USD'} /></td>
+            <td data-label={t.fields.created}>{formatDate(inquiry.createdAt)}</td>
+            <td data-label={t.common.actions}><AdminLink to={`/admin/inquiries/${inquiry.id}`}>{t.common.view}</AdminLink></td>
           </tr>)}</tbody>
         </table>
         {recentInquiries.length === 0 && <p className="admin-empty">{t.buyers.noRecentInquiries}</p>}

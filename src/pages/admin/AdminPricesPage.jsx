@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useAdminAccess } from '../../components/AdminAccessContext'
 import { formatMarketLabel, getCurrencyInputStep, getMarketDisplay, marketCurrency, supportedCurrencies, supportedMarkets } from '../../config/currency.js'
 import { AdminMoney, AdminPageHeader, AdminPagination, AdminPreviewNote } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
@@ -19,6 +20,8 @@ const pageSize = 20
 
 export function AdminPricesPage() {
   const t = useAdminCopy()
+  const { hasPermission } = useAdminAccess()
+  const canWritePrices = hasPermission('prices.write')
   const [market, setMarket] = useState('ALL')
   const [query, setQuery] = useState('')
   const [activeOnly, setActiveOnly] = useState(false)
@@ -90,7 +93,7 @@ export function AdminPricesPage() {
     />
     <AdminPreviewNote>{t.prices.note}</AdminPreviewNote>
 
-    <form className="admin-toolbar" onSubmit={createPrice}>
+    {canWritePrices && <form className="admin-toolbar" onSubmit={createPrice}>
       <label className="admin-search">{t.prices.productCode}<input value={form.productCode} onChange={(event) => setField('productCode', event.target.value)} placeholder="NB-001" required /></label>
       <label className="admin-search">{t.prices.market}<select value={form.market} onChange={(event) => {
         const nextMarket = event.target.value
@@ -105,7 +108,7 @@ export function AdminPricesPage() {
       <label className="admin-search">{t.products.moq}<input min="1" value={form.moq} onChange={(event) => setField('moq', event.target.value)} required type="number" /></label>
       <label className="admin-check"><input checked={form.isActive} onChange={(event) => setField('isActive', event.target.checked)} type="checkbox" /> {t.common.active}</label>
       <button className="primary-action" type="submit">{t.prices.create}</button>
-    </form>
+    </form>}
 
     <div className="admin-toolbar">
       <label className="admin-search">{t.prices.searchLabel}<input value={query} onChange={(event) => resetPage(setQuery)(event.target.value)} placeholder={t.prices.searchPlaceholder} /></label>
@@ -124,25 +127,25 @@ export function AdminPricesPage() {
         <table className="admin-table">
           <thead><tr><th>{t.fields.productCode}</th><th>{t.fields.productName}</th><th>{t.fields.market}</th><th>{t.fields.currency}</th><th>{t.prices.wholesale}</th><th>{t.prices.retail}</th><th>{t.products.moq}</th><th>{t.prices.minRequestAmount}</th><th>{t.prices.visibleTo}</th><th>{t.common.active}</th><th>{t.common.actions}</th></tr></thead>
           <tbody>{prices.map((price) => <tr key={price.id}>
-            <td>{price.productCode}</td>
-            <td>{price.productNameEn || price.productNameKo || '-'}</td>
-            <td><img alt={getMarketDisplay(price.market).label} className="admin-market-flag" src={getMarketDisplay(price.market).flagSrc} title={price.market} /></td>
-            <td>{price.currency}</td>
-            <td><AdminMoney value={price.wholesalePrice} currency={price.currency} /></td>
-            <td>{price.retailPrice == null ? '-' : <AdminMoney value={price.retailPrice} currency={price.currency} />}</td>
-            <td>{price.moq}</td>
-            <td><AdminMoney value={price.minOrderAmount || 0} currency={price.currency} /></td>
-            <td>{price.visibleTo}</td>
-            <td>{price.isActive ? t.common.active : t.common.inactive}</td>
-            <td>
+            <td data-label={t.fields.productCode}>{price.productCode}</td>
+            <td data-label={t.fields.productName}>{price.productNameEn || price.productNameKo || '-'}</td>
+            <td data-label={t.fields.market}><img alt={getMarketDisplay(price.market).label} className="admin-market-flag" src={getMarketDisplay(price.market).flagSrc} title={price.market} /></td>
+            <td data-label={t.fields.currency}>{price.currency}</td>
+            <td data-label={t.prices.wholesale}><AdminMoney value={price.wholesalePrice} currency={price.currency} /></td>
+            <td data-label={t.prices.retail}>{price.retailPrice == null ? '-' : <AdminMoney value={price.retailPrice} currency={price.currency} />}</td>
+            <td data-label={t.products.moq}>{price.moq}</td>
+            <td data-label={t.prices.minRequestAmount}><AdminMoney value={price.minOrderAmount || 0} currency={price.currency} /></td>
+            <td data-label={t.prices.visibleTo}>{price.visibleTo}</td>
+            <td data-label={t.common.active}>{price.isActive ? t.common.active : t.common.inactive}</td>
+            <td data-label={t.common.actions}>
               <div className="admin-actions tight">
-                <button
+                {canWritePrices && <button
                   disabled={savingPriceId === price.id}
                   onClick={() => updatePrice(price.id, { isActive: !price.isActive }, price.isActive ? t.prices.deactivated : t.prices.activated)}
                   type="button"
                 >
                   {price.isActive ? t.common.deactivate : t.common.activate}
-                </button>
+                </button>}
               </div>
             </td>
           </tr>)}</tbody>

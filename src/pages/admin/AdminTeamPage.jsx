@@ -1,7 +1,7 @@
 import { Fragment, useState } from 'react'
 import { useAdminAccess } from '../../components/AdminAccessContext'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
-import { AdminPageHeader } from './AdminPageParts'
+import { AdminConfirmDialog, AdminPageHeader } from './AdminPageParts'
 import { useAdminCopy } from './adminCopy'
 import { delegableAdminPermissions, getAdminPermissionLabel } from '../../constants/adminPermissionCatalog'
 import { useLocalePath } from '../../utils/locale'
@@ -16,6 +16,8 @@ export function AdminTeamPage() {
   const [draft, setDraft] = useState({ adminRole: 'operator', permissionKey: 'buyers.read', effect: 'allow', reason: '', expiresAt: '' })
   const [promoteDraft, setPromoteDraft] = useState({ email: '', adminRole: 'operator' })
   const [message, setMessage] = useState('')
+  const [confirmation, setConfirmation] = useState(null)
+  const [confirmationBusy, setConfirmationBusy] = useState(false)
   const { data, error, status } = useAdminApiResource((api, token) => api.getAdmins(token), [refreshKey])
   const mutate = useAdminApiMutation()
   const canManage = admin?.adminRole === 'owner' && hasPermission('admins.manage')
@@ -59,7 +61,7 @@ export function AdminTeamPage() {
     setMessage('')
   }
 
-  const saveRole = async (row) => {
+  const requestRoleSave = (row) => {
     setMessage('')
     const nextRole = draft.adminRole
     const currentRole = row.adminRole || 'operator'
@@ -76,16 +78,7 @@ export function AdminTeamPage() {
         : currentRole === 'owner'
           ? (copy.confirmDowngradeOwner || 'Downgrade this owner role?')
           : (copy.confirmRoleChange || 'Change this admin role?')
-    if (!window.confirm(confirmMessage)) return
-    try {
-      await mutate((api, token) => api.updateAdminRole(row.userId, nextRole, token))
-      setMessage(copy.roleSaved || 'Admin role updated.')
-      setEditingUserId('')
-      setEditingMode('')
-      setRefreshKey((current) => current + 1)
-    } catch (error) {
-      setMessage(error?.message || copy.saveFailed || 'Unable to update admin role.')
-    }
+    setConfirmation({ kind: 'role', row, nextRole, title: copy.editRole || 'Edit role', description: confirmMessage })
   }
 
   const upsertOverride = async (userId) => {
@@ -105,35 +98,59 @@ export function AdminTeamPage() {
     }
   }
 
-  const deleteOverride = async (userId, permissionKey) => {
-    setMessage('')
-    try {
-      await mutate((api, token) => api.deletePermissionOverride(userId, permissionKey, token))
-      setMessage(copy.overrideDeleted || 'Permission override removed.')
-      setRefreshKey((current) => current + 1)
-    } catch (error) {
-      setMessage(error?.message || copy.saveFailed || 'Unable to remove permission override.')
-    }
+  const requestOverrideDelete = (userId, permissionKey) => {
+    setConfirmation({
+      kind: 'delete-override',
+      userId,
+      permissionKey,
+      title: copy.removeOverride || 'Remove override',
+      description: `${getAdminPermissionLabel(permissionKey, locale)} ${copy.removeOverrideConfirm || 'override를 제거할까요?'}`,
+      danger: true,
+    })
   }
 
-  const promoteUserToAdmin = async () => {
+  const requestUserPromotion = () => {
     const email = promoteDraft.email.trim()
     if (!email) {
       setMessage(copy.promoteEmailRequired || 'Email is required.')
       return
     }
-    if (!window.confirm(copy.promoteConfirm || 'Assign this user as an operator?')) return
+    setConfirmation({
+      kind: 'promote',
+      email,
+      adminRole: promoteDraft.adminRole,
+      title: copy.promoteTitle || 'Assign operator',
+      description: copy.promoteConfirm || 'Assign this user as an operator?',
+    })
+  }
+
+  const confirmAdminAction = async () => {
+    if (!confirmation) return
+    setConfirmationBusy(true)
     setMessage('')
     try {
-      await mutate((api, token) => api.promoteUserToAdmin({
-        email,
-        adminRole: promoteDraft.adminRole,
-      }, token))
-      setMessage(copy.promoteSaved || 'User was assigned as an admin operator.')
-      setPromoteDraft({ email: '', adminRole: 'operator' })
+      if (confirmation.kind === 'role') {
+        await mutate((api, token) => api.updateAdminRole(confirmation.row.userId, confirmation.nextRole, token))
+        setMessage(copy.roleSaved || 'Admin role updated.')
+        setEditingUserId('')
+        setEditingMode('')
+      } else if (confirmation.kind === 'delete-override') {
+        await mutate((api, token) => api.deletePermissionOverride(confirmation.userId, confirmation.permissionKey, token))
+        setMessage(copy.overrideDeleted || 'Permission override removed.')
+      } else if (confirmation.kind === 'promote') {
+        await mutate((api, token) => api.promoteUserToAdmin({
+          email: confirmation.email,
+          adminRole: confirmation.adminRole,
+        }, token))
+        setMessage(copy.promoteSaved || 'User was assigned as an admin operator.')
+        setPromoteDraft({ email: '', adminRole: 'operator' })
+      }
       setRefreshKey((current) => current + 1)
+      setConfirmation(null)
     } catch (error) {
-      setMessage(error?.message || copy.saveFailed || 'Unable to assign operator access.')
+      setMessage(error?.message || copy.saveFailed || 'Unable to update admin access.')
+    } finally {
+      setConfirmationBusy(false)
     }
   }
 
@@ -158,7 +175,7 @@ export function AdminTeamPage() {
             <option value="manager">{t.shell.roles?.manager || 'Manager'}</option>
           </select>
         </label>
-        <button disabled={!promoteDraft.email.trim()} type="button" onClick={promoteUserToAdmin}>{copy.promoteAction || 'Assign operator'}</button>
+        <button disabled={!promoteDraft.email.trim()} type="button" onClick={requestUserPromotion}>{copy.promoteAction || 'Assign operator'}</button>
       </div>
     </section>}
     {canManage && <section className="admin-card admin-permission-catalog" aria-labelledby="admin-permission-catalog-title">
@@ -181,7 +198,7 @@ export function AdminTeamPage() {
       {admins.length === 0
         ? <p>{copy.empty}</p>
         : <div className="admin-table-wrap">
-          <table>
+          <table className="admin-table">
             <thead>
               <tr>
                 <th>{copy.email}</th>
@@ -199,11 +216,11 @@ export function AdminTeamPage() {
                 const isOwner = row.adminRole === 'owner'
                 return <Fragment key={row.userId}>
                   <tr>
-                    <td>{row.email || '-'}</td>
-                    <td><span className="status-pill">{t.shell.roles?.[row.adminRole] || row.adminRole}</span></td>
-                    <td>{row.accountStatus || row.status}</td>
-                    <td>{row.permissions?.length ?? 0}</td>
-                    <td>
+                    <td data-label={copy.email}>{row.email || '-'}</td>
+                    <td data-label={copy.role}><span className="status-pill">{t.shell.roles?.[row.adminRole] || row.adminRole}</span></td>
+                    <td data-label={copy.account}>{row.accountStatus || row.status}</td>
+                    <td data-label={copy.permissionCount || 'Permissions'}>{row.permissions?.length ?? 0}</td>
+                    <td data-label={copy.overrides || 'Overrides'}>
                       {(row.permissionOverrides || []).length === 0
                         ? '-'
                         : <ul className="admin-compact-list">
@@ -211,11 +228,11 @@ export function AdminTeamPage() {
                             <span>{override.effect}: {getAdminPermissionLabel(override.permissionKey, locale)}</span>
                             <small>{override.expiresAt || copy.noExpiry || 'No expiry'}</small>
                             {canManage && !isOwner && <button type="button" onClick={() => startOverrideEdit(row, override)}>{t.common.edit || 'Edit'}</button>}
-                            {canManage && !isOwner && <button type="button" onClick={() => deleteOverride(row.userId, override.permissionKey)}>{t.common.remove || 'Remove'}</button>}
+                            {canManage && !isOwner && <button type="button" onClick={() => requestOverrideDelete(row.userId, override.permissionKey)}>{t.common.remove || 'Remove'}</button>}
                           </li>)}
                         </ul>}
                     </td>
-                    <td>
+                    <td data-label={t.common.actions}>
                       {canManage && <button type="button" onClick={() => startRoleEdit(row)}>{copy.editRole || 'Edit role'}</button>}
                       {canManage && !isOwner && <button type="button" onClick={() => startOverrideEdit(row)}>{copy.addOverride || 'Add override'}</button>}
                       {canManage && isOwner && <span className="admin-muted">{copy.ownerProtected || 'Owner overrides are not allowed.'}</span>}
@@ -232,7 +249,7 @@ export function AdminTeamPage() {
                           </select>
                         </label>
                         {row.userId === admin?.userId && row.adminRole === 'owner' && draft.adminRole !== 'owner' && <p className="admin-muted">{copy.selfDowngradeWarning || 'You are downgrading your own owner role.'}</p>}
-                        <button type="button" onClick={() => saveRole(row)}>{copy.saveRole || 'Save role'}</button>
+                        <button type="button" onClick={() => requestRoleSave(row)}>{copy.saveRole || 'Save role'}</button>
                         <button type="button" onClick={() => { setEditingUserId(''); setEditingMode('') }}>{copy.cancel || 'Cancel'}</button>
                       </div>
                     </td>
@@ -269,5 +286,14 @@ export function AdminTeamPage() {
         </div>}
       {!canManage && <p className="admin-muted">{copy.readOnly || 'You can review admin access but cannot edit roles or overrides.'}</p>}
     </section>
+    <AdminConfirmDialog
+      busy={confirmationBusy}
+      danger={Boolean(confirmation?.danger)}
+      description={confirmation?.description || ''}
+      open={Boolean(confirmation)}
+      title={confirmation?.title || ''}
+      onCancel={() => !confirmationBusy && setConfirmation(null)}
+      onConfirm={confirmAdminAction}
+    />
   </section>
 }

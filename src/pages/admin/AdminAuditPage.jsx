@@ -45,7 +45,7 @@ export function AdminAuditPage() {
       {auditLogs.length === 0
         ? <p>{copy.empty}</p>
         : <div className="admin-table-wrap">
-          <table>
+          <table className="admin-table">
             <thead>
               <tr>
                 <th>{copy.action}</th>
@@ -58,12 +58,12 @@ export function AdminAuditPage() {
             </thead>
             <tbody>
               {auditLogs.map((entry) => <tr key={entry.id}>
-                <td>{entry.action}</td>
-                <td>{entry.entityType || '-'} {entry.entityId ? `#${String(entry.entityId).slice(0, 8)}` : ''}</td>
-                <td>{Array.isArray(entry.changedFields) && entry.changedFields.length > 0 ? entry.changedFields.join(', ') : '-'}</td>
-                <td>{entry.actor?.role || '-'}</td>
-                <td>{entry.requestId || '-'}</td>
-                <td>{entry.createdAt ? new Date(entry.createdAt).toLocaleString() : '-'}</td>
+                <td data-label={copy.action}>{entry.action}</td>
+                <td data-label={copy.entity}>{entry.entityType || '-'} {entry.entityId ? `#${String(entry.entityId).slice(0, 8)}` : ''}</td>
+                <td data-label={copy.changedFields || 'Changed fields'}>{Array.isArray(entry.changedFields) && entry.changedFields.length > 0 ? entry.changedFields.join(', ') : '-'}</td>
+                <td data-label={copy.actor || 'Actor'}>{entry.actor?.role || '-'}</td>
+                <td data-label={copy.request}>{entry.requestId || '-'}</td>
+                <td data-label={copy.created}>{entry.createdAt ? new Date(entry.createdAt).toLocaleString() : '-'}</td>
               </tr>)}
             </tbody>
           </table>
