@@ -6,6 +6,11 @@ import { useCommerce } from '../commerce/commerceStore'
 import { formatMoney } from '../utils/commerce'
 import { useLocalePath } from '../utils/locale'
 
+const pricePendingLabel = '가격 확인중'
+const formatQuoteAmount = (value, currency, unavailable = false) => (
+  unavailable ? pricePendingLabel : formatMoney(value, currency)
+)
+
 function QuoteLine({ row, currency }) {
   const thumbnailUrl = row.thumbnailUrl ?? row.product?.imageSet?.thumb
 
@@ -19,7 +24,7 @@ function QuoteLine({ row, currency }) {
       <small>{row.productName}</small>
       <small>{row.color} / {row.size} / {row.quantity} pcs</small>
     </span>
-    <strong>{formatMoney(row.subtotal, currency)}</strong>
+    <strong>{formatQuoteAmount(row.subtotal, currency, row.priceUnavailable)}</strong>
   </div>
 }
 
@@ -53,6 +58,7 @@ export function RequestQuotePage() {
   if (authStatus === 'error') return <main className="content"><div className="approval-page"><h1>거래처 세션을 확인할 수 없습니다.</h1><p>{authError || '거래처 권한을 확인하지 못했습니다.'}</p></div></main>
   if (!isApproved) return <AccessNotice viewerState={viewerState} />
   if (!inquiryRows.length) return <main className="content"><div className="approval-page"><h1>먼저 견적 리스트에 상품을 담아주세요.</h1><Link to={toLocalePath('/products')}>상품 목록 보기</Link></div></main>
+  const hasUnavailablePrice = inquiryRows.some((row) => row.priceUnavailable)
 
   const submit = async () => {
     if (submitStatus === 'submitting') return
@@ -87,7 +93,7 @@ export function RequestQuotePage() {
       </div>
       <div className="quote-section">
         <h3>견적 요약</h3>
-        <dl><dt>상품 수</dt><dd>{inquiryRows.length}</dd><dt>총 수량</dt><dd>{totalQuantity}</dd><dt>예상 합계</dt><dd>{formatMoney(estimatedTotal, inquiryRows[0]?.currency || buyer.currency)}</dd></dl>
+        <dl><dt>상품 수</dt><dd>{inquiryRows.length}</dd><dt>총 수량</dt><dd>{totalQuantity}</dd><dt>예상 합계</dt><dd>{formatQuoteAmount(estimatedTotal, inquiryRows[0]?.currency || buyer.currency, hasUnavailablePrice)}</dd></dl>
       </div>
       {inquiryRows.map((row) => <QuoteLine key={`${row.productId}-${row.color}-${row.size}`} row={row} currency={row.currency || buyer.currency} />)}
       <textarea value={memo} onChange={(event) => setMemo(event.target.value)} placeholder="요청 메모" />

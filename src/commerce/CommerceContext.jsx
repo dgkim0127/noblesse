@@ -335,10 +335,10 @@ export function CommerceProvider({ children }) {
     if (!isApproved) return
     const product = products.find((candidate) => candidate.productId === productId)
     const price = getPrice(productId)
-    if (!product || !price) return
+    if (!product) return
 
     const selectedOption = getDefaultOption(product, option)
-    const quantity = normalizeQuantity(rawQuantity, price.moq)
+    const quantity = normalizeQuantity(rawQuantity, price?.moq ?? product.moqDefault ?? 1)
     setInquiryItems((current) => {
       const found = current.find((item) => isSameInquiryItem(item, productId, selectedOption))
       return found
@@ -435,9 +435,8 @@ export function CommerceProvider({ children }) {
     const product = products.find((candidate) => candidate.productId === productId || candidate.code === productId)
     if (!isApproved || !product) return null
     const price = getPrice(product.productId)
-    if (!price) return null
     const selectedOption = getDefaultOption(product, option)
-    const quantity = normalizeQuantity(rawQuantity, price.moq)
+    const quantity = normalizeQuantity(rawQuantity, price?.moq ?? product.moqDefault ?? 1)
 
     if (!isMockMode) {
       const token = await getCurrentUserIdToken()

@@ -17,7 +17,14 @@ function toNumber(value) {
   return Number(value) || 0;
 }
 
+function isZeroMoney(value) {
+  return toNumber(value) === 0;
+}
+
 function mapItem(row) {
+  const priceSnapshot = toNumber(row.price_snapshot);
+  const subtotal = toNumber(row.subtotal);
+
   return {
     id: row.id,
     productId: row.product_code,
@@ -31,8 +38,9 @@ function mapItem(row) {
     moq: row.moq,
     market: row.market,
     currency: row.currency,
-    priceSnapshot: toNumber(row.price_snapshot),
-    subtotal: toNumber(row.subtotal)
+    priceSnapshot,
+    subtotal,
+    priceUnavailable: isZeroMoney(row.price_snapshot) && isZeroMoney(row.subtotal)
   };
 }
 
@@ -112,6 +120,27 @@ async function loadPricedProduct(client, productCode, market, currency) {
       limit 1
     `,
     [productCode, market, currency]
+  );
+  return result.rows[0] || null;
+}
+
+async function loadVisibleProduct(client, productCode) {
+  const result = await client.query(
+    `
+      select
+        p.id as product_id,
+        p.code as product_code,
+        p.name_en,
+        p.name_ko,
+        p.category_id,
+        p.material,
+        p.moq_default
+      from public.products p
+      where p.code = $1
+        and p.is_visible = true
+      limit 1
+    `,
+    [productCode]
   );
   return result.rows[0] || null;
 }
@@ -265,12 +294,35 @@ export function createBuyerInquiryQueries(pool) {
       try {
         await client.query("begin");
 
-        const pricedItems = [];
+        const inquiryItems = [];
         for (const item of input.items) {
           const pricedProduct = await loadPricedProduct(client, item.productCode, viewer.assignedMarket, viewer.currency);
           if (!pricedProduct) {
-            await client.query("rollback");
-            return null;
+            const visibleProduct = await loadVisibleProduct(client, item.productCode);
+            if (!visibleProduct) {
+              await client.query("rollback");
+              return null;
+            }
+
+            const moq = Number(visibleProduct.moq_default) || 1;
+            const quantity = Math.max(moq, Math.ceil(item.quantity / moq) * moq);
+            inquiryItems.push({
+              productId: visibleProduct.product_id,
+              productCode: visibleProduct.product_code,
+              productName: visibleProduct.name_en || visibleProduct.name_ko || visibleProduct.product_code,
+              categoryId: visibleProduct.category_id,
+              material: visibleProduct.material || "",
+              color: item.color || "",
+              size: item.size || "",
+              quantity,
+              moq,
+              market: viewer.assignedMarket,
+              currency: viewer.currency,
+              priceSnapshot: 0,
+              subtotal: 0,
+              subtotalMinor: 0
+            });
+            continue;
           }
           if (pricedProduct.market !== viewer.assignedMarket || pricedProduct.currency !== viewer.currency) {
             await client.query("rollback");
@@ -287,7 +339,7 @@ export function createBuyerInquiryQueries(pool) {
             return null;
           }
 
-          pricedItems.push({
+          inquiryItems.push({
             productId: pricedProduct.product_id,
             productCode: pricedProduct.product_code,
             productName: pricedProduct.name_en || pricedProduct.name_ko || pricedProduct.product_code,
@@ -305,9 +357,9 @@ export function createBuyerInquiryQueries(pool) {
           });
         }
 
-        const totalItems = pricedItems.length;
-        const totalQuantity = pricedItems.reduce((sum, item) => sum + item.quantity, 0);
-        const estimatedTotal = sumMoney(pricedItems.map((item) => item.subtotal), viewer.currency);
+        const totalItems = inquiryItems.length;
+        const totalQuantity = inquiryItems.reduce((sum, item) => sum + item.quantity, 0);
+        const estimatedTotal = sumMoney(inquiryItems.map((item) => item.subtotal), viewer.currency);
         if (estimatedTotal === null) {
           await client.query("rollback");
           return null;
@@ -355,7 +407,7 @@ export function createBuyerInquiryQueries(pool) {
 
         const inquiry = inquiryResult.rows[0];
         const insertedItems = [];
-        for (const item of pricedItems) {
+        for (const item of inquiryItems) {
           const itemResult = await client.query(
             `
               insert into public.inquiry_items (

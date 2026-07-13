@@ -15,6 +15,15 @@ const statusLabel = {
 }
 
 const statusTabs = ['all', 'requested', 'checking', 'quoted', 'confirmed', 'cancelled']
+const pricePendingLabel = '가격 확인중'
+
+function hasUnavailablePrice(inquiry = {}) {
+  return (inquiry.items || []).some((item) => item.priceUnavailable)
+}
+
+function formatInquiryMoney(value, currency, unavailable = false) {
+  return unavailable ? pricePendingLabel : formatMoney(value || 0, currency)
+}
 
 function InquiryAccessNotice({ viewerState }) {
   return <main className="content">
@@ -168,6 +177,7 @@ export function MyInquiriesPage() {
     const selectedKey = getInquiryKey(selected)
     const items = selected.items || []
     const selectedCurrency = selected.currency || buyer.currency
+    const selectedHasUnavailablePrice = hasUnavailablePrice(selected)
 
     return <main className="content">
       <Link className="back" to={toLocalePath('/my-inquiries')}>Inquiry history</Link>
@@ -178,7 +188,7 @@ export function MyInquiriesPage() {
         <dl className="inquiry-meta">
           <dt>Items</dt><dd>{selected.totalItems ?? items.length}</dd>
           <dt>Total Quantity</dt><dd>{selected.totalQuantity ?? 0}</dd>
-          <dt>Estimated Total</dt><dd>{formatMoney(selected.estimatedTotal || 0, selectedCurrency)}</dd>
+          <dt>Estimated Total</dt><dd>{formatInquiryMoney(selected.estimatedTotal, selectedCurrency, selectedHasUnavailablePrice)}</dd>
         </dl>
         {items.map((item) => <div className="quote-line inquiry-detail-line" key={`${item.productId || item.productCode}-${item.color}-${item.size}`}>
           {item.thumbnailUrl && <img className="quote-thumb" src={item.thumbnailUrl} alt={item.productName || item.productCode} loading="lazy" width="300" height="300" onError={(event) => { event.currentTarget.hidden = true }} />}
@@ -186,9 +196,9 @@ export function MyInquiriesPage() {
             {item.productCode} / {item.productName}
             <small>{item.material} / {item.color} / {item.size} / MOQ {item.moq}</small>
           </span>
-          <strong>{formatMoney(item.subtotal || 0, selectedCurrency)}</strong>
+          <strong>{formatInquiryMoney(item.subtotal, selectedCurrency, item.priceUnavailable)}</strong>
         </div>)}
-        <div className="quote-total"><span>Estimated Total</span><strong>{formatMoney(selected.estimatedTotal || 0, selectedCurrency)}</strong></div>
+        <div className="quote-total"><span>Estimated Total</span><strong>{formatInquiryMoney(selected.estimatedTotal, selectedCurrency, selectedHasUnavailablePrice)}</strong></div>
       </section>
     </main>
   }
@@ -205,7 +215,7 @@ export function MyInquiriesPage() {
           <FileText size={20} />
           <div><strong>{item.inquiryNumber || itemKey}</strong><span>{item.totalItems ?? 0} items / {item.totalQuantity ?? 0} pcs / {item.createdAt ? new Date(item.createdAt).toLocaleDateString('ko-KR') : '-'}</span></div>
           <em className={`status status-${item.status}`}>{statusLabel[item.status] || item.status}</em>
-          <b>{formatMoney(item.estimatedTotal || 0, item.currency || buyer.currency)}</b>
+          <b>{formatInquiryMoney(item.estimatedTotal, item.currency || buyer.currency, hasUnavailablePrice(item))}</b>
         </Link>
       })}</div>
       : <section className="empty"><h2>No inquiry records found.</h2><p>Create a quote request from the Inquiry List after selecting approved buyer products.</p><Link className="secondary-action" to={toLocalePath('/products')}>Product List</Link></section>}

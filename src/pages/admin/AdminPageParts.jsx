@@ -24,7 +24,8 @@ export function AdminStatus({ status }) {
   return <span className={`admin-status ${status}`}>{getAdminStatusLabel(t, status)}</span>
 }
 
-export function AdminMoney({ value, currency = 'USD' }) {
+export function AdminMoney({ value, currency = 'USD', unavailable = false }) {
+  if (unavailable) return <>가격 확인중</>
   return <>{formatMoney(value, currency)}</>
 }
 

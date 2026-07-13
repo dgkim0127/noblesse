@@ -26,12 +26,14 @@ function mapInquiry(row) {
     totalItems: row.total_items,
     totalQuantity: row.total_quantity,
     estimatedTotal: row.estimated_total,
+    priceUnavailable: row.has_unavailable_price === true,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
 }
 
 function mapInquiryItem(row) {
+  const priceUnavailable = Number(row.price_snapshot || 0) === 0 && Number(row.subtotal || 0) === 0;
   return {
     id: row.id,
     productId: row.product_id,
@@ -43,7 +45,8 @@ function mapInquiryItem(row) {
     quantity: row.quantity,
     moq: row.moq,
     priceSnapshot: row.price_snapshot,
-    subtotal: row.subtotal
+    subtotal: row.subtotal,
+    priceUnavailable
   };
 }
 
@@ -112,6 +115,7 @@ export function createAdminInquiryQueries(pool) {
             i.admin_memo,
             count(ii.id)::int as total_items,
             coalesce(sum(ii.quantity), 0)::int as total_quantity,
+            coalesce(bool_or(ii.price_snapshot = 0 and ii.subtotal = 0), false) as has_unavailable_price,
             i.estimated_total,
             i.created_at,
             i.updated_at

@@ -753,8 +753,10 @@ export function ProductDetailPage() {
   const adminPriceBooks = product && isAdmin ? getAdminPriceBooks(product.productId) : []
   const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
   const canUseTradeTerms = Boolean(isApproved && price && approvedAmount !== null)
+  const canRequestProductQuote = Boolean(isApproved && product)
   const canViewAdminPrices = Boolean(isAdmin && adminPriceBooks.length > 0)
-  const visibleMoq = canUseTradeTerms ? price.moq : canViewAdminPrices ? adminPriceBooks[0]?.moq : null
+  const requestMoq = canUseTradeTerms ? price.moq : product?.moqDefault || 1
+  const visibleMoq = canUseTradeTerms ? price.moq : canRequestProductQuote ? requestMoq : canViewAdminPrices ? adminPriceBooks[0]?.moq : null
   const [quantity, setQuantity] = useState(visibleMoq || 1)
   const [directMemo, setDirectMemo] = useState('')
   const [directStatus, setDirectStatus] = useState('idle')
@@ -800,7 +802,7 @@ export function ProductDetailPage() {
   const sizeGuideBody = productDetailContent.sizeGuide || copy.sizeGuideText
   const shippingNoticeBody = productDetailContent.exchangeNotice || copy.shippingNoticeText
   const quoteWorkflowLead = productDetailContent.wholesaleNotice || copy.quoteWorkflowLead
-  const currentQuantity = normalizeQuantity(quantity, visibleMoq || 1)
+  const currentQuantity = normalizeQuantity(quantity, requestMoq || 1)
   const accessLink = viewerState === 'pending' ? '/approval-pending' : '/register'
   const accessLabel = viewerState === 'pending' ? copy.reviewStatus : copy.requestAccess
   const relatedProducts = getRelatedProducts(products, product)
@@ -835,9 +837,9 @@ export function ProductDetailPage() {
   ].filter(([, value]) => value)
 
   const addSelectedItem = () => addInquiryItem(product.productId, { color: activeColor, size: activeSize }, currentQuantity)
-  const updateQuantity = (nextQuantity) => setQuantity(normalizeQuantity(nextQuantity, visibleMoq || 1))
+  const updateQuantity = (nextQuantity) => setQuantity(normalizeQuantity(nextQuantity, requestMoq || 1))
   const submitSelectedProductInquiry = async () => {
-    if (!canUseTradeTerms || directStatus === 'submitting') return
+    if (!canRequestProductQuote || directStatus === 'submitting') return
     setDirectStatus('submitting')
     setDirectError('')
     setDirectInquiry(null)
@@ -895,20 +897,27 @@ export function ProductDetailPage() {
           </div>
         </div>}
 
-        {canUseTradeTerms ? <div className="pd-trade-box">
+        {canRequestProductQuote ? <div className="pd-trade-box">
           <small>{copy.approvalRequired}</small>
-          <strong>{formatMoney(approvedAmount, price.currency)}</strong>
-          <span>{copy.moq} {price.moq} pcs · {price.market} · {price.currency}</span>
+          {canUseTradeTerms
+            ? <>
+              <strong>{formatMoney(approvedAmount, price.currency)}</strong>
+              <span>{copy.moq} {price.moq} pcs · {price.market} · {price.currency}</span>
+            </>
+            : <>
+              <strong>{copy.priceUnavailable}</strong>
+              <span>{copy.quoteNoticeText}</span>
+            </>}
           <OptionButtons label={copy.color} options={colors} selected={activeColor} onSelect={setSelectedColor} />
           <OptionButtons label={copy.size} options={sizes} selected={activeSize} onSelect={setSelectedSize} />
           <div className="pd-option-group">
             <span>{copy.quantity}</span>
             <div className="pd-quantity-control">
-              <button type="button" aria-label="Decrease quantity" onClick={() => updateQuantity(currentQuantity - visibleMoq)}><Minus size={15} /></button>
-              <input value={currentQuantity} type="number" min={visibleMoq} step={visibleMoq} onBlur={(event) => updateQuantity(event.target.value)} onChange={(event) => updateQuantity(event.target.value)} />
-              <button type="button" aria-label="Increase quantity" onClick={() => updateQuantity(currentQuantity + visibleMoq)}><Plus size={15} /></button>
+              <button type="button" aria-label="Decrease quantity" onClick={() => updateQuantity(currentQuantity - requestMoq)}><Minus size={15} /></button>
+              <input value={currentQuantity} type="number" min={requestMoq} step={requestMoq} onBlur={(event) => updateQuantity(event.target.value)} onChange={(event) => updateQuantity(event.target.value)} />
+              <button type="button" aria-label="Increase quantity" onClick={() => updateQuantity(currentQuantity + requestMoq)}><Plus size={15} /></button>
             </div>
-            <small>{copy.quantityNote(visibleMoq)}</small>
+            <small>{copy.quantityNote(requestMoq)}</small>
           </div>
           <div className="pd-direct-inquiry-form" id="pd-inquiry-form">
             <label htmlFor="pd-direct-inquiry-memo">{copy.directInquiryTitle}</label>
@@ -1046,7 +1055,7 @@ export function ProductDetailPage() {
     </section>
 
     <div className="pd-mobile-action" aria-label={copy.quoteNotice}>
-      {canUseTradeTerms
+      {canRequestProductQuote
         ? <a className="pd-primary-action" href="#pd-inquiry-form">{copy.directInquirySubmit}</a>
         : !canViewAdminPrices && <Link className="pd-secondary-action" to={toLocalePath(accessLink)}>{accessLabel}</Link>}
     </div>

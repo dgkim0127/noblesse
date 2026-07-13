@@ -19,8 +19,10 @@ test('product detail gates buyer price and MOQ behind approved buyer or admin pr
   const source = readSource('src/pages/ProductDetailPage.jsx')
 
   assert.match(source, /const canUseTradeTerms = Boolean\(isApproved && price && approvedAmount !== null\)/)
+  assert.match(source, /const canRequestProductQuote = Boolean\(isApproved && product\)/)
   assert.match(source, /const canViewAdminPrices = Boolean\(isAdmin && adminPriceBooks\.length > 0\)/)
-  assert.match(source, /const visibleMoq = canUseTradeTerms \? price\.moq : canViewAdminPrices \? adminPriceBooks\[0\]\?\.moq : null/)
+  assert.match(source, /const requestMoq = canUseTradeTerms \? price\.moq : product\?\.moqDefault \|\| 1/)
+  assert.match(source, /const visibleMoq = canUseTradeTerms \? price\.moq : canRequestProductQuote \? requestMoq : canViewAdminPrices \? adminPriceBooks\[0\]\?\.moq : null/)
   assert.match(source, /!canViewAdminPrices && <Link className="pd-secondary-action"/)
 })
 

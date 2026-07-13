@@ -257,7 +257,9 @@ export const buildInquiryRows = (inquiryItems, products, buyer, isApproved, prod
   const subtotal = priceSnapshot === null ? null : multiplyMoney(priceSnapshot, item.quantity, price.currency)
   const option = getDefaultOption(product, item)
 
-  return product && price && priceSnapshot !== null && subtotal !== null ? {
+  if (!product) return null
+
+  if (price && priceSnapshot !== null && subtotal !== null) return {
     ...item,
     product,
     price,
@@ -274,7 +276,34 @@ export const buildInquiryRows = (inquiryItems, products, buyer, isApproved, prod
     priceSnapshot,
     subtotal,
     tone: product.tone,
-  } : null
+  }
+
+  const market = buyer?.assignedMarket
+  const currency = buyer?.currency
+  if (!isApproved || !isValidMarketCurrencyPair(market, currency)) return null
+
+  const moq = product.moqDefault || 1
+  const quantity = normalizeQuantity(item.quantity, moq)
+  return {
+    ...item,
+    product,
+    price: null,
+    productCode: product.code,
+    productName: product.nameEn,
+    thumbnailUrl: product.imageSet?.thumb ?? '',
+    imageAlt: product.imageAlt,
+    material: product.material,
+    color: option.color,
+    size: option.size,
+    moq,
+    currency,
+    market,
+    quantity,
+    priceSnapshot: 0,
+    subtotal: 0,
+    priceUnavailable: true,
+    tone: product.tone,
+  }
 }).filter(Boolean)
 
 export const buildInquirySnapshot = ({ inquiryRows, buyer, requestMemo, inquiryId }) => {

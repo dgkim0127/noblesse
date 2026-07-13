@@ -22,6 +22,7 @@ This index points operators and implementers to the current site map, QA evidenc
 | `docs/QA_SITE_WIDE_AUDIT.md` | Read-only browser and API QA evidence |
 | `docs/N74_CATALOG_EDITOR_SAVE_LOAD_CANARY.md` | Controlled admin catalog editor save/load canary evidence |
 | `docs/N77_PRODUCT_INQUIRY_MVP_REPORT.md` | Product-detail inquiry request MVP implementation notes |
+| `docs/N77_PRODUCT_QUOTE_REQUEST_E2E_CANARY.md` | Product quote request price-gate fix and E2E canary status |
 | `docs/ROADMAP_B2B_SHOPPING_MALL.md` | Staged roadmap for B2B catalog operations |
 | `docs/OPS_INDEX.md` | Entry point for operations docs |
 
@@ -78,3 +79,5 @@ N74P5 owner canary price save retry fast: current `origin/main` baseline `b0570d
 N74P5B owner session canary price save retry: current `origin/main` baseline `85083138fe835b89429305c03ebfd7ba519ec80e` was clean except allowed local untracked folders. The active browser owner session rendered `/kr/admin/team` and `/kr/admin/prices` without the fail-closed admin gate. The hidden canary KR price save was submitted exactly once through the production admin UI for `NB-CANARY-EDITOR-SAVELOAD-001` with `KRW 1800`; reload confirmed the price row persisted. Public checks still show the canary detail route returns 404 and the product list does not include the canary. Seed product hash remained `58f6f661afab553f381d6232f92cdc8da83928858ff1a2fe6d96b9106069c9db`. Decision: `CATALOG_PRICE_SAVELOAD_VERIFIED`.
 
 N77 product inquiry MVP note: product detail now has an approved-buyer one-product quote request action that reuses the existing `POST /buyer/inquiries` backend contract. No migration or backend deploy was required. Guest and pending users remain on approval guidance, and hidden products remain protected by the backend visible-product lookup.
+
+N77Q quote request price-gate retry: backend and frontend now support price-pending quote requests for visible products without showing `0` as a real buyer/admin price. Backend revision `noblesse-backend-00021-r27` and Firebase Hosting target `noblesse` were deployed. The live canary was not successfully created: the approved buyer session first received `404` from `POST /api/buyer/inquiries`, then the browser session rendered as `guest`. Seed product hash remained unchanged and the hidden canary stayed absent. Current blocker: fresh approved buyer session required for retry and response-body diagnosis.

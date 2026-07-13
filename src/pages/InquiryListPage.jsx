@@ -173,6 +173,11 @@ function useInquiryListCopy() {
   return { copy, locale, toLocalePath }
 }
 
+const pricePendingLabel = '가격 확인중'
+const formatQuoteAmount = (value, currency, unavailable = false) => (
+  unavailable ? pricePendingLabel : formatMoney(value, currency)
+)
+
 function AccessNotice({ viewerState }) {
   const isPending = viewerState === 'pending'
   const { copy, toLocalePath } = useInquiryListCopy()
@@ -244,6 +249,7 @@ export function InquiryListPage() {
 
   const hasItems = inquiryRows.length > 0
   const currency = inquiryRows[0]?.currency || buyer?.currency || 'KRW'
+  const hasUnavailablePrice = inquiryRows.some((row) => row.priceUnavailable)
 
   return (
     <main className="content quote-cart-page">
@@ -308,12 +314,12 @@ export function InquiryListPage() {
                     </div>
                     <div className="quote-cart-term">
                       <span>{copy.unitPrice}</span>
-                      <strong>{formatMoney(row.priceSnapshot, row.currency)}</strong>
+                      <strong>{formatQuoteAmount(row.priceSnapshot, row.currency, row.priceUnavailable)}</strong>
                     </div>
                     <QuantityControl copy={copy} option={option} row={row} updateInquiryQuantity={updateInquiryQuantity} />
                     <div className="quote-cart-price">
                       <span>{copy.subtotal}</span>
-                      <strong>{formatMoney(row.subtotal, row.currency)}</strong>
+                      <strong>{formatQuoteAmount(row.subtotal, row.currency, row.priceUnavailable)}</strong>
                     </div>
                     <button className="quote-cart-remove remove" type="button" aria-label={copy.remove} onClick={() => removeInquiryItem(row.productId, option)}>
                       <Trash2 size={16} />
@@ -330,7 +336,7 @@ export function InquiryListPage() {
           <dl>
             <div><dt>{copy.summaryItems}</dt><dd>{inquiryRows.length}</dd></div>
             <div><dt>{copy.summaryQuantity}</dt><dd>{totalQuantity}</dd></div>
-            <div className="quote-cart-total"><dt>{copy.summaryTotal}</dt><dd>{formatMoney(estimatedTotal, currency)}</dd></div>
+            <div className="quote-cart-total"><dt>{copy.summaryTotal}</dt><dd>{formatQuoteAmount(estimatedTotal, currency, hasUnavailablePrice)}</dd></div>
           </dl>
           <p>{copy.notice}</p>
           <Link

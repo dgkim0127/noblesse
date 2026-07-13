@@ -40,7 +40,9 @@ export function AdminInquiriesPage() {
       <div className="admin-table-wrap">
         <table className="admin-table">
           <thead><tr><th>{t.inquiries.inquiryNumber}</th><th>{t.inquiries.buyerCompany}</th><th>{t.inquiries.market}</th><th>{t.inquiries.currency}</th><th>{t.common.status}</th><th>{t.inquiries.totalItems}</th><th>{t.inquiries.totalQuantity}</th><th>{t.inquiries.estimatedTotal}</th><th>{t.common.createdAt}</th><th>{t.common.actions}</th></tr></thead>
-          <tbody>{inquiries.map((inquiry) => <tr key={inquiry.id || inquiry.inquiryId}>
+          <tbody>{inquiries.map((inquiry) => {
+            const hasUnavailablePrice = inquiry.priceUnavailable || (inquiry.items || []).some((item) => item.priceUnavailable)
+            return <tr key={inquiry.id || inquiry.inquiryId}>
             <td>{inquiry.inquiryNumber || inquiry.inquiryId}</td>
             <td>{inquiry.companyName || inquiry.buyerCompanyName || '-'}</td>
             <td><img alt={getMarketDisplay(inquiry.market).label} className="admin-market-flag" src={getMarketDisplay(inquiry.market).flagSrc} title={inquiry.market} /></td>
@@ -48,10 +50,11 @@ export function AdminInquiriesPage() {
             <td><AdminStatus status={inquiry.status} /></td>
             <td>{inquiry.totalItems}</td>
             <td>{inquiry.totalQuantity}</td>
-            <td><AdminMoney value={inquiry.estimatedTotal} currency={inquiry.currency} /></td>
+            <td><AdminMoney unavailable={hasUnavailablePrice} value={inquiry.estimatedTotal} currency={inquiry.currency} /></td>
             <td>{inquiry.createdAt ? new Date(inquiry.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
             <td><div className="admin-actions tight"><AdminLink to={`/admin/inquiries/${inquiry.id || inquiry.inquiryId}`}>{t.common.view}</AdminLink></div></td>
-          </tr>)}</tbody>
+          </tr>
+          })}</tbody>
         </table>
         <AdminPagination
           disabled={requestStatus === 'loading'}

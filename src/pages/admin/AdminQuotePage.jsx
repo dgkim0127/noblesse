@@ -19,6 +19,7 @@ export function AdminQuotePage() {
 
   const quote = data?.quote
   const items = data?.items || []
+  const hasUnavailableRequestedPrice = items.some((item) => Number(item.requestedPriceSnapshot || 0) === 0)
 
   if (!quote) {
     return <>
@@ -79,7 +80,7 @@ export function AdminQuotePage() {
         <dl className="admin-definition-list">
           <dt>{t.quotes.leadTime}</dt><dd>{quote.leadTime || '-'}</dd>
           <dt>{t.quotes.shippingNote}</dt><dd>{quote.shippingNote || '-'}</dd>
-          <dt>{t.quotes.requestedTotal}</dt><dd><AdminMoney value={quote.requestedTotal || 0} currency={quote.currency} /></dd>
+          <dt>{t.quotes.requestedTotal}</dt><dd><AdminMoney unavailable={hasUnavailableRequestedPrice} value={quote.requestedTotal || 0} currency={quote.currency} /></dd>
           <dt>{t.quotes.confirmedTotal}</dt><dd><AdminMoney value={quote.confirmedTotal || 0} currency={quote.currency} /></dd>
         </dl>
       </article>
@@ -94,7 +95,7 @@ export function AdminQuotePage() {
             <td>{item.productCode}</td>
             <td>{item.requestedQuantity}</td>
             <td>{item.confirmedQuantity}</td>
-            <td><AdminMoney value={item.requestedPriceSnapshot || 0} currency={quote.currency} /></td>
+            <td><AdminMoney unavailable={Number(item.requestedPriceSnapshot || 0) === 0} value={item.requestedPriceSnapshot || 0} currency={quote.currency} /></td>
             <td><AdminMoney value={item.confirmedUnitPrice || 0} currency={quote.currency} /></td>
             <td><AdminMoney value={item.confirmedSubtotal || 0} currency={quote.currency} /></td>
           </tr>)}</tbody>

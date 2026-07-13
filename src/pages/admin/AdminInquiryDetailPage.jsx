@@ -22,6 +22,7 @@ export function AdminInquiryDetailPage() {
   const inquiry = data?.inquiry || {}
   const buyer = data?.buyer || {}
   const items = data?.items || inquiry.items || []
+  const hasUnavailablePrice = items.some((item) => item.priceUnavailable)
 
   const saveMemo = async () => {
     if (saveStatus === 'saving') return
@@ -82,7 +83,7 @@ export function AdminInquiryDetailPage() {
         <dl className="admin-definition-list">
           <dt>{t.inquiries.totalItems}</dt><dd>{inquiry.totalItems}</dd>
           <dt>{t.inquiries.totalQuantity}</dt><dd>{inquiry.totalQuantity}</dd>
-          <dt>{t.inquiries.estimatedTotal}</dt><dd><AdminMoney value={inquiry.estimatedTotal} currency={inquiry.currency} /></dd>
+          <dt>{t.inquiries.estimatedTotal}</dt><dd><AdminMoney unavailable={hasUnavailablePrice} value={inquiry.estimatedTotal} currency={inquiry.currency} /></dd>
         </dl>
       </article>
       <article className="admin-card wide-card">
@@ -105,8 +106,8 @@ export function AdminInquiryDetailPage() {
             <td>{item.size}</td>
             <td>{item.quantity}</td>
             <td>{item.moq}</td>
-            <td><AdminMoney value={item.priceSnapshot} currency={inquiry.currency} /></td>
-            <td><AdminMoney value={item.subtotal} currency={inquiry.currency} /></td>
+            <td><AdminMoney unavailable={item.priceUnavailable} value={item.priceSnapshot} currency={inquiry.currency} /></td>
+            <td><AdminMoney unavailable={item.priceUnavailable} value={item.subtotal} currency={inquiry.currency} /></td>
           </tr>)}</tbody>
         </table>
       </div>
