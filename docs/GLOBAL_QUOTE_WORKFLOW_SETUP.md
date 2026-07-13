@@ -23,7 +23,9 @@ profiles, products, market prices, requests, official quotations, line items,
 documents, and status history. It also enables row-level security and provides
 the buyer request/response RPCs.
 
-Do not replace the migration with direct SQL edits in production.
+Keep every production schema change as a version-controlled migration. The
+Supabase project currently has this migration applied through its SQL Editor
+because a CLI database connection was not configured on the operator machine.
 
 ## 2. Configure the frontend
 
@@ -41,11 +43,21 @@ Vite variables, source code, or committed files.
 Without both variables, the app keeps its local demo fallback so the catalog UI
 can be reviewed, but no production account or quotation is persisted.
 
-## 3. Seed catalog and price data
+## 3. Manage the catalog as an administrator
 
-Before enabling buyer access, import the approved catalog into `products` and
-set `is_visible` only for public products. Each product needs its `image_set`
-with WebP URLs at these intended widths:
+Apply the catalog administration migration:
+
+```text
+supabase/migrations/20260713_admin_catalog_management.sql
+```
+
+An approved administrator can then use `/admin/catalog` to create or update a
+product, upload its storefront images, configure options and MOQ, choose
+catalog visibility, and set an approved-Buyer price for each active market.
+The image bucket is public for storefront delivery, but its write policy is
+limited to approved administrators.
+
+For fast storefront delivery, upload WebP files at these intended widths:
 
 | Use | Width |
 | --- | ---: |
@@ -54,15 +66,16 @@ with WebP URLs at these intended widths:
 | `detail` | 1200px |
 | `zoom` | 1800px |
 
-Add market-specific rows to `product_prices` for every approved buyer market.
-Prices remain invisible until a buyer profile has `approval_status = approved`.
+Set a market-specific price for every approved buyer market. Prices remain
+invisible until a buyer profile has `status = approved` and the assigned market
+matches the price record.
 
 ## 4. Prepare accounts and admin roles
 
 1. A new Supabase Auth user receives a pending `buyer_profiles` row through the
    migration trigger.
 2. An approved operator updates only the intended buyer profile to
-   `approval_status = approved`, and sets the buyer's market, currency, and
+   `status = approved`, and sets the buyer's market, currency, and
    language preference.
 3. An approved operator sets `role = admin` only for explicitly authorized
    staff. Admins can issue quotations and review all quote requests.

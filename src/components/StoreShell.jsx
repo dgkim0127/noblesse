@@ -1,4 +1,4 @@
-import { Clock3, FileText, Heart, ListPlus, LogIn, Search, ShieldCheck, UserRound } from 'lucide-react'
+import { Clock3, FileText, Heart, ListPlus, LogIn, PackagePlus, Search, ShieldCheck, UserRound } from 'lucide-react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 
@@ -16,7 +16,7 @@ export function StoreShell() {
           {isGuest && <><NavLink to="/login"><LogIn size={18} />Login</NavLink><NavLink to="/register"><UserRound size={18} />Request Access</NavLink></>}
           {isPending && <NavLink to="/approval-pending"><Clock3 size={18} />Approval Pending</NavLink>}
           {isApproved && <><NavLink to="/my-inquiries"><FileText size={18} />My Quotes</NavLink><NavLink to="/account"><UserRound size={18} />My Page</NavLink><NavLink className="inquiry-link" to="/inquiry-list"><ListPlus size={18} />Inquiry List<b>{inquiryItems.length}</b></NavLink></>}
-          {isAdmin && <NavLink to="/admin/quotes"><ShieldCheck size={18} />Quote Admin</NavLink>}
+          {isAdmin && <><NavLink to="/admin/catalog"><PackagePlus size={18} />Catalog Admin</NavLink><NavLink to="/admin/quotes"><ShieldCheck size={18} />Quote Admin</NavLink></>}
           {isSupabaseConfigured && !isGuest && <button className="header-signout" type="button" onClick={logout}>Sign out</button>}
         </nav>
       </div>

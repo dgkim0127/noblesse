@@ -5,6 +5,7 @@ import { CommerceProvider } from './commerce/CommerceContext'
 import { StoreShell } from './components/StoreShell'
 
 const AccountPage = lazy(() => import('./pages/AccountPage').then((module) => ({ default: module.AccountPage })))
+const AdminCatalogPage = lazy(() => import('./pages/AdminCatalogPage').then((module) => ({ default: module.AdminCatalogPage })))
 const AdminQuotesPage = lazy(() => import('./pages/AdminQuotesPage').then((module) => ({ default: module.AdminQuotesPage })))
 const ApprovalPendingPage = lazy(() => import('./pages/ApprovalPendingPage').then((module) => ({ default: module.ApprovalPendingPage })))
 const HomePage = lazy(() => import('./pages/HomePage').then((module) => ({ default: module.HomePage })))
@@ -35,6 +36,7 @@ function App() {
       <Route path="/request-quote" element={<RequestQuotePage />} />
       <Route path="/my-inquiries" element={<MyInquiriesPage />} />
       <Route path="/my-inquiries/:inquiryId" element={<MyInquiriesPage />} />
+      <Route path="/admin/catalog" element={<AdminCatalogPage />} />
       <Route path="/admin/quotes" element={<AdminQuotesPage />} />
       <Route path="/account" element={<AccountPage />} />
       <Route path="/login" element={<LoginPage />} />
