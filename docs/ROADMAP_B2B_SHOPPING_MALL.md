@@ -161,4 +161,6 @@ Remaining recommended follow-up:
 | Real catalog data | Fill only confirmed material, gauge, size, and decoration data supplied by the operator |
 | Product inquiry MVP | Build the quote-request workflow after catalog data entry is stable |
 
-N77Q status: price-pending quote request code has been deployed to backend revision `noblesse-backend-00021-r27` and Firebase Hosting target `noblesse`. The E2E canary did not complete because the live approved buyer session returned `404` once and then became a guest session. N78 should remain blocked until a fresh approved buyer session submits one quote request canary and buyer/admin visibility is verified.
+N77Q status: price-pending quote request code has been deployed to backend revision `noblesse-backend-00021-r27` and Firebase Hosting target `noblesse`. The first E2E canary did not complete because the live approved buyer session returned `404` once and then became a guest session.
+
+N77Q2 status: backend revision `noblesse-backend-00022-s8c` fixed the KRW numeric-scale POST404 path, and the approved buyer canary submitted successfully as `INQ-20260713-29833682`. Buyer-side visibility is verified. N78 remains blocked until admin-side visibility/detail is verified with an admin browser session.

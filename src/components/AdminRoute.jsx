@@ -26,6 +26,11 @@ export function AdminRoute({ children }) {
   }
 
   const authMissing = !isMockMode && !isAuthConfigured()
+  const openLoginModal = () => {
+    window.dispatchEvent(new CustomEvent('noblesse:open-login-modal', {
+      detail: { notice: t.route.releaseBody },
+    }))
+  }
 
   return <main className="content admin-access-page">
     <section className="admin-card admin-access-card">
@@ -38,7 +43,7 @@ export function AdminRoute({ children }) {
           ? t.route.previewBody
           : t.route.releaseBody}</p>
       <div className="admin-actions">
-        {!isMockMode && <Link className="primary-action" to={toLocalePath('/login')}>{t.route.login}</Link>}
+        {!isMockMode && <button className="primary-action" type="button" onClick={openLoginModal}>{t.route.login}</button>}
         <Link className="secondary-action" to={toLocalePath('/products')}>{t.route.productList}</Link>
         <Link className="secondary-action" to={toLocalePath('/account')}>{t.route.account}</Link>
       </div>

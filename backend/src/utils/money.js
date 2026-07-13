@@ -30,10 +30,18 @@ export function toMinorUnits(value, currency) {
   if (!parts || parts.sign < 0) return null;
 
   const minorUnits = getCurrencyMinorUnits(currency);
-  if (parts.fractionPart.length > minorUnits) return null;
+  const fractionPart =
+    parts.fractionPart.length > minorUnits
+      ? parts.fractionPart.slice(0, minorUnits)
+      : parts.fractionPart;
+  const extraFractionPart =
+    parts.fractionPart.length > minorUnits
+      ? parts.fractionPart.slice(minorUnits)
+      : "";
+  if (extraFractionPart && /[1-9]/.test(extraFractionPart)) return null;
 
   const whole = BigInt(parts.wholePart || "0");
-  const fraction = BigInt((parts.fractionPart || "").padEnd(minorUnits, "0") || "0");
+  const fraction = BigInt((fractionPart || "").padEnd(minorUnits, "0") || "0");
   const multiplier = 10n ** BigInt(minorUnits);
   const minor = whole * multiplier + fraction;
   if (minor > BigInt(Number.MAX_SAFE_INTEGER)) return null;

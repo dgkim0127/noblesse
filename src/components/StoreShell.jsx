@@ -702,7 +702,7 @@ export function StoreShell() {
     setIsSearchOpen(false)
   }
 
-  const openLoginModal = (event, notice = '') => {
+  const openLoginModal = useCallback((event, notice = '') => {
     if (loginModalCloseTimerRef.current) window.clearTimeout(loginModalCloseTimerRef.current)
     loginModalCloseTimerRef.current = null
     setIsLoginModalClosing(false)
@@ -719,7 +719,16 @@ export function StoreShell() {
     setIsSearchOpen(false)
     closeCompactSearch()
     setIsLoginModalOpen(true)
-  }
+  }, [closeCompactSearch])
+
+  useEffect(() => {
+    const handleOpenLoginModal = (event) => {
+      openLoginModal(null, event.detail?.notice || '')
+    }
+
+    window.addEventListener('noblesse:open-login-modal', handleOpenLoginModal)
+    return () => window.removeEventListener('noblesse:open-login-modal', handleOpenLoginModal)
+  }, [openLoginModal])
 
   const openLoginRequiredModal = (event) => {
     openLoginModal(event, sideCopy.loginRequired)

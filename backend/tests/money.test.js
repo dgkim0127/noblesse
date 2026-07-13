@@ -24,7 +24,9 @@ test("money precision validation accepts exact minor unit inputs", () => {
     assert.equal(validateMoneyPrecision(value, "TWD"), true);
   }
   assert.equal(validateMoneyPrecision(1000, "KRW"), true);
+  assert.equal(validateMoneyPrecision("1800.00", "KRW"), true);
   assert.equal(validateMoneyPrecision(1200, "JPY"), true);
+  assert.equal(validateMoneyPrecision("1200.0", "JPY"), true);
 });
 
 test("money precision validation rejects drift-prone or unsafe inputs", () => {
