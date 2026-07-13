@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createCatalogApi } from '../api/catalogApi'
+import { createAdminApi } from '../api/adminApi'
 import { createBuyerApi } from '../api/buyerApi'
 import { createApiClient } from '../api/client'
 import { getRuntimeConfig } from '../config/runtimeConfig'
@@ -28,6 +29,8 @@ import { getInquiryKey } from './inquiryKeys'
 
 const formatInquiryId = () => `INQ-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${String(Date.now()).slice(-3)}`
 const viewerStates = new Set(['guest', 'pending', 'approved', 'admin'])
+const adminPricePageLimit = 100
+const adminPricePageCap = 20
 
 function upsertInquiry(inquiries, nextInquiry) {
   const nextKey = getInquiryKey(nextInquiry)
@@ -38,8 +41,34 @@ function upsertInquiry(inquiries, nextInquiry) {
     : [nextInquiry, ...inquiries]
 }
 
+async function loadAdminProductPrices(adminApi, token) {
+  const prices = []
+  let offset = 0
+
+  for (let page = 0; page < adminPricePageCap; page += 1) {
+    const result = await adminApi.getPrices({
+      active: true,
+      limit: adminPricePageLimit,
+      offset,
+    }, token)
+    const pagePrices = result.data?.prices || []
+
+    prices.push(...pagePrices)
+
+    const nextOffset = result.meta?.nextOffset
+    const parsedNextOffset = Number(nextOffset)
+    if (nextOffset === null || nextOffset === undefined || pagePrices.length === 0 || !Number.isFinite(parsedNextOffset)) {
+      break
+    }
+    offset = parsedNextOffset
+  }
+
+  return prices
+}
+
 async function loadAuthenticatedCommerceState({ apiBaseUrl, token }) {
   const apiClient = createApiClient({ baseUrl: apiBaseUrl })
+  const adminApi = createAdminApi(apiClient)
   const buyerApi = createBuyerApi(apiClient)
   const profile = normalizeBuyerProfile(await buyerApi.getCurrentBuyerProfile(token))
   const isApprovedProfile = isApprovedBuyer(profile)
@@ -47,9 +76,15 @@ async function loadAuthenticatedCommerceState({ apiBaseUrl, token }) {
   let prices = []
   let inquiryResult = { data: { inquiries: [] } }
 
-  if (isApprovedProfile || isAdminProfile) {
+  if (isApprovedProfile) {
     try {
       prices = await buyerApi.getProductPrices(token)
+    } catch {
+      prices = []
+    }
+  } else if (isAdminProfile) {
+    try {
+      prices = await loadAdminProductPrices(adminApi, token)
     } catch {
       prices = []
     }
@@ -459,6 +494,7 @@ export function CommerceProvider({ children }) {
     isApproved,
     isGuest,
     isPending,
+    productPrices,
     products,
     removeInquiryItem,
     registerBuyer,
