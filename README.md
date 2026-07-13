@@ -15,18 +15,22 @@ Home
 -> My Inquiries
 ```
 
-## First version
+## Global quote workflow
 
 - Vite + React + React Router
-- Mock buyer states: `guest`, `pending`, `approved`
-- Mock catalog records shaped like the future Firestore documents
+- Supabase Auth and Postgres support for buyer profiles, catalog prices, quote requests, quotes, and status history
+- Buyer states: `guest`, `pending`, `approved`, `admin`
 - Approved Buyer Price and MOQ visible only after Buyer Approval
 - Inquiry List and Request Quote available only to approved buyers
+- Buyers can review a published quotation, download a PDF, and accept or decline it on the site
+- Buyer acceptance records an administrator follow-up request only; it does not create an order or a payment
+- Admins can review requests, set item pricing and terms, then publish an official quotation
 - Responsive product grid: desktop 4 columns, tablet 3 columns, mobile 2 columns
+- Route-level code splitting keeps account, quote administration, Supabase, and PDF code out of the initial storefront bundle
 
-Real Firebase services and authentication are intentionally deferred. The
-planned data model, storage paths, and access policy are documented under
-[`docs`](./docs).
+Firebase Hosting continues to serve the frontend. Supabase is the data and
+identity service for the quote workflow. The application remains a B2B catalog:
+there is no checkout, payment, order confirmation, or inventory deduction flow.
 
 ## Run locally
 
@@ -41,3 +45,11 @@ npm run dev
 npm run lint
 npm run build
 ```
+
+## Configure Supabase and Firebase Hosting
+
+Follow [the quote workflow setup guide](./docs/GLOBAL_QUOTE_WORKFLOW_SETUP.md)
+before deploying. It covers the database migration, the two public Vite
+environment variables, initial catalog and market-price data, and the
+administrator profile setup. Do not place service-role keys in frontend
+environment variables.

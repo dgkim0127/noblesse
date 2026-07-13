@@ -1,25 +1,32 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
 import './App.css'
 import { CommerceProvider } from './commerce/CommerceContext'
 import { StoreShell } from './components/StoreShell'
-import { AccountPage } from './pages/AccountPage'
-import { ApprovalPendingPage } from './pages/ApprovalPendingPage'
-import { HomePage } from './pages/HomePage'
-import { InquiryListPage } from './pages/InquiryListPage'
-import { LoginPage } from './pages/LoginPage'
-import { MyInquiriesPage } from './pages/MyInquiriesPage'
-import { ProductDetailPage } from './pages/ProductDetailPage'
-import { ProductsPage } from './pages/ProductsPage'
-import { RegisterPage } from './pages/RegisterPage'
-import { RequestQuotePage } from './pages/RequestQuotePage'
+
+const AccountPage = lazy(() => import('./pages/AccountPage').then((module) => ({ default: module.AccountPage })))
+const AdminQuotesPage = lazy(() => import('./pages/AdminQuotesPage').then((module) => ({ default: module.AdminQuotesPage })))
+const ApprovalPendingPage = lazy(() => import('./pages/ApprovalPendingPage').then((module) => ({ default: module.ApprovalPendingPage })))
+const HomePage = lazy(() => import('./pages/HomePage').then((module) => ({ default: module.HomePage })))
+const InquiryListPage = lazy(() => import('./pages/InquiryListPage').then((module) => ({ default: module.InquiryListPage })))
+const LoginPage = lazy(() => import('./pages/LoginPage').then((module) => ({ default: module.LoginPage })))
+const MyInquiriesPage = lazy(() => import('./pages/MyInquiriesPage').then((module) => ({ default: module.MyInquiriesPage })))
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage').then((module) => ({ default: module.ProductDetailPage })))
+const ProductsPage = lazy(() => import('./pages/ProductsPage').then((module) => ({ default: module.ProductsPage })))
+const RegisterPage = lazy(() => import('./pages/RegisterPage').then((module) => ({ default: module.RegisterPage })))
+const RequestQuotePage = lazy(() => import('./pages/RequestQuotePage').then((module) => ({ default: module.RequestQuotePage })))
 
 function LegacyInquiryDetailRedirect() {
   const { orderId } = useParams()
   return <Navigate replace to={`/my-inquiries/${orderId}`} />
 }
 
+function LoadingPage() {
+  return <main className="route-loading" aria-live="polite">Loading Noblesse catalog...</main>
+}
+
 function App() {
-  return <BrowserRouter><CommerceProvider><Routes>
+  return <BrowserRouter><CommerceProvider><Suspense fallback={<LoadingPage />}><Routes>
     <Route element={<StoreShell />}>
       <Route path="/" element={<HomePage />} />
       <Route path="/products" element={<ProductsPage />} />
@@ -28,6 +35,7 @@ function App() {
       <Route path="/request-quote" element={<RequestQuotePage />} />
       <Route path="/my-inquiries" element={<MyInquiriesPage />} />
       <Route path="/my-inquiries/:inquiryId" element={<MyInquiriesPage />} />
+      <Route path="/admin/quotes" element={<AdminQuotesPage />} />
       <Route path="/account" element={<AccountPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
@@ -38,7 +46,7 @@ function App() {
       <Route path="/orders/:orderId" element={<LegacyInquiryDetailRedirect />} />
     </Route>
     <Route path="*" element={<Navigate replace to="/" />} />
-  </Routes></CommerceProvider></BrowserRouter>
+  </Routes></Suspense></CommerceProvider></BrowserRouter>
 }
 
 export default App

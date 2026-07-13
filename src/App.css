@@ -259,6 +259,229 @@ a {
   opacity: 0.45;
 }
 
+.route-loading {
+  display: grid;
+  min-height: 60vh;
+  place-items: center;
+  color: #746b7e;
+}
+
+.header-signout {
+  border: 0;
+  color: #746b7e;
+  background: transparent;
+  cursor: pointer;
+}
+
+.form-error {
+  margin: 0;
+  color: #b4234a !important;
+  font-size: 13px;
+}
+
+.quote-contact-grid,
+.admin-quote-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.quote-contact-grid label,
+.admin-quote-fields label,
+.quote-memo {
+  display: grid;
+  gap: 6px;
+  color: #665d72;
+  font-size: 13px;
+}
+
+.quote-contact-grid input,
+.admin-quote-fields input,
+.admin-quote-fields textarea,
+.quote-memo textarea,
+.product-options input {
+  min-width: 0;
+  border: 1px solid #e9e1dd;
+  border-radius: 6px;
+  padding: 10px;
+  color: #2a234f;
+  background: #fff;
+}
+
+.quote-memo textarea,
+.admin-quote-fields textarea {
+  min-height: 94px;
+  resize: vertical;
+}
+
+.product-options {
+  display: grid;
+  gap: 8px;
+  margin: 22px 0;
+}
+
+.product-options > span {
+  margin-top: 8px;
+  color: #746b7e;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.product-options > div:not(.quantity-control) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.product-options button {
+  border: 1px solid #e9e1dd;
+  border-radius: 5px;
+  padding: 8px 10px;
+  color: #2a234f;
+  background: #fff;
+  cursor: pointer;
+}
+
+.product-options button.active {
+  border-color: #ff8fa9;
+  background: #fff0f3;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantity-control input {
+  width: 80px;
+  text-align: center;
+}
+
+.official-quote {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+  border-top: 1px solid #eee8e3;
+  padding-top: 20px;
+}
+
+.official-quote h2,
+.official-quote p {
+  margin: 0;
+}
+
+.quote-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.quote-accepted {
+  color: #2a234f;
+  font-weight: 700;
+}
+
+.admin-quotes-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.admin-quote-list {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-quote-list button {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border: 1px solid #ece4df;
+  border-radius: 6px;
+  padding: 12px;
+  color: #2a234f;
+  text-align: left;
+  background: #fff;
+  cursor: pointer;
+}
+
+.admin-quote-list button.active {
+  border-color: #ff8fa9;
+  background: #fff5f7;
+}
+
+.admin-quote-list span,
+.admin-request-meta,
+.admin-quote-item span {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-quote-list small,
+.admin-request-meta span,
+.admin-quote-item small {
+  color: #857d89;
+  font-size: 12px;
+}
+
+.admin-quote-editor {
+  display: grid;
+  gap: 16px;
+  border: 1px solid #ece4df;
+  border-radius: 7px;
+  padding: 20px;
+  background: #fff;
+}
+
+.admin-editor-wrap {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-quote-items {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-quote-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px auto;
+  gap: 12px;
+  align-items: end;
+  border-bottom: 1px solid #eee8e3;
+  padding-bottom: 10px;
+}
+
+.admin-quote-item label {
+  display: grid;
+  gap: 4px;
+  color: #746b7e;
+  font-size: 12px;
+}
+
+.admin-quote-item input {
+  width: 100%;
+  border: 1px solid #e9e1dd;
+  border-radius: 5px;
+  padding: 8px;
+}
+
+.admin-quote-total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  color: #2a234f;
+}
+
+.admin-quote-total strong {
+  margin-right: auto;
+  font-size: 20px;
+}
+
 .secondary-action {
   border: 1px solid #2a234f;
   color: #2a234f;
@@ -1403,6 +1626,26 @@ a {
   .quote-section dl,
   .inquiry-meta {
     grid-template-columns: 1fr;
+  }
+
+  .quote-contact-grid,
+  .admin-quote-fields,
+  .admin-quotes-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-quote-item {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .admin-quote-total {
+    justify-content: flex-start;
+  }
+
+  .admin-quote-total strong {
+    width: 100%;
+    margin-right: 0;
   }
 
   .account-panel dl,

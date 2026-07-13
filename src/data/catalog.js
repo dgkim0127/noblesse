@@ -95,11 +95,18 @@ export const mockUsers = {
   },
 }
 
+const productImage = (productId, width) => `https://images.unsplash.com/photo-${{
+  'NB-001': '1515562141207-7a88fb7ce338',
+  'NB-002': '1600721391776-b5cd0e0048f9',
+  'NB-003': '1671644730555-916aa8d8157f',
+  'NB-004': '1611652022419-a9419f74343d',
+}[productId] ?? '1515562141207-7a88fb7ce338'}?auto=format&fit=crop&w=${width}&h=${Math.round(width * 1.2)}&q=80&fm=webp`
+
 const imageSet = (productId) => ({
-  thumb: `https://cdn.example.com/products/${productId}/thumb/thumb.webp`,
-  card: `https://cdn.example.com/products/${productId}/card/card.webp`,
-  detail: `https://cdn.example.com/products/${productId}/detail/detail.webp`,
-  zoom: `https://cdn.example.com/products/${productId}/zoom/zoom.webp`,
+  thumb: productImage(productId, 300),
+  card: productImage(productId, 600),
+  detail: productImage(productId, 1200),
+  zoom: productImage(productId, 1800),
 })
 
 const productSeeds = [

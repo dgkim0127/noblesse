@@ -11,7 +11,7 @@ export function HomePage() {
       <div className="hero-art"><span className="hero-ring" /><span className="hero-gem" /></div>
     </section>
     <section className="buyer-strip"><BadgeCheck size={19} /><div><strong>{isApproved ? `${buyer.companyName} / Approved Buyer` : viewerState === 'pending' ? 'Buyer Approval is pending' : 'Wholesale access for approved buyers'}</strong><span>{isApproved ? `Your ${buyer.assignedMarket} market price list is active.` : 'Browse the catalog now. Prices and Inquiry features unlock after approval.'}</span></div><Globe2 size={19} /></section>
-    <section className="section-wrap"><div className="section-title"><div><Sparkles size={18} /><h2>Featured piercing</h2></div><Link to="/products">View all</Link></div><div className="catalog-grid">{products.map((product) => <CatalogCard key={product.productId} product={product} />)}</div></section>
+    <section className="section-wrap"><div className="section-title"><div><Sparkles size={18} /><h2>Featured piercing</h2></div><Link to="/products">View all</Link></div><div className="catalog-grid">{products.slice(0, 8).map((product) => <CatalogCard key={product.productId} product={product} />)}</div></section>
     <section className="brand-note"><Gem size={21} /><div><strong>Designed for global buyers</strong><span>Large product visuals, export-ready information, and a simple Request Quote flow.</span></div></section>
   </main>
 }
