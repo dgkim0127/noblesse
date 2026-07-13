@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:production": "node scripts/validateProductionBuildEnv.mjs && vite build",
+    "check:performance-budget": "node scripts/checkPerformanceBudget.mjs",
     "lint": "eslint .",
     "postgres:transform-sample": "node scripts/postgres/transformFirebaseSalesSample.mjs",
     "preview": "vite preview",

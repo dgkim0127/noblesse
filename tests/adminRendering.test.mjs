@@ -14,6 +14,7 @@ const adminRoutePages = [
   'src/pages/admin/AdminBuyerDetailPage.jsx',
   'src/pages/admin/AdminBuyersPage.jsx',
   'src/pages/admin/AdminCatalogEntryPage.jsx',
+  'src/pages/admin/AdminProductEditorPage.jsx',
   'src/pages/admin/AdminCategoriesPage.jsx',
   'src/pages/admin/AdminDashboardPage.jsx',
   'src/pages/admin/AdminFxPage.jsx',
@@ -30,9 +31,12 @@ test('admin shell keeps child routes mounted through the outlet', () => {
   const routes = readWorkspaceFile('src/App.jsx')
 
   assert.match(shell, /<section className="admin-main admin-console-main">[\s\S]*<Outlet \/>[\s\S]*<\/section>/)
-  assert.match(routes, /<Route path="admin" element=\{<AdminRoute><AdminShell \/><\/AdminRoute>\}>/)
+  assert.match(routes, /function AdminWorkspaceRoute\(\)/)
+  assert.match(routes, /<AdminRoute><AdminShell \/><\/AdminRoute>/)
+  assert.match(routes, /<Route path="admin" element=\{<AdminWorkspaceRoute \/>\}>/)
   assert.match(routes, /<Route index element=\{withAdminSuspense\(<AdminDashboardPage \/>, 'dashboard\.read'\)\}/)
-  assert.match(routes, /<Route path="catalog\/new" element=\{withAdminSuspense\(<AdminCatalogEntryPage \/>, 'catalog\.write'\)\}/)
+  assert.match(routes, /<Route path="catalog\/new" element=\{<LegacyAdminCatalogRedirect \/>\}/)
+  assert.match(routes, /<Route path="products\/new" element=\{withAdminSuspense\(<AdminProductEditorPage \/>, 'catalog\.write'\)\}/)
   assert.match(routes, /<Route path="fx" element=\{withAdminSuspense\(<AdminFxPage \/>, 'prices\.read'\)\}/)
 })
 

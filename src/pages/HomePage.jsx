@@ -1401,7 +1401,6 @@ export function HomePage() {
   }, [activeHomeSectionNav])
   const activeHomeSectionIds = activeHomeSectionNav.map((item) => item.id).join('|')
   const firstActiveHomeSectionId = activeHomeSectionNav[0]?.id ?? homeSectionNav[0].id
-  const showcaseLoopPanels = [...homeShowcasePanels, ...homeShowcasePanels, ...homeShowcasePanels]
 
   const replayProductSectionReveal = (section) => {
     const cards = Array.from(section.querySelectorAll('.home-product-card'))
@@ -1662,10 +1661,8 @@ export function HomePage() {
 
     const scroller = showcaseScrollerRef.current
     const step = getShowcaseStep()
-    const loopWidth = step * homeShowcasePanels.length
-
-    if (scroller && step && scroller.scrollLeft >= loopWidth) {
-      scroller.scrollLeft -= loopWidth
+    if (scroller && step) {
+      scroller.scrollLeft = Math.round(scroller.scrollLeft / step) * step
     }
   }
 
@@ -1690,7 +1687,7 @@ export function HomePage() {
         ref={showcaseScrollerRef}
       >
         <div className="home-showcase-track">
-        {showcaseLoopPanels.map((banner, index) => {
+        {homeShowcasePanels.map((banner, index) => {
           const bannerTitle = getLocalizedValue(banner.title, locale)
           const bannerEyebrow = getLocalizedValue(banner.eyebrow, locale)
           const bannerText = getLocalizedValue(banner.text, locale)

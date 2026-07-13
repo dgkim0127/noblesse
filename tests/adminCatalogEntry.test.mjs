@@ -10,11 +10,14 @@ function readWorkspaceFile(path) {
   return readFileSync(join(root, path), 'utf8')
 }
 
-test('unified catalog entry route is exposed in locale and default admin trees', () => {
+test('dedicated product editor routes are exposed and legacy entry redirects', () => {
   const routes = readWorkspaceFile('src/App.jsx')
-  const routeMatches = routes.match(/<Route path="catalog\/new" element=\{withAdminSuspense\(<AdminCatalogEntryPage \/>, 'catalog\.write'\)\} \/>/g) || []
+  const newRouteMatches = routes.match(/<Route path="products\/new" element=\{withAdminSuspense\(<AdminProductEditorPage \/>, 'catalog\.write'\)\} \/>/g) || []
+  const editRouteMatches = routes.match(/<Route path="products\/:productId\/edit" element=\{withAdminSuspense\(<AdminProductEditorPage \/>, 'catalog\.write'\)\} \/>/g) || []
 
-  assert.equal(routeMatches.length, 2)
+  assert.equal(newRouteMatches.length, 2)
+  assert.equal(editRouteMatches.length, 2)
+  assert.match(routes, /path="catalog\/new" element=\{<LegacyAdminCatalogRedirect \/>\}/)
 })
 
 test('unified catalog entry form reuses existing admin API calls and backend image upload', () => {
@@ -120,11 +123,11 @@ test('unified catalog entry image UI supports preview, primary, ordering, and cl
   assert.match(page, /maxImageCount = 8/)
 })
 
-test('products page exposes the unified catalog entry action', () => {
+test('products page exposes the dedicated product editor action', () => {
   const productsPage = readWorkspaceFile('src/pages/admin/AdminProductsPage.jsx')
 
-  assert.match(productsPage, /to="\/admin\/catalog\/new"/)
-  assert.match(productsPage, /t\.dashboard\.addProduct/)
+  assert.match(productsPage, /to="\/admin\/products\/new"/)
+  assert.match(productsPage, /새 상품/)
 })
 
 test('unified catalog entry copy exists for every admin locale', () => {
