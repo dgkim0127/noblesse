@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import admin from "firebase-admin";
+import sharp from "sharp";
 import { getFirebaseAdminApp } from "../auth/firebaseAuth.js";
 import {
   internalError,
@@ -11,13 +12,14 @@ import {
 import { parseMultipartFormData } from "../utils/multipart.js";
 
 const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
-const extensionByMimeType = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp"
-};
 const maxImages = 8;
 const maxFileBytes = 10 * 1024 * 1024;
+const imageVariants = {
+  thumb: 300,
+  card: 600,
+  detail: 1200,
+  zoom: 1800
+};
 
 function detectImageMime(buffer) {
   if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
@@ -93,9 +95,8 @@ function sanitizeAltText(value) {
   return text.length > 200 ? text.slice(0, 200) : text;
 }
 
-function buildObjectKey(productId, upload, requestId) {
-  const ext = extensionByMimeType[upload.contentType] || "bin";
-  return `products/${productId}/${Date.now()}-${requestId || crypto.randomUUID()}-${upload.index}.${ext}`;
+function buildObjectKey(productId, upload, requestId, variant) {
+  return `products/${productId}/${Date.now()}-${requestId || crypto.randomUUID()}-${upload.index}-${variant}.webp`;
 }
 
 function encodeMediaKey(objectKey) {
@@ -104,28 +105,50 @@ function encodeMediaKey(objectKey) {
 
 function buildImageSet(uploadedImages, primaryIndex) {
   const primary = uploadedImages[primaryIndex] || uploadedImages[0];
-  const primaryUrl = primary.url;
   return {
-    thumb: primaryUrl,
-    card: primaryUrl,
-    detail: primaryUrl,
-    zoom: primaryUrl,
-    primary: primaryUrl,
+    thumb: primary.sources.thumb.url,
+    card: primary.sources.card.url,
+    detail: primary.sources.detail.url,
+    zoom: primary.sources.zoom.url,
+    primary: primary.sources.detail.url,
     gallery: uploadedImages.map((image) => ({
-      url: image.url,
-      objectKey: image.objectKey,
-      mimeType: image.mimeType,
-      sizeBytes: image.sizeBytes,
+      url: image.sources.detail.url,
+      thumb: image.sources.thumb.url,
+      card: image.sources.card.url,
+      detail: image.sources.detail.url,
+      zoom: image.sources.zoom.url,
+      sources: Object.fromEntries(Object.entries(image.sources).map(([key, source]) => [key, source.url])),
+      objectKeys: Object.fromEntries(Object.entries(image.sources).map(([key, source]) => [key, source.objectKey])),
+      mimeType: "image/webp",
+      sizeBytes: image.sources.detail.sizeBytes,
       sortOrder: image.sortOrder,
       isPrimary: image.isPrimary
     }))
   };
 }
 
-function buildImageAlt(uploadedImages, primaryIndex) {
+export async function transformProductImage(buffer) {
+  const base = sharp(buffer, { failOn: "error" }).rotate();
+  const transformed = {};
+  for (const [variant, width] of Object.entries(imageVariants)) {
+    transformed[variant] = await base
+      .clone()
+      .resize({ width, fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
+  }
+  return transformed;
+}
+
+function buildImageAlt(uploadedImages, primaryIndex, localizedAlt = {}) {
   const primary = uploadedImages[primaryIndex] || uploadedImages[0];
   return {
     default: primary.altText || "",
+    translations: Object.fromEntries(
+      ["kr", "en", "jp", "zh-TW"]
+        .map((locale) => [locale, sanitizeAltText(localizedAlt?.[locale])])
+        .filter(([, value]) => value)
+    ),
     gallery: uploadedImages.map((image) => ({
       altText: image.altText || "",
       sortOrder: image.sortOrder,
@@ -148,7 +171,7 @@ async function cleanupUploadedObjects(objectStore, objectKeys) {
 
 export function createFirebaseImageObjectStore(env, adminModule = admin) {
   return {
-    async save({ objectKey, buffer, contentType }) {
+    async save({ objectKey, buffer, contentType, cacheControl = "public, max-age=31536000" }) {
       if (!env.firebaseStorageBucket) {
         throw internalError("Firebase Storage bucket is not configured.");
       }
@@ -157,7 +180,7 @@ export function createFirebaseImageObjectStore(env, adminModule = admin) {
       await bucket.file(objectKey).save(buffer, {
         metadata: {
           contentType,
-          cacheControl: "public, max-age=31536000"
+          cacheControl
         },
         resumable: false
       });
@@ -190,7 +213,7 @@ export function decodeMediaKey(mediaKey) {
   return objectKey;
 }
 
-export function createAdminProductImageService({ queries, objectStore }) {
+export function createAdminProductImageService({ queries, objectStore, imageTransformer = transformProductImage }) {
   return {
     async uploadProductImages({ productId, contentType, body, adminViewer }) {
       const parts = parseMultipartFormData({ contentType, body });
@@ -203,18 +226,25 @@ export function createAdminProductImageService({ queries, objectStore }) {
       try {
         const uploadedImages = [];
         for (const image of images) {
-          const objectKey = buildObjectKey(productId, image, adminViewer?.requestId);
-          await objectStore.save({
-            objectKey,
-            buffer: image.buffer,
-            contentType: image.contentType
-          });
-          uploadedObjectKeys.push(objectKey);
+          const variants = await imageTransformer(image.buffer);
+          const sources = {};
+          for (const variant of Object.keys(imageVariants)) {
+            const variantBuffer = variants[variant];
+            if (!Buffer.isBuffer(variantBuffer) || variantBuffer.length === 0) {
+              throw validationError(`Unable to create ${variant} image`);
+            }
+            const objectKey = buildObjectKey(productId, image, adminViewer?.requestId, variant);
+            await objectStore.save({ objectKey, buffer: variantBuffer, contentType: "image/webp" });
+            uploadedObjectKeys.push(objectKey);
+            sources[variant] = {
+              objectKey,
+              url: `/api/catalog/media/${encodeMediaKey(objectKey)}`,
+              sizeBytes: variantBuffer.length
+            };
+          }
           uploadedImages.push({
-            objectKey,
-            url: `/api/catalog/media/${encodeMediaKey(objectKey)}`,
-            mimeType: image.contentType,
-            sizeBytes: image.buffer.length,
+            sources,
+            mimeType: "image/webp",
             sortOrder: image.index,
             isPrimary: image.index === primaryIndex,
             altText: sanitizeAltText(altTexts[image.index])
@@ -222,14 +252,20 @@ export function createAdminProductImageService({ queries, objectStore }) {
         }
 
         const imageSet = buildImageSet(uploadedImages, primaryIndex);
-        const imageAlt = buildImageAlt(uploadedImages, primaryIndex);
+        const imageAlt = buildImageAlt(uploadedImages, primaryIndex, metadata.localizedAlt);
         const result = await queries.updateProductImages(productId, { imageSet, imageAlt }, adminViewer);
         if (!result) {
           throw notFound("Product not found");
         }
+        const { replacedObjectKeys = [], ...safeResult } = result;
+        const uploadedKeySet = new Set(uploadedObjectKeys);
+        await cleanupUploadedObjects(
+          objectStore,
+          replacedObjectKeys.filter((objectKey) => !uploadedKeySet.has(objectKey))
+        );
 
         return {
-          ...result,
+          ...safeResult,
           images: uploadedImages
         };
       } catch (error) {

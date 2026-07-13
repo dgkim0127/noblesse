@@ -379,6 +379,36 @@ test("packaged product catalog attribute detail migration matches canonical migr
   assert.equal(packaged, canonical);
 });
 
+test("admin operations redesign migration is additive and supports localized drafts and quote documents", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260713_admin_operations_redesign.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.match(sqlText, /add column if not exists name_zh_tw text/i);
+  assert.match(sqlText, /add column if not exists description_zh_tw text/i);
+  assert.match(sqlText, /alter column name_en drop not null/i);
+  assert.match(sqlText, /create table if not exists public\.admin_quote_documents/i);
+  assert.match(sqlText, /create table if not exists public\.admin_quote_status_history/i);
+  assert.match(sqlText, /document_locale in \('kr', 'en', 'jp', 'zh-TW'\)/i);
+  assert.match(sqlText, /status in \('draft', 'sent', 'accepted', 'rejected', 'cancelled'\)/i);
+  assert.doesNotMatch(sqlText, /\bdrop\s+table\b|\btruncate\b|\bdelete\s+from\b/i);
+});
+
+test("packaged admin operations redesign migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260713_admin_operations_redesign.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260713_admin_operations_redesign.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
 test("migration runner resolves packaged lifecycle migration path explicitly", () => {
   const resolved = resolveSchemaSqlPath({
     SCHEMA_SQL_PATH: "migrations/20260622_admin_rbac_account_lifecycle.sql"

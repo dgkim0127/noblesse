@@ -18,6 +18,7 @@ function mapCategory(row) {
     nameKo: row.name_ko,
     nameEn: row.name_en,
     nameJa: row.name_ja,
+    nameZhTw: row.name_zh_tw,
     slug: row.slug,
     coverUrl: row.cover_url,
     isVisible: row.is_visible,
@@ -33,6 +34,7 @@ function createCategorySnapshot(row) {
     categoryId: row.category_id,
     slug: row.slug,
     nameEn: row.name_en,
+    nameZhTw: row.name_zh_tw,
     isVisible: row.is_visible,
     sortOrder: row.sort_order,
     updatedAt: row.updated_at
@@ -56,6 +58,7 @@ const categorySelect = `
     name_ko,
     name_en,
     name_ja,
+    name_zh_tw,
     slug,
     cover_url,
     is_visible,
@@ -114,6 +117,7 @@ export function createAdminCategoryQueries(pool) {
               or name_ko ilike $2
               or name_en ilike $2
               or name_ja ilike $2
+              or name_zh_tw ilike $2
             )
           order by sort_order asc, created_at desc
           limit $3 offset $4
@@ -151,12 +155,13 @@ export function createAdminCategoryQueries(pool) {
               name_ko,
               name_en,
               name_ja,
+              name_zh_tw,
               slug,
               cover_url,
               is_visible,
               sort_order
             )
-            values ($1, $2, $3, $4, $5, $6, $7, $8)
+            values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             returning *
           `,
           [
@@ -164,6 +169,7 @@ export function createAdminCategoryQueries(pool) {
             input.nameKo,
             input.nameEn,
             input.nameJa,
+            input.nameZhTw,
             input.slug,
             input.coverUrl,
             input.isVisible,
@@ -218,10 +224,11 @@ export function createAdminCategoryQueries(pool) {
               name_ko = coalesce($2, name_ko),
               name_en = coalesce($3, name_en),
               name_ja = coalesce($4, name_ja),
-              slug = coalesce($5, slug),
-              cover_url = coalesce($6, cover_url),
-              is_visible = coalesce($7, is_visible),
-              sort_order = coalesce($8, sort_order),
+              name_zh_tw = coalesce($5, name_zh_tw),
+              slug = coalesce($6, slug),
+              cover_url = coalesce($7, cover_url),
+              is_visible = coalesce($8, is_visible),
+              sort_order = coalesce($9, sort_order),
               updated_at = now()
             where id = $1
             returning *
@@ -231,6 +238,7 @@ export function createAdminCategoryQueries(pool) {
             input.nameKo,
             input.nameEn,
             input.nameJa,
+            input.nameZhTw,
             input.slug,
             input.coverUrl,
             input.isVisible,

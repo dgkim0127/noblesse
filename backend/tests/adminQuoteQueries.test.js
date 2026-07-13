@@ -15,6 +15,7 @@ const adminViewer = {
 function createFakePool({ duplicate = false, inquiryRows = [{ id: inquiryId, inquiry_number: "INQ-001", currency: "JPY", estimated_total: 22000 }] } = {}) {
   const calls = [];
   let releaseCount = 0;
+  let quoteStatus = "draft";
   const client = {
     async query(sql, params = []) {
       const text = String(sql).trim();
@@ -37,14 +38,14 @@ function createFakePool({ duplicate = false, inquiryRows = [{ id: inquiryId, inq
         return { rows: [{ id: "item-1", product_id: "product-1", product_code: "NB-001", requested_quantity: 20, confirmed_quantity: 20, requested_price_snapshot: 1100, confirmed_unit_price: 1100, confirmed_subtotal: 22000 }] };
       }
       if (normalized.startsWith("insert into public.audit_logs")) return { rows: [{ id: "audit-1" }] };
-      if (normalized.includes("from public.admin_quotes") && normalized.includes("for update of aq")) {
+      if (normalized.includes("from public.admin_quotes") && normalized.includes("where aq.id")) {
         return {
           rows: [{
             id: quoteId,
             inquiry_id: inquiryId,
             inquiry_number: "INQ-001",
             company_name: "Buyer Co",
-            status: "draft",
+            status: quoteStatus,
             confirmed_total: 22000,
             requested_total: 22000,
             currency: "JPY",
@@ -53,29 +54,17 @@ function createFakePool({ duplicate = false, inquiryRows = [{ id: inquiryId, inq
             admin_memo: null,
             quoted_by: null,
             quoted_at: null,
+            current_document_id: null,
             created_at: "2026-06-16T00:00:00.000Z",
             updated_at: "2026-06-16T00:00:00.000Z"
           }]
         };
       }
       if (normalized.startsWith("update public.admin_quotes")) {
-        return {
-          rows: [{
-            id: quoteId,
-            inquiry_id: inquiryId,
-            status: "sent",
-            confirmed_total: 22000,
-            currency: "JPY",
-            lead_time: null,
-            shipping_note: null,
-            admin_memo: null,
-            quoted_by: adminViewer.userId,
-            quoted_at: "2026-06-16T00:00:00.000Z",
-            created_at: "2026-06-16T00:00:00.000Z",
-            updated_at: "2026-06-16T00:00:00.000Z"
-          }]
-        };
+        quoteStatus = params[1] || quoteStatus;
+        return { rows: [] };
       }
+      if (normalized.startsWith("insert into public.admin_quote_status_history")) return { rows: [] };
       throw new Error(`Unexpected query: ${text}`);
     },
     release() {
@@ -133,17 +122,18 @@ test("createQuoteFromInquiry rolls back when inquiry is not found", async () => 
   assert.equal(fake.releaseCount, 1);
 });
 
-test("updateQuoteStatus updates quote status and writes audit log", async () => {
+test("updateQuoteStatus cancels a quote and writes status history and audit log", async () => {
   const fake = createFakePool();
-  const result = await createAdminQuoteQueries(fake.pool).updateQuoteStatus(quoteId, "sent", adminViewer);
+  const result = await createAdminQuoteQueries(fake.pool).updateQuoteStatus(quoteId, "cancelled", adminViewer);
   const texts = fake.calls.map((call) => call.sql.toLowerCase());
 
   assert.equal(texts.includes("begin"), true);
   assert.equal(texts.some((text) => text.includes("for update of aq")), true);
   assert.equal(texts.some((text) => text.startsWith("update public.admin_quotes")), true);
+  assert.equal(texts.some((text) => text.startsWith("insert into public.admin_quote_status_history")), true);
   assert.equal(texts.some((text) => text.startsWith("insert into public.audit_logs")), true);
   assert.equal(texts.includes("commit"), true);
   assert.equal(fake.releaseCount, 1);
-  assert.equal(result.quote.status, "sent");
+  assert.equal(result.quote.status, "cancelled");
   assert.equal(result.auditLogId, "audit-1");
 });

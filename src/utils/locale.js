@@ -2331,7 +2331,7 @@ export const getLocalizedProductName = (product, locale) => {
   const contentLocale = getLocaleContentKey(locale)
   if (contentLocale === 'kr') return product.nameKo ?? product.nameEn
   if (contentLocale === 'jp') return product.nameJa ?? product.nameEn ?? product.nameKo
-  if (contentLocale === 'cn') return localizeText(product.nameCn ?? product.nameEn ?? product.nameKo, locale)
+  if (contentLocale === 'cn') return product.nameZhTw ?? localizeText(product.nameCn ?? product.nameEn ?? product.nameKo, locale)
   return product.nameEn ?? product.nameKo
 }
 
@@ -2339,14 +2339,23 @@ export const getLocalizedProductDescription = (product, locale) => {
   const contentLocale = getLocaleContentKey(locale)
   if (contentLocale === 'kr') return product.descriptionKo ?? product.descriptionEn ?? product.descriptionJa
   if (contentLocale === 'jp') return product.descriptionJa ?? product.descriptionEn ?? product.descriptionKo
-  if (contentLocale === 'cn') return localizeText(product.descriptionCn ?? product.descriptionEn ?? product.descriptionKo ?? product.descriptionJa, locale)
+  if (contentLocale === 'cn') return product.descriptionZhTw ?? localizeText(product.descriptionCn ?? product.descriptionEn ?? product.descriptionKo ?? product.descriptionJa, locale)
   return product.descriptionEn ?? product.descriptionKo ?? product.descriptionJa
+}
+
+export const getLocalizedProductDetailContent = (product, locale) => {
+  const detailContent = product?.detailContent || {}
+  const contentLocale = canonicalizeLocale(locale)
+  const localized = detailContent.translations?.[contentLocale]
+  return localized && typeof localized === 'object'
+    ? { ...detailContent, ...localized }
+    : detailContent
 }
 
 export const getLocalizedProductAlt = (product, locale) => {
   const contentLocale = getLocaleContentKey(locale)
   if (contentLocale === 'kr') return product.imageAlt?.ko ?? product.nameKo ?? product.nameEn
   if (contentLocale === 'jp') return product.imageAlt?.ja ?? product.nameJa ?? product.nameEn
-  if (contentLocale === 'cn') return localizeText(product.imageAlt?.cn ?? product.nameCn ?? product.nameEn ?? product.nameKo, locale)
+  if (contentLocale === 'cn') return product.imageAlt?.['zh-TW'] ?? product.nameZhTw ?? localizeText(product.imageAlt?.cn ?? product.nameCn ?? product.nameEn ?? product.nameKo, locale)
   return product.imageAlt?.en ?? product.nameEn ?? product.nameKo
 }

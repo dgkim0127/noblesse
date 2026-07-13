@@ -44,7 +44,16 @@ function createImageApp({ updateProductImages, objectStore }) {
         buyers: {},
         products: createAdminProductService({
           queries,
-          imageService: createAdminProductImageService({ queries, objectStore })
+          imageService: createAdminProductImageService({
+            queries,
+            objectStore,
+            imageTransformer: async (buffer) => ({
+              thumb: Buffer.from(buffer),
+              card: Buffer.from(buffer),
+              detail: Buffer.from(buffer),
+              zoom: Buffer.from(buffer)
+            })
+          })
         })
       }
     },
@@ -130,10 +139,11 @@ test("POST /api/admin/products/:productId/images stores images and updates produ
   });
 
   assert.equal(response.status, 201);
-  assert.equal(saved.length, 1);
+  assert.equal(saved.length, 4);
   assert.equal(deleted.length, 0);
-  assert.equal(saved[0].contentType, "image/png");
-  assert.match(saved[0].objectKey, /^products\/11111111-1111-4111-8111-111111111111\//);
+  assert.ok(saved.every((entry) => entry.contentType === "image/webp"));
+  assert.ok(saved.every((entry) => /^products\/11111111-1111-4111-8111-111111111111\//.test(entry.objectKey)));
+  assert.ok(["thumb", "card", "detail", "zoom"].every((variant) => receivedInput.imageSet[variant]));
   assert.match(receivedInput.imageSet.card, /^\/api\/catalog\/media\//);
   assert.equal(receivedInput.imageSet.gallery[0].isPrimary, true);
   assert.equal(receivedInput.imageAlt.default, "Primary alt");
@@ -338,7 +348,7 @@ test("POST /api/admin/products/:productId/images cleans up uploaded objects when
   });
 
   assert.equal(response.status, 500);
-  assert.equal(saved.length, 1);
+  assert.equal(saved.length, 4);
   assert.deepEqual(deleted, saved);
 });
 
@@ -372,7 +382,7 @@ test("POST /api/admin/products/:productId/images cleans up uploaded objects when
 
   assert.equal(response.status, 404);
   assert.equal(response.body.error.code, "NOT_FOUND");
-  assert.equal(saved.length, 1);
+  assert.equal(saved.length, 4);
   assert.deepEqual(deleted, saved);
 });
 
@@ -405,5 +415,5 @@ test("POST /api/admin/products/:productId/images preserves DB failure when clean
 
   assert.equal(response.status, 500);
   assert.equal(response.body.error.code, "INTERNAL_ERROR");
-  assert.equal(saved.length, 1);
+  assert.equal(saved.length, 4);
 });

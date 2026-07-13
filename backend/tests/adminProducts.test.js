@@ -4,7 +4,7 @@ import { createApp } from "../src/app.js";
 import { createAdminProductService } from "../src/services/adminProductService.js";
 import { request } from "./testClient.js";
 
-function createAppWithProducts({ onCreateProduct, onUpdateProduct } = {}) {
+function createAppWithProducts({ onCreateProduct, onUpdateProduct, onBulkUpdate, onDuplicate } = {}) {
   const productId = "11111111-1111-4111-8111-111111111111";
   return createApp({
     env: { nodeEnv: "test", isProduction: false, allowedOrigins: [] },
@@ -23,6 +23,10 @@ function createAppWithProducts({ onCreateProduct, onUpdateProduct } = {}) {
                   isVisible: filters.visible ?? true
                 }
               ];
+            },
+            async getProduct(id) {
+              if (id !== productId) return null;
+              return { id, code: "NB-001", nameKo: "상품", completion: { publishable: false } };
             },
             async createProduct(input) {
               onCreateProduct?.(input);
@@ -62,6 +66,15 @@ function createAppWithProducts({ onCreateProduct, onUpdateProduct } = {}) {
                 },
                 auditLogId: "audit-1"
               };
+            },
+            async duplicateProduct(id, code) {
+              onDuplicate?.({ id, code });
+              if (id !== productId) return null;
+              return { product: { id: "22222222-2222-4222-8222-222222222222", code, isVisible: false }, auditLogId: "audit-duplicate-1" };
+            },
+            async bulkUpdateProducts(input) {
+              onBulkUpdate?.(input);
+              return { products: input.ids.map((id) => ({ id, isVisible: input.action === "publish" })), auditLogIds: ["audit-bulk-1"] };
             }
           }
         })
@@ -99,13 +112,61 @@ test("POST /api/admin/products creates product through admin API", async () => {
       sizes: [],
       imageSet: {},
       imageAlt: {},
-      isVisible: true
+      isVisible: false
     })
   });
 
   assert.equal(response.status, 201);
   assert.equal(response.body.data.product.code, "NB-999");
   assert.equal(response.body.data.auditLogId, "audit-create-1");
+});
+
+test("GET /api/admin/products/:productId returns editor data", async () => {
+  const response = await request(createAppWithProducts(), "/api/admin/products/11111111-1111-4111-8111-111111111111", {
+    headers: { authorization: "Bearer admin-token" }
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.data.product.code, "NB-001");
+});
+
+test("POST /api/admin/products/:productId/duplicate creates an unpublished copy with a new code", async () => {
+  let captured;
+  const response = await request(createAppWithProducts({ onDuplicate: (input) => { captured = input; } }), "/api/admin/products/11111111-1111-4111-8111-111111111111/duplicate", {
+    method: "POST",
+    headers: { authorization: "Bearer admin-token", "content-type": "application/json" },
+    body: JSON.stringify({ code: "NB-001-COPY" })
+  });
+
+  assert.equal(response.status, 201);
+  assert.equal(response.body.data.product.code, "NB-001-COPY");
+  assert.equal(response.body.data.product.isVisible, false);
+  assert.equal(captured.code, "NB-001-COPY");
+});
+
+test("PATCH /api/admin/products/bulk applies a supported action to selected products", async () => {
+  let captured;
+  const response = await request(createAppWithProducts({ onBulkUpdate: (input) => { captured = input; } }), "/api/admin/products/bulk", {
+    method: "PATCH",
+    headers: { authorization: "Bearer admin-token", "content-type": "application/json" },
+    body: JSON.stringify({ ids: ["11111111-1111-4111-8111-111111111111"], action: "setCategory", categoryKey: "barbell" })
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(captured.action, "setCategory");
+  assert.equal(captured.categoryKey, "barbell");
+});
+
+test("PATCH /api/admin/products/bulk rejects more than 100 products", async () => {
+  const ids = Array.from({ length: 101 }, (_, index) => `${String(index).padStart(8, "0")}-1111-4111-8111-111111111111`);
+  const response = await request(createAppWithProducts(), "/api/admin/products/bulk", {
+    method: "PATCH",
+    headers: { authorization: "Bearer admin-token", "content-type": "application/json" },
+    body: JSON.stringify({ ids, action: "unpublish" })
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(response.body.error.code, "VALIDATION_ERROR");
 });
 
 test("POST /api/admin/products accepts catalog attributes and detail metadata", async () => {
@@ -134,7 +195,7 @@ test("POST /api/admin/products accepts catalog attributes and detail metadata", 
       detailContent: { headline: "Clover barbell", care: "Keep dry" },
       homePlacement: { showInPiercing: true, sortPriority: 2 },
       badge: "new drop",
-      isVisible: true
+      isVisible: false
     })
   });
 

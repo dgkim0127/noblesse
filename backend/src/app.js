@@ -15,6 +15,7 @@ import { createAdminPriceQueries } from "./db/queries/adminPriceQueries.js";
 import { createAdminProductQueries } from "./db/queries/adminProductQueries.js";
 import { createAdminQuoteQueries } from "./db/queries/adminQuoteQueries.js";
 import { createBuyerInquiryQueries } from "./db/queries/buyerInquiryQueries.js";
+import { createBuyerQuoteQueries } from "./db/queries/buyerQuoteQueries.js";
 import { createBuyerRegistrationQueries } from "./db/queries/buyerRegistrationQueries.js";
 import { createLoginIdentifierQueries } from "./db/queries/loginIdentifierQueries.js";
 import * as catalogQueries from "./db/queries/catalogQueries.js";
@@ -41,6 +42,7 @@ import {
 } from "./services/adminProductImageService.js";
 import { createAdminQuoteService } from "./services/adminQuoteService.js";
 import { createBuyerInquiryService } from "./services/buyerInquiryService.js";
+import { createBuyerQuoteService } from "./services/buyerQuoteService.js";
 import { createBuyerRegistrationService } from "./services/buyerRegistrationService.js";
 import { createBuyerService } from "./services/buyerService.js";
 import { createCatalogService } from "./services/catalogService.js";
@@ -96,6 +98,12 @@ export function createApp(options = {}) {
       createBuyerInquiryService({
         queries: options.queries?.buyerInquiries || createBuyerInquiryQueries(pool)
       }),
+    buyerQuotes:
+      options.services?.buyerQuotes ||
+      createBuyerQuoteService({
+        queries: options.queries?.buyerQuotes || createBuyerQuoteQueries(pool),
+        objectStore: imageObjectStore
+      }),
     auth:
       options.services?.auth ||
       createLoginIdentifierService({
@@ -146,7 +154,8 @@ export function createApp(options = {}) {
       quotes:
         options.services?.admin?.quotes ||
         createAdminQuoteService({
-          queries: options.queries?.admin?.quotes || createAdminQuoteQueries(pool)
+          queries: options.queries?.admin?.quotes || createAdminQuoteQueries(pool),
+          objectStore: imageObjectStore
         })
     }
   };
@@ -186,6 +195,7 @@ export function createApp(options = {}) {
       buyerService: services.buyer,
       buyerRegistrationService: services.buyerRegistration,
       buyerInquiryService: services.buyerInquiries,
+      buyerQuoteService: services.buyerQuotes,
       requireFirebaseIdentity,
       requireUser
     })

@@ -120,18 +120,18 @@ test("POST /api/admin/quotes rejects client price fields", async () => {
   assert.equal(response.body.error.code, "VALIDATION_ERROR");
 });
 
-test("PATCH /api/admin/quotes/:quoteId/status updates quote status", async () => {
+test("PATCH /api/admin/quotes/:quoteId/status cancels a quote", async () => {
   const response = await request(createAppWithQuotes(), `/api/admin/quotes/${quoteId}/status`, {
     method: "PATCH",
     headers: {
       authorization: "Bearer admin-token",
       "content-type": "application/json"
     },
-    body: JSON.stringify({ status: "sent" })
+    body: JSON.stringify({ status: "cancelled" })
   });
 
   assert.equal(response.status, 200);
-  assert.equal(response.body.data.quote.status, "sent");
+  assert.equal(response.body.data.quote.status, "cancelled");
   assert.equal(response.body.data.auditLogId, "audit-status-1");
 });
 
@@ -142,7 +142,7 @@ test("PATCH /api/admin/quotes/:quoteId/status rejects unknown fields", async () 
       authorization: "Bearer admin-token",
       "content-type": "application/json"
     },
-    body: JSON.stringify({ status: "sent", quotedBy: "client" })
+    body: JSON.stringify({ status: "cancelled", quotedBy: "client" })
   });
 
   assert.equal(response.status, 400);
