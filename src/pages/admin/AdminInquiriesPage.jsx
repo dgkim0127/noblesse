@@ -43,16 +43,16 @@ export function AdminInquiriesPage() {
           <tbody>{inquiries.map((inquiry) => {
             const hasUnavailablePrice = inquiry.priceUnavailable || (inquiry.items || []).some((item) => item.priceUnavailable)
             return <tr key={inquiry.id || inquiry.inquiryId}>
-            <td>{inquiry.inquiryNumber || inquiry.inquiryId}</td>
-            <td>{inquiry.companyName || inquiry.buyerCompanyName || '-'}</td>
-            <td><img alt={getMarketDisplay(inquiry.market).label} className="admin-market-flag" src={getMarketDisplay(inquiry.market).flagSrc} title={inquiry.market} /></td>
-            <td>{inquiry.currency}</td>
-            <td><AdminStatus status={inquiry.status} /></td>
-            <td>{inquiry.totalItems}</td>
-            <td>{inquiry.totalQuantity}</td>
-            <td><AdminMoney unavailable={hasUnavailablePrice} value={inquiry.estimatedTotal} currency={inquiry.currency} /></td>
-            <td>{inquiry.createdAt ? new Date(inquiry.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
-            <td><div className="admin-actions tight"><AdminLink to={`/admin/inquiries/${inquiry.id || inquiry.inquiryId}`}>{t.common.view}</AdminLink></div></td>
+            <td data-label={t.inquiries.inquiryNumber}>{inquiry.inquiryNumber || inquiry.inquiryId}</td>
+            <td data-label={t.inquiries.buyerCompany}>{inquiry.companyName || inquiry.buyerCompanyName || '-'}</td>
+            <td data-label={t.inquiries.market}><img alt={getMarketDisplay(inquiry.market).label} className="admin-market-flag" src={getMarketDisplay(inquiry.market).flagSrc} title={inquiry.market} /></td>
+            <td data-label={t.inquiries.currency}>{inquiry.currency}</td>
+            <td data-label={t.common.status}><AdminStatus status={inquiry.status} /></td>
+            <td data-label={t.inquiries.totalItems}>{inquiry.totalItems}</td>
+            <td data-label={t.inquiries.totalQuantity}>{inquiry.totalQuantity}</td>
+            <td data-label={t.inquiries.estimatedTotal}><AdminMoney unavailable={hasUnavailablePrice} value={inquiry.estimatedTotal} currency={inquiry.currency} /></td>
+            <td data-label={t.common.createdAt}>{inquiry.createdAt ? new Date(inquiry.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
+            <td data-label={t.common.actions}><div className="admin-actions tight"><AdminLink to={`/admin/inquiries/${inquiry.id || inquiry.inquiryId}`}>{t.common.view}</AdminLink></div></td>
           </tr>
           })}</tbody>
         </table>

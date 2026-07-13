@@ -1,4 +1,4 @@
-import { FileText } from 'lucide-react'
+import { CheckCircle2, Download, FileText, XCircle } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getInquiryKey } from '../commerce/inquiryKeys'
@@ -16,6 +16,22 @@ const statusLabel = {
 
 const statusTabs = ['all', 'requested', 'checking', 'quoted', 'confirmed', 'cancelled']
 const pricePendingLabel = '가격 확인중'
+
+const quoteCopy = {
+  kr: { title: '공식 견적서', download: 'PDF 다운로드', accept: '견적 승인', reject: '견적 거절', validUntil: '유효기간', leadTime: '납기', shipping: '배송 조건', total: '견적 합계', note: '안내', decisionHelp: '견적 승인은 주문이나 결제를 만들지 않으며, 관리자 후속 처리 요청으로만 기록됩니다.', confirmAccept: '이 견적을 승인할까요?', confirmReject: '이 견적을 거절할까요?', confirm: '확인', cancel: '취소', reason: '메모 (선택)' },
+  en: { title: 'Official quotation', download: 'Download PDF', accept: 'Accept quote', reject: 'Reject quote', validUntil: 'Valid until', leadTime: 'Lead time', shipping: 'Shipping terms', total: 'Quote total', note: 'Note', decisionHelp: 'Accepting this quote requests administrator follow-up. It does not create an order or payment.', confirmAccept: 'Accept this quote?', confirmReject: 'Reject this quote?', confirm: 'Confirm', cancel: 'Cancel', reason: 'Note (optional)' },
+  jp: { title: '正式見積書', download: 'PDFダウンロード', accept: '見積を承認', reject: '見積を拒否', validUntil: '有効期限', leadTime: '納期', shipping: '配送条件', total: '見積合計', note: 'ご案内', decisionHelp: '見積承認は注文・決済を作成せず、管理者の後続対応依頼として記録されます。', confirmAccept: 'この見積を承認しますか？', confirmReject: 'この見積を拒否しますか？', confirm: '確認', cancel: 'キャンセル', reason: 'メモ（任意）' },
+  'zh-TW': { title: '正式報價單', download: '下載 PDF', accept: '接受報價', reject: '拒絕報價', validUntil: '有效期限', leadTime: '交期', shipping: '運送條件', total: '報價合計', note: '說明', decisionHelp: '接受報價只會提出管理員後續處理需求，不會建立訂單或付款。', confirmAccept: '要接受這份報價嗎？', confirmReject: '要拒絕這份報價嗎？', confirm: '確認', cancel: '取消', reason: '備註（選填）' },
+}
+
+function triggerQuoteDownload(blob, filename) {
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = filename
+  anchor.click()
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
 
 function hasUnavailablePrice(inquiry = {}) {
   return (inquiry.items || []).some((item) => item.priceUnavailable)
@@ -59,16 +75,25 @@ export function MyInquiriesPage() {
     inquiries,
     isApproved,
     loadInquiry,
+    loadInquiryQuote,
+    decideInquiryQuote,
+    downloadInquiryQuoteDocument,
     refreshInquiries,
     viewerState,
   } = useCommerce()
-  const { toLocalePath } = useLocalePath()
+  const { locale, toLocalePath } = useLocalePath()
+  const quotationCopy = quoteCopy[locale] || quoteCopy.en
   const [statusFilter, setStatusFilter] = useState('all')
   const [refreshStatus, setRefreshStatus] = useState('idle')
   const [refreshError, setRefreshError] = useState('')
   const [selectedInquiry, setSelectedInquiry] = useState(null)
   const [detailStatus, setDetailStatus] = useState('idle')
   const [detailError, setDetailError] = useState('')
+  const [issuedQuote, setIssuedQuote] = useState(null)
+  const [quoteStatus, setQuoteStatus] = useState('idle')
+  const [quoteError, setQuoteError] = useState('')
+  const [decision, setDecision] = useState(null)
+  const [decisionNote, setDecisionNote] = useState('')
   const filteredInquiries = useMemo(
     () => statusFilter === 'all' ? inquiries : inquiries.filter((item) => item.status === statusFilter),
     [inquiries, statusFilter]
@@ -121,6 +146,33 @@ export function MyInquiriesPage() {
       isMounted = false
     }
   }, [authStatus, dataStatus, inquiryId, isApproved, loadInquiry])
+
+  useEffect(() => {
+    if (!isApproved || dataStatus !== 'ready' || authStatus !== 'authenticated' || !inquiryId) {
+      setIssuedQuote(null)
+      setQuoteStatus('idle')
+      return undefined
+    }
+
+    let isMounted = true
+    setQuoteStatus('loading')
+    setQuoteError('')
+    loadInquiryQuote(inquiryId)
+      .then((quote) => {
+        if (!isMounted) return
+        setIssuedQuote(quote)
+        setQuoteStatus('ready')
+      })
+      .catch((error) => {
+        if (!isMounted) return
+        setQuoteStatus('error')
+        setQuoteError(error?.message || 'Unable to load the issued quote.')
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [authStatus, dataStatus, inquiryId, isApproved, loadInquiryQuote])
 
   if (dataStatus === 'loading' || authStatus === 'checking') {
     return <InquiryStateNotice
@@ -179,6 +231,36 @@ export function MyInquiriesPage() {
     const selectedCurrency = selected.currency || buyer.currency
     const selectedHasUnavailablePrice = hasUnavailablePrice(selected)
 
+    const downloadQuote = async () => {
+      if (!issuedQuote?.id || !issuedQuote.documentId) return
+      setQuoteStatus('loading')
+      setQuoteError('')
+      try {
+        const blob = await downloadInquiryQuoteDocument({ quoteId: issuedQuote.id, documentId: issuedQuote.documentId })
+        if (blob) triggerQuoteDownload(blob, `${issuedQuote.quoteNumber || 'quotation'}-v${issuedQuote.revision}.pdf`)
+        setQuoteStatus('ready')
+      } catch (error) {
+        setQuoteStatus('error')
+        setQuoteError(error?.message || 'Unable to download the quote PDF.')
+      }
+    }
+
+    const submitDecision = async () => {
+      if (!decision || !issuedQuote?.id || !issuedQuote.documentId) return
+      setQuoteStatus('loading')
+      setQuoteError('')
+      try {
+        const nextQuote = await decideInquiryQuote({ quoteId: issuedQuote.id, documentId: issuedQuote.documentId, decision, note: decisionNote })
+        if (nextQuote) setIssuedQuote(nextQuote)
+        setDecision(null)
+        setDecisionNote('')
+        setQuoteStatus('ready')
+      } catch (error) {
+        setQuoteStatus('error')
+        setQuoteError(error?.message || 'Unable to save the quote decision.')
+      }
+    }
+
     return <main className="content">
       <Link className="back" to={toLocalePath('/my-inquiries')}>Inquiry history</Link>
       <section className="inquiry-detail">
@@ -200,6 +282,22 @@ export function MyInquiriesPage() {
         </div>)}
         <div className="quote-total"><span>Estimated Total</span><strong>{formatInquiryMoney(selected.estimatedTotal, selectedCurrency, selectedHasUnavailablePrice)}</strong></div>
       </section>
+      {quoteStatus === 'loading' && !issuedQuote && <p className="auth-notice" role="status">Loading issued quote...</p>}
+      {quoteStatus === 'error' && <p className="auth-notice" role="alert">{quoteError}</p>}
+      {issuedQuote && <section className="buyer-quote-document">
+        <header><div><span>Version {issuedQuote.revision}</span><h2>{quotationCopy.title}</h2><p>{issuedQuote.quoteNumber}</p></div><span className={`status status-${issuedQuote.displayStatus || issuedQuote.status}`}>{issuedQuote.displayStatus || issuedQuote.status}</span></header>
+        <dl className="buyer-quote-terms">
+          <dt>{quotationCopy.validUntil}</dt><dd>{issuedQuote.validUntil ? new Date(`${String(issuedQuote.validUntil).slice(0, 10)}T00:00:00`).toLocaleDateString({ kr: 'ko-KR', en: 'en-US', jp: 'ja-JP', 'zh-TW': 'zh-TW' }[locale] || 'en-US') : '-'}</dd>
+          <dt>{quotationCopy.leadTime}</dt><dd>{issuedQuote.snapshot?.leadTime || '-'}</dd>
+          <dt>{quotationCopy.shipping}</dt><dd>{issuedQuote.snapshot?.shippingNote || '-'}</dd>
+        </dl>
+        <div className="buyer-quote-lines">{(issuedQuote.snapshot?.items || []).map((item) => <div key={item.id || item.productCode}><span><strong>{item.productName || item.productCode}</strong><small>{item.productCode} · {[item.color, item.size].filter(Boolean).join(' / ')}</small></span><span>{item.quantity}</span><span>{formatMoney(item.unitPrice, issuedQuote.snapshot.currency)}</span><strong>{formatMoney(item.subtotal, issuedQuote.snapshot.currency)}</strong></div>)}</div>
+        <div className="buyer-quote-total"><span>{quotationCopy.total}</span><strong>{formatMoney(issuedQuote.snapshot?.total, issuedQuote.snapshot?.currency)}</strong></div>
+        {issuedQuote.snapshot?.customerNote && <div className="buyer-quote-note"><strong>{quotationCopy.note}</strong><p>{issuedQuote.snapshot.customerNote}</p></div>}
+        <div className="buyer-quote-actions"><button className="secondary-action" disabled={quoteStatus === 'loading'} type="button" onClick={downloadQuote}><Download size={17} />{quotationCopy.download}</button>{issuedQuote.status === 'sent' && !issuedQuote.isExpired && <><button className="primary-action" disabled={quoteStatus === 'loading'} type="button" onClick={() => setDecision('accepted')}><CheckCircle2 size={17} />{quotationCopy.accept}</button><button className="secondary-action" disabled={quoteStatus === 'loading'} type="button" onClick={() => setDecision('rejected')}><XCircle size={17} />{quotationCopy.reject}</button></>}</div>
+        {issuedQuote.status === 'sent' && !issuedQuote.isExpired && <p className="buyer-quote-decision-help">{quotationCopy.decisionHelp}</p>}
+      </section>}
+      {decision && <div className="buyer-quote-dialog-backdrop" role="presentation"><section aria-modal="true" className="buyer-quote-dialog" role="dialog"><h2>{decision === 'accepted' ? quotationCopy.confirmAccept : quotationCopy.confirmReject}</h2><p>{quotationCopy.decisionHelp}</p><label><span>{quotationCopy.reason}</span><textarea rows="4" value={decisionNote} onChange={(event) => setDecisionNote(event.target.value)} /></label><div><button className="secondary-action" type="button" onClick={() => setDecision(null)}>{quotationCopy.cancel}</button><button className="primary-action" disabled={quoteStatus === 'loading'} type="button" onClick={submitDecision}>{quotationCopy.confirm}</button></div></section></div>}
     </main>
   }
 

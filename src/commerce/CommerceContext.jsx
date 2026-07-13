@@ -397,6 +397,33 @@ export function CommerceProvider({ children }) {
     return inquiry
   }, [isApproved, isMockMode, runtimeConfig.apiBaseUrl])
 
+  const loadInquiryQuote = useCallback(async (inquiryId) => {
+    if (isMockMode || !isApproved || !inquiryId) return null
+    const token = await getCurrentUserIdToken()
+    const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+    const buyerApi = createBuyerApi(apiClient)
+    const result = await buyerApi.getInquiryQuote(inquiryId, token)
+    return result.data?.quote || null
+  }, [isApproved, isMockMode, runtimeConfig.apiBaseUrl])
+
+  const decideInquiryQuote = useCallback(async ({ quoteId, documentId, decision, note = '' } = {}) => {
+    if (isMockMode || !isApproved || !quoteId || !documentId) return null
+    const token = await getCurrentUserIdToken()
+    const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+    const buyerApi = createBuyerApi(apiClient)
+    const result = await buyerApi.decideQuote(quoteId, { documentId, decision, note }, token)
+    return result.data?.quote || null
+  }, [isApproved, isMockMode, runtimeConfig.apiBaseUrl])
+
+  const downloadInquiryQuoteDocument = useCallback(async ({ quoteId, documentId } = {}) => {
+    if (isMockMode || !isApproved || !quoteId || !documentId) return null
+    const token = await getCurrentUserIdToken()
+    const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+    const buyerApi = createBuyerApi(apiClient)
+    const result = await buyerApi.downloadQuoteDocument(quoteId, documentId, token)
+    return result.data || null
+  }, [isApproved, isMockMode, runtimeConfig.apiBaseUrl])
+
   const submitRequestQuote = async (requestMemo) => {
     if (!isMockMode) {
       if (!isApproved || inquiryRows.length === 0) return null
@@ -502,6 +529,9 @@ export function CommerceProvider({ children }) {
     removeInquiryItem,
     registerBuyer,
     loadInquiry,
+    loadInquiryQuote,
+    decideInquiryQuote,
+    downloadInquiryQuoteDocument,
     refreshInquiries,
     setViewerState,
     signIn,

@@ -15,6 +15,7 @@ import { formatAdminPriceBook } from '../config/currency'
 import { formatMoney } from '../utils/commerce'
 import {
   getLocalizedProductAlt,
+  getLocalizedProductDetailContent,
   getLocalizedProductDescription,
   getLocalizedProductName,
   useLocalePath,
@@ -653,7 +654,7 @@ const buildGalleryImages = (product, productAlt, copy) => {
 const getLocalizedCategoryName = (product, contentLocale) => {
   if (contentLocale === 'kr') return product.categoryNameKo || product.categoryNameEn || product.categoryId
   if (contentLocale === 'jp') return product.categoryNameJa || product.categoryNameEn || product.categoryNameKo || product.categoryId
-  if (contentLocale === 'cn') return product.categoryNameCn || product.categoryNameEn || product.categoryNameKo || product.categoryId
+  if (contentLocale === 'cn') return product.categoryNameZhTw || product.categoryNameCn || product.categoryNameEn || product.categoryNameKo || product.categoryId
   return product.categoryNameEn || product.categoryNameKo || product.categoryId
 }
 
@@ -795,7 +796,7 @@ export function ProductDetailPage() {
   const activeColor = colors.includes(selectedColor) ? selectedColor : colors[0] ?? ''
   const activeSize = sizes.includes(selectedSize) ? selectedSize : sizes[0] ?? ''
   const productSpecs = product.specs || {}
-  const productDetailContent = product.detailContent || {}
+  const productDetailContent = getLocalizedProductDetailContent(product, locale)
   const specUnit = productSpecs.unit || 'mm'
   const overviewBody = productDetailContent.description || productDetailContent.body || description || copy.quietDetailLead
   const materialGuideBody = productDetailContent.materialInfo || (product.material ? copy.materialGuideText(product.material) : '')
