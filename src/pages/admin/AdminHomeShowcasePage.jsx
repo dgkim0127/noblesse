@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, CheckCircle2, CircleDashed, Eye, EyeOff, ImagePlus, Monitor, Pencil, Plus, Smartphone, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, CheckCircle2, CircleDashed, Crosshair, Eye, EyeOff, ImagePlus, Monitor, Pencil, Plus, Smartphone, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useAdminAccess } from '../../components/AdminAccessContext'
 import { AdminConfirmDialog, AdminEmptyState, AdminPageHeader, AdminToast } from './AdminPageParts'
@@ -10,6 +10,31 @@ const languages = [
   { key: 'jp', label: '日本語' },
   { key: 'zh-TW', label: '繁體中文' },
 ]
+const focusPoints = [
+  { key: 'top-left', label: '왼쪽 위', x: 0, y: 0 },
+  { key: 'top-center', label: '가운데 위', x: 50, y: 0 },
+  { key: 'top-right', label: '오른쪽 위', x: 100, y: 0 },
+  { key: 'center-left', label: '왼쪽 가운데', x: 0, y: 50 },
+  { key: 'center', label: '정가운데', x: 50, y: 50 },
+  { key: 'center-right', label: '오른쪽 가운데', x: 100, y: 50 },
+  { key: 'bottom-left', label: '왼쪽 아래', x: 0, y: 100 },
+  { key: 'bottom-center', label: '가운데 아래', x: 50, y: 100 },
+  { key: 'bottom-right', label: '오른쪽 아래', x: 100, y: 100 },
+]
+
+function normalizeImagePosition(value) {
+  const x = Number(value?.x)
+  const y = Number(value?.y)
+  return [x, y].every((coordinate) => Number.isInteger(coordinate) && coordinate >= 0 && coordinate <= 100)
+    ? { x, y }
+    : { x: 50, y: 50 }
+}
+
+function focusMarkerCoordinate(value) {
+  if (value === 0) return '12px'
+  if (value === 100) return 'calc(100% - 12px)'
+  return `${value}%`
+}
 
 const emptyLocalized = () => Object.fromEntries(languages.map(({ key }) => [key, '']))
 const createEmptyForm = () => ({
@@ -19,6 +44,7 @@ const createEmptyForm = () => ({
   title: emptyLocalized(),
   eyebrow: emptyLocalized(),
   description: emptyLocalized(),
+  imagePosition: { x: 50, y: 50 },
 })
 
 function slideToForm(slide) {
@@ -29,6 +55,7 @@ function slideToForm(slide) {
     title: { ...emptyLocalized(), ...(slide.title || {}) },
     eyebrow: { ...emptyLocalized(), ...(slide.eyebrow || {}) },
     description: { ...emptyLocalized(), ...(slide.description || {}) },
+    imagePosition: normalizeImagePosition(slide.imageSet?.position),
   }
 }
 
@@ -40,6 +67,7 @@ function formPayload(form) {
     title: Object.fromEntries(languages.map(({ key }) => [key, form.title[key].trim()])),
     eyebrow: Object.fromEntries(languages.map(({ key }) => [key, form.eyebrow[key].trim()])),
     description: Object.fromEntries(languages.map(({ key }) => [key, form.description[key].trim()])),
+    imagePosition: normalizeImagePosition(form.imagePosition),
   }
 }
 
@@ -204,6 +232,8 @@ export function AdminHomeShowcasePage() {
   }
 
   const currentPreview = imagePreview || editor?.image
+  const imagePosition = normalizeImagePosition(form.imagePosition)
+  const selectedFocusPoint = focusPoints.find((point) => point.x === imagePosition.x && point.y === imagePosition.y) || focusPoints[4]
   const previewTitle = form.title[activeLanguage].trim() || '큰 제목 미리보기'
   const previewEyebrow = form.eyebrow[activeLanguage].trim() || 'COLLECTION'
   const previewDescription = form.description[activeLanguage].trim() || '설명을 입력하면 홈 화면에서 보이는 위치에 바로 표시됩니다.'
@@ -237,15 +267,22 @@ export function AdminHomeShowcasePage() {
           <div className={`admin-showcase-live-preview is-${previewMode}`}>
             <div className="admin-showcase-image-preview">
               {currentPreview
-                ? <img alt="스냅 미리보기" src={currentPreview} />
+                ? <img alt="스냅 미리보기" src={currentPreview} style={{ objectPosition: `${imagePosition.x}% ${imagePosition.y}%` }} />
                 : <span className="admin-showcase-preview-empty"><ImagePlus aria-hidden="true" size={34} /> 사진 미리보기</span>}
               <span className="admin-showcase-preview-shade" />
+              {currentPreview && <span className="admin-showcase-focus-marker" style={{ left: focusMarkerCoordinate(imagePosition.x), top: focusMarkerCoordinate(imagePosition.y) }}><Crosshair aria-hidden="true" size={16} /></span>}
               <span className="admin-showcase-preview-label">{form.label.trim() || 'NOBLESSE'}</span>
               <span className="admin-showcase-preview-copy">
                 <strong>{previewTitle}</strong>
                 <b>{previewEyebrow}</b>
                 <span>{previewDescription}</span>
               </span>
+            </div>
+          </div>
+          <div className="admin-showcase-focus-control">
+            <div><strong>사진 초점</strong><span>{selectedFocusPoint.label}</span></div>
+            <div className="admin-showcase-focus-grid" role="group" aria-label="사진 초점 위치">
+              {focusPoints.map((point) => <button aria-label={point.label} aria-pressed={point.key === selectedFocusPoint.key} className={point.key === selectedFocusPoint.key ? 'is-active' : undefined} key={point.key} title={point.label} type="button" onClick={() => setField('imagePosition', { x: point.x, y: point.y })}><span aria-hidden="true" /></button>)}
             </div>
           </div>
           <label className="secondary-action admin-file-action">
@@ -283,7 +320,7 @@ export function AdminHomeShowcasePage() {
     /> : <section className="admin-showcase-list" aria-label="홈 스냅 노출 순서">
       {slides.map((slide, index) => <article className="admin-showcase-row" key={slide.id}>
         <div className="admin-showcase-order"><strong>{String(index + 1).padStart(2, '0')}</strong><div><button aria-label="위로 이동" disabled={!canWrite || index === 0 || Boolean(busyId)} title="위로 이동" type="button" onClick={() => moveSlide(index, -1)}><ArrowUp size={16} /></button><button aria-label="아래로 이동" disabled={!canWrite || index === slides.length - 1 || Boolean(busyId)} title="아래로 이동" type="button" onClick={() => moveSlide(index, 1)}><ArrowDown size={16} /></button></div></div>
-        <div className="admin-showcase-thumbnail">{slide.imageSet?.card ? <img alt="" src={slide.imageSet.card} /> : <ImagePlus aria-hidden="true" size={24} />}</div>
+        <div className="admin-showcase-thumbnail">{slide.imageSet?.card ? <img alt="" src={slide.imageSet.card} style={{ objectPosition: `${normalizeImagePosition(slide.imageSet?.position).x}% ${normalizeImagePosition(slide.imageSet?.position).y}%` }} /> : <ImagePlus aria-hidden="true" size={24} />}</div>
         <div className="admin-showcase-summary">
           <div><span className={`admin-status ${slide.isActive ? 'visible' : 'hidden'}`}>{slide.isActive ? '공개' : '초안'}</span><small>{slide.label || 'NOBLESSE'}</small></div>
           <strong>{slide.title?.kr || slide.title?.en || slide.internalName}</strong>

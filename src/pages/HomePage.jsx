@@ -631,6 +631,14 @@ const homeShowcasePanels = [
 const homeShowcaseLabels = ['NEW', 'HOT', 'TRADE', 'BEST', 'TITANIUM', 'GOLD']
 const homeShowcaseAutoplayDelay = 3600
 
+function normalizeShowcaseImagePosition(value) {
+  const x = Number(value?.x)
+  const y = Number(value?.y)
+  return [x, y].every((coordinate) => Number.isInteger(coordinate) && coordinate >= 0 && coordinate <= 100)
+    ? { x, y }
+    : { x: 50, y: 50 }
+}
+
 function normalizeManagedShowcasePanel(slide) {
   return {
     key: slide.id,
@@ -640,6 +648,7 @@ function normalizeManagedShowcasePanel(slide) {
     to: slide.targetUrl || '/products',
     image: slide.imageSet?.detail || slide.imageSet?.card || '',
     imageSet: slide.imageSet || {},
+    imagePosition: normalizeShowcaseImagePosition(slide.imageSet?.position),
     label: slide.label || 'NOBLESSE',
   }
 }
@@ -1761,7 +1770,7 @@ export function HomePage() {
             const label = banner.label || homeShowcaseLabels[index] || 'NOBLESSE'
 
             return <Link className="home-showcase-panel" key={banner.key} onClick={handleShowcaseClick} to={toLocalePath(banner.to)}>
-              <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} srcSet={banner.imageSet?.card && banner.imageSet?.detail ? `${banner.imageSet.card} 600w, ${banner.imageSet.detail} 1200w` : undefined} width="900" />
+              <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} srcSet={banner.imageSet?.card && banner.imageSet?.detail ? `${banner.imageSet.card} 600w, ${banner.imageSet.detail} 1200w` : undefined} style={{ objectPosition: `${banner.imagePosition?.x ?? 50}% ${banner.imagePosition?.y ?? 50}%` }} width="900" />
               <span className="home-showcase-label">{label}</span>
               <span className="home-showcase-copy">
                 <strong>{bannerTitle}</strong>

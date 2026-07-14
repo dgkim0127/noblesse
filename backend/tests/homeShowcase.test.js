@@ -50,14 +50,26 @@ function createMemoryQueries(initialSlides = []) {
       return slides.find((slide) => slide.id === id) || null;
     },
     async createSlide(input) {
-      const slide = baseSlide({ ...input, id: slideId });
+      const { imagePosition, ...fields } = input;
+      const slide = baseSlide({
+        ...fields,
+        id: slideId,
+        imageSet: { position: imagePosition || { x: 50, y: 50 } }
+      });
       slides = [...slides, slide];
       return slide;
     },
     async updateSlide(id, input) {
       const existing = slides.find((slide) => slide.id === id);
       if (!existing) return null;
-      const updated = { ...existing, ...input };
+      const { imagePosition, ...fields } = input;
+      const updated = {
+        ...existing,
+        ...fields,
+        imageSet: imagePosition
+          ? { ...existing.imageSet, position: imagePosition }
+          : existing.imageSet
+      };
       slides = slides.map((slide) => slide.id === id ? updated : slide);
       return updated;
     },
@@ -99,6 +111,7 @@ test("public home showcase omits private storage object keys", async () => {
         isActive: true,
         imageSet: {
           detail: "/api/catalog/media/safe",
+          position: { x: 0, y: 100 },
           objectKeys: { detail: "home-showcase/private.webp" }
         }
       })
@@ -109,6 +122,7 @@ test("public home showcase omits private storage object keys", async () => {
 
   assert.equal(slides.length, 1);
   assert.equal(slides[0].imageSet.detail, "/api/catalog/media/safe");
+  assert.deepEqual(slides[0].imageSet.position, { x: 0, y: 100 });
   assert.equal("objectKeys" in slides[0].imageSet, false);
   assert.equal("internalName" in slides[0], false);
   assert.equal("isActive" in slides[0], false);
@@ -123,11 +137,17 @@ test("home showcase drafts allow partial translations but publishing requires al
   const draft = await service.createSlide({
     internalName: "Draft snap",
     title: { kr: "초안" },
+    imagePosition: { x: 100, y: 0 },
     targetUrl: "/products"
   });
 
   assert.equal(draft.isActive, false);
+  assert.deepEqual(draft.imageSet.position, { x: 100, y: 0 });
   assert.equal(draft.completion.isPublishable, false);
+  await assert.rejects(
+    () => service.updateSlide(slideId, { imagePosition: { x: 101, y: 50 } }),
+    /imagePosition coordinates/
+  );
   await assert.rejects(
     () => service.updateSlide(slideId, { isActive: true }),
     /Home showcase slide is incomplete/
@@ -137,7 +157,7 @@ test("home showcase drafts allow partial translations but publishing requires al
 test("home showcase image upload creates four WebP variants and enables publishing", async () => {
   const saved = [];
   const deleted = [];
-  const queries = createMemoryQueries([baseSlide()]);
+  const queries = createMemoryQueries([baseSlide({ imageSet: { position: { x: 0, y: 50 } } })]);
   const service = createAdminHomeShowcaseService({
     queries,
     objectStore: {
@@ -159,6 +179,7 @@ test("home showcase image upload creates four WebP variants and enables publishi
   assert.equal(saved.length, 4);
   assert.ok(saved.every((entry) => entry.objectKey.startsWith(`home-showcase/${slideId}/`)));
   assert.equal(deleted.length, 0);
+  assert.deepEqual(uploaded.imageSet.position, { x: 0, y: 50 });
   assert.equal(uploaded.completion.isPublishable, true);
   assert.equal(published.isActive, true);
 });

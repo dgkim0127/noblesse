@@ -159,12 +159,13 @@ export function createHomeShowcaseQueries(pool) {
               eyebrow,
               description,
               target_url,
+              image_set,
               sort_order,
               is_active,
               created_by,
               updated_by
             )
-            values ($1, $2, $3::jsonb, $4::jsonb, $5::jsonb, $6, $7, $8, $9, $9)
+            values ($1, $2, $3::jsonb, $4::jsonb, $5::jsonb, $6, $7::jsonb, $8, $9, $10, $10)
             returning *
           `,
           [
@@ -174,6 +175,7 @@ export function createHomeShowcaseQueries(pool) {
             input.eyebrow,
             input.description,
             input.targetUrl,
+            JSON.stringify({ position: input.imagePosition }),
             input.sortOrder,
             input.isActive,
             actor.userId
@@ -206,8 +208,12 @@ export function createHomeShowcaseQueries(pool) {
               description = coalesce($7::jsonb, description),
               target_url = coalesce($8, target_url),
               sort_order = coalesce($9, sort_order),
-              is_active = coalesce($10, is_active),
-              updated_by = $11,
+              image_set = case
+                when $10::boolean then jsonb_set(image_set, '{position}', $11::jsonb, true)
+                else image_set
+              end,
+              is_active = coalesce($12, is_active),
+              updated_by = $13,
               updated_at = now()
             where id = $1
             returning *
@@ -222,6 +228,8 @@ export function createHomeShowcaseQueries(pool) {
             input.description,
             input.targetUrl,
             input.sortOrder,
+            Object.hasOwn(input, "imagePosition"),
+            input.imagePosition ? JSON.stringify(input.imagePosition) : null,
             input.isActive,
             actor.userId
           ]

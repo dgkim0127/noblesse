@@ -20,6 +20,7 @@ const variants = ["thumb", "card", "detail", "zoom"];
 const maxSlides = 12;
 const maxFileBytes = 10 * 1024 * 1024;
 const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+const defaultImagePosition = Object.freeze({ x: 50, y: 50 });
 const slideWriteFields = [
   "internalName",
   "label",
@@ -27,6 +28,7 @@ const slideWriteFields = [
   "eyebrow",
   "description",
   "targetUrl",
+  "imagePosition",
   "sortOrder",
   "isActive"
 ];
@@ -60,6 +62,29 @@ function parseTargetUrl(value, { required = false } = {}) {
   return parsed;
 }
 
+function parseImagePosition(value) {
+  if (value === undefined) return undefined;
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw validationError("imagePosition must be an object");
+  }
+  const safePosition = rejectUnknownFields(value, ["x", "y"]);
+  const x = Number(safePosition.x);
+  const y = Number(safePosition.y);
+  if (![x, y].every((coordinate) => Number.isInteger(coordinate) && coordinate >= 0 && coordinate <= 100)) {
+    throw validationError("imagePosition coordinates must be integers from 0 to 100");
+  }
+  return { x, y };
+}
+
+function normalizeStoredImagePosition(value) {
+  const x = Number(value?.x);
+  const y = Number(value?.y);
+  if (![x, y].every((coordinate) => Number.isInteger(coordinate) && coordinate >= 0 && coordinate <= 100)) {
+    return defaultImagePosition;
+  }
+  return { x, y };
+}
+
 function parseSlideBody(body = {}, { partial = false } = {}) {
   const safeBody = rejectUnknownFields(body, slideWriteFields);
   const parsed = {
@@ -73,6 +98,7 @@ function parseSlideBody(body = {}, { partial = false } = {}) {
     eyebrow: parseLocalized(safeBody.eyebrow, "eyebrow", 80),
     description: parseLocalized(safeBody.description, "description", 300),
     targetUrl: parseTargetUrl(safeBody.targetUrl, { required: !partial }),
+    imagePosition: parseImagePosition(safeBody.imagePosition),
     sortOrder: parseInteger(safeBody.sortOrder, "sortOrder"),
     isActive: parseBooleanLike(safeBody.isActive, "isActive")
   };
@@ -82,6 +108,7 @@ function parseSlideBody(body = {}, { partial = false } = {}) {
     parsed.eyebrow = parsed.eyebrow || Object.fromEntries(locales.map((locale) => [locale, ""]));
     parsed.description = parsed.description || Object.fromEntries(locales.map((locale) => [locale, ""]));
     parsed.targetUrl = parsed.targetUrl || "/products";
+    parsed.imagePosition = parsed.imagePosition || defaultImagePosition;
     parsed.sortOrder = parsed.sortOrder ?? 0;
     parsed.isActive = parsed.isActive ?? false;
   }
@@ -191,7 +218,10 @@ export function createAdminHomeShowcaseService({ queries, objectStore, imageTran
       const transformed = await imageTransformer(buffer);
       const uploadedKeys = [];
       try {
-        const imageSet = { objectKeys: {} };
+        const imageSet = {
+          objectKeys: {},
+          position: normalizeStoredImagePosition(existing.imageSet?.position)
+        };
         for (const variant of variants) {
           const variantBuffer = transformed[variant];
           if (!Buffer.isBuffer(variantBuffer) || !variantBuffer.length) {

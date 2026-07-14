@@ -135,6 +135,21 @@
   position: absolute;
 }
 
+.admin-showcase-focus-marker {
+  align-items: center;
+  background: #fff;
+  border: 2px solid var(--admin-accent);
+  border-radius: 50%;
+  color: var(--admin-primary);
+  display: flex;
+  height: 24px;
+  justify-content: center;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  z-index: 3;
+}
+
 .admin-showcase-preview-label {
   color: #fff;
   font-size: 13px;
@@ -176,6 +191,66 @@
 
 .admin-showcase-live-preview.is-mobile .admin-showcase-preview-copy strong {
   font-size: 19px;
+}
+
+.admin-showcase-focus-control {
+  align-items: center;
+  border: 1px solid #e0e2e7;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  min-height: 78px;
+  padding: 10px 12px;
+}
+
+.admin-showcase-focus-control > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.admin-showcase-focus-control strong {
+  color: var(--admin-text);
+  font-size: 12px;
+}
+
+.admin-showcase-focus-control > div:first-child span {
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+
+.admin-showcase-focus-grid {
+  display: grid;
+  gap: 3px;
+  grid-template-columns: repeat(3, 22px);
+}
+
+.admin-showcase-focus-grid button {
+  align-items: center;
+  background: #f4f5f7;
+  border: 1px solid #d9dce3;
+  border-radius: 4px;
+  display: flex;
+  height: 22px;
+  justify-content: center;
+  padding: 0;
+  width: 22px;
+}
+
+.admin-showcase-focus-grid button span {
+  background: #8a8f9a;
+  border-radius: 50%;
+  height: 4px;
+  width: 4px;
+}
+
+.admin-showcase-focus-grid button.is-active {
+  background: #f8edf1;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 1px var(--admin-accent);
+}
+
+.admin-showcase-focus-grid button.is-active span {
+  background: var(--admin-primary);
 }
 
 .admin-showcase-readiness {

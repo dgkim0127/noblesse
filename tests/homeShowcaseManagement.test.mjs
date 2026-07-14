@@ -6,6 +6,7 @@ const app = readFileSync('src/App.jsx', 'utf8')
 const adminApi = readFileSync('src/api/adminApi.js', 'utf8')
 const catalogApi = readFileSync('src/api/catalogApi.js', 'utf8')
 const commerce = readFileSync('src/commerce/CommerceContext.jsx', 'utf8')
+const home = readFileSync('src/pages/HomePage.jsx', 'utf8')
 const editor = readFileSync('src/pages/admin/AdminHomeShowcasePage.jsx', 'utf8')
 const operations = readFileSync('src/pages/admin/AdminOperationsPage.jsx', 'utf8')
 
@@ -43,4 +44,13 @@ test('home showcase editor previews localized content and publication readiness'
   assert.match(editor, /form\.title\[activeLanguage\]/)
   assert.match(editor, /completedTitleCount/)
   assert.match(editor, /공개 준비 상태/)
+})
+
+test('home showcase image focus is editable and reaches the storefront image', () => {
+  assert.match(editor, /focusPoints/)
+  assert.match(editor, /사진 초점 위치/)
+  assert.match(editor, /imagePosition: normalizeImagePosition/)
+  assert.match(editor, /objectPosition:/)
+  assert.match(home, /normalizeShowcaseImagePosition/)
+  assert.match(home, /banner\.imagePosition/)
 })
