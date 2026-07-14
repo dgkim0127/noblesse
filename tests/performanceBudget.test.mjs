@@ -33,10 +33,13 @@ test('mobile performance budget keeps initial payload and list rendering bounded
   assert.equal(budget.mobile.horizontalOverflowPx, 0)
 })
 
-test('home showcase renders one image set without cloned carousel panels', () => {
+test('home showcase auto-advances one image set without cloned carousel panels', () => {
   assert.match(home, /homeShowcasePanels\.map/)
   assert.doesNotMatch(home, /showcaseLoopPanels/)
   assert.doesNotMatch(home, /\.\.\.homeShowcasePanels, \.\.\.homeShowcasePanels/)
+  assert.match(home, /window\.setTimeout\(advanceShowcase, delay\)/)
+  assert.match(home, /prefers-reduced-motion: reduce/)
+  assert.match(home, /home-showcase-control--autoplay/)
   assert.match(home, /buyerConceptPanels\.map/)
   assert.doesNotMatch(home, /\.\.\.buyerConceptPanels/)
   assert.doesNotMatch(home, /setInterval\(slide/)

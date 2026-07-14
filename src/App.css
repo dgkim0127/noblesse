@@ -14074,6 +14074,47 @@ h6 {
   padding: 0 0 18px !important;
 }
 
+.home-showcase-stage {
+  position: relative;
+  width: 100%;
+}
+
+.home-showcase-controls {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 8;
+  display: flex;
+  gap: 4px;
+}
+
+.home-showcase-control {
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid rgb(42 35 79 / 18%);
+  border-radius: 6px;
+  color: var(--noblesse-sub);
+  background: rgb(255 255 255 / 90%);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 10%);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.home-showcase-control:hover,
+.home-showcase-control:focus-visible {
+  border-color: var(--noblesse-main);
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.home-showcase-control svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.9;
+}
+
 .home-showcase-grid {
   --showcase-card-width: var(--showcase-reference-card) !important;
   --showcase-gap: var(--showcase-reference-gap) !important;
@@ -14171,6 +14212,22 @@ h6 {
     min-height: 0 !important;
   }
 
+  .home-showcase-controls {
+    top: 10px;
+    right: auto;
+    left: calc(var(--showcase-reference-card) - 42px);
+  }
+
+  .home-showcase-control {
+    width: 32px;
+    height: 32px;
+  }
+
+  .home-showcase-control--previous,
+  .home-showcase-control--next {
+    display: none;
+  }
+
   .home-showcase-label {
     top: 16px;
     left: 16px;
@@ -14219,6 +14276,12 @@ h6 {
   .home-section-nav button {
     min-width: 112px;
     font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-showcase-control--autoplay {
+    display: none;
   }
 }
 

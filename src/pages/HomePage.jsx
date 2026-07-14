@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { ClipboardList, Headphones, Heart, Mail } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ClipboardList, Headphones, Heart, Mail, Pause, Play } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatAdminPriceBook } from '../config/currency'
@@ -618,7 +618,48 @@ const homeShowcasePanels = [
     image: 'https://images.unsplash.com/photo-1653227907864-560dce4c252d?auto=format&fit=crop&crop=entropy&w=900&h=1350&q=86',
     to: '/products?q=ring',
   },
+  {
+    ...heroBanners[0],
+    key: 'titanium-labret-showcase',
+  },
+  {
+    ...heroBanners[2],
+    key: 'gold-tiny-showcase',
+  },
 ]
+
+const homeShowcaseLabels = ['NEW', 'HOT', 'TRADE', 'BEST', 'TITANIUM', 'GOLD']
+const homeShowcaseAutoplayDelay = 3600
+const homeShowcaseControlCopy = {
+  kr: {
+    group: '스냅 슬라이드 조작',
+    previous: '이전 스냅',
+    next: '다음 스냅',
+    pause: '자동 슬라이드 일시정지',
+    play: '자동 슬라이드 재생',
+  },
+  en: {
+    group: 'Snap carousel controls',
+    previous: 'Previous snap',
+    next: 'Next snap',
+    pause: 'Pause automatic slides',
+    play: 'Play automatic slides',
+  },
+  jp: {
+    group: 'スナップスライド操作',
+    previous: '前のスナップ',
+    next: '次のスナップ',
+    pause: '自動スライドを一時停止',
+    play: '自動スライドを再生',
+  },
+  cn: {
+    group: '快照輪播控制',
+    previous: '上一張快照',
+    next: '下一張快照',
+    pause: '暫停自動輪播',
+    play: '播放自動輪播',
+  },
+}
 
 function getLocalizedValue(values, locale) {
   return resolveLocaleCopy(values, locale, 'en') ?? values.en ?? values.kr
@@ -1308,6 +1349,7 @@ function BuyerCollectionSection() {
 
 export function HomePage() {
   const showcaseScrollerRef = useRef(null)
+  const showcaseInteractionRef = useRef(0)
   const sectionNavAnchorRef = useRef(null)
   const sectionNavTriggerRef = useRef(null)
   const showcaseDragRef = useRef({
@@ -1317,11 +1359,13 @@ export function HomePage() {
     startX: 0,
   })
   const [isShowcaseDragging, setIsShowcaseDragging] = useState(false)
+  const [isShowcaseAutoplayPaused, setIsShowcaseAutoplayPaused] = useState(false)
   const [isSectionNavFixed, setIsSectionNavFixed] = useState(false)
   const [activeHomeSection, setActiveHomeSection] = useState(homeSectionNav[0].id)
   const { dataMode, isApproved, products } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const copy = resolveLocaleCopy(homeCopy, locale)
+  const showcaseControlCopy = resolveLocaleCopy(homeShowcaseControlCopy, locale)
   const homeSourceProducts = getHomeSourceProducts({ products, mockProducts, dataMode })
   const homeProducts = selectAllowedHomeProducts(homeSourceProducts)
   const newProducts = selectNewArrivalProducts(homeProducts, homeSectionProductLimit['new-arrival'])
@@ -1423,6 +1467,70 @@ export function HomePage() {
     const gap = Number.parseFloat(window.getComputedStyle(track).gap) || 0
     return firstPanel.getBoundingClientRect().width + gap
   }, [])
+
+  const scrollShowcase = useCallback((direction) => {
+    const scroller = showcaseScrollerRef.current
+    const step = getShowcaseStep()
+
+    if (!scroller || !step) return
+
+    const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth)
+    const currentIndex = Math.round(scroller.scrollLeft / step)
+    const nextPosition = (currentIndex + direction) * step
+    const wrapThreshold = step * 0.35
+    let target = Math.min(maxScroll, Math.max(0, nextPosition))
+
+    if (direction > 0 && nextPosition > maxScroll + wrapThreshold) target = 0
+    if (direction < 0 && nextPosition < 0) target = maxScroll
+
+    scroller.scrollTo({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      left: target,
+    })
+  }, [getShowcaseStep])
+
+  useEffect(() => {
+    const scroller = showcaseScrollerRef.current
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+    if (!scroller || reduceMotion.matches || isShowcaseAutoplayPaused) return undefined
+
+    let timeoutId
+    const schedule = (delay = homeShowcaseAutoplayDelay) => {
+      window.clearTimeout(timeoutId)
+      timeoutId = window.setTimeout(advanceShowcase, delay)
+    }
+    const markInteraction = () => {
+      showcaseInteractionRef.current = Date.now()
+    }
+    function advanceShowcase() {
+      if (document.hidden || showcaseDragRef.current.isDragging || scroller.contains(document.activeElement)) {
+        schedule(800)
+        return
+      }
+
+      const remainingDelay = homeShowcaseAutoplayDelay - (Date.now() - showcaseInteractionRef.current)
+      if (remainingDelay > 0) {
+        schedule(remainingDelay)
+        return
+      }
+
+      scrollShowcase(1)
+      markInteraction()
+      schedule()
+    }
+
+    markInteraction()
+    schedule()
+    scroller.addEventListener('wheel', markInteraction, { passive: true })
+    document.addEventListener('visibilitychange', markInteraction)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+      scroller.removeEventListener('wheel', markInteraction)
+      document.removeEventListener('visibilitychange', markInteraction)
+    }
+  }, [isShowcaseAutoplayPaused, scrollShowcase])
 
   useEffect(() => {
     if (!activeHomeSectionNav.some((item) => item.id === activeHomeSection)) {
@@ -1548,6 +1656,8 @@ export function HomePage() {
     const scroller = showcaseScrollerRef.current
     if (!scroller) return
 
+    showcaseInteractionRef.current = Date.now()
+
     showcaseDragRef.current = {
       didDrag: false,
       hasCapture: false,
@@ -1602,35 +1712,58 @@ export function HomePage() {
     showcaseDragRef.current.didDrag = false
   }
 
+  const handleShowcaseControl = (direction) => {
+    showcaseInteractionRef.current = Date.now()
+    scrollShowcase(direction)
+  }
+
+  const handleShowcaseAutoplayToggle = () => {
+    showcaseInteractionRef.current = Date.now()
+    setIsShowcaseAutoplayPaused((isPaused) => !isPaused)
+  }
+
   return <main>
     <section className="home-main-portrait-section home-showcase-section">
-      <div
-        aria-label="Noblesse piercing image showcase"
-        className={`home-showcase-grid${isShowcaseDragging ? ' is-dragging' : ''}`}
-        onPointerCancel={handleShowcasePointerEnd}
-        onPointerDown={handleShowcasePointerDown}
-        onPointerLeave={handleShowcasePointerEnd}
-        onPointerMove={handleShowcasePointerMove}
-        onPointerUp={handleShowcasePointerEnd}
-        ref={showcaseScrollerRef}
-      >
-        <div className="home-showcase-track">
-        {homeShowcasePanels.map((banner, index) => {
-          const bannerTitle = getLocalizedValue(banner.title, locale)
-          const bannerEyebrow = getLocalizedValue(banner.eyebrow, locale)
-          const bannerText = getLocalizedValue(banner.text, locale)
-          const label = ['NEW', 'HOT', 'TRADE', 'BEST', 'SILVER', 'RING'][index % homeShowcasePanels.length]
+      <div className="home-showcase-stage" role="region" aria-label="Noblesse piercing image showcase" aria-roledescription="carousel">
+        <div
+          aria-live="off"
+          className={`home-showcase-grid${isShowcaseDragging ? ' is-dragging' : ''}`}
+          onPointerCancel={handleShowcasePointerEnd}
+          onPointerDown={handleShowcasePointerDown}
+          onPointerLeave={handleShowcasePointerEnd}
+          onPointerMove={handleShowcasePointerMove}
+          onPointerUp={handleShowcasePointerEnd}
+          ref={showcaseScrollerRef}
+        >
+          <div className="home-showcase-track">
+          {homeShowcasePanels.map((banner, index) => {
+            const bannerTitle = getLocalizedValue(banner.title, locale)
+            const bannerEyebrow = getLocalizedValue(banner.eyebrow, locale)
+            const bannerText = getLocalizedValue(banner.text, locale)
+            const label = homeShowcaseLabels[index] ?? 'NOBLESSE'
 
-          return <Link className="home-showcase-panel" key={`${banner.key}-${index}`} onClick={handleShowcaseClick} to={toLocalePath(banner.to)}>
-            <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} width="900" />
-            <span className="home-showcase-label">{label}</span>
-            <span className="home-showcase-copy">
-              <strong>{bannerTitle}</strong>
-              <small>{bannerEyebrow}</small>
-              <em>{bannerText}</em>
-            </span>
-          </Link>
-        })}
+            return <Link className="home-showcase-panel" key={banner.key} onClick={handleShowcaseClick} to={toLocalePath(banner.to)}>
+              <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} width="900" />
+              <span className="home-showcase-label">{label}</span>
+              <span className="home-showcase-copy">
+                <strong>{bannerTitle}</strong>
+                <small>{bannerEyebrow}</small>
+                <em>{bannerText}</em>
+              </span>
+            </Link>
+          })}
+          </div>
+        </div>
+        <div className="home-showcase-controls" aria-label={showcaseControlCopy.group}>
+          <button aria-label={showcaseControlCopy.previous} className="home-showcase-control home-showcase-control--previous" onClick={() => handleShowcaseControl(-1)} type="button">
+            <ChevronLeft aria-hidden="true" />
+          </button>
+          <button aria-label={isShowcaseAutoplayPaused ? showcaseControlCopy.play : showcaseControlCopy.pause} className="home-showcase-control home-showcase-control--autoplay" onClick={handleShowcaseAutoplayToggle} type="button">
+            {isShowcaseAutoplayPaused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+          </button>
+          <button aria-label={showcaseControlCopy.next} className="home-showcase-control home-showcase-control--next" onClick={() => handleShowcaseControl(1)} type="button">
+            <ChevronRight aria-hidden="true" />
+          </button>
         </div>
       </div>
       <div className="home-showcase-categories" aria-label="피어싱 카테고리">
