@@ -1899,13 +1899,19 @@ button:disabled,
   width: 8px;
 }
 
-.admin-analytics-status-controls button[aria-pressed='false'] {
+.admin-analytics-status-controls button[aria-checked='false'] {
   color: #989ba5;
   opacity: 0.55;
 }
 
-.admin-analytics-status-controls button[aria-pressed='false'] > span {
+.admin-analytics-status-controls button[aria-checked='false'] > span {
   background: #b9bcc5;
+}
+
+.admin-analytics-status-controls button[aria-checked='true'] {
+  background: #f4f2f8;
+  border-color: var(--admin-primary);
+  color: var(--admin-primary);
 }
 
 .admin-analytics-period-control button:focus-visible,
@@ -1914,22 +1920,32 @@ button:disabled,
   outline-offset: -2px;
 }
 
-.admin-analytics-boxplot {
+.admin-analytics-candlestick {
   display: grid;
   grid-template-columns: 38px minmax(0, 1fr);
-  height: 320px;
+  grid-template-rows: 220px 12px 62px 28px 22px;
+  height: 354px;
   margin: 0;
   min-width: 0;
   padding-top: 10px;
   width: 100%;
 }
 
-.admin-analytics-boxplot-axis {
-  height: 244px;
+.admin-analytics-candlestick-axis {
   position: relative;
 }
 
-.admin-analytics-boxplot-axis > span {
+.admin-analytics-candlestick-axis.is-main {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.admin-analytics-candlestick-axis.is-volume {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.admin-analytics-candlestick-axis > span {
   color: var(--admin-muted);
   font-size: 10px;
   line-height: 1;
@@ -1938,105 +1954,213 @@ button:disabled,
   transform: translateY(50%);
 }
 
-.admin-analytics-boxplot-plot {
+.admin-analytics-candlestick-plot {
+  grid-column: 2;
+  grid-row: 1;
   min-width: 0;
   position: relative;
 }
 
-.admin-analytics-boxplot-grid {
-  height: 244px;
-  inset: 0 0 auto;
+.admin-analytics-candlestick-grid,
+.admin-analytics-candlestick-average,
+.admin-analytics-candlestick-columns {
+  inset: 0;
   position: absolute;
 }
 
-.admin-analytics-boxplot-grid > span {
+.admin-analytics-candlestick-grid > span {
   border-top: 1px solid #e4e6eb;
   left: 0;
   position: absolute;
   right: 0;
 }
 
-.admin-analytics-boxplot-columns {
-  display: grid;
-  gap: 12px;
+.admin-analytics-candlestick-average {
   height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  width: 100%;
+  z-index: 2;
+}
+
+.admin-analytics-candlestick-average path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+
+.admin-analytics-candlestick-average path.is-short {
+  stroke: #ff8fa9;
+}
+
+.admin-analytics-candlestick-average path.is-long {
+  stroke: #b49736;
+}
+
+.admin-analytics-candlestick-columns,
+.admin-analytics-volume-columns,
+.admin-analytics-candlestick-dates {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.admin-analytics-candlestick-columns {
+  height: 100%;
+  z-index: 1;
+}
+
+.admin-analytics-candle {
   min-width: 0;
   position: relative;
 }
 
-.admin-analytics-boxplot-column {
-  display: grid;
-  grid-template-rows: 244px auto auto;
-  min-width: 0;
-  text-align: center;
-}
-
-.admin-analytics-boxplot-column:focus-visible {
-  outline: 2px solid var(--admin-accent);
-  outline-offset: 3px;
-}
-
-.admin-analytics-boxplot-column > strong {
-  color: var(--admin-text);
-  font-size: 11px;
-  line-height: 1.25;
-  margin-top: 10px;
-  overflow-wrap: anywhere;
-}
-
-.admin-analytics-boxplot-column > small {
-  color: var(--admin-muted);
-  font-size: 10px;
-  line-height: 1.25;
-  margin-top: 4px;
-}
-
-.admin-analytics-boxplot-visual {
-  height: 100%;
-  margin: 0 auto;
-  max-width: 62px;
-  position: relative;
-  width: 56%;
-}
-
-.admin-analytics-boxplot-whisker,
-.admin-analytics-boxplot-cap,
-.admin-analytics-boxplot-box,
-.admin-analytics-boxplot-median {
+.admin-analytics-candle::before {
+  border-left: 1px dashed transparent;
+  bottom: 0;
+  content: '';
+  left: 50%;
   position: absolute;
+  top: 0;
 }
 
-.admin-analytics-boxplot-whisker {
-  background: var(--admin-boxplot-color);
-  left: calc(50% - 1px);
+.admin-analytics-candle:hover::before,
+.admin-analytics-candle:focus-visible::before {
+  border-left-color: #c8cad2;
+}
+
+.admin-analytics-candle:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: -2px;
+}
+
+.admin-analytics-candle-wick,
+.admin-analytics-candle-body {
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.admin-analytics-candle-wick {
+  background: #6d7080;
   min-height: 1px;
-  width: 2px;
+  width: 1px;
 }
 
-.admin-analytics-boxplot-cap {
-  border-top: 2px solid var(--admin-boxplot-color);
-  left: 26%;
+.admin-analytics-candle-body {
+  bottom: var(--admin-candle-bottom);
+  height: max(4px, var(--admin-candle-height));
+  max-width: 14px;
+  min-width: 5px;
+  width: 34%;
+}
+
+.admin-analytics-candle.is-up .admin-analytics-candle-wick,
+.admin-analytics-candle.is-up .admin-analytics-candle-body {
+  background: #2f6fcb;
+}
+
+.admin-analytics-candle.is-down .admin-analytics-candle-wick,
+.admin-analytics-candle.is-down .admin-analytics-candle-body {
+  background: #c1495f;
+}
+
+.admin-analytics-candle.is-flat .admin-analytics-candle-wick,
+.admin-analytics-candle.is-flat .admin-analytics-candle-body {
+  background: #6d7080;
+}
+
+.admin-analytics-candle.is-flat .admin-analytics-candle-body {
+  bottom: clamp(0px, calc(var(--admin-candle-bottom) - 2px), calc(100% - 4px));
+  height: 4px;
+}
+
+.admin-analytics-candle.is-empty {
+  opacity: 0.24;
+}
+
+.admin-analytics-candlestick-volume {
+  border-bottom: 1px solid #d9dbe2;
+  border-top: 1px solid #e4e6eb;
+  grid-column: 2;
+  grid-row: 3;
+  min-width: 0;
+  position: relative;
+}
+
+.admin-analytics-volume-columns {
+  align-items: end;
+  height: 100%;
+}
+
+.admin-analytics-volume-columns > span {
+  justify-self: center;
+  max-width: 14px;
+  min-height: 1px;
+  opacity: 0.58;
   width: 48%;
 }
 
-.admin-analytics-boxplot-box {
-  background: color-mix(in srgb, var(--admin-boxplot-color) 18%, white);
-  border: 2px solid var(--admin-boxplot-color);
-  bottom: var(--admin-boxplot-bottom);
-  height: max(6px, var(--admin-boxplot-height));
-  left: 12%;
-  width: 76%;
+.admin-analytics-volume-columns > span.is-up {
+  background: #2f6fcb;
 }
 
-.admin-analytics-boxplot-box.is-flat {
-  bottom: clamp(0px, calc(var(--admin-boxplot-bottom) - 3px), calc(100% - 6px));
-  height: 6px;
+.admin-analytics-volume-columns > span.is-down {
+  background: #c1495f;
 }
 
-.admin-analytics-boxplot-median {
-  border-top: 2px solid var(--admin-boxplot-color);
-  left: 8%;
-  width: 84%;
+.admin-analytics-candlestick-dates {
+  align-items: start;
+  grid-column: 2;
+  grid-row: 4;
+  padding-top: 6px;
+}
+
+.admin-analytics-candlestick-dates > span {
+  color: var(--admin-muted);
+  font-size: 9px;
+  line-height: 1;
+  min-width: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.admin-analytics-candlestick figcaption {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  grid-column: 2;
+  grid-row: 5;
+  justify-content: flex-end;
+}
+
+.admin-analytics-candlestick figcaption > span {
+  align-items: center;
+  color: var(--admin-muted);
+  display: inline-flex;
+  font-size: 9px;
+  gap: 5px;
+}
+
+.admin-analytics-candlestick figcaption > span::before {
+  background: currentColor;
+  content: '';
+  height: 2px;
+  width: 14px;
+}
+
+.admin-analytics-candlestick figcaption > span.is-short {
+  color: #d86783;
+}
+
+.admin-analytics-candlestick figcaption > span.is-long {
+  color: #9a7a2f;
+}
+
+.admin-analytics-candlestick figcaption > span.is-volume::before {
+  height: 8px;
+  width: 6px;
 }
 
 .admin-analytics-trend-empty {
@@ -2451,7 +2575,7 @@ button:disabled,
 
   .admin-analytics-status-controls {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
 
@@ -2544,31 +2668,35 @@ button:disabled,
     padding: 0 6px;
   }
 
-  .admin-analytics-boxplot {
-    grid-template-columns: 30px minmax(0, 1fr);
-    height: 260px;
+  .admin-analytics-candlestick {
+    grid-template-columns: 28px minmax(0, 1fr);
+    grid-template-rows: 180px 10px 50px 26px 20px;
+    height: 296px;
   }
 
-  .admin-analytics-boxplot-axis,
-  .admin-analytics-boxplot-grid {
-    height: 182px;
+  .admin-analytics-candlestick-axis > span {
+    font-size: 9px;
+    right: 6px;
   }
 
-  .admin-analytics-boxplot-column {
-    grid-template-rows: 182px auto auto;
+  .admin-analytics-candlestick-columns,
+  .admin-analytics-volume-columns,
+  .admin-analytics-candlestick-dates {
+    gap: 3px;
   }
 
-  .admin-analytics-boxplot-columns {
-    gap: 5px;
+  .admin-analytics-candle-body,
+  .admin-analytics-volume-columns > span {
+    max-width: 10px;
   }
 
-  .admin-analytics-boxplot-column > strong {
-    font-size: 10px;
+  .admin-analytics-candlestick-dates > span,
+  .admin-analytics-candlestick figcaption > span {
+    font-size: 8px;
   }
 
-  .admin-analytics-boxplot-visual {
-    max-width: 42px;
-    width: 68%;
+  .admin-analytics-candlestick figcaption {
+    gap: 10px;
   }
 
   .admin-analytics-currency-chart > header {

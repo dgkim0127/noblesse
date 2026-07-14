@@ -4,7 +4,7 @@ import { getMarketDisplay } from '../../config/currency.js'
 import { useLocalePath } from '../../utils/locale.js'
 import { AdminEmptyState, AdminLink, AdminMoney, AdminPageHeader, AdminStatus } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiResource } from './adminApiPageUtils'
-import { createStatusBoxPlotRows } from './adminAnalyticsBoxPlot.js'
+import { createCandlestickBuckets, createMovingAverage, getCandlestickBucketSize } from './adminAnalyticsCandlestick.js'
 import { getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
 const quoteTrendSeries = [
@@ -24,6 +24,11 @@ const chartLocales = {
 
 function formatChartValue(value, locale) {
   return new Intl.NumberFormat(chartLocales[locale] || 'en-US', { maximumFractionDigits: 1 }).format(value)
+}
+
+function formatChartDate(date, locale) {
+  if (!date) return ''
+  return new Intl.DateTimeFormat(chartLocales[locale] || 'en-US', { day: 'numeric', month: 'numeric' }).format(new Date(`${date}T00:00:00+09:00`))
 }
 
 function getMaximum(rows = []) {
@@ -56,49 +61,78 @@ function StatusColumnChart({ rows }) {
   </div>
 }
 
-function getBoxPlotPosition(value, maximum) {
+function getCandlestickPosition(value, maximum) {
   return `${(Number(value || 0) / maximum) * 100}%`
 }
 
-function QuoteStatusBoxPlot({ data, locale, t, visibleStatuses }) {
-  const rows = createStatusBoxPlotRows(data, quoteTrendSeries.filter((series) => visibleStatuses.has(series.key)))
-  const maximum = Math.max(1, ...rows.map((row) => row.maximum))
+function getMovingAveragePath(values, maximum) {
+  if (values.length === 0) return ''
+
+  return values.map((value, index) => {
+    const x = ((index + 0.5) / values.length) * 100
+    const y = 100 - ((value / maximum) * 100)
+    return `${index === 0 ? 'M' : 'L'} ${x} ${y}`
+  }).join(' ')
+}
+
+function QuoteStatusCandlestick({ data, locale, rangeDays, selectedStatus, t }) {
+  const statusKeys = quoteTrendSeries.map((series) => series.key)
+  const rows = createCandlestickBuckets(data, selectedStatus, statusKeys, getCandlestickBucketSize(rangeDays))
+  const movingAverage3 = createMovingAverage(rows, 3)
+  const movingAverage5 = createMovingAverage(rows, 5)
+  const maximum = Math.max(1, ...rows.map((row) => row.high), ...movingAverage3, ...movingAverage5)
+  const maximumVolume = Math.max(1, ...rows.map((row) => row.volume))
   const axisTicks = [maximum, maximum / 2, 0]
+  const volumeTicks = [maximumVolume, 0]
+  const labelInterval = Math.max(1, Math.ceil(rows.length / 5))
 
-  return <figure aria-label={t.analytics.quoteTrendAria} className="admin-analytics-boxplot">
-    <div aria-hidden="true" className="admin-analytics-boxplot-axis">
-      {axisTicks.map((value, index) => <span key={`${value}-${index}`} style={{ bottom: getBoxPlotPosition(value, maximum) }}>{formatChartValue(value, locale)}</span>)}
+  return <figure aria-label={t.analytics.quoteTrendAria} className="admin-analytics-candlestick">
+    <div aria-hidden="true" className="admin-analytics-candlestick-axis is-main">
+      {axisTicks.map((value, index) => <span key={`${value}-${index}`} style={{ bottom: getCandlestickPosition(value, maximum) }}>{formatChartValue(value, locale)}</span>)}
     </div>
-    <div className="admin-analytics-boxplot-plot">
-      <div aria-hidden="true" className="admin-analytics-boxplot-grid">
-        {axisTicks.map((value, index) => <span key={`${value}-${index}`} style={{ bottom: getBoxPlotPosition(value, maximum) }} />)}
+    <div className="admin-analytics-candlestick-plot">
+      <div aria-hidden="true" className="admin-analytics-candlestick-grid">
+        {axisTicks.map((value, index) => <span key={`${value}-${index}`} style={{ bottom: getCandlestickPosition(value, maximum) }} />)}
       </div>
-      <div className="admin-analytics-boxplot-columns" style={{ gridTemplateColumns: `repeat(${rows.length}, minmax(0, 1fr))` }}>
+      <svg aria-hidden="true" className="admin-analytics-candlestick-average" preserveAspectRatio="none" viewBox="0 0 100 100">
+        <path className="is-short" d={getMovingAveragePath(movingAverage3, maximum)} vectorEffect="non-scaling-stroke" />
+        <path className="is-long" d={getMovingAveragePath(movingAverage5, maximum)} vectorEffect="non-scaling-stroke" />
+      </svg>
+      <div className="admin-analytics-candlestick-columns" style={{ gridTemplateColumns: `repeat(${rows.length}, minmax(0, 1fr))` }}>
         {rows.map((row) => {
-          const label = getAdminStatusLabel(t, row.key)
-          const minimum = formatChartValue(row.minimum, locale)
-          const lowerQuartile = formatChartValue(row.lowerQuartile, locale)
-          const median = formatChartValue(row.median, locale)
-          const upperQuartile = formatChartValue(row.upperQuartile, locale)
-          const maximumValue = formatChartValue(row.maximum, locale)
-          const summary = `${label}: ${t.analytics.boxPlotMinimum} ${minimum}, ${t.analytics.boxPlotLowerQuartile} ${lowerQuartile}, ${t.analytics.boxPlotMedian} ${median}, ${t.analytics.boxPlotUpperQuartile} ${upperQuartile}, ${t.analytics.boxPlotMaximum} ${maximumValue}`
-          const boxHeight = ((row.upperQuartile - row.lowerQuartile) / maximum) * 100
-          const isFlat = boxHeight === 0
+          const isUp = row.close > row.open
+          const isDown = row.close < row.open
+          const direction = isUp ? 'is-up' : isDown ? 'is-down' : 'is-flat'
+          const startDate = formatChartDate(row.startDate, locale)
+          const endDate = formatChartDate(row.endDate, locale)
+          const dateLabel = startDate === endDate ? startDate : `${startDate}–${endDate}`
+          const summary = `${dateLabel}: ${t.analytics.candlestickOpen} ${formatChartValue(row.open, locale)}, ${t.analytics.candlestickHigh} ${formatChartValue(row.high, locale)}, ${t.analytics.candlestickLow} ${formatChartValue(row.low, locale)}, ${t.analytics.candlestickClose} ${formatChartValue(row.close, locale)}, ${t.analytics.candlestickVolume} ${formatChartValue(row.volume, locale)}`
+          const bodyBottom = Math.min(row.open, row.close)
+          const bodyHeight = (Math.abs(row.close - row.open) / maximum) * 100
 
-          return <div aria-label={summary} className="admin-analytics-boxplot-column" key={row.key} role="img" tabIndex="0" title={summary}>
-            <div aria-hidden="true" className="admin-analytics-boxplot-visual" style={{ '--admin-boxplot-color': row.color }}>
-              <span className="admin-analytics-boxplot-whisker" style={{ bottom: getBoxPlotPosition(row.minimum, maximum), height: getBoxPlotPosition(row.maximum - row.minimum, maximum) }} />
-              <span className="admin-analytics-boxplot-cap is-maximum" style={{ bottom: getBoxPlotPosition(row.maximum, maximum) }} />
-              <span className="admin-analytics-boxplot-cap is-minimum" style={{ bottom: getBoxPlotPosition(row.minimum, maximum) }} />
-              <span className={`admin-analytics-boxplot-box${isFlat ? ' is-flat' : ''}`} style={{ '--admin-boxplot-bottom': getBoxPlotPosition(row.lowerQuartile, maximum), '--admin-boxplot-height': `${boxHeight}%` }} />
-              <span className="admin-analytics-boxplot-median" style={{ bottom: getBoxPlotPosition(row.median, maximum) }} />
-            </div>
-            <strong>{label}</strong>
-            <small>{t.analytics.boxPlotMaximum} {maximumValue}</small>
+          return <div aria-label={summary} className={`admin-analytics-candle ${direction}${row.volume === 0 ? ' is-empty' : ''}`} key={`${row.startDate}-${row.endDate}`} role="img" tabIndex="0" title={summary}>
+            <span aria-hidden="true" className="admin-analytics-candle-wick" style={{ bottom: getCandlestickPosition(row.low, maximum), height: getCandlestickPosition(row.high - row.low, maximum) }} />
+            <span aria-hidden="true" className="admin-analytics-candle-body" style={{ '--admin-candle-bottom': getCandlestickPosition(bodyBottom, maximum), '--admin-candle-height': `${bodyHeight}%` }} />
           </div>
         })}
       </div>
     </div>
+    <div aria-hidden="true" className="admin-analytics-candlestick-axis is-volume">
+      {volumeTicks.map((value, index) => <span key={`${value}-${index}`} style={{ bottom: getCandlestickPosition(value, maximumVolume) }}>{formatChartValue(value, locale)}</span>)}
+    </div>
+    <div className="admin-analytics-candlestick-volume">
+      <div className="admin-analytics-volume-columns" style={{ gridTemplateColumns: `repeat(${rows.length}, minmax(0, 1fr))` }}>
+        {rows.map((row) => <span aria-hidden="true" className={row.close >= row.open ? 'is-up' : 'is-down'} key={`${row.startDate}-${row.endDate}`} style={{ height: getCandlestickPosition(row.volume, maximumVolume) }} />)}
+      </div>
+    </div>
+    <div aria-hidden="true" className="admin-analytics-candlestick-dates" style={{ gridTemplateColumns: `repeat(${rows.length}, minmax(0, 1fr))` }}>
+      {rows.map((row, index) => <span key={`${row.startDate}-${row.endDate}`}>{(index % labelInterval === 0 || index === rows.length - 1) ? formatChartDate(row.endDate, locale) : ''}</span>)}
+    </div>
+    <figcaption>
+      <span className="is-short">MA3</span>
+      <span className="is-long">MA5</span>
+      <span className="is-volume">{t.analytics.candlestickVolume}</span>
+    </figcaption>
   </figure>
 }
 
@@ -127,10 +161,13 @@ export function AdminAnalyticsPage() {
   const t = useAdminCopy()
   const { locale } = useLocalePath()
   const [trendRange, setTrendRange] = useState(30)
-  const [visibleQuoteStatuses, setVisibleQuoteStatuses] = useState(() => new Set(quoteTrendSeries.map((series) => series.key)))
+  const [selectedQuoteStatus, setSelectedQuoteStatus] = useState('all')
   const { data, error, status } = useAdminApiResource((api, token) => api.getAnalytics(token), [])
   const trendData = useMemo(() => (data?.quotes?.trend?.points || []).slice(-trendRange), [data, trendRange])
-  const trendTotal = useMemo(() => trendData.reduce((total, point) => total + quoteTrendSeries.reduce((sum, series) => sum + Number(point[series.key] || 0), 0), 0), [trendData])
+  const trendTotal = useMemo(() => trendData.reduce((total, point) => {
+    if (selectedQuoteStatus === 'all') return total + quoteTrendSeries.reduce((sum, series) => sum + Number(point[series.key] || 0), 0)
+    return total + Number(point[selectedQuoteStatus] || 0)
+  }, 0), [selectedQuoteStatus, trendData])
   const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
   if (apiState) return apiState
 
@@ -149,22 +186,13 @@ export function AdminAnalyticsPage() {
     { days: 30, label: t.analytics.last30Days },
     { days: 90, label: t.analytics.last90Days },
   ]
+  const statusOptions = [{ color: '#2a234f', key: 'all' }, ...quoteTrendSeries]
   const metrics = [
     { key: 'open-inquiries', icon: Inbox, label: t.analytics.openInquiries, note: t.analytics.openInquiriesNote, value: overview.openInquiries || 0, to: '/admin/inquiries' },
     { key: 'draft-quotes', icon: FilePenLine, label: t.analytics.draftQuotes, note: t.analytics.draftQuotesNote, value: overview.draftQuotes || 0, to: '/admin/quotes' },
     { key: 'awaiting-buyer', icon: Clock3, label: t.analytics.awaitingBuyer, note: t.analytics.awaitingBuyerNote, value: overview.awaitingBuyer || 0, to: '/admin/quotes' },
     { key: 'accepted-quotes', icon: BadgeCheck, label: t.analytics.acceptedQuotes, note: t.analytics.acceptedQuotesNote, value: overview.acceptedQuotes || 0, to: '/admin/quotes' },
   ]
-  const toggleQuoteStatus = (statusKey) => {
-    setVisibleQuoteStatuses((current) => {
-      if (current.has(statusKey) && current.size === 1) return current
-      const next = new Set(current)
-      if (next.has(statusKey)) next.delete(statusKey)
-      else next.add(statusKey)
-      return next
-    })
-  }
-
   return <>
     <AdminPageHeader title={t.analytics.title} description={t.analytics.description} />
     <div className="admin-analytics-freshness">
@@ -189,17 +217,18 @@ export function AdminAnalyticsPage() {
           <div aria-label={t.analytics.trendRange} className="admin-analytics-period-control" role="group">
             {periodOptions.map((option) => <button aria-pressed={trendRange === option.days} key={option.days} onClick={() => setTrendRange(option.days)} type="button">{option.label}</button>)}
           </div>
-          <div aria-label={t.analytics.visibleStatuses} className="admin-analytics-status-controls" role="group">
-            {quoteTrendSeries.map((series) => <button
-              aria-pressed={visibleQuoteStatuses.has(series.key)}
+          <div aria-label={t.analytics.selectedStatus} className="admin-analytics-status-controls" role="radiogroup">
+            {statusOptions.map((series) => <button
+              aria-checked={selectedQuoteStatus === series.key}
               key={series.key}
-              onClick={() => toggleQuoteStatus(series.key)}
+              onClick={() => setSelectedQuoteStatus(series.key)}
+              role="radio"
               style={{ '--admin-series-color': series.color }}
               type="button"
-            ><span aria-hidden="true" />{getAdminStatusLabel(t, series.key)}</button>)}
+            ><span aria-hidden="true" />{series.key === 'all' ? t.analytics.allStatuses : getAdminStatusLabel(t, series.key)}</button>)}
           </div>
         </div>
-        <QuoteStatusBoxPlot data={trendData} locale={locale} t={t} visibleStatuses={visibleQuoteStatuses} />
+        <QuoteStatusCandlestick data={trendData} locale={locale} rangeDays={trendRange} selectedStatus={selectedQuoteStatus} t={t} />
         {trendTotal === 0 && <p className="admin-analytics-trend-empty">{t.analytics.noTrendActivity}</p>}
         <small className="admin-analytics-time-zone">{t.analytics.koreaBusinessDay}</small>
       </section>
