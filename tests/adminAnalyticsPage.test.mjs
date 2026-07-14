@@ -24,7 +24,11 @@ test('admin analytics presents actionable quote flow and responsive operations s
   }
   assert.match(page, /admin-analytics-main-grid/)
   assert.match(page, /admin-analytics-currency/)
+  assert.match(page, /StatusColumnChart/)
+  assert.match(page, /CurrencyComparisonChart/)
   assert.match(styles, /\.admin-analytics-kpis/)
+  assert.match(styles, /\.admin-analytics-column-chart/)
   assert.match(styles, /\.admin-analytics-bar/)
+  assert.match(styles, /\.admin-analytics-currency-chart/)
   assert.match(styles, /@media \(max-width: 620px\)[\s\S]*\.admin-analytics-main-grid/)
 })
