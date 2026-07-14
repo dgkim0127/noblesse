@@ -1424,27 +1424,6 @@ export function HomePage() {
     return firstPanel.getBoundingClientRect().width + gap
   }, [])
 
-  const alignShowcaseGapToCenter = useCallback(() => {
-    const scroller = showcaseScrollerRef.current
-    const firstPanel = scroller?.querySelector('.home-showcase-panel')
-    const step = getShowcaseStep()
-
-    if (!scroller || !firstPanel || !step) return
-
-    const panelWidth = firstPanel.getBoundingClientRect().width
-    const gapOffset = panelWidth + (step - panelWidth) / 2 - scroller.clientWidth / 2
-    scroller.scrollLeft = Math.max(0, gapOffset)
-  }, [getShowcaseStep])
-
-  useEffect(() => {
-    alignShowcaseGapToCenter()
-    window.addEventListener('resize', alignShowcaseGapToCenter)
-
-    return () => {
-      window.removeEventListener('resize', alignShowcaseGapToCenter)
-    }
-  }, [alignShowcaseGapToCenter, getShowcaseStep])
-
   useEffect(() => {
     if (!activeHomeSectionNav.some((item) => item.id === activeHomeSection)) {
       setActiveHomeSection(firstActiveHomeSectionId)
