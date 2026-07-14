@@ -37,4 +37,7 @@ test('home showcase renders one image set without cloned carousel panels', () =>
   assert.match(home, /homeShowcasePanels\.map/)
   assert.doesNotMatch(home, /showcaseLoopPanels/)
   assert.doesNotMatch(home, /\.\.\.homeShowcasePanels, \.\.\.homeShowcasePanels/)
+  assert.match(home, /buyerConceptPanels\.map/)
+  assert.doesNotMatch(home, /\.\.\.buyerConceptPanels/)
+  assert.doesNotMatch(home, /setInterval\(slide/)
 })

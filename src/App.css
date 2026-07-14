@@ -12243,8 +12243,6 @@ h6 {
   width: max-content;
   gap: var(--buyer-concept-gap);
   padding-left: max(0px, calc((100vw - 1180px) / 2));
-  will-change: transform;
-  animation: buyerConceptRotate 20s cubic-bezier(.54, 0, .18, 1) infinite;
 }
 
 .buyer-concept-card {
@@ -12337,32 +12335,6 @@ h6 {
   border-radius: 999px;
   background: rgb(255 255 255 / 9%);
   backdrop-filter: blur(6px);
-}
-
-@keyframes buyerConceptRotate {
-  0%,
-  18% {
-    transform: translate3d(0, 0, 0);
-  }
-
-  28%,
-  46% {
-    transform: translate3d(calc(var(--buyer-concept-step) * -1), 0, 0);
-  }
-
-  56%,
-  74% {
-    transform: translate3d(calc(var(--buyer-concept-step) * -2), 0, 0);
-  }
-
-  84%,
-  99.99% {
-    transform: translate3d(calc(var(--buyer-concept-step) * -3), 0, 0);
-  }
-
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
 }
 
 @media (max-width: 760px) {
@@ -13051,8 +13023,11 @@ h6 {
   margin-right: 0 !important;
   margin-left: calc(50% - 50vw) !important;
   padding: 0 !important;
-  overflow: hidden !important;
-  scroll-behavior: auto !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  overscroll-behavior-inline: contain;
+  scroll-behavior: smooth !important;
+  scroll-snap-type: x proximity;
 }
 
 .buyer-concept-rail {
@@ -13061,10 +13036,9 @@ h6 {
   min-width: 0 !important;
   max-width: none !important;
   gap: 10px !important;
-  padding: 0 !important;
+  padding: 0 max(16px, calc((100vw - 1280px) / 2)) 12px !important;
   transform: none;
   animation: none !important;
-  will-change: transform;
 }
 
 .buyer-concept-card,
@@ -13081,6 +13055,7 @@ h6 {
   background: #111 !important;
   box-shadow: none !important;
   color: #fff !important;
+  scroll-snap-align: start;
 }
 
 .buyer-concept-card img {

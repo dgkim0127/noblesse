@@ -1273,57 +1273,6 @@ function ProductSection({ products, sectionId, title, note }) {
 function BuyerCollectionSection() {
   const { locale, toLocalePath } = useLocalePath()
   const copy = homeBuyerCollectionCopy[locale] ?? homeBuyerCollectionCopy.en
-  const marqueeViewportRef = useRef(null)
-  const panels = [...buyerConceptPanels, ...buyerConceptPanels, ...buyerConceptPanels]
-
-  useEffect(() => {
-    const viewport = marqueeViewportRef.current
-    const rail = viewport?.querySelector('.buyer-concept-rail')
-
-    if (!viewport || !rail) return undefined
-
-    const getCardStep = () => {
-      const loopPoint = rail.scrollWidth / 3
-      const firstCard = rail.querySelector('.buyer-concept-card')
-      const gap = Number.parseFloat(window.getComputedStyle(rail).gap) || 0
-      const cardStep = firstCard ? firstCard.getBoundingClientRect().width + gap : 0
-
-      return {
-        cardStep,
-        loopPoint,
-      }
-    }
-
-    const slide = () => {
-      const { cardStep, loopPoint } = getCardStep()
-      if (!cardStep || loopPoint <= viewport.clientWidth) return
-
-      if (viewport.scrollLeft >= loopPoint) {
-        viewport.scrollLeft -= loopPoint
-      }
-
-      const nextLeft = viewport.scrollLeft + cardStep * 2
-
-      viewport.scrollTo({
-        behavior: 'smooth',
-        left: nextLeft,
-      })
-
-      if (nextLeft >= loopPoint) {
-        window.setTimeout(() => {
-          if (viewport.scrollLeft >= loopPoint) {
-            viewport.scrollLeft -= loopPoint
-          }
-        }, 720)
-      }
-    }
-
-    const interval = window.setInterval(slide, 2000)
-
-    return () => {
-      window.clearInterval(interval)
-    }
-  }, [])
 
   return <section className="section-wrap buyer-collection-section" id="home-buyer-selection">
     <div className="buyer-collection-heading">
@@ -1333,14 +1282,14 @@ function BuyerCollectionSection() {
         <p>{copy.note}</p>
       </div>
     </div>
-    <div className="buyer-concept-viewport" ref={marqueeViewportRef}>
+    <div className="buyer-concept-viewport">
       <div className="buyer-concept-rail">
-        {panels.map((panel, index) => {
+        {buyerConceptPanels.map((panel) => {
           const title = getLocalizedValue(panel.title, locale)
           const text = getLocalizedValue(panel.text, locale)
           const tags = getLocalizedValue(panel.tags, locale)
 
-          return <Link className="buyer-concept-card" to={toLocalePath(panel.to)} key={`${panel.key}-${index}`}>
+          return <Link className="buyer-concept-card" to={toLocalePath(panel.to)} key={panel.key}>
             <img src={panel.image} alt={title} loading="lazy" width="1200" height="1200" />
             <span className="buyer-concept-eyebrow">NOBLESSE</span>
             <div className="buyer-concept-copy">
