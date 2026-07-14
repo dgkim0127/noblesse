@@ -34,3 +34,13 @@ test('home showcase admin API supports create edit image ordering visibility and
   assert.match(editor, /languages = \[/)
   assert.match(editor, /'zh-TW'/)
 })
+
+test('home showcase editor previews localized content and publication readiness', () => {
+  assert.match(editor, /previewMode/)
+  assert.match(editor, /admin-showcase-live-preview/)
+  assert.match(editor, /데스크톱 미리보기/)
+  assert.match(editor, /모바일 미리보기/)
+  assert.match(editor, /form\.title\[activeLanguage\]/)
+  assert.match(editor, /completedTitleCount/)
+  assert.match(editor, /공개 준비 상태/)
+})

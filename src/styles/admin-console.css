@@ -22,7 +22,7 @@
 .admin-showcase-editor-layout {
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
 }
 
 .admin-showcase-image-editor {
@@ -37,22 +37,171 @@
   line-height: 1.5;
 }
 
-.admin-showcase-image-preview {
+.admin-showcase-preview-toolbar {
   align-items: center;
-  aspect-ratio: 3 / 4;
-  background: #f4f5f7;
-  border: 1px dashed #cfd3da;
-  border-radius: 6px;
-  color: #848995;
   display: flex;
+  justify-content: space-between;
+  min-height: 34px;
+}
+
+.admin-showcase-preview-toolbar > div:first-child {
+  display: grid;
+  gap: 1px;
+}
+
+.admin-showcase-preview-toolbar strong {
+  color: var(--admin-text);
+  font-size: 13px;
+}
+
+.admin-showcase-preview-toolbar span {
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+
+.admin-showcase-preview-modes {
+  background: #eef0f3;
+  border: 1px solid #d9dce3;
+  border-radius: 6px;
+  display: grid;
+  grid-template-columns: repeat(2, 32px);
+  padding: 2px;
+}
+
+.admin-showcase-preview-modes button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: #747985;
+  display: flex;
+  height: 28px;
   justify-content: center;
+  padding: 0;
+}
+
+.admin-showcase-preview-modes button.is-active {
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(33 36 45 / 14%);
+  color: var(--admin-primary);
+}
+
+.admin-showcase-live-preview {
+  margin-inline: auto;
+  max-width: 340px;
+  transition: width 160ms ease;
+  width: 100%;
+}
+
+.admin-showcase-live-preview.is-mobile {
+  max-width: 236px;
+  width: 72%;
+}
+
+.admin-showcase-image-preview {
+  aspect-ratio: 3 / 4;
+  background: #25262d;
+  border: 1px solid #cfd3da;
+  border-radius: 6px;
+  color: #fff;
   overflow: hidden;
+  position: relative;
 }
 
 .admin-showcase-image-preview img {
   height: 100%;
+  inset: 0;
   object-fit: cover;
+  position: absolute;
   width: 100%;
+}
+
+.admin-showcase-preview-empty {
+  align-items: center;
+  color: #bec2ca;
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  gap: 8px;
+  inset: 0;
+  justify-content: center;
+  position: absolute;
+}
+
+.admin-showcase-preview-shade {
+  background: rgb(0 0 0 / 16%);
+  box-shadow: inset 0 -180px 120px -90px rgb(0 0 0 / 95%);
+  inset: 0;
+  position: absolute;
+}
+
+.admin-showcase-preview-label {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 850;
+  left: 18px;
+  position: absolute;
+  top: 16px;
+}
+
+.admin-showcase-preview-copy {
+  bottom: 18px;
+  display: grid;
+  gap: 5px;
+  left: 18px;
+  max-width: calc(100% - 36px);
+  position: absolute;
+  right: 18px;
+}
+
+.admin-showcase-preview-copy strong {
+  color: #fff;
+  font-size: 22px;
+  line-height: 1.22;
+  overflow-wrap: anywhere;
+}
+
+.admin-showcase-preview-copy b {
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.admin-showcase-preview-copy > span {
+  color: rgb(255 255 255 / 88%);
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.admin-showcase-live-preview.is-mobile .admin-showcase-preview-copy strong {
+  font-size: 19px;
+}
+
+.admin-showcase-readiness {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-showcase-readiness span {
+  align-items: center;
+  border: 1px solid #e0e2e7;
+  border-radius: 5px;
+  color: #8a5a35;
+  display: flex;
+  font-size: 11px;
+  gap: 5px;
+  justify-content: center;
+  min-height: 34px;
+  padding: 5px 7px;
+  text-align: center;
+}
+
+.admin-showcase-readiness span.is-complete {
+  background: #eef8f2;
+  border-color: #c8e7d4;
+  color: var(--admin-success);
 }
 
 .admin-file-action {
@@ -193,11 +342,11 @@
   }
 
   .admin-showcase-image-editor {
-    grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+    max-width: 420px;
   }
 
   .admin-showcase-image-editor > small {
-    grid-column: 2;
+    grid-column: auto;
   }
 
   .admin-showcase-row {
@@ -213,7 +362,7 @@
 
 @media (max-width: 560px) {
   .admin-showcase-image-editor {
-    grid-template-columns: 1fr;
+    max-width: none;
   }
 
   .admin-showcase-image-preview {
@@ -222,6 +371,10 @@
 
   .admin-showcase-image-editor > small {
     grid-column: auto;
+  }
+
+  .admin-showcase-readiness {
+    grid-template-columns: 1fr;
   }
 
   .admin-showcase-row {

@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Eye, EyeOff, ImagePlus, Pencil, Plus, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, CheckCircle2, CircleDashed, Eye, EyeOff, ImagePlus, Monitor, Pencil, Plus, Smartphone, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useAdminAccess } from '../../components/AdminAccessContext'
 import { AdminConfirmDialog, AdminEmptyState, AdminPageHeader, AdminToast } from './AdminPageParts'
@@ -63,6 +63,7 @@ export function AdminHomeShowcasePage() {
   const [editor, setEditor] = useState(null)
   const [form, setForm] = useState(createEmptyForm)
   const [activeLanguage, setActiveLanguage] = useState('kr')
+  const [previewMode, setPreviewMode] = useState('desktop')
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState('')
   const [busyId, setBusyId] = useState('')
@@ -93,6 +94,7 @@ export function AdminHomeShowcasePage() {
     setForm(createEmptyForm())
     setImageFile(null)
     setActiveLanguage('kr')
+    setPreviewMode('desktop')
   }
 
   const openCreate = () => {
@@ -100,6 +102,7 @@ export function AdminHomeShowcasePage() {
     setForm(createEmptyForm())
     setImageFile(null)
     setActiveLanguage('kr')
+    setPreviewMode('desktop')
   }
 
   const openEdit = (slide) => {
@@ -107,6 +110,7 @@ export function AdminHomeShowcasePage() {
     setForm(slideToForm(slide))
     setImageFile(null)
     setActiveLanguage('kr')
+    setPreviewMode('desktop')
   }
 
   const setField = (field, value) => setForm((current) => ({ ...current, [field]: value }))
@@ -200,6 +204,15 @@ export function AdminHomeShowcasePage() {
   }
 
   const currentPreview = imagePreview || editor?.image
+  const previewTitle = form.title[activeLanguage].trim() || '큰 제목 미리보기'
+  const previewEyebrow = form.eyebrow[activeLanguage].trim() || 'COLLECTION'
+  const previewDescription = form.description[activeLanguage].trim() || '설명을 입력하면 홈 화면에서 보이는 위치에 바로 표시됩니다.'
+  const completedTitleCount = languages.filter(({ key }) => form.title[key].trim()).length
+  const readiness = [
+    { key: 'image', label: '사진', complete: Boolean(currentPreview) },
+    { key: 'titles', label: `언어 제목 ${completedTitleCount}/4`, complete: completedTitleCount === languages.length },
+    { key: 'target', label: '연결 경로', complete: form.targetUrl.trim().startsWith('/') && !form.targetUrl.trim().startsWith('//') },
+  ]
 
   return <>
     <AdminPageHeader
@@ -214,14 +227,35 @@ export function AdminHomeShowcasePage() {
       </div>
       <div className="admin-showcase-editor-layout">
         <div className="admin-showcase-image-editor">
-          <div className="admin-showcase-image-preview">
-            {currentPreview ? <img alt="스냅 미리보기" src={currentPreview} /> : <ImagePlus aria-hidden="true" size={34} />}
+          <div className="admin-showcase-preview-toolbar">
+            <div><strong>홈 노출 미리보기</strong><span>{languages.find(({ key }) => key === activeLanguage)?.label}</span></div>
+            <div className="admin-showcase-preview-modes" role="group" aria-label="미리보기 화면">
+              <button aria-label="데스크톱 미리보기" aria-pressed={previewMode === 'desktop'} className={previewMode === 'desktop' ? 'is-active' : undefined} title="데스크톱 미리보기" type="button" onClick={() => setPreviewMode('desktop')}><Monitor size={16} /></button>
+              <button aria-label="모바일 미리보기" aria-pressed={previewMode === 'mobile'} className={previewMode === 'mobile' ? 'is-active' : undefined} title="모바일 미리보기" type="button" onClick={() => setPreviewMode('mobile')}><Smartphone size={16} /></button>
+            </div>
+          </div>
+          <div className={`admin-showcase-live-preview is-${previewMode}`}>
+            <div className="admin-showcase-image-preview">
+              {currentPreview
+                ? <img alt="스냅 미리보기" src={currentPreview} />
+                : <span className="admin-showcase-preview-empty"><ImagePlus aria-hidden="true" size={34} /> 사진 미리보기</span>}
+              <span className="admin-showcase-preview-shade" />
+              <span className="admin-showcase-preview-label">{form.label.trim() || 'NOBLESSE'}</span>
+              <span className="admin-showcase-preview-copy">
+                <strong>{previewTitle}</strong>
+                <b>{previewEyebrow}</b>
+                <span>{previewDescription}</span>
+              </span>
+            </div>
           </div>
           <label className="secondary-action admin-file-action">
             <ImagePlus size={17} /> 사진 선택
             <input accept="image/jpeg,image/png,image/webp" type="file" onChange={(event) => setImageFile(event.target.files?.[0] || null)} />
           </label>
           <small>JPG, PNG, WebP / 최대 10MB. 저장하면 화면별 WebP 크기를 자동 생성합니다.</small>
+          <div className="admin-showcase-readiness" aria-label="공개 준비 상태" aria-live="polite">
+            {readiness.map((item) => <span className={item.complete ? 'is-complete' : undefined} key={item.key}>{item.complete ? <CheckCircle2 aria-hidden="true" size={15} /> : <CircleDashed aria-hidden="true" size={15} />} {item.label}</span>)}
+          </div>
         </div>
         <div className="admin-showcase-fields">
           <div className="admin-form-grid">
