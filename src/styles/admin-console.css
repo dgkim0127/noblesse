@@ -1914,54 +1914,129 @@ button:disabled,
   outline-offset: -2px;
 }
 
-.admin-analytics-trend-chart {
+.admin-analytics-boxplot {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
   height: 320px;
+  margin: 0;
   min-width: 0;
+  padding-top: 10px;
   width: 100%;
 }
 
-.admin-analytics-trend-chart .recharts-surface:focus-visible {
-  outline: 2px solid var(--admin-primary);
-  outline-offset: 2px;
+.admin-analytics-boxplot-axis {
+  height: 244px;
+  position: relative;
 }
 
-.admin-analytics-trend-tooltip {
-  background: #fff;
-  border: 1px solid var(--admin-border-strong);
-  border-radius: 5px;
-  box-shadow: 0 5px 16px rgb(42 35 79 / 12%);
-  display: grid;
-  gap: 7px;
-  min-width: 150px;
-  padding: 11px;
-}
-
-.admin-analytics-trend-tooltip > strong {
-  color: var(--admin-text);
-  font-size: 12px;
-}
-
-.admin-analytics-trend-tooltip > div {
-  align-items: center;
-  display: grid;
-  gap: 7px;
-  grid-template-columns: 8px minmax(0, 1fr) auto;
-}
-
-.admin-analytics-trend-tooltip > div > span {
-  border-radius: 50%;
-  height: 8px;
-  width: 8px;
-}
-
-.admin-analytics-trend-tooltip small {
+.admin-analytics-boxplot-axis > span {
   color: var(--admin-muted);
-  font-size: 11px;
+  font-size: 10px;
+  line-height: 1;
+  position: absolute;
+  right: 8px;
+  transform: translateY(50%);
 }
 
-.admin-analytics-trend-tooltip b {
+.admin-analytics-boxplot-plot {
+  min-width: 0;
+  position: relative;
+}
+
+.admin-analytics-boxplot-grid {
+  height: 244px;
+  inset: 0 0 auto;
+  position: absolute;
+}
+
+.admin-analytics-boxplot-grid > span {
+  border-top: 1px solid #e4e6eb;
+  left: 0;
+  position: absolute;
+  right: 0;
+}
+
+.admin-analytics-boxplot-columns {
+  display: grid;
+  gap: 12px;
+  height: 100%;
+  min-width: 0;
+  position: relative;
+}
+
+.admin-analytics-boxplot-column {
+  display: grid;
+  grid-template-rows: 244px auto auto;
+  min-width: 0;
+  text-align: center;
+}
+
+.admin-analytics-boxplot-column:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 3px;
+}
+
+.admin-analytics-boxplot-column > strong {
   color: var(--admin-text);
-  font-size: 12px;
+  font-size: 11px;
+  line-height: 1.25;
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+}
+
+.admin-analytics-boxplot-column > small {
+  color: var(--admin-muted);
+  font-size: 10px;
+  line-height: 1.25;
+  margin-top: 4px;
+}
+
+.admin-analytics-boxplot-visual {
+  height: 100%;
+  margin: 0 auto;
+  max-width: 62px;
+  position: relative;
+  width: 56%;
+}
+
+.admin-analytics-boxplot-whisker,
+.admin-analytics-boxplot-cap,
+.admin-analytics-boxplot-box,
+.admin-analytics-boxplot-median {
+  position: absolute;
+}
+
+.admin-analytics-boxplot-whisker {
+  background: var(--admin-boxplot-color);
+  left: calc(50% - 1px);
+  min-height: 1px;
+  width: 2px;
+}
+
+.admin-analytics-boxplot-cap {
+  border-top: 2px solid var(--admin-boxplot-color);
+  left: 26%;
+  width: 48%;
+}
+
+.admin-analytics-boxplot-box {
+  background: color-mix(in srgb, var(--admin-boxplot-color) 18%, white);
+  border: 2px solid var(--admin-boxplot-color);
+  bottom: var(--admin-boxplot-bottom);
+  height: max(6px, var(--admin-boxplot-height));
+  left: 12%;
+  width: 76%;
+}
+
+.admin-analytics-boxplot-box.is-flat {
+  bottom: clamp(0px, calc(var(--admin-boxplot-bottom) - 3px), calc(100% - 6px));
+  height: 6px;
+}
+
+.admin-analytics-boxplot-median {
+  border-top: 2px solid var(--admin-boxplot-color);
+  left: 8%;
+  width: 84%;
 }
 
 .admin-analytics-trend-empty {
@@ -2469,8 +2544,31 @@ button:disabled,
     padding: 0 6px;
   }
 
-  .admin-analytics-trend-chart {
+  .admin-analytics-boxplot {
+    grid-template-columns: 30px minmax(0, 1fr);
     height: 260px;
+  }
+
+  .admin-analytics-boxplot-axis,
+  .admin-analytics-boxplot-grid {
+    height: 182px;
+  }
+
+  .admin-analytics-boxplot-column {
+    grid-template-rows: 182px auto auto;
+  }
+
+  .admin-analytics-boxplot-columns {
+    gap: 5px;
+  }
+
+  .admin-analytics-boxplot-column > strong {
+    font-size: 10px;
+  }
+
+  .admin-analytics-boxplot-visual {
+    max-width: 42px;
+    width: 68%;
   }
 
   .admin-analytics-currency-chart > header {

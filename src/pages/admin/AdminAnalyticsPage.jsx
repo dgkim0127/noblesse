@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
 import { BadgeCheck, Clock3, FilePenLine, Inbox } from 'lucide-react'
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { getMarketDisplay } from '../../config/currency.js'
 import { useLocalePath } from '../../utils/locale.js'
 import { AdminEmptyState, AdminLink, AdminMoney, AdminPageHeader, AdminStatus } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiResource } from './adminApiPageUtils'
+import { createStatusBoxPlotRows } from './adminAnalyticsBoxPlot.js'
 import { getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
 const quoteTrendSeries = [
@@ -22,11 +22,8 @@ const chartLocales = {
   'zh-TW': 'zh-TW',
 }
 
-function formatChartDate(date, locale, full = false) {
-  const value = new Date(`${date}T00:00:00+09:00`)
-  return new Intl.DateTimeFormat(chartLocales[locale] || 'en-US', full
-    ? { day: 'numeric', month: 'short', year: 'numeric' }
-    : { day: 'numeric', month: 'numeric' }).format(value)
+function formatChartValue(value, locale) {
+  return new Intl.NumberFormat(chartLocales[locale] || 'en-US', { maximumFractionDigits: 1 }).format(value)
 }
 
 function getMaximum(rows = []) {
@@ -59,42 +56,50 @@ function StatusColumnChart({ rows }) {
   </div>
 }
 
-function QuoteTrendTooltip({ active, label, locale, payload, t }) {
-  if (!active || !payload?.length || !label) return null
-
-  return <div className="admin-analytics-trend-tooltip">
-    <strong>{formatChartDate(label, locale, true)}</strong>
-    {payload.map((item) => <div key={item.dataKey}>
-      <span style={{ backgroundColor: item.stroke }} />
-      <small>{getAdminStatusLabel(t, item.dataKey)}</small>
-      <b>{item.value}</b>
-    </div>)}
-  </div>
+function getBoxPlotPosition(value, maximum) {
+  return `${(Number(value || 0) / maximum) * 100}%`
 }
 
-function QuoteTrendChart({ data, locale, t, visibleStatuses }) {
-  return <div aria-label={t.analytics.quoteTrendAria} className="admin-analytics-trend-chart" role="img">
-    <ResponsiveContainer height="100%" width="100%">
-      <AreaChart accessibilityLayer data={data} margin={{ bottom: 2, left: -8, right: 8, top: 10 }}>
-        <CartesianGrid stroke="#e4e6eb" vertical={false} />
-        <XAxis axisLine={false} dataKey="date" minTickGap={24} tick={{ fill: '#6d7080', fontSize: 11 }} tickFormatter={(value) => formatChartDate(value, locale)} tickLine={false} />
-        <YAxis allowDecimals={false} axisLine={false} domain={[0, (maximum) => Math.max(1, maximum)]} tick={{ fill: '#6d7080', fontSize: 11 }} tickLine={false} width={34} />
-        <Tooltip content={<QuoteTrendTooltip locale={locale} t={t} />} cursor={{ stroke: '#c8cad2', strokeWidth: 1 }} />
-        {quoteTrendSeries.filter((series) => visibleStatuses.has(series.key)).map((series) => <Area
-          activeDot={{ r: 4, strokeWidth: 2 }}
-          dataKey={series.key}
-          dot={false}
-          fill={series.color}
-          fillOpacity={0.1}
-          isAnimationActive={false}
-          key={series.key}
-          stroke={series.color}
-          strokeWidth={2}
-          type="monotone"
-        />)}
-      </AreaChart>
-    </ResponsiveContainer>
-  </div>
+function QuoteStatusBoxPlot({ data, locale, t, visibleStatuses }) {
+  const rows = createStatusBoxPlotRows(data, quoteTrendSeries.filter((series) => visibleStatuses.has(series.key)))
+  const maximum = Math.max(1, ...rows.map((row) => row.maximum))
+  const axisTicks = [maximum, maximum / 2, 0]
+
+  return <figure aria-label={t.analytics.quoteTrendAria} className="admin-analytics-boxplot">
+    <div aria-hidden="true" className="admin-analytics-boxplot-axis">
+      {axisTicks.map((value, index) => <span key={`${value}-${index}`} style={{ bottom: getBoxPlotPosition(value, maximum) }}>{formatChartValue(value, locale)}</span>)}
+    </div>
+    <div className="admin-analytics-boxplot-plot">
+      <div aria-hidden="true" className="admin-analytics-boxplot-grid">
+        {axisTicks.map((value, index) => <span key={`${value}-${index}`} style={{ bottom: getBoxPlotPosition(value, maximum) }} />)}
+      </div>
+      <div className="admin-analytics-boxplot-columns" style={{ gridTemplateColumns: `repeat(${rows.length}, minmax(0, 1fr))` }}>
+        {rows.map((row) => {
+          const label = getAdminStatusLabel(t, row.key)
+          const minimum = formatChartValue(row.minimum, locale)
+          const lowerQuartile = formatChartValue(row.lowerQuartile, locale)
+          const median = formatChartValue(row.median, locale)
+          const upperQuartile = formatChartValue(row.upperQuartile, locale)
+          const maximumValue = formatChartValue(row.maximum, locale)
+          const summary = `${label}: ${t.analytics.boxPlotMinimum} ${minimum}, ${t.analytics.boxPlotLowerQuartile} ${lowerQuartile}, ${t.analytics.boxPlotMedian} ${median}, ${t.analytics.boxPlotUpperQuartile} ${upperQuartile}, ${t.analytics.boxPlotMaximum} ${maximumValue}`
+          const boxHeight = ((row.upperQuartile - row.lowerQuartile) / maximum) * 100
+          const isFlat = boxHeight === 0
+
+          return <div aria-label={summary} className="admin-analytics-boxplot-column" key={row.key} role="img" tabIndex="0" title={summary}>
+            <div aria-hidden="true" className="admin-analytics-boxplot-visual" style={{ '--admin-boxplot-color': row.color }}>
+              <span className="admin-analytics-boxplot-whisker" style={{ bottom: getBoxPlotPosition(row.minimum, maximum), height: getBoxPlotPosition(row.maximum - row.minimum, maximum) }} />
+              <span className="admin-analytics-boxplot-cap is-maximum" style={{ bottom: getBoxPlotPosition(row.maximum, maximum) }} />
+              <span className="admin-analytics-boxplot-cap is-minimum" style={{ bottom: getBoxPlotPosition(row.minimum, maximum) }} />
+              <span className={`admin-analytics-boxplot-box${isFlat ? ' is-flat' : ''}`} style={{ '--admin-boxplot-bottom': getBoxPlotPosition(row.lowerQuartile, maximum), '--admin-boxplot-height': `${boxHeight}%` }} />
+              <span className="admin-analytics-boxplot-median" style={{ bottom: getBoxPlotPosition(row.median, maximum) }} />
+            </div>
+            <strong>{label}</strong>
+            <small>{t.analytics.boxPlotMaximum} {maximumValue}</small>
+          </div>
+        })}
+      </div>
+    </div>
+  </figure>
 }
 
 function CurrencyComparisonChart({ row, t }) {
@@ -194,7 +199,7 @@ export function AdminAnalyticsPage() {
             ><span aria-hidden="true" />{getAdminStatusLabel(t, series.key)}</button>)}
           </div>
         </div>
-        <QuoteTrendChart data={trendData} locale={locale} t={t} visibleStatuses={visibleQuoteStatuses} />
+        <QuoteStatusBoxPlot data={trendData} locale={locale} t={t} visibleStatuses={visibleQuoteStatuses} />
         {trendTotal === 0 && <p className="admin-analytics-trend-empty">{t.analytics.noTrendActivity}</p>}
         <small className="admin-analytics-time-zone">{t.analytics.koreaBusinessDay}</small>
       </section>
