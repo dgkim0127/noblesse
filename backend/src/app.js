@@ -7,6 +7,7 @@ import { createPostgresViewerLoader, createRequireFirebaseIdentity, createRequir
 import { createPool } from "./db/pool.js";
 import { createAdminBuyerQueries } from "./db/queries/adminBuyerQueries.js";
 import { createAdminAccessQueries } from "./db/queries/adminAccessQueries.js";
+import { createAdminAnalyticsQueries } from "./db/queries/adminAnalyticsQueries.js";
 import { createAdminCategoryQueries } from "./db/queries/adminCategoryQueries.js";
 import { createAdminDashboardQueries } from "./db/queries/adminDashboardQueries.js";
 import { createAdminInquiryQueries } from "./db/queries/adminInquiryQueries.js";
@@ -30,6 +31,7 @@ import { createCatalogRoutes } from "./routes/catalogRoutes.js";
 import { createHealthRoutes } from "./routes/healthRoutes.js";
 import { createAdminBuyerService } from "./services/adminBuyerService.js";
 import { createAdminAccessService } from "./services/adminAccessService.js";
+import { createAdminAnalyticsService } from "./services/adminAnalyticsService.js";
 import { createAdminCategoryService } from "./services/adminCategoryService.js";
 import { createAdminDashboardService } from "./services/adminDashboardService.js";
 import { createAdminInquiryService } from "./services/adminInquiryService.js";
@@ -128,6 +130,12 @@ export function createApp(options = {}) {
         createAdminDashboardService({
           queries:
             options.queries?.admin?.dashboard || createAdminDashboardQueries(pool)
+        }),
+      analytics:
+        options.services?.admin?.analytics ||
+        createAdminAnalyticsService({
+          queries:
+            options.queries?.admin?.analytics || createAdminAnalyticsQueries(pool)
         }),
       inquiries:
         options.services?.admin?.inquiries ||

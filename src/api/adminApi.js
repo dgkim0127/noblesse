@@ -40,6 +40,10 @@ export function createAdminApi(apiClient) {
       return unwrap(await apiClient.apiFetch('/admin/dashboard', { token: requireToken(token) }))
     },
 
+    async getAnalytics(token) {
+      return unwrap(await apiClient.apiFetch('/admin/analytics', { token: requireToken(token) }))
+    },
+
     async getHomeShowcase(token) {
       return unwrap(await apiClient.apiFetch('/admin/home-showcase', { token: requireToken(token) }))
     },

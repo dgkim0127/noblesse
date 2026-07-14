@@ -46,6 +46,17 @@ test('admin dashboard calls contract route with bearer token option', async () =
   assert.equal(result.requestId, 'req-test')
 })
 
+test('admin analytics calls the protected aggregate route', async () => {
+  const { calls, client } = createMockApiClient({ data: { overview: { openInquiries: 2 }, currencyTotals: [] } })
+  const adminApi = createAdminApi(client)
+
+  const result = await adminApi.getAnalytics('admin-token')
+
+  assert.equal(calls[0].path, '/admin/analytics')
+  assert.equal(calls[0].options.token, 'admin-token')
+  assert.equal(result.data.overview.openInquiries, 2)
+})
+
 test('admin inquiry list serializes supported query params', async () => {
   const { calls, client } = createMockApiClient({ data: { inquiries: [] } })
   const adminApi = createAdminApi(client)

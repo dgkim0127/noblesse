@@ -145,6 +145,16 @@ export function createAdminRoutes({
   );
 
   router.get(
+    "/analytics",
+    requireAdmin,
+    can("analytics.read"),
+    asyncRoute(async (req, res) => {
+      const data = await services.analytics.getAnalytics(req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
     "/inquiries",
     requireAdmin,
     can("inquiries.read"),

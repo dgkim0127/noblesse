@@ -1,91 +1,111 @@
-import { useMemo } from 'react'
-import { AdminMoney, AdminPageHeader, AdminPreviewNote } from './AdminPageParts'
+import { BadgeCheck, Clock3, FilePenLine, Inbox } from 'lucide-react'
+import { getMarketDisplay } from '../../config/currency.js'
+import { AdminEmptyState, AdminLink, AdminMoney, AdminPageHeader, AdminStatus } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiResource } from './adminApiPageUtils'
-import { getAdminStatusLabel, useAdminCopy } from './adminCopy'
+import { useAdminCopy } from './adminCopy'
 
-function countBy(rows, getKey) {
-  return rows.reduce((counts, row) => {
-    const key = getKey(row) || 'unknown'
-    counts.set(key, (counts.get(key) || 0) + 1)
-    return counts
-  }, new Map())
+function getMaximum(rows = []) {
+  return Math.max(1, ...rows.map((row) => Number(row.count || 0)))
 }
 
-function toRows(counts) {
-  return Array.from(counts.entries())
-    .map(([label, count]) => ({ label, count }))
-    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+function AnalyticsBar({ count, maximum, tone }) {
+  const width = count > 0 ? Math.max(5, Math.round((count / maximum) * 100)) : 0
+  return <span aria-hidden="true" className="admin-analytics-bar"><span className={`is-${tone}`} style={{ width: `${width}%` }} /></span>
 }
 
 export function AdminAnalyticsPage() {
   const t = useAdminCopy()
-  const { data, error, status } = useAdminApiResource(async (api, token) => {
-    const [dashboard, inquiries, buyers, products] = await Promise.all([
-      api.getDashboard(token),
-      api.getInquiries({ limit: 100 }, token),
-      api.getBuyers({ limit: 100 }, token),
-      api.getProducts({ limit: 100 }, token),
-    ])
-
-    return {
-      data: {
-        dashboard: dashboard.data || dashboard,
-        inquiries: inquiries.data?.inquiries || [],
-        buyers: buyers.data?.buyers || [],
-        products: products.data?.products || [],
-      },
-    }
-  }, [])
-
+  const { data, error, status } = useAdminApiResource((api, token) => api.getAnalytics(token), [])
   const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
-  const analytics = useMemo(() => {
-    const inquiries = data?.inquiries || []
-    const buyers = data?.buyers || []
-    const products = data?.products || []
-    const totalEstimated = inquiries.reduce((sum, inquiry) => sum + Number(inquiry.estimatedTotal || 0), 0)
-
-    return {
-      totalEstimated,
-      statusRows: toRows(countBy(inquiries, (inquiry) => getAdminStatusLabel(t, inquiry.status))),
-      marketRows: toRows(countBy(inquiries, (inquiry) => inquiry.market || inquiry.country)),
-      buyerRows: toRows(countBy(buyers, (buyer) => getAdminStatusLabel(t, buyer.status))),
-      productRows: toRows(countBy(products, (product) => product.isVisible ? t.common.visible : t.common.hidden)),
-    }
-  }, [data, t])
-
   if (apiState) return apiState
 
-  return <>
-    <AdminPageHeader
-      title={t.analytics.title}
-      description={t.analytics.description}
-    />
-    <AdminPreviewNote>{t.analytics.note}</AdminPreviewNote>
+  const overview = data?.overview || {}
+  const quoteStatuses = data?.quotes?.statuses || []
+  const inquiryStatuses = data?.inquiries?.statuses || []
+  const markets = data?.markets || []
+  const currencyTotals = data?.currencyTotals || []
+  const quoteMaximum = getMaximum(quoteStatuses)
+  const inquiryMaximum = getMaximum(inquiryStatuses)
+  const marketMaximum = getMaximum(markets)
+  const metrics = [
+    { key: 'open-inquiries', icon: Inbox, label: t.analytics.openInquiries, note: t.analytics.openInquiriesNote, value: overview.openInquiries || 0, to: '/admin/inquiries' },
+    { key: 'draft-quotes', icon: FilePenLine, label: t.analytics.draftQuotes, note: t.analytics.draftQuotesNote, value: overview.draftQuotes || 0, to: '/admin/quotes' },
+    { key: 'awaiting-buyer', icon: Clock3, label: t.analytics.awaitingBuyer, note: t.analytics.awaitingBuyerNote, value: overview.awaitingBuyer || 0, to: '/admin/quotes' },
+    { key: 'accepted-quotes', icon: BadgeCheck, label: t.analytics.acceptedQuotes, note: t.analytics.acceptedQuotesNote, value: overview.acceptedQuotes || 0, to: '/admin/quotes' },
+  ]
 
-    <section className="admin-metric-grid">
-      <article className="admin-card"><p className="eyebrow">{t.analytics.inquiries}</p><h2>{data.dashboard?.inquiries?.total ?? data.inquiries.length}</h2><span>{t.analytics.totalRequestRecords}</span></article>
-      <article className="admin-card"><p className="eyebrow">{t.analytics.buyers}</p><h2>{data.dashboard?.buyers?.total ?? data.buyers.length}</h2><span>{t.analytics.tradeAccounts}</span></article>
-      <article className="admin-card"><p className="eyebrow">{t.analytics.products}</p><h2>{data.dashboard?.products?.total ?? data.products.length}</h2><span>{t.analytics.catalogRecords}</span></article>
-      <article className="admin-card"><p className="eyebrow">{t.analytics.estimatedTotal}</p><h2><AdminMoney value={analytics.totalEstimated} currency="USD" /></h2><span>{t.analytics.mixedCurrency}</span></article>
+  return <>
+    <AdminPageHeader title={t.analytics.title} description={t.analytics.description} />
+    <div className="admin-analytics-freshness">
+      <span>{t.analytics.note}</span>
+      {data?.generatedAt && <time dateTime={data.generatedAt}>{t.analytics.generatedAt}: {new Date(data.generatedAt).toLocaleString()}</time>}
+    </div>
+
+    <section aria-label={t.analytics.keyMetrics} className="admin-analytics-kpis">
+      {metrics.map(({ icon: Icon, key, label, note, to, value }) => <AdminLink className="admin-analytics-kpi" key={key} to={to}>
+        <Icon aria-hidden="true" size={20} />
+        <span><small>{label}</small><strong>{value}</strong><b>{note}</b></span>
+      </AdminLink>)}
     </section>
 
-    <section className="admin-layout two">
-      <article className="admin-card">
-        <h2>{t.analytics.inquiryStatus}</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.common.status}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.statusRows.map((row) => <tr key={row.label}><td data-label={t.common.status}>{row.label}</td><td data-label={t.common.count}>{row.count}</td></tr>)}</tbody></table></div>
-      </article>
-      <article className="admin-card">
-        <h2>{t.analytics.markets}</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.fields.market}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.marketRows.map((row) => <tr key={row.label}><td data-label={t.fields.market}>{row.label}</td><td data-label={t.common.count}>{row.count}</td></tr>)}</tbody></table></div>
-      </article>
-      <article className="admin-card">
-        <h2>{t.analytics.buyerStatus}</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.common.status}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.buyerRows.map((row) => <tr key={row.label}><td data-label={t.common.status}>{row.label}</td><td data-label={t.common.count}>{row.count}</td></tr>)}</tbody></table></div>
-      </article>
-      <article className="admin-card">
-        <h2>{t.analytics.productVisibility}</h2>
-        <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>{t.analytics.visibility}</th><th>{t.common.count}</th></tr></thead><tbody>{analytics.productRows.map((row) => <tr key={row.label}><td data-label={t.analytics.visibility}>{row.label}</td><td data-label={t.common.count}>{row.count}</td></tr>)}</tbody></table></div>
-      </article>
+    <div className="admin-analytics-main-grid">
+      <section className="admin-analytics-section">
+        <header><div><h2>{t.analytics.quoteFlow}</h2><p>{t.analytics.quoteFlowDescription}</p></div><strong>{data?.quotes?.total || 0}</strong></header>
+        <div className="admin-analytics-breakdown">
+          {quoteStatuses.map((row) => <div className="admin-analytics-breakdown-row" key={row.status}>
+            <div><AdminStatus status={row.status} /><b>{row.count}</b></div>
+            <AnalyticsBar count={row.count} maximum={quoteMaximum} tone={row.status} />
+          </div>)}
+        </div>
+      </section>
+
+      <section className="admin-analytics-section">
+        <header><div><h2>{t.analytics.inquiryFlow}</h2><p>{t.analytics.inquiryFlowDescription}</p></div><strong>{data?.inquiries?.total || 0}</strong></header>
+        <div className="admin-analytics-breakdown">
+          {inquiryStatuses.map((row) => <div className="admin-analytics-breakdown-row" key={row.status}>
+            <div><AdminStatus status={row.status} /><b>{row.count}</b></div>
+            <AnalyticsBar count={row.count} maximum={inquiryMaximum} tone={row.status} />
+          </div>)}
+        </div>
+      </section>
+
+      <section className="admin-analytics-section">
+        <header><div><h2>{t.analytics.marketDistribution}</h2><p>{t.analytics.marketDistributionDescription}</p></div></header>
+        {markets.length === 0 ? <AdminEmptyState title={t.analytics.noMarketData} /> : <div className="admin-analytics-breakdown">
+          {markets.map((row) => {
+            const market = getMarketDisplay(row.market)
+            return <div className="admin-analytics-breakdown-row" key={row.market}>
+              <div><span className="admin-analytics-market"><img alt="" src={market.flagSrc} />{market.label}</span><b>{row.count}</b></div>
+              <AnalyticsBar count={row.count} maximum={marketMaximum} tone="market" />
+            </div>
+          })}
+        </div>}
+      </section>
+
+      <section className="admin-analytics-section admin-analytics-operations">
+        <header><div><h2>{t.analytics.buyerAndCatalog}</h2><p>{t.analytics.buyerAndCatalogDescription}</p></div></header>
+        <dl>
+          <div><dt>{t.analytics.pendingBuyers}</dt><dd>{overview.pendingBuyers || 0}</dd></div>
+          <div><dt>{t.analytics.visibleProducts}</dt><dd>{data?.products?.visible || 0}</dd></div>
+          <div><dt>{t.analytics.hiddenProducts}</dt><dd>{data?.products?.hidden || 0}</dd></div>
+        </dl>
+      </section>
+    </div>
+
+    <section className="admin-analytics-section admin-analytics-currency">
+      <header><div><h2>{t.analytics.currencyTotals}</h2><p>{t.analytics.currencyTotalsDescription}</p></div></header>
+      {currencyTotals.length === 0 ? <AdminEmptyState title={t.analytics.noCurrencyData} /> : <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead><tr><th>{t.fields.currency}</th><th>{t.analytics.requestCount}</th><th>{t.analytics.requestedAmount}</th><th>{t.analytics.issuedCount}</th><th>{t.analytics.issuedAmount}</th></tr></thead>
+          <tbody>{currencyTotals.map((row) => <tr key={row.currency}>
+            <td data-label={t.fields.currency}><strong>{row.currency}</strong></td>
+            <td data-label={t.analytics.requestCount}>{row.requestCount}</td>
+            <td data-label={t.analytics.requestedAmount}><AdminMoney currency={row.currency} value={row.requestedTotal} /></td>
+            <td data-label={t.analytics.issuedCount}>{row.issuedCount}</td>
+            <td data-label={t.analytics.issuedAmount}><AdminMoney currency={row.currency} value={row.issuedTotal} /></td>
+          </tr>)}</tbody>
+        </table>
+      </div>}
     </section>
   </>
 }
