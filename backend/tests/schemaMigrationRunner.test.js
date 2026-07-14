@@ -437,6 +437,31 @@ test("packaged home showcase migration matches canonical migration exactly", () 
   assert.equal(packaged, canonical);
 });
 
+test("quote status trend index migration is additive and read optimized", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260714_quote_status_trend_index.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.match(sqlText, /create index if not exists idx_admin_quote_status_history_created_status/i);
+  assert.match(sqlText, /admin_quote_status_history\(created_at desc, to_status\)/i);
+  assert.doesNotMatch(sqlText, /\bdrop\s+table\b|\btruncate\b|\bdelete\s+from\b/i);
+});
+
+test("packaged quote status trend index migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260714_quote_status_trend_index.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260714_quote_status_trend_index.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
 test("migration runner resolves packaged lifecycle migration path explicitly", () => {
   const resolved = resolveSchemaSqlPath({
     SCHEMA_SQL_PATH: "migrations/20260622_admin_rbac_account_lifecycle.sql"

@@ -1,6 +1,8 @@
 const inquiryStatuses = ["requested", "checking", "quoted", "confirmed", "cancelled"];
 const quoteStatuses = ["draft", "sent", "accepted", "rejected", "cancelled"];
 const buyerStatuses = ["draft", "pending", "approved", "rejected", "suspended"];
+const analyticsTimeZone = "Asia/Seoul";
+const quoteTrendRangeDays = 90;
 
 function assertPool(pool) {
   if (!pool) {
@@ -22,7 +24,7 @@ export function createAdminAnalyticsQueries(pool) {
   return {
     async getAnalyticsSummary() {
       assertPool(pool);
-      const [overviewResult, inquiryResult, quoteResult, buyerResult, marketResult, currencyResult] = await Promise.all([
+      const [overviewResult, inquiryResult, quoteResult, buyerResult, marketResult, quoteTrendResult, currencyResult] = await Promise.all([
         pool.query(`
           select
             (select count(*)::int from public.inquiries) as inquiry_total,
@@ -45,6 +47,57 @@ export function createAdminAnalyticsQueries(pool) {
           from public.inquiries
           group by coalesce(nullif(market, ''), 'GLOBAL')
           order by count desc, market asc
+        `),
+        pool.query(`
+          with days as (
+            select generate_series(
+              (now() at time zone '${analyticsTimeZone}')::date - interval '${quoteTrendRangeDays - 1} days',
+              (now() at time zone '${analyticsTimeZone}')::date,
+              interval '1 day'
+            )::date as day
+          ),
+          quotes_without_history as (
+            select quote.*
+            from public.admin_quotes quote
+            where not exists (
+              select 1
+              from public.admin_quote_status_history history
+              where history.admin_quote_id = quote.id
+            )
+          ),
+          raw_transitions as (
+            select created_at, to_status
+            from public.admin_quote_status_history
+            union all
+            select created_at, 'draft' as to_status
+            from quotes_without_history
+            union all
+            select coalesce(updated_at, created_at) as created_at, status as to_status
+            from quotes_without_history
+            where status <> 'draft'
+          ),
+          transitions as (
+            select
+              (created_at at time zone '${analyticsTimeZone}')::date as day,
+              to_status
+            from raw_transitions
+            where created_at >= (
+              ((now() at time zone '${analyticsTimeZone}')::date - interval '${quoteTrendRangeDays - 1} days')
+              at time zone '${analyticsTimeZone}'
+            )
+              and to_status in ('draft', 'sent', 'accepted', 'rejected', 'cancelled')
+          )
+          select
+            to_char(days.day, 'YYYY-MM-DD') as date,
+            count(transitions.to_status) filter (where transitions.to_status = 'draft')::int as draft,
+            count(transitions.to_status) filter (where transitions.to_status = 'sent')::int as sent,
+            count(transitions.to_status) filter (where transitions.to_status = 'accepted')::int as accepted,
+            count(transitions.to_status) filter (where transitions.to_status = 'rejected')::int as rejected,
+            count(transitions.to_status) filter (where transitions.to_status = 'cancelled')::int as cancelled
+          from days
+          left join transitions on transitions.day = days.day
+          group by days.day
+          order by days.day asc
         `),
         pool.query(`
           with inquiry_totals as (
@@ -102,7 +155,19 @@ export function createAdminAnalyticsQueries(pool) {
         quotes: {
           total: toNumber(overview.quote_total),
           issued: toNumber(overview.quote_issued),
-          statuses: quotes
+          statuses: quotes,
+          trend: {
+            rangeDays: quoteTrendRangeDays,
+            timeZone: analyticsTimeZone,
+            points: quoteTrendResult.rows.map((row) => ({
+              date: row.date,
+              draft: toNumber(row.draft),
+              sent: toNumber(row.sent),
+              accepted: toNumber(row.accepted),
+              rejected: toNumber(row.rejected),
+              cancelled: toNumber(row.cancelled)
+            }))
+          }
         },
         buyers: {
           total: toNumber(overview.buyer_total),

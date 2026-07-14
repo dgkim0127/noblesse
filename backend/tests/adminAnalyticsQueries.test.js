@@ -3,9 +3,12 @@ import test from "node:test";
 import { createAdminAnalyticsQueries } from "../src/db/queries/adminAnalyticsQueries.js";
 
 function createAnalyticsPool() {
+  const statements = [];
   return {
+    statements,
     async query(text) {
       const normalized = text.replace(/\s+/g, " ").trim().toLowerCase();
+      statements.push(normalized);
       if (normalized.includes("as inquiry_total")) {
         return {
           rows: [{
@@ -31,6 +34,15 @@ function createAnalyticsPool() {
       if (normalized.includes("group by coalesce(nullif(market")) {
         return { rows: [{ market: "KR", count: 4 }, { market: "JP", count: 3 }] };
       }
+      if (normalized.includes("from public.admin_quote_status_history")) {
+        return {
+          rows: [
+            { date: "2026-07-12", draft: 1, sent: 0, accepted: 0, rejected: 0, cancelled: 0 },
+            { date: "2026-07-13", draft: 0, sent: 1, accepted: 0, rejected: 0, cancelled: 0 },
+            { date: "2026-07-14", draft: 0, sent: 0, accepted: 1, rejected: 0, cancelled: 0 }
+          ]
+        };
+      }
       if (normalized.startsWith("with inquiry_totals")) {
         return {
           rows: [
@@ -45,7 +57,8 @@ function createAnalyticsPool() {
 }
 
 test("admin analytics aggregates operational counts without mixing currencies", async () => {
-  const queries = createAdminAnalyticsQueries(createAnalyticsPool());
+  const pool = createAnalyticsPool();
+  const queries = createAdminAnalyticsQueries(pool);
   const result = await queries.getAnalyticsSummary();
 
   assert.deepEqual(result.overview, {
@@ -64,6 +77,18 @@ test("admin analytics aggregates operational counts without mixing currencies", 
     { status: "cancelled", count: 0 }
   ]);
   assert.equal(result.quotes.issued, 3);
+  assert.deepEqual(result.quotes.trend, {
+    rangeDays: 90,
+    timeZone: "Asia/Seoul",
+    points: [
+      { date: "2026-07-12", draft: 1, sent: 0, accepted: 0, rejected: 0, cancelled: 0 },
+      { date: "2026-07-13", draft: 0, sent: 1, accepted: 0, rejected: 0, cancelled: 0 },
+      { date: "2026-07-14", draft: 0, sent: 0, accepted: 1, rejected: 0, cancelled: 0 }
+    ]
+  });
+  const trendSql = pool.statements.find((statement) => statement.includes("from public.admin_quote_status_history"));
+  assert.match(trendSql, /quotes_without_history/);
+  assert.match(trendSql, /from public\.admin_quotes quote/);
   assert.deepEqual(result.markets, [{ market: "KR", count: 4 }, { market: "JP", count: 3 }]);
   assert.deepEqual(result.currencyTotals, [
     { currency: "JPY", requestCount: 2, requestedTotal: 24000, issuedCount: 1, issuedTotal: 13000 },

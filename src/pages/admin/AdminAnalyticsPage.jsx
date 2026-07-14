@@ -1,8 +1,33 @@
+import { useMemo, useState } from 'react'
 import { BadgeCheck, Clock3, FilePenLine, Inbox } from 'lucide-react'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { getMarketDisplay } from '../../config/currency.js'
+import { useLocalePath } from '../../utils/locale.js'
 import { AdminEmptyState, AdminLink, AdminMoney, AdminPageHeader, AdminStatus } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiResource } from './adminApiPageUtils'
-import { useAdminCopy } from './adminCopy'
+import { getAdminStatusLabel, useAdminCopy } from './adminCopy'
+
+const quoteTrendSeries = [
+  { color: '#9a7a2f', key: 'draft' },
+  { color: '#2a234f', key: 'sent' },
+  { color: '#2f7d5a', key: 'accepted' },
+  { color: '#e06f8a', key: 'rejected' },
+  { color: '#b54a5c', key: 'cancelled' },
+]
+
+const chartLocales = {
+  kr: 'ko-KR',
+  en: 'en-US',
+  jp: 'ja-JP',
+  'zh-TW': 'zh-TW',
+}
+
+function formatChartDate(date, locale, full = false) {
+  const value = new Date(`${date}T00:00:00+09:00`)
+  return new Intl.DateTimeFormat(chartLocales[locale] || 'en-US', full
+    ? { day: 'numeric', month: 'short', year: 'numeric' }
+    : { day: 'numeric', month: 'numeric' }).format(value)
+}
 
 function getMaximum(rows = []) {
   return Math.max(1, ...rows.map((row) => Number(row.count || 0)))
@@ -34,6 +59,44 @@ function StatusColumnChart({ rows }) {
   </div>
 }
 
+function QuoteTrendTooltip({ active, label, locale, payload, t }) {
+  if (!active || !payload?.length || !label) return null
+
+  return <div className="admin-analytics-trend-tooltip">
+    <strong>{formatChartDate(label, locale, true)}</strong>
+    {payload.map((item) => <div key={item.dataKey}>
+      <span style={{ backgroundColor: item.stroke }} />
+      <small>{getAdminStatusLabel(t, item.dataKey)}</small>
+      <b>{item.value}</b>
+    </div>)}
+  </div>
+}
+
+function QuoteTrendChart({ data, locale, t, visibleStatuses }) {
+  return <div aria-label={t.analytics.quoteTrendAria} className="admin-analytics-trend-chart" role="img">
+    <ResponsiveContainer height="100%" width="100%">
+      <AreaChart accessibilityLayer data={data} margin={{ bottom: 2, left: -8, right: 8, top: 10 }}>
+        <CartesianGrid stroke="#e4e6eb" vertical={false} />
+        <XAxis axisLine={false} dataKey="date" minTickGap={24} tick={{ fill: '#6d7080', fontSize: 11 }} tickFormatter={(value) => formatChartDate(value, locale)} tickLine={false} />
+        <YAxis allowDecimals={false} axisLine={false} domain={[0, (maximum) => Math.max(1, maximum)]} tick={{ fill: '#6d7080', fontSize: 11 }} tickLine={false} width={34} />
+        <Tooltip content={<QuoteTrendTooltip locale={locale} t={t} />} cursor={{ stroke: '#c8cad2', strokeWidth: 1 }} />
+        {quoteTrendSeries.filter((series) => visibleStatuses.has(series.key)).map((series) => <Area
+          activeDot={{ r: 4, strokeWidth: 2 }}
+          dataKey={series.key}
+          dot={false}
+          fill={series.color}
+          fillOpacity={0.1}
+          isAnimationActive={false}
+          key={series.key}
+          stroke={series.color}
+          strokeWidth={2}
+          type="monotone"
+        />)}
+      </AreaChart>
+    </ResponsiveContainer>
+  </div>
+}
+
 function CurrencyComparisonChart({ row, t }) {
   const maximum = Math.max(1, Number(row.requestedTotal || 0), Number(row.issuedTotal || 0))
   const series = [
@@ -57,12 +120,16 @@ function CurrencyComparisonChart({ row, t }) {
 
 export function AdminAnalyticsPage() {
   const t = useAdminCopy()
+  const { locale } = useLocalePath()
+  const [trendRange, setTrendRange] = useState(30)
+  const [visibleQuoteStatuses, setVisibleQuoteStatuses] = useState(() => new Set(quoteTrendSeries.map((series) => series.key)))
   const { data, error, status } = useAdminApiResource((api, token) => api.getAnalytics(token), [])
+  const trendData = useMemo(() => (data?.quotes?.trend?.points || []).slice(-trendRange), [data, trendRange])
+  const trendTotal = useMemo(() => trendData.reduce((total, point) => total + quoteTrendSeries.reduce((sum, series) => sum + Number(point[series.key] || 0), 0), 0), [trendData])
   const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
   if (apiState) return apiState
 
   const overview = data?.overview || {}
-  const quoteStatuses = data?.quotes?.statuses || []
   const inquiryStatuses = data?.inquiries?.statuses || []
   const markets = data?.markets || []
   const currencyTotals = data?.currencyTotals || []
@@ -72,12 +139,26 @@ export function AdminAnalyticsPage() {
     { count: data?.products?.hidden || 0, key: 'hidden', label: t.analytics.hiddenProducts, tone: 'hidden' },
   ]
   const productMaximum = getMaximum(productRows)
+  const periodOptions = [
+    { days: 7, label: t.analytics.last7Days },
+    { days: 30, label: t.analytics.last30Days },
+    { days: 90, label: t.analytics.last90Days },
+  ]
   const metrics = [
     { key: 'open-inquiries', icon: Inbox, label: t.analytics.openInquiries, note: t.analytics.openInquiriesNote, value: overview.openInquiries || 0, to: '/admin/inquiries' },
     { key: 'draft-quotes', icon: FilePenLine, label: t.analytics.draftQuotes, note: t.analytics.draftQuotesNote, value: overview.draftQuotes || 0, to: '/admin/quotes' },
     { key: 'awaiting-buyer', icon: Clock3, label: t.analytics.awaitingBuyer, note: t.analytics.awaitingBuyerNote, value: overview.awaitingBuyer || 0, to: '/admin/quotes' },
     { key: 'accepted-quotes', icon: BadgeCheck, label: t.analytics.acceptedQuotes, note: t.analytics.acceptedQuotesNote, value: overview.acceptedQuotes || 0, to: '/admin/quotes' },
   ]
+  const toggleQuoteStatus = (statusKey) => {
+    setVisibleQuoteStatuses((current) => {
+      if (current.has(statusKey) && current.size === 1) return current
+      const next = new Set(current)
+      if (next.has(statusKey)) next.delete(statusKey)
+      else next.add(statusKey)
+      return next
+    })
+  }
 
   return <>
     <AdminPageHeader title={t.analytics.title} description={t.analytics.description} />
@@ -94,9 +175,28 @@ export function AdminAnalyticsPage() {
     </section>
 
     <div className="admin-analytics-main-grid">
-      <section className="admin-analytics-section">
-        <header><div><h2>{t.analytics.quoteFlow}</h2><p>{t.analytics.quoteFlowDescription}</p></div><strong>{data?.quotes?.total || 0}</strong></header>
-        <StatusColumnChart rows={quoteStatuses} />
+      <section className="admin-analytics-section admin-analytics-trend">
+        <header>
+          <div><h2>{t.analytics.quoteFlow}</h2><p>{t.analytics.quoteFlowDescription}</p></div>
+          <div className="admin-analytics-trend-summary"><small>{t.analytics.periodTransitions}</small><strong>{trendTotal}</strong></div>
+        </header>
+        <div className="admin-analytics-trend-toolbar">
+          <div aria-label={t.analytics.trendRange} className="admin-analytics-period-control" role="group">
+            {periodOptions.map((option) => <button aria-pressed={trendRange === option.days} key={option.days} onClick={() => setTrendRange(option.days)} type="button">{option.label}</button>)}
+          </div>
+          <div aria-label={t.analytics.visibleStatuses} className="admin-analytics-status-controls" role="group">
+            {quoteTrendSeries.map((series) => <button
+              aria-pressed={visibleQuoteStatuses.has(series.key)}
+              key={series.key}
+              onClick={() => toggleQuoteStatus(series.key)}
+              style={{ '--admin-series-color': series.color }}
+              type="button"
+            ><span aria-hidden="true" />{getAdminStatusLabel(t, series.key)}</button>)}
+          </div>
+        </div>
+        <QuoteTrendChart data={trendData} locale={locale} t={t} visibleStatuses={visibleQuoteStatuses} />
+        {trendTotal === 0 && <p className="admin-analytics-trend-empty">{t.analytics.noTrendActivity}</p>}
+        <small className="admin-analytics-time-zone">{t.analytics.koreaBusinessDay}</small>
       </section>
 
       <section className="admin-analytics-section">
