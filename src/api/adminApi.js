@@ -40,6 +40,49 @@ export function createAdminApi(apiClient) {
       return unwrap(await apiClient.apiFetch('/admin/dashboard', { token: requireToken(token) }))
     },
 
+    async getHomeShowcase(token) {
+      return unwrap(await apiClient.apiFetch('/admin/home-showcase', { token: requireToken(token) }))
+    },
+
+    async createHomeShowcaseSlide(input = {}, token) {
+      return unwrap(await apiClient.apiFetch('/admin/home-showcase', {
+        method: 'POST',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async updateHomeShowcaseSlide(slideId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/home-showcase/${encodeURIComponent(slideId)}`, {
+        method: 'PATCH',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async uploadHomeShowcaseImage(slideId, formData, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/home-showcase/${encodeURIComponent(slideId)}/image`, {
+        method: 'POST',
+        token: requireToken(token),
+        body: formData,
+      }))
+    },
+
+    async reorderHomeShowcase(ids, token) {
+      return unwrap(await apiClient.apiFetch('/admin/home-showcase/order', {
+        method: 'PUT',
+        token: requireToken(token),
+        body: { ids },
+      }))
+    },
+
+    async deleteHomeShowcaseSlide(slideId, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/home-showcase/${encodeURIComponent(slideId)}`, {
+        method: 'DELETE',
+        token: requireToken(token),
+      }))
+    },
+
     async getInquiries(params = {}, token) {
       return unwrap(await apiClient.apiFetch(`/admin/inquiries${buildQuery(params)}`, { token: requireToken(token) }))
     },

@@ -207,7 +207,7 @@ export function createFirebaseImageObjectStore(env, adminModule = admin) {
 
 export function decodeMediaKey(mediaKey) {
   const objectKey = Buffer.from(String(mediaKey || ""), "base64url").toString("utf8");
-  if (!objectKey.startsWith("products/")) {
+  if (!["products/", "home-showcase/"].some((prefix) => objectKey.startsWith(prefix))) {
     throw validationError("Invalid media key");
   }
   return objectKey;

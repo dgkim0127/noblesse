@@ -409,6 +409,34 @@ test("packaged admin operations redesign migration matches canonical migration e
   assert.equal(packaged, canonical);
 });
 
+test("home showcase migration is additive and keeps storefront content draft-first", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260714_home_showcase_management.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.match(sqlText, /create table if not exists public\.home_showcase_slides/i);
+  assert.match(sqlText, /title jsonb not null default '\{\}'::jsonb/i);
+  assert.match(sqlText, /image_set jsonb not null default '\{\}'::jsonb/i);
+  assert.match(sqlText, /is_active boolean not null default false/i);
+  assert.match(sqlText, /target_url like '\/%'/i);
+  assert.doesNotMatch(sqlText, /\bdrop\s+table\b|\btruncate\b|\bdelete\s+from\b/i);
+});
+
+test("packaged home showcase migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260714_home_showcase_management.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260714_home_showcase_management.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
 test("migration runner resolves packaged lifecycle migration path explicitly", () => {
   const resolved = resolveSchemaSqlPath({
     SCHEMA_SQL_PATH: "migrations/20260622_admin_rbac_account_lifecycle.sql"
@@ -503,6 +531,14 @@ test("fresh install schema includes product catalog attribute detail fields", ()
   ]) {
     assert.match(schema, new RegExp(fragment.replace(/[{}()[\]]/g, "\\$&"), "i"));
   }
+});
+
+test("fresh install schema includes administrator-managed home showcase slides", () => {
+  const schema = readFileSync(join(process.cwd(), "..", "supabase", "schema.sql"), "utf8");
+
+  assert.match(schema, /create table if not exists public\.home_showcase_slides/i);
+  assert.match(schema, /idx_home_showcase_slides_public_order/i);
+  assert.match(schema, /target_url like '\/%'/i);
 });
 
 test("migration runner does not access Secret Manager or open real DB in tests", () => {

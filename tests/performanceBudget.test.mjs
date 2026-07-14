@@ -34,7 +34,9 @@ test('mobile performance budget keeps initial payload and list rendering bounded
 })
 
 test('home showcase auto-advances one image set without cloned carousel panels', () => {
-  assert.match(home, /homeShowcasePanels\.map/)
+  assert.match(home, /homeShowcase\?\.length/)
+  assert.match(home, /homeShowcase\.map\(normalizeManagedShowcasePanel\)/)
+  assert.match(home, /showcasePanels\.map/)
   assert.doesNotMatch(home, /showcaseLoopPanels/)
   assert.doesNotMatch(home, /\.\.\.homeShowcasePanels, \.\.\.homeShowcasePanels/)
   assert.match(home, /window\.setTimeout\(advanceShowcase, delay\)/)

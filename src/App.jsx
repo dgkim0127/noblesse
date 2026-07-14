@@ -36,6 +36,7 @@ const AdminBuyersPage = lazyNamed(() => import('./pages/admin/AdminBuyersPage'),
 const AdminCategoriesPage = lazyNamed(() => import('./pages/admin/AdminCategoriesPage'), 'AdminCategoriesPage')
 const AdminDashboardPage = lazyNamed(() => import('./pages/admin/AdminDashboardPage'), 'AdminDashboardPage')
 const AdminFxPage = lazyNamed(() => import('./pages/admin/AdminFxPage'), 'AdminFxPage')
+const AdminHomeShowcasePage = lazyNamed(() => import('./pages/admin/AdminHomeShowcasePage'), 'AdminHomeShowcasePage')
 const AdminInquiriesPage = lazyNamed(() => import('./pages/admin/AdminInquiriesPage'), 'AdminInquiriesPage')
 const AdminInquiryDetailPage = lazyNamed(() => import('./pages/admin/AdminInquiryDetailPage'), 'AdminInquiryDetailPage')
 const AdminOperationsPage = lazyNamed(() => import('./pages/admin/AdminOperationsPage'), 'AdminOperationsPage')
@@ -108,6 +109,7 @@ function App() {
         <Route path="products/new" element={withAdminSuspense(<AdminProductEditorPage />, 'catalog.write')} />
         <Route path="products/:productId/edit" element={withAdminSuspense(<AdminProductEditorPage />, 'catalog.write')} />
         <Route path="categories" element={withAdminSuspense(<AdminCategoriesPage />, 'catalog.read')} />
+        <Route path="home-showcase" element={withAdminSuspense(<AdminHomeShowcasePage />, 'catalog.read')} />
         <Route path="prices" element={withAdminSuspense(<AdminPricesPage />, 'prices.read')} />
         <Route path="fx" element={withAdminSuspense(<AdminFxPage />, 'prices.read')} />
         <Route path="inquiries" element={withAdminSuspense(<AdminInquiriesPage />, 'inquiries.read')} />
@@ -151,6 +153,7 @@ function App() {
         <Route path="products/new" element={withAdminSuspense(<AdminProductEditorPage />, 'catalog.write')} />
         <Route path="products/:productId/edit" element={withAdminSuspense(<AdminProductEditorPage />, 'catalog.write')} />
         <Route path="categories" element={withAdminSuspense(<AdminCategoriesPage />, 'catalog.read')} />
+        <Route path="home-showcase" element={withAdminSuspense(<AdminHomeShowcasePage />, 'catalog.read')} />
         <Route path="prices" element={withAdminSuspense(<AdminPricesPage />, 'prices.read')} />
         <Route path="fx" element={withAdminSuspense(<AdminFxPage />, 'prices.read')} />
         <Route path="inquiries" element={withAdminSuspense(<AdminInquiriesPage />, 'inquiries.read')} />

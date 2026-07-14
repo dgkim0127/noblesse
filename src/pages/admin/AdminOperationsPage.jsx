@@ -1,8 +1,9 @@
-import { FolderTree, Landmark, ShieldCheck, Tags, UsersRound } from 'lucide-react'
+import { FolderTree, Images, Landmark, ShieldCheck, Tags, UsersRound } from 'lucide-react'
 import { useAdminAccess } from '../../components/AdminAccessContext'
 import { AdminLink, AdminPageHeader } from './AdminPageParts'
 
 const operationLinks = [
+  { title: '홈 스냅', description: '홈 첫 화면의 사진, 문구와 노출 순서를 관리합니다.', to: '/admin/home-showcase', icon: Images, permission: 'catalog.read' },
   { title: '카테고리', description: '상품 분류와 노출 순서를 관리합니다.', to: '/admin/categories', icon: FolderTree, permission: 'catalog.read' },
   { title: '가격', description: '승인 회원에게 표시할 시장별 가격을 관리합니다.', to: '/admin/prices', icon: Tags, permission: 'prices.read' },
   { title: '환율 정책', description: '자동 환율 가격의 기준과 상태를 확인합니다.', to: '/admin/fx', icon: Landmark, permission: 'prices.read' },

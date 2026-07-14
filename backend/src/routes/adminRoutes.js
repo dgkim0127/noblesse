@@ -34,6 +34,12 @@ export function createAdminRoutes({
     }
     return next();
   };
+  const requireShowcasePublishPermission = (req, res, next) => {
+    if (Object.hasOwn(req.body || {}, "isActive")) {
+      return can("catalog.publish")(req, res, next);
+    }
+    return next();
+  };
 
   router.get(
     "/me",
@@ -496,6 +502,81 @@ export function createAdminRoutes({
     requireBulkPublishPermission,
     asyncRoute(async (req, res) => {
       const data = await services.products.bulkUpdateProducts(req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/home-showcase",
+    requireAdmin,
+    can("catalog.read"),
+    asyncRoute(async (req, res) => {
+      const slides = await services.homeShowcase.listSlides(req.adminViewer);
+      res.json({ data: { slides }, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/home-showcase",
+    requireAdmin,
+    can("catalog.write"),
+    requireShowcasePublishPermission,
+    asyncRoute(async (req, res) => {
+      const data = await services.homeShowcase.createSlide(req.body, req.adminViewer);
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.put(
+    "/home-showcase/order",
+    requireAdmin,
+    can("catalog.write"),
+    asyncRoute(async (req, res) => {
+      const slides = await services.homeShowcase.reorderSlides(req.body, req.adminViewer);
+      res.json({ data: { slides }, meta: withRequestId(req) });
+    })
+  );
+
+  router.patch(
+    "/home-showcase/:slideId",
+    requireAdmin,
+    can("catalog.write"),
+    requireShowcasePublishPermission,
+    asyncRoute(async (req, res) => {
+      const data = await services.homeShowcase.updateSlide(
+        req.params.slideId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/home-showcase/:slideId/image",
+    requireAdmin,
+    can("catalog.write"),
+    imageUploadParser,
+    asyncRoute(async (req, res) => {
+      const data = await services.homeShowcase.uploadImage(
+        req.params.slideId,
+        {
+          contentType: req.headers["content-type"] || "",
+          body: req.body
+        },
+        req.adminViewer
+      );
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.delete(
+    "/home-showcase/:slideId",
+    requireAdmin,
+    can("catalog.write"),
+    can("catalog.publish"),
+    asyncRoute(async (req, res) => {
+      const data = await services.homeShowcase.deleteSlide(req.params.slideId, req.adminViewer);
       res.json({ data, meta: withRequestId(req) });
     })
   );

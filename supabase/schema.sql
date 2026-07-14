@@ -393,6 +393,26 @@ create table if not exists public.banners (
   updated_at timestamptz default now()
 );
 
+create table if not exists public.home_showcase_slides (
+  id uuid primary key default gen_random_uuid(),
+  internal_name text not null,
+  label text,
+  title jsonb not null default '{}'::jsonb,
+  eyebrow jsonb not null default '{}'::jsonb,
+  description jsonb not null default '{}'::jsonb,
+  target_url text not null default '/products',
+  image_set jsonb not null default '{}'::jsonb,
+  image_alt jsonb not null default '{}'::jsonb,
+  sort_order integer not null default 0 check (sort_order >= 0),
+  is_active boolean not null default false,
+  created_by uuid references public.users(id) on delete set null,
+  updated_by uuid references public.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint home_showcase_slides_target_url_check
+    check (target_url like '/%' and target_url not like '//%')
+);
+
 create table if not exists public.catalog_files (
   id uuid primary key default gen_random_uuid(),
   file_id text unique not null,
@@ -548,6 +568,7 @@ create index if not exists idx_admin_quote_documents_quote_revision on public.ad
 create index if not exists idx_admin_quote_status_history_quote_created on public.admin_quote_status_history(admin_quote_id, created_at asc);
 create index if not exists idx_banners_visible_sort on public.banners(is_visible, sort_order);
 create index if not exists idx_banners_starts_ends on public.banners(starts_at, ends_at);
+create index if not exists idx_home_showcase_slides_public_order on public.home_showcase_slides(is_active, sort_order, created_at);
 create index if not exists idx_catalog_files_market_visible on public.catalog_files(market, visible_to);
 create index if not exists idx_catalog_files_uploaded_at on public.catalog_files(uploaded_at);
 create index if not exists idx_terms_versions_key_version on public.terms_versions(agreement_key, version);

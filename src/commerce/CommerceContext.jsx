@@ -113,6 +113,7 @@ export function CommerceProvider({ children }) {
   const runtimeConfig = useMemo(() => getRuntimeConfig(), [])
   const [viewerState, setViewerStateValue] = useState('guest')
   const [products, setProducts] = useState([])
+  const [homeShowcase, setHomeShowcase] = useState([])
   const [dataStatus, setDataStatus] = useState('loading')
   const [dataError, setDataError] = useState(null)
   const [inquiryItems, setInquiryItems] = useState([])
@@ -144,6 +145,7 @@ export function CommerceProvider({ children }) {
       if (!runtimeConfig.isConfigured) {
         if (!isMounted) return
         setProducts([])
+        setHomeShowcase([])
         setInquiries([])
         setDataStatus('error')
         setDataError(runtimeConfig.errors.join(' '))
@@ -156,6 +158,7 @@ export function CommerceProvider({ children }) {
         setMockProfiles(catalog.mockUsers ?? { guest: guestProfile })
         setProductPrices(catalog.mockProductPrices ?? [])
         setProducts(catalog.mockProducts ?? [])
+        setHomeShowcase([])
         setInquiries(catalog.mockInquiries ?? [])
         setDataStatus('ready')
         setDataError(null)
@@ -165,17 +168,22 @@ export function CommerceProvider({ children }) {
       try {
         const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
         const catalogApi = createCatalogApi(apiClient)
-        const apiProducts = await catalogApi.getCatalogProducts()
+        const [apiProducts, showcaseSlides] = await Promise.all([
+          catalogApi.getCatalogProducts(),
+          catalogApi.getHomeShowcase().catch(() => []),
+        ])
         if (!isMounted) return
         setMockProfiles({ guest: guestProfile })
         setProductPrices([])
         setProducts(adaptApiProducts(apiProducts))
+        setHomeShowcase(showcaseSlides)
         setInquiries([])
         setDataStatus('ready')
         setDataError(null)
       } catch (error) {
         if (!isMounted) return
         setProducts([])
+        setHomeShowcase([])
         setInquiries([])
         setDataStatus('error')
         setDataError(error?.message || 'Catalog API is unavailable.')
@@ -517,6 +525,7 @@ export function CommerceProvider({ children }) {
     estimatedTotal,
     getPrice,
     getAdminPriceBooks,
+    homeShowcase,
     inquiries,
     inquiryItems,
     inquiryRows,

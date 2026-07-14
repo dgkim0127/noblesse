@@ -18,6 +18,7 @@ import { createBuyerInquiryQueries } from "./db/queries/buyerInquiryQueries.js";
 import { createBuyerQuoteQueries } from "./db/queries/buyerQuoteQueries.js";
 import { createBuyerRegistrationQueries } from "./db/queries/buyerRegistrationQueries.js";
 import { createLoginIdentifierQueries } from "./db/queries/loginIdentifierQueries.js";
+import { createHomeShowcaseQueries } from "./db/queries/homeShowcaseQueries.js";
 import * as catalogQueries from "./db/queries/catalogQueries.js";
 import * as buyerQueries from "./db/queries/buyerQueries.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -32,6 +33,7 @@ import { createAdminAccessService } from "./services/adminAccessService.js";
 import { createAdminCategoryService } from "./services/adminCategoryService.js";
 import { createAdminDashboardService } from "./services/adminDashboardService.js";
 import { createAdminInquiryService } from "./services/adminInquiryService.js";
+import { createAdminHomeShowcaseService } from "./services/adminHomeShowcaseService.js";
 import { createAdminFxService } from "./services/adminFxService.js";
 import { createAdminPriceService } from "./services/adminPriceService.js";
 import { createAdminProductService } from "./services/adminProductService.js";
@@ -47,6 +49,7 @@ import { createBuyerRegistrationService } from "./services/buyerRegistrationServ
 import { createBuyerService } from "./services/buyerService.js";
 import { createCatalogService } from "./services/catalogService.js";
 import { createLoginIdentifierService } from "./services/loginIdentifierService.js";
+import { createHomeShowcaseService } from "./services/homeShowcaseService.js";
 
 function buildCorsOptions(env) {
   if (!env.allowedOrigins.length) {
@@ -79,6 +82,10 @@ export function createApp(options = {}) {
       queries: options.queries?.admin?.prices || createAdminPriceQueries(pool),
       fxService: adminFxService
     });
+  const homeShowcaseQueries =
+    options.queries?.homeShowcase || createHomeShowcaseQueries(pool);
+  const homeShowcaseService =
+    options.services?.homeShowcase || createHomeShowcaseService({ queries: homeShowcaseQueries });
   const services = {
     catalog:
       options.services?.catalog ||
@@ -109,6 +116,7 @@ export function createApp(options = {}) {
       createLoginIdentifierService({
         queries: options.queries?.auth || createLoginIdentifierQueries(pool)
       }),
+    homeShowcase: homeShowcaseService,
     admin: {
       access:
         options.services?.admin?.access ||
@@ -135,6 +143,12 @@ export function createApp(options = {}) {
         options.services?.admin?.categories ||
         createAdminCategoryService({
           queries: options.queries?.admin?.categories || createAdminCategoryQueries(pool)
+        }),
+      homeShowcase:
+        options.services?.admin?.homeShowcase ||
+        createAdminHomeShowcaseService({
+          queries: homeShowcaseQueries,
+          objectStore: imageObjectStore
         }),
       prices:
         adminPriceService,
@@ -188,7 +202,14 @@ export function createApp(options = {}) {
 
   app.use("/api/health", createHealthRoutes());
   app.use("/api/auth", createAuthRoutes({ loginIdentifierService: services.auth }));
-  app.use("/api/catalog", createCatalogRoutes({ catalogService: services.catalog, mediaService }));
+  app.use(
+    "/api/catalog",
+    createCatalogRoutes({
+      catalogService: services.catalog,
+      homeShowcaseService: services.homeShowcase,
+      mediaService
+    })
+  );
   app.use(
     "/api/buyer",
     createBuyerRoutes({

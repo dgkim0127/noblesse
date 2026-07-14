@@ -630,6 +630,19 @@ const homeShowcasePanels = [
 
 const homeShowcaseLabels = ['NEW', 'HOT', 'TRADE', 'BEST', 'TITANIUM', 'GOLD']
 const homeShowcaseAutoplayDelay = 3600
+
+function normalizeManagedShowcasePanel(slide) {
+  return {
+    key: slide.id,
+    title: slide.title || {},
+    eyebrow: slide.eyebrow || {},
+    text: slide.description || {},
+    to: slide.targetUrl || '/products',
+    image: slide.imageSet?.detail || slide.imageSet?.card || '',
+    imageSet: slide.imageSet || {},
+    label: slide.label || 'NOBLESSE',
+  }
+}
 const homeShowcaseControlCopy = {
   kr: {
     group: '스냅 슬라이드 조작',
@@ -1362,10 +1375,15 @@ export function HomePage() {
   const [isShowcaseAutoplayPaused, setIsShowcaseAutoplayPaused] = useState(false)
   const [isSectionNavFixed, setIsSectionNavFixed] = useState(false)
   const [activeHomeSection, setActiveHomeSection] = useState(homeSectionNav[0].id)
-  const { dataMode, isApproved, products } = useCommerce()
+  const { dataMode, homeShowcase, isApproved, products } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const copy = resolveLocaleCopy(homeCopy, locale)
   const showcaseControlCopy = resolveLocaleCopy(homeShowcaseControlCopy, locale)
+  const showcasePanels = useMemo(() => (
+    homeShowcase?.length
+      ? homeShowcase.map(normalizeManagedShowcasePanel)
+      : homeShowcasePanels
+  ), [homeShowcase])
   const homeSourceProducts = getHomeSourceProducts({ products, mockProducts, dataMode })
   const homeProducts = selectAllowedHomeProducts(homeSourceProducts)
   const newProducts = selectNewArrivalProducts(homeProducts, homeSectionProductLimit['new-arrival'])
@@ -1736,14 +1754,14 @@ export function HomePage() {
           ref={showcaseScrollerRef}
         >
           <div className="home-showcase-track">
-          {homeShowcasePanels.map((banner, index) => {
+          {showcasePanels.map((banner, index) => {
             const bannerTitle = getLocalizedValue(banner.title, locale)
             const bannerEyebrow = getLocalizedValue(banner.eyebrow, locale)
             const bannerText = getLocalizedValue(banner.text, locale)
-            const label = homeShowcaseLabels[index] ?? 'NOBLESSE'
+            const label = banner.label || homeShowcaseLabels[index] || 'NOBLESSE'
 
             return <Link className="home-showcase-panel" key={banner.key} onClick={handleShowcaseClick} to={toLocalePath(banner.to)}>
-              <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} width="900" />
+              <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} srcSet={banner.imageSet?.card && banner.imageSet?.detail ? `${banner.imageSet.card} 600w, ${banner.imageSet.detail} 1200w` : undefined} width="900" />
               <span className="home-showcase-label">{label}</span>
               <span className="home-showcase-copy">
                 <strong>{bannerTitle}</strong>

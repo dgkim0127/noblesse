@@ -14,7 +14,7 @@ function asyncRoute(handler) {
   return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 }
 
-export function createCatalogRoutes({ catalogService, mediaService }) {
+export function createCatalogRoutes({ catalogService, homeShowcaseService, mediaService }) {
   const router = Router();
 
   router.get(
@@ -22,6 +22,14 @@ export function createCatalogRoutes({ catalogService, mediaService }) {
     asyncRoute(async (req, res) => {
       const products = await catalogService.listProducts({ viewer: req.viewer || null });
       res.json({ products });
+    })
+  );
+
+  router.get(
+    "/home-showcase",
+    asyncRoute(async (req, res) => {
+      const slides = homeShowcaseService ? await homeShowcaseService.listPublicSlides() : [];
+      res.json({ slides });
     })
   );
 
