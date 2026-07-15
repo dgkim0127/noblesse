@@ -16,6 +16,7 @@
     "test:production-uat": "node scripts/productionUatE2e.mjs"
   },
   "dependencies": {
+    "fflate": "^0.8.2",
     "firebase": "12.6.0",
     "lucide-react": "^1.16.0",
     "react": "^19.2.6",

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatMoney } from '../utils/commerce'
 import { getLocaleContentKey, getLocalizedProductAlt, getLocalizedProductName, useLocalePath } from '../utils/locale'
+import { imagePresentationStyle } from '../utils/productImageGallery'
 
 const inquiryListCopy = {
   kr: {
@@ -302,6 +303,7 @@ export function InquiryListPage() {
                           loading="lazy"
                           width="300"
                           height="300"
+                          style={{ objectFit: 'cover', ...imagePresentationStyle(row.product?.imageSet) }}
                           onError={(event) => { event.currentTarget.hidden = true }}
                         />
                       )}

@@ -1,9 +1,24 @@
-import { ChevronDown, ImagePlus, Monitor, PackageCheck, Settings2, Smartphone, Trash2, UploadCloud, X } from 'lucide-react'
+import { ChevronDown, FileArchive, GripVertical, ImagePlus, Monitor, PackageCheck, RotateCcw, Settings2, Smartphone, Trash2, UploadCloud, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
 import { ProductDetailView } from '../ProductDetailPage'
 import { useLocalePath } from '../../utils/locale'
+import {
+  extractProductImagesFromZip,
+  maxProductImages,
+  prepareDirectProductImages,
+} from '../../utils/adminProductImageFiles'
+import {
+  defaultImagePosition,
+  imageDraftsToPreviewSet,
+  imagePresentationStyle,
+  maxImageScale,
+  minImageScale,
+  normalizeImagePosition,
+  normalizeImageScale,
+  productToImageDrafts,
+} from '../../utils/productImageGallery'
 import {
   AdminConfirmDialog,
   AdminLink,
@@ -20,9 +35,6 @@ const localeTabs = [
   { key: 'jp', label: '日本語' },
   { key: 'zh-TW', label: '繁體中文' },
 ]
-const maxImages = 8
-const maxImageBytes = 10 * 1024 * 1024
-const allowedImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const inspectorGroups = [
   { id: 'basic', label: '기본 정보' },
   { id: 'images', label: '이미지' },
@@ -134,15 +146,9 @@ function priceToForm(price, product) {
   }
 }
 
-function getCurrentImage(product) {
-  return product?.imageSet?.detail || product?.imageSet?.primary || product?.imageSet?.card || product?.imageSet?.thumb || ''
-}
-
-function buildDraftProduct({ category, form, previewImage, product }) {
+function buildDraftProduct({ category, form, images, product }) {
   const productId = product?.productId || product?.id || 'draft-product'
-  const imageSet = previewImage
-    ? { thumb: previewImage, card: previewImage, detail: previewImage, zoom: previewImage }
-    : product?.imageSet || {}
+  const imageSet = imageDraftsToPreviewSet(images)
   return {
     ...(product || {}),
     id: productId,
@@ -223,13 +229,40 @@ function buildProductPayload(form) {
 
 function buildImageFormData(images, translations) {
   const formData = new FormData()
-  images.forEach((image) => formData.append('images', image.file, image.file.name))
+  const uploads = images.filter((image) => image.kind === 'new')
+  const uploadIndexById = new Map(uploads.map((image, index) => [image.id, index]))
+  uploads.forEach((image) => formData.append('images', image.file, image.file.name))
   formData.append('metadata', JSON.stringify({
-    primaryIndex: Math.max(0, images.findIndex((image) => image.isPrimary)),
-    altTexts: images.map((image) => image.altText.trim() || translations.kr.name.trim() || translations.en.name.trim()),
+    items: images.map((image) => ({
+      ...(image.kind === 'new' ? { uploadIndex: uploadIndexById.get(image.id) } : { existingId: image.existingId }),
+      altText: image.altText.trim() || translations.kr.name.trim() || translations.en.name.trim(),
+      position: normalizeImagePosition(image.position),
+      scale: normalizeImageScale(image.scale),
+    })),
     localizedAlt: Object.fromEntries(localeTabs.map(({ key }) => [key, translations[key].name.trim()]).filter(([, value]) => value)),
   }))
   return formData
+}
+
+function createNewImageDraft(candidate, index) {
+  const id = globalThis.crypto?.randomUUID?.() || `${candidate.file.name}-${candidate.file.lastModified}-${index}`
+  return {
+    id,
+    existingId: '',
+    kind: 'new',
+    file: candidate.file,
+    filename: candidate.sortKey || candidate.file.name,
+    previewUrl: URL.createObjectURL(candidate.file),
+    thumbUrl: '',
+    sources: {},
+    altText: '',
+    position: { ...defaultImagePosition },
+    scale: minImageScale,
+  }
+}
+
+function revokeDraftUrls(images) {
+  images.filter((image) => image.kind === 'new').forEach((image) => URL.revokeObjectURL(image.previewUrl))
 }
 
 function getReadiness(form, { hasImage, hasPrice }) {
@@ -276,7 +309,10 @@ export function AdminProductEditorPage() {
   const navigate = useNavigate()
   const mutate = useAdminApiMutation()
   const fileInputRef = useRef(null)
+  const zipInputRef = useRef(null)
   const imageFilesRef = useRef([])
+  const cropPointerRef = useRef(null)
+  const sortPointerRef = useRef(null)
   const inlineSnapshotRef = useRef(null)
   const inspectorCloseRef = useRef(null)
   const inspectorRef = useRef(null)
@@ -296,6 +332,11 @@ export function AdminProductEditorPage() {
   const [compactInspector, setCompactInspector] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches)
   const [previewMode, setPreviewMode] = useState('desktop')
   const [images, setImages] = useState([])
+  const [selectedImageId, setSelectedImageId] = useState('')
+  const [imagesDirty, setImagesDirty] = useState(false)
+  const [imageDropActive, setImageDropActive] = useState(false)
+  const [imageImporting, setImageImporting] = useState(false)
+  const [sortingImageId, setSortingImageId] = useState('')
   const [dirty, setDirty] = useState(false)
   const [priceDirty, setPriceDirty] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -321,12 +362,16 @@ export function AdminProductEditorPage() {
     const nextProduct = resource.data?.product || null
     const nextForm = productToForm(nextProduct)
     const nextPrice = priceToForm(resource.data?.price, nextProduct)
+    const nextImages = productToImageDrafts(nextProduct)
     initialRef.current = { form: structuredClone(nextForm), price: { ...nextPrice } }
     setProduct(nextProduct)
     setForm(nextForm)
     setPrice(nextPrice)
+    setImages(nextImages)
+    setSelectedImageId(nextImages[0]?.id || '')
     setPriceSaved(Boolean(resource.data?.price?.isActive))
     setDirty(false)
+    setImagesDirty(false)
     setPriceDirty(false)
   }, [productId, resource.data, resource.status])
 
@@ -335,7 +380,7 @@ export function AdminProductEditorPage() {
   }, [images])
 
   useEffect(() => () => {
-    imageFilesRef.current.forEach((image) => URL.revokeObjectURL(image.previewUrl))
+    revokeDraftUrls(imageFilesRef.current)
   }, [])
 
   useEffect(() => {
@@ -399,13 +444,13 @@ export function AdminProductEditorPage() {
 
   const apiState = shouldShowAdminApiState(resource.status) ? <AdminApiState error={resource.error} status={resource.status} /> : null
   const categories = resource.data?.categories || []
-  const hasImage = images.length > 0 || Boolean(getCurrentImage(product))
+  const hasImage = images.length > 0
   const hasPrice = priceDirty
     ? price.isActive && price.wholesalePrice !== '' && Number(price.wholesalePrice) >= 0
     : priceSaved
   const readiness = useMemo(() => getReadiness(form, { hasImage, hasPrice }), [form, hasImage, hasPrice])
-  const previewImage = images.find((image) => image.isPrimary)?.previewUrl || images[0]?.previewUrl || getCurrentImage(product)
   const previewCategory = categories.find((item) => item.categoryId === form.categoryKey)
+  const selectedImage = images.find((image) => image.id === selectedImageId) || images[0] || null
 
   if (apiState) return apiState
 
@@ -430,43 +475,204 @@ export function AdminProductEditorPage() {
     setDirty(true)
   }
 
+  const markImagesDirty = () => {
+    setImagesDirty(true)
+    setDirty(true)
+  }
+
+  const appendImageCandidates = (candidates) => {
+    if (images.length + candidates.length > maxProductImages) {
+      setToast({ message: `이미지는 최대 ${maxProductImages}장입니다. 현재 ${images.length}장이라 ${Math.max(0, maxProductImages - images.length)}장만 더 추가할 수 있습니다.`, tone: 'error' })
+      return
+    }
+    const existingFingerprints = new Set(images.filter((image) => image.kind === 'new').map((image) => `${image.filename}:${image.file?.size || 0}`))
+    const incomingFingerprints = new Set()
+    for (const candidate of candidates) {
+      const fingerprint = `${candidate.sortKey || candidate.file.name}:${candidate.file.size}`
+      if (existingFingerprints.has(fingerprint) || incomingFingerprints.has(fingerprint)) {
+        setToast({ message: `${candidate.sortKey || candidate.file.name}: 같은 이미지가 이미 선택되어 있습니다.`, tone: 'error' })
+        return
+      }
+      incomingFingerprints.add(fingerprint)
+    }
+    const nextImages = candidates.map(createNewImageDraft)
+    setImages((current) => [...current, ...nextImages])
+    setSelectedImageId((current) => current || nextImages[0]?.id || '')
+    markImagesDirty()
+  }
+
+  const importDirectImages = async (files) => {
+    if (!files?.length) return
+    setImageImporting(true)
+    try {
+      appendImageCandidates(await prepareDirectProductImages(files))
+    } catch (error) {
+      setToast({ message: error?.message || '이미지를 불러오지 못했습니다.', tone: 'error' })
+    } finally {
+      setImageImporting(false)
+    }
+  }
+
+  const importZip = async (file) => {
+    if (!file) return
+    setImageImporting(true)
+    try {
+      appendImageCandidates(await extractProductImagesFromZip(file))
+    } catch (error) {
+      setToast({ message: error?.message || 'ZIP 파일을 불러오지 못했습니다.', tone: 'error' })
+    } finally {
+      setImageImporting(false)
+    }
+  }
+
   const selectImages = (event) => {
     const files = [...(event.target.files || [])]
     event.target.value = ''
-    if (files.length === 0) return
-    if (files.length > maxImages) {
-      setToast({ message: `이미지는 최대 ${maxImages}개까지 등록할 수 있습니다.`, tone: 'error' })
+    void importDirectImages(files)
+  }
+
+  const selectZip = (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    void importZip(file)
+  }
+
+  const dropImages = (event) => {
+    event.preventDefault()
+    setImageDropActive(false)
+    const files = [...(event.dataTransfer?.files || [])]
+    if (files.length === 1 && (files[0].type === 'application/zip' || files[0].name.toLowerCase().endsWith('.zip'))) {
+      void importZip(files[0])
       return
     }
-    if (files.some((file) => !allowedImageTypes.has(file.type) || file.size > maxImageBytes)) {
-      setToast({ message: 'JPG, PNG, WebP 파일을 장당 10MB 이하로 등록해 주세요.', tone: 'error' })
+    if (files.some((file) => file.name.toLowerCase().endsWith('.zip'))) {
+      setToast({ message: 'ZIP 파일과 일반 이미지는 한 번에 함께 넣을 수 없습니다.', tone: 'error' })
       return
     }
-    images.forEach((image) => URL.revokeObjectURL(image.previewUrl))
-    setImages(files.map((file, index) => ({
-      id: `${file.name}-${file.lastModified}-${index}`,
-      file,
-      previewUrl: URL.createObjectURL(file),
-      altText: '',
-      isPrimary: index === 0,
-    })))
-    setDirty(true)
+    void importDirectImages(files)
   }
 
   const removeImage = (imageId) => {
+    if (product?.isVisible && images.length === 1) {
+      setToast({ message: '공개 중인 상품은 이미지 한 장을 유지해야 합니다. 먼저 상품을 비공개로 전환해 주세요.', tone: 'error' })
+      return
+    }
     setImages((current) => {
       const removed = current.find((image) => image.id === imageId)
-      if (removed) URL.revokeObjectURL(removed.previewUrl)
-      const next = current.filter((image) => image.id !== imageId)
-      if (next.length > 0 && !next.some((image) => image.isPrimary)) next[0] = { ...next[0], isPrimary: true }
+      if (removed?.kind === 'new') URL.revokeObjectURL(removed.previewUrl)
+      return current.filter((image) => image.id !== imageId)
+    })
+    setSelectedImageId((current) => current === imageId ? images.find((image) => image.id !== imageId)?.id || '' : current)
+    markImagesDirty()
+  }
+
+  const updateImage = (imageId, changes) => {
+    setImages((current) => current.map((image) => image.id === imageId ? { ...image, ...changes } : image))
+    markImagesDirty()
+  }
+
+  const moveImage = (imageId, targetIndex) => {
+    setImages((current) => {
+      const sourceIndex = current.findIndex((image) => image.id === imageId)
+      if (sourceIndex < 0 || targetIndex < 0 || targetIndex >= current.length || sourceIndex === targetIndex) return current
+      const next = [...current]
+      const [moved] = next.splice(sourceIndex, 1)
+      next.splice(targetIndex, 0, moved)
       return next
     })
-    setDirty(true)
+    markImagesDirty()
+  }
+
+  const moveImageToTarget = (imageId, targetId) => {
+    setImages((current) => {
+      const sourceIndex = current.findIndex((image) => image.id === imageId)
+      const targetIndex = current.findIndex((image) => image.id === targetId)
+      if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) return current
+      const next = [...current]
+      const [moved] = next.splice(sourceIndex, 1)
+      next.splice(targetIndex, 0, moved)
+      return next
+    })
+    markImagesDirty()
+  }
+
+  const beginImageSort = (event, imageId) => {
+    event.preventDefault()
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+    sortPointerRef.current = { imageId, pointerId: event.pointerId }
+    setSortingImageId(imageId)
+  }
+
+  const continueImageSort = (event) => {
+    const activeSort = sortPointerRef.current
+    if (!activeSort || activeSort.pointerId !== event.pointerId) return
+    const targetRow = document.elementFromPoint(event.clientX, event.clientY)?.closest?.('[data-image-sort-id]')
+    const targetId = targetRow?.dataset?.imageSortId
+    if (targetId && targetId !== activeSort.imageId) moveImageToTarget(activeSort.imageId, targetId)
+  }
+
+  const endImageSort = (event) => {
+    if (sortPointerRef.current?.pointerId !== event.pointerId) return
+    sortPointerRef.current = null
+    setSortingImageId('')
+  }
+
+  const handleImageSortKey = (event, imageId, index) => {
+    if (!['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return
+    event.preventDefault()
+    const targetIndex = event.key === 'Home'
+      ? 0
+      : event.key === 'End'
+        ? images.length - 1
+        : index + (event.key === 'ArrowUp' ? -1 : 1)
+    moveImage(imageId, targetIndex)
+  }
+
+  const beginCropMove = (event) => {
+    if (!selectedImage) return
+    event.preventDefault()
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+    cropPointerRef.current = {
+      pointerId: event.pointerId,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      position: normalizeImagePosition(selectedImage.position),
+      rect: event.currentTarget.getBoundingClientRect(),
+    }
+  }
+
+  const continueCropMove = (event) => {
+    const drag = cropPointerRef.current
+    if (!drag || drag.pointerId !== event.pointerId || !selectedImage) return
+    const deltaX = ((event.clientX - drag.clientX) / Math.max(1, drag.rect.width)) * 100
+    const deltaY = ((event.clientY - drag.clientY) / Math.max(1, drag.rect.height)) * 100
+    updateImage(selectedImage.id, {
+      position: normalizeImagePosition({ x: drag.position.x - deltaX, y: drag.position.y - deltaY }),
+    })
+  }
+
+  const endCropMove = (event) => {
+    if (cropPointerRef.current?.pointerId !== event.pointerId) return
+    cropPointerRef.current = null
+  }
+
+  const handleCropKey = (event) => {
+    if (!selectedImage || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return
+    event.preventDefault()
+    const position = normalizeImagePosition(selectedImage.position)
+    updateImage(selectedImage.id, {
+      position: normalizeImagePosition({
+        x: position.x + (event.key === 'ArrowLeft' ? -2 : event.key === 'ArrowRight' ? 2 : 0),
+        y: position.y + (event.key === 'ArrowUp' ? -2 : event.key === 'ArrowDown' ? 2 : 0),
+      }),
+    })
   }
 
   const discardChanges = () => {
-    images.forEach((image) => URL.revokeObjectURL(image.previewUrl))
-    setImages([])
+    revokeDraftUrls(images)
+    const restoredImages = productToImageDrafts(product)
+    setImages(restoredImages)
+    setSelectedImageId(restoredImages[0]?.id || '')
     setForm(structuredClone(initialRef.current.form))
     setPrice({ ...initialRef.current.price })
     setActiveEditor(null)
@@ -475,6 +681,7 @@ export function AdminProductEditorPage() {
     setInspectorOpen(false)
     inlineSnapshotRef.current = null
     setDirty(false)
+    setImagesDirty(false)
     setPriceDirty(false)
     setToast({ message: '변경사항을 되돌렸습니다.', tone: 'success' })
   }
@@ -508,7 +715,7 @@ export function AdminProductEditorPage() {
       const savedProductId = savedProduct?.id || productId
       if (!savedProductId) throw new Error('저장된 상품 ID를 확인할 수 없습니다.')
 
-      if (images.length > 0) {
+      if (imagesDirty) {
         const imageResult = await mutate((api, token) => api.uploadProductImages(savedProductId, buildImageFormData(images, form.translations), token))
         savedProduct = imageResult.data?.product || savedProduct
       }
@@ -530,8 +737,10 @@ export function AdminProductEditorPage() {
         savedProduct = visibilityResult.data?.product || { ...savedProduct, isVisible: true }
       }
 
-      images.forEach((image) => URL.revokeObjectURL(image.previewUrl))
-      setImages([])
+      revokeDraftUrls(images)
+      const nextImages = productToImageDrafts(savedProduct)
+      setImages(nextImages)
+      setSelectedImageId(nextImages[0]?.id || '')
       setProduct(savedProduct)
       const nextForm = productToForm(savedProduct || { ...payload, id: savedProductId })
       initialRef.current = { form: structuredClone(nextForm), price: { ...price } }
@@ -542,6 +751,7 @@ export function AdminProductEditorPage() {
       setInspectorOpen(false)
       inlineSnapshotRef.current = null
       setDirty(false)
+      setImagesDirty(false)
       setPriceDirty(false)
       setConfirm(null)
       setToast({ message: publish ? '상품을 저장하고 공개했습니다.' : '초안을 저장했습니다.', tone: 'success' })
@@ -564,7 +774,7 @@ export function AdminProductEditorPage() {
   })
 
   const currentTranslation = form.translations[activeLocale]
-  const draftProduct = buildDraftProduct({ category: previewCategory, form, previewImage, product })
+  const draftProduct = buildDraftProduct({ category: previewCategory, form, images, product })
   const draftPrice = price.isActive && price.wholesalePrice !== ''
     ? {
       currency: 'KRW',
@@ -619,7 +829,12 @@ export function AdminProductEditorPage() {
     changeInline,
     commitInline,
     localeLabel: localeTabs.find(({ key }) => key === activeLocale)?.label || activeLocale,
+    selectedImageId,
     selectedField,
+    selectImage: (imageId) => {
+      setSelectedImageId(imageId)
+      selectEditorField('image')
+    },
     selectField: selectEditorField,
     values: currentTranslation,
   }
@@ -703,17 +918,63 @@ export function AdminProductEditorPage() {
 
             <InspectorGroup group={inspectorGroups[1]} open={openInspectorGroup === 'images'} onOpen={() => setOpenInspectorGroup('images')}>
               <InspectorField activeField={selectedField} field="image">
-                <div className="admin-product-inspector-image">
-                  {previewImage ? <img alt="현재 상품" src={previewImage} /> : <span><ImagePlus size={24} />등록된 이미지 없음</span>}
+                <div
+                  className={`admin-product-image-dropzone${imageDropActive ? ' is-active' : ''}`}
+                  onDragEnter={(event) => { event.preventDefault(); setImageDropActive(true) }}
+                  onDragLeave={() => setImageDropActive(false)}
+                  onDragOver={(event) => { event.preventDefault(); setImageDropActive(true) }}
+                  onDrop={dropImages}
+                >
+                  <ImagePlus aria-hidden="true" size={25} />
+                  <strong>{imageImporting ? '사진을 불러오는 중입니다' : '사진을 여기에 놓으세요'}</strong>
+                  <span>기존 사진 뒤에 파일명 순서대로 추가합니다.</span>
+                  <div className="admin-product-image-import-actions">
+                    <button disabled={imageImporting || images.length >= maxProductImages} type="button" onClick={() => fileInputRef.current?.click()}><UploadCloud size={16} /> 사진 여러 장</button>
+                    <button disabled={imageImporting || images.length >= maxProductImages} type="button" onClick={() => zipInputRef.current?.click()}><FileArchive size={16} /> ZIP 불러오기</button>
+                  </div>
                 </div>
-                <button className="secondary-action" type="button" onClick={() => fileInputRef.current?.click()}><UploadCloud size={16} /> 이미지 선택 또는 교체</button>
-                {images.length > 0 && <div className="admin-product-inspector-thumbs">{images.map((image) => <article className={image.isPrimary ? 'is-primary' : ''} key={image.id}>
-                  <img alt="업로드 미리보기" src={image.previewUrl} />
-                  <label><input checked={image.isPrimary} name="visualPrimaryImage" type="radio" onChange={() => { setImages((current) => current.map((item) => ({ ...item, isPrimary: item.id === image.id }))); setDirty(true) }} /> 대표</label>
-                  <input aria-label="이미지 대체 문구" placeholder="대체 문구" value={image.altText} onChange={(event) => { setImages((current) => current.map((item) => item.id === image.id ? { ...item, altText: event.target.value } : item)); setDirty(true) }} />
-                  <button aria-label="이미지 제거" title="이미지 제거" type="button" onClick={() => removeImage(image.id)}><Trash2 size={14} /></button>
-                </article>)}</div>}
-                <small>JPG, PNG, WebP · 최대 8개 · 장당 10MB</small>
+                {selectedImage && <section className="admin-product-image-crop" aria-label="선택한 사진 맞춤">
+                  <header><div><strong>사진 맞춤</strong><span>{images.findIndex((image) => image.id === selectedImage.id) + 1}번 사진</span></div><button aria-label="사진 맞춤 초기화" title="가운데로 초기화" type="button" onClick={() => updateImage(selectedImage.id, { position: { ...defaultImagePosition }, scale: minImageScale })}><RotateCcw size={15} /></button></header>
+                  <div
+                    aria-label="사진 초점 위치. 끌거나 화살표 키로 조정"
+                    className="admin-product-image-crop-frame"
+                    onKeyDown={handleCropKey}
+                    onPointerCancel={endCropMove}
+                    onPointerDown={beginCropMove}
+                    onPointerMove={continueCropMove}
+                    onPointerUp={endCropMove}
+                    role="group"
+                    tabIndex={0}
+                  >
+                    <img alt="맞춤 미리보기" draggable={false} src={selectedImage.previewUrl} style={imagePresentationStyle(selectedImage)} />
+                    <span>사진을 끌어 위치를 맞추세요</span>
+                  </div>
+                  <label className="admin-product-image-scale"><span>확대 <b>{normalizeImageScale(selectedImage.scale).toFixed(1)}x</b></span><input aria-label="사진 확대" max={maxImageScale} min={minImageScale} step="0.1" type="range" value={normalizeImageScale(selectedImage.scale)} onChange={(event) => updateImage(selectedImage.id, { scale: Number(event.target.value) })} /></label>
+                  <label className="admin-field"><span>이미지 대체 문구</span><input maxLength="200" placeholder="상품을 설명하는 짧은 문구" value={selectedImage.altText} onChange={(event) => updateImage(selectedImage.id, { altText: event.target.value })} /></label>
+                </section>}
+                {images.length > 0 && <div className="admin-product-image-sortable" aria-label="상품 이미지 순서">
+                  {images.map((image, index) => <article
+                    className={`${index === 0 ? 'is-primary ' : ''}${selectedImage?.id === image.id ? 'is-selected ' : ''}${sortingImageId === image.id ? 'is-sorting' : ''}`.trim()}
+                    data-image-sort-id={image.id}
+                    key={image.id}
+                  >
+                    <button
+                      aria-label={`${index + 1}번 사진 순서 변경. 위아래 화살표 키로 이동`}
+                      className="admin-product-image-drag-handle"
+                      title="끌어서 순서 변경"
+                      type="button"
+                      onKeyDown={(event) => handleImageSortKey(event, image.id, index)}
+                      onPointerCancel={endImageSort}
+                      onPointerDown={(event) => beginImageSort(event, image.id)}
+                      onPointerMove={continueImageSort}
+                      onPointerUp={endImageSort}
+                    ><GripVertical size={17} /></button>
+                    <button className="admin-product-image-thumb" type="button" onClick={() => setSelectedImageId(image.id)}><img alt="" src={image.thumbUrl || image.previewUrl} style={imagePresentationStyle(image)} /><span>{index + 1}</span></button>
+                    <button className="admin-product-image-name" type="button" onClick={() => setSelectedImageId(image.id)}><strong>{index === 0 ? '대표 이미지' : `${index + 1}번 이미지`}</strong><span title={image.filename}>{image.filename}</span></button>
+                    <button aria-label={`${index + 1}번 이미지 제거`} className="admin-product-image-remove" title="이미지 제거" type="button" onClick={() => removeImage(image.id)}><Trash2 size={15} /></button>
+                  </article>)}
+                </div>}
+                <small>JPG, PNG, WebP · 최대 8장 · 장당 10MB · ZIP 해제 후 최대 80MB</small>
               </InspectorField>
             </InspectorGroup>
 
@@ -812,6 +1073,7 @@ export function AdminProductEditorPage() {
       </div>
 
       <input accept="image/jpeg,image/png,image/webp" hidden multiple ref={fileInputRef} type="file" onChange={selectImages} />
+      <input accept=".zip,application/zip" hidden ref={zipInputRef} type="file" onChange={selectZip} />
     </form>
 
     <AdminSaveBar visible={dirty} saving={saving} onDiscard={discardChanges} onSave={() => saveProduct()} />

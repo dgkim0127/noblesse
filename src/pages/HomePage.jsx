@@ -15,6 +15,7 @@ import {
 } from '../services/homePlacement'
 import { formatMoney } from '../utils/commerce'
 import { getLocaleContentKey, getLocalizedProductAlt, getLocalizedProductName, resolveLocaleCopy, useLocalePath } from '../utils/locale'
+import { imagePresentationStyle, productGalleryEntries } from '../utils/productImageGallery'
 
 const homeCopy = {
   kr: {
@@ -1151,13 +1152,13 @@ function HomeProductCard({ product, index, variant = 'default' }) {
   const productName = getLocalizedProductName(product, locale)
   const productAlt = getLocalizedProductAlt(product, locale)
   const price = getPrice(product.productId)
-  const imageSources = [
-    product.imageSet?.card,
-    product.imageSet?.detail,
-    product.imageSet?.zoom,
-  ].filter((src) => src && !src.includes('cdn.example.com'))
+  const galleryImages = productGalleryEntries(product, productAlt)
+    .filter((image) => image.cardSrc && !image.cardSrc.includes('cdn.example.com'))
+    .slice(0, 3)
   const fallbackImage = homeShowcasePanels[index % homeShowcasePanels.length]?.image
-  const cardImageSources = imageSources.length > 0 ? imageSources : [fallbackImage].filter(Boolean)
+  const cardImages = galleryImages.length > 0
+    ? galleryImages
+    : fallbackImage ? [{ id: 'fallback', cardSrc: fallbackImage, position: { x: 50, y: 50 }, scale: 1 }] : []
   const adminPriceBooks = isAdmin ? getAdminPriceBooks(product.productId) : []
   const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
   const unavailablePriceLabel = resolveLocaleCopy({ kr: '가격 미등록', en: 'Price unavailable', jp: '価格未登録', cn: '價格未登記' }, locale, 'en')
@@ -1207,12 +1208,13 @@ function HomeProductCard({ product, index, variant = 'default' }) {
       <span className="home-product-status">{statusLabel}</span>
       <span className="jewel-shape" />
       <span className="home-product-image-cycle" style={{ '--cycle-delay': `${(index % 5) * 0.18}s` }}>
-        {cardImageSources.map((src, imageIndex) => <img
+        {cardImages.map((image, imageIndex) => <img
           alt={imageIndex === 0 ? productAlt : ''}
           aria-hidden={imageIndex === 0 ? undefined : 'true'}
-          key={`${product.productId}-${imageIndex}`}
+          key={`${product.productId}-${image.id}`}
           loading="lazy"
-          src={src}
+          src={image.cardSrc}
+          style={imagePresentationStyle(image)}
           width="600"
           height="900"
           onError={(event) => { event.currentTarget.hidden = true }}

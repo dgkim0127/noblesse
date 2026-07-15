@@ -33,7 +33,7 @@ test('product operations use dedicated list and editor workflows', () => {
   assert.doesNotMatch(editor, /<Check\b/)
   assert.match(editor, /previewMode === 'desktop'/)
   assert.match(editor, /previewMode === 'mobile'/)
-  assert.match(editor, /previewImage/)
+  assert.match(editor, /imageDraftsToPreviewSet/)
   assert.match(detail, /export function ProductDetailView/)
   assert.match(detail, /function ProductInlineEditor/)
   assert.match(detail, /event\.key === 'Escape'/)

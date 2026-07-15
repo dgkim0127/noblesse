@@ -21,6 +21,7 @@ import {
   getLocalizedProductName,
   useLocalePath,
 } from '../utils/locale'
+import { imagePresentationStyle, productGalleryEntries } from '../utils/productImageGallery'
 
 const normalizeQuantity = (rawQuantity, moq) => {
   const numeric = Number(rawQuantity)
@@ -637,19 +638,10 @@ const withUnit = (value, unit = 'mm') => {
 }
 
 const buildGalleryImages = (product, productAlt, copy) => {
-  const imageSet = product?.imageSet || {}
-  const candidates = [
-    { id: 'detail', src: imageSet.detail, label: copy.selectedImage },
-    { id: 'zoom', src: imageSet.zoom, label: copy.viewLarge },
-    { id: 'card', src: imageSet.card, label: copy.gallery },
-    { id: 'thumb', src: imageSet.thumb, label: copy.thumbnail },
-  ]
-  const seen = new Set()
-  return candidates.filter((image) => {
-    if (!image.src || seen.has(image.src)) return false
-    seen.add(image.src)
-    return true
-  }).map((image) => ({ ...image, alt: productAlt }))
+  return productGalleryEntries(product, productAlt).map((image, index) => ({
+    ...image,
+    label: index === 0 ? copy.selectedImage : `${copy.gallery} ${index + 1}`,
+  }))
 }
 
 const getLocalizedCategoryName = (product, contentLocale) => {
@@ -676,43 +668,49 @@ const getRelatedProducts = (products, product) => {
     .map(({ item }) => item)
 }
 
-function ProductGallery({ copy, product, productAlt }) {
+function ProductGallery({ copy, editor, product, productAlt }) {
   const images = useMemo(() => buildGalleryImages(product, productAlt, copy), [copy, product, productAlt])
-  const [selectedSrc, setSelectedSrc] = useState(images[0]?.src || '')
+  const [selectedId, setSelectedId] = useState(images[0]?.id || '')
 
   useEffect(() => {
-    setSelectedSrc(images[0]?.src || '')
-  }, [images])
+    setSelectedId((current) => {
+      if (editor?.selectedImageId && images.some((image) => image.id === editor.selectedImageId)) return editor.selectedImageId
+      return images.some((image) => image.id === current) ? current : images[0]?.id || ''
+    })
+  }, [editor?.selectedImageId, images])
 
-  const selectedImage = images.find((image) => image.src === selectedSrc) || images[0] || null
-  const secondaryImages = images.filter((image) => image.src !== selectedImage?.src).slice(0, 2)
+  const selectedImage = images.find((image) => image.id === selectedId) || images[0] || null
+  const secondaryImages = images.filter((image) => image.id !== selectedImage?.id).slice(0, 2)
 
   return <section className={`pd-gallery ${secondaryImages.length > 0 ? 'has-side-images' : 'is-single'}`} aria-label={copy.gallery}>
     <div className="pd-gallery-grid">
       <figure className={`pd-main-image tone-${product.tone}`}>
         {selectedImage
-          ? <img src={selectedImage.src} alt={selectedImage.alt} loading="eager" width="1200" height="1200" onError={(event) => { event.currentTarget.hidden = true }} />
+          ? <img src={selectedImage.detailSrc} alt={selectedImage.alt} loading="eager" width="1200" height="1200" style={imagePresentationStyle(selectedImage)} onError={(event) => { event.currentTarget.hidden = true }} />
           : <div className="pd-image-placeholder"><Images size={32} /><span>{copy.noImage}</span></div>}
       </figure>
       {secondaryImages.length > 0 && <div className="pd-side-images" aria-hidden="true">
         {secondaryImages.map((image) => <figure className="pd-side-image" key={`side-${image.id}`}>
-          <img src={image.src} alt="" loading="lazy" width="600" height="600" onError={(event) => { event.currentTarget.hidden = true }} />
+          <img src={image.cardSrc || image.detailSrc} alt="" loading="lazy" width="600" height="600" style={imagePresentationStyle(image)} onError={(event) => { event.currentTarget.hidden = true }} />
         </figure>)}
       </div>}
     </div>
     {images.length > 1 && <div className="pd-thumbs" role="list" aria-label={copy.thumbnail}>
       {images.map((image) => <button
         aria-label={image.label}
-        aria-pressed={selectedImage?.src === image.src}
-        className={selectedImage?.src === image.src ? 'pd-thumb is-active' : 'pd-thumb'}
+        aria-pressed={selectedImage?.id === image.id}
+        className={selectedImage?.id === image.id ? 'pd-thumb is-active' : 'pd-thumb'}
         key={image.id}
-        onClick={() => setSelectedSrc(image.src)}
+        onClick={() => {
+          setSelectedId(image.id)
+          editor?.selectImage?.(image.id)
+        }}
         type="button"
       >
-        <img src={image.src} alt="" loading="lazy" width="300" height="300" onError={(event) => { event.currentTarget.hidden = true }} />
+        <img src={image.thumbSrc || image.detailSrc} alt="" loading="lazy" width="300" height="300" style={imagePresentationStyle(image)} onError={(event) => { event.currentTarget.hidden = true }} />
       </button>)}
     </div>}
-    {product.imageSet?.zoom && <a className="pd-large-link" href={product.imageSet.zoom} rel="noreferrer" target="_blank">{copy.viewLarge}<ChevronRight size={14} /></a>}
+    {selectedImage?.zoomSrc && <a className="pd-large-link" href={selectedImage.zoomSrc} rel="noreferrer" target="_blank">{copy.viewLarge}<ChevronRight size={14} /></a>}
   </section>
 }
 
@@ -924,7 +922,7 @@ export function ProductDetailView({
     </nav>
 
     <section className="pd-hero">
-      <ProductEditorTarget editor={editor} field="image" label="상품 이미지"><ProductGallery copy={copy} product={product} productAlt={productAlt} /></ProductEditorTarget>
+      <ProductEditorTarget editor={editor} field="image" label="상품 이미지"><ProductGallery copy={copy} editor={editor} product={product} productAlt={productAlt} /></ProductEditorTarget>
 
       <aside className="pd-panel" aria-label={copy.productInfo}>
         <div className="pd-badges">
@@ -1050,7 +1048,7 @@ export function ProductDetailView({
       <div className="pd-overview-grid">
         <ProductEditorTarget editor={editor} field="image" label="상세 이미지"><div className="pd-overview-media">
           {product.imageSet?.card || product.imageSet?.detail
-            ? <img src={product.imageSet.card || product.imageSet.detail} alt={productAlt} loading="lazy" />
+            ? <img src={product.imageSet.card || product.imageSet.detail} alt={productAlt} loading="lazy" style={imagePresentationStyle(product.imageSet)} />
             : <div className="pd-image-placeholder"><Images size={30} /><span>{copy.noImage}</span></div>}
         </div></ProductEditorTarget>
         <article className="pd-overview-note">
@@ -1075,7 +1073,7 @@ export function ProductDetailView({
       <div className="pd-spec-layout">
         <div className="pd-spec-image">
           {product.imageSet?.detail || product.imageSet?.card
-            ? <img src={product.imageSet.detail || product.imageSet.card} alt={productAlt} loading="lazy" />
+            ? <img src={product.imageSet.detail || product.imageSet.card} alt={productAlt} loading="lazy" style={imagePresentationStyle(product.imageSet)} />
             : <div className="pd-image-placeholder"><Images size={30} /><span>{copy.noImage}</span></div>}
         </div>
         <ProductEditorTarget align="end" editor={editor} field="specs" label="상세 스펙"><dl className="pd-spec-table">
