@@ -26,6 +26,17 @@ test('product detail gates buyer price and MOQ behind approved buyer or admin pr
   assert.match(source, /!canViewAdminPrices && <Link className="pd-secondary-action"/)
 })
 
+test('shared product detail editor uses active locale values without storefront fallback', () => {
+  const source = readSource('src/pages/ProductDetailPage.jsx')
+
+  assert.match(source, /export function ProductDetailView/)
+  assert.match(source, /const productName = editor \? editor\.values\.name/)
+  assert.match(source, /const description = editor \? editor\.values\.summary/)
+  assert.match(source, /editor \? '' : copy\.quietDetailHeadline/)
+  assert.match(source, /disabled=\{Boolean\(editor\)\}/)
+  assert.match(source, /if \(editor\) return/)
+})
+
 test('product detail can submit a direct product inquiry through the commerce helper', () => {
   const source = readSource('src/pages/ProductDetailPage.jsx')
   const commerce = readSource('src/commerce/CommerceContext.jsx')

@@ -4,6 +4,7 @@ import {
   Images,
   LockKeyhole,
   Minus,
+  Pencil,
   Plus,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -726,39 +727,94 @@ function OptionButtons({ label, options, selected, onSelect }) {
   </div>
 }
 
-export function ProductDetailPage() {
-  const { productId } = useParams()
-  const {
-    addInquiryItem,
-    approvedPrice,
-    dataError,
-    dataStatus,
-    getAdminPriceBooks,
-    getPrice,
-    isAdmin,
-    isApproved,
-    products,
-    submitProductInquiry,
-    viewerState,
-  } = useCommerce()
-  const { contentLocale, locale, toLocalePath } = useLocalePath()
+function ProductEditorTarget({ align = 'start', children, editor, field, label }) {
+  if (!editor) return children
+  const active = editor.active?.kind === 'popover' && editor.active.field === field
+  return <div className={`pd-editor-target is-${align}${active ? ' is-active' : ''}`}>
+    {children}
+    <button
+      aria-label={`${label} 편집`}
+      aria-pressed={active}
+      className="pd-editor-target-trigger"
+      title={`${label} 편집`}
+      type="button"
+      onClick={(event) => editor.openPopover(field, event.currentTarget)}
+    ><Pencil aria-hidden="true" size={15} /></button>
+    {active && editor.renderPopover(field)}
+  </div>
+}
+
+function ProductInlineEditor({ as: Tag = 'p', className = '', editor, field, label, multiline = false, placeholder, value }) {
+  if (!editor) return value ? <Tag className={className}>{value}</Tag> : null
+  const active = editor.active?.kind === 'inline' && editor.active.field === field
+  if (active) {
+    const sharedProps = {
+      'aria-label': `${label} 편집`,
+      autoFocus: true,
+      className: 'pd-inline-editor-input',
+      maxLength: multiline ? 4000 : 240,
+      value,
+      onBlur: () => editor.commitInline(field),
+      onChange: (event) => editor.changeInline(field, event.target.value),
+      onKeyDown: (event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault()
+          editor.cancelInline(field)
+          return
+        }
+        if ((!multiline && event.key === 'Enter') || (multiline && event.key === 'Enter' && (event.ctrlKey || event.metaKey))) {
+          event.preventDefault()
+          editor.commitInline(field)
+        }
+      },
+    }
+    return <Tag className={`${className} pd-inline-editor is-active`.trim()}>
+      {multiline ? <textarea {...sharedProps} rows={field === 'body' ? 8 : 3} /> : <input {...sharedProps} type="text" />}
+    </Tag>
+  }
+  return <Tag className={`${className} pd-inline-editor${value ? '' : ' is-placeholder'}`.trim()}>
+    <button aria-label={`${label} 편집`} type="button" onClick={() => editor.beginInline(field, value)}>
+      <span>{value || placeholder}</span><Pencil aria-hidden="true" size={14} />
+    </button>
+  </Tag>
+}
+
+export function ProductDetailView({
+  addInquiryItem = () => {},
+  adminPriceBooks = [],
+  approvedAmount = null,
+  contentLocale = 'kr',
+  editor = null,
+  isAdmin = false,
+  isApproved = false,
+  locale = 'kr',
+  price = null,
+  product,
+  products = [],
+  submitProductInquiry = async () => null,
+  toLocalePath = (path) => path,
+  viewerState = 'guest',
+}) {
   const copy = getDetailCopy(contentLocale)
-  const product = products.find((item) => item.productId === productId)
-  const productName = product ? getLocalizedProductName(product, locale) : ''
+  const productName = editor ? editor.values.name : product ? getLocalizedProductName(product, locale) : ''
   const productAlt = product ? getLocalizedProductAlt(product, locale) : ''
-  const description = product ? getLocalizedProductDescription(product, locale) : ''
+  const description = editor ? editor.values.summary : product ? getLocalizedProductDescription(product, locale) : ''
   const [selectedColor, setSelectedColor] = useState('')
   const [selectedSize, setSelectedSize] = useState('')
-  const price = product ? getPrice(product.productId) : null
-  const approvedAmount = product ? approvedPrice(product.productId) : null
-  const adminPriceBooks = product && isAdmin ? getAdminPriceBooks(product.productId) : []
   const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
   const canUseTradeTerms = Boolean(isApproved && price && approvedAmount !== null)
   const canRequestProductQuote = Boolean(isApproved && product)
   const canViewAdminPrices = Boolean(isAdmin && adminPriceBooks.length > 0)
   const requestMoq = canUseTradeTerms ? price.moq : product?.moqDefault || 1
   const visibleMoq = canUseTradeTerms ? price.moq : canRequestProductQuote ? requestMoq : canViewAdminPrices ? adminPriceBooks[0]?.moq : null
-  const [quantity, setQuantity] = useState(visibleMoq || 1)
+  const editorCanUseTradeTerms = Boolean(editor && price && approvedAmount !== null)
+  const showTradeTerms = canUseTradeTerms || editorCanUseTradeTerms
+  const showQuoteTools = Boolean(editor) || canRequestProductQuote
+  const effectiveRequestMoq = editor
+    ? editorCanUseTradeTerms ? price.moq : product?.moqDefault || 1
+    : requestMoq
+  const effectiveVisibleMoq = editor ? effectiveRequestMoq : visibleMoq
+  const [quantity, setQuantity] = useState(effectiveVisibleMoq || 1)
   const [directMemo, setDirectMemo] = useState('')
   const [directStatus, setDirectStatus] = useState('idle')
   const [directError, setDirectError] = useState('')
@@ -770,8 +826,8 @@ export function ProductDetailPage() {
   }, [product?.productId, product?.colors, product?.sizes])
 
   useEffect(() => {
-    if (visibleMoq) setQuantity(visibleMoq)
-  }, [visibleMoq])
+    if (effectiveVisibleMoq) setQuantity(effectiveVisibleMoq)
+  }, [effectiveVisibleMoq])
 
   useEffect(() => {
     setDirectMemo('')
@@ -779,14 +835,6 @@ export function ProductDetailPage() {
     setDirectError('')
     setDirectInquiry(null)
   }, [product?.productId])
-
-  if (dataStatus === 'loading') {
-    return <main className="content pd-page"><div className="empty">Loading product details...</div></main>
-  }
-
-  if (dataStatus === 'error') {
-    return <main className="content pd-page"><div className="empty"><h1>Catalog API unavailable</h1><p>{dataError || 'Unable to load product details.'}</p></div></main>
-  }
 
   if (!product) return <main className="content pd-page"><div className="empty">{copy.notFound}</div></main>
 
@@ -796,14 +844,17 @@ export function ProductDetailPage() {
   const activeColor = colors.includes(selectedColor) ? selectedColor : colors[0] ?? ''
   const activeSize = sizes.includes(selectedSize) ? selectedSize : sizes[0] ?? ''
   const productSpecs = product.specs || {}
-  const productDetailContent = getLocalizedProductDetailContent(product, locale)
+  const localizedDetailContent = getLocalizedProductDetailContent(product, locale)
+  const productDetailContent = editor
+    ? { ...localizedDetailContent, headline: editor.values.headline, body: editor.values.body, description: editor.values.body }
+    : localizedDetailContent
   const specUnit = productSpecs.unit || 'mm'
   const overviewBody = productDetailContent.description || productDetailContent.body || description || copy.quietDetailLead
   const materialGuideBody = productDetailContent.materialInfo || (product.material ? copy.materialGuideText(product.material) : '')
   const sizeGuideBody = productDetailContent.sizeGuide || copy.sizeGuideText
   const shippingNoticeBody = productDetailContent.exchangeNotice || copy.shippingNoticeText
   const quoteWorkflowLead = productDetailContent.wholesaleNotice || copy.quoteWorkflowLead
-  const currentQuantity = normalizeQuantity(quantity, requestMoq || 1)
+  const currentQuantity = normalizeQuantity(quantity, effectiveRequestMoq || 1)
   const accessLink = viewerState === 'pending' ? '/approval-pending' : '/register'
   const accessLabel = viewerState === 'pending' ? copy.reviewStatus : copy.requestAccess
   const relatedProducts = getRelatedProducts(products, product)
@@ -837,10 +888,13 @@ export function ProductDetailPage() {
     [copy.specNote, productSpecs.specNote || productSpecs.decorationNote],
   ].filter(([, value]) => value)
 
-  const addSelectedItem = () => addInquiryItem(product.productId, { color: activeColor, size: activeSize }, currentQuantity)
-  const updateQuantity = (nextQuantity) => setQuantity(normalizeQuantity(nextQuantity, requestMoq || 1))
+  const addSelectedItem = () => {
+    if (editor) return
+    addInquiryItem(product.productId, { color: activeColor, size: activeSize }, currentQuantity)
+  }
+  const updateQuantity = (nextQuantity) => setQuantity(normalizeQuantity(nextQuantity, effectiveRequestMoq || 1))
   const submitSelectedProductInquiry = async () => {
-    if (!canRequestProductQuote || directStatus === 'submitting') return
+    if (editor || !canRequestProductQuote || directStatus === 'submitting') return
     setDirectStatus('submitting')
     setDirectError('')
     setDirectInquiry(null)
@@ -862,30 +916,32 @@ export function ProductDetailPage() {
     }
   }
 
-  return <main className="content pd-page">
+  return <main className={`content pd-page${editor ? ' is-editor-preview' : ''}`}>
     <nav className="pd-breadcrumb" aria-label="Breadcrumb">
-      <Link to={toLocalePath('/products')}><ChevronLeft size={16} />{copy.back}</Link>
-      <span>{categoryName}</span>
-      <span>{product.code}</span>
+      {editor ? <span><ChevronLeft size={16} />{copy.back}</span> : <Link to={toLocalePath('/products')}><ChevronLeft size={16} />{copy.back}</Link>}
+      <ProductEditorTarget editor={editor} field="category" label="카테고리"><span>{categoryName || '카테고리 선택'}</span></ProductEditorTarget>
+      <ProductEditorTarget align="end" editor={editor} field="code" label="상품 코드"><span>{product.code || '상품 코드 입력'}</span></ProductEditorTarget>
     </nav>
 
     <section className="pd-hero">
-      <ProductGallery copy={copy} product={product} productAlt={productAlt} />
+      <ProductEditorTarget editor={editor} field="image" label="상품 이미지"><ProductGallery copy={copy} product={product} productAlt={productAlt} /></ProductEditorTarget>
 
       <aside className="pd-panel" aria-label={copy.productInfo}>
         <div className="pd-badges">
           <span>{copy.badgesNew}</span>
           {product.isExportAvailable && <span>{copy.badgesExportReady}</span>}
         </div>
-        <p className="pd-eyebrow">{copy.productCode} {product.code}</p>
-        <h1>{productName}</h1>
-        {product.nameEn && product.nameEn !== productName && <p className="pd-alt-name">{product.nameEn}</p>}
-        {description && <p className="pd-summary">{description}</p>}
+        <ProductEditorTarget align="end" editor={editor} field="code" label="상품 코드"><p className="pd-eyebrow">{copy.productCode} {product.code || '상품 코드 입력'}</p></ProductEditorTarget>
+        <ProductInlineEditor as="h1" editor={editor} field="name" label="상품명" placeholder={`${editor?.localeLabel || ''} 상품명 입력`.trim()} value={productName} />
+        {!editor && product.nameEn && product.nameEn !== productName && <p className="pd-alt-name">{product.nameEn}</p>}
+        <ProductInlineEditor className="pd-summary" editor={editor} field="summary" label="한 줄 요약" multiline placeholder={`${editor?.localeLabel || ''} 한 줄 요약 입력`.trim()} value={description} />
 
-        <dl className="pd-meta-list">
-          {productInfoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
-          {visibleMoq && <div><dt>{copy.moq}</dt><dd>{visibleMoq} pcs</dd></div>}
-        </dl>
+        <ProductEditorTarget align="end" editor={editor} field="productInfo" label="상품 정보">
+          <dl className="pd-meta-list">
+            {productInfoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+            {effectiveVisibleMoq && <div><dt>{copy.moq}</dt><dd>{effectiveVisibleMoq} pcs</dd></div>}
+          </dl>
+        </ProductEditorTarget>
 
         {canViewAdminPrices && <div className="pd-admin-prices">
           <small>{copy.adminPriceBooks}</small>
@@ -898,9 +954,11 @@ export function ProductDetailPage() {
           </div>
         </div>}
 
-        {canRequestProductQuote ? <div className="pd-trade-box">
+        {showQuoteTools ? <div className="pd-trade-box">
           <small>{copy.approvalRequired}</small>
-          {canUseTradeTerms
+          <ProductEditorTarget align="end" editor={editor} field="price" label="승인 회원 가격">
+            <div className="pd-editor-price-target">
+          {showTradeTerms
             ? <>
               <strong>{formatMoney(approvedAmount, price.currency)}</strong>
               <span>{copy.moq} {price.moq} pcs · {price.market} · {price.currency}</span>
@@ -909,20 +967,29 @@ export function ProductDetailPage() {
               <strong>{copy.priceUnavailable}</strong>
               <span>{copy.quoteNoticeText}</span>
             </>}
-          <OptionButtons label={copy.color} options={colors} selected={activeColor} onSelect={setSelectedColor} />
-          <OptionButtons label={copy.size} options={sizes} selected={activeSize} onSelect={setSelectedSize} />
+            </div>
+          </ProductEditorTarget>
+          <ProductEditorTarget align="end" editor={editor} field="colors" label="색상 옵션">
+            {colors.length > 0 ? <OptionButtons label={copy.color} options={colors} selected={activeColor} onSelect={setSelectedColor} /> : <div className="pd-option-group is-empty"><span>{copy.color}</span><small>색상 옵션 입력</small></div>}
+          </ProductEditorTarget>
+          <ProductEditorTarget align="end" editor={editor} field="sizes" label="사이즈 옵션">
+            {sizes.length > 0 ? <OptionButtons label={copy.size} options={sizes} selected={activeSize} onSelect={setSelectedSize} /> : <div className="pd-option-group is-empty"><span>{copy.size}</span><small>사이즈 옵션 입력</small></div>}
+          </ProductEditorTarget>
+          <ProductEditorTarget align="end" editor={editor} field="moq" label="MOQ">
           <div className="pd-option-group">
             <span>{copy.quantity}</span>
             <div className="pd-quantity-control">
-              <button type="button" aria-label="Decrease quantity" onClick={() => updateQuantity(currentQuantity - requestMoq)}><Minus size={15} /></button>
-              <input value={currentQuantity} type="number" min={requestMoq} step={requestMoq} onBlur={(event) => updateQuantity(event.target.value)} onChange={(event) => updateQuantity(event.target.value)} />
-              <button type="button" aria-label="Increase quantity" onClick={() => updateQuantity(currentQuantity + requestMoq)}><Plus size={15} /></button>
+              <button disabled={Boolean(editor)} type="button" aria-label="Decrease quantity" onClick={() => updateQuantity(currentQuantity - effectiveRequestMoq)}><Minus size={15} /></button>
+              <input disabled={Boolean(editor)} value={currentQuantity} type="number" min={effectiveRequestMoq} step={effectiveRequestMoq} onBlur={(event) => updateQuantity(event.target.value)} onChange={(event) => updateQuantity(event.target.value)} />
+              <button disabled={Boolean(editor)} type="button" aria-label="Increase quantity" onClick={() => updateQuantity(currentQuantity + effectiveRequestMoq)}><Plus size={15} /></button>
             </div>
-            <small>{copy.quantityNote(requestMoq)}</small>
+            <small>{copy.quantityNote(effectiveRequestMoq)}</small>
           </div>
+          </ProductEditorTarget>
           <div className="pd-direct-inquiry-form" id="pd-inquiry-form">
             <label htmlFor="pd-direct-inquiry-memo">{copy.directInquiryTitle}</label>
             <textarea
+              disabled={Boolean(editor)}
               id="pd-direct-inquiry-memo"
               maxLength={1000}
               onChange={(event) => setDirectMemo(event.target.value)}
@@ -931,10 +998,10 @@ export function ProductDetailPage() {
               value={directMemo}
             />
             <div className="pd-direct-actions">
-              <button className="pd-secondary-action" type="button" onClick={addSelectedItem}><Plus size={17} />{copy.addToInquiry}</button>
+              <button className="pd-secondary-action" disabled={Boolean(editor)} type="button" onClick={addSelectedItem}><Plus size={17} />{copy.addToInquiry}</button>
               <button
                 className="pd-primary-action"
-                disabled={directStatus === 'submitting'}
+                disabled={Boolean(editor) || directStatus === 'submitting'}
                 type="button"
                 onClick={submitSelectedProductInquiry}
               >
@@ -977,15 +1044,15 @@ export function ProductDetailPage() {
     <section className="pd-editorial pd-overview" id="pd-overview">
       <div className="pd-editorial-copy">
         <p className="pd-editorial-eyebrow">{copy.quietDetailEyebrow}</p>
-        <h2>{productDetailContent.headline || copy.quietDetailHeadline}</h2>
-        <p>{overviewBody}</p>
+        <ProductInlineEditor as="h2" editor={editor} field="headline" label="상세 제목" placeholder={`${editor?.localeLabel || ''} 상세 제목 입력`.trim()} value={productDetailContent.headline || (editor ? '' : copy.quietDetailHeadline)} />
+        <ProductInlineEditor editor={editor} field="body" label="상세 본문" multiline placeholder={`${editor?.localeLabel || ''} 상세 본문 입력`.trim()} value={editor ? productDetailContent.body : overviewBody} />
       </div>
       <div className="pd-overview-grid">
-        <div className="pd-overview-media">
+        <ProductEditorTarget editor={editor} field="image" label="상세 이미지"><div className="pd-overview-media">
           {product.imageSet?.card || product.imageSet?.detail
             ? <img src={product.imageSet.card || product.imageSet.detail} alt={productAlt} loading="lazy" />
             : <div className="pd-image-placeholder"><Images size={30} /><span>{copy.noImage}</span></div>}
-        </div>
+        </div></ProductEditorTarget>
         <article className="pd-overview-note">
           <span>01 / FORM</span>
           <h3>{productDetailContent.decoration || copy.buyerPointTitleOne}</h3>
@@ -1011,11 +1078,11 @@ export function ProductDetailPage() {
             ? <img src={product.imageSet.detail || product.imageSet.card} alt={productAlt} loading="lazy" />
             : <div className="pd-image-placeholder"><Images size={30} /><span>{copy.noImage}</span></div>}
         </div>
-        <dl className="pd-spec-table">
-          {productInfoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
-          {visibleMoq && <div><dt>{copy.moq}</dt><dd>{visibleMoq} pcs</dd></div>}
-          {specificationRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
-        </dl>
+        <ProductEditorTarget align="end" editor={editor} field="specs" label="상세 스펙"><dl className="pd-spec-table">
+            {productInfoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+            {effectiveVisibleMoq && <div><dt>{copy.moq}</dt><dd>{effectiveVisibleMoq} pcs</dd></div>}
+            {specificationRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+          </dl></ProductEditorTarget>
       </div>
     </section>
 
@@ -1048,7 +1115,7 @@ export function ProductDetailPage() {
     <section className="pd-related">
       <div className="pd-section-heading">
         <div><p>{copy.category}</p><h2>{copy.categoryProducts}</h2></div>
-        <Link to={toLocalePath(`/products?category=${product.categoryId}`)}>{copy.categoryView}</Link>
+        {editor ? <span>{copy.categoryView}</span> : <Link to={toLocalePath(`/products?category=${product.categoryId}`)}>{copy.categoryView}</Link>}
       </div>
       {relatedProducts.length > 0
         ? <div className="catalog-grid">{relatedProducts.map((item) => <CatalogCard key={item.productId} product={item} />)}</div>
@@ -1056,9 +1123,51 @@ export function ProductDetailPage() {
     </section>
 
     <div className="pd-mobile-action" aria-label={copy.quoteNotice}>
-      {canRequestProductQuote
-        ? <a className="pd-primary-action" href="#pd-inquiry-form">{copy.directInquirySubmit}</a>
+      {showQuoteTools
+        ? editor ? <button className="pd-primary-action" disabled type="button">{copy.directInquirySubmit}</button> : <a className="pd-primary-action" href="#pd-inquiry-form">{copy.directInquirySubmit}</a>
         : !canViewAdminPrices && <Link className="pd-secondary-action" to={toLocalePath(accessLink)}>{accessLabel}</Link>}
     </div>
   </main>
+}
+
+export function ProductDetailPage() {
+  const { productId } = useParams()
+  const {
+    addInquiryItem,
+    approvedPrice,
+    dataError,
+    dataStatus,
+    getAdminPriceBooks,
+    getPrice,
+    isAdmin,
+    isApproved,
+    products,
+    submitProductInquiry,
+    viewerState,
+  } = useCommerce()
+  const { contentLocale, locale, toLocalePath } = useLocalePath()
+  const product = products.find((item) => item.productId === productId)
+
+  if (dataStatus === 'loading') {
+    return <main className="content pd-page"><div className="empty">Loading product details...</div></main>
+  }
+  if (dataStatus === 'error') {
+    return <main className="content pd-page"><div className="empty"><h1>Catalog API unavailable</h1><p>{dataError || 'Unable to load product details.'}</p></div></main>
+  }
+
+  return <ProductDetailView
+    addInquiryItem={addInquiryItem}
+    adminPriceBooks={product && isAdmin ? getAdminPriceBooks(product.productId) : []}
+    approvedAmount={product ? approvedPrice(product.productId) : null}
+    contentLocale={contentLocale}
+    isAdmin={isAdmin}
+    isApproved={isApproved}
+    locale={locale}
+    price={product ? getPrice(product.productId) : null}
+    product={product}
+    products={products}
+    submitProductInquiry={submitProductInquiry}
+    toLocalePath={toLocalePath}
+    viewerState={viewerState}
+  />
 }

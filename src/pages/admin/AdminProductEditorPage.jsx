@@ -1,10 +1,10 @@
-import { Check, ImagePlus, Monitor, PackageCheck, Smartphone, Trash2, UploadCloud } from 'lucide-react'
+import { ImagePlus, Monitor, PackageCheck, Settings2, Smartphone, Trash2, UploadCloud, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
+import { ProductDetailView } from '../ProductDetailPage'
 import { useLocalePath } from '../../utils/locale'
 import {
-  AdminCompletionBadge,
   AdminConfirmDialog,
   AdminLink,
   AdminNotice,
@@ -114,6 +114,53 @@ function getCurrentImage(product) {
   return product?.imageSet?.detail || product?.imageSet?.primary || product?.imageSet?.card || product?.imageSet?.thumb || ''
 }
 
+function buildDraftProduct({ category, form, previewImage, product }) {
+  const productId = product?.productId || product?.id || 'draft-product'
+  const imageSet = previewImage
+    ? { thumb: previewImage, card: previewImage, detail: previewImage, zoom: previewImage }
+    : product?.imageSet || {}
+  return {
+    ...(product || {}),
+    id: productId,
+    productId,
+    code: form.code.trim() || 'NB-PRODUCT-CODE',
+    nameKo: form.translations.kr.name,
+    nameEn: form.translations.en.name,
+    nameJa: form.translations.jp.name,
+    nameZhTw: form.translations['zh-TW'].name,
+    descriptionKo: form.translations.kr.summary,
+    descriptionEn: form.translations.en.summary,
+    descriptionJa: form.translations.jp.summary,
+    descriptionZhTw: form.translations['zh-TW'].summary,
+    categoryId: form.categoryKey,
+    categoryKey: form.categoryKey,
+    categoryNameKo: category?.nameKo || category?.nameEn || category?.categoryId || '',
+    categoryNameEn: category?.nameEn || category?.nameKo || category?.categoryId || '',
+    categoryNameJa: category?.nameJa || category?.nameEn || category?.nameKo || category?.categoryId || '',
+    categoryNameZhTw: category?.nameZhTw || category?.nameEn || category?.nameKo || category?.categoryId || '',
+    material: form.material,
+    colors: parseList(form.colorsText),
+    sizes: parseList(form.sizesText),
+    moqDefault: Math.max(1, Number(form.moqDefault || 1)),
+    leadTime: form.leadTime,
+    origin: form.origin,
+    badge: form.badge,
+    isExportAvailable: Boolean(form.isExportAvailable),
+    isNew: Boolean(form.isNew),
+    isBest: Boolean(form.isBest),
+    imageSet,
+    specs: form.specs,
+    taxonomy: form.taxonomy,
+    detailContent: {
+      ...form.detailContentBase,
+      translations: Object.fromEntries(localeTabs.map(({ key }) => [key, {
+        headline: form.translations[key].headline,
+        body: form.translations[key].body,
+      }])),
+    },
+  }
+}
+
 function buildProductPayload(form) {
   return {
     code: form.code.trim(),
@@ -190,6 +237,10 @@ export function AdminProductEditorPage() {
   const mutate = useAdminApiMutation()
   const fileInputRef = useRef(null)
   const imageFilesRef = useRef([])
+  const inlineSnapshotRef = useRef(null)
+  const settingsCloseRef = useRef(null)
+  const settingsDrawerRef = useRef(null)
+  const settingsTriggerRef = useRef(null)
   const initialRef = useRef({ form: structuredClone(emptyForm), price: { ...emptyPrice } })
   const initializedKeyRef = useRef('')
   const [form, setForm] = useState(() => structuredClone(emptyForm))
@@ -197,7 +248,9 @@ export function AdminProductEditorPage() {
   const [priceSaved, setPriceSaved] = useState(false)
   const [product, setProduct] = useState(null)
   const [activeLocale, setActiveLocale] = useState('kr')
+  const [activeEditor, setActiveEditor] = useState(null)
   const [previewMode, setPreviewMode] = useState('desktop')
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [images, setImages] = useState([])
   const [dirty, setDirty] = useState(false)
   const [priceDirty, setPriceDirty] = useState(false)
@@ -251,6 +304,46 @@ export function AdminProductEditorPage() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [dirty])
 
+  useEffect(() => {
+    if (activeEditor?.kind !== 'popover') return undefined
+    const closeOnOutsidePointer = (event) => {
+      if (event.target.closest('.admin-product-popover, .pd-editor-target-trigger')) return
+      setActiveEditor(null)
+    }
+    document.addEventListener('pointerdown', closeOnOutsidePointer)
+    return () => document.removeEventListener('pointerdown', closeOnOutsidePointer)
+  }, [activeEditor])
+
+  useEffect(() => {
+    if (!settingsOpen) return undefined
+    const focusTimer = window.setTimeout(() => settingsCloseRef.current?.focus(), 0)
+    const handleDrawerKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setSettingsOpen(false)
+        window.setTimeout(() => settingsTriggerRef.current?.focus(), 0)
+        return
+      }
+      if (event.key !== 'Tab') return
+      const focusable = [...(settingsDrawerRef.current?.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href]') || [])]
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+    document.addEventListener('keydown', handleDrawerKeyDown)
+    return () => {
+      window.clearTimeout(focusTimer)
+      document.removeEventListener('keydown', handleDrawerKeyDown)
+    }
+  }, [settingsOpen])
+
   const apiState = shouldShowAdminApiState(resource.status) ? <AdminApiState error={resource.error} status={resource.status} /> : null
   const categories = resource.data?.categories || []
   const hasImage = images.length > 0 || Boolean(getCurrentImage(product))
@@ -258,19 +351,8 @@ export function AdminProductEditorPage() {
     ? price.isActive && price.wholesalePrice !== '' && Number(price.wholesalePrice) >= 0
     : priceSaved
   const readiness = useMemo(() => getReadiness(form, { hasImage, hasPrice }), [form, hasImage, hasPrice])
-  const previewTranslation = form.translations[activeLocale] || emptyTranslation
-  const previewName = previewTranslation.name.trim() || form.translations.kr.name.trim() || '상품명'
-  const previewSummary = previewTranslation.summary.trim() || form.translations.kr.summary.trim() || '상품 요약'
-  const previewHeadline = previewTranslation.headline.trim() || form.translations.kr.headline.trim()
-  const previewBody = previewTranslation.body.trim() || form.translations.kr.body.trim()
   const previewImage = images.find((image) => image.isPrimary)?.previewUrl || images[0]?.previewUrl || getCurrentImage(product)
-  const previewColors = parseList(form.colorsText)
-  const previewSizes = parseList(form.sizesText)
   const previewCategory = categories.find((item) => item.categoryId === form.categoryKey)
-  const previewCategoryLabel = previewCategory?.nameKo || previewCategory?.nameEn || previewCategory?.nameZhTw || form.categoryKey || 'PIERCING'
-  const previewHasPrice = price.isActive && price.wholesalePrice !== '' && Number.isFinite(Number(price.wholesalePrice))
-  const previewPrice = previewHasPrice ? `${new Intl.NumberFormat('ko-KR').format(Number(price.wholesalePrice))} KRW` : '승인 후 가격 확인 가능'
-  const previewLocaleLabel = localeTabs.find(({ key }) => key === activeLocale)?.label || activeLocale
 
   if (apiState) return apiState
 
@@ -334,6 +416,9 @@ export function AdminProductEditorPage() {
     setImages([])
     setForm(structuredClone(initialRef.current.form))
     setPrice({ ...initialRef.current.price })
+    setActiveEditor(null)
+    setSettingsOpen(false)
+    inlineSnapshotRef.current = null
     setDirty(false)
     setPriceDirty(false)
     setToast({ message: '변경사항을 되돌렸습니다.', tone: 'success' })
@@ -396,6 +481,9 @@ export function AdminProductEditorPage() {
       const nextForm = productToForm(savedProduct || { ...payload, id: savedProductId })
       initialRef.current = { form: structuredClone(nextForm), price: { ...price } }
       setForm(nextForm)
+      setActiveEditor(null)
+      setSettingsOpen(false)
+      inlineSnapshotRef.current = null
       setDirty(false)
       setPriceDirty(false)
       setConfirm(null)
@@ -419,7 +507,114 @@ export function AdminProductEditorPage() {
   })
 
   const currentTranslation = form.translations[activeLocale]
-  const currentImage = getCurrentImage(product)
+  const draftProduct = buildDraftProduct({ category: previewCategory, form, previewImage, product })
+  const draftPrice = price.isActive && price.wholesalePrice !== ''
+    ? {
+      currency: 'KRW',
+      market: 'KR',
+      moq: Math.max(1, Number(price.moq || form.moqDefault || 1)),
+      wholesalePrice: Number(price.wholesalePrice),
+    }
+    : null
+  const previewContentLocale = activeLocale === 'zh-TW' ? 'cn' : activeLocale
+
+  const beginInline = (field, value) => {
+    inlineSnapshotRef.current = { field, value, wasDirty: dirty }
+    setActiveEditor({ field, kind: 'inline' })
+  }
+  const changeInline = (field, value) => setTranslationField(activeLocale, field, value)
+  const commitInline = (field) => {
+    if (inlineSnapshotRef.current?.field === field) inlineSnapshotRef.current = null
+    setActiveEditor((current) => current?.field === field ? null : current)
+  }
+  const cancelInline = (field) => {
+    const snapshot = inlineSnapshotRef.current
+    if (snapshot?.field === field) {
+      setForm((current) => ({
+        ...current,
+        translations: {
+          ...current.translations,
+          [activeLocale]: { ...current.translations[activeLocale], [field]: snapshot.value },
+        },
+      }))
+      setDirty(snapshot.wasDirty)
+      inlineSnapshotRef.current = null
+    }
+    setActiveEditor(null)
+  }
+  const openPopover = (field, target) => {
+    const rect = target.getBoundingClientRect()
+    const side = rect.bottom + 380 > window.innerHeight && rect.top > 380 ? 'top' : 'bottom'
+    setActiveEditor({ field, kind: 'popover', side })
+  }
+  const closePopover = () => setActiveEditor(null)
+  const renderPopover = (field) => {
+    const popover = (title, body) => <section
+      aria-label={`${title} 편집`}
+      className={`admin-product-popover is-${activeEditor?.side || 'bottom'}`}
+      role="dialog"
+    >
+      <header><div><strong>{title}</strong><span>변경 내용은 초안 저장 전까지 공개되지 않습니다.</span></div><button aria-label="편집창 닫기" title="편집창 닫기" type="button" onClick={closePopover}><X size={16} /></button></header>
+      <div className="admin-product-popover-body">{body}</div>
+    </section>
+
+    if (field === 'image') return popover('상품 이미지', <>
+      <div className="admin-product-popover-image">
+        {previewImage ? <img alt="현재 상품" src={previewImage} /> : <span><ImagePlus size={24} />등록된 이미지 없음</span>}
+      </div>
+      <button className="secondary-action" type="button" onClick={() => fileInputRef.current?.click()}><UploadCloud size={16} /> 이미지 선택 또는 교체</button>
+      {images.length > 0 && <div className="admin-product-popover-thumbs">{images.map((image) => <article className={image.isPrimary ? 'is-primary' : ''} key={image.id}>
+        <img alt="업로드 미리보기" src={image.previewUrl} />
+        <label><input checked={image.isPrimary} name="visualPrimaryImage" type="radio" onChange={() => { setImages((current) => current.map((item) => ({ ...item, isPrimary: item.id === image.id }))); setDirty(true) }} /> 대표</label>
+        <input aria-label="이미지 대체 문구" placeholder="대체 문구" value={image.altText} onChange={(event) => { setImages((current) => current.map((item) => item.id === image.id ? { ...item, altText: event.target.value } : item)); setDirty(true) }} />
+        <button aria-label="이미지 제거" title="이미지 제거" type="button" onClick={() => removeImage(image.id)}><Trash2 size={14} /></button>
+      </article>)}</div>}
+      <small>JPG, PNG, WebP · 최대 8개 · 장당 10MB</small>
+    </>)
+
+    if (field === 'category') return popover('카테고리', <label className="admin-field"><span>카테고리</span><select value={form.categoryKey} onChange={(event) => setField('categoryKey', event.target.value)}><option value="">선택</option>{categories.map((item) => <option key={item.id} value={item.categoryId}>{item.nameKo || item.nameEn || item.nameZhTw || item.categoryId}</option>)}</select></label>)
+    if (field === 'code') return popover('상품 코드', <label className="admin-field"><span>상품 코드 <b>*</b></span><input disabled={isEditing} maxLength="80" placeholder="NB-001" value={form.code} onChange={(event) => setField('code', event.target.value)} /><small>{isEditing ? '등록된 상품 코드는 변경할 수 없습니다.' : '저장 후에는 상품 코드를 변경할 수 없습니다.'}</small></label>)
+    if (field === 'productInfo') return popover('상품 정보', <div className="admin-form-grid">
+      <label className="admin-field"><span>소재</span><input value={form.material} onChange={(event) => setField('material', event.target.value)} /></label>
+      <label className="admin-field"><span>원산지</span><input maxLength="20" value={form.origin} onChange={(event) => setField('origin', event.target.value)} /></label>
+      <label className="admin-field admin-field-wide"><span>예상 납기</span><input placeholder="영업일 기준 7-10일" value={form.leadTime} onChange={(event) => setField('leadTime', event.target.value)} /></label>
+      <label className="admin-switch admin-field-wide"><input checked={form.isExportAvailable} type="checkbox" onChange={(event) => setField('isExportAvailable', event.target.checked)} /><span>수출 가능</span></label>
+    </div>)
+    if (field === 'colors') return popover('색상 옵션', <label className="admin-field"><span>색상</span><input placeholder="골드, 실버, 오알" value={form.colorsText} onChange={(event) => setField('colorsText', event.target.value)} /><small>쉼표로 구분해 입력합니다.</small></label>)
+    if (field === 'sizes') return popover('사이즈 옵션', <label className="admin-field"><span>사이즈</span><input placeholder="6mm, 8mm" value={form.sizesText} onChange={(event) => setField('sizesText', event.target.value)} /><small>쉼표로 구분해 입력합니다.</small></label>)
+    if (field === 'moq') return popover('MOQ', <div className="admin-form-grid">
+      <label className="admin-field"><span>상품 최소 수량</span><input min="1" type="number" value={form.moqDefault} onChange={(event) => setField('moqDefault', event.target.value)} /></label>
+      <label className="admin-field"><span>가격 MOQ</span><input disabled={!canWritePrices} min="1" type="number" value={price.moq} onChange={(event) => setPriceField('moq', event.target.value)} /></label>
+    </div>)
+    if (field === 'price') return popover('승인 회원 가격', <>
+      <div className="admin-form-grid">
+        <label className="admin-field"><span>KR 도매가 (KRW)</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.wholesalePrice} onChange={(event) => setPriceField('wholesalePrice', event.target.value)} /></label>
+        <label className="admin-field"><span>권장 소비자가</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.retailPrice} onChange={(event) => setPriceField('retailPrice', event.target.value)} /></label>
+        <label className="admin-field"><span>최소 견적 금액</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.minOrderAmount} onChange={(event) => setPriceField('minOrderAmount', event.target.value)} /></label>
+        <label className="admin-switch"><input checked={price.isActive} disabled={!canWritePrices} type="checkbox" onChange={(event) => setPriceField('isActive', event.target.checked)} /><span>KR 가격 활성화</span></label>
+      </div>
+      {!canWritePrices && <p className="admin-help-text">가격 수정 권한이 없어 읽기 전용으로 표시됩니다.</p>}
+    </>)
+    if (field === 'specs') return popover('상세 스펙', <div className="admin-form-grid">
+      <label className="admin-field"><span>게이지</span><input placeholder="16G" value={form.specs.gauge || ''} onChange={(event) => setNestedField('specs', 'gauge', event.target.value)} /></label>
+      <label className="admin-field"><span>길이</span><input value={form.specs.length || ''} onChange={(event) => setNestedField('specs', 'length', event.target.value)} /></label>
+      <label className="admin-field"><span>단위</span><select value={form.specs.unit || 'mm'} onChange={(event) => setNestedField('specs', 'unit', event.target.value)}><option value="mm">mm</option><option value="cm">cm</option><option value="inch">inch</option></select></label>
+      <label className="admin-field admin-field-wide"><span>스펙 메모</span><textarea rows="3" value={form.specs.specNote || ''} onChange={(event) => setNestedField('specs', 'specNote', event.target.value)} /></label>
+    </div>)
+    return null
+  }
+
+  const editorBridge = {
+    active: activeEditor,
+    beginInline,
+    cancelInline,
+    changeInline,
+    commitInline,
+    localeLabel: localeTabs.find(({ key }) => key === activeLocale)?.label || activeLocale,
+    openPopover,
+    renderPopover,
+    values: currentTranslation,
+  }
 
   return <>
     <AdminPageHeader
@@ -437,104 +632,68 @@ export function AdminProductEditorPage() {
       <p>{readiness.missing.join(', ')} 항목을 보완해 주세요. 저장만으로 상품이 자동 비공개되지는 않습니다.</p>
     </AdminNotice>}
 
-    <form className="admin-product-editor has-live-preview" onSubmit={(event) => { event.preventDefault(); saveProduct() }}>
-      <div className="admin-editor-main">
-        <section className="admin-editor-section">
-          <div className="admin-section-heading"><div><h2>기본 정보</h2><p>언어별 상품명과 한 줄 요약을 입력합니다.</p></div><AdminCompletionBadge complete={localeTabs.every(({ key }) => form.translations[key].name.trim() && form.translations[key].summary.trim())} /></div>
-          <div className="admin-language-tabs" role="tablist" aria-label="상품 언어">
-            {localeTabs.map(({ key, label }) => {
-              const complete = form.translations[key].name.trim() && form.translations[key].summary.trim()
-              return <button aria-selected={activeLocale === key} className={activeLocale === key ? 'is-active' : ''} key={key} role="tab" type="button" onClick={() => setActiveLocale(key)}><span>{label}</span>{complete && <Check size={15} />}</button>
-            })}
+    <form className="admin-product-visual-editor" onSubmit={(event) => { event.preventDefault(); saveProduct() }}>
+      <section className="admin-product-visual-toolbar" aria-label="상품 상세 편집 도구">
+        <div className="admin-language-tabs" role="tablist" aria-label="상품 언어">
+          {localeTabs.map(({ key, label }) => <button aria-selected={activeLocale === key} className={activeLocale === key ? 'is-active' : ''} key={key} role="tab" type="button" onClick={() => { if (activeEditor?.kind === 'inline') commitInline(activeEditor.field); else setActiveEditor(null); setActiveLocale(key) }}>{label}</button>)}
+        </div>
+        <div className="admin-product-visual-actions">
+          <button className={`admin-product-readiness-button${readiness.ready ? ' is-ready' : ''}`} type="button" onClick={() => { if (activeEditor?.kind === 'inline') commitInline(activeEditor.field); else setActiveEditor(null); setSettingsOpen(true) }}>
+            <span>공개 준비</span><strong>{readiness.ready ? '완료' : `${readiness.missing.length}개 필요`}</strong>
+          </button>
+          <div aria-label="미리보기 화면" className="admin-showcase-preview-modes" role="group">
+            <button aria-label="데스크톱 미리보기" aria-pressed={previewMode === 'desktop'} className={previewMode === 'desktop' ? 'is-active' : undefined} title="데스크톱 미리보기" type="button" onClick={() => setPreviewMode('desktop')}><Monitor size={16} /></button>
+            <button aria-label="모바일 미리보기" aria-pressed={previewMode === 'mobile'} className={previewMode === 'mobile' ? 'is-active' : undefined} title="모바일 미리보기" type="button" onClick={() => setPreviewMode('mobile')}><Smartphone size={16} /></button>
           </div>
-          <div className="admin-form-grid">
-            <label className="admin-field admin-field-wide"><span>상품명 <b>*</b></span><input maxLength="200" value={currentTranslation.name} onChange={(event) => setTranslationField(activeLocale, 'name', event.target.value)} /></label>
-            <label className="admin-field admin-field-wide"><span>한 줄 요약 <b>*</b></span><textarea maxLength="2000" rows="3" value={currentTranslation.summary} onChange={(event) => setTranslationField(activeLocale, 'summary', event.target.value)} /></label>
-            <label className="admin-field"><span>상품 코드 <b>*</b></span><input disabled={isEditing} maxLength="80" placeholder="NB-001" value={form.code} onChange={(event) => setField('code', event.target.value)} /></label>
+          <button ref={settingsTriggerRef} aria-label="상품 설정 열기" className="admin-product-settings-button" title="상품 설정" type="button" onClick={() => { if (activeEditor?.kind === 'inline') commitInline(activeEditor.field); else setActiveEditor(null); setSettingsOpen(true) }}><Settings2 size={17} /></button>
+        </div>
+      </section>
+
+      <section className={`admin-product-detail-canvas is-${previewMode}`} aria-label="실제 상품 상세 화면 편집 미리보기">
+        <ProductDetailView
+          approvedAmount={draftPrice?.wholesalePrice ?? null}
+          contentLocale={previewContentLocale}
+          editor={editorBridge}
+          isApproved
+          locale={activeLocale}
+          price={draftPrice}
+          product={draftProduct}
+          products={[draftProduct]}
+          toLocalePath={toLocalePath}
+          viewerState="approved"
+        />
+      </section>
+
+      {settingsOpen && <>
+        <button aria-label="상품 설정 닫기" className="admin-product-settings-backdrop" type="button" onClick={() => { setSettingsOpen(false); window.setTimeout(() => settingsTriggerRef.current?.focus(), 0) }} />
+        <aside aria-labelledby="admin-product-settings-title" aria-modal="true" className="admin-product-settings-drawer" ref={settingsDrawerRef} role="dialog">
+          <header><div><span>PRODUCT SETTINGS</span><h2 id="admin-product-settings-title">상품 설정</h2></div><button aria-label="상품 설정 닫기" ref={settingsCloseRef} title="닫기" type="button" onClick={() => { setSettingsOpen(false); window.setTimeout(() => settingsTriggerRef.current?.focus(), 0) }}><X size={18} /></button></header>
+          <div className={`admin-product-drawer-readiness${readiness.ready ? ' is-ready' : ''}`}><strong>{readiness.ready ? '공개할 수 있습니다.' : `${readiness.missing.length}개 항목을 보완해 주세요.`}</strong>{!readiness.ready && <p>{readiness.missing.join(', ')}</p>}</div>
+
+          <section><h3>분류와 운영 정보</h3><div className="admin-form-grid">
             <label className="admin-field"><span>원산지</span><input maxLength="20" value={form.origin} onChange={(event) => setField('origin', event.target.value)} /></label>
-          </div>
-        </section>
-
-        <section className="admin-editor-section">
-          <div className="admin-section-heading"><div><h2>이미지</h2><p>한 번 업로드하면 목록, 상세, 확대용 WebP를 자동 생성합니다.</p></div><AdminCompletionBadge complete={hasImage} /></div>
-          <input accept="image/jpeg,image/png,image/webp" hidden multiple ref={fileInputRef} type="file" onChange={selectImages} />
-          {images.length === 0 ? <button className="admin-image-dropzone" type="button" onClick={() => fileInputRef.current?.click()}>
-            {currentImage ? <img alt="현재 대표 이미지" src={currentImage} /> : <ImagePlus size={28} />}
-            <span><strong>{currentImage ? '새 이미지로 교체' : '이미지 선택'}</strong><small>JPG, PNG, WebP / 최대 8개 / 장당 10MB</small></span>
-          </button> : <>
-            <div className="admin-image-grid">{images.map((image) => <article className={image.isPrimary ? 'is-primary' : ''} key={image.id}>
-              <img alt="업로드 미리보기" src={image.previewUrl} />
-              <label><input checked={image.isPrimary} name="primaryImage" type="radio" onChange={() => { setImages((current) => current.map((item) => ({ ...item, isPrimary: item.id === image.id }))); setDirty(true) }} /> 대표 이미지</label>
-              <input aria-label="이미지 대체 문구" placeholder="비우면 언어별 상품명 사용" value={image.altText} onChange={(event) => { setImages((current) => current.map((item) => item.id === image.id ? { ...item, altText: event.target.value } : item)); setDirty(true) }} />
-              <button aria-label="이미지 제거" title="이미지 제거" type="button" onClick={() => removeImage(image.id)}><Trash2 size={16} /></button>
-            </article>)}</div>
-            <button className="secondary-action" type="button" onClick={() => fileInputRef.current?.click()}><UploadCloud size={17} />다시 선택</button>
-          </>}
-          {currentImage && images.length > 0 && <p className="admin-help-text">저장하면 기존 이미지 전체가 새로 선택한 이미지로 교체됩니다.</p>}
-        </section>
-
-        <section className="admin-editor-section">
-          <div className="admin-section-heading"><div><h2>옵션과 MOQ</h2><p>고객이 견적 요청에서 선택할 옵션을 입력합니다.</p></div></div>
-          <div className="admin-form-grid">
-            <label className="admin-field admin-field-wide"><span>색상</span><input placeholder="골드, 실버, 오알" value={form.colorsText} onChange={(event) => setField('colorsText', event.target.value)} /><small>쉼표로 구분</small></label>
-            <label className="admin-field admin-field-wide"><span>사이즈</span><input placeholder="6mm, 8mm" value={form.sizesText} onChange={(event) => setField('sizesText', event.target.value)} /><small>쉼표로 구분</small></label>
-            <label className="admin-field"><span>최소 수량</span><input min="1" type="number" value={form.moqDefault} onChange={(event) => setField('moqDefault', event.target.value)} /></label>
-            <label className="admin-field"><span>예상 납기</span><input placeholder="영업일 기준 7-10일" value={form.leadTime} onChange={(event) => setField('leadTime', event.target.value)} /></label>
-          </div>
-        </section>
-
-        <section className="admin-editor-section">
-          <div className="admin-section-heading"><div><h2>승인 회원 가격</h2><p>비회원과 승인 대기 회원에게는 표시되지 않습니다.</p></div><AdminCompletionBadge complete={hasPrice} /></div>
-          <div className="admin-form-grid">
-            <label className="admin-field"><span>KR 도매가 (KRW)</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.wholesalePrice} onChange={(event) => setPriceField('wholesalePrice', event.target.value)} /></label>
-            <label className="admin-field"><span>권장 소비자가 (선택)</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.retailPrice} onChange={(event) => setPriceField('retailPrice', event.target.value)} /></label>
-            <label className="admin-field"><span>가격 MOQ</span><input disabled={!canWritePrices} min="1" type="number" value={price.moq} onChange={(event) => setPriceField('moq', event.target.value)} /></label>
-            <label className="admin-field"><span>최소 견적 금액</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.minOrderAmount} onChange={(event) => setPriceField('minOrderAmount', event.target.value)} /></label>
-            <label className="admin-switch"><input checked={price.isActive} disabled={!canWritePrices} type="checkbox" onChange={(event) => setPriceField('isActive', event.target.checked)} /><span>KR 가격 활성화</span></label>
-          </div>
-          {!canReadPrices && <p className="admin-help-text">가격 조회 권한이 없어 가격 상태를 확인할 수 없습니다.</p>}
-          {canReadPrices && !canWritePrices && <p className="admin-help-text">가격은 조회 전용입니다. 변경하려면 가격 작성 권한이 필요합니다.</p>}
-        </section>
-
-        <details className="admin-advanced-section">
-          <summary>분류와 상태</summary>
-          <div className="admin-form-grid">
-            <label className="admin-field"><span>카테고리</span><select value={form.categoryKey} onChange={(event) => setField('categoryKey', event.target.value)}><option value="">선택</option>{categories.map((item) => <option key={item.id} value={item.categoryId}>{item.nameKo || item.nameEn || item.nameZhTw || item.categoryId}</option>)}</select></label>
             <label className="admin-field"><span>소재</span><input value={form.material} onChange={(event) => setField('material', event.target.value)} /></label>
+            <label className="admin-field admin-field-wide"><span>예상 납기</span><input placeholder="영업일 기준 7-10일" value={form.leadTime} onChange={(event) => setField('leadTime', event.target.value)} /></label>
             <label className="admin-field"><span>피어싱 유형</span><input value={form.taxonomy.piercingType || ''} onChange={(event) => setNestedField('taxonomy', 'piercingType', event.target.value)} /></label>
             <label className="admin-field"><span>기본 소재 코드</span><input value={form.taxonomy.baseMaterial || ''} onChange={(event) => setNestedField('taxonomy', 'baseMaterial', event.target.value)} /></label>
             <label className="admin-field"><span>배지</span><input placeholder="NEW" value={form.badge} onChange={(event) => setField('badge', event.target.value)} /></label>
             <label className="admin-field"><span>정렬 순서</span><input min="0" type="number" value={form.sortOrder} onChange={(event) => setField('sortOrder', event.target.value)} /></label>
+          </div></section>
+
+          <section><h3>표시 상태</h3><div className="admin-checkbox-grid">
             <label className="admin-switch"><input checked={form.isExportAvailable} type="checkbox" onChange={(event) => setField('isExportAvailable', event.target.checked)} /><span>수출 가능</span></label>
             <label className="admin-switch"><input checked={form.isNew} type="checkbox" onChange={(event) => setField('isNew', event.target.checked)} /><span>신상품 표시</span></label>
             <label className="admin-switch"><input checked={form.isBest} type="checkbox" onChange={(event) => setField('isBest', event.target.checked)} /><span>추천 상품 표시</span></label>
-          </div>
-          <AdminLink to="/admin/categories">카테고리 관리</AdminLink>
-        </details>
+          </div></section>
 
-        <details className="admin-advanced-section">
-          <summary>상세 스펙</summary>
-          <div className="admin-form-grid">
+          <section><h3>상세 스펙</h3><div className="admin-form-grid">
             <label className="admin-field"><span>게이지</span><input placeholder="16G" value={form.specs.gauge || ''} onChange={(event) => setNestedField('specs', 'gauge', event.target.value)} /></label>
             <label className="admin-field"><span>길이</span><input value={form.specs.length || ''} onChange={(event) => setNestedField('specs', 'length', event.target.value)} /></label>
             <label className="admin-field"><span>단위</span><select value={form.specs.unit || 'mm'} onChange={(event) => setNestedField('specs', 'unit', event.target.value)}><option value="mm">mm</option><option value="cm">cm</option><option value="inch">inch</option></select></label>
             <label className="admin-field admin-field-wide"><span>스펙 메모</span><textarea rows="3" value={form.specs.specNote || ''} onChange={(event) => setNestedField('specs', 'specNote', event.target.value)} /></label>
-          </div>
-        </details>
+          </div></section>
 
-        <details className="admin-advanced-section">
-          <summary>상세 문구</summary>
-          <div className="admin-language-tabs" role="tablist" aria-label="상세 문구 언어">{localeTabs.map(({ key, label }) => <button aria-selected={activeLocale === key} className={activeLocale === key ? 'is-active' : ''} key={key} role="tab" type="button" onClick={() => setActiveLocale(key)}>{label}</button>)}</div>
-          <div className="admin-form-grid">
-            <label className="admin-field admin-field-wide"><span>상세 제목</span><input value={currentTranslation.headline} onChange={(event) => setTranslationField(activeLocale, 'headline', event.target.value)} /></label>
-            <label className="admin-field admin-field-wide"><span>상세 본문</span><textarea rows="7" value={currentTranslation.body} onChange={(event) => setTranslationField(activeLocale, 'body', event.target.value)} /></label>
-          </div>
-          <p className="admin-help-text">한 언어에서 상세 제목이나 본문을 사용하면 공개 전에 네 언어를 모두 입력해야 합니다.</p>
-        </details>
-
-        <details className="admin-advanced-section">
-          <summary>홈 노출</summary>
-          <div className="admin-checkbox-grid">
+          <section><h3>홈 노출</h3><div className="admin-checkbox-grid">
             {[
               ['showInNewArrivals', '신상품'],
               ['showInWeeklyPick', '주간 추천'],
@@ -542,66 +701,11 @@ export function AdminProductEditorPage() {
               ['showInPiercing', '피어싱'],
               ['showInSteadySelection', '스테디 셀렉션'],
             ].map(([field, label]) => <label className="admin-switch" key={field}><input checked={Boolean(form.homePlacement[field])} type="checkbox" onChange={(event) => setNestedField('homePlacement', field, event.target.checked)} /><span>{label}</span></label>)}
-          </div>
-        </details>
-      </div>
+          </div></section>
+        </aside>
+      </>}
 
-      <aside aria-label="상품 상세 화면 미리보기" className="admin-editor-summary admin-product-preview-panel">
-        <div className="admin-product-preview-header">
-          <div><h2>상품 상세 미리보기</h2><span>{previewLocaleLabel}</span></div>
-          <div aria-label="미리보기 화면" className="admin-showcase-preview-modes" role="group">
-            <button aria-label="데스크톱 미리보기" aria-pressed={previewMode === 'desktop'} className={previewMode === 'desktop' ? 'is-active' : undefined} title="데스크톱 미리보기" type="button" onClick={() => setPreviewMode('desktop')}><Monitor size={16} /></button>
-            <button aria-label="모바일 미리보기" aria-pressed={previewMode === 'mobile'} className={previewMode === 'mobile' ? 'is-active' : undefined} title="모바일 미리보기" type="button" onClick={() => setPreviewMode('mobile')}><Smartphone size={16} /></button>
-          </div>
-        </div>
-
-        <div className={`admin-product-live-preview is-${previewMode}`}>
-          <div className="admin-product-preview-browser">
-            <header><strong>NOBLESSE</strong><span>PIERCING</span></header>
-            <div className="admin-product-preview-content">
-              <div className="admin-product-preview-gallery">
-                <div className="admin-product-preview-image">
-                  {previewImage ? <img alt="상품 상세 미리보기" src={previewImage} /> : <span><ImagePlus aria-hidden="true" size={28} /> 대표 이미지</span>}
-                  {(form.badge.trim() || form.isNew || form.isBest) && <b>{form.badge.trim() || (form.isNew ? 'NEW' : 'BEST')}</b>}
-                </div>
-                <div aria-hidden="true" className="admin-product-preview-thumbnails">
-                  {Array.from({ length: Math.min(4, Math.max(1, images.length)) }).map((_, index) => {
-                    const image = images[index]?.previewUrl || previewImage
-                    return <span className={index === 0 ? 'is-active' : undefined} key={index}>{image && <img alt="" src={image} />}</span>
-                  })}
-                </div>
-              </div>
-
-              <div className="admin-product-preview-info">
-                <small>{previewCategoryLabel}</small>
-                <h3>{previewName}</h3>
-                <p>{previewSummary}</p>
-                <div className="admin-product-preview-price"><span>승인 회원 가격</span><strong>{previewPrice}</strong></div>
-
-                <div className="admin-product-preview-options">
-                  <div><span>색상</span><p>{previewColors.length > 0 ? previewColors.map((color, index) => <b key={`${color}-${index}`}><i />{color}</b>) : <em>옵션 없음</em>}</p></div>
-                  <div><span>사이즈</span><p>{previewSizes.length > 0 ? previewSizes.map((size) => <b key={size}>{size}</b>) : <em>옵션 없음</em>}</p></div>
-                  <div className="admin-product-preview-moq"><span>MOQ</span><strong>{Math.max(1, Number(form.moqDefault || 1))}</strong></div>
-                </div>
-
-                <span className="admin-product-preview-cta">견적 리스트에 담기</span>
-              </div>
-            </div>
-
-            <section className={`admin-product-preview-detail${previewHeadline || previewBody ? '' : ' is-empty'}`}>
-              <small>PRODUCT DETAIL</small>
-              <h4>{previewHeadline || '상세 설명'}</h4>
-              <p>{previewBody || '상세 문구 미입력'}</p>
-            </section>
-          </div>
-        </div>
-
-        <h2>공개 준비</h2>
-        <div className={`admin-readiness ${readiness.ready ? 'is-ready' : ''}`}><strong>{readiness.ready ? '공개 가능' : `${readiness.missing.length}개 항목 필요`}</strong><p>{readiness.ready ? '모든 공개 조건을 충족했습니다.' : readiness.missing.join(', ')}</p></div>
-        <dl><dt>현재 상태</dt><dd>{product?.isVisible ? '공개' : '비공개 초안'}</dd><dt>대표 이미지</dt><dd>{hasImage ? '완료' : '필요'}</dd><dt>KR 가격</dt><dd>{hasPrice ? '완료' : '필요'}</dd></dl>
-        <button className="primary-action" disabled={!dirty || saving} type="submit">{saving ? '저장 중...' : '초안 저장'}</button>
-        {hasPermission('catalog.publish') && !product?.isVisible && <button disabled={saving} type="button" onClick={requestPublish}>검토 후 공개</button>}
-      </aside>
+      <input accept="image/jpeg,image/png,image/webp" hidden multiple ref={fileInputRef} type="file" onChange={selectImages} />
     </form>
 
     <AdminSaveBar visible={dirty} saving={saving} onDiscard={discardChanges} onSave={() => saveProduct()} />
