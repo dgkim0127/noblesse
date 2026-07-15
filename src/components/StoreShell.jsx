@@ -520,11 +520,22 @@ export function StoreShell() {
   const pathnameWithoutLocale = supportedLocales.includes(firstPathSegment)
     ? normalizedPathname.slice(firstPathSegment.length + 1) || '/'
     : normalizedPathname
+  const isAdminRoute = /^\/admin(?:\/|$)/.test(pathnameWithoutLocale)
   const isProductBrowsingRoute = /^\/(?:products|collections|piercing|material|shape)(?:\/|$)/.test(pathnameWithoutLocale)
   const usesHomeStyleHeader = isHomeImageRoute || isProductBrowsingRoute
   const inquiryListCount = Array.isArray(inquiryRows) ? inquiryRows.length : 0
 
   useEffect(() => {
+    if (isAdminRoute) {
+      setIsMarqueeCollapsed(false)
+      setIsSideLayout(false)
+      setIsHeaderCompact(false)
+      document.documentElement.classList.remove('noblesse-marquee-collapsed')
+      document.documentElement.classList.remove('noblesse-side-layout')
+      document.documentElement.classList.remove('noblesse-compact-header')
+      return undefined
+    }
+
     const handleScroll = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop || 0
       const marqueeCollapsed = scrollY > 24
@@ -559,9 +570,11 @@ export function StoreShell() {
       document.documentElement.classList.remove('noblesse-side-layout')
       document.documentElement.classList.remove('noblesse-compact-header')
     }
-  }, [])
+  }, [isAdminRoute])
 
   useEffect(() => {
+    if (isAdminRoute) return undefined
+
     let wheelLock = false
 
     const handleFirstWheel = (event) => {
@@ -581,7 +594,7 @@ export function StoreShell() {
     return () => {
       window.removeEventListener('wheel', handleFirstWheel)
     }
-  }, [])
+  }, [isAdminRoute])
 
   useEffect(() => {
     if (!isHeaderCompact && !isCompactSearchClosing) {
