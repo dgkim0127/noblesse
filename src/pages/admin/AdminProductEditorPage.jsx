@@ -1,4 +1,4 @@
-import { Check, ImagePlus, PackageCheck, Trash2, UploadCloud } from 'lucide-react'
+import { Check, ImagePlus, Monitor, PackageCheck, Smartphone, Trash2, UploadCloud } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
@@ -197,6 +197,7 @@ export function AdminProductEditorPage() {
   const [priceSaved, setPriceSaved] = useState(false)
   const [product, setProduct] = useState(null)
   const [activeLocale, setActiveLocale] = useState('kr')
+  const [previewMode, setPreviewMode] = useState('desktop')
   const [images, setImages] = useState([])
   const [dirty, setDirty] = useState(false)
   const [priceDirty, setPriceDirty] = useState(false)
@@ -257,6 +258,19 @@ export function AdminProductEditorPage() {
     ? price.isActive && price.wholesalePrice !== '' && Number(price.wholesalePrice) >= 0
     : priceSaved
   const readiness = useMemo(() => getReadiness(form, { hasImage, hasPrice }), [form, hasImage, hasPrice])
+  const previewTranslation = form.translations[activeLocale] || emptyTranslation
+  const previewName = previewTranslation.name.trim() || form.translations.kr.name.trim() || '상품명'
+  const previewSummary = previewTranslation.summary.trim() || form.translations.kr.summary.trim() || '상품 요약'
+  const previewHeadline = previewTranslation.headline.trim() || form.translations.kr.headline.trim()
+  const previewBody = previewTranslation.body.trim() || form.translations.kr.body.trim()
+  const previewImage = images.find((image) => image.isPrimary)?.previewUrl || images[0]?.previewUrl || getCurrentImage(product)
+  const previewColors = parseList(form.colorsText)
+  const previewSizes = parseList(form.sizesText)
+  const previewCategory = categories.find((item) => item.categoryId === form.categoryKey)
+  const previewCategoryLabel = previewCategory?.nameKo || previewCategory?.nameEn || previewCategory?.nameZhTw || form.categoryKey || 'PIERCING'
+  const previewHasPrice = price.isActive && price.wholesalePrice !== '' && Number.isFinite(Number(price.wholesalePrice))
+  const previewPrice = previewHasPrice ? `${new Intl.NumberFormat('ko-KR').format(Number(price.wholesalePrice))} KRW` : '승인 후 가격 확인 가능'
+  const previewLocaleLabel = localeTabs.find(({ key }) => key === activeLocale)?.label || activeLocale
 
   if (apiState) return apiState
 
@@ -423,7 +437,7 @@ export function AdminProductEditorPage() {
       <p>{readiness.missing.join(', ')} 항목을 보완해 주세요. 저장만으로 상품이 자동 비공개되지는 않습니다.</p>
     </AdminNotice>}
 
-    <form className="admin-product-editor" onSubmit={(event) => { event.preventDefault(); saveProduct() }}>
+    <form className="admin-product-editor has-live-preview" onSubmit={(event) => { event.preventDefault(); saveProduct() }}>
       <div className="admin-editor-main">
         <section className="admin-editor-section">
           <div className="admin-section-heading"><div><h2>기본 정보</h2><p>언어별 상품명과 한 줄 요약을 입력합니다.</p></div><AdminCompletionBadge complete={localeTabs.every(({ key }) => form.translations[key].name.trim() && form.translations[key].summary.trim())} /></div>
@@ -532,7 +546,56 @@ export function AdminProductEditorPage() {
         </details>
       </div>
 
-      <aside className="admin-editor-summary">
+      <aside aria-label="상품 상세 화면 미리보기" className="admin-editor-summary admin-product-preview-panel">
+        <div className="admin-product-preview-header">
+          <div><h2>상품 상세 미리보기</h2><span>{previewLocaleLabel}</span></div>
+          <div aria-label="미리보기 화면" className="admin-showcase-preview-modes" role="group">
+            <button aria-label="데스크톱 미리보기" aria-pressed={previewMode === 'desktop'} className={previewMode === 'desktop' ? 'is-active' : undefined} title="데스크톱 미리보기" type="button" onClick={() => setPreviewMode('desktop')}><Monitor size={16} /></button>
+            <button aria-label="모바일 미리보기" aria-pressed={previewMode === 'mobile'} className={previewMode === 'mobile' ? 'is-active' : undefined} title="모바일 미리보기" type="button" onClick={() => setPreviewMode('mobile')}><Smartphone size={16} /></button>
+          </div>
+        </div>
+
+        <div className={`admin-product-live-preview is-${previewMode}`}>
+          <div className="admin-product-preview-browser">
+            <header><strong>NOBLESSE</strong><span>PIERCING</span></header>
+            <div className="admin-product-preview-content">
+              <div className="admin-product-preview-gallery">
+                <div className="admin-product-preview-image">
+                  {previewImage ? <img alt="상품 상세 미리보기" src={previewImage} /> : <span><ImagePlus aria-hidden="true" size={28} /> 대표 이미지</span>}
+                  {(form.badge.trim() || form.isNew || form.isBest) && <b>{form.badge.trim() || (form.isNew ? 'NEW' : 'BEST')}</b>}
+                </div>
+                <div aria-hidden="true" className="admin-product-preview-thumbnails">
+                  {Array.from({ length: Math.min(4, Math.max(1, images.length)) }).map((_, index) => {
+                    const image = images[index]?.previewUrl || previewImage
+                    return <span className={index === 0 ? 'is-active' : undefined} key={index}>{image && <img alt="" src={image} />}</span>
+                  })}
+                </div>
+              </div>
+
+              <div className="admin-product-preview-info">
+                <small>{previewCategoryLabel}</small>
+                <h3>{previewName}</h3>
+                <p>{previewSummary}</p>
+                <div className="admin-product-preview-price"><span>승인 회원 가격</span><strong>{previewPrice}</strong></div>
+
+                <div className="admin-product-preview-options">
+                  <div><span>색상</span><p>{previewColors.length > 0 ? previewColors.map((color, index) => <b key={`${color}-${index}`}><i />{color}</b>) : <em>옵션 없음</em>}</p></div>
+                  <div><span>사이즈</span><p>{previewSizes.length > 0 ? previewSizes.map((size) => <b key={size}>{size}</b>) : <em>옵션 없음</em>}</p></div>
+                  <div className="admin-product-preview-moq"><span>MOQ</span><strong>{Math.max(1, Number(form.moqDefault || 1))}</strong></div>
+                </div>
+
+                <span className="admin-product-preview-cta">견적 리스트에 담기</span>
+              </div>
+            </div>
+
+            <section className={`admin-product-preview-detail${previewHeadline || previewBody ? '' : ' is-empty'}`}>
+              <small>PRODUCT DETAIL</small>
+              <h4>{previewHeadline || '상세 설명'}</h4>
+              <p>{previewBody || '상세 문구 미입력'}</p>
+            </section>
+          </div>
+        </div>
+
         <h2>공개 준비</h2>
         <div className={`admin-readiness ${readiness.ready ? 'is-ready' : ''}`}><strong>{readiness.ready ? '공개 가능' : `${readiness.missing.length}개 항목 필요`}</strong><p>{readiness.ready ? '모든 공개 조건을 충족했습니다.' : readiness.missing.join(', ')}</p></div>
         <dl><dt>현재 상태</dt><dd>{product?.isVisible ? '공개' : '비공개 초안'}</dd><dt>대표 이미지</dt><dd>{hasImage ? '완료' : '필요'}</dd><dt>KR 가격</dt><dd>{hasPrice ? '완료' : '필요'}</dd></dl>

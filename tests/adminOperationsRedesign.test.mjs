@@ -8,6 +8,7 @@ const read = (path) => readFileSync(join(process.cwd(), path), 'utf8')
 test('product operations use dedicated list and editor workflows', () => {
   const list = read('src/pages/admin/AdminProductsPage.jsx')
   const editor = read('src/pages/admin/AdminProductEditorPage.jsx')
+  const styles = read('src/styles/admin-console.css')
 
   assert.match(list, /\/admin\/products\/new/)
   assert.doesNotMatch(list, /\/admin\/catalog\/new/)
@@ -17,6 +18,15 @@ test('product operations use dedicated list and editor workflows', () => {
   assert.match(editor, /AdminSaveBar/)
   assert.match(editor, /getReadiness/)
   assert.match(editor, /prices\.write/)
+  assert.match(editor, /admin-product-live-preview/)
+  assert.match(editor, /previewMode === 'desktop'/)
+  assert.match(editor, /previewMode === 'mobile'/)
+  assert.match(editor, /previewTranslation/)
+  assert.match(editor, /previewImage/)
+  assert.match(editor, /previewColors/)
+  assert.match(editor, /previewPrice/)
+  assert.match(styles, /\.admin-product-live-preview/)
+  assert.match(styles, /\.admin-product-preview-content/)
 })
 
 test('quote workflow separates customer documents from internal notes and direct payment', () => {
