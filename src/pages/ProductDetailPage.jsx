@@ -729,18 +729,18 @@ function OptionButtons({ label, options, selected, onSelect }) {
 
 function ProductEditorTarget({ align = 'start', children, editor, field, label }) {
   if (!editor) return children
-  const active = editor.active?.kind === 'popover' && editor.active.field === field
+  const active = editor.selectedField === field
   return <div className={`pd-editor-target is-${align}${active ? ' is-active' : ''}`}>
     {children}
     <button
+      aria-controls="admin-product-inspector"
       aria-label={`${label} 편집`}
       aria-pressed={active}
       className="pd-editor-target-trigger"
       title={`${label} 편집`}
       type="button"
-      onClick={(event) => editor.openPopover(field, event.currentTarget)}
+      onClick={(event) => editor.selectField(field, event.currentTarget)}
     ><Pencil aria-hidden="true" size={15} /></button>
-    {active && editor.renderPopover(field)}
   </div>
 }
 

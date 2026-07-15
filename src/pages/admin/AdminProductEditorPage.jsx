@@ -1,4 +1,4 @@
-import { ImagePlus, Monitor, PackageCheck, Settings2, Smartphone, Trash2, UploadCloud, X } from 'lucide-react'
+import { ChevronDown, ImagePlus, Monitor, PackageCheck, Settings2, Smartphone, Trash2, UploadCloud, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
@@ -23,6 +23,30 @@ const localeTabs = [
 const maxImages = 8
 const maxImageBytes = 10 * 1024 * 1024
 const allowedImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp'])
+const inspectorGroups = [
+  { id: 'basic', label: '기본 정보' },
+  { id: 'images', label: '이미지' },
+  { id: 'trade', label: '옵션·가격' },
+  { id: 'details', label: '상세 정보' },
+  { id: 'operations', label: '운영 설정' },
+]
+const inspectorGroupByField = {
+  name: 'basic',
+  summary: 'basic',
+  code: 'basic',
+  category: 'basic',
+  image: 'images',
+  colors: 'trade',
+  sizes: 'trade',
+  moq: 'trade',
+  price: 'trade',
+  headline: 'details',
+  body: 'details',
+  productInfo: 'details',
+  specs: 'details',
+  readiness: 'operations',
+  settings: 'operations',
+}
 const emptyTranslation = { name: '', summary: '', headline: '', body: '' }
 const emptyPrice = { wholesalePrice: '', retailPrice: '', moq: '1', minOrderAmount: '0', isActive: true }
 const emptyForm = {
@@ -226,6 +250,22 @@ function getReadiness(form, { hasImage, hasPrice }) {
   return { ready: missing.length === 0, missing }
 }
 
+function InspectorGroup({ children, group, open, onOpen }) {
+  const panelId = `admin-product-inspector-${group.id}`
+  return <section className={`admin-product-inspector-group${open ? ' is-open' : ''}`}>
+    <button aria-controls={panelId} aria-expanded={open} className="admin-product-inspector-group-trigger" type="button" onClick={onOpen}>
+      <span>{group.label}</span><ChevronDown aria-hidden="true" size={17} />
+    </button>
+    {open && <div className="admin-product-inspector-group-body" id={panelId}>{children}</div>}
+  </section>
+}
+
+function InspectorField({ activeField, children, field }) {
+  return <div className={`admin-product-inspector-field${activeField === field ? ' is-active' : ''}`} data-editor-field={field}>
+    {children}
+  </div>
+}
+
 export function AdminProductEditorPage() {
   const { productId } = useParams()
   const isEditing = Boolean(productId)
@@ -238,8 +278,9 @@ export function AdminProductEditorPage() {
   const fileInputRef = useRef(null)
   const imageFilesRef = useRef([])
   const inlineSnapshotRef = useRef(null)
-  const settingsCloseRef = useRef(null)
-  const settingsDrawerRef = useRef(null)
+  const inspectorCloseRef = useRef(null)
+  const inspectorRef = useRef(null)
+  const inspectorReturnFocusRef = useRef(null)
   const settingsTriggerRef = useRef(null)
   const initialRef = useRef({ form: structuredClone(emptyForm), price: { ...emptyPrice } })
   const initializedKeyRef = useRef('')
@@ -249,8 +290,11 @@ export function AdminProductEditorPage() {
   const [product, setProduct] = useState(null)
   const [activeLocale, setActiveLocale] = useState('kr')
   const [activeEditor, setActiveEditor] = useState(null)
+  const [selectedField, setSelectedField] = useState(null)
+  const [openInspectorGroup, setOpenInspectorGroup] = useState('basic')
+  const [inspectorOpen, setInspectorOpen] = useState(false)
+  const [compactInspector, setCompactInspector] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches)
   const [previewMode, setPreviewMode] = useState('desktop')
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const [images, setImages] = useState([])
   const [dirty, setDirty] = useState(false)
   const [priceDirty, setPriceDirty] = useState(false)
@@ -305,27 +349,36 @@ export function AdminProductEditorPage() {
   }, [dirty])
 
   useEffect(() => {
-    if (activeEditor?.kind !== 'popover') return undefined
-    const closeOnOutsidePointer = (event) => {
-      if (event.target.closest('.admin-product-popover, .pd-editor-target-trigger')) return
-      setActiveEditor(null)
+    const media = window.matchMedia('(max-width: 1279px)')
+    const sync = () => {
+      setCompactInspector(media.matches)
+      if (!media.matches) setInspectorOpen(false)
     }
-    document.addEventListener('pointerdown', closeOnOutsidePointer)
-    return () => document.removeEventListener('pointerdown', closeOnOutsidePointer)
-  }, [activeEditor])
+    sync()
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
+  }, [])
 
   useEffect(() => {
-    if (!settingsOpen) return undefined
-    const focusTimer = window.setTimeout(() => settingsCloseRef.current?.focus(), 0)
-    const handleDrawerKeyDown = (event) => {
+    if (!selectedField || (compactInspector && !inspectorOpen)) return undefined
+    const frame = window.requestAnimationFrame(() => {
+      inspectorRef.current?.querySelector(`[data-editor-field="${selectedField}"]`)?.scrollIntoView({ block: 'nearest' })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [compactInspector, inspectorOpen, openInspectorGroup, selectedField])
+
+  useEffect(() => {
+    if (!compactInspector || !inspectorOpen) return undefined
+    const focusTimer = window.setTimeout(() => inspectorCloseRef.current?.focus(), 0)
+    const handleInspectorKeyDown = (event) => {
       if (event.key === 'Escape') {
         event.preventDefault()
-        setSettingsOpen(false)
-        window.setTimeout(() => settingsTriggerRef.current?.focus(), 0)
+        setInspectorOpen(false)
+        window.setTimeout(() => inspectorReturnFocusRef.current?.focus(), 0)
         return
       }
       if (event.key !== 'Tab') return
-      const focusable = [...(settingsDrawerRef.current?.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href]') || [])]
+      const focusable = [...(inspectorRef.current?.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href]') || [])]
       if (focusable.length === 0) return
       const first = focusable[0]
       const last = focusable[focusable.length - 1]
@@ -337,12 +390,12 @@ export function AdminProductEditorPage() {
         first.focus()
       }
     }
-    document.addEventListener('keydown', handleDrawerKeyDown)
+    document.addEventListener('keydown', handleInspectorKeyDown)
     return () => {
       window.clearTimeout(focusTimer)
-      document.removeEventListener('keydown', handleDrawerKeyDown)
+      document.removeEventListener('keydown', handleInspectorKeyDown)
     }
-  }, [settingsOpen])
+  }, [compactInspector, inspectorOpen])
 
   const apiState = shouldShowAdminApiState(resource.status) ? <AdminApiState error={resource.error} status={resource.status} /> : null
   const categories = resource.data?.categories || []
@@ -417,7 +470,9 @@ export function AdminProductEditorPage() {
     setForm(structuredClone(initialRef.current.form))
     setPrice({ ...initialRef.current.price })
     setActiveEditor(null)
-    setSettingsOpen(false)
+    setSelectedField(null)
+    setOpenInspectorGroup('basic')
+    setInspectorOpen(false)
     inlineSnapshotRef.current = null
     setDirty(false)
     setPriceDirty(false)
@@ -482,7 +537,9 @@ export function AdminProductEditorPage() {
       initialRef.current = { form: structuredClone(nextForm), price: { ...price } }
       setForm(nextForm)
       setActiveEditor(null)
-      setSettingsOpen(false)
+      setSelectedField(null)
+      setOpenInspectorGroup('basic')
+      setInspectorOpen(false)
       inlineSnapshotRef.current = null
       setDirty(false)
       setPriceDirty(false)
@@ -521,6 +578,8 @@ export function AdminProductEditorPage() {
   const beginInline = (field, value) => {
     inlineSnapshotRef.current = { field, value, wasDirty: dirty }
     setActiveEditor({ field, kind: 'inline' })
+    setSelectedField(field)
+    setOpenInspectorGroup(inspectorGroupByField[field] || 'basic')
   }
   const changeInline = (field, value) => setTranslationField(activeLocale, field, value)
   const commitInline = (field) => {
@@ -542,66 +601,15 @@ export function AdminProductEditorPage() {
     }
     setActiveEditor(null)
   }
-  const openPopover = (field, target) => {
-    const rect = target.getBoundingClientRect()
-    const side = rect.bottom + 380 > window.innerHeight && rect.top > 380 ? 'top' : 'bottom'
-    setActiveEditor({ field, kind: 'popover', side })
+  const selectEditorField = (field, trigger = null, { openPanel = true } = {}) => {
+    setSelectedField(field)
+    setOpenInspectorGroup(inspectorGroupByField[field] || 'basic')
+    if (trigger) inspectorReturnFocusRef.current = trigger
+    if (compactInspector && openPanel) setInspectorOpen(true)
   }
-  const closePopover = () => setActiveEditor(null)
-  const renderPopover = (field) => {
-    const popover = (title, body) => <section
-      aria-label={`${title} 편집`}
-      className={`admin-product-popover is-${activeEditor?.side || 'bottom'}`}
-      role="dialog"
-    >
-      <header><div><strong>{title}</strong><span>변경 내용은 초안 저장 전까지 공개되지 않습니다.</span></div><button aria-label="편집창 닫기" title="편집창 닫기" type="button" onClick={closePopover}><X size={16} /></button></header>
-      <div className="admin-product-popover-body">{body}</div>
-    </section>
-
-    if (field === 'image') return popover('상품 이미지', <>
-      <div className="admin-product-popover-image">
-        {previewImage ? <img alt="현재 상품" src={previewImage} /> : <span><ImagePlus size={24} />등록된 이미지 없음</span>}
-      </div>
-      <button className="secondary-action" type="button" onClick={() => fileInputRef.current?.click()}><UploadCloud size={16} /> 이미지 선택 또는 교체</button>
-      {images.length > 0 && <div className="admin-product-popover-thumbs">{images.map((image) => <article className={image.isPrimary ? 'is-primary' : ''} key={image.id}>
-        <img alt="업로드 미리보기" src={image.previewUrl} />
-        <label><input checked={image.isPrimary} name="visualPrimaryImage" type="radio" onChange={() => { setImages((current) => current.map((item) => ({ ...item, isPrimary: item.id === image.id }))); setDirty(true) }} /> 대표</label>
-        <input aria-label="이미지 대체 문구" placeholder="대체 문구" value={image.altText} onChange={(event) => { setImages((current) => current.map((item) => item.id === image.id ? { ...item, altText: event.target.value } : item)); setDirty(true) }} />
-        <button aria-label="이미지 제거" title="이미지 제거" type="button" onClick={() => removeImage(image.id)}><Trash2 size={14} /></button>
-      </article>)}</div>}
-      <small>JPG, PNG, WebP · 최대 8개 · 장당 10MB</small>
-    </>)
-
-    if (field === 'category') return popover('카테고리', <label className="admin-field"><span>카테고리</span><select value={form.categoryKey} onChange={(event) => setField('categoryKey', event.target.value)}><option value="">선택</option>{categories.map((item) => <option key={item.id} value={item.categoryId}>{item.nameKo || item.nameEn || item.nameZhTw || item.categoryId}</option>)}</select></label>)
-    if (field === 'code') return popover('상품 코드', <label className="admin-field"><span>상품 코드 <b>*</b></span><input disabled={isEditing} maxLength="80" placeholder="NB-001" value={form.code} onChange={(event) => setField('code', event.target.value)} /><small>{isEditing ? '등록된 상품 코드는 변경할 수 없습니다.' : '저장 후에는 상품 코드를 변경할 수 없습니다.'}</small></label>)
-    if (field === 'productInfo') return popover('상품 정보', <div className="admin-form-grid">
-      <label className="admin-field"><span>소재</span><input value={form.material} onChange={(event) => setField('material', event.target.value)} /></label>
-      <label className="admin-field"><span>원산지</span><input maxLength="20" value={form.origin} onChange={(event) => setField('origin', event.target.value)} /></label>
-      <label className="admin-field admin-field-wide"><span>예상 납기</span><input placeholder="영업일 기준 7-10일" value={form.leadTime} onChange={(event) => setField('leadTime', event.target.value)} /></label>
-      <label className="admin-switch admin-field-wide"><input checked={form.isExportAvailable} type="checkbox" onChange={(event) => setField('isExportAvailable', event.target.checked)} /><span>수출 가능</span></label>
-    </div>)
-    if (field === 'colors') return popover('색상 옵션', <label className="admin-field"><span>색상</span><input placeholder="골드, 실버, 오알" value={form.colorsText} onChange={(event) => setField('colorsText', event.target.value)} /><small>쉼표로 구분해 입력합니다.</small></label>)
-    if (field === 'sizes') return popover('사이즈 옵션', <label className="admin-field"><span>사이즈</span><input placeholder="6mm, 8mm" value={form.sizesText} onChange={(event) => setField('sizesText', event.target.value)} /><small>쉼표로 구분해 입력합니다.</small></label>)
-    if (field === 'moq') return popover('MOQ', <div className="admin-form-grid">
-      <label className="admin-field"><span>상품 최소 수량</span><input min="1" type="number" value={form.moqDefault} onChange={(event) => setField('moqDefault', event.target.value)} /></label>
-      <label className="admin-field"><span>가격 MOQ</span><input disabled={!canWritePrices} min="1" type="number" value={price.moq} onChange={(event) => setPriceField('moq', event.target.value)} /></label>
-    </div>)
-    if (field === 'price') return popover('승인 회원 가격', <>
-      <div className="admin-form-grid">
-        <label className="admin-field"><span>KR 도매가 (KRW)</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.wholesalePrice} onChange={(event) => setPriceField('wholesalePrice', event.target.value)} /></label>
-        <label className="admin-field"><span>권장 소비자가</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.retailPrice} onChange={(event) => setPriceField('retailPrice', event.target.value)} /></label>
-        <label className="admin-field"><span>최소 견적 금액</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.minOrderAmount} onChange={(event) => setPriceField('minOrderAmount', event.target.value)} /></label>
-        <label className="admin-switch"><input checked={price.isActive} disabled={!canWritePrices} type="checkbox" onChange={(event) => setPriceField('isActive', event.target.checked)} /><span>KR 가격 활성화</span></label>
-      </div>
-      {!canWritePrices && <p className="admin-help-text">가격 수정 권한이 없어 읽기 전용으로 표시됩니다.</p>}
-    </>)
-    if (field === 'specs') return popover('상세 스펙', <div className="admin-form-grid">
-      <label className="admin-field"><span>게이지</span><input placeholder="16G" value={form.specs.gauge || ''} onChange={(event) => setNestedField('specs', 'gauge', event.target.value)} /></label>
-      <label className="admin-field"><span>길이</span><input value={form.specs.length || ''} onChange={(event) => setNestedField('specs', 'length', event.target.value)} /></label>
-      <label className="admin-field"><span>단위</span><select value={form.specs.unit || 'mm'} onChange={(event) => setNestedField('specs', 'unit', event.target.value)}><option value="mm">mm</option><option value="cm">cm</option><option value="inch">inch</option></select></label>
-      <label className="admin-field admin-field-wide"><span>스펙 메모</span><textarea rows="3" value={form.specs.specNote || ''} onChange={(event) => setNestedField('specs', 'specNote', event.target.value)} /></label>
-    </div>)
-    return null
+  const closeInspector = () => {
+    setInspectorOpen(false)
+    window.setTimeout(() => inspectorReturnFocusRef.current?.focus(), 0)
   }
 
   const editorBridge = {
@@ -611,8 +619,8 @@ export function AdminProductEditorPage() {
     changeInline,
     commitInline,
     localeLabel: localeTabs.find(({ key }) => key === activeLocale)?.label || activeLocale,
-    openPopover,
-    renderPopover,
+    selectedField,
+    selectField: selectEditorField,
     values: currentTranslation,
   }
 
@@ -638,72 +646,170 @@ export function AdminProductEditorPage() {
           {localeTabs.map(({ key, label }) => <button aria-selected={activeLocale === key} className={activeLocale === key ? 'is-active' : ''} key={key} role="tab" type="button" onClick={() => { if (activeEditor?.kind === 'inline') commitInline(activeEditor.field); else setActiveEditor(null); setActiveLocale(key) }}>{label}</button>)}
         </div>
         <div className="admin-product-visual-actions">
-          <button className={`admin-product-readiness-button${readiness.ready ? ' is-ready' : ''}`} type="button" onClick={() => { if (activeEditor?.kind === 'inline') commitInline(activeEditor.field); else setActiveEditor(null); setSettingsOpen(true) }}>
+          <button aria-controls="admin-product-inspector" className={`admin-product-readiness-button${readiness.ready ? ' is-ready' : ''}`} type="button" onClick={(event) => { if (activeEditor?.kind === 'inline') commitInline(activeEditor.field); else setActiveEditor(null); selectEditorField('readiness', event.currentTarget) }}>
             <span>공개 준비</span><strong>{readiness.ready ? '완료' : `${readiness.missing.length}개 필요`}</strong>
           </button>
           <div aria-label="미리보기 화면" className="admin-showcase-preview-modes" role="group">
             <button aria-label="데스크톱 미리보기" aria-pressed={previewMode === 'desktop'} className={previewMode === 'desktop' ? 'is-active' : undefined} title="데스크톱 미리보기" type="button" onClick={() => setPreviewMode('desktop')}><Monitor size={16} /></button>
             <button aria-label="모바일 미리보기" aria-pressed={previewMode === 'mobile'} className={previewMode === 'mobile' ? 'is-active' : undefined} title="모바일 미리보기" type="button" onClick={() => setPreviewMode('mobile')}><Smartphone size={16} /></button>
           </div>
-          <button ref={settingsTriggerRef} aria-label="상품 설정 열기" className="admin-product-settings-button" title="상품 설정" type="button" onClick={() => { if (activeEditor?.kind === 'inline') commitInline(activeEditor.field); else setActiveEditor(null); setSettingsOpen(true) }}><Settings2 size={17} /></button>
+          <button ref={settingsTriggerRef} aria-controls="admin-product-inspector" aria-label="운영 설정 열기" className="admin-product-settings-button" title="운영 설정" type="button" onClick={(event) => { if (activeEditor?.kind === 'inline') commitInline(activeEditor.field); else setActiveEditor(null); selectEditorField('settings', event.currentTarget) }}><Settings2 size={17} /></button>
         </div>
       </section>
 
-      <section className={`admin-product-detail-canvas is-${previewMode}`} aria-label="실제 상품 상세 화면 편집 미리보기">
-        <ProductDetailView
-          approvedAmount={draftPrice?.wholesalePrice ?? null}
-          contentLocale={previewContentLocale}
-          editor={editorBridge}
-          isApproved
-          locale={activeLocale}
-          price={draftPrice}
-          product={draftProduct}
-          products={[draftProduct]}
-          toLocalePath={toLocalePath}
-          viewerState="approved"
-        />
-      </section>
+      <div className="admin-product-editor-workspace">
+        {compactInspector && inspectorOpen && <button aria-label="편집 패널 닫기" className="admin-product-inspector-backdrop" type="button" onClick={closeInspector} />}
+        <aside
+          aria-hidden={compactInspector && !inspectorOpen}
+          aria-labelledby="admin-product-inspector-title"
+          aria-modal={compactInspector ? true : undefined}
+          className={`admin-product-inspector${inspectorOpen ? ' is-open' : ''}`}
+          id="admin-product-inspector"
+          inert={compactInspector && !inspectorOpen}
+          ref={inspectorRef}
+          role={compactInspector ? 'dialog' : 'complementary'}
+        >
+          <header className="admin-product-inspector-header">
+            <div><span>{localeTabs.find(({ key }) => key === activeLocale)?.label}</span><h2 id="admin-product-inspector-title">상품 편집</h2></div>
+            <div className="admin-product-inspector-header-actions">
+              {dirty && <strong>변경 있음</strong>}
+              {compactInspector && <button aria-label="편집 패널 닫기" ref={inspectorCloseRef} title="닫기" type="button" onClick={closeInspector}><X size={18} /></button>}
+            </div>
+          </header>
 
-      {settingsOpen && <>
-        <button aria-label="상품 설정 닫기" className="admin-product-settings-backdrop" type="button" onClick={() => { setSettingsOpen(false); window.setTimeout(() => settingsTriggerRef.current?.focus(), 0) }} />
-        <aside aria-labelledby="admin-product-settings-title" aria-modal="true" className="admin-product-settings-drawer" ref={settingsDrawerRef} role="dialog">
-          <header><div><span>PRODUCT SETTINGS</span><h2 id="admin-product-settings-title">상품 설정</h2></div><button aria-label="상품 설정 닫기" ref={settingsCloseRef} title="닫기" type="button" onClick={() => { setSettingsOpen(false); window.setTimeout(() => settingsTriggerRef.current?.focus(), 0) }}><X size={18} /></button></header>
-          <div className={`admin-product-drawer-readiness${readiness.ready ? ' is-ready' : ''}`}><strong>{readiness.ready ? '공개할 수 있습니다.' : `${readiness.missing.length}개 항목을 보완해 주세요.`}</strong>{!readiness.ready && <p>{readiness.missing.join(', ')}</p>}</div>
+          <InspectorField activeField={selectedField} field="readiness">
+            <div className={`admin-product-inspector-readiness${readiness.ready ? ' is-ready' : ''}`}>
+              <span>공개 준비</span>
+              <strong>{readiness.ready ? '공개할 수 있습니다.' : `${readiness.missing.length}개 항목이 필요합니다.`}</strong>
+              {!readiness.ready && <p>{readiness.missing.join(', ')}</p>}
+            </div>
+          </InspectorField>
 
-          <section><h3>분류와 운영 정보</h3><div className="admin-form-grid">
-            <label className="admin-field"><span>원산지</span><input maxLength="20" value={form.origin} onChange={(event) => setField('origin', event.target.value)} /></label>
-            <label className="admin-field"><span>소재</span><input value={form.material} onChange={(event) => setField('material', event.target.value)} /></label>
-            <label className="admin-field admin-field-wide"><span>예상 납기</span><input placeholder="영업일 기준 7-10일" value={form.leadTime} onChange={(event) => setField('leadTime', event.target.value)} /></label>
-            <label className="admin-field"><span>피어싱 유형</span><input value={form.taxonomy.piercingType || ''} onChange={(event) => setNestedField('taxonomy', 'piercingType', event.target.value)} /></label>
-            <label className="admin-field"><span>기본 소재 코드</span><input value={form.taxonomy.baseMaterial || ''} onChange={(event) => setNestedField('taxonomy', 'baseMaterial', event.target.value)} /></label>
-            <label className="admin-field"><span>배지</span><input placeholder="NEW" value={form.badge} onChange={(event) => setField('badge', event.target.value)} /></label>
-            <label className="admin-field"><span>정렬 순서</span><input min="0" type="number" value={form.sortOrder} onChange={(event) => setField('sortOrder', event.target.value)} /></label>
-          </div></section>
+          <div className="admin-product-inspector-groups">
+            <InspectorGroup group={inspectorGroups[0]} open={openInspectorGroup === 'basic'} onOpen={() => setOpenInspectorGroup('basic')}>
+              <InspectorField activeField={selectedField} field="name">
+                <label className="admin-field"><span>{editorBridge.localeLabel} 상품명 <b>*</b></span><input maxLength="240" value={currentTranslation.name} onChange={(event) => setTranslationField(activeLocale, 'name', event.target.value)} /></label>
+              </InspectorField>
+              <InspectorField activeField={selectedField} field="summary">
+                <label className="admin-field"><span>{editorBridge.localeLabel} 한 줄 요약 <b>*</b></span><textarea maxLength="4000" rows="3" value={currentTranslation.summary} onChange={(event) => setTranslationField(activeLocale, 'summary', event.target.value)} /></label>
+              </InspectorField>
+              <InspectorField activeField={selectedField} field="code">
+                <label className="admin-field"><span>상품 코드 <b>*</b></span><input disabled={isEditing} maxLength="80" placeholder="NB-001" value={form.code} onChange={(event) => setField('code', event.target.value)} /><small>{isEditing ? '등록된 상품 코드는 변경할 수 없습니다.' : '저장 후에는 상품 코드를 변경할 수 없습니다.'}</small></label>
+              </InspectorField>
+              <InspectorField activeField={selectedField} field="category">
+                <label className="admin-field"><span>카테고리</span><select value={form.categoryKey} onChange={(event) => setField('categoryKey', event.target.value)}><option value="">선택</option>{categories.map((item) => <option key={item.id} value={item.categoryId}>{item.nameKo || item.nameEn || item.nameZhTw || item.categoryId}</option>)}</select></label>
+              </InspectorField>
+            </InspectorGroup>
 
-          <section><h3>표시 상태</h3><div className="admin-checkbox-grid">
-            <label className="admin-switch"><input checked={form.isExportAvailable} type="checkbox" onChange={(event) => setField('isExportAvailable', event.target.checked)} /><span>수출 가능</span></label>
-            <label className="admin-switch"><input checked={form.isNew} type="checkbox" onChange={(event) => setField('isNew', event.target.checked)} /><span>신상품 표시</span></label>
-            <label className="admin-switch"><input checked={form.isBest} type="checkbox" onChange={(event) => setField('isBest', event.target.checked)} /><span>추천 상품 표시</span></label>
-          </div></section>
+            <InspectorGroup group={inspectorGroups[1]} open={openInspectorGroup === 'images'} onOpen={() => setOpenInspectorGroup('images')}>
+              <InspectorField activeField={selectedField} field="image">
+                <div className="admin-product-inspector-image">
+                  {previewImage ? <img alt="현재 상품" src={previewImage} /> : <span><ImagePlus size={24} />등록된 이미지 없음</span>}
+                </div>
+                <button className="secondary-action" type="button" onClick={() => fileInputRef.current?.click()}><UploadCloud size={16} /> 이미지 선택 또는 교체</button>
+                {images.length > 0 && <div className="admin-product-inspector-thumbs">{images.map((image) => <article className={image.isPrimary ? 'is-primary' : ''} key={image.id}>
+                  <img alt="업로드 미리보기" src={image.previewUrl} />
+                  <label><input checked={image.isPrimary} name="visualPrimaryImage" type="radio" onChange={() => { setImages((current) => current.map((item) => ({ ...item, isPrimary: item.id === image.id }))); setDirty(true) }} /> 대표</label>
+                  <input aria-label="이미지 대체 문구" placeholder="대체 문구" value={image.altText} onChange={(event) => { setImages((current) => current.map((item) => item.id === image.id ? { ...item, altText: event.target.value } : item)); setDirty(true) }} />
+                  <button aria-label="이미지 제거" title="이미지 제거" type="button" onClick={() => removeImage(image.id)}><Trash2 size={14} /></button>
+                </article>)}</div>}
+                <small>JPG, PNG, WebP · 최대 8개 · 장당 10MB</small>
+              </InspectorField>
+            </InspectorGroup>
 
-          <section><h3>상세 스펙</h3><div className="admin-form-grid">
-            <label className="admin-field"><span>게이지</span><input placeholder="16G" value={form.specs.gauge || ''} onChange={(event) => setNestedField('specs', 'gauge', event.target.value)} /></label>
-            <label className="admin-field"><span>길이</span><input value={form.specs.length || ''} onChange={(event) => setNestedField('specs', 'length', event.target.value)} /></label>
-            <label className="admin-field"><span>단위</span><select value={form.specs.unit || 'mm'} onChange={(event) => setNestedField('specs', 'unit', event.target.value)}><option value="mm">mm</option><option value="cm">cm</option><option value="inch">inch</option></select></label>
-            <label className="admin-field admin-field-wide"><span>스펙 메모</span><textarea rows="3" value={form.specs.specNote || ''} onChange={(event) => setNestedField('specs', 'specNote', event.target.value)} /></label>
-          </div></section>
+            <InspectorGroup group={inspectorGroups[2]} open={openInspectorGroup === 'trade'} onOpen={() => setOpenInspectorGroup('trade')}>
+              <InspectorField activeField={selectedField} field="colors">
+                <label className="admin-field"><span>색상</span><input placeholder="골드, 실버, 오알" value={form.colorsText} onChange={(event) => setField('colorsText', event.target.value)} /><small>쉼표로 구분해 입력합니다.</small></label>
+              </InspectorField>
+              <InspectorField activeField={selectedField} field="sizes">
+                <label className="admin-field"><span>사이즈</span><input placeholder="6mm, 8mm" value={form.sizesText} onChange={(event) => setField('sizesText', event.target.value)} /><small>쉼표로 구분해 입력합니다.</small></label>
+              </InspectorField>
+              <InspectorField activeField={selectedField} field="moq">
+                <div className="admin-form-grid">
+                  <label className="admin-field"><span>상품 최소 수량</span><input min="1" type="number" value={form.moqDefault} onChange={(event) => setField('moqDefault', event.target.value)} /></label>
+                  <label className="admin-field"><span>가격 MOQ</span><input disabled={!canWritePrices} min="1" type="number" value={price.moq} onChange={(event) => setPriceField('moq', event.target.value)} /></label>
+                </div>
+              </InspectorField>
+              <InspectorField activeField={selectedField} field="price">
+                <div className="admin-form-grid">
+                  <label className="admin-field"><span>KR 도매가 (KRW)</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.wholesalePrice} onChange={(event) => setPriceField('wholesalePrice', event.target.value)} /></label>
+                  <label className="admin-field"><span>권장 소비자가</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.retailPrice} onChange={(event) => setPriceField('retailPrice', event.target.value)} /></label>
+                  <label className="admin-field"><span>최소 견적 금액</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.minOrderAmount} onChange={(event) => setPriceField('minOrderAmount', event.target.value)} /></label>
+                  <label className="admin-switch"><input checked={price.isActive} disabled={!canWritePrices} type="checkbox" onChange={(event) => setPriceField('isActive', event.target.checked)} /><span>KR 가격 활성화</span></label>
+                </div>
+                {!canWritePrices && <p className="admin-help-text">가격 수정 권한이 없어 읽기 전용으로 표시됩니다.</p>}
+              </InspectorField>
+            </InspectorGroup>
 
-          <section><h3>홈 노출</h3><div className="admin-checkbox-grid">
-            {[
-              ['showInNewArrivals', '신상품'],
-              ['showInWeeklyPick', '주간 추천'],
-              ['showInBuyerSelection', '바이어 셀렉션'],
-              ['showInPiercing', '피어싱'],
-              ['showInSteadySelection', '스테디 셀렉션'],
-            ].map(([field, label]) => <label className="admin-switch" key={field}><input checked={Boolean(form.homePlacement[field])} type="checkbox" onChange={(event) => setNestedField('homePlacement', field, event.target.checked)} /><span>{label}</span></label>)}
-          </div></section>
+            <InspectorGroup group={inspectorGroups[3]} open={openInspectorGroup === 'details'} onOpen={() => setOpenInspectorGroup('details')}>
+              <InspectorField activeField={selectedField} field="headline">
+                <label className="admin-field"><span>{editorBridge.localeLabel} 상세 제목</span><input maxLength="240" value={currentTranslation.headline} onChange={(event) => setTranslationField(activeLocale, 'headline', event.target.value)} /></label>
+              </InspectorField>
+              <InspectorField activeField={selectedField} field="body">
+                <label className="admin-field"><span>{editorBridge.localeLabel} 상세 본문</span><textarea maxLength="4000" rows="6" value={currentTranslation.body} onChange={(event) => setTranslationField(activeLocale, 'body', event.target.value)} /></label>
+              </InspectorField>
+              <InspectorField activeField={selectedField} field="productInfo">
+                <div className="admin-form-grid">
+                  <label className="admin-field"><span>소재</span><input value={form.material} onChange={(event) => setField('material', event.target.value)} /></label>
+                  <label className="admin-field"><span>원산지</span><input maxLength="20" value={form.origin} onChange={(event) => setField('origin', event.target.value)} /></label>
+                  <label className="admin-field"><span>예상 납기</span><input placeholder="영업일 기준 7-10일" value={form.leadTime} onChange={(event) => setField('leadTime', event.target.value)} /></label>
+                </div>
+              </InspectorField>
+              <InspectorField activeField={selectedField} field="specs">
+                <div className="admin-form-grid">
+                  <label className="admin-field"><span>게이지</span><input placeholder="16G" value={form.specs.gauge || ''} onChange={(event) => setNestedField('specs', 'gauge', event.target.value)} /></label>
+                  <label className="admin-field"><span>길이</span><input value={form.specs.length || ''} onChange={(event) => setNestedField('specs', 'length', event.target.value)} /></label>
+                  <label className="admin-field"><span>단위</span><select value={form.specs.unit || 'mm'} onChange={(event) => setNestedField('specs', 'unit', event.target.value)}><option value="mm">mm</option><option value="cm">cm</option><option value="inch">inch</option></select></label>
+                  <label className="admin-field"><span>스펙 메모</span><textarea rows="3" value={form.specs.specNote || ''} onChange={(event) => setNestedField('specs', 'specNote', event.target.value)} /></label>
+                </div>
+              </InspectorField>
+            </InspectorGroup>
+
+            <InspectorGroup group={inspectorGroups[4]} open={openInspectorGroup === 'operations'} onOpen={() => setOpenInspectorGroup('operations')}>
+              <InspectorField activeField={selectedField} field="settings">
+                <div className="admin-form-grid">
+                  <label className="admin-field"><span>피어싱 유형</span><input value={form.taxonomy.piercingType || ''} onChange={(event) => setNestedField('taxonomy', 'piercingType', event.target.value)} /></label>
+                  <label className="admin-field"><span>기본 소재 코드</span><input value={form.taxonomy.baseMaterial || ''} onChange={(event) => setNestedField('taxonomy', 'baseMaterial', event.target.value)} /></label>
+                  <label className="admin-field"><span>배지</span><input placeholder="NEW" value={form.badge} onChange={(event) => setField('badge', event.target.value)} /></label>
+                  <label className="admin-field"><span>정렬 순서</span><input min="0" type="number" value={form.sortOrder} onChange={(event) => setField('sortOrder', event.target.value)} /></label>
+                </div>
+                <div className="admin-checkbox-grid admin-product-inspector-switches">
+                  <label className="admin-switch"><input checked={form.isExportAvailable} type="checkbox" onChange={(event) => setField('isExportAvailable', event.target.checked)} /><span>수출 가능</span></label>
+                  <label className="admin-switch"><input checked={form.isNew} type="checkbox" onChange={(event) => setField('isNew', event.target.checked)} /><span>신상품 표시</span></label>
+                  <label className="admin-switch"><input checked={form.isBest} type="checkbox" onChange={(event) => setField('isBest', event.target.checked)} /><span>추천 상품 표시</span></label>
+                </div>
+                <div className="admin-product-inspector-home-placement">
+                  <strong>홈 노출</strong>
+                  <div className="admin-checkbox-grid">
+                    {[
+                      ['showInNewArrivals', '신상품'],
+                      ['showInWeeklyPick', '주간 추천'],
+                      ['showInBuyerSelection', '바이어 셀렉션'],
+                      ['showInPiercing', '피어싱'],
+                      ['showInSteadySelection', '스테디 셀렉션'],
+                    ].map(([field, label]) => <label className="admin-switch" key={field}><input checked={Boolean(form.homePlacement[field])} type="checkbox" onChange={(event) => setNestedField('homePlacement', field, event.target.checked)} /><span>{label}</span></label>)}
+                  </div>
+                </div>
+              </InspectorField>
+            </InspectorGroup>
+          </div>
         </aside>
-      </>}
+
+        <section className={`admin-product-detail-canvas is-${previewMode}`} aria-label="실제 상품 상세 화면 편집 미리보기">
+          <ProductDetailView
+            approvedAmount={draftPrice?.wholesalePrice ?? null}
+            contentLocale={previewContentLocale}
+            editor={editorBridge}
+            isApproved
+            locale={activeLocale}
+            price={draftPrice}
+            product={draftProduct}
+            products={[draftProduct]}
+            toLocalePath={toLocalePath}
+            viewerState="approved"
+          />
+        </section>
+      </div>
 
       <input accept="image/jpeg,image/png,image/webp" hidden multiple ref={fileInputRef} type="file" onChange={selectImages} />
     </form>
