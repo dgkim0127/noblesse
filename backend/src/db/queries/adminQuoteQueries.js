@@ -63,6 +63,7 @@ function mapQuoteItem(row) {
     productName: row.product_name || row.product_code,
     color: row.color || "",
     size: row.size || "",
+    selectedOptions: Array.isArray(row.selected_options) ? row.selected_options : [],
     requestedQuantity: row.requested_quantity,
     confirmedQuantity: row.confirmed_quantity,
     requestedPriceSnapshot: toNumber(row.requested_price_snapshot),
@@ -169,6 +170,7 @@ const itemSelect = `
     product_name,
     color,
     size,
+    selected_options,
     requested_quantity,
     confirmed_quantity,
     requested_price_snapshot,
@@ -267,7 +269,7 @@ export function createAdminQuoteQueries(pool) {
         }
         const itemsResult = await client.query(
           `
-            select product_id, product_code, product_name, color, size, quantity, price_snapshot, subtotal
+            select product_id, product_code, product_name, color, size, selected_options, quantity, price_snapshot, subtotal
             from public.inquiry_items
             where inquiry_id = $1
             order by created_at asc, id asc
@@ -300,14 +302,14 @@ export function createAdminQuoteQueries(pool) {
           const inserted = await client.query(
             `
               insert into public.admin_quote_items (
-                admin_quote_id, product_id, product_code, product_name, color, size,
+                admin_quote_id, product_id, product_code, product_name, color, size, selected_options,
                 requested_quantity, confirmed_quantity, requested_price_snapshot,
                 confirmed_unit_price, confirmed_subtotal
               )
-              values ($1, $2, $3, $4, $5, $6, $7, $7, $8, $8, $9)
+              values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $8, $9, $9, $10)
               returning *
             `,
-            [quote.id, item.product_id, item.product_code, item.product_name, item.color, item.size, item.quantity, item.price_snapshot, item.subtotal]
+            [quote.id, item.product_id, item.product_code, item.product_name, item.color, item.size, JSON.stringify(item.selected_options || []), item.quantity, item.price_snapshot, item.subtotal]
           );
           quoteItems.push(mapQuoteItem(inserted.rows[0]));
         }

@@ -1,4 +1,5 @@
 import { applyDiscount, multiplyMoney, sumMoney, toMinorUnits } from "../../utils/money.js";
+import { resolveSelectedOptions } from "../../utils/productOptions.js";
 
 function assertPool(pool) {
   if (!pool) {
@@ -34,6 +35,7 @@ function mapItem(row) {
     material: row.material,
     color: row.color,
     size: row.size,
+    selectedOptions: Array.isArray(row.selected_options) ? row.selected_options : [],
     quantity: row.quantity,
     moq: row.moq,
     market: row.market,
@@ -102,6 +104,9 @@ async function loadPricedProduct(client, productCode, market, currency) {
         p.name_ko,
         p.category_id,
         p.material,
+        p.colors,
+        p.sizes,
+        p.option_groups,
         pp.id,
         pp.market,
         pp.currency,
@@ -134,7 +139,10 @@ async function loadVisibleProduct(client, productCode) {
         p.name_ko,
         p.category_id,
         p.material,
-        p.moq_default
+        p.moq_default,
+        p.colors,
+        p.sizes,
+        p.option_groups
       from public.products p
       where p.code = $1
         and p.is_visible = true
@@ -208,6 +216,7 @@ export function createBuyerInquiryQueries(pool) {
                   'material', ii.material,
                   'color', ii.color,
                   'size', ii.size,
+                  'selected_options', ii.selected_options,
                   'quantity', ii.quantity,
                   'moq', ii.moq,
                   'market', i.market,
@@ -263,6 +272,7 @@ export function createBuyerInquiryQueries(pool) {
                   'material', ii.material,
                   'color', ii.color,
                   'size', ii.size,
+                  'selected_options', ii.selected_options,
                   'quantity', ii.quantity,
                   'moq', ii.moq,
                   'market', i.market,
@@ -306,14 +316,16 @@ export function createBuyerInquiryQueries(pool) {
 
             const moq = Number(visibleProduct.moq_default) || 1;
             const quantity = Math.max(moq, Math.ceil(item.quantity / moq) * moq);
+            const resolvedOptions = resolveSelectedOptions(visibleProduct, item);
             inquiryItems.push({
               productId: visibleProduct.product_id,
               productCode: visibleProduct.product_code,
               productName: visibleProduct.name_en || visibleProduct.name_ko || visibleProduct.product_code,
               categoryId: visibleProduct.category_id,
               material: visibleProduct.material || "",
-              color: item.color || "",
-              size: item.size || "",
+              color: resolvedOptions.color,
+              size: resolvedOptions.size,
+              selectedOptions: resolvedOptions.selectedOptions,
               quantity,
               moq,
               market: viewer.assignedMarket,
@@ -331,6 +343,7 @@ export function createBuyerInquiryQueries(pool) {
 
           const moq = Number(pricedProduct.moq) || 1;
           const quantity = Math.max(moq, Math.ceil(item.quantity / moq) * moq);
+          const resolvedOptions = resolveSelectedOptions(pricedProduct, item);
           const unitPrice = applyDiscount(pricedProduct.wholesale_price, viewer.discountRate, pricedProduct.currency);
           const subtotal = multiplyMoney(unitPrice, quantity, pricedProduct.currency);
           const subtotalMinor = toMinorUnits(subtotal, pricedProduct.currency);
@@ -345,8 +358,9 @@ export function createBuyerInquiryQueries(pool) {
             productName: pricedProduct.name_en || pricedProduct.name_ko || pricedProduct.product_code,
             categoryId: pricedProduct.category_id,
             material: pricedProduct.material || "",
-            color: item.color || "",
-            size: item.size || "",
+            color: resolvedOptions.color,
+            size: resolvedOptions.size,
+            selectedOptions: resolvedOptions.selectedOptions,
             quantity,
             moq,
             market: pricedProduct.market,
@@ -422,9 +436,10 @@ export function createBuyerInquiryQueries(pool) {
                 quantity,
                 moq,
                 price_snapshot,
-                subtotal
+                subtotal,
+                selected_options
               )
-              values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+              values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::jsonb)
               returning
                 id,
                 product_code,
@@ -433,6 +448,7 @@ export function createBuyerInquiryQueries(pool) {
                 material,
                 color,
                 size,
+                selected_options,
                 quantity,
                 moq,
                 price_snapshot,
@@ -450,7 +466,8 @@ export function createBuyerInquiryQueries(pool) {
               item.quantity,
               item.moq,
               item.priceSnapshot,
-              item.subtotal
+              item.subtotal,
+              JSON.stringify(item.selectedOptions || [])
             ]
           );
           insertedItems.push(itemResult.rows[0]);

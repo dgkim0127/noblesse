@@ -1,3 +1,5 @@
+import { getEffectiveOptionGroups } from "../../utils/productOptions.js";
+
 function mapProduct(row) {
   return {
     id: row.id,
@@ -13,6 +15,7 @@ function mapProduct(row) {
     material: row.material,
     colors: row.colors || [],
     sizes: row.sizes || [],
+    optionGroups: getEffectiveOptionGroups(row),
     moqDefault: row.moq_default,
     leadTime: row.lead_time,
     origin: row.origin,
@@ -47,6 +50,7 @@ const visibleProductSelect = `
     p.material,
     p.colors,
     p.sizes,
+    p.option_groups,
     p.moq_default,
     p.lead_time,
     p.origin,

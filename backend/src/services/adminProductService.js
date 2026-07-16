@@ -10,6 +10,8 @@ import {
   validationError
 } from "../utils/validators.js";
 import { conflict, notFound } from "../utils/errors.js";
+import { normalizeDetailContent } from "../utils/productDetailContent.js";
+import { normalizeOptionGroups, syncLegacyOptionArrays } from "../utils/productOptions.js";
 import { createAdminProductImageService } from "./adminProductImageService.js";
 
 function parseProductFilters(filters) {
@@ -41,6 +43,7 @@ const productWriteFields = [
   "material",
   "colors",
   "sizes",
+  "optionGroups",
   "moqDefault",
   "leadTime",
   "origin",
@@ -115,7 +118,8 @@ function parseProductBody(body = {}, { partial = false } = {}) {
     imageAlt: parseObject(safeBody.imageAlt, "imageAlt"),
     taxonomy: parseOptionalObject(safeBody.taxonomy, "taxonomy"),
     specs: parseOptionalObject(safeBody.specs, "specs"),
-    detailContent: parseOptionalObject(safeBody.detailContent, "detailContent"),
+    detailContent: normalizeDetailContent(safeBody.detailContent),
+    optionGroups: normalizeOptionGroups(safeBody.optionGroups),
     homePlacement: parseOptionalObject(safeBody.homePlacement, "homePlacement"),
     badge: parseOptionalBadge(safeBody.badge),
     isVisible: parseBooleanLike(safeBody.isVisible, "isVisible"),
@@ -142,12 +146,22 @@ function parseProductBody(body = {}, { partial = false } = {}) {
     parsed.taxonomy = parsed.taxonomy || {};
     parsed.specs = parsed.specs || {};
     parsed.detailContent = parsed.detailContent || {};
+    parsed.optionGroups = parsed.optionGroups || [];
     parsed.homePlacement = parsed.homePlacement || {};
     parsed.isVisible = parsed.isVisible ?? false;
     parsed.isExportAvailable = parsed.isExportAvailable ?? true;
     parsed.isNew = parsed.isNew ?? false;
     parsed.isBest = parsed.isBest ?? false;
     parsed.sortOrder = parsed.sortOrder || 0;
+  }
+
+  if (parsed.optionGroups !== undefined) {
+    const legacy = syncLegacyOptionArrays(parsed.optionGroups, {
+      colors: parsed.colors || [],
+      sizes: parsed.sizes || []
+    });
+    parsed.colors = legacy.colors;
+    parsed.sizes = legacy.sizes;
   }
 
   return Object.fromEntries(Object.entries(parsed).filter(([, value]) => value !== undefined));

@@ -102,6 +102,25 @@ function formatMoney(value, currency) {
   }
 }
 
+function localizedOptionLabel(labelsByLocale, locale) {
+  const labels = labelsByLocale && typeof labelsByLocale === "object" ? labelsByLocale : {};
+  return labels[locale] || labels.en || labels.kr || labels.jp || labels["zh-TW"] || "";
+}
+
+function formatItemOptions(item, locale) {
+  if (Array.isArray(item.selectedOptions) && item.selectedOptions.length > 0) {
+    return item.selectedOptions
+      .map((option) => {
+        const group = localizedOptionLabel(option.groupLabels, locale);
+        const value = localizedOptionLabel(option.valueLabels, locale);
+        return group && value ? `${group}: ${value}` : value || group;
+      })
+      .filter(Boolean)
+      .join(" / ");
+  }
+  return [item.color, item.size].filter(Boolean).join(" / ");
+}
+
 function writeKeyValue(doc, label, value, y) {
   doc.fillColor("#6b6b73").fontSize(8).text(label, 48, y, { width: 100 });
   doc.fillColor("#20212a").fontSize(9).text(value || "-", 150, y, { width: 390 });
@@ -141,7 +160,9 @@ export async function createQuotePdfBuffer(snapshot) {
   y += 25;
 
   for (const item of snapshot.items || []) {
-    const rowHeight = 38;
+    const optionText = formatItemOptions(item, locale) || "-";
+    doc.fontSize(7.5);
+    const rowHeight = Math.max(38, Math.min(68, doc.heightOfString(optionText, { width: 88, lineGap: 1 }) + 16));
     if (y + rowHeight > 705) {
       doc.addPage();
       y = 48;
@@ -149,7 +170,7 @@ export async function createQuotePdfBuffer(snapshot) {
     doc.moveTo(48, y + rowHeight).lineTo(547, y + rowHeight).strokeColor("#ececf0").lineWidth(0.6).stroke();
     doc.fillColor("#20212a").fontSize(8).text(item.productName || item.productCode, 56, y + 8, { width: 176, ellipsis: true });
     doc.fillColor("#6b6b73").fontSize(7).text(item.productCode, 56, y + 21, { width: 176, ellipsis: true });
-    doc.fillColor("#34353d").fontSize(8).text([item.color, item.size].filter(Boolean).join(" / ") || "-", 238, y + 12, { width: 88, ellipsis: true });
+    doc.fillColor("#34353d").fontSize(7.5).text(optionText, 238, y + 8, { width: 88, height: rowHeight - 12, lineGap: 1, ellipsis: true });
     doc.text(String(item.quantity), 330, y + 12, { width: 38, align: "right" });
     doc.text(formatMoney(item.unitPrice, snapshot.currency), 375, y + 12, { width: 75, align: "right" });
     doc.text(formatMoney(item.subtotal, snapshot.currency), 455, y + 12, { width: 84, align: "right" });

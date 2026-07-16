@@ -489,6 +489,32 @@ test("packaged quote status trend index migration matches canonical migration ex
   assert.equal(packaged, canonical);
 });
 
+test("product option and quote snapshot migration is additive", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260716_product_options_and_quote_snapshots.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.match(sqlText, /add column if not exists option_groups jsonb not null default '\[\]'::jsonb/i);
+  assert.match(sqlText, /inquiry_items\s+add column if not exists selected_options jsonb not null default '\[\]'::jsonb/i);
+  assert.match(sqlText, /admin_quote_items\s+add column if not exists selected_options jsonb not null default '\[\]'::jsonb/i);
+  assert.doesNotMatch(sqlText, /\bdrop\b|\btruncate\b|\bdelete\s+from\b|\brename\b/i);
+});
+
+test("packaged product option migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260716_product_options_and_quote_snapshots.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260716_product_options_and_quote_snapshots.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
 test("migration runner resolves packaged lifecycle migration path explicitly", () => {
   const resolved = resolveSchemaSqlPath({
     SCHEMA_SQL_PATH: "migrations/20260622_admin_rbac_account_lifecycle.sql"

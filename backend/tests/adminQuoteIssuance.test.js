@@ -24,6 +24,12 @@ function createCandidate() {
     items: [{
       id: itemId,
       productCode: "NB-001",
+      selectedOptions: [{
+        groupId: "color",
+        valueId: "gold",
+        groupLabels: { kr: "색상", en: "Color", jp: "カラー", "zh-TW": "顏色" },
+        valueLabels: { kr: "골드", en: "Gold", jp: "ゴールド", "zh-TW": "金色" }
+      }],
       productName: "클로버 바벨",
       confirmedQuantity: 1,
       confirmedUnitPrice: 12000,
@@ -51,8 +57,10 @@ test("issueQuote stores an immutable customer snapshot and excludes internal mem
     },
     async pdfRenderer(snapshot) {
       assert.equal(snapshot.adminMemo, undefined);
+      assert.equal(snapshot.schemaVersion, 2);
       assert.equal(snapshot.customerNote, "고객 안내");
       assert.equal(snapshot.items[0].subtotal, 12000);
+      assert.equal(snapshot.items[0].selectedOptions[0].valueLabels.en, "Gold");
       return Buffer.from("%PDF-test");
     }
   });

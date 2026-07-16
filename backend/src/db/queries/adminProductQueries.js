@@ -1,3 +1,6 @@
+import { getDetailContentPublishIssues } from "../../utils/productDetailContent.js";
+import { getEffectiveOptionGroups, getOptionPublishIssues } from "../../utils/productOptions.js";
+
 function assertPool(pool) {
   if (!pool) {
     throw new Error("PostgreSQL pool is not configured for admin product queries.");
@@ -58,6 +61,9 @@ function createProductCompletion(row) {
   if (!hasPrimaryImage) missing.push("primaryImage");
   if (!hasKrPrice) missing.push("krPrice");
   missing.push(...getLocalizedDetailMissing(row));
+  const optionGroups = getEffectiveOptionGroups(row);
+  missing.push(...getOptionPublishIssues(optionGroups, imageSet));
+  missing.push(...getDetailContentPublishIssues(row.detail_content || {}, imageSet));
   return {
     languages,
     hasCategory: Boolean(row.category_id),
@@ -84,10 +90,13 @@ function mapProduct(row) {
     material: row.material,
     colors: row.colors || [],
     sizes: row.sizes || [],
+    optionGroups: getEffectiveOptionGroups(row),
+    optionGroupsLegacy: !Array.isArray(row.option_groups) || row.option_groups.length === 0,
     moqDefault: row.moq_default,
     leadTime: row.lead_time,
     origin: row.origin,
     imageSet: row.image_set || {},
+    optionGroups: getEffectiveOptionGroups(row),
     imageAlt: row.image_alt || {},
     taxonomy: row.taxonomy || {},
     specs: row.specs || {},
@@ -157,6 +166,7 @@ const productSelect = `
     p.material,
     p.colors,
     p.sizes,
+    p.option_groups,
     p.moq_default,
     p.lead_time,
     p.origin,
@@ -325,6 +335,7 @@ export function createAdminProductQueries(pool) {
               material,
               colors,
               sizes,
+              option_groups,
               moq_default,
               lead_time,
               origin,
@@ -346,9 +357,9 @@ export function createAdminProductQueries(pool) {
               description_zh_tw
             )
             values (
-              $1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::jsonb, $10, $11, $12,
-              $13::jsonb, $14::jsonb, $15::jsonb, $16::jsonb, $17::jsonb, $18::jsonb, $19,
-              $20, $21, $22, $23, $24, $25, $26, $27, $28
+              $1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::jsonb, $10::jsonb, $11, $12, $13,
+              $14::jsonb, $15::jsonb, $16::jsonb, $17::jsonb, $18::jsonb, $19::jsonb, $20,
+              $21, $22, $23, $24, $25, $26, $27, $28, $29
             )
             returning id
           `,
@@ -362,6 +373,7 @@ export function createAdminProductQueries(pool) {
             input.material,
             JSON.stringify(input.colors),
             JSON.stringify(input.sizes),
+            JSON.stringify(input.optionGroups || []),
             input.moqDefault,
             input.leadTime,
             input.origin,
@@ -475,25 +487,26 @@ export function createAdminProductQueries(pool) {
               material = coalesce($7, material),
               colors = coalesce($8::jsonb, colors),
               sizes = coalesce($9::jsonb, sizes),
-              moq_default = coalesce($10, moq_default),
-              lead_time = coalesce($11, lead_time),
-              origin = coalesce($12, origin),
-              image_set = coalesce($13::jsonb, image_set),
-              image_alt = coalesce($14::jsonb, image_alt),
-              taxonomy = coalesce($15::jsonb, taxonomy),
-              specs = coalesce($16::jsonb, specs),
-              detail_content = coalesce($17::jsonb, detail_content),
-              home_placement = coalesce($18::jsonb, home_placement),
-              badge = coalesce($19, badge),
-              is_visible = coalesce($20, is_visible),
-              is_export_available = coalesce($21, is_export_available),
-              is_new = coalesce($22, is_new),
-              is_best = coalesce($23, is_best),
-              sort_order = coalesce($24, sort_order),
-              description_ko = coalesce($25, description_ko),
-              description_en = coalesce($26, description_en),
-              description_ja = coalesce($27, description_ja),
-              description_zh_tw = coalesce($28, description_zh_tw),
+              option_groups = coalesce($10::jsonb, option_groups),
+              moq_default = coalesce($11, moq_default),
+              lead_time = coalesce($12, lead_time),
+              origin = coalesce($13, origin),
+              image_set = coalesce($14::jsonb, image_set),
+              image_alt = coalesce($15::jsonb, image_alt),
+              taxonomy = coalesce($16::jsonb, taxonomy),
+              specs = coalesce($17::jsonb, specs),
+              detail_content = coalesce($18::jsonb, detail_content),
+              home_placement = coalesce($19::jsonb, home_placement),
+              badge = coalesce($20, badge),
+              is_visible = coalesce($21, is_visible),
+              is_export_available = coalesce($22, is_export_available),
+              is_new = coalesce($23, is_new),
+              is_best = coalesce($24, is_best),
+              sort_order = coalesce($25, sort_order),
+              description_ko = coalesce($26, description_ko),
+              description_en = coalesce($27, description_en),
+              description_ja = coalesce($28, description_ja),
+              description_zh_tw = coalesce($29, description_zh_tw),
               updated_at = now()
             where id = $1
             returning id
@@ -508,6 +521,7 @@ export function createAdminProductQueries(pool) {
             input.material,
             input.colors ? JSON.stringify(input.colors) : null,
             input.sizes ? JSON.stringify(input.sizes) : null,
+            input.optionGroups ? JSON.stringify(input.optionGroups) : null,
             input.moqDefault,
             input.leadTime,
             input.origin,
@@ -709,14 +723,14 @@ export function createAdminProductQueries(pool) {
           `
             insert into public.products (
               code, name_ko, name_en, name_ja, name_zh_tw, category_id, material,
-              colors, sizes, moq_default, lead_time, origin, image_set, image_alt,
+              colors, sizes, option_groups, moq_default, lead_time, origin, image_set, image_alt,
               taxonomy, specs, detail_content, home_placement, badge, is_visible,
               is_export_available, is_new, is_best, sort_order,
               description_ko, description_en, description_ja, description_zh_tw
             )
             select
               $2, name_ko, name_en, name_ja, name_zh_tw, category_id, material,
-              colors, sizes, moq_default, lead_time, origin, image_set, image_alt,
+              colors, sizes, option_groups, moq_default, lead_time, origin, image_set, image_alt,
               taxonomy, specs, detail_content, '{}'::jsonb, badge, false,
               is_export_available, false, false, sort_order,
               description_ko, description_en, description_ja, description_zh_tw

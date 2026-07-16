@@ -92,7 +92,7 @@ function createQuoteNumber(quote) {
 function createDocumentSnapshot(candidate) {
   const quote = candidate.quote;
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     quoteId: quote.id,
     inquiryId: quote.inquiryId,
     inquiryNumber: quote.inquiryNumber,
@@ -116,6 +116,7 @@ function createDocumentSnapshot(candidate) {
       productName: item.productName || item.productCode,
       color: item.color || "",
       size: item.size || "",
+      selectedOptions: Array.isArray(item.selectedOptions) ? item.selectedOptions : [],
       quantity: Number(item.confirmedQuantity),
       unitPrice: Number(item.confirmedUnitPrice),
       subtotal: Number(item.confirmedSubtotal),

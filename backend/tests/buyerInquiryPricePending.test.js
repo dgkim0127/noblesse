@@ -55,7 +55,8 @@ test("createInquiry creates a price-pending inquiry when visible product has no 
             quantity: params[8],
             moq: params[9],
             price_snapshot: params[10],
-            subtotal: params[11]
+            subtotal: params[11],
+            selected_options: JSON.parse(params[12])
           }]
         };
       }
@@ -90,6 +91,7 @@ test("createInquiry creates a price-pending inquiry when visible product has no 
   assert.deepEqual(inquiryInsert.params.slice(2, 7), ["KR", "KRW", 1, 1, 0]);
   assert.equal(itemInsert.params[10], 0);
   assert.equal(itemInsert.params[11], 0);
+  assert.deepEqual(JSON.parse(itemInsert.params[12]), []);
   assert.ok(calls.some((call) => call.sql === "commit"));
 });
 
@@ -149,7 +151,8 @@ test("createInquiry accepts KRW numeric strings with zero fractional scale", asy
             quantity: params[8],
             moq: params[9],
             price_snapshot: params[10],
-            subtotal: params[11]
+            subtotal: params[11],
+            selected_options: JSON.parse(params[12])
           }]
         };
       }

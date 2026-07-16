@@ -108,6 +108,7 @@ create table if not exists public.products (
   material text,
   colors jsonb default '[]'::jsonb,
   sizes jsonb default '[]'::jsonb,
+  option_groups jsonb not null default '[]'::jsonb,
   moq_default integer default 1 check (moq_default > 0),
   lead_time text,
   origin text default 'KR',
@@ -291,6 +292,7 @@ create table if not exists public.inquiry_items (
   material text,
   color text,
   size text,
+  selected_options jsonb not null default '[]'::jsonb,
   quantity integer not null check (quantity > 0),
   moq integer not null check (moq > 0),
   price_snapshot numeric(14,2) not null check (price_snapshot >= 0),
@@ -335,6 +337,7 @@ create table if not exists public.admin_quote_items (
   product_name text,
   color text,
   size text,
+  selected_options jsonb not null default '[]'::jsonb,
   item_note text,
   created_at timestamptz default now()
 );
