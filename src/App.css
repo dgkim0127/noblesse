@@ -15330,7 +15330,7 @@ h6 {
 
 .pd-process-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
   border: 1px solid #eee2dc;
 }
 
@@ -15352,6 +15352,172 @@ h6 {
   margin-inline: auto;
 }
 
+.pd-key-facts {
+  display: grid;
+  max-width: min(1360px, 100%);
+  width: 100%;
+  margin-inline: auto;
+  border-block: 1px solid #e9e3df;
+  padding: 26px 0;
+  background: #fff;
+}
+
+.pd-key-facts > p {
+  margin: 0 0 18px;
+  color: #8c838d;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pd-key-facts dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin: 0;
+}
+
+.pd-key-facts dl > div {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 0 24px;
+}
+
+.pd-key-facts dl > div:first-child {
+  padding-left: 0;
+}
+
+.pd-key-facts dl > div + div {
+  border-left: 1px solid #eee8e4;
+}
+
+.pd-key-facts dt,
+.pd-structure-list dt {
+  color: #918893;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pd-key-facts dd,
+.pd-structure-list dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--noblesse-sub);
+  font-size: 15px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.pd-detail-story {
+  gap: clamp(48px, 6vw, 86px);
+  background: #fff;
+}
+
+.pd-detail-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  max-width: 1100px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.pd-detail-gallery figure {
+  position: relative;
+  min-height: 520px;
+  margin: 0;
+  overflow: hidden;
+  background: #f5f2ef;
+}
+
+.pd-detail-gallery figure.is-featured,
+.pd-detail-gallery.is-single figure {
+  grid-column: 1 / -1;
+  min-height: 680px;
+}
+
+.pd-detail-gallery img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pd-spec-layout.is-data-only {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.56fr);
+  align-items: start;
+}
+
+.pd-size-note,
+.pd-shipping-note {
+  display: grid;
+  gap: 12px;
+  border-top: 2px solid var(--noblesse-sub);
+  padding: 24px 0 0;
+}
+
+.pd-size-note strong,
+.pd-shipping-note strong,
+.pd-care-guides strong {
+  color: var(--noblesse-sub);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.pd-size-note p,
+.pd-shipping-note p,
+.pd-care-guides p {
+  margin: 0;
+  color: #756d78;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.pd-material-care-section {
+  gap: clamp(42px, 5vw, 72px);
+  background: #f4f1ed;
+}
+
+.pd-material-care-grid {
+  display: grid;
+  grid-template-columns: minmax(340px, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(42px, 6vw, 96px);
+  align-items: start;
+}
+
+.pd-structure-list {
+  margin: 0;
+  border-top: 1px solid #dcd4ce;
+}
+
+.pd-structure-list > div {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.7fr) minmax(0, 1fr);
+  gap: 18px;
+  border-bottom: 1px solid #ddd5cf;
+  padding: 18px 0;
+}
+
+.pd-care-guides {
+  display: grid;
+  border-top: 1px solid #dcd4ce;
+}
+
+.pd-care-guides article {
+  display: grid;
+  gap: 10px;
+  border-bottom: 1px solid #ddd5cf;
+  padding: 18px 0;
+}
+
+.pd-delivery-section .pd-process-grid {
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+}
+
+.pd-shipping-note {
+  max-width: 760px;
+}
+
 @media (max-width: 1180px) {
   .pd-hero {
     grid-template-columns: 1fr;
@@ -15367,7 +15533,9 @@ h6 {
 
   .pd-gallery-grid,
   .pd-spec-layout,
+  .pd-spec-layout.is-data-only,
   .pd-material-section,
+  .pd-material-care-grid,
   .pd-overview-grid {
     grid-template-columns: 1fr;
   }
@@ -15438,6 +15606,34 @@ h6 {
     padding: 52px 20px;
   }
 
+  .pd-key-facts {
+    padding: 22px 0;
+  }
+
+  .pd-key-facts dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pd-key-facts dl > div,
+  .pd-key-facts dl > div:first-child {
+    border: 0;
+    border-top: 1px solid #eee8e4;
+    padding: 14px 12px 14px 0;
+  }
+
+  .pd-detail-gallery {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .pd-detail-gallery figure,
+  .pd-detail-gallery figure.is-featured,
+  .pd-detail-gallery.is-single figure {
+    grid-column: auto;
+    min-height: auto;
+    aspect-ratio: 1;
+  }
+
   .pd-editorial h2 {
     font-size: clamp(30px, 8vw, 40px);
     line-height: 1.08;
@@ -15462,5 +15658,9 @@ h6 {
   .pd-spec-table div {
     grid-template-columns: 1fr;
     gap: 6px;
+  }
+
+  .pd-structure-list > div {
+    grid-template-columns: minmax(100px, 0.7fr) minmax(0, 1fr);
   }
 }

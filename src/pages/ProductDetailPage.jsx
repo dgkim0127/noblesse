@@ -369,7 +369,30 @@ const detailCopy = {
 }
 
 const cleanDetailCopy = {
-  en: detailCopy.en,
+  en: {
+    ...detailCopy.en,
+    careGuide: 'Care guide',
+    closureType: 'Closure',
+    detailImages: 'Product details',
+    detailImagesIntro: 'Review the product from multiple angles and in actual wearing context.',
+    finish: 'Finish',
+    keyFacts: 'Key specifications',
+    materialAndCare: 'Material & care',
+    piercingType: 'Piercing type',
+    plating: 'Plating',
+    productStructure: 'Product structure',
+    saleType: 'Sales unit',
+    saleTypePair: 'Pair',
+    saleTypeSet: 'Set',
+    saleTypeSingle: 'Single piece',
+    sectionDelivery: 'Quote guide',
+    sectionMaterial: 'Material & care',
+    sectionOverview: 'Detail images',
+    sectionSpecification: 'Exact specifications',
+    stoneType: 'Stone',
+    wearingGuide: 'Fit & wearing',
+    wearingLocation: 'Recommended placement',
+  },
   kr: {
     ...detailCopy.en,
     addToInquiry: '견적 리스트에 담기',
@@ -438,10 +461,10 @@ const cleanDetailCopy = {
     sizes: '사이즈',
     specification: '상세 사양',
     specificationIntro: '견적 검토에는 장식 문구보다 등록된 구조와 사양을 사용합니다.',
-    sectionDelivery: '출고 안내',
-    sectionMaterial: '소재 안내',
-    sectionOverview: '개요',
-    sectionSpecification: '상세 사양',
+    sectionDelivery: '견적 안내',
+    sectionMaterial: '소재·관리',
+    sectionOverview: '상세 이미지',
+    sectionSpecification: '정확한 규격',
     quietDetailHeadline: '작은 피어싱도 한눈에 검토할 수 있게 정리했습니다.',
     quietDetailLead: '이미지, 소재, 옵션, 견적 안내를 분리해 바이어가 필요한 정보를 빠르게 확인할 수 있습니다.',
     statusGuest: '회원가입 후 거래처 승인을 요청하면 가격과 견적 기능을 사용할 수 있습니다.',
@@ -465,6 +488,23 @@ const cleanDetailCopy = {
     decorationCount: '장식 수량',
     settingMethod: '세팅 방식',
     specNote: '사양 메모',
+    careGuide: '보관·관리 안내',
+    closureType: '잠금 방식',
+    detailImages: '상품 상세',
+    detailImagesIntro: '제품의 구조와 실제 착용 느낌을 여러 각도에서 확인하세요.',
+    finish: '표면 마감',
+    keyFacts: '핵심 사양',
+    materialAndCare: '소재·관리',
+    piercingType: '피어싱 유형',
+    plating: '도금',
+    productStructure: '제품 구조',
+    saleType: '판매 단위',
+    saleTypePair: '한 쌍',
+    saleTypeSet: '세트',
+    saleTypeSingle: '낱개',
+    stoneType: '스톤',
+    wearingGuide: '착용 안내',
+    wearingLocation: '권장 착용 부위',
   },
   jp: {
     ...detailCopy.en,
@@ -481,10 +521,10 @@ const cleanDetailCopy = {
     quoteNotice: '見積案内',
     requestAccess: '取引先承認を申請',
     reviewStatus: '承認状況を見る',
-    sectionDelivery: '出荷案内',
-    sectionMaterial: '素材案内',
-    sectionOverview: '概要',
-    sectionSpecification: '詳細仕様',
+    sectionDelivery: '見積案内',
+    sectionMaterial: '素材・お手入れ',
+    sectionOverview: '詳細画像',
+    sectionSpecification: '正確な仕様',
     specification: '詳細仕様',
     specificationIntro: '見積検討には装飾的な説明ではなく登録された仕様を使用します。',
     statusGuest: '会員登録後、取引先承認を申請すると価格と見積機能を利用できます。',
@@ -513,6 +553,23 @@ const cleanDetailCopy = {
     decorationCount: '装飾数',
     settingMethod: 'セッティング方式',
     specNote: '仕様メモ',
+    careGuide: '保管・お手入れ',
+    closureType: '留め方',
+    detailImages: '商品詳細',
+    detailImagesIntro: '商品の構造と着用イメージを複数の角度から確認できます。',
+    finish: '表面仕上げ',
+    keyFacts: '主要仕様',
+    materialAndCare: '素材・お手入れ',
+    piercingType: 'ピアスタイプ',
+    plating: 'メッキ',
+    productStructure: '商品構造',
+    saleType: '販売単位',
+    saleTypePair: 'ペア',
+    saleTypeSet: 'セット',
+    saleTypeSingle: '片耳',
+    stoneType: 'ストーン',
+    wearingGuide: '着用案内',
+    wearingLocation: '推奨部位',
   },
   cn: {
     ...detailCopy.en,
@@ -529,10 +586,10 @@ const cleanDetailCopy = {
     quoteNotice: '詢價說明',
     requestAccess: '申請買家核准',
     reviewStatus: '查看核准狀態',
-    sectionDelivery: '出貨說明',
-    sectionMaterial: '材質說明',
-    sectionOverview: '概要',
-    sectionSpecification: '詳細規格',
+    sectionDelivery: '詢價說明',
+    sectionMaterial: '材質與保養',
+    sectionOverview: '詳細圖片',
+    sectionSpecification: '精確規格',
     specification: '詳細規格',
     specificationIntro: '詢價判斷以登錄的結構與規格為準，而不是裝飾文案。',
     statusGuest: '註冊並申請買家核准後，即可使用價格與詢價功能。',
@@ -561,6 +618,23 @@ const cleanDetailCopy = {
     decorationCount: '裝飾數量',
     settingMethod: '鑲嵌方式',
     specNote: '規格備註',
+    careGuide: '保存與保養',
+    closureType: '固定方式',
+    detailImages: '商品詳細',
+    detailImagesIntro: '從多個角度確認商品結構與實際配戴效果。',
+    finish: '表面處理',
+    keyFacts: '主要規格',
+    materialAndCare: '材質與保養',
+    piercingType: '穿孔飾品類型',
+    plating: '電鍍',
+    productStructure: '商品結構',
+    saleType: '販售單位',
+    saleTypePair: '一對',
+    saleTypeSet: '套組',
+    saleTypeSingle: '單件',
+    stoneType: '寶石',
+    wearingGuide: '配戴說明',
+    wearingLocation: '建議配戴部位',
   },
 }
 
@@ -847,11 +921,20 @@ export function ProductDetailView({
     ? { ...localizedDetailContent, headline: editor.values.headline, body: editor.values.body, description: editor.values.body }
     : localizedDetailContent
   const specUnit = productSpecs.unit || 'mm'
-  const overviewBody = productDetailContent.description || productDetailContent.body || description || copy.quietDetailLead
   const materialGuideBody = productDetailContent.materialInfo || (product.material ? copy.materialGuideText(product.material) : '')
   const sizeGuideBody = productDetailContent.sizeGuide || copy.sizeGuideText
+  const wearingGuideBody = productDetailContent.wearingGuide || ''
+  const careGuideBody = productDetailContent.careGuide || productDetailContent.care || ''
   const shippingNoticeBody = productDetailContent.exchangeNotice || copy.shippingNoticeText
   const quoteWorkflowLead = productDetailContent.wholesaleNotice || copy.quoteWorkflowLead
+  const productTaxonomy = product.taxonomy || {}
+  const galleryImages = buildGalleryImages(product, productAlt, copy)
+  const detailGalleryImages = galleryImages.slice(3)
+  const saleTypeLabels = {
+    pair: copy.saleTypePair,
+    set: copy.saleTypeSet,
+    single: copy.saleTypeSingle,
+  }
   const currentQuantity = normalizeQuantity(quantity, effectiveRequestMoq || 1)
   const accessLink = viewerState === 'pending' ? '/approval-pending' : '/register'
   const accessLabel = viewerState === 'pending' ? copy.reviewStatus : copy.requestAccess
@@ -868,6 +951,13 @@ export function ProductDetailView({
     [copy.exportAvailability, product.isExportAvailable ? copy.available : copy.unavailable],
   ].filter(([, value]) => value !== undefined && value !== null && value !== '')
 
+  const heroInfoRows = [
+    [copy.category, categoryName],
+    [copy.material, product.material || productTaxonomy.baseMaterial],
+    [copy.origin, product.origin],
+    [copy.leadTime, product.leadTime],
+  ].filter(([, value]) => value !== undefined && value !== null && value !== '')
+
   const specificationRows = [
     [copy.gauge, productSpecs.gauge],
     [copy.length, withUnit(productSpecs.length, specUnit)],
@@ -882,9 +972,37 @@ export function ProductDetailView({
     [copy.decorationColor, productSpecs.decorationColor],
     [copy.decorationSize, withUnit(productSpecs.decorationSize, specUnit)],
     [copy.decorationCount, productSpecs.decorationCount],
+    [copy.stoneType, productSpecs.stoneType],
+    [copy.closureType, productSpecs.closureType],
     [copy.settingMethod, productSpecs.settingMethod],
+    [copy.plating, productSpecs.plating],
+    [copy.finish, productSpecs.finish],
     [copy.specNote, productSpecs.specNote || productSpecs.decorationNote],
   ].filter(([, value]) => value)
+
+  const structureRows = [
+    [copy.piercingType, productTaxonomy.piercingType],
+    [copy.wearingLocation, productTaxonomy.wearingLocation],
+    [copy.material, product.material || productTaxonomy.baseMaterial],
+    [copy.plating, productSpecs.plating],
+    [copy.finish, productSpecs.finish],
+    [copy.stoneType, productSpecs.stoneType],
+    [copy.closureType, productSpecs.closureType],
+    [copy.settingMethod, productSpecs.settingMethod],
+    [copy.saleType, saleTypeLabels[productTaxonomy.saleType] || productTaxonomy.saleType],
+  ].filter(([, value]) => value)
+
+  const keyFacts = [
+    [copy.piercingType, productTaxonomy.piercingType || categoryName],
+    [copy.material, product.material || productTaxonomy.baseMaterial],
+    [copy.gauge, productSpecs.gauge || (productSpecs.barThickness ? withUnit(productSpecs.barThickness, specUnit) : '')],
+    [copy.barLength, withUnit(productSpecs.barLength || productSpecs.postLength || productSpecs.innerDiameter || productSpecs.length, specUnit)],
+    [copy.wearingLocation, productTaxonomy.wearingLocation],
+    [copy.moq, effectiveVisibleMoq ? `${effectiveVisibleMoq} pcs` : ''],
+  ].filter(([, value]) => value)
+
+  const hasDetailStory = detailGalleryImages.length > 0 || productDetailContent.headline || productDetailContent.body || editor
+  const hasMaterialAndCare = structureRows.length > 0 || materialGuideBody || wearingGuideBody || careGuideBody || editor
 
   const addSelectedItem = () => {
     if (editor) return
@@ -936,7 +1054,7 @@ export function ProductDetailView({
 
         <ProductEditorTarget align="end" editor={editor} field="productInfo" label="상품 정보">
           <dl className="pd-meta-list">
-            {productInfoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+            {heroInfoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
             {effectiveVisibleMoq && <div><dt>{copy.moq}</dt><dd>{effectiveVisibleMoq} pcs</dd></div>}
           </dl>
         </ProductEditorTarget>
@@ -1025,77 +1143,74 @@ export function ProductDetailView({
       </aside>
     </section>
 
-    <section className="pd-assurance-strip" aria-label={copy.guide}>
-      <article><strong>{copy.assuranceMoqTitle}</strong><span>{copy.assuranceMoqBody}</span></article>
-      <article><strong>{copy.assuranceMarketTitle}</strong><span>{copy.assuranceMarketBody}</span></article>
-      <article><strong>{copy.assuranceAssetsTitle}</strong><span>{copy.assuranceAssetsBody}</span></article>
-      <article><strong>{copy.assuranceQcTitle}</strong><span>{copy.assuranceQcBody}</span></article>
-    </section>
+    {keyFacts.length > 0 && <section className="pd-key-facts" aria-label={copy.keyFacts}>
+      <p>{copy.keyFacts}</p>
+      <dl>{keyFacts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+    </section>}
 
     <nav className="pd-section-nav" aria-label={copy.productInfo}>
-      <a href="#pd-overview">{copy.sectionOverview}</a>
+      {hasDetailStory && <a href="#pd-overview">{copy.sectionOverview}</a>}
       <a href="#pd-specification">{copy.sectionSpecification}</a>
-      <a href="#pd-material">{copy.sectionMaterial}</a>
+      {hasMaterialAndCare && <a href="#pd-material">{copy.sectionMaterial}</a>}
       <a href="#pd-delivery">{copy.sectionDelivery}</a>
     </nav>
 
-    <section className="pd-editorial pd-overview" id="pd-overview">
+    {hasDetailStory && <section className="pd-editorial pd-detail-story" id="pd-overview">
       <div className="pd-editorial-copy">
-        <p className="pd-editorial-eyebrow">{copy.quietDetailEyebrow}</p>
-        <ProductInlineEditor as="h2" editor={editor} field="headline" label="상세 제목" placeholder={`${editor?.localeLabel || ''} 상세 제목 입력`.trim()} value={productDetailContent.headline || (editor ? '' : copy.quietDetailHeadline)} />
-        <ProductInlineEditor editor={editor} field="body" label="상세 본문" multiline placeholder={`${editor?.localeLabel || ''} 상세 본문 입력`.trim()} value={editor ? productDetailContent.body : overviewBody} />
+        <p className="pd-editorial-eyebrow">{copy.detailImages}</p>
+        <ProductInlineEditor as="h2" editor={editor} field="headline" label="상세 제목" placeholder={`${editor?.localeLabel || ''} 상세 제목 입력`.trim()} value={productDetailContent.headline || (editor ? '' : productName)} />
+        <ProductInlineEditor editor={editor} field="body" label="상세 본문" multiline placeholder={`${editor?.localeLabel || ''} 상세 본문 입력`.trim()} value={editor ? productDetailContent.body : (productDetailContent.body || description || copy.detailImagesIntro)} />
       </div>
-      <div className="pd-overview-grid">
-        <ProductEditorTarget editor={editor} field="image" label="상세 이미지"><div className="pd-overview-media">
-          {product.imageSet?.card || product.imageSet?.detail
-            ? <img src={product.imageSet.card || product.imageSet.detail} alt={productAlt} loading="lazy" style={imagePresentationStyle(product.imageSet)} />
-            : <div className="pd-image-placeholder"><Images size={30} /><span>{copy.noImage}</span></div>}
-        </div></ProductEditorTarget>
-        <article className="pd-overview-note">
-          <span>01 / FORM</span>
-          <h3>{productDetailContent.decoration || copy.buyerPointTitleOne}</h3>
-          <p>{productDetailContent.fit || copy.buyerPointBodyOne}</p>
-        </article>
-      </div>
-      <div className="pd-buyer-points" aria-label={copy.buyerPoint}>
-        <p>{copy.buyerPoint}</p>
-        <article><strong>01</strong><h3>{copy.buyerPointTitleOne}</h3><span>{copy.buyerPointBodyOne}</span></article>
-        <article><strong>02</strong><h3>{copy.buyerPointTitleTwo}</h3><span>{copy.buyerPointBodyTwo}</span></article>
-        <article><strong>03</strong><h3>{copy.buyerPointTitleThree}</h3><span>{copy.buyerPointBodyThree}</span></article>
-      </div>
-    </section>
+      {(detailGalleryImages.length > 0 || editor) && <ProductEditorTarget editor={editor} field="image" label="상세 이미지">
+        <div className={`pd-detail-gallery${detailGalleryImages.length === 1 ? ' is-single' : ''}`}>
+          {detailGalleryImages.length > 0
+            ? detailGalleryImages.map((image, index) => <figure className={index === 0 ? 'is-featured' : ''} key={`detail-${image.id}`}>
+              <img alt={image.alt} loading="lazy" src={image.detailSrc || image.cardSrc} style={imagePresentationStyle(image)} />
+            </figure>)
+            : editor && <div className="pd-image-placeholder"><Images size={30} /><span>{copy.noImage}</span></div>}
+        </div>
+      </ProductEditorTarget>}
+    </section>}
 
     <section className="pd-editorial pd-specification-section" id="pd-specification">
       <div className="pd-section-heading">
         <div><p>{copy.productInfo}</p><h2>{copy.specification}</h2></div>
         <span>{copy.specificationIntro}</span>
       </div>
-      <div className="pd-spec-layout">
-        <div className="pd-spec-image">
-          {product.imageSet?.detail || product.imageSet?.card
-            ? <img src={product.imageSet.detail || product.imageSet.card} alt={productAlt} loading="lazy" style={imagePresentationStyle(product.imageSet)} />
-            : <div className="pd-image-placeholder"><Images size={30} /><span>{copy.noImage}</span></div>}
-        </div>
+      <div className="pd-spec-layout is-data-only">
         <ProductEditorTarget align="end" editor={editor} field="specs" label="상세 스펙"><dl className="pd-spec-table">
             {productInfoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
             {effectiveVisibleMoq && <div><dt>{copy.moq}</dt><dd>{effectiveVisibleMoq} pcs</dd></div>}
             {specificationRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
           </dl></ProductEditorTarget>
+        <ProductEditorTarget align="end" editor={editor} field="care" label="사이즈 안내">
+          <aside className="pd-size-note"><strong>{copy.sizeGuide}</strong><p>{sizeGuideBody}</p></aside>
+        </ProductEditorTarget>
       </div>
     </section>
 
-    <section className="pd-editorial pd-material-section" id="pd-material">
-      <div className="pd-material-copy">
-        <p className="pd-editorial-eyebrow">{copy.materialGuide}</p>
-        <h2>{copy.materialHeadline}</h2>
-        {materialGuideBody && <p>{materialGuideBody}</p>}
+    {hasMaterialAndCare && <section className="pd-editorial pd-material-care-section" id="pd-material">
+      <div className="pd-section-heading">
+        <div><p>{copy.productStructure}</p><h2>{copy.materialAndCare}</h2></div>
+        {materialGuideBody && <span>{materialGuideBody}</span>}
       </div>
-      <div className="pd-material-cards">
-        {product.material && <article><span>{product.material}</span><strong>{copy.material}</strong></article>}
-        {joinList(colors) && <article><span>{joinList(colors)}</span><strong>{copy.colors}</strong></article>}
-        {copy.quoteNotice && <article><span>QC</span><strong>{copy.assuranceQcTitle}</strong></article>}
+      <div className="pd-material-care-grid">
+        <ProductEditorTarget editor={editor} field="productInfo" label="제품 구조">
+          <dl className="pd-structure-list">
+            {structureRows.length > 0
+              ? structureRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)
+              : <div><dt>{copy.material}</dt><dd>—</dd></div>}
+          </dl>
+        </ProductEditorTarget>
+        <ProductEditorTarget align="end" editor={editor} field="care" label="착용 및 관리 안내">
+          <div className="pd-care-guides">
+            {(wearingGuideBody || editor) && <article><strong>{copy.wearingGuide}</strong><p>{wearingGuideBody || '—'}</p></article>}
+            {(sizeGuideBody || editor) && <article><strong>{copy.sizeGuide}</strong><p>{sizeGuideBody || '—'}</p></article>}
+            {(careGuideBody || editor) && <article><strong>{copy.careGuide}</strong><p>{careGuideBody || '—'}</p></article>}
+          </div>
+        </ProductEditorTarget>
       </div>
-    </section>
+    </section>}
 
     <section className="pd-editorial pd-delivery-section" id="pd-delivery">
       <div className="pd-section-heading">
@@ -1106,8 +1221,8 @@ export function ProductDetailView({
         <article><strong>01</strong><h3>{copy.quoteStepSelect}</h3><p>{copy.quoteStepSelectBody}</p></article>
         <article><strong>02</strong><h3>{copy.quoteStepReceive}</h3><p>{copy.quoteStepReceiveBody}</p></article>
         <article><strong>03</strong><h3>{copy.quoteStepConfirm}</h3><p>{copy.quoteStepConfirmBody}</p></article>
-        <article><strong>04</strong><h3>{copy.shippingNotice}</h3><p>{shippingNoticeBody}</p>{sizeGuideBody && <small>{sizeGuideBody}</small>}</article>
       </div>
+      <aside className="pd-shipping-note"><strong>{copy.shippingNotice}</strong><p>{shippingNoticeBody}</p></aside>
     </section>
 
     <section className="pd-related">

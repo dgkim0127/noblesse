@@ -118,12 +118,22 @@ const inspectorGroupByField = {
   price: 'trade',
   headline: 'details',
   body: 'details',
+  care: 'details',
   productInfo: 'details',
   specs: 'details',
   readiness: 'operations',
   settings: 'operations',
 }
-const emptyTranslation = { name: '', summary: '', headline: '', body: '' }
+const emptyTranslation = {
+  name: '',
+  summary: '',
+  headline: '',
+  body: '',
+  wearingGuide: '',
+  materialInfo: '',
+  careGuide: '',
+  sizeGuide: '',
+}
 const emptyPrice = { wholesalePrice: '', retailPrice: '', moq: '1', minOrderAmount: '0', isActive: true }
 const emptyForm = {
   code: '',
@@ -140,8 +150,29 @@ const emptyForm = {
   isBest: false,
   sortOrder: '0',
   translations: Object.fromEntries(localeTabs.map(({ key }) => [key, { ...emptyTranslation }])),
-  taxonomy: { productGroup: 'piercing', piercingType: '', baseMaterial: '', saleType: 'single' },
-  specs: { gauge: '', length: '', unit: 'mm', specNote: '' },
+  taxonomy: { productGroup: 'piercing', piercingType: '', baseMaterial: '', wearingLocation: '', saleType: 'single' },
+  specs: {
+    gauge: '',
+    length: '',
+    barLength: '',
+    postLength: '',
+    innerDiameter: '',
+    barThickness: '',
+    ballSize: '',
+    charmSize: '',
+    totalLength: '',
+    decorationType: '',
+    decorationColor: '',
+    decorationSize: '',
+    decorationCount: '',
+    stoneType: '',
+    settingMethod: '',
+    closureType: '',
+    plating: '',
+    finish: '',
+    unit: 'mm',
+    specNote: '',
+  },
   homePlacement: {
     showInNewArrivals: false,
     showInWeeklyPick: false,
@@ -171,6 +202,10 @@ function getTranslation(product, locale) {
     summary: product?.[descriptionFields[locale]] || '',
     headline: translatedDetail.headline || legacyDetail.headline || '',
     body: translatedDetail.body || translatedDetail.description || legacyDetail.body || legacyDetail.description || '',
+    wearingGuide: translatedDetail.wearingGuide || legacyDetail.wearingGuide || '',
+    materialInfo: translatedDetail.materialInfo || legacyDetail.materialInfo || '',
+    careGuide: translatedDetail.careGuide || translatedDetail.care || legacyDetail.careGuide || legacyDetail.care || '',
+    sizeGuide: translatedDetail.sizeGuide || legacyDetail.sizeGuide || '',
   }
 }
 
@@ -250,6 +285,10 @@ function buildDraftProduct({ category, form, images, product }) {
       translations: Object.fromEntries(localeTabs.map(({ key }) => [key, {
         headline: form.translations[key].headline,
         body: form.translations[key].body,
+        wearingGuide: form.translations[key].wearingGuide,
+        materialInfo: form.translations[key].materialInfo,
+        careGuide: form.translations[key].careGuide,
+        sizeGuide: form.translations[key].sizeGuide,
       }])),
     },
   }
@@ -280,6 +319,10 @@ function buildProductPayload(form) {
       translations: Object.fromEntries(localeTabs.map(({ key }) => [key, {
         headline: form.translations[key].headline.trim(),
         body: form.translations[key].body.trim(),
+        wearingGuide: form.translations[key].wearingGuide.trim(),
+        materialInfo: form.translations[key].materialInfo.trim(),
+        careGuide: form.translations[key].careGuide.trim(),
+        sizeGuide: form.translations[key].sizeGuide.trim(),
       }])),
     },
     homePlacement: { ...form.homePlacement, sortPriority: Number(form.homePlacement.sortPriority || 0) },
@@ -1039,6 +1082,7 @@ export function AdminProductEditorPage() {
                   </article>)}
                 </div>}
                 <small>JPG, PNG, WebP · 최대 8장 · 장당 10MB · ZIP 해제 후 최대 80MB</small>
+                <p className="admin-help-text">1번은 대표 이미지, 2~3번은 상단 보조 이미지, 4번 이후는 상세 이미지 순서로 고객 화면에 표시됩니다.</p>
               </InspectorField>
             </InspectorGroup>
 
@@ -1073,6 +1117,15 @@ export function AdminProductEditorPage() {
               <InspectorField activeField={selectedField} field="body">
                 <label className="admin-field"><span>{editorBridge.localeLabel} 상세 본문</span><textarea maxLength="4000" rows="6" value={currentTranslation.body} onChange={(event) => setTranslationField(activeLocale, 'body', event.target.value)} /></label>
               </InspectorField>
+              <InspectorField activeField={selectedField} field="care">
+                <div className="admin-product-detail-guides">
+                  <strong>착용·소재·관리 안내</strong>
+                  <label className="admin-field"><span>{editorBridge.localeLabel} 착용 안내</span><textarea maxLength="1200" rows="3" placeholder="권장 착용 부위와 형태, 착용 시 확인할 점" value={currentTranslation.wearingGuide} onChange={(event) => setTranslationField(activeLocale, 'wearingGuide', event.target.value)} /></label>
+                  <label className="admin-field"><span>{editorBridge.localeLabel} 소재 안내</span><textarea maxLength="1200" rows="3" placeholder="기본 소재, 도금, 스톤과 알레르기 관련 사실 정보" value={currentTranslation.materialInfo} onChange={(event) => setTranslationField(activeLocale, 'materialInfo', event.target.value)} /></label>
+                  <label className="admin-field"><span>{editorBridge.localeLabel} 사이즈 안내</span><textarea maxLength="1200" rows="3" placeholder="측정 기준과 실제 착용 시 확인할 치수" value={currentTranslation.sizeGuide} onChange={(event) => setTranslationField(activeLocale, 'sizeGuide', event.target.value)} /></label>
+                  <label className="admin-field"><span>{editorBridge.localeLabel} 보관·관리 안내</span><textarea maxLength="1200" rows="3" placeholder="물기, 화장품, 보관과 세척 시 주의사항" value={currentTranslation.careGuide} onChange={(event) => setTranslationField(activeLocale, 'careGuide', event.target.value)} /></label>
+                </div>
+              </InspectorField>
               <InspectorField activeField={selectedField} field="productInfo">
                 <div className="admin-form-grid">
                   <label className="admin-field"><span>소재</span><input value={form.material} onChange={(event) => setField('material', event.target.value)} /></label>
@@ -1081,10 +1134,31 @@ export function AdminProductEditorPage() {
                 </div>
               </InspectorField>
               <InspectorField activeField={selectedField} field="specs">
-                <div className="admin-form-grid">
-                  <label className="admin-field"><span>게이지</span><input placeholder="16G" value={form.specs.gauge || ''} onChange={(event) => setNestedField('specs', 'gauge', event.target.value)} /></label>
-                  <label className="admin-field"><span>길이</span><input value={form.specs.length || ''} onChange={(event) => setNestedField('specs', 'length', event.target.value)} /></label>
-                  <label className="admin-field"><span>단위</span><select value={form.specs.unit || 'mm'} onChange={(event) => setNestedField('specs', 'unit', event.target.value)}><option value="mm">mm</option><option value="cm">cm</option><option value="inch">inch</option></select></label>
+                <div className="admin-product-spec-editor">
+                  <header><strong>착용 규격</strong><span>해당 상품에 필요한 값만 입력하세요.</span></header>
+                  <div className="admin-form-grid">
+                    <label className="admin-field"><span>게이지</span><input placeholder="16G / 1.2mm" value={form.specs.gauge || ''} onChange={(event) => setNestedField('specs', 'gauge', event.target.value)} /></label>
+                    <label className="admin-field"><span>기본 길이</span><input value={form.specs.length || ''} onChange={(event) => setNestedField('specs', 'length', event.target.value)} /></label>
+                    <label className="admin-field"><span>바 길이</span><input value={form.specs.barLength || ''} onChange={(event) => setNestedField('specs', 'barLength', event.target.value)} /></label>
+                    <label className="admin-field"><span>포스트 길이</span><input value={form.specs.postLength || ''} onChange={(event) => setNestedField('specs', 'postLength', event.target.value)} /></label>
+                    <label className="admin-field"><span>내경</span><input value={form.specs.innerDiameter || ''} onChange={(event) => setNestedField('specs', 'innerDiameter', event.target.value)} /></label>
+                    <label className="admin-field"><span>바 두께</span><input value={form.specs.barThickness || ''} onChange={(event) => setNestedField('specs', 'barThickness', event.target.value)} /></label>
+                    <label className="admin-field"><span>전체 길이</span><input value={form.specs.totalLength || ''} onChange={(event) => setNestedField('specs', 'totalLength', event.target.value)} /></label>
+                    <label className="admin-field"><span>단위</span><select value={form.specs.unit || 'mm'} onChange={(event) => setNestedField('specs', 'unit', event.target.value)}><option value="mm">mm</option><option value="cm">cm</option><option value="inch">inch</option></select></label>
+                  </div>
+                  <header><strong>장식·마감</strong><span>제품 구조를 확인할 수 있는 항목입니다.</span></header>
+                  <div className="admin-form-grid">
+                    <label className="admin-field"><span>볼 사이즈</span><input value={form.specs.ballSize || ''} onChange={(event) => setNestedField('specs', 'ballSize', event.target.value)} /></label>
+                    <label className="admin-field"><span>장식 사이즈</span><input value={form.specs.decorationSize || form.specs.charmSize || ''} onChange={(event) => setNestedField('specs', 'decorationSize', event.target.value)} /></label>
+                    <label className="admin-field"><span>장식 타입</span><input placeholder="큐빅 / 클로버" value={form.specs.decorationType || ''} onChange={(event) => setNestedField('specs', 'decorationType', event.target.value)} /></label>
+                    <label className="admin-field"><span>스톤</span><input placeholder="Cubic zirconia" value={form.specs.stoneType || ''} onChange={(event) => setNestedField('specs', 'stoneType', event.target.value)} /></label>
+                    <label className="admin-field"><span>장식 색상</span><input value={form.specs.decorationColor || ''} onChange={(event) => setNestedField('specs', 'decorationColor', event.target.value)} /></label>
+                    <label className="admin-field"><span>장식 수량</span><input inputMode="numeric" value={form.specs.decorationCount || ''} onChange={(event) => setNestedField('specs', 'decorationCount', event.target.value)} /></label>
+                    <label className="admin-field"><span>잠금 방식</span><input placeholder="나사형 / 푸시핀" value={form.specs.closureType || ''} onChange={(event) => setNestedField('specs', 'closureType', event.target.value)} /></label>
+                    <label className="admin-field"><span>세팅 방식</span><input placeholder="프롱 / 베젤" value={form.specs.settingMethod || ''} onChange={(event) => setNestedField('specs', 'settingMethod', event.target.value)} /></label>
+                    <label className="admin-field"><span>도금</span><input placeholder="14K gold plating" value={form.specs.plating || ''} onChange={(event) => setNestedField('specs', 'plating', event.target.value)} /></label>
+                    <label className="admin-field"><span>표면 마감</span><input placeholder="Polished" value={form.specs.finish || ''} onChange={(event) => setNestedField('specs', 'finish', event.target.value)} /></label>
+                  </div>
                   <label className="admin-field"><span>스펙 메모</span><textarea rows="3" value={form.specs.specNote || ''} onChange={(event) => setNestedField('specs', 'specNote', event.target.value)} /></label>
                 </div>
               </InspectorField>
@@ -1095,6 +1169,8 @@ export function AdminProductEditorPage() {
                 <div className="admin-form-grid">
                   <label className="admin-field"><span>피어싱 유형</span><input value={form.taxonomy.piercingType || ''} onChange={(event) => setNestedField('taxonomy', 'piercingType', event.target.value)} /></label>
                   <label className="admin-field"><span>기본 소재 코드</span><input value={form.taxonomy.baseMaterial || ''} onChange={(event) => setNestedField('taxonomy', 'baseMaterial', event.target.value)} /></label>
+                  <label className="admin-field"><span>권장 착용 부위</span><input placeholder="귓불 / 헬릭스 / 트라거스" value={form.taxonomy.wearingLocation || ''} onChange={(event) => setNestedField('taxonomy', 'wearingLocation', event.target.value)} /></label>
+                  <label className="admin-field"><span>판매 단위</span><select value={form.taxonomy.saleType || 'single'} onChange={(event) => setNestedField('taxonomy', 'saleType', event.target.value)}><option value="single">낱개</option><option value="pair">한 쌍</option><option value="set">세트</option></select></label>
                   <label className="admin-field"><span>배지</span><input placeholder="NEW" value={form.badge} onChange={(event) => setField('badge', event.target.value)} /></label>
                   <label className="admin-field"><span>정렬 순서</span><input min="0" type="number" value={form.sortOrder} onChange={(event) => setField('sortOrder', event.target.value)} /></label>
                 </div>
