@@ -526,6 +526,46 @@ export function createAdminRoutes({
     })
   );
 
+  router.get(
+    "/home-layout",
+    requireAdmin,
+    can("catalog.read"),
+    asyncRoute(async (req, res) => {
+      const data = await services.homeLayout.getLayout(req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.put(
+    "/home-layout/draft",
+    requireAdmin,
+    can("catalog.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.homeLayout.saveDraft(req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/home-layout/publish",
+    requireAdmin,
+    can("catalog.publish"),
+    asyncRoute(async (req, res) => {
+      const data = await services.homeLayout.publish(req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/home-layout/reset-draft",
+    requireAdmin,
+    can("catalog.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.homeLayout.resetDraft(req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
   router.post(
     "/home-showcase",
     requireAdmin,

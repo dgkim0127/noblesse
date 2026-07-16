@@ -10,6 +10,11 @@ export function createCatalogApi(apiClient) {
       return response.data?.slides || [];
     },
 
+    async getHomeLayout() {
+      const response = await apiClient.apiFetch("/catalog/home-layout");
+      return response.data?.config || null;
+    },
+
     async getCatalogProduct(productCode) {
       const response = await apiClient.apiFetch(`/catalog/products/${encodeURIComponent(productCode)}`);
       return response.data?.product || null;

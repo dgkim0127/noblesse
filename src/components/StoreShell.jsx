@@ -5,9 +5,9 @@ import noblesseLogo from '../assets/noblesse-logo.png'
 import { useCommerce } from '../commerce/commerceStore'
 import { getLoginErrorMessage } from '../services/authErrors'
 import { resolveLocaleCopy, supportedLocales, useLocalePath } from '../utils/locale'
+import { defaultHomeLayout, getHomeLayoutText } from '../config/homeLayout'
 
 const searchHistoryKey = 'noblesse-search-history'
-const topMarqueeText = 'SILVER 925 & Surgical Piercing & Brass Piercing · 실버 & 써지컬 & 신주 피어싱 · Allergy-conscious materials · Since 2010'
 
 const shellCopy = {
   kr: {
@@ -492,6 +492,7 @@ export function StoreShell() {
     dataError,
     dataMode,
     dataStatus,
+    homeLayout,
     isAdmin,
     isApproved,
     isGuest,
@@ -505,6 +506,8 @@ export function StoreShell() {
   } = useCommerce()
   const { locale, localeMeta, toLanguagePath, toLocalePath } = useLocalePath()
   const copy = resolveLocaleCopy(shellCopy, locale)
+  const topMarqueeText = getHomeLayoutText(homeLayout?.header?.marquee || defaultHomeLayout.header.marquee, locale)
+  const showTopMarquee = homeLayout?.header?.showMarquee !== false
   const footer = resolveLocaleCopy(footerInfo, locale)
   const loginCopy = resolveLocaleCopy(loginModalCopy, locale)
   const compactViewerLabels = resolveLocaleCopy(shellCompactViewerLabels, locale) ?? copy.viewerLabels
@@ -796,12 +799,12 @@ export function StoreShell() {
   const myInquiriesPath = isAdmin ? '/admin/inquiries' : '/my-inquiries'
   const inquiryListPath = '/inquiry-list'
 
-  return <div className={`site-shell ${isHomeImageRoute ? 'home-image-shell' : ''} ${usesHomeStyleHeader ? 'product-list-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isSideLayout ? 'has-side-layout' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''} ${isPreviewBarHidden ? 'has-preview-hidden' : 'has-preview-visible'}`.trim()}>
-    <div className={`top-marquee ${isMarqueeCollapsed ? 'is-collapsed' : ''}`} style={topMarqueeStyle} aria-label={`${headerBrandName} material notice`}>
+  return <div className={`site-shell ${isHomeImageRoute ? 'home-image-shell' : ''} ${usesHomeStyleHeader ? 'product-list-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isSideLayout ? 'has-side-layout' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''} ${isPreviewBarHidden ? 'has-preview-hidden' : 'has-preview-visible'} ${showTopMarquee ? '' : 'has-hidden-marquee'}`.trim()}>
+    {showTopMarquee ? <div className={`top-marquee ${isMarqueeCollapsed ? 'is-collapsed' : ''}`} style={topMarqueeStyle} aria-label={`${headerBrandName} material notice`}>
       <div className="top-marquee-track" aria-hidden="true">
         {Array.from({ length: 4 }).map((_, index) => <span key={index}>{topMarqueeText}</span>)}
       </div>
-    </div>
+    </div> : null}
 
     <header className={`site-header ${isHeaderCompact ? 'is-compact' : ''}`}>
       <div className="header-main" style={compactHeaderMainStyle}>

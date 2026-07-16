@@ -20,6 +20,7 @@ import { createBuyerQuoteQueries } from "./db/queries/buyerQuoteQueries.js";
 import { createBuyerRegistrationQueries } from "./db/queries/buyerRegistrationQueries.js";
 import { createLoginIdentifierQueries } from "./db/queries/loginIdentifierQueries.js";
 import { createHomeShowcaseQueries } from "./db/queries/homeShowcaseQueries.js";
+import { createHomeLayoutQueries } from "./db/queries/homeLayoutQueries.js";
 import * as catalogQueries from "./db/queries/catalogQueries.js";
 import * as buyerQueries from "./db/queries/buyerQueries.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -36,6 +37,7 @@ import { createAdminCategoryService } from "./services/adminCategoryService.js";
 import { createAdminDashboardService } from "./services/adminDashboardService.js";
 import { createAdminInquiryService } from "./services/adminInquiryService.js";
 import { createAdminHomeShowcaseService } from "./services/adminHomeShowcaseService.js";
+import { createAdminHomeLayoutService } from "./services/adminHomeLayoutService.js";
 import { createAdminFxService } from "./services/adminFxService.js";
 import { createAdminPriceService } from "./services/adminPriceService.js";
 import { createAdminProductService } from "./services/adminProductService.js";
@@ -52,6 +54,7 @@ import { createBuyerService } from "./services/buyerService.js";
 import { createCatalogService } from "./services/catalogService.js";
 import { createLoginIdentifierService } from "./services/loginIdentifierService.js";
 import { createHomeShowcaseService } from "./services/homeShowcaseService.js";
+import { createHomeLayoutService } from "./services/homeLayoutService.js";
 
 function buildCorsOptions(env) {
   if (!env.allowedOrigins.length) {
@@ -88,6 +91,10 @@ export function createApp(options = {}) {
     options.queries?.homeShowcase || createHomeShowcaseQueries(pool);
   const homeShowcaseService =
     options.services?.homeShowcase || createHomeShowcaseService({ queries: homeShowcaseQueries });
+  const homeLayoutQueries =
+    options.queries?.homeLayout || createHomeLayoutQueries(pool);
+  const homeLayoutService =
+    options.services?.homeLayout || createHomeLayoutService({ queries: homeLayoutQueries });
   const services = {
     catalog:
       options.services?.catalog ||
@@ -119,6 +126,7 @@ export function createApp(options = {}) {
         queries: options.queries?.auth || createLoginIdentifierQueries(pool)
       }),
     homeShowcase: homeShowcaseService,
+    homeLayout: homeLayoutService,
     admin: {
       access:
         options.services?.admin?.access ||
@@ -158,6 +166,9 @@ export function createApp(options = {}) {
           queries: homeShowcaseQueries,
           objectStore: imageObjectStore
         }),
+      homeLayout:
+        options.services?.admin?.homeLayout ||
+        createAdminHomeLayoutService({ queries: homeLayoutQueries }),
       prices:
         adminPriceService,
       fx:
@@ -215,6 +226,7 @@ export function createApp(options = {}) {
     createCatalogRoutes({
       catalogService: services.catalog,
       homeShowcaseService: services.homeShowcase,
+      homeLayoutService: services.homeLayout,
       mediaService
     })
   );

@@ -15,7 +15,7 @@ test('home product sections do not backfill empty merchandising slots with unrel
 
   assert.doesNotMatch(page, /_fillHomeSectionProducts/)
   assert.match(page, /getHomeSourceProducts\(\{ products, mockProducts, dataMode \}\)/)
-  assert.match(page, /const newProducts = selectNewArrivalProducts\(homeProducts, homeSectionProductLimit\['new-arrival'\]\)/)
+  assert.match(page, /const newProducts = selectNewArrivalProducts\(homeProducts\)/)
   assert.match(page, /const weeklyProducts = selectWeeklyBestProducts\(homeProducts\)/)
   assert.match(placement, /return dataMode === 'mock' \? mockProducts : \[\]/)
   assert.match(placement, /hasExplicitPlacement\(products, 'showInWeeklyPick'\)/)
@@ -27,10 +27,10 @@ test('home navigation keeps all merch slots visible and disables empty sections'
   const page = readWorkspaceFile('src/pages/HomePage.jsx')
 
   assert.match(page, /const activeHomeSectionNav = useMemo\(\(\) => homeSectionNav\.filter/)
-  assert.match(page, /if \(item\.id === 'new-arrival'\) return newProducts\.length > 0/)
-  assert.match(page, /if \(item\.id === 'weekly-pick'\) return weeklyProducts\.length > 0/)
-  assert.match(page, /if \(item\.id === 'piercing-catalog'\) return piercingCatalogProducts\.length > 0/)
-  assert.match(page, /if \(item\.id === 'steady-selection'\) return steadySelectionProducts\.length > 0/)
+  assert.match(page, /if \(item\.id === 'new-arrival'\) return newArrivalProductCount > 0/)
+  assert.match(page, /if \(item\.id === 'weekly-pick'\) return weeklyPickProductCount > 0/)
+  assert.match(page, /if \(item\.id === 'piercing-catalog'\) return piercingCatalogProductCount > 0/)
+  assert.match(page, /if \(item\.id === 'steady-selection'\) return steadySelectionProductCount > 0/)
   assert.match(page, /const homeSectionNavItems = useMemo/)
   assert.match(page, /isDisabled: !activeIds\.has\(item\.id\)/)
   assert.match(page, /\{homeSectionNavItems\.map\(\(item\) => <button/)

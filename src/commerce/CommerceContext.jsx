@@ -26,6 +26,7 @@ import {
 import { adaptApiProducts } from '../services/apiProductAdapter'
 import { CommerceContext } from './commerceStore'
 import { getInquiryKey } from './inquiryKeys'
+import { cloneHomeLayout, defaultHomeLayout, normalizeHomeLayout } from '../config/homeLayout'
 
 const formatInquiryId = () => `INQ-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${String(Date.now()).slice(-3)}`
 const viewerStates = new Set(['guest', 'pending', 'approved', 'admin'])
@@ -114,6 +115,7 @@ export function CommerceProvider({ children }) {
   const [viewerState, setViewerStateValue] = useState('guest')
   const [products, setProducts] = useState([])
   const [homeShowcase, setHomeShowcase] = useState([])
+  const [homeLayout, setHomeLayout] = useState(() => cloneHomeLayout(defaultHomeLayout))
   const [dataStatus, setDataStatus] = useState('loading')
   const [dataError, setDataError] = useState(null)
   const [inquiryItems, setInquiryItems] = useState([])
@@ -146,6 +148,7 @@ export function CommerceProvider({ children }) {
         if (!isMounted) return
         setProducts([])
         setHomeShowcase([])
+        setHomeLayout(cloneHomeLayout(defaultHomeLayout))
         setInquiries([])
         setDataStatus('error')
         setDataError(runtimeConfig.errors.join(' '))
@@ -159,6 +162,7 @@ export function CommerceProvider({ children }) {
         setProductPrices(catalog.mockProductPrices ?? [])
         setProducts(catalog.mockProducts ?? [])
         setHomeShowcase([])
+        setHomeLayout(cloneHomeLayout(defaultHomeLayout))
         setInquiries(catalog.mockInquiries ?? [])
         setDataStatus('ready')
         setDataError(null)
@@ -168,15 +172,17 @@ export function CommerceProvider({ children }) {
       try {
         const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
         const catalogApi = createCatalogApi(apiClient)
-        const [apiProducts, showcaseSlides] = await Promise.all([
+        const [apiProducts, showcaseSlides, publishedHomeLayout] = await Promise.all([
           catalogApi.getCatalogProducts(),
           catalogApi.getHomeShowcase().catch(() => []),
+          catalogApi.getHomeLayout().catch(() => null),
         ])
         if (!isMounted) return
         setMockProfiles({ guest: guestProfile })
         setProductPrices([])
         setProducts(adaptApiProducts(apiProducts))
         setHomeShowcase(showcaseSlides)
+        setHomeLayout(normalizeHomeLayout(publishedHomeLayout))
         setInquiries([])
         setDataStatus('ready')
         setDataError(null)
@@ -184,6 +190,7 @@ export function CommerceProvider({ children }) {
         if (!isMounted) return
         setProducts([])
         setHomeShowcase([])
+        setHomeLayout(cloneHomeLayout(defaultHomeLayout))
         setInquiries([])
         setDataStatus('error')
         setDataError(error?.message || 'Catalog API is unavailable.')
@@ -526,6 +533,7 @@ export function CommerceProvider({ children }) {
     getPrice,
     getAdminPriceBooks,
     homeShowcase,
+    homeLayout,
     inquiries,
     inquiryItems,
     inquiryRows,

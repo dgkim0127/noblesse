@@ -437,6 +437,33 @@ test("packaged home showcase migration matches canonical migration exactly", () 
   assert.equal(packaged, canonical);
 });
 
+test("home layout editor migration is additive and stores draft and published configurations separately", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260716_home_layout_editor.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.match(sqlText, /create table if not exists public\.home_page_configs/i);
+  assert.match(sqlText, /draft_config jsonb not null default '\{\}'::jsonb/i);
+  assert.match(sqlText, /published_config jsonb not null default '\{\}'::jsonb/i);
+  assert.match(sqlText, /draft_revision integer not null default 1/i);
+  assert.doesNotMatch(sqlText, /\bdrop\s+table\b|\btruncate\b|\bdelete\s+from\b/i);
+});
+
+test("packaged home layout editor migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260716_home_layout_editor.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260716_home_layout_editor.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
 test("quote status trend index migration is additive and read optimized", () => {
   const sqlText = readFileSync(
     join(process.cwd(), "..", "supabase", "migrations", "20260714_quote_status_trend_index.sql"),
@@ -564,6 +591,14 @@ test("fresh install schema includes administrator-managed home showcase slides",
   assert.match(schema, /create table if not exists public\.home_showcase_slides/i);
   assert.match(schema, /idx_home_showcase_slides_public_order/i);
   assert.match(schema, /target_url like '\/%'/i);
+});
+
+test("fresh install schema includes draft and published home layout configuration", () => {
+  const schema = readFileSync(join(process.cwd(), "..", "supabase", "schema.sql"), "utf8");
+
+  assert.match(schema, /create table if not exists public\.home_page_configs/i);
+  assert.match(schema, /draft_config jsonb not null default '\{\}'::jsonb/i);
+  assert.match(schema, /published_config jsonb not null default '\{\}'::jsonb/i);
 });
 
 test("migration runner does not access Secret Manager or open real DB in tests", () => {

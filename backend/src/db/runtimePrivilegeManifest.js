@@ -18,6 +18,7 @@ export const runtimePrivilegeManifest = Object.freeze({
   collections: [],
   product_collections: [],
   home_showcase_slides: ["SELECT", "INSERT", "UPDATE", "DELETE"],
+  home_page_configs: ["SELECT", "UPDATE"],
   inquiries: ["SELECT", "INSERT", "UPDATE"],
   inquiry_items: ["SELECT", "INSERT"],
   admin_quotes: ["SELECT", "INSERT", "UPDATE"],
@@ -56,7 +57,8 @@ const querySourceModules = Object.freeze([
   "adminPriceQueries.js",
   "adminProductQueries.js",
   "adminQuoteQueries.js",
-  "homeShowcaseQueries.js"
+  "homeShowcaseQueries.js",
+  "homeLayoutQueries.js"
 ]);
 
 export function getRuntimePrivilegeEntries() {

@@ -48,6 +48,34 @@ export function createAdminApi(apiClient) {
       return unwrap(await apiClient.apiFetch('/admin/home-showcase', { token: requireToken(token) }))
     },
 
+    async getHomeLayout(token) {
+      return unwrap(await apiClient.apiFetch('/admin/home-layout', { token: requireToken(token) }))
+    },
+
+    async saveHomeLayoutDraft(config, expectedRevision, token) {
+      return unwrap(await apiClient.apiFetch('/admin/home-layout/draft', {
+        method: 'PUT',
+        token: requireToken(token),
+        body: { config, expectedRevision },
+      }))
+    },
+
+    async publishHomeLayout(expectedRevision, token) {
+      return unwrap(await apiClient.apiFetch('/admin/home-layout/publish', {
+        method: 'POST',
+        token: requireToken(token),
+        body: { expectedRevision },
+      }))
+    },
+
+    async resetHomeLayoutDraft(expectedRevision, token) {
+      return unwrap(await apiClient.apiFetch('/admin/home-layout/reset-draft', {
+        method: 'POST',
+        token: requireToken(token),
+        body: { expectedRevision },
+      }))
+    },
+
     async createHomeShowcaseSlide(input = {}, token) {
       return unwrap(await apiClient.apiFetch('/admin/home-showcase', {
         method: 'POST',

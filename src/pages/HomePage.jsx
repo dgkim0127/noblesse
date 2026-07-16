@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, ClipboardList, Headphones, Heart, Mail, Paus
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatAdminPriceBook } from '../config/currency'
+import { defaultHomeLayout, getHomeLayoutText, normalizeHomeLayout, selectConfiguredProducts } from '../config/homeLayout'
 import { mockProducts } from '../data/catalog'
 import { homeTaxonomyLinks } from '../data/productTaxonomy'
 import {
@@ -1144,9 +1145,10 @@ const priceAfterApprovalLabel = {
   cn: '審核後可查看價格',
 }
 
-function HomeProductCard({ product, index, variant = 'default' }) {
+function HomeProductCard({ product, index, variant = 'default', localeOverride = '' }) {
   const { addInquiryItem, approvedPrice, getAdminPriceBooks, getPrice, isAdmin, isApproved, viewerState } = useCommerce()
-  const { locale, toLocalePath } = useLocalePath()
+  const { locale: routeLocale, toLocalePath } = useLocalePath()
+  const locale = localeOverride || routeLocale
   const [isFavorite, setIsFavorite] = useState(false)
   const [favoriteNotice, setFavoriteNotice] = useState('')
   const productName = getLocalizedProductName(product, locale)
@@ -1246,12 +1248,14 @@ function HomeProductCard({ product, index, variant = 'default' }) {
   </article>
 }
 
-function ProductSection({ products, sectionId, title, note }) {
-  const { locale, toLocalePath } = useLocalePath()
+function ProductSection({ products, sectionId, title, note, limit, layout = 'grid', localeOverride = '', selected = false }) {
+  const { locale: routeLocale, toLocalePath } = useLocalePath()
+  const locale = localeOverride || routeLocale
+  const contentLocale = getLocaleContentKey(locale)
   const [activeTab, setActiveTab] = useState(0)
   const [tabMotionKey, setTabMotionKey] = useState(0)
 
-  const sectionSubtabs = homeSectionSubtabs[sectionId]?.[locale] ?? homeSectionSubtabs[sectionId]?.en ?? []
+  const sectionSubtabs = homeSectionSubtabs[sectionId]?.[contentLocale] ?? homeSectionSubtabs[sectionId]?.en ?? []
   const sectionTabFilters = homeSectionTabFilters[sectionId] ?? []
   const visibleSubtabs = sectionTabFilters.length > 0
     ? sectionSubtabs
@@ -1265,7 +1269,7 @@ function ProductSection({ products, sectionId, title, note }) {
       label,
     }))
   const viewAll = homeSectionViewAll[sectionId]
-  const isLoopSection = sectionId === 'weekly-pick'
+  const isLoopSection = layout === 'feature'
   const resolvedActiveTab = Math.min(activeTab, Math.max(visibleSubtabs.length - 1, 0))
   const activeTabFilter = sectionTabFilters.length > 0
     ? visibleSubtabs[resolvedActiveTab]?.filter ?? null
@@ -1273,7 +1277,7 @@ function ProductSection({ products, sectionId, title, note }) {
   const filteredProducts = activeTabFilter
     ? products.filter((product) => productMatchesTabFilter(product, activeTabFilter))
     : products
-  const sectionProducts = filteredProducts.slice(0, homeSectionProductLimit[sectionId] ?? homeSectionLimit)
+  const sectionProducts = filteredProducts.slice(0, limit ?? homeSectionProductLimit[sectionId] ?? homeSectionLimit)
   const renderProducts = isLoopSection ? [...sectionProducts, ...sectionProducts] : sectionProducts
 
   useEffect(() => {
@@ -1293,7 +1297,7 @@ function ProductSection({ products, sectionId, title, note }) {
     const [featureProduct, ...supportProducts] = sectionProducts
     const weeklySupportProducts = supportProducts.slice(0, 4)
 
-    return <section className={`section-wrap product-feature-section section-${sectionId}`} id={`home-${sectionId}`}>
+    return <section className={`section-wrap product-feature-section section-${sectionId}${selected ? ' is-home-editor-selected' : ''}`} data-home-section-id={sectionId} id={`home-${sectionId}`}>
       <div className="weekly-edit-inner">
         <div className="home-product-section-title weekly-edit-title">
           <span>NOBLESSE WEEKLY EDIT</span>
@@ -1302,23 +1306,23 @@ function ProductSection({ products, sectionId, title, note }) {
         </div>
         <div className="weekly-edit-board">
           {featureProduct ? <div className="weekly-edit-feature">
-            <HomeProductCard product={featureProduct} index={0} variant={sectionId} />
+            <HomeProductCard product={featureProduct} index={0} variant={sectionId} localeOverride={locale} />
           </div> : null}
           <div className="weekly-edit-side">
-            <p>{homeProductSectionCopy[locale]?.weeklyNote ?? homeProductSectionCopy.en.weeklyNote}</p>
+            <p>{homeProductSectionCopy[contentLocale]?.weeklyNote ?? homeProductSectionCopy.en.weeklyNote}</p>
             <div className="weekly-edit-list">
-              {weeklySupportProducts.map((product, index) => <HomeProductCard key={product.productId} product={product} index={index + 1} variant={sectionId} />)}
+              {weeklySupportProducts.map((product, index) => <HomeProductCard key={product.productId} product={product} index={index + 1} variant={sectionId} localeOverride={locale} />)}
             </div>
           </div>
         </div>
         {viewAll ? <Link className="home-section-more weekly-edit-more" to={toLocalePath(viewAll.to)}>
-          <span>{viewAll.labels?.[locale] ?? viewAll.labels?.en}</span>
+          <span>{viewAll.labels?.[contentLocale] ?? viewAll.labels?.en}</span>
         </Link> : null}
       </div>
     </section>
   }
 
-  return <section className={`section-wrap product-feature-section section-${sectionId}`} id={`home-${sectionId}`}>
+  return <section className={`section-wrap product-feature-section section-${sectionId}${selected ? ' is-home-editor-selected' : ''}`} data-home-section-id={sectionId} id={`home-${sectionId}`}>
     <div className="home-product-section-title">
       <ScrambleText as="h2" persistKey={`product-section-title-${sectionId}`}>{title}</ScrambleText>
       {note ? <p>{note}</p> : null}
@@ -1327,24 +1331,26 @@ function ProductSection({ products, sectionId, title, note }) {
       {visibleSubtabs.map((tab, index) => <button className={index === resolvedActiveTab ? 'is-active' : undefined} key={tab.label} type="button" onClick={() => handleTabClick(index)}>{tab.label}</button>)}
     </div> : null}
     <div className={`home-product-grid${isLoopSection ? ' is-looping' : ''}${sectionTabFilters.length > 0 ? ' has-tab-motion' : ''}`} key={`${sectionId}-${tabMotionKey}`}>
-      {renderProducts.map((product, index) => <HomeProductCard key={`${product.productId}-${index}`} product={product} index={index} variant={sectionId} />)}
+      {renderProducts.map((product, index) => <HomeProductCard key={`${product.productId}-${index}`} product={product} index={index} variant={sectionId} localeOverride={locale} />)}
     </div>
     {viewAll ? <Link className="home-section-more" to={toLocalePath(viewAll.to)}>
-      <span>{viewAll.labels?.[locale] ?? viewAll.labels?.en}</span>
+      <span>{viewAll.labels?.[contentLocale] ?? viewAll.labels?.en}</span>
     </Link> : null}
   </section>
 }
 
-function BuyerCollectionSection() {
-  const { locale, toLocalePath } = useLocalePath()
-  const copy = homeBuyerCollectionCopy[locale] ?? homeBuyerCollectionCopy.en
+function BuyerCollectionSection({ title, note, localeOverride = '', selected = false }) {
+  const { locale: routeLocale, toLocalePath } = useLocalePath()
+  const locale = localeOverride || routeLocale
+  const contentLocale = getLocaleContentKey(locale)
+  const copy = homeBuyerCollectionCopy[contentLocale] ?? homeBuyerCollectionCopy.en
 
-  return <section className="section-wrap buyer-collection-section" id="home-buyer-selection">
+  return <section className={`section-wrap buyer-collection-section${selected ? ' is-home-editor-selected' : ''}`} data-home-section-id="buyer-selection" id="home-buyer-selection">
     <div className="buyer-collection-heading">
       <span className="buyer-heading-spark" aria-hidden="true">✦</span>
       <div>
-        <ScrambleText as="h2" persistKey="buyer-concept-title">{copy.title}</ScrambleText>
-        <p>{copy.note}</p>
+        <ScrambleText as="h2" persistKey="buyer-concept-title">{title || copy.title}</ScrambleText>
+        <p>{note || copy.note}</p>
       </div>
     </div>
     <div className="buyer-concept-viewport">
@@ -1371,7 +1377,8 @@ function BuyerCollectionSection() {
   </section>
 }
 
-export function HomePage() {
+export function HomePage({ editorMode = false, layoutOverride = null, localeOverride = '', selectedSectionId = '', onSelectSection }) {
+  const homeRootRef = useRef(null)
   const showcaseScrollerRef = useRef(null)
   const showcaseInteractionRef = useRef(0)
   const sectionNavAnchorRef = useRef(null)
@@ -1386,8 +1393,13 @@ export function HomePage() {
   const [isShowcaseAutoplayPaused, setIsShowcaseAutoplayPaused] = useState(false)
   const [isSectionNavFixed, setIsSectionNavFixed] = useState(false)
   const [activeHomeSection, setActiveHomeSection] = useState(homeSectionNav[0].id)
-  const { dataMode, homeShowcase, isApproved, products } = useCommerce()
-  const { locale, toLocalePath } = useLocalePath()
+  const { dataMode, homeLayout: commerceHomeLayout, homeShowcase, isApproved, products } = useCommerce()
+  const { locale: routeLocale, toLocalePath } = useLocalePath()
+  const locale = localeOverride || routeLocale
+  const contentLocale = getLocaleContentKey(locale)
+  const homeLayout = useMemo(() => normalizeHomeLayout(layoutOverride || commerceHomeLayout || defaultHomeLayout), [commerceHomeLayout, layoutOverride])
+  const visibleSections = homeLayout.sections.filter((section) => section.visible)
+  const sectionById = new Map(homeLayout.sections.map((section) => [section.id, section]))
   const copy = resolveLocaleCopy(homeCopy, locale)
   const showcaseControlCopy = resolveLocaleCopy(homeShowcaseControlCopy, locale)
   const showcasePanels = useMemo(() => (
@@ -1397,22 +1409,37 @@ export function HomePage() {
   ), [homeShowcase])
   const homeSourceProducts = getHomeSourceProducts({ products, mockProducts, dataMode })
   const homeProducts = selectAllowedHomeProducts(homeSourceProducts)
-  const newProducts = selectNewArrivalProducts(homeProducts, homeSectionProductLimit['new-arrival'])
+  const newProducts = selectNewArrivalProducts(homeProducts)
   const weeklyProducts = selectWeeklyBestProducts(homeProducts)
   const piercingCatalogProducts = selectPiercingCatalogProducts(homeProducts)
   const steadySelectionProducts = selectSteadySelectionProducts(homeProducts)
+  const deferProductLimit = { applyLimit: false }
+  const configuredProducts = {
+    'new-arrival': selectConfiguredProducts(homeProducts, newProducts, sectionById.get('new-arrival')?.productSource, deferProductLimit),
+    'weekly-pick': selectConfiguredProducts(homeProducts, weeklyProducts, sectionById.get('weekly-pick')?.productSource, deferProductLimit),
+    'piercing-catalog': selectConfiguredProducts(homeProducts, piercingCatalogProducts, sectionById.get('piercing-catalog')?.productSource, deferProductLimit),
+    'steady-selection': selectConfiguredProducts(homeProducts, steadySelectionProducts, sectionById.get('steady-selection')?.productSource, deferProductLimit),
+  }
+  const newArrivalProductCount = configuredProducts['new-arrival'].length
+  const weeklyPickProductCount = configuredProducts['weekly-pick'].length
+  const piercingCatalogProductCount = configuredProducts['piercing-catalog'].length
+  const steadySelectionProductCount = configuredProducts['steady-selection'].length
   const activeHomeSectionNav = useMemo(() => homeSectionNav.filter((item) => {
-    if (item.id === 'new-arrival') return newProducts.length > 0
-    if (item.id === 'weekly-pick') return weeklyProducts.length > 0
+    if (!sectionById.get(item.id)?.visible) return false
+    if (item.id === 'new-arrival') return newArrivalProductCount > 0
+    if (item.id === 'weekly-pick') return weeklyPickProductCount > 0
     if (item.id === 'buyer-selection') return buyerConceptPanels.length > 0
-    if (item.id === 'piercing-catalog') return piercingCatalogProducts.length > 0
-    if (item.id === 'steady-selection') return steadySelectionProducts.length > 0
+    if (item.id === 'piercing-catalog') return piercingCatalogProductCount > 0
+    if (item.id === 'steady-selection') return steadySelectionProductCount > 0
     return true
+  // Layout changes are intentional dependencies for editor preview updates.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [
-    newProducts.length,
-    weeklyProducts.length,
-    piercingCatalogProducts.length,
-    steadySelectionProducts.length,
+    homeLayout,
+    newArrivalProductCount,
+    weeklyPickProductCount,
+    piercingCatalogProductCount,
+    steadySelectionProductCount,
   ])
   const homeSectionNavItems = useMemo(() => {
     const activeIds = new Set(activeHomeSectionNav.map((item) => item.id))
@@ -1470,8 +1497,12 @@ export function HomePage() {
   }
 
   const scrollToHomeSection = (sectionId) => {
+    if (editorMode) {
+      onSelectSection?.(sectionId)
+      return
+    }
     setActiveHomeSection(sectionId)
-    const section = document.getElementById(`home-${sectionId}`)
+    const section = homeRootRef.current?.querySelector(`#home-${sectionId}`)
     if (!section) return
 
     if (['new-arrival', 'piercing-catalog', 'steady-selection'].includes(sectionId)) {
@@ -1519,6 +1550,7 @@ export function HomePage() {
   }, [getShowcaseStep])
 
   useEffect(() => {
+    if (editorMode) return undefined
     const scroller = showcaseScrollerRef.current
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
 
@@ -1559,7 +1591,7 @@ export function HomePage() {
       scroller.removeEventListener('wheel', markInteraction)
       document.removeEventListener('visibilitychange', markInteraction)
     }
-  }, [isShowcaseAutoplayPaused, scrollShowcase])
+  }, [editorMode, isShowcaseAutoplayPaused, scrollShowcase])
 
   useEffect(() => {
     if (!activeHomeSectionNav.some((item) => item.id === activeHomeSection)) {
@@ -1568,7 +1600,8 @@ export function HomePage() {
   }, [activeHomeSection, activeHomeSectionIds, activeHomeSectionNav, firstActiveHomeSectionId])
 
   useEffect(() => {
-    const root = document.querySelector('main')
+    if (editorMode) return undefined
+    const root = homeRootRef.current
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     if (!root || reduceMotion || !('IntersectionObserver' in window)) return undefined
@@ -1638,9 +1671,10 @@ export function HomePage() {
       mutationObserver.disconnect()
       observer.disconnect()
     }
-  }, [])
+  }, [editorMode])
 
   useLayoutEffect(() => {
+    if (editorMode) return undefined
     const fixedTop = () => (window.matchMedia('(max-width: 760px)').matches ? 74 : 18)
 
     const updateSectionNavPosition = () => {
@@ -1655,7 +1689,7 @@ export function HomePage() {
 
       const activeOffset = fixedTop() + 120
       const currentSection = activeHomeSectionNav.reduce((current, item) => {
-        const section = document.getElementById(`home-${item.id}`)
+        const section = homeRootRef.current?.querySelector(`#home-${item.id}`)
         if (!section) return current
 
         return section.getBoundingClientRect().top <= activeOffset ? item.id : current
@@ -1677,7 +1711,7 @@ export function HomePage() {
       window.removeEventListener('scroll', updateSectionNavPosition)
       window.removeEventListener('resize', resetSectionNavTrigger)
     }
-  }, [activeHomeSectionIds, activeHomeSectionNav, firstActiveHomeSectionId])
+  }, [activeHomeSectionIds, activeHomeSectionNav, editorMode, firstActiveHomeSectionId])
 
   const handleShowcasePointerDown = (event) => {
     if (event.button !== undefined && event.button !== 0) return
@@ -1751,106 +1785,154 @@ export function HomePage() {
     setIsShowcaseAutoplayPaused((isPaused) => !isPaused)
   }
 
-  return <main>
-    <section className="home-main-portrait-section home-showcase-section">
-      <div className="home-showcase-stage" role="region" aria-label="Noblesse piercing image showcase" aria-roledescription="carousel">
-        <div
-          aria-live="off"
-          className={`home-showcase-grid${isShowcaseDragging ? ' is-dragging' : ''}`}
-          onPointerCancel={handleShowcasePointerEnd}
-          onPointerDown={handleShowcasePointerDown}
-          onPointerLeave={handleShowcasePointerEnd}
-          onPointerMove={handleShowcasePointerMove}
-          onPointerUp={handleShowcasePointerEnd}
-          ref={showcaseScrollerRef}
-        >
-          <div className="home-showcase-track">
-          {showcasePanels.map((banner, index) => {
-            const bannerTitle = getLocalizedValue(banner.title, locale)
-            const bannerEyebrow = getLocalizedValue(banner.eyebrow, locale)
-            const bannerText = getLocalizedValue(banner.text, locale)
-            const label = banner.label || homeShowcaseLabels[index] || 'NOBLESSE'
+  const handleEditorSelection = (event) => {
+    if (!editorMode) return
+    const target = event.target.closest?.('[data-home-section-id]')
+    if (!target) return
+    event.preventDefault()
+    event.stopPropagation()
+    onSelectSection?.(target.dataset.homeSectionId)
+  }
 
-            return <Link className="home-showcase-panel" key={banner.key} onClick={handleShowcaseClick} to={toLocalePath(banner.to)}>
-              <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} srcSet={banner.imageSet?.card && banner.imageSet?.detail ? `${banner.imageSet.card} 600w, ${banner.imageSet.detail} 1200w` : undefined} style={{ objectPosition: `${banner.imagePosition?.x ?? 50}% ${banner.imagePosition?.y ?? 50}%` }} width="900" />
-              <span className="home-showcase-label">{label}</span>
-              <span className="home-showcase-copy">
-                <strong>{bannerTitle}</strong>
-                <small>{bannerEyebrow}</small>
-                <em>{bannerText}</em>
-              </span>
-            </Link>
-          })}
-          </div>
-        </div>
-        <div className="home-showcase-controls" aria-label={showcaseControlCopy.group}>
-          <button aria-label={showcaseControlCopy.previous} className="home-showcase-control home-showcase-control--previous" onClick={() => handleShowcaseControl(-1)} type="button">
-            <ChevronLeft aria-hidden="true" />
-          </button>
-          <button aria-label={isShowcaseAutoplayPaused ? showcaseControlCopy.play : showcaseControlCopy.pause} className="home-showcase-control home-showcase-control--autoplay" onClick={handleShowcaseAutoplayToggle} type="button">
-            {isShowcaseAutoplayPaused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
-          </button>
-          <button aria-label={showcaseControlCopy.next} className="home-showcase-control home-showcase-control--next" onClick={() => handleShowcaseControl(1)} type="button">
-            <ChevronRight aria-hidden="true" />
-          </button>
-        </div>
-      </div>
-      <div className="home-showcase-categories" aria-label="피어싱 카테고리">
-        {homeCategoryChips.map((category) => <Link className={!category.icon && !category.emoji ? 'is-text-only' : undefined} key={category.key ?? category.icon} to={toLocalePath(category.to)}>
-          <CategoryChipIcon emoji={category.emoji} type={category.icon} />
-          <b>{category.labels[locale] ?? category.labels.en}</b>
-        </Link>)}
-      </div>
-    </section>
+  const productMap = {
+    ...configuredProducts,
+  }
 
+  const sectionNavigation = <>
     <div className={`home-section-nav-anchor${isSectionNavFixed ? ' is-fixed' : ''}`} ref={sectionNavAnchorRef}>
       <div className="home-section-nav" aria-label="홈 제품 섹션 이동">
         {homeSectionNavItems.map((item) => <button key={item.id} aria-disabled={item.isDisabled ? 'true' : undefined} className={`${activeHomeSection === item.id ? 'is-active' : ''}${item.isDisabled ? ' is-disabled' : ''}`.trim() || undefined} disabled={item.isDisabled} type="button" onClick={() => scrollToHomeSection(item.id)}>
-          {item.labels[locale] ?? item.labels.en}
+          {item.labels[contentLocale] ?? item.labels.en}
         </button>)}
       </div>
     </div>
-    {isSectionNavFixed ? <div className="home-section-nav-fixed" aria-label="고정 제품 섹션 이동">
+    {!editorMode && isSectionNavFixed ? <div className="home-section-nav-fixed" aria-label="고정 제품 섹션 이동">
       {homeSectionNavItems.map((item) => <button key={item.id} aria-disabled={item.isDisabled ? 'true' : undefined} className={`${activeHomeSection === item.id ? 'is-active' : ''}${item.isDisabled ? ' is-disabled' : ''}`.trim() || undefined} disabled={item.isDisabled} type="button" onClick={() => scrollToHomeSection(item.id)}>
-        {item.labels[locale] ?? item.labels.en}
+        {item.labels[contentLocale] ?? item.labels.en}
       </button>)}
     </div> : null}
+  </>
 
-    <ProductSection products={newProducts} sectionId="new-arrival" title={homeProductSectionCopy[locale]?.newTitle ?? homeProductSectionCopy.en.newTitle} note={homeProductSectionCopy[locale]?.newNote ?? homeProductSectionCopy.en.newNote} />
-    <ProductSection products={weeklyProducts} sectionId="weekly-pick" title={homeProductSectionCopy[locale]?.weeklyTitle ?? homeProductSectionCopy.en.weeklyTitle} note={homeProductSectionCopy[locale]?.weeklyNote ?? homeProductSectionCopy.en.weeklyNote} />
-    <BuyerCollectionSection />
-    <ProductSection products={piercingCatalogProducts} sectionId="piercing-catalog" title={homeProductSectionCopy[locale]?.piercingTitle ?? homeProductSectionCopy.en.piercingTitle} note={homeProductSectionCopy[locale]?.piercingNote ?? homeProductSectionCopy.en.piercingNote} />
-    <ProductSection products={steadySelectionProducts} sectionId="steady-selection" title={homeProductSectionCopy[locale]?.steadyTitle ?? homeProductSectionCopy.en.steadyTitle} note={homeProductSectionCopy[locale]?.steadyNote ?? homeProductSectionCopy.en.steadyNote} />
+  const renderSection = (section) => {
+    const selected = editorMode && selectedSectionId === section.id
+    if (section.id === 'showcase') {
+      return <section className={`home-main-portrait-section home-showcase-section${selected ? ' is-home-editor-selected' : ''}`} data-home-section-id={section.id} key={section.id}>
+        <div className="home-showcase-stage" role="region" aria-label="Noblesse piercing image showcase" aria-roledescription="carousel">
+          <div
+            aria-live="off"
+            className={`home-showcase-grid${isShowcaseDragging ? ' is-dragging' : ''}`}
+            onPointerCancel={handleShowcasePointerEnd}
+            onPointerDown={handleShowcasePointerDown}
+            onPointerLeave={handleShowcasePointerEnd}
+            onPointerMove={handleShowcasePointerMove}
+            onPointerUp={handleShowcasePointerEnd}
+            ref={showcaseScrollerRef}
+          >
+            <div className="home-showcase-track">
+            {showcasePanels.map((banner, index) => {
+              const bannerTitle = getLocalizedValue(banner.title, locale)
+              const bannerEyebrow = getLocalizedValue(banner.eyebrow, locale)
+              const bannerText = getLocalizedValue(banner.text, locale)
+              const label = banner.label || homeShowcaseLabels[index] || 'NOBLESSE'
 
-    <section className="campaign-banner">
-      <div>
-        <ScrambleText as="p" className="eyebrow" persistKey="campaign-eyebrow">{copy.campaignEyebrow}</ScrambleText>
-        <ScrambleText as="h2" persistKey="campaign-title">{copy.campaignTitle}</ScrambleText>
-        <ScrambleText persistKey="campaign-note">{copy.campaignNote}</ScrambleText>
-      </div>
-      <Link className="secondary-action" to={toLocalePath(isApproved ? '/request-quote' : '/register')}><ScrambleText persistKey="campaign-cta">{copy.campaignCta}</ScrambleText></Link>
-    </section>
+              return <Link className="home-showcase-panel" key={banner.key} onClick={handleShowcaseClick} to={toLocalePath(banner.to)}>
+                <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} srcSet={banner.imageSet?.card && banner.imageSet?.detail ? `${banner.imageSet.card} 600w, ${banner.imageSet.detail} 1200w` : undefined} style={{ objectPosition: `${banner.imagePosition?.x ?? 50}% ${banner.imagePosition?.y ?? 50}%` }} width="900" />
+                <span className="home-showcase-label">{label}</span>
+                <span className="home-showcase-copy">
+                  <strong>{bannerTitle}</strong>
+                  <small>{bannerEyebrow}</small>
+                  <em>{bannerText}</em>
+                </span>
+              </Link>
+            })}
+            </div>
+          </div>
+          {!editorMode ? <div className="home-showcase-controls" aria-label={showcaseControlCopy.group}>
+            <button aria-label={showcaseControlCopy.previous} className="home-showcase-control home-showcase-control--previous" onClick={() => handleShowcaseControl(-1)} type="button"><ChevronLeft aria-hidden="true" /></button>
+            <button aria-label={isShowcaseAutoplayPaused ? showcaseControlCopy.play : showcaseControlCopy.pause} className="home-showcase-control home-showcase-control--autoplay" onClick={handleShowcaseAutoplayToggle} type="button">{isShowcaseAutoplayPaused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}</button>
+            <button aria-label={showcaseControlCopy.next} className="home-showcase-control home-showcase-control--next" onClick={() => handleShowcaseControl(1)} type="button"><ChevronRight aria-hidden="true" /></button>
+          </div> : null}
+        </div>
+      </section>
+    }
 
-    <section className="section-wrap home-bottom-grid">
-      <article className="info-card">
-        <ClockIcon />
-        <ScrambleText as="h2" persistKey="recent-title">{copy.recentTitle}</ScrambleText>
-        <ScrambleText as="p" persistKey="recent-note">{copy.recentNote}</ScrambleText>
-      </article>
-      <article className="info-card">
-        <Headphones size={22} />
-        <ScrambleText as="h2" persistKey="support-title">{copy.supportTitle}</ScrambleText>
-        <ScrambleText as="p" persistKey="support-note">{copy.supportNote}</ScrambleText>
-        <ScrambleText as="small" persistKey="support-small">{copy.supportSmall}</ScrambleText>
-      </article>
-      <article className="info-card">
-        <Mail size={22} />
-        <ScrambleText as="h2" persistKey="company-title">{copy.companyTitle}</ScrambleText>
-        <ScrambleText as="p" persistKey="company-note">{copy.companyNote}</ScrambleText>
-        <ScrambleText as="small" persistKey="company-small">{copy.companySmall}</ScrambleText>
-      </article>
-    </section>
+    if (section.id === 'categories') {
+      return <section className={`home-showcase-category-section${selected ? ' is-home-editor-selected' : ''}`} data-home-section-id={section.id} key={section.id}>
+        <div className="home-showcase-categories" aria-label={getHomeLayoutText(section.title, locale)}>
+          {homeCategoryChips.map((category) => <Link className={!category.icon && !category.emoji ? 'is-text-only' : undefined} key={category.key ?? category.icon} to={toLocalePath(category.to)}>
+            <CategoryChipIcon emoji={category.emoji} type={category.icon} />
+            <b>{category.labels[contentLocale] ?? category.labels.en}</b>
+          </Link>)}
+        </div>
+      </section>
+    }
 
+    if (section.type === 'productCollection') {
+      return <ProductSection
+        key={section.id}
+        products={productMap[section.id] || []}
+        sectionId={section.id}
+        title={getHomeLayoutText(section.title, locale)}
+        note={getHomeLayoutText(section.note, locale)}
+        limit={section.productSource?.limit}
+        layout={section.layout}
+        localeOverride={locale}
+        selected={selected}
+      />
+    }
+
+    if (section.id === 'buyer-selection') {
+      return <BuyerCollectionSection key={section.id} localeOverride={locale} note={getHomeLayoutText(section.note, locale)} selected={selected} title={getHomeLayoutText(section.title, locale)} />
+    }
+
+    if (section.id === 'campaign') {
+      return <section className={`campaign-banner${selected ? ' is-home-editor-selected' : ''}`} data-home-section-id={section.id} key={section.id}>
+        <div>
+          <ScrambleText as="p" className="eyebrow" persistKey="campaign-eyebrow">{getHomeLayoutText(section.eyebrow, locale, copy.campaignEyebrow)}</ScrambleText>
+          <ScrambleText as="h2" persistKey="campaign-title">{getHomeLayoutText(section.title, locale, copy.campaignTitle)}</ScrambleText>
+          <ScrambleText persistKey="campaign-note">{getHomeLayoutText(section.note, locale, copy.campaignNote)}</ScrambleText>
+        </div>
+        <Link className="secondary-action" to={toLocalePath(isApproved ? section.ctaApprovedPath : section.ctaPath)}><ScrambleText persistKey="campaign-cta">{getHomeLayoutText(section.ctaLabel, locale, copy.campaignCta)}</ScrambleText></Link>
+      </section>
+    }
+
+    if (section.id === 'support') {
+      return <section aria-label={getHomeLayoutText(section.title, locale)} className={`section-wrap home-bottom-grid${selected ? ' is-home-editor-selected' : ''}`} data-home-section-id={section.id} key={section.id}>
+        <article className="info-card">
+          <ClockIcon />
+          <ScrambleText as="h2" persistKey="recent-title">{copy.recentTitle}</ScrambleText>
+          <ScrambleText as="p" persistKey="recent-note">{copy.recentNote}</ScrambleText>
+        </article>
+        <article className="info-card">
+          <Headphones size={22} />
+          <ScrambleText as="h2" persistKey="support-title">{copy.supportTitle}</ScrambleText>
+          <ScrambleText as="p" persistKey="support-note">{copy.supportNote}</ScrambleText>
+          <ScrambleText as="small" persistKey="support-small">{copy.supportSmall}</ScrambleText>
+        </article>
+        <article className="info-card">
+          <Mail size={22} />
+          <ScrambleText as="h2" persistKey="company-title">{copy.companyTitle}</ScrambleText>
+          <ScrambleText as="p" persistKey="company-note">{copy.companyNote}</ScrambleText>
+          <ScrambleText as="small" persistKey="company-small">{copy.companySmall}</ScrambleText>
+        </article>
+      </section>
+    }
+    return null
+  }
+
+  let navigationInserted = false
+  const renderedSections = []
+  visibleSections.forEach((section) => {
+    if (!navigationInserted && !['showcase', 'categories'].includes(section.id)) {
+      renderedSections.push(<div key="section-navigation">{sectionNavigation}</div>)
+      navigationInserted = true
+    }
+    renderedSections.push(renderSection(section))
+  })
+  if (!navigationInserted) renderedSections.push(<div key="section-navigation">{sectionNavigation}</div>)
+
+  return <main className={editorMode ? 'home-editor-preview-root' : undefined} onClickCapture={handleEditorSelection} ref={homeRootRef}>
+    {renderedSections}
   </main>
 }
 
