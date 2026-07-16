@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
 import { AdminVisualEditorShell } from '../../components/AdminVisualEditorShell'
+import { ProductDetailBlocksEditor } from '../../components/admin/ProductDetailBlocksEditor'
+import { ProductOptionGroupsEditor } from '../../components/admin/ProductOptionGroupsEditor'
 import { ProductDetailView } from '../ProductDetailPage'
 import { useLocalePath } from '../../utils/locale'
 import {
@@ -20,6 +22,18 @@ import {
   normalizeImageScale,
   productToImageDrafts,
 } from '../../utils/productImageGallery'
+import {
+  createPiercingDetailTemplate,
+  getProductDetailBlockDraftIssues,
+  normalizeProductDetailBlocks,
+} from '../../utils/productDetailBlocks'
+import {
+  createPiercingOptionTemplate,
+  getEffectiveProductOptionGroups,
+  getProductOptionDraftIssues,
+  normalizeProductOptionGroups,
+  syncLegacyProductOptions,
+} from '../../utils/productOptions'
 import {
   AdminConfirmDialog,
   AdminLink,
@@ -48,12 +62,14 @@ const inspectorGroupByField = {
   code: 'basic',
   category: 'basic',
   image: 'images',
+  options: 'trade',
   colors: 'trade',
   sizes: 'trade',
   moq: 'trade',
   price: 'trade',
   headline: 'details',
   body: 'details',
+  detailBlocks: 'details',
   care: 'details',
   productInfo: 'details',
   specs: 'details',
@@ -75,8 +91,7 @@ const emptyForm = {
   code: '',
   categoryKey: '',
   material: '',
-  colorsText: '',
-  sizesText: '',
+  optionGroups: [],
   moqDefault: '1',
   leadTime: '',
   origin: 'KR',
@@ -120,14 +135,6 @@ const emptyForm = {
   detailContentBase: {},
 }
 
-function parseList(value) {
-  return String(value || '').split(/[,/\n]/).map((item) => item.trim()).filter(Boolean)
-}
-
-function toTextList(value) {
-  return Array.isArray(value) ? value.join(', ') : ''
-}
-
 function getTranslation(product, locale) {
   const nameFields = { kr: 'nameKo', en: 'nameEn', jp: 'nameJa', 'zh-TW': 'nameZhTw' }
   const descriptionFields = { kr: 'descriptionKo', en: 'descriptionEn', jp: 'descriptionJa', 'zh-TW': 'descriptionZhTw' }
@@ -152,8 +159,7 @@ function productToForm(product) {
     code: product.code || '',
     categoryKey: product.categoryKey || '',
     material: product.material || '',
-    colorsText: toTextList(product.colors),
-    sizesText: toTextList(product.sizes),
+    optionGroups: getEffectiveProductOptionGroups(product),
     moqDefault: String(product.moqDefault || 1),
     leadTime: product.leadTime || '',
     origin: product.origin || 'KR',
@@ -166,7 +172,7 @@ function productToForm(product) {
     taxonomy: { ...emptyForm.taxonomy, ...(product.taxonomy || {}) },
     specs: { ...emptyForm.specs, ...(product.specs || {}) },
     homePlacement: { ...emptyForm.homePlacement, ...(product.homePlacement || {}) },
-    detailContentBase,
+    detailContentBase: { ...detailContentBase, blocks: normalizeProductDetailBlocks(detailContentBase.blocks) },
   }
 }
 
@@ -184,6 +190,8 @@ function priceToForm(price, product) {
 function buildDraftProduct({ category, form, images, product }) {
   const productId = product?.productId || product?.id || 'draft-product'
   const imageSet = imageDraftsToPreviewSet(images)
+  const optionGroups = normalizeProductOptionGroups(form.optionGroups)
+  const legacyOptions = syncLegacyProductOptions(optionGroups)
   return {
     ...(product || {}),
     id: productId,
@@ -204,8 +212,9 @@ function buildDraftProduct({ category, form, images, product }) {
     categoryNameJa: category?.nameJa || category?.nameEn || category?.nameKo || category?.categoryId || '',
     categoryNameZhTw: category?.nameZhTw || category?.nameEn || category?.nameKo || category?.categoryId || '',
     material: form.material,
-    colors: parseList(form.colorsText),
-    sizes: parseList(form.sizesText),
+    colors: legacyOptions.colors,
+    sizes: legacyOptions.sizes,
+    optionGroups,
     moqDefault: Math.max(1, Number(form.moqDefault || 1)),
     leadTime: form.leadTime,
     origin: form.origin,
@@ -218,6 +227,7 @@ function buildDraftProduct({ category, form, images, product }) {
     taxonomy: form.taxonomy,
     detailContent: {
       ...form.detailContentBase,
+      blocks: normalizeProductDetailBlocks(form.detailContentBase.blocks),
       translations: Object.fromEntries(localeTabs.map(({ key }) => [key, {
         headline: form.translations[key].headline,
         body: form.translations[key].body,
@@ -231,6 +241,8 @@ function buildDraftProduct({ category, form, images, product }) {
 }
 
 function buildProductPayload(form) {
+  const optionGroups = normalizeProductOptionGroups(form.optionGroups)
+  const legacyOptions = syncLegacyProductOptions(optionGroups)
   return {
     code: form.code.trim(),
     nameKo: form.translations.kr.name.trim() || undefined,
@@ -243,8 +255,9 @@ function buildProductPayload(form) {
     descriptionZhTw: form.translations['zh-TW'].summary.trim() || undefined,
     categoryKey: form.categoryKey || undefined,
     material: form.material.trim() || undefined,
-    colors: parseList(form.colorsText),
-    sizes: parseList(form.sizesText),
+    colors: legacyOptions.colors,
+    sizes: legacyOptions.sizes,
+    optionGroups,
     moqDefault: Math.max(1, Number(form.moqDefault || 1)),
     leadTime: form.leadTime.trim() || undefined,
     origin: form.origin.trim() || 'KR',
@@ -252,6 +265,7 @@ function buildProductPayload(form) {
     specs: form.specs,
     detailContent: {
       ...form.detailContentBase,
+      blocks: normalizeProductDetailBlocks(form.detailContentBase.blocks),
       translations: Object.fromEntries(localeTabs.map(({ key }) => [key, {
         headline: form.translations[key].headline.trim(),
         body: form.translations[key].body.trim(),
@@ -308,7 +322,7 @@ function revokeDraftUrls(images) {
   images.filter((image) => image.kind === 'new').forEach((image) => URL.revokeObjectURL(image.previewUrl))
 }
 
-function getReadiness(form, { hasImage, hasPrice }) {
+function getReadiness(form, { hasImage, hasPrice, images }) {
   const missing = []
   for (const { key, label } of localeTabs) {
     if (!form.translations[key].name.trim() || !form.translations[key].summary.trim()) missing.push(`${label} 상품명과 요약`)
@@ -316,6 +330,8 @@ function getReadiness(form, { hasImage, hasPrice }) {
   if (!form.categoryKey) missing.push('카테고리')
   if (!hasImage) missing.push('대표 이미지')
   if (!hasPrice) missing.push('활성 KR 가격')
+  missing.push(...getProductOptionDraftIssues(form.optionGroups, images))
+  missing.push(...getProductDetailBlockDraftIssues(form.detailContentBase.blocks, images))
   for (const field of ['headline', 'body']) {
     const anyUsed = localeTabs.some(({ key }) => form.translations[key][field].trim())
     if (!anyUsed) continue
@@ -323,7 +339,7 @@ function getReadiness(form, { hasImage, hasPrice }) {
       if (!form.translations[key][field].trim()) missing.push(`${label} 상세 ${field === 'headline' ? '제목' : '본문'}`)
     }
   }
-  return { ready: missing.length === 0, missing }
+  return { ready: missing.length === 0, missing: [...new Set(missing)] }
 }
 
 function InspectorGroup({ children, group, open }) {
@@ -446,7 +462,7 @@ export function AdminProductEditorPage() {
   const hasPrice = priceDirty
     ? price.isActive && price.wholesalePrice !== '' && Number(price.wholesalePrice) >= 0
     : priceSaved
-  const readiness = useMemo(() => getReadiness(form, { hasImage, hasPrice }), [form, hasImage, hasPrice])
+  const readiness = useMemo(() => getReadiness(form, { hasImage, hasPrice, images }), [form, hasImage, hasPrice, images])
   const previewCategory = categories.find((item) => item.categoryId === form.categoryKey)
   const selectedImage = images.find((image) => image.id === selectedImageId) || images[0] || null
 
@@ -458,6 +474,17 @@ export function AdminProductEditorPage() {
   }
   const setNestedField = (group, field, value) => {
     setForm((current) => ({ ...current, [group]: { ...current[group], [field]: value } }))
+    setDirty(true)
+  }
+  const setOptionGroups = (optionGroups) => {
+    setForm((current) => ({ ...current, optionGroups }))
+    setDirty(true)
+  }
+  const setDetailBlocks = (blocks) => {
+    setForm((current) => ({
+      ...current,
+      detailContentBase: { ...current.detailContentBase, blocks },
+    }))
     setDirty(true)
   }
   const setTranslationField = (locale, field, value) => {
@@ -476,6 +503,24 @@ export function AdminProductEditorPage() {
   const markImagesDirty = () => {
     setImagesDirty(true)
     setDirty(true)
+  }
+
+  const applyPiercingTemplate = ({ includeOptions = true, includeDetails = true } = {}) => {
+    const stableImageIds = images.filter((image) => image.kind !== 'new').map((image) => image.existingId || image.id).filter(Boolean)
+    setForm((current) => ({
+      ...current,
+      optionGroups: includeOptions && current.optionGroups.length === 0
+        ? createPiercingOptionTemplate()
+        : current.optionGroups,
+      detailContentBase: {
+        ...current.detailContentBase,
+        blocks: includeDetails && normalizeProductDetailBlocks(current.detailContentBase.blocks).length === 0
+          ? createPiercingDetailTemplate(stableImageIds)
+          : current.detailContentBase.blocks,
+      },
+    }))
+    setDirty(true)
+    setToast({ message: '피어싱 기본 구성을 로컬 초안에 넣었습니다. 저장 전 내용을 확인해 주세요.', tone: 'success' })
   }
 
   const appendImageCandidates = (candidates) => {
@@ -830,15 +875,15 @@ export function AdminProductEditorPage() {
       setSelectedImageId(imageId)
       selectEditorField('image')
     },
-    selectField: selectEditorField,
+    selectField: (field, trigger, options) => selectEditorField(['colors', 'sizes'].includes(field) ? 'options' : field, trigger, options),
     values: currentTranslation,
   }
 
   const sectionDefaultField = {
     basic: 'name',
     images: 'image',
-    trade: 'colors',
-    details: 'headline',
+    trade: 'options',
+    details: 'detailBlocks',
     operations: 'settings',
   }
   const productSections = [
@@ -861,17 +906,17 @@ export function AdminProductEditorPage() {
     {
       id: 'trade',
       label: '옵션·가격',
-      description: hasPrice ? 'KR 승인 회원 가격 설정됨' : '옵션과 승인 가격',
+      description: `${form.optionGroups.length}개 옵션 그룹 · ${hasPrice ? 'KR 가격 설정됨' : '가격 확인 필요'}`,
       icon: SlidersHorizontal,
-      status: hasPrice ? 'complete' : 'warning',
-      statusLabel: hasPrice ? '가격 준비 완료' : '활성 KR 가격 필요',
+      status: hasPrice && getProductOptionDraftIssues(form.optionGroups, images).length === 0 ? 'complete' : 'warning',
+      statusLabel: hasPrice ? '옵션 번역과 값 확인' : '활성 KR 가격 필요',
     },
     {
       id: 'details',
       label: '상세 정보',
-      description: currentTranslation.headline || '착용·소재·규격',
+      description: `${normalizeProductDetailBlocks(form.detailContentBase.blocks).length}개 콘텐츠 블록 · 착용·소재·규격`,
       icon: ListChecks,
-      status: currentTranslation.headline.trim() || currentTranslation.body.trim() ? 'complete' : 'neutral',
+      status: normalizeProductDetailBlocks(form.detailContentBase.blocks).length > 0 ? 'complete' : 'neutral',
       statusLabel: '선택 상세 콘텐츠',
     },
     {
@@ -1006,16 +1051,20 @@ export function AdminProductEditorPage() {
                   </article>)}
                 </div>}
                 <small>JPG, PNG, WebP · 최대 8장 · 장당 10MB · ZIP 해제 후 최대 80MB</small>
-                <p className="admin-help-text">1번은 대표 이미지, 2~3번은 상단 보조 이미지, 4번 이후는 상세 이미지 순서로 고객 화면에 표시됩니다.</p>
+                <p className="admin-help-text">첫 사진은 대표 이미지입니다. 상세 화면에 사용할 사진은 상세 콘텐츠 블록에서 필요한 위치에 연결합니다.</p>
               </InspectorField>
             </InspectorGroup>
 
             <InspectorGroup group={inspectorGroups[2]} open={openInspectorGroup === 'trade'} onOpen={() => setOpenInspectorGroup('trade')}>
-              <InspectorField activeField={selectedField} field="colors">
-                <label className="admin-field"><span>색상</span><input placeholder="골드, 실버, 오알" value={form.colorsText} onChange={(event) => setField('colorsText', event.target.value)} /><small>쉼표로 구분해 입력합니다.</small></label>
-              </InspectorField>
-              <InspectorField activeField={selectedField} field="sizes">
-                <label className="admin-field"><span>사이즈</span><input placeholder="6mm, 8mm" value={form.sizesText} onChange={(event) => setField('sizesText', event.target.value)} /><small>쉼표로 구분해 입력합니다.</small></label>
+              <InspectorField activeField={selectedField} field="options">
+                <ProductOptionGroupsEditor
+                  activeLocale={activeLocale}
+                  groups={form.optionGroups}
+                  images={images}
+                  onChange={setOptionGroups}
+                  onSelectField={selectEditorField}
+                />
+                {form.optionGroups.length === 0 && <button className="admin-link-button admin-product-template-action" type="button" onClick={() => applyPiercingTemplate({ includeOptions: true, includeDetails: true })}>피어싱 기본 옵션·상세 구성 넣기</button>}
               </InspectorField>
               <InspectorField activeField={selectedField} field="moq">
                 <div className="admin-form-grid">
@@ -1035,20 +1084,14 @@ export function AdminProductEditorPage() {
             </InspectorGroup>
 
             <InspectorGroup group={inspectorGroups[3]} open={openInspectorGroup === 'details'} onOpen={() => setOpenInspectorGroup('details')}>
-              <InspectorField activeField={selectedField} field="headline">
-                <label className="admin-field"><span>{editorBridge.localeLabel} 상세 제목</span><input maxLength="240" value={currentTranslation.headline} onChange={(event) => setTranslationField(activeLocale, 'headline', event.target.value)} /></label>
-              </InspectorField>
-              <InspectorField activeField={selectedField} field="body">
-                <label className="admin-field"><span>{editorBridge.localeLabel} 상세 본문</span><textarea maxLength="4000" rows="6" value={currentTranslation.body} onChange={(event) => setTranslationField(activeLocale, 'body', event.target.value)} /></label>
-              </InspectorField>
-              <InspectorField activeField={selectedField} field="care">
-                <div className="admin-product-detail-guides">
-                  <strong>착용·소재·관리 안내</strong>
-                  <label className="admin-field"><span>{editorBridge.localeLabel} 착용 안내</span><textarea maxLength="1200" rows="3" placeholder="권장 착용 부위와 형태, 착용 시 확인할 점" value={currentTranslation.wearingGuide} onChange={(event) => setTranslationField(activeLocale, 'wearingGuide', event.target.value)} /></label>
-                  <label className="admin-field"><span>{editorBridge.localeLabel} 소재 안내</span><textarea maxLength="1200" rows="3" placeholder="기본 소재, 도금, 스톤과 알레르기 관련 사실 정보" value={currentTranslation.materialInfo} onChange={(event) => setTranslationField(activeLocale, 'materialInfo', event.target.value)} /></label>
-                  <label className="admin-field"><span>{editorBridge.localeLabel} 사이즈 안내</span><textarea maxLength="1200" rows="3" placeholder="측정 기준과 실제 착용 시 확인할 치수" value={currentTranslation.sizeGuide} onChange={(event) => setTranslationField(activeLocale, 'sizeGuide', event.target.value)} /></label>
-                  <label className="admin-field"><span>{editorBridge.localeLabel} 보관·관리 안내</span><textarea maxLength="1200" rows="3" placeholder="물기, 화장품, 보관과 세척 시 주의사항" value={currentTranslation.careGuide} onChange={(event) => setTranslationField(activeLocale, 'careGuide', event.target.value)} /></label>
-                </div>
+              <InspectorField activeField={selectedField} field="detailBlocks">
+                <ProductDetailBlocksEditor
+                  activeLocale={activeLocale}
+                  blocks={form.detailContentBase.blocks}
+                  images={images}
+                  onChange={setDetailBlocks}
+                  onTemplate={() => applyPiercingTemplate({ includeOptions: false, includeDetails: true })}
+                />
               </InspectorField>
               <InspectorField activeField={selectedField} field="productInfo">
                 <div className="admin-form-grid">

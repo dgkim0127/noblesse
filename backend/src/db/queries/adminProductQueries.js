@@ -96,7 +96,6 @@ function mapProduct(row) {
     leadTime: row.lead_time,
     origin: row.origin,
     imageSet: row.image_set || {},
-    optionGroups: getEffectiveOptionGroups(row),
     imageAlt: row.image_alt || {},
     taxonomy: row.taxonomy || {},
     specs: row.specs || {},
