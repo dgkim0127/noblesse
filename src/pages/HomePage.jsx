@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, ClipboardList, Headphones, Heart, Mail, Pause, Play } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatAdminPriceBook } from '../config/currency'
 import { defaultHomeLayout, getHomeLayoutText, normalizeHomeLayout, selectConfiguredProducts } from '../config/homeLayout'
@@ -17,6 +17,7 @@ import {
 import { formatMoney } from '../utils/commerce'
 import { getLocaleContentKey, getLocalizedProductAlt, getLocalizedProductName, resolveLocaleCopy, useLocalePath } from '../utils/locale'
 import { imagePresentationStyle, productGalleryEntries } from '../utils/productImageGallery'
+import { getEffectiveProductOptionGroups } from '../utils/productOptions'
 
 const homeCopy = {
   kr: {
@@ -1148,12 +1149,15 @@ const priceAfterApprovalLabel = {
 function HomeProductCard({ product, index, variant = 'default', localeOverride = '' }) {
   const { addInquiryItem, approvedPrice, getAdminPriceBooks, getPrice, isAdmin, isApproved, viewerState } = useCommerce()
   const { locale: routeLocale, toLocalePath } = useLocalePath()
+  const navigate = useNavigate()
   const locale = localeOverride || routeLocale
   const [isFavorite, setIsFavorite] = useState(false)
   const [favoriteNotice, setFavoriteNotice] = useState('')
   const productName = getLocalizedProductName(product, locale)
   const productAlt = getLocalizedProductAlt(product, locale)
   const price = getPrice(product.productId)
+  const hasExplicitOptions = Array.isArray(product.optionGroups || product.option_groups) && (product.optionGroups || product.option_groups).length > 0
+  const requiresOptionSelection = hasExplicitOptions && getEffectiveProductOptionGroups(product).some((group) => group.required)
   const galleryImages = productGalleryEntries(product, productAlt)
     .filter((image) => image.cardSrc && !image.cardSrc.includes('cdn.example.com'))
     .slice(0, 3)
@@ -1198,8 +1202,15 @@ function HomeProductCard({ product, index, variant = 'default', localeOverride =
       return
     }
 
+    if (requiresOptionSelection) {
+      setFavoriteNotice(resolveLocaleCopy({ kr: '상세에서 옵션을 선택해주세요', en: 'Select options on the product page', jp: '商品ページでオプションを選択してください', cn: '请在商品页选择选项' }, locale, 'en'))
+      window.clearTimeout(window.__noblesseFavoriteNoticeTimer)
+      window.__noblesseFavoriteNoticeTimer = window.setTimeout(() => navigate(toLocalePath(`/products/${product.productId}`)), 500)
+      return
+    }
+
     addInquiryItem(product.productId)
-    setFavoriteNotice('견적 리스트에 담았어요')
+    setFavoriteNotice(resolveLocaleCopy({ kr: '견적 리스트에 담았어요', en: 'Added to Inquiry List', jp: '見積リストに追加しました', cn: '已加入询价清单' }, locale, 'en'))
     window.clearTimeout(window.__noblesseFavoriteNoticeTimer)
     window.__noblesseFavoriteNoticeTimer = window.setTimeout(() => setFavoriteNotice(''), 1800)
   }

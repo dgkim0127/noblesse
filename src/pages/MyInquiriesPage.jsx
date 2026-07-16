@@ -5,6 +5,7 @@ import { getInquiryKey } from '../commerce/inquiryKeys'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatMoney } from '../utils/commerce'
 import { useLocalePath } from '../utils/locale'
+import { formatSelectedProductOptions } from '../utils/productOptions'
 
 const statusLabel = {
   requested: 'Quote Requested',
@@ -272,14 +273,18 @@ export function MyInquiriesPage() {
           <dt>Total Quantity</dt><dd>{selected.totalQuantity ?? 0}</dd>
           <dt>Estimated Total</dt><dd>{formatInquiryMoney(selected.estimatedTotal, selectedCurrency, selectedHasUnavailablePrice)}</dd>
         </dl>
-        {items.map((item) => <div className="quote-line inquiry-detail-line" key={`${item.productId || item.productCode}-${item.color}-${item.size}`}>
+        {items.map((item, index) => {
+          const optionSummary = formatSelectedProductOptions(item.selectedOptions, locale)
+          const legacySummary = [item.color, item.size].filter(Boolean)
+          return <div className="quote-line inquiry-detail-line" key={item.id || `${item.productId || item.productCode}-${index}`}>
           {item.thumbnailUrl && <img className="quote-thumb" src={item.thumbnailUrl} alt={item.productName || item.productCode} loading="lazy" width="300" height="300" onError={(event) => { event.currentTarget.hidden = true }} />}
           <span>
             {item.productCode} / {item.productName}
-            <small>{item.material} / {item.color} / {item.size} / MOQ {item.moq}</small>
+            <small>{[item.material, ...(optionSummary.length ? optionSummary : legacySummary), `MOQ ${item.moq}`].filter(Boolean).join(' / ')}</small>
           </span>
           <strong>{formatInquiryMoney(item.subtotal, selectedCurrency, item.priceUnavailable)}</strong>
-        </div>)}
+        </div>
+        })}
         <div className="quote-total"><span>Estimated Total</span><strong>{formatInquiryMoney(selected.estimatedTotal, selectedCurrency, selectedHasUnavailablePrice)}</strong></div>
       </section>
       {quoteStatus === 'loading' && !issuedQuote && <p className="auth-notice" role="status">Loading issued quote...</p>}
@@ -291,7 +296,11 @@ export function MyInquiriesPage() {
           <dt>{quotationCopy.leadTime}</dt><dd>{issuedQuote.snapshot?.leadTime || '-'}</dd>
           <dt>{quotationCopy.shipping}</dt><dd>{issuedQuote.snapshot?.shippingNote || '-'}</dd>
         </dl>
-        <div className="buyer-quote-lines">{(issuedQuote.snapshot?.items || []).map((item) => <div key={item.id || item.productCode}><span><strong>{item.productName || item.productCode}</strong><small>{item.productCode} · {[item.color, item.size].filter(Boolean).join(' / ')}</small></span><span>{item.quantity}</span><span>{formatMoney(item.unitPrice, issuedQuote.snapshot.currency)}</span><strong>{formatMoney(item.subtotal, issuedQuote.snapshot.currency)}</strong></div>)}</div>
+        <div className="buyer-quote-lines">{(issuedQuote.snapshot?.items || []).map((item, index) => {
+          const optionSummary = formatSelectedProductOptions(item.selectedOptions, locale)
+          const legacySummary = [item.color, item.size].filter(Boolean)
+          return <div key={item.id || `${item.productCode}-${index}`}><span><strong>{item.productName || item.productCode}</strong><small>{[item.productCode, ...(optionSummary.length ? optionSummary : legacySummary)].filter(Boolean).join(' · ')}</small></span><span>{item.quantity}</span><span>{formatMoney(item.unitPrice, issuedQuote.snapshot.currency)}</span><strong>{formatMoney(item.subtotal, issuedQuote.snapshot.currency)}</strong></div>
+        })}</div>
         <div className="buyer-quote-total"><span>{quotationCopy.total}</span><strong>{formatMoney(issuedQuote.snapshot?.total, issuedQuote.snapshot?.currency)}</strong></div>
         {issuedQuote.snapshot?.customerNote && <div className="buyer-quote-note"><strong>{quotationCopy.note}</strong><p>{issuedQuote.snapshot.customerNote}</p></div>}
         <div className="buyer-quote-actions"><button className="secondary-action" disabled={quoteStatus === 'loading'} type="button" onClick={downloadQuote}><Download size={17} />{quotationCopy.download}</button>{issuedQuote.status === 'sent' && !issuedQuote.isExpired && <><button className="primary-action" disabled={quoteStatus === 'loading'} type="button" onClick={() => setDecision('accepted')}><CheckCircle2 size={17} />{quotationCopy.accept}</button><button className="secondary-action" disabled={quoteStatus === 'loading'} type="button" onClick={() => setDecision('rejected')}><XCircle size={17} />{quotationCopy.reject}</button></>}</div>

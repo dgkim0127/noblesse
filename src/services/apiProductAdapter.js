@@ -37,6 +37,11 @@ export function adaptApiProduct(product) {
     material: product.material || '',
     colors: normalizeStringArray(product.colors),
     sizes: normalizeStringArray(product.sizes),
+    optionGroups: Array.isArray(product.optionGroups)
+      ? product.optionGroups
+      : Array.isArray(product.option_groups)
+        ? product.option_groups
+        : [],
     moqDefault: product.moqDefault || 1,
     leadTime: product.leadTime || '',
     origin: product.origin || '',

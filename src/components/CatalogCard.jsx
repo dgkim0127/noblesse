@@ -5,6 +5,7 @@ import { formatAdminPriceBook } from '../config/currency'
 import { formatMoney } from '../utils/commerce'
 import { getLocalizedProductAlt, getLocalizedProductName, resolveLocaleCopy, useLocalePath } from '../utils/locale'
 import { imagePresentationStyle } from '../utils/productImageGallery'
+import { getEffectiveProductOptionGroups } from '../utils/productOptions'
 
 const cardCopy = {
   kr: {
@@ -13,6 +14,7 @@ const cardCopy = {
     lockedButton: '거래처 문의 필요',
     minQty: 'MOQ',
     memberPrice: '거래 조건',
+    selectOptions: '옵션 선택',
     unavailable: '가격 미등록',
   },
   en: {
@@ -21,6 +23,7 @@ const cardCopy = {
     lockedButton: 'Trade inquiry needed',
     minQty: 'Minimum qty',
     memberPrice: 'Trade terms',
+    selectOptions: 'Select options',
     unavailable: 'Price unavailable',
   },
   jp: {
@@ -29,6 +32,7 @@ const cardCopy = {
     lockedButton: '取引先お問い合わせが必要',
     minQty: '最小数量',
     memberPrice: '取引条件',
+    selectOptions: 'オプションを選択',
     unavailable: '価格未登録',
   },
   cn: {
@@ -37,6 +41,7 @@ const cardCopy = {
     lockedButton: '需要贸易咨询',
     minQty: '最小数量',
     memberPrice: '交易条件',
+    selectOptions: '选择选项',
     unavailable: '价格未登记',
   },
 }
@@ -50,6 +55,9 @@ export function CatalogCard({ product }) {
   const productName = getLocalizedProductName(product, locale)
   const productAlt = getLocalizedProductAlt(product, locale)
   const canUseTradeTerms = isApproved && price
+  const hasExplicitOptions = Array.isArray(product.optionGroups || product.option_groups) && (product.optionGroups || product.option_groups).length > 0
+  const requiresOptionSelection = hasExplicitOptions && getEffectiveProductOptionGroups(product).some((group) => group.required)
+  const detailPath = toLocalePath(`/products/${product.productId}`)
   const adminPriceBooks = isAdmin ? getAdminPriceBooks(product.productId) : []
   const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
   const favoriteLabel = resolveLocaleCopy({ kr: '좋아요', en: 'Favorite', jp: 'お気に入り', cn: '收藏' }, locale, 'en')
@@ -61,9 +69,9 @@ export function CatalogCard({ product }) {
         {product.isNew && <b>NEW</b>}
       </Link>
       <div className="catalog-quick-actions" aria-label={`${productName} actions`}>
-        <button className="catalog-quick-action" type="button" disabled={!canUseTradeTerms} onClick={() => addInquiryItem(product.productId)} title={canUseTradeTerms ? copy.add : copy.lockedButton} aria-label={canUseTradeTerms ? copy.add : copy.lockedButton}>
-          <Plus size={17} />
-        </button>
+        {canUseTradeTerms && requiresOptionSelection
+          ? <Link className="catalog-quick-action" to={detailPath} title={copy.selectOptions} aria-label={copy.selectOptions}><Plus size={17} /></Link>
+          : <button className="catalog-quick-action" type="button" disabled={!canUseTradeTerms} onClick={() => addInquiryItem(product.productId)} title={canUseTradeTerms ? copy.add : copy.lockedButton} aria-label={canUseTradeTerms ? copy.add : copy.lockedButton}><Plus size={17} /></button>}
         <button className="catalog-quick-action" type="button" title={favoriteLabel} aria-label={favoriteLabel}>
           <Heart size={17} />
         </button>
@@ -77,6 +85,8 @@ export function CatalogCard({ product }) {
         ? <div className="approved-price admin-price-books"><strong>{adminPriceLabel}</strong><span className="admin-price-book-grid">{adminPriceItems.map((item, index) => <span className="admin-price-book-item" key={`${item.market}-${item.currency}-${index}`}><img alt={item.flagLabel} className="admin-price-book-flag" src={item.flagSrc} /><span className="admin-price-book-value"><b>{item.amount}</b><span>{item.symbol}</span><em>{item.currency}</em></span></span>)}</span></div>
         : canUseTradeTerms ? <div className="approved-price"><strong>{formatMoney(approvedPrice(product.productId), price.currency)}</strong><span>{copy.minQty} {price.moq} / {copy.memberPrice} · {price.currency}</span></div> : <div className="locked-price"><LockKeyhole size={14} />{isApproved ? copy.unavailable : copy.locked}</div>}
     </div>
-    <button className="add-inquiry" type="button" disabled={!canUseTradeTerms} onClick={() => addInquiryItem(product.productId)}><Plus size={16} />{canUseTradeTerms ? copy.add : copy.lockedButton}</button>
+    {canUseTradeTerms && requiresOptionSelection
+      ? <Link className="add-inquiry" to={detailPath}><Plus size={16} />{copy.selectOptions}</Link>
+      : <button className="add-inquiry" type="button" disabled={!canUseTradeTerms} onClick={() => addInquiryItem(product.productId)}><Plus size={16} />{canUseTradeTerms ? copy.add : copy.lockedButton}</button>}
   </article>
 }

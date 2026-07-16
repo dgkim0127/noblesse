@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
 import { formatMoney } from '../../utils/commerce'
+import { formatSelectedProductOptions } from '../../utils/productOptions'
 import {
   AdminConfirmDialog,
   AdminEmptyState,
@@ -252,8 +253,10 @@ export function AdminQuotePage() {
               <thead><tr><th>상품</th><th>요청 수량</th><th>견적 수량</th><th>단가</th><th>소계</th><th>품목 비고</th></tr></thead>
               <tbody>{form.items.map((item) => {
                 const subtotal = Number(item.confirmedQuantity || 0) * Number(item.confirmedUnitPrice || 0)
+                const optionSummary = formatSelectedProductOptions(item.selectedOptions, form.documentLocale)
+                const legacySummary = [item.color, item.size].filter(Boolean)
                 return <tr key={item.id}>
-                  <td data-label="상품"><strong>{item.productName || item.productCode}</strong><small>{item.productCode}{[item.color, item.size].filter(Boolean).length ? ` / ${[item.color, item.size].filter(Boolean).join(' / ')}` : ''}</small></td>
+                  <td data-label="상품"><strong>{item.productName || item.productCode}</strong><small>{[item.productCode, ...(optionSummary.length ? optionSummary : legacySummary)].filter(Boolean).join(' / ')}</small></td>
                   <td data-label="요청 수량">{item.requestedQuantity}</td>
                   <td data-label="견적 수량"><input aria-label={`${item.productCode} 견적 수량`} disabled={!editable} min="1" type="number" value={item.confirmedQuantity} onChange={(event) => setItemField(item.id, 'confirmedQuantity', event.target.value)} /></td>
                   <td data-label="단가"><input aria-label={`${item.productCode} 단가`} disabled={!editable} min="0" step="0.01" type="number" value={item.confirmedUnitPrice} onChange={(event) => setItemField(item.id, 'confirmedUnitPrice', event.target.value)} /></td>

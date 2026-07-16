@@ -353,13 +353,21 @@ export function CommerceProvider({ children }) {
     if (!product) return
 
     const selectedOption = getDefaultOption(product, option)
+    if (selectedOption.groups.some((group) => group.required && !selectedOption.selection[group.id])) return false
     const quantity = normalizeQuantity(rawQuantity, price?.moq ?? product.moqDefault ?? 1)
     setInquiryItems((current) => {
       const found = current.find((item) => isSameInquiryItem(item, productId, selectedOption))
       return found
         ? current.map((item) => isSameInquiryItem(item, productId, selectedOption) ? { ...item, quantity: item.quantity + quantity } : item)
-        : [...current, { productId, color: selectedOption.color, size: selectedOption.size, quantity }]
+        : [...current, {
+            productId,
+            color: selectedOption.color,
+            size: selectedOption.size,
+            selectedOptions: selectedOption.selectedOptionPairs,
+            quantity,
+          }]
     })
+    return true
   }
 
   const updateInquiryQuantity = (productId, rawQuantity, option = {}) => {
@@ -451,6 +459,7 @@ export function CommerceProvider({ children }) {
           productCode: row.productCode,
           color: row.color,
           size: row.size,
+          selectedOptions: row.selectedOptionPairs || [],
           quantity: row.quantity,
         })),
       }, token)
@@ -478,6 +487,7 @@ export function CommerceProvider({ children }) {
     if (!isApproved || !product) return null
     const price = getPrice(product.productId)
     const selectedOption = getDefaultOption(product, option)
+    if (selectedOption.groups.some((group) => group.required && !selectedOption.selection[group.id])) return null
     const quantity = normalizeQuantity(rawQuantity, price?.moq ?? product.moqDefault ?? 1)
 
     if (!isMockMode) {
@@ -490,6 +500,7 @@ export function CommerceProvider({ children }) {
           productCode: product.code,
           color: selectedOption.color,
           size: selectedOption.size,
+          selectedOptions: selectedOption.selectedOptionPairs,
           quantity,
         }],
       }, token)
@@ -501,7 +512,13 @@ export function CommerceProvider({ children }) {
     }
 
     const singleRow = buildInquiryRows(
-      [{ productId: product.productId, color: selectedOption.color, size: selectedOption.size, quantity }],
+      [{
+        productId: product.productId,
+        color: selectedOption.color,
+        size: selectedOption.size,
+        selectedOptions: selectedOption.selectedOptionPairs,
+        quantity,
+      }],
       products,
       buyer,
       isApproved,

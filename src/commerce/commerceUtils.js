@@ -1,5 +1,6 @@
 import { getDisplayCurrency, isValidMarketCurrencyPair, marketCurrency, supportedMarkets } from '../config/currency.js'
 import { applyDiscount, multiplyMoney, sumMoney } from '../utils/money.js'
+import { productOptionCombinationKey, resolveProductOptionSelection } from '../utils/productOptions.js'
 
 export const guestProfile = {
   uid: '',
@@ -241,12 +242,14 @@ export const normalizeQuantity = (rawQuantity, moq) => {
   return Math.max(safeMoq, Math.ceil((Number.isFinite(numeric) ? numeric : safeMoq) / safeMoq) * safeMoq)
 }
 
-export const getDefaultOption = (product, option = {}) => ({
-  color: option.color ?? product?.colors?.[0] ?? '',
-  size: option.size ?? product?.sizes?.[0] ?? '',
-})
+export const getDefaultOption = (product, option = {}) => resolveProductOptionSelection(product, option)
 
-export const getInquiryItemKey = (productId, option = {}) => `${productId}::${option.color ?? ''}::${option.size ?? ''}`
+export const getInquiryItemKey = (productId, option = {}) => {
+  const combination = productOptionCombinationKey(option.selectedOptionPairs || option.selectedOptions || [])
+  return combination
+    ? `${productId}::${combination}`
+    : `${productId}::${option.color ?? ''}::${option.size ?? ''}`
+}
 
 export const isSameInquiryItem = (item, productId, option = {}) => getInquiryItemKey(item.productId, item) === getInquiryItemKey(productId, option)
 
@@ -270,6 +273,8 @@ export const buildInquiryRows = (inquiryItems, products, buyer, isApproved, prod
     material: product.material,
     color: option.color,
     size: option.size,
+    selectedOptionPairs: option.selectedOptionPairs,
+    selectedOptions: option.selectedOptions,
     moq: price.moq,
     currency: price.currency,
     market: price.market,
@@ -295,6 +300,8 @@ export const buildInquiryRows = (inquiryItems, products, buyer, isApproved, prod
     material: product.material,
     color: option.color,
     size: option.size,
+    selectedOptionPairs: option.selectedOptionPairs,
+    selectedOptions: option.selectedOptions,
     moq,
     currency,
     market,
@@ -338,6 +345,7 @@ export const buildInquirySnapshot = ({ inquiryRows, buyer, requestMemo, inquiryI
       material: row.material,
       color: row.color,
       size: row.size,
+      selectedOptions: row.selectedOptions || [],
       moq: row.moq,
       market: row.market,
       currency: row.currency,

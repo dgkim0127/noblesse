@@ -221,8 +221,26 @@ export function selectedOptionPairs(selection = {}) {
     .map(([groupId, valueId]) => ({ groupId, valueId }))
 }
 
+export function normalizeSelectedOptionPairs(value = []) {
+  const seen = new Set()
+  return (Array.isArray(value) ? value : [])
+    .flatMap((item) => {
+      const groupId = String(item?.groupId || '')
+      const valueId = String(item?.valueId || '')
+      if (!groupId || !valueId || seen.has(groupId)) return []
+      seen.add(groupId)
+      return [{ groupId, valueId }]
+    })
+    .sort((left, right) => left.groupId.localeCompare(right.groupId))
+}
+
+export function selectedOptionMap(value = []) {
+  return Object.fromEntries(normalizeSelectedOptionPairs(value).map((item) => [item.groupId, item.valueId]))
+}
+
 export function productOptionCombinationKey(selection = {}) {
-  return selectedOptionPairs(selection).map(({ groupId, valueId }) => `${groupId}:${valueId}`).join('|')
+  const pairs = Array.isArray(selection) ? normalizeSelectedOptionPairs(selection) : selectedOptionPairs(selection)
+  return pairs.map(({ groupId, valueId }) => `${groupId}:${valueId}`).join('|')
 }
 
 export function getSelectedOptionSnapshots(optionGroups = [], selection = {}) {
@@ -248,4 +266,57 @@ export function getLegacySelectionFromSnapshots(snapshots = [], locale = 'kr') {
     color: getLocalizedOptionLabel(find('color')?.valueLabels, locale),
     size: getLocalizedOptionLabel(find('size')?.valueLabels, locale),
   }
+}
+
+function findValueByLabel(group, label) {
+  const target = String(label || '').trim().toLocaleLowerCase()
+  if (!target) return null
+  return group.values.find((value) => productOptionLocales.some((locale) => (
+    String(value.labels?.[locale] || '').trim().toLocaleLowerCase() === target
+  ))) || null
+}
+
+export function resolveProductOptionSelection(product = {}, option = {}, { defaultLegacy = true } = {}) {
+  const groups = getEffectiveProductOptionGroups(product)
+  const selection = selectedOptionMap(option.selectedOptionPairs || option.selectedOptions)
+
+  groups.forEach((group) => {
+    if (selection[group.id]) return
+    const legacyLabel = group.legacyKey === 'color' ? option.color : group.legacyKey === 'size' ? option.size : ''
+    const matched = findValueByLabel(group, legacyLabel)
+    if (matched?.active) {
+      selection[group.id] = matched.id
+      return
+    }
+    if (defaultLegacy && group.id.startsWith('legacy-')) {
+      const firstActive = group.values.find((value) => value.active)
+      if (firstActive) selection[group.id] = firstActive.id
+    }
+  })
+
+  const snapshots = getSelectedOptionSnapshots(groups, selection)
+  const legacy = getLegacySelectionFromSnapshots(snapshots)
+  return {
+    groups,
+    selection,
+    selectedOptionPairs: selectedOptionPairs(selection),
+    selectedOptions: snapshots,
+    color: legacy.color || String(option.color || ''),
+    size: legacy.size || String(option.size || ''),
+  }
+}
+
+export function getMissingRequiredProductOptions(optionGroups = [], selection = {}) {
+  return normalizeProductOptionGroups(optionGroups).filter((group) => (
+    group.required
+    && !group.values.some((value) => value.active && value.id === selection[group.id])
+  ))
+}
+
+export function formatSelectedProductOptions(selectedOptions = [], locale = 'kr') {
+  return (Array.isArray(selectedOptions) ? selectedOptions : []).flatMap((item) => {
+    const group = getLocalizedOptionLabel(item?.groupLabels, locale)
+    const value = getLocalizedOptionLabel(item?.valueLabels, locale)
+    return group && value ? [`${group}: ${value}`] : []
+  })
 }

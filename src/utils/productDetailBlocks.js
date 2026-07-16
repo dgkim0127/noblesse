@@ -1,4 +1,4 @@
-import { productOptionLocales } from './productOptions'
+import { productOptionLocales } from './productOptions.js'
 
 export const productDetailBlockTypes = [
   ['heading', '제목'],

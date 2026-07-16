@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
 import { useLocalePath } from '../../utils/locale'
+import { formatSelectedProductOptions } from '../../utils/productOptions'
 import { AdminLink, AdminMoney, AdminPageHeader, AdminStatus } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy, getAdminStatusLabel, useAdminCopy } from './adminCopy'
@@ -120,17 +121,20 @@ export function AdminInquiryDetailPage() {
       <h2>{t.inquiries.itemSnapshot}</h2>
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th>{t.fields.productCode}</th><th>{t.fields.productName}</th><th>{t.fields.color}</th><th>{t.fields.size}</th><th>{t.fields.quantity}</th><th>{t.products.moq}</th><th>{t.inquiries.priceSnapshot}</th><th>{t.inquiries.subtotal}</th></tr></thead>
-          <tbody>{items.map((item) => <tr key={`${item.id || item.productCode}-${item.color}-${item.size}`}>
+          <thead><tr><th>{t.fields.productCode}</th><th>{t.fields.productName}</th><th>선택 옵션</th><th>{t.fields.quantity}</th><th>{t.products.moq}</th><th>{t.inquiries.priceSnapshot}</th><th>{t.inquiries.subtotal}</th></tr></thead>
+          <tbody>{items.map((item, index) => {
+            const optionSummary = formatSelectedProductOptions(item.selectedOptions, 'kr')
+            const legacySummary = [item.color, item.size].filter(Boolean)
+            return <tr key={item.id || `${item.productCode}-${index}`}>
             <td data-label={t.fields.productCode}>{item.productCode}</td>
             <td data-label={t.fields.productName}>{item.productName}</td>
-            <td data-label={t.fields.color}>{item.color}</td>
-            <td data-label={t.fields.size}>{item.size}</td>
+            <td data-label="선택 옵션">{(optionSummary.length ? optionSummary : legacySummary).join(' / ') || '-'}</td>
             <td data-label={t.fields.quantity}>{item.quantity}</td>
             <td data-label={t.products.moq}>{item.moq}</td>
             <td data-label={t.inquiries.priceSnapshot}><AdminMoney unavailable={item.priceUnavailable} value={item.priceSnapshot} currency={inquiry.currency} /></td>
             <td data-label={t.inquiries.subtotal}><AdminMoney unavailable={item.priceUnavailable} value={item.subtotal} currency={inquiry.currency} /></td>
-          </tr>)}</tbody>
+          </tr>
+          })}</tbody>
         </table>
       </div>
     </section>
