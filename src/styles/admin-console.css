@@ -3158,6 +3158,698 @@ button:disabled,
   }
 }
 
+/* Shared SmartStore-style visual editor */
+.site-shell.visual-editor-shell {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.site-shell.visual-editor-shell > .top-marquee,
+.site-shell.visual-editor-shell > .site-header,
+.site-shell.visual-editor-shell > .site-footer {
+  display: none;
+}
+
+.site-shell.visual-editor-shell > .locale-transition-frame {
+  animation: none;
+  height: 100dvh;
+  min-height: 0;
+  transform: none;
+}
+
+@media (min-width: 821px) {
+  .admin-console-shell.is-visual-editor-route {
+    grid-template-columns: 68px minmax(0, 1fr);
+  }
+
+  .is-visual-editor-route .admin-console-sidebar {
+    padding: 12px 8px;
+    width: 68px;
+  }
+
+  .is-visual-editor-route .admin-brand-block {
+    justify-content: center;
+    min-height: 44px;
+    padding: 0;
+  }
+
+  .is-visual-editor-route .admin-brand-block > div,
+  .is-visual-editor-route .admin-console-sidebar nav a span,
+  .is-visual-editor-route .admin-sidebar-footer {
+    display: none;
+  }
+
+  .is-visual-editor-route .admin-console-sidebar nav a {
+    justify-content: center;
+    min-height: 48px;
+    padding: 0;
+  }
+
+  .is-visual-editor-route .admin-console-main {
+    gap: 0;
+    min-width: 0;
+    padding: 0;
+  }
+
+  .is-visual-editor-route .admin-console-topbar {
+    display: none;
+  }
+
+  .is-visual-editor-route .admin-save-bar {
+    left: 80px;
+    right: 12px;
+  }
+}
+
+.admin-visual-editor {
+  background: #eef0f4;
+  color: var(--admin-text);
+  height: 100dvh;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.admin-visual-editor-commandbar {
+  align-items: center;
+  background: #fff;
+  border-bottom: 1px solid var(--admin-border);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(170px, 1fr) auto auto auto auto;
+  min-height: 64px;
+  padding: 8px 14px;
+  position: relative;
+  z-index: 60;
+}
+
+.admin-visual-editor-title {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.admin-visual-editor-title strong {
+  font-size: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-visual-editor-title span {
+  color: var(--admin-muted);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-visual-editor-locales,
+.admin-visual-editor-devices,
+.admin-visual-editor-actions {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+}
+
+.admin-visual-editor-locales button,
+.admin-visual-editor-devices button,
+.admin-visual-editor-readiness,
+.admin-visual-editor-actions > button,
+.admin-visual-editor-actions > a {
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  border-radius: 5px;
+  color: var(--admin-text);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 700;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 10px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.admin-visual-editor-locales button {
+  border-color: transparent;
+}
+
+.admin-visual-editor-locales button.is-active {
+  border-bottom-color: var(--admin-primary);
+  color: var(--admin-primary);
+}
+
+.admin-visual-editor-devices {
+  background: #f0f1f4;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.admin-visual-editor-devices button {
+  background: transparent;
+  border: 0;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  width: 34px;
+}
+
+.admin-visual-editor-devices button.is-active {
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(29 31 40 / 14%);
+  color: var(--admin-primary);
+}
+
+.admin-visual-editor-readiness {
+  color: var(--admin-warning);
+  gap: 5px;
+}
+
+.admin-visual-editor-readiness.is-ready {
+  color: var(--admin-success);
+}
+
+.admin-visual-editor-actions > .primary-action {
+  background: var(--admin-primary);
+  border-color: var(--admin-primary);
+  color: #fff;
+}
+
+.admin-visual-editor-workspace {
+  display: grid;
+  grid-template-columns: 200px 340px minmax(0, 1fr);
+  height: calc(100dvh - 64px);
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.admin-visual-editor-sections,
+.admin-visual-editor-inspector {
+  background: #fff;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.admin-visual-editor-sections {
+  border-right: 1px solid var(--admin-border);
+  padding: 10px 8px;
+}
+
+.admin-visual-editor-sections-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 0 8px;
+}
+
+.admin-visual-editor-sections-heading span {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-visual-editor-sections-heading strong,
+.admin-visual-editor-sections-heading small {
+  color: var(--admin-muted);
+  font-size: 10px;
+}
+
+.admin-visual-editor-sections-heading strong {
+  color: var(--admin-warning);
+}
+
+.admin-visual-editor-section-list {
+  display: grid;
+  gap: 3px;
+}
+
+.admin-visual-editor-section {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 8px 28px;
+  min-height: 54px;
+  padding: 3px;
+}
+
+.admin-visual-editor-section.is-selected {
+  background: #f0eef6;
+  border-color: #d9d4e7;
+  box-shadow: inset 3px 0 var(--admin-primary);
+}
+
+.admin-visual-editor-section.is-hidden {
+  opacity: .58;
+}
+
+.admin-visual-editor-section.is-dragging {
+  opacity: .45;
+}
+
+.admin-visual-editor-drag,
+.admin-visual-editor-visibility,
+.admin-visual-editor-order button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--admin-muted);
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  padding: 0;
+  width: 28px;
+}
+
+.admin-visual-editor-drag {
+  cursor: grab;
+  width: 18px;
+}
+
+.admin-visual-editor-drag-spacer {
+  width: 18px;
+}
+
+.admin-visual-editor-section-main {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  display: grid;
+  gap: 7px;
+  grid-template-columns: 18px minmax(0, 1fr);
+  min-width: 0;
+  padding: 7px 5px;
+  text-align: left;
+}
+
+.admin-visual-editor-section-main > span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.admin-visual-editor-section-main strong,
+.admin-visual-editor-section-main small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-visual-editor-section-main strong {
+  font-size: 12px;
+}
+
+.admin-visual-editor-section-main small {
+  color: var(--admin-muted);
+  font-size: 10px;
+}
+
+.admin-visual-editor-section-status {
+  background: #aeb2bc;
+  border-radius: 50%;
+  height: 7px;
+  width: 7px;
+}
+
+.admin-visual-editor-section-status.is-complete {
+  background: var(--admin-success);
+}
+
+.admin-visual-editor-section-status.is-warning {
+  background: #c77a10;
+}
+
+.admin-visual-editor-order {
+  display: none;
+  grid-column: 2 / 5;
+  justify-content: flex-end;
+}
+
+.admin-visual-editor-section:focus-within .admin-visual-editor-order {
+  display: flex;
+}
+
+.admin-visual-editor-inspector {
+  border-right: 1px solid var(--admin-border);
+  scroll-behavior: smooth;
+}
+
+.admin-visual-editor-inspector-header {
+  align-items: center;
+  background: #fff;
+  border-bottom: 1px solid var(--admin-border);
+  display: flex;
+  justify-content: space-between;
+  min-height: 58px;
+  padding: 10px 14px;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.admin-visual-editor-inspector-header > div {
+  display: grid;
+  gap: 2px;
+}
+
+.admin-visual-editor-inspector-header span {
+  color: var(--admin-muted);
+  font-size: 10px;
+}
+
+.admin-visual-editor-inspector-header strong {
+  font-size: 15px;
+}
+
+.admin-visual-editor-inspector-header > button {
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  border-radius: 5px;
+  display: none;
+  height: 34px;
+  justify-content: center;
+  padding: 0;
+  width: 34px;
+}
+
+.admin-visual-editor-inspector-body {
+  min-width: 0;
+}
+
+.admin-visual-editor-inspector-body > .admin-home-editor-inspector-body {
+  padding-top: 14px;
+}
+
+.admin-product-inspector-group + .admin-product-inspector-group {
+  border-top: 0;
+}
+
+.admin-visual-editor-canvas {
+  background: #e9ebef;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 12px;
+}
+
+.admin-visual-preview-frame {
+  background: #dfe1e6;
+  min-height: 280px;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.admin-visual-preview-stage {
+  background: #fff;
+  position: absolute;
+  top: 16px;
+  transform-origin: left top;
+}
+
+.admin-visual-preview-stage > * {
+  max-width: none;
+  width: 100%;
+}
+
+.admin-visual-editor .admin-product-detail-canvas,
+.admin-visual-editor .admin-product-detail-canvas.is-mobile,
+.admin-visual-editor .admin-home-editor-viewport,
+.admin-visual-editor .admin-home-editor-viewport.is-desktop,
+.admin-visual-editor .admin-home-editor-viewport.is-tablet,
+.admin-visual-editor .admin-home-editor-viewport.is-mobile {
+  margin: 0;
+  max-width: none;
+  min-height: 0;
+  width: 100%;
+}
+
+.admin-visual-editor .admin-product-detail-canvas {
+  background: #fff;
+  border: 0;
+  overflow: visible;
+  padding: 0;
+  position: static;
+}
+
+.admin-visual-editor .admin-home-editor-viewport {
+  background: #fff;
+}
+
+.admin-visual-editor-backdrop {
+  display: none;
+}
+
+.is-visual-editor-route .admin-product-visual-editor {
+  gap: 0;
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.is-visual-editor-route > .admin-console-main > .admin-notice {
+  margin: 8px 12px;
+}
+
+@media (max-width: 1279px) and (min-width: 821px) {
+  .admin-visual-editor-commandbar {
+    gap: 8px;
+    grid-template-columns: minmax(140px, 1fr) auto auto auto;
+  }
+
+  .admin-visual-editor-title span {
+    display: none;
+  }
+
+  .admin-visual-editor-locales {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    overflow-x: auto;
+  }
+
+  .admin-visual-editor-workspace {
+    grid-template-columns: 200px minmax(0, 1fr);
+    height: calc(100dvh - 108px);
+  }
+
+  .admin-visual-editor-inspector {
+    box-shadow: 12px 0 28px rgb(25 26 34 / 20%);
+    height: calc(100dvh - 108px);
+    left: 268px;
+    position: fixed;
+    top: 108px;
+    transform: translateX(-110%);
+    transition: transform 160ms ease;
+    width: 340px;
+    z-index: 82;
+  }
+
+  .admin-visual-editor.is-inspector-open .admin-visual-editor-inspector {
+    transform: translateX(0);
+  }
+
+  .admin-visual-editor-inspector-header > button {
+    display: inline-flex;
+  }
+
+  .admin-visual-editor-backdrop {
+    background: rgb(25 26 34 / 36%);
+    border: 0;
+    bottom: 0;
+    display: block;
+    left: 268px;
+    opacity: 0;
+    pointer-events: none;
+    position: fixed;
+    right: 0;
+    top: 108px;
+    transition: opacity 160ms ease;
+    z-index: 81;
+  }
+
+  .admin-visual-editor.is-inspector-open .admin-visual-editor-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .admin-visual-editor-canvas {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 820px) {
+  .is-visual-editor-route .admin-console-main {
+    padding: 0;
+  }
+
+  .is-visual-editor-route .admin-console-sidebar {
+    align-items: center;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 40px minmax(0, 1fr);
+    height: 56px;
+    min-height: 56px;
+    overflow: hidden;
+    padding: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 80;
+  }
+
+  .is-visual-editor-route .admin-brand-block {
+    justify-content: center;
+    min-height: 40px;
+    padding: 0;
+  }
+
+  .is-visual-editor-route .admin-brand-block > div,
+  .is-visual-editor-route .admin-console-sidebar nav a span,
+  .is-visual-editor-route .admin-sidebar-footer {
+    display: none;
+  }
+
+  .is-visual-editor-route .admin-console-sidebar nav {
+    display: flex;
+    gap: 4px;
+    min-width: 0;
+    overflow-x: auto;
+    padding: 0;
+    scrollbar-width: none;
+  }
+
+  .is-visual-editor-route .admin-console-sidebar nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .is-visual-editor-route .admin-console-sidebar nav a {
+    display: inline-flex;
+    flex: 0 0 40px;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0;
+  }
+
+  .is-visual-editor-route .admin-console-sidebar nav a.active {
+    box-shadow: inset 0 -2px 0 var(--admin-primary);
+  }
+
+  .is-visual-editor-route .admin-console-topbar {
+    display: none;
+  }
+
+  .admin-visual-editor {
+    height: auto;
+    min-height: 100dvh;
+  }
+
+  .admin-visual-editor-commandbar {
+    gap: 7px;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    padding: 8px;
+  }
+
+  .admin-visual-editor-title {
+    grid-column: 1 / -1;
+  }
+
+  .admin-visual-editor-title span {
+    display: none;
+  }
+
+  .admin-visual-editor-locales {
+    grid-column: 1 / -1;
+    overflow-x: auto;
+  }
+
+  .admin-visual-editor-readiness span {
+    max-width: 116px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .admin-visual-editor-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+
+  .admin-visual-editor-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    overflow: visible;
+  }
+
+  .admin-visual-editor-sections {
+    border-bottom: 1px solid var(--admin-border);
+    border-right: 0;
+    max-height: 260px;
+  }
+
+  .admin-visual-editor-inspector {
+    height: 100dvh;
+    inset: 0;
+    position: fixed;
+    transform: translateX(-105%);
+    transition: transform 160ms ease;
+    width: 100vw;
+    z-index: 102;
+  }
+
+  .admin-visual-editor.is-inspector-open .admin-visual-editor-inspector {
+    transform: translateX(0);
+  }
+
+  .admin-visual-editor-inspector-header > button {
+    display: inline-flex;
+  }
+
+  .admin-visual-editor-backdrop {
+    background: rgb(25 26 34 / 42%);
+    border: 0;
+    display: block;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: fixed;
+    z-index: 101;
+  }
+
+  .admin-visual-editor.is-inspector-open .admin-visual-editor-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .admin-visual-editor-canvas {
+    min-height: 420px;
+    overflow: hidden;
+    padding: 6px;
+  }
+
+  .admin-visual-preview-stage {
+    top: 8px;
+  }
+
+  .is-visual-editor-route .admin-save-bar {
+    left: 8px;
+    right: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-visual-editor-inspector,
+  .admin-visual-editor-backdrop {
+    transition: none;
+  }
+}
+
 .admin-row-actions.admin-showcase-actions {
   flex-wrap: nowrap;
   justify-content: flex-end;

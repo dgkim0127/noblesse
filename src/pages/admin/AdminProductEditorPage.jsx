@@ -1,7 +1,8 @@
-import { ChevronDown, FileArchive, GripVertical, ImagePlus, Monitor, PackageCheck, RotateCcw, Settings2, Smartphone, Trash2, UploadCloud, X } from 'lucide-react'
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { FileArchive, FileText, GripVertical, ImagePlus, Images, ListChecks, PackageCheck, RotateCcw, Settings2, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
+import { AdminVisualEditorShell } from '../../components/AdminVisualEditorShell'
 import { ProductDetailView } from '../ProductDetailPage'
 import { useLocalePath } from '../../utils/locale'
 import {
@@ -23,7 +24,6 @@ import {
   AdminConfirmDialog,
   AdminLink,
   AdminNotice,
-  AdminPageHeader,
   AdminSaveBar,
   AdminToast,
 } from './AdminPageParts'
@@ -35,70 +35,6 @@ const localeTabs = [
   { key: 'jp', label: '日本語' },
   { key: 'zh-TW', label: '繁體中文' },
 ]
-const productPreviewWidths = { desktop: 1440, mobile: 390 }
-const productPreviewInsets = { desktop: 16, mobile: 0 }
-
-function ProductPreviewCanvas({ children, mode }) {
-  const viewportRef = useRef(null)
-  const stageRef = useRef(null)
-  const [layout, setLayout] = useState({ height: 0, offset: 0, scale: 1 })
-  const logicalWidth = productPreviewWidths[mode]
-  const inset = productPreviewInsets[mode]
-
-  useLayoutEffect(() => {
-    const viewport = viewportRef.current
-    const stage = stageRef.current
-    if (!viewport || !stage) return undefined
-
-    const updateLayout = () => {
-      const availableWidth = viewport.clientWidth
-      if (availableWidth <= 0) return
-      const usableWidth = Math.max(1, availableWidth - inset * 2)
-      const scale = Math.min(1, usableWidth / logicalWidth)
-      const height = Math.ceil(stage.scrollHeight * scale) + inset * 2
-      const offset = inset + Math.max(0, Math.floor((usableWidth - logicalWidth * scale) / 2))
-
-      setLayout((current) => (
-        Math.abs(current.scale - scale) < 0.001
-        && current.height === height
-        && current.offset === offset
-          ? current
-          : { height, offset, scale }
-      ))
-    }
-
-    updateLayout()
-    window.addEventListener('resize', updateLayout)
-    if (typeof ResizeObserver === 'undefined') {
-      return () => window.removeEventListener('resize', updateLayout)
-    }
-
-    const observer = new ResizeObserver(updateLayout)
-    observer.observe(viewport)
-    observer.observe(stage)
-    return () => {
-      observer.disconnect()
-      window.removeEventListener('resize', updateLayout)
-    }
-  }, [inset, logicalWidth])
-
-  return <section
-    aria-label="실제 상품 상세 화면 편집 미리보기"
-    className={`admin-product-detail-canvas is-${mode}`}
-    data-preview-width={logicalWidth}
-    ref={viewportRef}
-    style={layout.height ? { height: `${layout.height}px` } : undefined}
-  >
-    <div
-      className="admin-product-preview-stage"
-      ref={stageRef}
-      style={{ left: `${layout.offset}px`, top: `${inset}px`, transform: `scale(${layout.scale})`, width: `${logicalWidth}px` }}
-    >
-      {children}
-    </div>
-  </section>
-}
-
 const inspectorGroups = [
   { id: 'basic', label: '기본 정보' },
   { id: 'images', label: '이미지' },
@@ -390,13 +326,11 @@ function getReadiness(form, { hasImage, hasPrice }) {
   return { ready: missing.length === 0, missing }
 }
 
-function InspectorGroup({ children, group, open, onOpen }) {
+function InspectorGroup({ children, group, open }) {
+  if (!open) return null
   const panelId = `admin-product-inspector-${group.id}`
-  return <section className={`admin-product-inspector-group${open ? ' is-open' : ''}`}>
-    <button aria-controls={panelId} aria-expanded={open} className="admin-product-inspector-group-trigger" type="button" onClick={onOpen}>
-      <span>{group.label}</span><ChevronDown aria-hidden="true" size={17} />
-    </button>
-    {open && <div className="admin-product-inspector-group-body" id={panelId}>{children}</div>}
+  return <section aria-label={group.label} className="admin-product-inspector-group is-open">
+    <div className="admin-product-inspector-group-body" id={panelId}>{children}</div>
   </section>
 }
 
@@ -424,7 +358,6 @@ export function AdminProductEditorPage() {
   const inspectorCloseRef = useRef(null)
   const inspectorRef = useRef(null)
   const inspectorReturnFocusRef = useRef(null)
-  const settingsTriggerRef = useRef(null)
   const initialRef = useRef({ form: structuredClone(emptyForm), price: { ...emptyPrice } })
   const initializedKeyRef = useRef('')
   const [form, setForm] = useState(() => structuredClone(emptyForm))
@@ -436,7 +369,6 @@ export function AdminProductEditorPage() {
   const [selectedField, setSelectedField] = useState(null)
   const [openInspectorGroup, setOpenInspectorGroup] = useState('basic')
   const [inspectorOpen, setInspectorOpen] = useState(false)
-  const [compactInspector, setCompactInspector] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches)
   const [previewMode, setPreviewMode] = useState('desktop')
   const [images, setImages] = useState([])
   const [selectedImageId, setSelectedImageId] = useState('')
@@ -501,53 +433,12 @@ export function AdminProductEditorPage() {
   }, [dirty])
 
   useEffect(() => {
-    const media = window.matchMedia('(max-width: 1279px)')
-    const sync = () => {
-      setCompactInspector(media.matches)
-      if (!media.matches) setInspectorOpen(false)
-    }
-    sync()
-    media.addEventListener('change', sync)
-    return () => media.removeEventListener('change', sync)
-  }, [])
-
-  useEffect(() => {
-    if (!selectedField || (compactInspector && !inspectorOpen)) return undefined
+    if (!selectedField || (window.matchMedia('(max-width: 1279px)').matches && !inspectorOpen)) return undefined
     const frame = window.requestAnimationFrame(() => {
       inspectorRef.current?.querySelector(`[data-editor-field="${selectedField}"]`)?.scrollIntoView({ block: 'nearest' })
     })
     return () => window.cancelAnimationFrame(frame)
-  }, [compactInspector, inspectorOpen, openInspectorGroup, selectedField])
-
-  useEffect(() => {
-    if (!compactInspector || !inspectorOpen) return undefined
-    const focusTimer = window.setTimeout(() => inspectorCloseRef.current?.focus(), 0)
-    const handleInspectorKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        setInspectorOpen(false)
-        window.setTimeout(() => inspectorReturnFocusRef.current?.focus(), 0)
-        return
-      }
-      if (event.key !== 'Tab') return
-      const focusable = [...(inspectorRef.current?.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href]') || [])]
-      if (focusable.length === 0) return
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault()
-        first.focus()
-      }
-    }
-    document.addEventListener('keydown', handleInspectorKeyDown)
-    return () => {
-      window.clearTimeout(focusTimer)
-      document.removeEventListener('keydown', handleInspectorKeyDown)
-    }
-  }, [compactInspector, inspectorOpen])
+  }, [inspectorOpen, openInspectorGroup, selectedField])
 
   const apiState = shouldShowAdminApiState(resource.status) ? <AdminApiState error={resource.error} status={resource.status} /> : null
   const categories = resource.data?.categories || []
@@ -922,12 +813,9 @@ export function AdminProductEditorPage() {
     setSelectedField(field)
     setOpenInspectorGroup(inspectorGroupByField[field] || 'basic')
     if (trigger) inspectorReturnFocusRef.current = trigger
-    if (compactInspector && openPanel) setInspectorOpen(true)
+    if (openPanel) setInspectorOpen(true)
   }
-  const closeInspector = () => {
-    setInspectorOpen(false)
-    window.setTimeout(() => inspectorReturnFocusRef.current?.focus(), 0)
-  }
+  const closeInspector = () => setInspectorOpen(false)
 
   const editorBridge = {
     active: activeEditor,
@@ -946,59 +834,95 @@ export function AdminProductEditorPage() {
     values: currentTranslation,
   }
 
-  return <>
-    <AdminPageHeader
-      eyebrow="상품 운영"
-      title={isEditing ? getTranslation(product, 'kr').name || product?.code || '상품 수정' : '새 상품'}
-      description={isEditing ? `${product?.code || ''} 상품 정보와 공개 준비 상태를 관리합니다.` : '필수 정보부터 입력하고 초안으로 저장하세요.'}
-      actions={<>
-        <AdminLink to="/admin/products">목록</AdminLink>
-        {hasPermission('catalog.publish') && !product?.isVisible && <button className="primary-action" disabled={saving} type="button" onClick={requestPublish}><PackageCheck size={17} />검토 후 공개</button>}
-      </>}
-    />
+  const sectionDefaultField = {
+    basic: 'name',
+    images: 'image',
+    trade: 'colors',
+    details: 'headline',
+    operations: 'settings',
+  }
+  const productSections = [
+    {
+      id: 'basic',
+      label: '기본 정보',
+      description: currentTranslation.name || '상품명과 분류',
+      icon: FileText,
+      status: currentTranslation.name.trim() && currentTranslation.summary.trim() && form.code.trim() && form.categoryKey ? 'complete' : 'warning',
+      statusLabel: '상품명, 요약, 코드와 카테고리',
+    },
+    {
+      id: 'images',
+      label: '이미지',
+      description: images.length ? `${images.length}장 · 첫 사진이 대표` : '사진을 추가하세요',
+      icon: Images,
+      status: hasImage ? 'complete' : 'warning',
+      statusLabel: hasImage ? '이미지 준비 완료' : '대표 이미지 필요',
+    },
+    {
+      id: 'trade',
+      label: '옵션·가격',
+      description: hasPrice ? 'KR 승인 회원 가격 설정됨' : '옵션과 승인 가격',
+      icon: SlidersHorizontal,
+      status: hasPrice ? 'complete' : 'warning',
+      statusLabel: hasPrice ? '가격 준비 완료' : '활성 KR 가격 필요',
+    },
+    {
+      id: 'details',
+      label: '상세 정보',
+      description: currentTranslation.headline || '착용·소재·규격',
+      icon: ListChecks,
+      status: currentTranslation.headline.trim() || currentTranslation.body.trim() ? 'complete' : 'neutral',
+      statusLabel: '선택 상세 콘텐츠',
+    },
+    {
+      id: 'operations',
+      label: '운영 설정',
+      description: readiness.ready ? '공개 준비 완료' : `${readiness.missing.length}개 항목 확인`,
+      icon: Settings2,
+      status: readiness.ready ? 'complete' : 'warning',
+      statusLabel: readiness.ready ? '공개 가능' : '공개 준비 확인 필요',
+    },
+  ]
+  const selectProductSection = (sectionId, field = sectionDefaultField[sectionId]) => {
+    if (activeEditor?.kind === 'inline') commitInline(activeEditor.field)
+    else setActiveEditor(null)
+    setOpenInspectorGroup(sectionId)
+    setSelectedField(field)
+    setInspectorOpen(true)
+  }
 
+  return <>
     {product?.isVisible && !readiness.ready && <AdminNotice tone="warning">
       <strong>현재 공개 중인 기존 상품이지만 새 공개 기준에는 미완성입니다.</strong>
       <p>{readiness.missing.join(', ')} 항목을 보완해 주세요. 저장만으로 상품이 자동 비공개되지는 않습니다.</p>
     </AdminNotice>}
 
     <form className="admin-product-visual-editor" onSubmit={(event) => { event.preventDefault(); saveProduct() }}>
-      <section className="admin-product-visual-toolbar" aria-label="상품 상세 편집 도구">
-        <div className="admin-language-tabs" role="tablist" aria-label="상품 언어">
-          {localeTabs.map(({ key, label }) => <button aria-selected={activeLocale === key} className={activeLocale === key ? 'is-active' : ''} key={key} role="tab" type="button" onClick={() => { if (activeEditor?.kind === 'inline') commitInline(activeEditor.field); else setActiveEditor(null); setActiveLocale(key) }}>{label}</button>)}
-        </div>
-        <div className="admin-product-visual-actions">
-          <button aria-controls="admin-product-inspector" className={`admin-product-readiness-button${readiness.ready ? ' is-ready' : ''}`} type="button" onClick={(event) => { if (activeEditor?.kind === 'inline') commitInline(activeEditor.field); else setActiveEditor(null); selectEditorField('readiness', event.currentTarget) }}>
-            <span>공개 준비</span><strong>{readiness.ready ? '완료' : `${readiness.missing.length}개 필요`}</strong>
-          </button>
-          <div aria-label="미리보기 화면" className="admin-showcase-preview-modes" role="group">
-            <button aria-label="데스크톱 미리보기" aria-pressed={previewMode === 'desktop'} className={previewMode === 'desktop' ? 'is-active' : undefined} title="데스크톱 미리보기" type="button" onClick={() => setPreviewMode('desktop')}><Monitor size={16} /></button>
-            <button aria-label="모바일 미리보기" aria-pressed={previewMode === 'mobile'} className={previewMode === 'mobile' ? 'is-active' : undefined} title="모바일 미리보기" type="button" onClick={() => setPreviewMode('mobile')}><Smartphone size={16} /></button>
-          </div>
-          <button ref={settingsTriggerRef} aria-controls="admin-product-inspector" aria-label="운영 설정 열기" className="admin-product-settings-button" title="운영 설정" type="button" onClick={(event) => { if (activeEditor?.kind === 'inline') commitInline(activeEditor.field); else setActiveEditor(null); selectEditorField('settings', event.currentTarget) }}><Settings2 size={17} /></button>
-        </div>
-      </section>
-
-      <div className="admin-product-editor-workspace">
-        {compactInspector && inspectorOpen && <button aria-label="편집 패널 닫기" className="admin-product-inspector-backdrop" type="button" onClick={closeInspector} />}
-        <aside
-          aria-hidden={compactInspector && !inspectorOpen}
-          aria-labelledby="admin-product-inspector-title"
-          aria-modal={compactInspector ? true : undefined}
-          className={`admin-product-inspector${inspectorOpen ? ' is-open' : ''}`}
-          id="admin-product-inspector"
-          inert={compactInspector && !inspectorOpen}
-          ref={inspectorRef}
-          role={compactInspector ? 'dialog' : 'complementary'}
-        >
-          <header className="admin-product-inspector-header">
-            <div><span>{localeTabs.find(({ key }) => key === activeLocale)?.label}</span><h2 id="admin-product-inspector-title">상품 편집</h2></div>
-            <div className="admin-product-inspector-header-actions">
-              {dirty && <strong>변경 있음</strong>}
-              {compactInspector && <button aria-label="편집 패널 닫기" ref={inspectorCloseRef} title="닫기" type="button" onClick={closeInspector}><X size={18} /></button>}
-            </div>
-          </header>
-
+      <AdminVisualEditorShell
+        actions={<>
+          <AdminLink to="/admin/products">목록</AdminLink>
+          {hasPermission('catalog.publish') && !product?.isVisible && <button className="primary-action" disabled={saving} type="button" onClick={requestPublish}><PackageCheck size={17} />검토 후 공개</button>}
+        </>}
+        activeDevice={previewMode}
+        activeLocale={activeLocale}
+        description={isEditing ? product?.code || '상품 수정' : '신규 상품 초안'}
+        dirty={dirty}
+        inspectorOpen={inspectorOpen}
+        inspectorCloseRef={inspectorCloseRef}
+        inspectorRef={inspectorRef}
+        inspectorReturnFocusRef={inspectorReturnFocusRef}
+        locales={localeTabs}
+        onCloseInspector={closeInspector}
+        onDeviceChange={setPreviewMode}
+        onLocaleChange={(key) => { if (activeEditor?.kind === 'inline') commitInline(activeEditor.field); else setActiveEditor(null); setActiveLocale(key) }}
+        onReadinessClick={() => selectProductSection('operations', 'readiness')}
+        onSelectSection={selectProductSection}
+        previewAriaLabel="실제 상품 상세 화면 편집 미리보기"
+        readiness={{ ready: readiness.ready, label: readiness.ready ? '공개 준비 완료' : `${readiness.missing.length}개 확인 필요` }}
+        sections={productSections}
+        selectedSectionId={openInspectorGroup}
+        title={isEditing ? getTranslation(product, 'kr').name || product?.code || '상품 수정' : '새 상품'}
+        inspector={<>
           <InspectorField activeField={selectedField} field="readiness">
             <div className={`admin-product-inspector-readiness${readiness.ready ? ' is-ready' : ''}`}>
               <span>공개 준비</span>
@@ -1194,9 +1118,9 @@ export function AdminProductEditorPage() {
               </InspectorField>
             </InspectorGroup>
           </div>
-        </aside>
-
-        <ProductPreviewCanvas mode={previewMode}>
+        </>}
+      >
+        <div className={`admin-product-detail-canvas is-${previewMode}`}>
           <ProductDetailView
             approvedAmount={draftPrice?.wholesalePrice ?? null}
             contentLocale={previewContentLocale}
@@ -1209,8 +1133,8 @@ export function AdminProductEditorPage() {
             toLocalePath={toLocalePath}
             viewerState="approved"
           />
-        </ProductPreviewCanvas>
-      </div>
+        </div>
+      </AdminVisualEditorShell>
 
       <input accept="image/jpeg,image/png,image/webp" hidden multiple ref={fileInputRef} type="file" onChange={selectImages} />
       <input accept=".zip,application/zip" hidden ref={zipInputRef} type="file" onChange={selectZip} />

@@ -24,16 +24,23 @@ test('home editor exposes protected draft and publish routes without replacing t
 test('home editor uses the real home renderer and explicit save controls', () => {
   const editor = read('src/pages/admin/AdminHomeEditorPage.jsx')
   const home = read('src/pages/HomePage.jsx')
+  const visualShell = read('src/components/AdminVisualEditorShell.jsx')
   const css = read('src/styles/admin-console.css')
 
   assert.match(editor, /<HomePage editorMode layoutOverride=\{draft\}/)
   assert.match(editor, /<AdminSaveBar/)
-  assert.match(editor, /draggable=\{section\.id !== 'showcase'\}/)
+  assert.match(editor, /AdminVisualEditorShell/)
+  assert.match(editor, /reorderable: section\.id !== 'showcase'/)
+  assert.match(editor, /onToggleSection=\{toggleSection\}/)
+  assert.match(editor, /onMoveSection=\{moveSection\}/)
   assert.match(editor, /고객 홈에 적용/)
   assert.doesNotMatch(editor, /dangerouslySetInnerHTML/)
   assert.match(home, /data-home-section-id/)
-  assert.match(css, /grid-template-columns: 220px 330px minmax\(620px, 1fr\)/)
-  assert.match(css, /\.admin-home-editor-inspector/)
+  assert.match(css, /grid-template-columns: 200px 340px minmax\(0, 1fr\)/)
+  assert.match(css, /\.admin-visual-editor-inspector/)
+  assert.match(visualShell, /desktop: 1440/)
+  assert.match(visualShell, /tablet: 1024/)
+  assert.match(visualShell, /mobile: 390/)
 })
 
 test('home layout normalization keeps showcase first and locale values explicit', () => {

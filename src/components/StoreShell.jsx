@@ -524,6 +524,7 @@ export function StoreShell() {
     ? normalizedPathname.slice(firstPathSegment.length + 1) || '/'
     : normalizedPathname
   const isAdminRoute = /^\/admin(?:\/|$)/.test(pathnameWithoutLocale)
+  const isVisualEditorRoute = /^\/admin\/(?:home-editor|products\/(?:new|[^/]+\/edit))$/.test(pathnameWithoutLocale)
   const isProductBrowsingRoute = /^\/(?:products|collections|piercing|material|shape)(?:\/|$)/.test(pathnameWithoutLocale)
   const usesHomeStyleHeader = isHomeImageRoute || isProductBrowsingRoute
   const inquiryListCount = Array.isArray(inquiryRows) ? inquiryRows.length : 0
@@ -799,7 +800,7 @@ export function StoreShell() {
   const myInquiriesPath = isAdmin ? '/admin/inquiries' : '/my-inquiries'
   const inquiryListPath = '/inquiry-list'
 
-  return <div className={`site-shell ${isHomeImageRoute ? 'home-image-shell' : ''} ${usesHomeStyleHeader ? 'product-list-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isSideLayout ? 'has-side-layout' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''} ${isPreviewBarHidden ? 'has-preview-hidden' : 'has-preview-visible'} ${showTopMarquee ? '' : 'has-hidden-marquee'}`.trim()}>
+  return <div className={`site-shell ${isHomeImageRoute ? 'home-image-shell' : ''} ${usesHomeStyleHeader ? 'product-list-shell' : ''} ${isVisualEditorRoute ? 'visual-editor-shell' : ''} ${isMarqueeCollapsed ? 'has-collapsed-marquee' : ''} ${isSideLayout ? 'has-side-layout' : ''} ${isHeaderCompact ? 'has-compact-header' : ''} ${isCompactSearchOpen ? 'has-compact-search-open' : ''} ${isCompactSearchClosing ? 'has-compact-search-closing' : ''} ${isPreviewBarHidden ? 'has-preview-hidden' : 'has-preview-visible'} ${showTopMarquee ? '' : 'has-hidden-marquee'}`.trim()}>
     {showTopMarquee ? <div className={`top-marquee ${isMarqueeCollapsed ? 'is-collapsed' : ''}`} style={topMarqueeStyle} aria-label={`${headerBrandName} material notice`}>
       <div className="top-marquee-track" aria-hidden="true">
         {Array.from({ length: 4 }).map((_, index) => <span key={index}>{topMarqueeText}</span>)}

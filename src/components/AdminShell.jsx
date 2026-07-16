@@ -7,7 +7,7 @@ import {
   Settings2,
   Store,
 } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { getRuntimeConfig } from '../config/runtimeConfig'
 import { getAdminRuntimeKind, useAdminCopy } from '../pages/admin/adminCopy'
 import { useLocalePath } from '../utils/locale'
@@ -24,13 +24,15 @@ const adminNavigation = [
 ]
 
 export function AdminShell() {
+  const location = useLocation()
   const { toLocalePath } = useLocalePath()
   const t = useAdminCopy()
   const runtimeKind = getAdminRuntimeKind(getRuntimeConfig())
   const { admin, hasPermission, status } = useAdminAccess()
   const roleLabel = t.shell.roles?.[admin?.adminRole] || admin?.adminRole || 'admin'
+  const isVisualEditorRoute = /\/admin\/(?:home-editor|products\/(?:new|[^/]+\/edit))\/?$/.test(location.pathname)
 
-  return <main className="admin-shell admin-console-shell">
+  return <main className={`admin-shell admin-console-shell${isVisualEditorRoute ? ' is-visual-editor-route' : ''}`}>
     <aside className="admin-sidebar admin-console-sidebar" aria-label={t.shell.aria}>
       <div className="admin-brand-block">
         <Store size={22} />
@@ -44,7 +46,7 @@ export function AdminShell() {
           const visible = status !== 'ready' || permissions.some((permission) => hasPermission(permission))
           if (!visible) return null
           const destination = key === 'quotes' && !hasPermission('quotes.read') ? fallbackPath : path
-          return <NavLink end={end} key={key} to={toLocalePath(destination)}>
+          return <NavLink aria-label={label} end={end} key={key} title={label} to={toLocalePath(destination)}>
             <Icon size={18} />
             <span>{label}</span>
           </NavLink>

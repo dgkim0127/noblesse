@@ -1,21 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowDown,
-  ArrowUp,
-  Check,
-  Eye,
-  EyeOff,
-  GripVertical,
   Images,
+  LifeBuoy,
   LayoutGrid,
-  Monitor,
+  Megaphone,
+  PackageSearch,
   RotateCcw,
   Send,
-  Smartphone,
-  Tablet,
-  X,
 } from 'lucide-react'
 import { useAdminAccess } from '../../components/AdminAccessContext'
+import { AdminVisualEditorShell } from '../../components/AdminVisualEditorShell'
 import { useCommerce } from '../../commerce/commerceStore'
 import { cloneHomeLayout, getHomeLayoutText, homeLayoutLocales, normalizeHomeLayout } from '../../config/homeLayout'
 import { getLocalizedProductName } from '../../utils/locale'
@@ -23,7 +17,6 @@ import { HomePage } from '../HomePage'
 import {
   AdminConfirmDialog,
   AdminLink,
-  AdminPageHeader,
   AdminSaveBar,
   AdminToast,
 } from './AdminPageParts'
@@ -41,12 +34,6 @@ const sectionLabels = {
   campaign: '견적 안내 배너',
   support: '이용 안내',
 }
-
-const deviceOptions = [
-  { id: 'desktop', label: '데스크톱', icon: Monitor },
-  { id: 'tablet', label: '태블릿', icon: Tablet },
-  { id: 'mobile', label: '모바일', icon: Smartphone },
-]
 
 function completionFor(config) {
   const missing = []
@@ -75,7 +62,7 @@ function LocalizedInput({ label, locale, multiline = false, value, onChange }) {
   </label>
 }
 
-function EditorInspector({ config, locale, products, selectedId, onChange, onClose }) {
+function EditorInspector({ config, locale, products, selectedId, onChange }) {
   const sectionIndex = config.sections.findIndex((section) => section.id === selectedId)
   const section = sectionIndex >= 0 ? config.sections[sectionIndex] : null
   const updateHeader = (patch) => onChange({ ...config, header: { ...config.header, ...patch } })
@@ -89,10 +76,6 @@ function EditorInspector({ config, locale, products, selectedId, onChange, onClo
 
   if (selectedId === 'header') {
     return <div className="admin-home-editor-inspector-body">
-      <div className="admin-home-editor-inspector-heading">
-        <div><small>공통 영역</small><h2>상단 안내 띠</h2></div>
-        <button className="admin-home-editor-close" aria-label="설정 닫기" title="설정 닫기" type="button" onClick={onClose}><X size={18} /></button>
-      </div>
       <label className="admin-home-editor-switch-row">
         <span><strong>안내 띠 표시</strong><small>쇼핑몰 최상단에 반복 문구를 표시합니다.</small></span>
         <input checked={config.header.showMarquee} type="checkbox" onChange={(event) => updateHeader({ showMarquee: event.target.checked })} />
@@ -107,11 +90,6 @@ function EditorInspector({ config, locale, products, selectedId, onChange, onClo
   const pinned = new Set(source?.pinnedProductIds || [])
 
   return <div className="admin-home-editor-inspector-body">
-    <div className="admin-home-editor-inspector-heading">
-      <div><small>{section.visible ? '홈에 표시 중' : '숨김'}</small><h2>{sectionLabels[section.id]}</h2></div>
-      <button className="admin-home-editor-close" aria-label="설정 닫기" title="설정 닫기" type="button" onClick={onClose}><X size={18} /></button>
-    </div>
-
     {section.id !== 'showcase' ? <label className="admin-home-editor-switch-row">
       <span><strong>섹션 표시</strong><small>끄면 고객 홈에서 이 영역을 숨깁니다.</small></span>
       <input checked={section.visible} type="checkbox" onChange={(event) => updateSection({ visible: event.target.checked })} />
@@ -192,15 +170,6 @@ export function AdminHomeEditorPage() {
     setSavedDraft(cloneHomeLayout(next))
     setRevision(resource.data.draftRevision || 1)
   }, [resource.data, resource.status])
-
-  useEffect(() => {
-    if (!inspectorOpen) return undefined
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') setInspectorOpen(false)
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [inspectorOpen])
 
   const dirty = useMemo(() => Boolean(draft && savedDraft && JSON.stringify(draft) !== JSON.stringify(savedDraft)), [draft, savedDraft])
   const completion = useMemo(() => draft ? completionFor(draft) : { isPublishable: false, missing: [] }, [draft])
@@ -292,68 +261,77 @@ export function AdminHomeEditorPage() {
     setDraggedId('')
   }
 
+  const toggleSection = (sectionId) => {
+    if (sectionId === 'showcase') return
+    const sections = draft.sections.map((item) => item.id === sectionId ? { ...item, visible: !item.visible } : item)
+    setDraft({ ...draft, sections })
+  }
+  const sectionIcon = (section) => {
+    if (section.id === 'showcase') return Images
+    if (section.type === 'campaign') return Megaphone
+    if (section.id === 'support') return LifeBuoy
+    return PackageSearch
+  }
+  const visualSections = [
+    {
+      id: 'header',
+      label: '상단 공통 영역',
+      description: '안내 띠와 고정 헤더',
+      icon: LayoutGrid,
+      status: !draft.header.showMarquee || draft.header.marquee?.[locale]?.trim() ? 'complete' : 'warning',
+      statusLabel: '현재 언어 안내 문구',
+    },
+    ...draft.sections.map((section, index) => {
+      const localeComplete = section.id === 'showcase'
+        || (section.title?.[locale]?.trim() && section.note?.[locale]?.trim() && (section.type !== 'campaign' || section.ctaLabel?.[locale]?.trim()))
+      return {
+        id: section.id,
+        label: sectionLabels[section.id],
+        description: getHomeLayoutText(section.title, locale) || (section.visible ? '문구를 입력하세요' : '고객 홈에서 숨김'),
+        icon: sectionIcon(section),
+        moveDownDisabled: index === draft.sections.length - 1,
+        moveUpDisabled: index <= 1,
+        reorderable: section.id !== 'showcase',
+        status: !section.visible ? 'neutral' : localeComplete ? 'complete' : 'warning',
+        statusLabel: !section.visible ? '숨김' : localeComplete ? '현재 언어 준비 완료' : '현재 언어 문구 확인 필요',
+        visible: section.visible,
+        visibilityLocked: section.id === 'showcase',
+      }
+    }),
+  ]
+
   return <>
-    <AdminPageHeader
-      eyebrow="홈 운영"
-      title="메인 화면 편집"
-      description="고객이 보는 홈을 확인하면서 섹션 순서, 문구와 노출 상품을 정리합니다."
+    <AdminVisualEditorShell
       actions={<>
-        <button disabled={saving} type="button" onClick={() => setConfirm({ type: 'reset' })}><RotateCcw size={16} /> 게시본으로 되돌리기</button>
-        {hasPermission('catalog.publish') ? <button className="primary-action" disabled={saving || !completion.isPublishable} type="button" onClick={() => setConfirm({ type: 'publish' })}><Send size={16} /> 고객 홈에 적용</button> : null}
+        <button disabled={saving} type="button" onClick={() => setConfirm({ type: 'reset' })}><RotateCcw size={16} />게시본 복원</button>
+        {hasPermission('catalog.publish') ? <button className="primary-action" disabled={saving || !completion.isPublishable} type="button" onClick={() => setConfirm({ type: 'publish' })}><Send size={16} />고객 홈에 적용</button> : null}
       </>}
-    />
-
-    <div className="admin-home-editor-toolbar">
-      <div className="admin-home-editor-locales" role="tablist" aria-label="미리보기 언어">
-        {homeLayoutLocales.map((item) => <button aria-selected={locale === item} className={locale === item ? 'is-active' : undefined} key={item} role="tab" type="button" onClick={() => setLocale(item)}>{localeLabels[item]}</button>)}
-      </div>
-      <div className="admin-home-editor-devices" aria-label="미리보기 화면 크기">
-        {deviceOptions.map(({ id, label, icon: Icon }) => <button aria-label={label} aria-pressed={device === id} className={device === id ? 'is-active' : undefined} key={id} title={label} type="button" onClick={() => setDevice(id)}><Icon size={17} /></button>)}
-      </div>
-      <button className={`admin-home-editor-readiness${completion.isPublishable ? ' is-ready' : ''}`} type="button" onClick={() => {
+      activeDevice={device}
+      activeLocale={locale}
+      description="섹션 순서와 노출, 문구, 상품을 실제 화면에서 확인합니다."
+      dirty={dirty}
+      draggedSectionId={draggedId}
+      inspector={<EditorInspector config={draft} locale={locale} products={products} selectedId={selectedId} onChange={setDraft} />}
+      inspectorOpen={inspectorOpen}
+      inspectorRef={inspectorRef}
+      locales={homeLayoutLocales.map((key) => ({ key, label: localeLabels[key] }))}
+      onCloseInspector={() => setInspectorOpen(false)}
+      onDeviceChange={setDevice}
+      onDragStartSection={setDraggedId}
+      onDropSection={dropSection}
+      onLocaleChange={setLocale}
+      onMoveSection={moveSection}
+      onReadinessClick={() => {
         if (completion.missing.length) setToast({ message: `공개 전 확인: ${completion.missing.slice(0, 3).join(', ')}`, tone: 'error' })
-      }}>
-        {completion.isPublishable ? <Check size={16} /> : null}
-        {completion.isPublishable ? '공개 준비 완료' : `${completion.missing.length}개 확인 필요`}
-      </button>
-    </div>
-
-    <section className={`admin-home-editor-workspace${inspectorOpen ? ' is-inspector-open' : ''}`}>
-      <nav className="admin-home-editor-components" aria-label="홈 화면 구성">
-        <button className={selectedId === 'header' ? 'is-selected' : undefined} type="button" onClick={() => selectItem('header')}>
-          <LayoutGrid aria-hidden="true" size={18} /><span><strong>상단 공통 영역</strong><small>안내 띠와 고정 헤더</small></span>
-        </button>
-        <div className="admin-home-editor-component-list">
-          {draft.sections.map((section, index) => <div
-            className={`admin-home-editor-component${selectedId === section.id ? ' is-selected' : ''}${section.visible ? '' : ' is-hidden'}`}
-            draggable={section.id !== 'showcase'}
-            key={section.id}
-            onDragOver={(event) => event.preventDefault()}
-            onDragStart={() => setDraggedId(section.id)}
-            onDrop={() => dropSection(section.id)}
-          >
-            <button className="admin-home-editor-drag" aria-label={`${sectionLabels[section.id]} 순서 이동`} disabled={section.id === 'showcase'} title="끌어서 순서 변경" type="button"><GripVertical size={16} /></button>
-            <button className="admin-home-editor-component-main" type="button" onClick={() => selectItem(section.id)}>
-              <span><strong>{sectionLabels[section.id]}</strong><small>{getHomeLayoutText(section.title, locale)}</small></span>
-            </button>
-            <button aria-label={section.visible ? '숨기기' : '표시하기'} className="admin-home-editor-visibility" disabled={section.id === 'showcase'} title={section.visible ? '숨기기' : '표시하기'} type="button" onClick={() => {
-              const sections = draft.sections.map((item) => item.id === section.id ? { ...item, visible: !item.visible } : item)
-              setDraft({ ...draft, sections })
-            }}>{section.visible ? <Eye size={15} /> : <EyeOff size={15} />}</button>
-            <span className="admin-home-editor-order-buttons">
-              <button aria-label="위로 이동" disabled={section.id === 'showcase' || index <= 1} title="위로 이동" type="button" onClick={() => moveSection(section.id, -1)}><ArrowUp size={14} /></button>
-              <button aria-label="아래로 이동" disabled={section.id === 'showcase' || index === draft.sections.length - 1} title="아래로 이동" type="button" onClick={() => moveSection(section.id, 1)}><ArrowDown size={14} /></button>
-            </span>
-          </div>)}
-        </div>
-      </nav>
-
-      <button className="admin-home-editor-backdrop" aria-label="설정 닫기" type="button" onClick={() => setInspectorOpen(false)} />
-      <aside className="admin-home-editor-inspector" ref={inspectorRef}>
-        <EditorInspector config={draft} locale={locale} products={products} selectedId={selectedId} onChange={setDraft} onClose={() => setInspectorOpen(false)} />
-      </aside>
-
-      <div className="admin-home-editor-canvas">
+      }}
+      onSelectSection={selectItem}
+      onToggleSection={toggleSection}
+      previewAriaLabel="실제 고객 홈 화면 편집 미리보기"
+      readiness={{ ready: completion.isPublishable, label: completion.isPublishable ? '공개 준비 완료' : `${completion.missing.length}개 확인 필요` }}
+      sections={visualSections}
+      selectedSectionId={selectedId}
+      title="메인 화면 편집"
+    >
         <div className={`admin-home-editor-viewport is-${device}`}>
           <div className="admin-home-preview-header">
             {draft.header.showMarquee ? <div className="admin-home-preview-marquee">{getHomeLayoutText(draft.header.marquee, locale)}</div> : null}
@@ -361,8 +339,7 @@ export function AdminHomeEditorPage() {
           </div>
           <HomePage editorMode layoutOverride={draft} localeOverride={locale} selectedSectionId={selectedId} onSelectSection={selectItem} />
         </div>
-      </div>
-    </section>
+    </AdminVisualEditorShell>
 
     <AdminSaveBar visible={dirty} saving={saving} dirtyLabel="홈 화면 초안에 저장하지 않은 변경이 있습니다." saveLabel="초안 저장" onDiscard={() => setDraft(cloneHomeLayout(savedDraft))} onSave={() => saveDraft()} />
     <AdminConfirmDialog
