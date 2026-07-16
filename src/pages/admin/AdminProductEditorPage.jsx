@@ -1,5 +1,5 @@
 import { ChevronDown, FileArchive, GripVertical, ImagePlus, Monitor, PackageCheck, RotateCcw, Settings2, Smartphone, Trash2, UploadCloud, X } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
 import { ProductDetailView } from '../ProductDetailPage'
@@ -35,6 +35,70 @@ const localeTabs = [
   { key: 'jp', label: '日本語' },
   { key: 'zh-TW', label: '繁體中文' },
 ]
+const productPreviewWidths = { desktop: 1440, mobile: 390 }
+const productPreviewInsets = { desktop: 16, mobile: 0 }
+
+function ProductPreviewCanvas({ children, mode }) {
+  const viewportRef = useRef(null)
+  const stageRef = useRef(null)
+  const [layout, setLayout] = useState({ height: 0, offset: 0, scale: 1 })
+  const logicalWidth = productPreviewWidths[mode]
+  const inset = productPreviewInsets[mode]
+
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current
+    const stage = stageRef.current
+    if (!viewport || !stage) return undefined
+
+    const updateLayout = () => {
+      const availableWidth = viewport.clientWidth
+      if (availableWidth <= 0) return
+      const usableWidth = Math.max(1, availableWidth - inset * 2)
+      const scale = Math.min(1, usableWidth / logicalWidth)
+      const height = Math.ceil(stage.scrollHeight * scale) + inset * 2
+      const offset = inset + Math.max(0, Math.floor((usableWidth - logicalWidth * scale) / 2))
+
+      setLayout((current) => (
+        Math.abs(current.scale - scale) < 0.001
+        && current.height === height
+        && current.offset === offset
+          ? current
+          : { height, offset, scale }
+      ))
+    }
+
+    updateLayout()
+    window.addEventListener('resize', updateLayout)
+    if (typeof ResizeObserver === 'undefined') {
+      return () => window.removeEventListener('resize', updateLayout)
+    }
+
+    const observer = new ResizeObserver(updateLayout)
+    observer.observe(viewport)
+    observer.observe(stage)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', updateLayout)
+    }
+  }, [inset, logicalWidth])
+
+  return <section
+    aria-label="실제 상품 상세 화면 편집 미리보기"
+    className={`admin-product-detail-canvas is-${mode}`}
+    data-preview-width={logicalWidth}
+    ref={viewportRef}
+    style={layout.height ? { height: `${layout.height}px` } : undefined}
+  >
+    <div
+      className="admin-product-preview-stage"
+      ref={stageRef}
+      style={{ left: `${layout.offset}px`, top: `${inset}px`, transform: `scale(${layout.scale})`, width: `${logicalWidth}px` }}
+    >
+      {children}
+    </div>
+  </section>
+}
+
 const inspectorGroups = [
   { id: 'basic', label: '기본 정보' },
   { id: 'images', label: '이미지' },
@@ -1056,7 +1120,7 @@ export function AdminProductEditorPage() {
           </div>
         </aside>
 
-        <section className={`admin-product-detail-canvas is-${previewMode}`} aria-label="실제 상품 상세 화면 편집 미리보기">
+        <ProductPreviewCanvas mode={previewMode}>
           <ProductDetailView
             approvedAmount={draftPrice?.wholesalePrice ?? null}
             contentLocale={previewContentLocale}
@@ -1069,7 +1133,7 @@ export function AdminProductEditorPage() {
             toLocalePath={toLocalePath}
             viewerState="approved"
           />
-        </section>
+        </ProductPreviewCanvas>
       </div>
 
       <input accept="image/jpeg,image/png,image/webp" hidden multiple ref={fileInputRef} type="file" onChange={selectImages} />

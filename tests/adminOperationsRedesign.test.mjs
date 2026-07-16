@@ -33,6 +33,12 @@ test('product operations use dedicated list and editor workflows', () => {
   assert.doesNotMatch(editor, /<Check\b/)
   assert.match(editor, /previewMode === 'desktop'/)
   assert.match(editor, /previewMode === 'mobile'/)
+  assert.match(editor, /productPreviewWidths = \{ desktop: 1440, mobile: 390 \}/)
+  assert.match(editor, /productPreviewInsets = \{ desktop: 16, mobile: 0 \}/)
+  assert.match(editor, /function ProductPreviewCanvas/)
+  assert.match(editor, /new ResizeObserver\(updateLayout\)/)
+  assert.match(editor, /window\.addEventListener\('resize', updateLayout\)/)
+  assert.match(editor, /transform: `scale\(\$\{layout\.scale\}\)`/)
   assert.match(editor, /imageDraftsToPreviewSet/)
   assert.match(detail, /export function ProductDetailView/)
   assert.match(detail, /function ProductInlineEditor/)
@@ -67,6 +73,9 @@ test('visual product editor keeps both navigation and the inspector stable witho
   assert.match(styles, /@media \(max-width: 820px\)[\s\S]*?\.admin-product-inspector[\s\S]*?width: 100vw/)
   assert.doesNotMatch(styles, /bottom:\s*0;[\s\S]{0,240}\.admin-product-popover/)
   assert.match(styles, /\.admin-product-detail-canvas\.is-mobile[\s\S]*?max-width: 390px/)
+  assert.match(styles, /\.admin-product-preview-stage[\s\S]*?position: absolute[\s\S]*?transform-origin: left top/)
+  assert.match(styles, /\.admin-product-detail-canvas\.is-desktop \.pd-hero[\s\S]*?grid-template-columns: minmax\(0, 1\.42fr\) minmax\(390px, 0\.78fr\)/)
+  assert.match(styles, /\.admin-product-detail-canvas\.is-desktop \.pd-gallery-grid[\s\S]*?grid-template-columns: minmax\(0, 2\.05fr\) minmax\(150px, 0\.98fr\)/)
 })
 
 test('quote workflow separates customer documents from internal notes and direct payment', () => {
