@@ -122,6 +122,77 @@ test("createQuoteFromInquiry rolls back when inquiry is not found", async () => 
   assert.equal(fake.releaseCount, 1);
 });
 
+test("updateQuoteDraft keeps quantity parameters consistently typed", async () => {
+  const calls = [];
+  const quoteRow = {
+    id: quoteId,
+    inquiry_id: inquiryId,
+    inquiry_number: "INQ-001",
+    company_name: "Buyer Co",
+    status: "draft",
+    confirmed_total: 1800,
+    requested_total: 1800,
+    currency: "KRW",
+    lead_time: "7-14 business days",
+    shipping_note: "EXW",
+    valid_until: "2026-07-27",
+    document_locale: "kr",
+    customer_note: "Quote note",
+    admin_memo: null,
+    created_at: "2026-07-20T00:00:00.000Z",
+    updated_at: "2026-07-20T00:00:00.000Z"
+  };
+  const itemRow = {
+    id: "44444444-4444-4444-8444-444444444444",
+    product_id: "product-1",
+    product_code: "NB-001",
+    product_name: "Test product",
+    requested_quantity: 1,
+    confirmed_quantity: 1,
+    requested_price_snapshot: 1800,
+    confirmed_unit_price: 1800,
+    confirmed_subtotal: 1800
+  };
+  const client = {
+    async query(sql, params = []) {
+      const text = String(sql).trim();
+      const normalized = text.toLowerCase();
+      calls.push({ sql: text, params });
+      if (["begin", "commit", "rollback"].includes(normalized)) return { rows: [] };
+      if (normalized.includes("from public.admin_quotes") && normalized.includes("where aq.id")) return { rows: [quoteRow] };
+      if (normalized.startsWith("update public.admin_quote_items")) return { rows: [{ id: itemRow.id }] };
+      if (normalized.startsWith("select coalesce(sum(confirmed_subtotal)")) return { rows: [{ total: 1800 }] };
+      if (normalized.startsWith("update public.admin_quotes")) return { rows: [] };
+      if (normalized.includes("from public.admin_quote_items")) return { rows: [itemRow] };
+      if (normalized.startsWith("insert into public.audit_logs")) return { rows: [{ id: "audit-1" }] };
+      throw new Error(`Unexpected query: ${text}`);
+    },
+    release() {}
+  };
+  const pool = { async connect() { return client; } };
+
+  const result = await createAdminQuoteQueries(pool).updateQuoteDraft(quoteId, {
+    leadTime: quoteRow.lead_time,
+    shippingNote: quoteRow.shipping_note,
+    validUntil: quoteRow.valid_until,
+    documentLocale: quoteRow.document_locale,
+    customerNote: quoteRow.customer_note,
+    adminMemo: "",
+    items: [{
+      id: itemRow.id,
+      confirmedQuantity: 1,
+      confirmedUnitPrice: 1800,
+      itemNote: ""
+    }]
+  }, adminViewer);
+
+  const itemUpdate = calls.find((call) => call.sql.toLowerCase().startsWith("update public.admin_quote_items"));
+  assert.match(itemUpdate.sql, /confirmed_quantity = \$3::integer/i);
+  assert.match(itemUpdate.sql, /round\(\(\$3::integer \* \$4::numeric\), 2\)/i);
+  assert.equal(result.quote.confirmedTotal, 1800);
+  assert.equal(result.items[0].confirmedQuantity, 1);
+});
+
 test("updateQuoteStatus cancels a quote and writes status history and audit log", async () => {
   const fake = createFakePool();
   const result = await createAdminQuoteQueries(fake.pool).updateQuoteStatus(quoteId, "cancelled", adminViewer);

@@ -363,9 +363,9 @@ export function createAdminQuoteQueries(pool) {
           const itemResult = await client.query(
             `
               update public.admin_quote_items
-              set confirmed_quantity = $3,
-                  confirmed_unit_price = $4,
-                  confirmed_subtotal = round(($3::numeric * $4::numeric), 2),
+              set confirmed_quantity = $3::integer,
+                  confirmed_unit_price = $4::numeric,
+                  confirmed_subtotal = round(($3::integer * $4::numeric), 2),
                   item_note = nullif($5, '')
               where admin_quote_id = $1 and id = $2
               returning id
