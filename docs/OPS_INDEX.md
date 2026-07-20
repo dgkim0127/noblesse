@@ -10,7 +10,7 @@ This index points operators and implementers to the current site map, QA evidenc
 | --- | --- |
 | Active repository | `D:\noblesse-current-main-quote` |
 | Branch | `main` |
-| Baseline HEAD | `54e520c0a1d2ee2a44f1f77ab4629584ac8cf9cc` |
+| Baseline HEAD | `c99f2e8e76a1f4350f4ee462bde3e86f9f859d8d` |
 | Production URL | `https://noblesse.web.app` |
 | Canonical Taiwan route | `zh-TW` |
 
@@ -54,9 +54,9 @@ This index points operators and implementers to the current site map, QA evidenc
 
 ## Current Production Release
 
-PR #7 merged as `54e520c0a1d2ee2a44f1f77ab4629584ac8cf9cc` and was released on 2026-07-20. Cloud SQL backup `1784507477114` completed before five additive migrations. Backend revision `noblesse-backend-00023-gah` now receives 100% traffic, and Firebase Hosting target `noblesse` deployed successfully.
+PR #7 merged as `54e520c0a1d2ee2a44f1f77ab4629584ac8cf9cc` and was released on 2026-07-20. Quote draft hotfix PR #9 merged as `c99f2e8e76a1f4350f4ee462bde3e86f9f859d8d`. Cloud SQL backup `1784507477114` completed before five additive migrations. Backend revision `noblesse-backend-00025-tuv` now receives 100% traffic, and Firebase Hosting target `noblesse` remains live.
 
-Public API, hidden-canary, locale, responsive, horizontal-overflow, and console checks passed. Authenticated admin and approved-buyer option/quote/PDF E2E remains pending because no prepared authenticated session or production UAT credential set was available. No credential or session data was extracted. See `docs/PRODUCTION_RELEASE_20260720.md`.
+Public API, hidden-canary, locale, responsive, horizontal-overflow, and console checks passed. The authenticated admin flow now verifies the existing inquiry, one quote draft, official document version 1, status history, and authenticated PDF download. A conditional bucket IAM binding restricted to the `quotes/` prefix enables runtime PDF create/read/cleanup without project-wide Storage access. Buyer accept/reject and two distinct structured option combinations remain pending. No credential or session data was extracted. See `docs/PRODUCTION_RELEASE_20260720.md`.
 
 ## Historical Task Notes
 
@@ -89,3 +89,5 @@ N77 product inquiry MVP note: product detail now has an approved-buyer one-produ
 N77Q quote request price-gate retry: backend and frontend now support price-pending quote requests for visible products without showing `0` as a real buyer/admin price. Backend revision `noblesse-backend-00021-r27` and Firebase Hosting target `noblesse` were deployed. The live canary was not successfully created: the approved buyer session first received `404` from `POST /api/buyer/inquiries`, then the browser session rendered as `guest`. Seed product hash remained unchanged and the hidden canary stayed absent. Current blocker: fresh approved buyer session required for retry and response-body diagnosis.
 
 N77Q2 quote request POST404 fix: `/api/buyer/inquiries` was confirmed as the correct protected endpoint. The 404 cause was backend money precision rejecting PostgreSQL numeric strings such as `1800.00` for KRW. Backend revision `noblesse-backend-00022-s8c` accepts zero-only fractional scale for zero-minor-unit currencies while still rejecting real fractional KRW/JPY values. The approved buyer canary for `NB-4WAY-GREEN-CLOVER-BARBELL` color `오알`, quantity `1` submitted successfully as `INQ-20260713-29833682` / `8405661e-db9c-418d-bb9b-dfa39f663f0f`, and buyer-side detail rendered without internal fields or direct-purchase wording. Firebase Hosting target `noblesse` was redeployed so the admin-required gate opens the current login modal instead of sending operators to a separate login page. Admin-side visibility remains pending until an admin browser login is available. No product, price, buyer approval, order/payment/cart, FX, scheduler, Secret/IAM, SQL, DB console, CN/CNY, or hidden canary exposure occurred.
+
+N77Q5 admin quote/PDF verification: the owner session confirmed the existing canary inquiry in the admin list and detail. PR #9 fixed quote draft numeric parameter typing and backend revision `noblesse-backend-00025-tuv` is live at 100% traffic. Exactly one quote draft was created and issued as immutable document version 1 with a server-calculated KRW `1,800` total. One conditional bucket `roles/storage.objectAdmin` binding, restricted to the `quotes/` prefix and the production runtime service account, enabled PDF create/read/cleanup. The PDF downloaded successfully, the admin console and horizontal overflow were both `0`, the seed product remained readable with a stable repeated post-operation hash, and the hidden canary remained private. Buyer accept/reject and structured option-combination E2E remain pending.

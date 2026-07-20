@@ -181,3 +181,55 @@ Admin-side verification is still pending because the active browser session is t
 ### Remaining Gate
 
 Admin-side visibility must still be verified with an admin session before N78 is considered unblocked.
+
+## N77Q5 Admin Quote And PDF Verification
+
+Date: 2026-07-20
+
+Decision: `PRODUCT_QUOTE_REQUEST_ADMIN_SIDE_VERIFIED`
+
+### Admin Visibility
+
+The authenticated owner session verified the existing canary inquiry in the production admin list and detail. The product code, legacy color selection, quantity `1`, buyer record, memo, and requested status were visible. No additional buyer inquiry was submitted.
+
+### Official Quote
+
+Exactly one quote draft was created for the existing inquiry and saved with KRW unit price `1,800`, valid-until date `2026-07-27`, lead time, shipping terms, and a customer-facing note. The quote draft quantity SQL parameter regression was fixed by PR #9 and deployed as backend revision `noblesse-backend-00025-tuv`.
+
+The first issue attempt stopped before document creation because the runtime account could access only the bucket's `products/` prefix. One bucket-level conditional `roles/storage.objectAdmin` binding was added for that same production runtime service account and restricted to the `quotes/` prefix. No project-wide Storage role or unrelated IAM role was added.
+
+The single controlled retry returned `201` and produced:
+
+| Item | Result |
+| --- | --- |
+| Admin quote status | `sent` / `발행됨` |
+| Document revision | `1` |
+| Server-calculated total | KRW `1,800` |
+| PDF download | Pass |
+| PDF signature | `%PDF-` |
+| PDF size | `6,198,401` bytes |
+| Quote objects in Storage | `1` |
+| Admin console errors | `0` |
+| Admin horizontal overflow | `0` |
+
+### Safety
+
+| Check | Result |
+| --- | --- |
+| Seed product API | `200` |
+| Repeated post-operation seed hash | `ff621c331f05bb91678d504f492fbe35f539c8ca7a8ae54b15acee54af19162a` |
+| Hidden canary detail | `404` |
+| Hidden canary public list | Absent |
+| Product or price mutation | No |
+| Additional inquiry beyond the existing canary | No |
+| Quote drafts created | Exactly `1` intended draft |
+| Document revisions created | Exactly `1` intended revision |
+| Buyer approval mutation | No |
+| Order/payment/cart | No |
+| FX Job/Scheduler | No |
+| Secret value or session data read | No |
+| Direct SQL/DB console | No |
+
+### Remaining Gate
+
+The admin-side inquiry, official quote issue, immutable PDF version, and download path are verified. Buyer accept/reject and two distinct structured option combinations remain pending a dedicated approved-buyer session before the complete option-aware workflow is considered finished.

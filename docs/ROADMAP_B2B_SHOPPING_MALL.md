@@ -98,11 +98,11 @@ Needed:
 
 | Feature | Notes |
 | --- | --- |
-| Single-product inquiry | Implemented on product detail by reusing the existing inquiry create API for approved buyers; N77Q added price-pending fallback support, but the live buyer canary remains blocked until a fresh approved buyer session completes one successful submit |
+| Single-product inquiry | Verified with the existing approved-buyer canary and confirmed in the production admin list/detail |
 | Multi-product inquiry | Existing Inquiry List remains the source |
 | Quantity and option capture | Keep product option data structured |
-| Admin quote response | Respond with price, availability, lead time, and notes |
-| Buyer history | My Inquiries shows submitted and responded requests |
+| Admin quote response | Production-verified through draft save, server total calculation, immutable document version 1, and authenticated PDF download |
+| Buyer history | Buyer-side inquiry visibility is verified; issued-quote visibility and accept/reject remain the next controlled gate |
 | Status labels | Quote Requested, Under Review, Quote Sent, Closed, Cancelled |
 
 ## Phase 6 - FX and Pricing Operations
@@ -137,9 +137,9 @@ If a future back-office order or settlement workflow is needed, it should be des
 
 ## 2026-07-20 Production Release Status
 
-PR #7 is live on backend revision `noblesse-backend-00023-gah` and Firebase Hosting target `noblesse`. The release includes the task-oriented admin redesign, visual home and product editors, structured product options, structured product-detail blocks, quote snapshot v2 support, and PDF option-label support. Public storefront and API checks passed across KR, EN, JP, Traditional Chinese, legacy CN, desktop, tablet, and mobile widths.
+PR #7 and quote draft hotfix PR #9 are live on backend revision `noblesse-backend-00025-tuv`; Firebase Hosting target `noblesse` remains live. The release includes the task-oriented admin redesign, visual home and product editors, structured product options, structured product-detail blocks, quote snapshot v2 support, and PDF option-label support. Public storefront and API checks passed across KR, EN, JP, Traditional Chinese, legacy CN, desktop, tablet, and mobile widths.
 
-The next release gate is a controlled authenticated E2E using dedicated test accounts. It must verify two distinct option combinations through buyer inquiry, admin inquiry, official quote, PDF, and buyer accept/reject ownership without creating checkout, payment, order, inventory, or option-surcharge behavior. Bundle splitting is the main post-release performance optimization because the production build still reports a large entry chunk even though the enforced performance budget passes.
+The authenticated admin gate is now complete: the existing buyer inquiry rendered in admin, one quote draft was saved, immutable document version 1 was issued, and the authenticated PDF downloaded successfully on backend revision `noblesse-backend-00025-tuv`. The next controlled gate is narrower: use a dedicated approved-buyer session to verify two distinct option combinations, issued-quote visibility, and accept/reject ownership without creating checkout, payment, order, inventory, or option-surcharge behavior. Bundle splitting remains the main post-release performance optimization because the production build still reports a large entry chunk even though the enforced performance budget passes.
 
 ## Next Recommended Task
 
@@ -170,3 +170,5 @@ Remaining recommended follow-up:
 N77Q status: price-pending quote request code has been deployed to backend revision `noblesse-backend-00021-r27` and Firebase Hosting target `noblesse`. The first E2E canary did not complete because the live approved buyer session returned `404` once and then became a guest session.
 
 N77Q2 status: backend revision `noblesse-backend-00022-s8c` fixed the KRW numeric-scale POST404 path, and the approved buyer canary submitted successfully as `INQ-20260713-29833682`. Buyer-side visibility is verified. N78 remains blocked until admin-side visibility/detail is verified with an admin browser session.
+
+N77Q5 status: admin-side inquiry visibility/detail, official quote issue, immutable PDF revision 1, and authenticated PDF download are verified in production. N78 admin quote issuance is unblocked. The remaining release gate is approved-buyer issued-quote visibility plus accept/reject and structured option-combination ownership checks.
