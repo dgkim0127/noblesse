@@ -1,3 +1,12 @@
+import {
+  BODY_JEWELRY_GAUGE_SYSTEM,
+  createBodyJewelryGaugeMeasurement,
+  formatBodyJewelryGaugeMeasurement,
+  getBodyJewelryGaugePairByGauge,
+  isValidBodyJewelryGaugeMeasurement,
+  normalizeBodyJewelryGaugeMeasurement,
+} from './bodyJewelryGauge.js'
+
 export const productOptionLocales = ['kr', 'en', 'jp', 'zh-TW']
 
 const optionGroupTypes = new Set(['text', 'swatch'])
@@ -7,6 +16,16 @@ const localeLabels = {
   en: 'English',
   jp: '日本語',
   'zh-TW': '繁體中文',
+}
+
+function gaugePresetValue(gauge) {
+  const measurement = createBodyJewelryGaugeMeasurement(getBodyJewelryGaugePairByGauge(gauge))
+  const label = formatBodyJewelryGaugeMeasurement(measurement)
+  return {
+    id: gauge.toLowerCase(),
+    labels: Object.fromEntries(productOptionLocales.map((locale) => [locale, label])),
+    measurement,
+  }
 }
 
 const presetDefinitions = {
@@ -27,7 +46,7 @@ const presetDefinitions = {
     type: 'text',
     required: true,
     labels: { kr: '바 길이', en: 'Bar length', jp: 'バーの長さ', 'zh-TW': '耳針長度' },
-    values: ['6mm', '8mm', '10mm'].map((label) => ({
+    values: ['4mm', '6mm', '8mm', '10mm'].map((label) => ({
       id: label.toLowerCase(),
       labels: Object.fromEntries(productOptionLocales.map((locale) => [locale, label])),
     })),
@@ -35,12 +54,14 @@ const presetDefinitions = {
   gauge: {
     id: 'gauge',
     type: 'text',
-    required: false,
-    labels: { kr: '게이지', en: 'Gauge', jp: 'ゲージ', 'zh-TW': '規格' },
-    values: ['16G', '18G', '20G'].map((label) => ({
-      id: label.toLowerCase(),
-      labels: Object.fromEntries(productOptionLocales.map((locale) => [locale, label])),
-    })),
+    required: true,
+    labels: {
+      kr: '바 두께 (게이지)',
+      en: 'Bar thickness (gauge)',
+      jp: 'バーの太さ（ゲージ）',
+      'zh-TW': '耳針粗細（規格）',
+    },
+    values: ['16G', '18G', '20G'].map(gaugePresetValue),
   },
   ballSize: {
     id: 'ball-size',
@@ -64,7 +85,7 @@ const presetDefinitions = {
 export const productOptionPresets = [
   ['color', '색상'],
   ['barLength', '바 길이'],
-  ['gauge', '게이지'],
+  ['gauge', '바 두께 (mm/G)'],
   ['ballSize', '볼 크기'],
   ['custom', '사용자 지정'],
 ]
@@ -78,26 +99,54 @@ function cleanLabels(labels = {}) {
   return Object.fromEntries(productOptionLocales.map((locale) => [locale, String(labels?.[locale] || '')]))
 }
 
-function normalizeValue(value = {}, index = 0) {
+function isGaugeGroupId(groupId) {
+  return /^gauge(?:-\d+)?$/i.test(String(groupId || ''))
+}
+
+function normalizeValue(value = {}, index = 0, groupId = '') {
+  let labels = cleanLabels(value.labels)
+  const usesGaugeMeasurement = isGaugeGroupId(groupId) || value?.measurement?.system === BODY_JEWELRY_GAUGE_SYSTEM
+  let measurement = usesGaugeMeasurement
+    ? normalizeBodyJewelryGaugeMeasurement(value.measurement, firstLabel(labels))
+    : null
+  if (measurement && isValidBodyJewelryGaugeMeasurement(measurement)) {
+    measurement = createBodyJewelryGaugeMeasurement(
+      getBodyJewelryGaugePairByGauge(measurement.gauge),
+      measurement.authority,
+    )
+    const label = formatBodyJewelryGaugeMeasurement(measurement)
+    labels = Object.fromEntries(productOptionLocales.map((locale) => [locale, label]))
+  }
   return {
     id: String(value.id || makeId(`value-${index + 1}`)).slice(0, 64),
     active: value.active !== false,
-    labels: cleanLabels(value.labels),
+    labels,
     swatch: /^#[0-9a-f]{6}$/i.test(String(value.swatch || '')) ? String(value.swatch).toUpperCase() : '',
     imageId: String(value.imageId || ''),
+    ...(measurement ? { measurement } : {}),
   }
 }
 
 export function normalizeProductOptionGroups(value) {
   if (!Array.isArray(value)) return []
-  return value.slice(0, 6).map((group, index) => ({
-    id: String(group?.id || makeId(`group-${index + 1}`)).slice(0, 64),
-    type: optionGroupTypes.has(group?.type) ? group.type : 'text',
-    required: Boolean(group?.required),
-    legacyKey: ['color', 'size'].includes(group?.legacyKey) ? group.legacyKey : '',
-    labels: cleanLabels(group?.labels),
-    values: Array.isArray(group?.values) ? group.values.slice(0, 20).map(normalizeValue) : [],
-  }))
+  return value.slice(0, 6).map((group, index) => {
+    const id = String(group?.id || makeId(`group-${index + 1}`)).slice(0, 64)
+    return {
+      id,
+      type: optionGroupTypes.has(group?.type) ? group.type : 'text',
+      required: Boolean(group?.required),
+      legacyKey: ['color', 'size'].includes(group?.legacyKey) ? group.legacyKey : '',
+      labels: cleanLabels(group?.labels),
+      values: Array.isArray(group?.values)
+        ? group.values.slice(0, 20).map((item, valueIndex) => normalizeValue(item, valueIndex, id))
+        : [],
+    }
+  })
+}
+
+export function isBodyJewelryGaugeGroup(group = {}) {
+  return isGaugeGroupId(group.id)
+    || group.values?.some((value) => value?.measurement?.system === BODY_JEWELRY_GAUGE_SYSTEM)
 }
 
 function stableHash(value) {
@@ -208,6 +257,9 @@ export function getProductOptionDraftIssues(optionGroups = [], images = []) {
       productOptionLocales.forEach((locale) => {
         if (!value.labels[locale].trim()) issues.push(`${groupIndex + 1}번 옵션 ${valueIndex + 1}번 값 ${localeLabels[locale]} 이름`)
       })
+      if (isBodyJewelryGaugeGroup(group) && !isValidBodyJewelryGaugeMeasurement(value.measurement)) {
+        issues.push(`${groupIndex + 1}번 옵션 ${valueIndex + 1}번 값 mm/G 표준 규격`)
+      }
       if (value.imageId && !imageIds.has(value.imageId)) issues.push(`${groupIndex + 1}번 옵션 ${valueIndex + 1}번 연결 이미지`)
     })
   })
@@ -256,6 +308,7 @@ export function getSelectedOptionSnapshots(optionGroups = [], selection = {}) {
       valueLabels: value.labels,
       swatch: value.swatch,
       imageId: value.imageId,
+      ...(value.measurement ? { measurement: value.measurement } : {}),
     }]
   })
 }

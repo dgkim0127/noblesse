@@ -1,4 +1,12 @@
 import { validationError } from "./validators.js";
+import {
+  BODY_JEWELRY_GAUGE_SYSTEM,
+  createGaugeMeasurement,
+  formatGaugeMeasurement,
+  getGaugePairByGauge,
+  isValidGaugeMeasurement,
+  normalizeGaugeMeasurement
+} from "./bodyJewelryGauge.js";
 
 export const PRODUCT_OPTION_LOCALES = ["kr", "en", "jp", "zh-TW"];
 export const PRODUCT_OPTION_GROUP_TYPES = ["text", "swatch"];
@@ -40,19 +48,59 @@ function parseBoolean(value, defaultValue) {
   return value;
 }
 
-function parseOptionValue(value, groupIndex, valueIndex) {
+function isGaugeGroupId(groupId) {
+  return /^gauge(?:-\d+)?$/i.test(String(groupId || ""));
+}
+
+function isGaugeGroup(group = {}) {
+  return isGaugeGroupId(group.id)
+    || group.values?.some((value) => value?.measurement?.system === BODY_JEWELRY_GAUGE_SYSTEM);
+}
+
+function parseGaugeMeasurement(value, labels, field, groupId) {
+  const raw = value.measurement;
+  const usesGaugeMeasurement = isGaugeGroupId(groupId)
+    || raw?.system === BODY_JEWELRY_GAUGE_SYSTEM;
+  if (!usesGaugeMeasurement) return null;
+  if (raw !== undefined && (!raw || typeof raw !== "object" || Array.isArray(raw))) {
+    throw validationError(`${field}.measurement must be an object`);
+  }
+  const source = raw || {};
+  const system = parseText(source.system || BODY_JEWELRY_GAUGE_SYSTEM, `${field}.measurement.system`, 40);
+  if (system !== BODY_JEWELRY_GAUGE_SYSTEM) throw validationError(`Invalid ${field}.measurement.system`);
+  const authority = parseText(source.authority || "gauge", `${field}.measurement.authority`, 8);
+  if (!new Set(["mm", "gauge"]).has(authority)) throw validationError(`Invalid ${field}.measurement.authority`);
+  const normalizedSource = { system, authority };
+  if (Object.prototype.hasOwnProperty.call(source, "mm")) {
+    normalizedSource.mm = parseText(source.mm, `${field}.measurement.mm`, 8);
+  }
+  if (Object.prototype.hasOwnProperty.call(source, "gauge")) {
+    normalizedSource.gauge = parseText(source.gauge, `${field}.measurement.gauge`, 8);
+  }
+  return normalizeGaugeMeasurement(normalizedSource, firstLabel(labels));
+}
+
+function parseOptionValue(value, groupIndex, valueIndex, groupId) {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw validationError(`optionGroups[${groupIndex}].values[${valueIndex}] must be an object`);
   }
   const field = `optionGroups[${groupIndex}].values[${valueIndex}]`;
   const swatch = parseText(value.swatch, `${field}.swatch`, 7);
   if (swatch && !swatchPattern.test(swatch)) throw validationError(`Invalid ${field}.swatch`);
+  let labels = parseLabels(value.labels, `${field}.labels`);
+  let measurement = parseGaugeMeasurement(value, labels, field, groupId);
+  if (measurement && isValidGaugeMeasurement(measurement)) {
+    measurement = createGaugeMeasurement(getGaugePairByGauge(measurement.gauge), measurement.authority);
+    const label = formatGaugeMeasurement(measurement);
+    labels = Object.fromEntries(PRODUCT_OPTION_LOCALES.map((locale) => [locale, label]));
+  }
   return {
     id: parseId(value.id, `${field}.id`),
     active: parseBoolean(value.active, true),
-    labels: parseLabels(value.labels, `${field}.labels`),
+    labels,
     swatch: swatch.toUpperCase(),
-    imageId: parseText(value.imageId, `${field}.imageId`, 128)
+    imageId: parseText(value.imageId, `${field}.imageId`, 128),
+    ...(measurement ? { measurement } : {})
   };
 }
 function normalizeLegacyKey(value, field) {
@@ -84,7 +132,7 @@ export function normalizeOptionGroups(value) {
 
     const valueIds = new Set();
     const values = group.values.map((item, valueIndex) => {
-      const normalized = parseOptionValue(item, groupIndex, valueIndex);
+      const normalized = parseOptionValue(item, groupIndex, valueIndex, id);
       if (valueIds.has(normalized.id)) throw validationError(`Duplicate option value id: ${normalized.id}`);
       valueIds.add(normalized.id);
       return normalized;
@@ -206,6 +254,9 @@ export function getOptionPublishIssues(optionGroups, imageSet = {}) {
           issues.push(`optionGroups.${group.id}.values.${value.id}.labels.${locale}`);
         }
       }
+      if (isGaugeGroup(group) && !isValidGaugeMeasurement(value.measurement)) {
+        issues.push(`optionGroups.${group.id}.values.${value.id}.measurement`);
+      }
       if (value.imageId && !imageIds.has(value.imageId)) {
         issues.push(`optionGroups.${group.id}.values.${value.id}.imageId`);
       }
@@ -265,6 +316,9 @@ export function resolveSelectedOptions(product, selectionInput = {}) {
     }
     const value = group.values.find((candidate) => candidate.id === valueId && candidate.active);
     if (!value) throw validationError(`Unavailable option value: ${group.id}.${valueId}`);
+    if (isGaugeGroup(group) && !isValidGaugeMeasurement(value.measurement)) {
+      throw validationError(`Invalid gauge option value: ${group.id}.${valueId}`);
+    }
     snapshots.push({
       groupId: group.id,
       valueId: value.id,
@@ -273,7 +327,8 @@ export function resolveSelectedOptions(product, selectionInput = {}) {
       groupLabels: { ...group.labels },
       valueLabels: { ...value.labels },
       swatch: value.swatch || "",
-      imageId: value.imageId || ""
+      imageId: value.imageId || "",
+      ...(value.measurement ? { measurement: { ...value.measurement } } : {})
     });
   }
 

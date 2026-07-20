@@ -1,8 +1,19 @@
 import { ChevronDown, ChevronUp, GripVertical, Plus, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
+  bodyJewelryGaugePairs,
+  createBodyJewelryGaugeMeasurement,
+  formatBodyJewelryGaugeMeasurement,
+  getResolvedBodyJewelryGaugePair,
+  hasBodyJewelryGaugeConflict,
+  isValidBodyJewelryGaugeMeasurement,
+  normalizeBodyJewelryGaugeMeasurement,
+} from '../../utils/bodyJewelryGauge.js'
+import {
   createProductOptionPreset,
+  isBodyJewelryGaugeGroup,
   normalizeProductOptionGroups,
+  productOptionLocales,
   productOptionPresets,
 } from '../../utils/productOptions'
 
@@ -18,6 +29,11 @@ function moveItem(items, sourceIndex, targetIndex) {
   return next
 }
 
+function gaugeLabels(measurement) {
+  const label = formatBodyJewelryGaugeMeasurement(measurement)
+  return Object.fromEntries(productOptionLocales.map((locale) => [locale, label]))
+}
+
 export function ProductOptionGroupsEditor({ activeLocale, groups, images, onChange, onSelectField }) {
   const safeGroups = normalizeProductOptionGroups(groups)
   const [selectedGroupId, setSelectedGroupId] = useState(safeGroups[0]?.id || '')
@@ -30,6 +46,7 @@ export function ProductOptionGroupsEditor({ activeLocale, groups, images, onChan
   }, [safeGroups, selectedGroupId])
 
   const selectedGroup = safeGroups.find((group) => group.id === selectedGroupId) || safeGroups[0] || null
+  const selectedGroupUsesGauge = isBodyJewelryGaugeGroup(selectedGroup)
   const commit = (nextGroups) => onChange(normalizeProductOptionGroups(nextGroups))
   const updateGroup = (groupId, patch) => commit(safeGroups.map((group) => group.id === groupId ? { ...group, ...patch } : group))
   const removeGroup = (groupId) => {
@@ -52,15 +69,31 @@ export function ProductOptionGroupsEditor({ activeLocale, groups, images, onChan
       values: selectedGroup.values.map((value) => value.id === valueId ? { ...value, ...patch } : value),
     })
   }
+  const updateGaugeMeasurement = (value, nextMeasurement, authority, shouldResolve = false) => {
+    const normalized = normalizeBodyJewelryGaugeMeasurement({ ...nextMeasurement, authority }, value.labels?.[activeLocale])
+    const resolvedPair = shouldResolve ? getResolvedBodyJewelryGaugePair(normalized, authority) : null
+    const measurement = resolvedPair
+      ? createBodyJewelryGaugeMeasurement(resolvedPair, authority)
+      : normalized
+    updateValue(value.id, { measurement, labels: gaugeLabels(measurement) })
+  }
   const addValue = () => {
     if (!selectedGroup || selectedGroup.values.length >= 20) return
+    const usedGauges = new Set(selectedGroup.values.map((value) => value.measurement?.gauge).filter(Boolean))
+    const availableGaugePair = selectedGroupUsesGauge
+      ? bodyJewelryGaugePairs.find((pair) => !usedGauges.has(pair.gauge))
+      : null
+    const measurement = createBodyJewelryGaugeMeasurement(availableGaugePair)
     updateGroup(selectedGroup.id, {
       values: [...selectedGroup.values, {
-        id: makeValueId(),
+        id: availableGaugePair && !selectedGroup.values.some((value) => value.id === availableGaugePair.gauge.toLowerCase())
+          ? availableGaugePair.gauge.toLowerCase()
+          : makeValueId(),
         active: true,
-        labels: { kr: '', en: '', jp: '', 'zh-TW': '' },
+        labels: measurement ? gaugeLabels(measurement) : { kr: '', en: '', jp: '', 'zh-TW': '' },
         swatch: selectedGroup.type === 'swatch' ? '#D4AF37' : '',
         imageId: '',
+        ...(measurement ? { measurement } : {}),
       }],
     })
   }
@@ -114,7 +147,13 @@ export function ProductOptionGroupsEditor({ activeLocale, groups, images, onChan
         </div>
 
         <div className="admin-option-value-list" role="list" aria-label="옵션 값 순서">
-          {selectedGroup.values.map((value, index) => <article
+          {selectedGroup.values.map((value, index) => {
+            const measurement = selectedGroupUsesGauge
+              ? normalizeBodyJewelryGaugeMeasurement(value.measurement, value.labels?.[activeLocale])
+              : null
+            const gaugeConflict = measurement ? hasBodyJewelryGaugeConflict(measurement) : false
+            const gaugeValid = measurement ? isValidBodyJewelryGaugeMeasurement(measurement) : false
+            return <article
             className={!value.active ? 'is-inactive' : ''}
             draggable
             key={value.id}
@@ -123,10 +162,35 @@ export function ProductOptionGroupsEditor({ activeLocale, groups, images, onChan
             onDragStart={() => setDraggedValueId(value.id)}
             onDrop={(event) => { event.preventDefault(); if (draggedValueId) moveValue(draggedValueId, index); setDraggedValueId('') }}
           >
-            <div className="admin-option-value-row">
+            <div className={`admin-option-value-row${selectedGroupUsesGauge ? ' is-gauge' : ''}`}>
               <button className="admin-option-drag" aria-label={`${index + 1}번 옵션 값 순서 변경`} type="button"><GripVertical size={16} /></button>
               {selectedGroup.type === 'swatch' && <input aria-label="색상" className="admin-option-color" type="color" value={value.swatch || '#D4AF37'} onChange={(event) => updateValue(value.id, { swatch: event.target.value.toUpperCase() })} />}
-              <label className="admin-field"><span>{activeLocale} 값</span><input maxLength="120" placeholder={`${index + 1}번 값`} value={value.labels[activeLocale]} onChange={(event) => updateValue(value.id, { labels: { ...value.labels, [activeLocale]: event.target.value } })} /></label>
+              {selectedGroupUsesGauge ? <div className="admin-gauge-value-editor">
+                <div className="admin-gauge-value-inputs">
+                  <label className="admin-field"><span>두께 mm</span><input
+                    inputMode="decimal"
+                    list="body-jewelry-gauge-mm-values"
+                    maxLength="8"
+                    placeholder="1.2"
+                    value={measurement.mm}
+                    onBlur={() => updateGaugeMeasurement(value, measurement, 'mm', true)}
+                    onChange={(event) => updateGaugeMeasurement(value, { ...measurement, mm: event.target.value }, 'mm')}
+                  /></label>
+                  <label className="admin-field"><span>게이지 G</span><select value={measurement.gauge} onChange={(event) => updateGaugeMeasurement(value, { ...measurement, gauge: event.target.value }, 'gauge', true)}>
+                    <option value="">선택</option>
+                    {bodyJewelryGaugePairs.map((pair) => <option key={pair.gauge} value={pair.gauge}>{pair.gauge}</option>)}
+                  </select></label>
+                </div>
+                <div className="admin-gauge-authority" aria-label="게이지 변환 기준" role="group">
+                  <span>변환 기준</span>
+                  <button className={measurement.authority === 'mm' ? 'is-active' : ''} type="button" onClick={() => updateGaugeMeasurement(value, measurement, 'mm', true)}>mm</button>
+                  <button className={measurement.authority === 'gauge' ? 'is-active' : ''} type="button" onClick={() => updateGaugeMeasurement(value, measurement, 'gauge', true)}>G</button>
+                  <output>{formatBodyJewelryGaugeMeasurement(measurement) || '규격 미입력'}</output>
+                </div>
+                {!gaugeValid && <p className={`admin-gauge-status${gaugeConflict ? ' is-conflict' : ''}`}>
+                  {gaugeConflict ? 'mm와 G가 다릅니다. 적용할 기준을 선택하세요.' : 'APP 표준 mm 또는 G 규격을 선택하세요.'}
+                </p>}
+              </div> : <label className="admin-field"><span>{activeLocale} 값</span><input maxLength="120" placeholder={`${index + 1}번 값`} value={value.labels[activeLocale]} onChange={(event) => updateValue(value.id, { labels: { ...value.labels, [activeLocale]: event.target.value } })} /></label>}
               <div className="admin-option-order-actions">
                 <button aria-label="위로 이동" disabled={index === 0} type="button" onClick={() => moveValue(value.id, index - 1)}><ChevronUp size={14} /></button>
                 <button aria-label="아래로 이동" disabled={index === selectedGroup.values.length - 1} type="button" onClick={() => moveValue(value.id, index + 1)}><ChevronDown size={14} /></button>
@@ -140,10 +204,13 @@ export function ProductOptionGroupsEditor({ activeLocale, groups, images, onChan
                 {images.map((image, imageIndex) => <option disabled={image.kind === 'new'} key={image.id} value={image.kind === 'new' ? '' : image.existingId || image.id}>{imageIndex + 1}번 사진{image.kind === 'new' ? ' (저장 후 연결 가능)' : ''}</option>)}
               </select></label>
             </div>
-          </article>)}
+          </article>})}
         </div>
         <button className="admin-secondary-action admin-option-add-value" disabled={selectedGroup.values.length >= 20} type="button" onClick={addValue}><Plus size={16} />옵션 값 추가</button>
       </div>}
+      <datalist id="body-jewelry-gauge-mm-values">
+        {bodyJewelryGaugePairs.map((pair) => <option key={pair.gauge} value={pair.mm}>{pair.gauge}</option>)}
+      </datalist>
     </>}
   </section>
 }
