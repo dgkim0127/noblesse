@@ -1020,7 +1020,7 @@ export function StoreShell() {
               </button>
             </span>
           </label>
-          <button className="primary-action" type="submit">{loginCopy.submit}</button>
+          <button className="primary-action login-submit-action" type="submit">{loginCopy.submit}</button>
         </form>
         <div className="auth-links">
           <button className="text-action login-register-action" type="button" onClick={goToRegisterFromLogin}>{loginCopy.register}</button>
