@@ -8,9 +8,9 @@ This index points operators and implementers to the current site map, QA evidenc
 
 | Item | Value |
 | --- | --- |
-| Active repository | `D:\noblesse-main-work` |
+| Active repository | `D:\noblesse-current-main-quote` |
 | Branch | `main` |
-| Baseline HEAD | `81c5d80f0a2daf0dc9bf091b46e107d4b89ec1d3` |
+| Baseline HEAD | `54e520c0a1d2ee2a44f1f77ab4629584ac8cf9cc` |
 | Production URL | `https://noblesse.web.app` |
 | Canonical Taiwan route | `zh-TW` |
 
@@ -23,6 +23,7 @@ This index points operators and implementers to the current site map, QA evidenc
 | `docs/N74_CATALOG_EDITOR_SAVE_LOAD_CANARY.md` | Controlled admin catalog editor save/load canary evidence |
 | `docs/N77_PRODUCT_INQUIRY_MVP_REPORT.md` | Product-detail inquiry request MVP implementation notes |
 | `docs/N77_PRODUCT_QUOTE_REQUEST_E2E_CANARY.md` | Product quote request price-gate fix and E2E canary status |
+| `docs/PRODUCTION_RELEASE_20260720.md` | PR #7 production release, validation, safety, and rollback evidence |
 | `docs/ROADMAP_B2B_SHOPPING_MALL.md` | Staged roadmap for B2B catalog operations |
 | `docs/OPS_INDEX.md` | Entry point for operations docs |
 
@@ -37,6 +38,7 @@ This index points operators and implementers to the current site map, QA evidenc
 | Work on product attributes | Next task `N74-CATALOG-ATTRIBUTE-DETAIL-EDITOR-REWORK` |
 | Check catalog editor save/load status | `docs/N74_CATALOG_EDITOR_SAVE_LOAD_CANARY.md` |
 | Check product-detail inquiry MVP status | `docs/N77_PRODUCT_INQUIRY_MVP_REPORT.md` |
+| Check the current production release | `docs/PRODUCTION_RELEASE_20260720.md` |
 
 ## Production Read-Only Smoke
 
@@ -50,11 +52,15 @@ This index points operators and implementers to the current site map, QA evidenc
 | Catalog API | 200 |
 | Buyer/Admin profile without auth | 401 |
 
-## No-Mutation Confirmation
+## Current Production Release
 
-This index was produced from read-only route, source, and API inspection.
+PR #7 merged as `54e520c0a1d2ee2a44f1f77ab4629584ac8cf9cc` and was released on 2026-07-20. Cloud SQL backup `1784507477114` completed before five additive migrations. Backend revision `noblesse-backend-00023-gah` now receives 100% traffic, and Firebase Hosting target `noblesse` deployed successfully.
 
-No production deploy, runtime config change, data mutation, manual FX execution, or database migration is part of this documentation task.
+Public API, hidden-canary, locale, responsive, horizontal-overflow, and console checks passed. Authenticated admin and approved-buyer option/quote/PDF E2E remains pending because no prepared authenticated session or production UAT credential set was available. No credential or session data was extracted. See `docs/PRODUCTION_RELEASE_20260720.md`.
+
+## Historical Task Notes
+
+The notes below preserve the scope and mutation boundaries of earlier tasks. They do not replace the current production release record above.
 
 N74 save/load canary note: one hidden canary product save was attempted through the production admin editor. Product and image steps completed, price save stopped on missing admin permission. Existing public product data remained unchanged.
 
