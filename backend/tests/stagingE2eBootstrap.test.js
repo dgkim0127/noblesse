@@ -24,6 +24,13 @@ function createService({
   source = stagingSource(),
   firebaseError,
   firebaseUser = { uid: adminUid },
+  adminQueryResult = {
+    ok: true,
+    category: "STAGING_ADMIN_BOOTSTRAP_COMPLETE",
+    adminReady: true,
+    ownerReady: true,
+    adminAlreadyReady: false
+  },
   queryResult = {
     ok: true,
     category: "BOOTSTRAP_COMPLETE",
@@ -45,6 +52,10 @@ function createService({
       }
     },
     queries: {
+      async bootstrapAdmin(input) {
+        calls.push({ type: "bootstrapAdmin", input });
+        return adminQueryResult;
+      },
       async bootstrapAccounts(input) {
         calls.push({ type: "bootstrapAccounts", input });
         return queryResult;
@@ -71,6 +82,25 @@ test("staging bootstrap env rejects identical admin and buyer emails", () => {
     stagingSource({ NOBLESSE_STAGING_BUYER_EMAIL: adminEmail.toUpperCase() })
   );
   assert.deepEqual(result, { ok: false, category: "IDENTICAL_EMAILS_REJECTED" });
+});
+
+test("staging admin-only bootstrap does not require or mutate a buyer", async () => {
+  const source = stagingSource({
+    NOBLESSE_STAGING_ADMIN_ONLY: "YES",
+    NOBLESSE_STAGING_BUYER_EMAIL: ""
+  });
+  const { calls, service } = createService({ source });
+
+  const result = await service.bootstrap();
+  const adminCall = calls.find((call) => call.type === "bootstrapAdmin");
+
+  assert.equal(result.ok, true);
+  assert.equal(result.adminReady, true);
+  assert.equal(result.ownerReady, true);
+  assert.deepEqual(adminCall.input, {
+    adminIdentity: { authUid: adminUid, email: adminEmail }
+  });
+  assert.equal(calls.some((call) => call.type === "bootstrapAccounts"), false);
 });
 
 test("bootstrap reports Firebase admin user missing without DB mutation", async () => {
@@ -121,7 +151,13 @@ test("bootstrap passes sanitized admin identity and buyer email to query layer",
   });
 });
 
-function createFakePool({ buyerUser, buyerProfile = { id: "buyer-profile-1" }, adminUser, failOn = "" } = {}) {
+function createFakePool({
+  buyerUser,
+  buyerProfile = { id: "buyer-profile-1" },
+  adminUser,
+  adminProfileRole = null,
+  failOn = ""
+} = {}) {
   const calls = [];
   let releaseCount = 0;
   const client = {
@@ -142,11 +178,21 @@ function createFakePool({ buyerUser, buyerProfile = { id: "buyer-profile-1" }, a
       if (normalized.startsWith("select id, auth_uid")) {
         return { rows: adminUser ? [adminUser] : [] };
       }
+      if (normalized.startsWith("select admin_role") && normalized.includes("from public.admin_profiles")) {
+        return { rows: adminProfileRole ? [{ admin_role: adminProfileRole }] : [] };
+      }
       if (normalized.startsWith("insert into public.users")) {
-        return { rows: [{ id: "admin-user-1", role: "admin", status: "approved" }] };
+        return {
+          rows: [{ id: "admin-user-1", role: "admin", status: "approved", account_status: "active" }]
+        };
       }
       if (normalized.startsWith("update public.users") && normalized.includes("set auth_uid")) {
-        return { rows: [{ id: "admin-user-1", role: "admin", status: "approved" }] };
+        return {
+          rows: [{ id: "admin-user-1", role: "admin", status: "approved", account_status: "active" }]
+        };
+      }
+      if (normalized.startsWith("insert into public.admin_profiles")) {
+        return { rows: [] };
       }
       if (normalized.startsWith("update public.users") && normalized.includes("where id = $1 and role = 'buyer'")) {
         return { rows: [{ id: params[0], role: "buyer", status: "approved" }] };
@@ -196,6 +242,46 @@ test("query layer upserts approved admin and approves buyer in one transaction",
   assert.equal(texts.some((text) => text.includes("where id = $1 and role = 'buyer'")), true);
   assert.equal(texts.includes("commit"), true);
   assert.equal(fake.releaseCount, 1);
+});
+
+test("admin-only query creates one active owner without buyer mutation", async () => {
+  const fake = createFakePool();
+
+  const result = await createStagingE2eBootstrapQueries(fake.pool).bootstrapAdmin({
+    adminIdentity: { authUid: adminUid, email: adminEmail }
+  });
+  const texts = callTexts(fake.calls);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.category, "STAGING_ADMIN_BOOTSTRAP_COMPLETE");
+  assert.equal(result.adminReady, true);
+  assert.equal(result.ownerReady, true);
+  assert.equal(texts.some((text) => text.startsWith("insert into public.users")), true);
+  assert.equal(texts.some((text) => text.startsWith("insert into public.admin_profiles")), true);
+  assert.equal(texts.some((text) => text.includes("from public.buyers")), false);
+  assert.equal(texts.includes("commit"), true);
+});
+
+test("admin-only query is idempotent for an existing active owner", async () => {
+  const fake = createFakePool({
+    adminUser: {
+      id: "admin-user-1",
+      auth_uid: adminUid,
+      email: adminEmail,
+      role: "admin",
+      status: "approved",
+      account_status: "active"
+    },
+    adminProfileRole: "owner"
+  });
+
+  const result = await createStagingE2eBootstrapQueries(fake.pool).bootstrapAdmin({
+    adminIdentity: { authUid: adminUid, email: adminEmail }
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.adminAlreadyReady, true);
+  assert.equal(result.ownerReady, true);
 });
 
 test("query layer keeps role/status exact on idempotent rerun", async () => {

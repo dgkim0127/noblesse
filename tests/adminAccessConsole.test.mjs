@@ -7,14 +7,14 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf
 test('admin shell groups navigation and hides links by permission', () => {
   const shell = read('src/components/AdminShell.jsx')
 
-  assert.match(shell, /adminNavGroups/)
-  assert.match(shell, /operations/)
-  assert.match(shell, /members/)
-  assert.match(shell, /governance/)
-  assert.match(shell, /hasPermission\(item\.permission\)/)
-  assert.match(shell, /\/admin\/team/)
+  assert.match(shell, /adminNavigation/)
+  for (const key of ['dashboard', 'products', 'quotes', 'buyers', 'operations', 'analytics']) {
+    assert.match(shell, new RegExp(`key: '${key}'`))
+  }
+  assert.match(shell, /permissions\.some\(\(permission\) => hasPermission\(permission\)\)/)
+  assert.match(shell, /\/admin\/operations/)
   assert.match(shell, /\/admin\/buyers/)
-  assert.match(shell, /\/admin\/audit/)
+  assert.match(shell, /\/admin\/quotes/)
 })
 
 test('admin routes use permission gates for governance pages', () => {
@@ -23,7 +23,8 @@ test('admin routes use permission gates for governance pages', () => {
   assert.match(app, /AdminPermissionGate/)
   assert.match(app, /path="team".*admins\.read/s)
   assert.match(app, /path="audit".*audit\.read/s)
-  assert.match(app, /path="catalog\/new".*catalog\.write/s)
+  assert.match(app, /path="catalog\/new".*LegacyAdminCatalogRedirect/s)
+  assert.match(app, /path="products\/new".*catalog\.write/s)
 })
 
 test('admin api exposes access, buyer lifecycle, team, and audit methods', () => {
@@ -58,16 +59,16 @@ test('admin access copy covers every locale', () => {
   assert.match(copy, /members: '회원'/)
 })
 
-test('admin dashboard renders RBAC lifecycle summary sections', () => {
+test('admin dashboard prioritizes the daily operations queue', () => {
   const page = read('src/pages/admin/AdminDashboardPage.jsx')
 
-  for (const contractField of ['accountFunnel', 'workQueue', 'catalogHealth', 'recentActivity']) {
+  for (const contractField of ['workQueue', 'catalogHealth', 'tasks']) {
     assert.match(page, new RegExp(contractField))
   }
-  assert.match(page, /hasPermission\('buyers\.review'\)/)
+  assert.match(page, /hasPermission\(item\.permission\)/)
   assert.match(page, /hasPermission\('catalog\.write'\)/)
-  assert.match(page, /hasPermission\('audit\.read'\)/)
-  assert.match(page, /getAdminStatusLabel\(t, item\)/)
+  assert.match(page, /오늘 할 일/)
+  assert.match(page, /보완이 필요한 상품/)
 })
 
 test('admin team page protects owner-only role and override controls', () => {
@@ -96,7 +97,8 @@ test('admin team page protects owner-only role and override controls', () => {
   assert.match(page, /value="owner"/)
   assert.match(page, /startRoleEdit\(row\)/)
   assert.match(page, /startOverrideEdit\(row/)
-  assert.match(page, /window\.confirm/)
+  assert.match(page, /AdminConfirmDialog/)
+  assert.doesNotMatch(page, /window\.confirm/)
   assert.match(page, /promoteUserToAdmin/)
   assert.match(page, /promoteDraft/)
   assert.match(page, /upsertPermissionOverride/)

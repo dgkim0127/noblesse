@@ -1,0 +1,9 @@
+{
+  "mobile": {
+    "initialJavaScriptGzipKb": 250,
+    "initialCssGzipKb": 50,
+    "initialImageRequests": 12,
+    "listZoomImageRequests": 0,
+    "horizontalOverflowPx": 0
+  }
+}

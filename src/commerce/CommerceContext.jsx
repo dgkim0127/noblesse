@@ -26,6 +26,7 @@ import {
 import { adaptApiProducts } from '../services/apiProductAdapter'
 import { CommerceContext } from './commerceStore'
 import { getInquiryKey } from './inquiryKeys'
+import { cloneHomeLayout, defaultHomeLayout, normalizeHomeLayout } from '../config/homeLayout'
 
 const formatInquiryId = () => `INQ-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${String(Date.now()).slice(-3)}`
 const viewerStates = new Set(['guest', 'pending', 'approved', 'admin'])
@@ -113,6 +114,8 @@ export function CommerceProvider({ children }) {
   const runtimeConfig = useMemo(() => getRuntimeConfig(), [])
   const [viewerState, setViewerStateValue] = useState('guest')
   const [products, setProducts] = useState([])
+  const [homeShowcase, setHomeShowcase] = useState([])
+  const [homeLayout, setHomeLayout] = useState(() => cloneHomeLayout(defaultHomeLayout))
   const [dataStatus, setDataStatus] = useState('loading')
   const [dataError, setDataError] = useState(null)
   const [inquiryItems, setInquiryItems] = useState([])
@@ -144,6 +147,8 @@ export function CommerceProvider({ children }) {
       if (!runtimeConfig.isConfigured) {
         if (!isMounted) return
         setProducts([])
+        setHomeShowcase([])
+        setHomeLayout(cloneHomeLayout(defaultHomeLayout))
         setInquiries([])
         setDataStatus('error')
         setDataError(runtimeConfig.errors.join(' '))
@@ -156,6 +161,8 @@ export function CommerceProvider({ children }) {
         setMockProfiles(catalog.mockUsers ?? { guest: guestProfile })
         setProductPrices(catalog.mockProductPrices ?? [])
         setProducts(catalog.mockProducts ?? [])
+        setHomeShowcase([])
+        setHomeLayout(cloneHomeLayout(defaultHomeLayout))
         setInquiries(catalog.mockInquiries ?? [])
         setDataStatus('ready')
         setDataError(null)
@@ -165,17 +172,25 @@ export function CommerceProvider({ children }) {
       try {
         const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
         const catalogApi = createCatalogApi(apiClient)
-        const apiProducts = await catalogApi.getCatalogProducts()
+        const [apiProducts, showcaseSlides, publishedHomeLayout] = await Promise.all([
+          catalogApi.getCatalogProducts(),
+          catalogApi.getHomeShowcase().catch(() => []),
+          catalogApi.getHomeLayout().catch(() => null),
+        ])
         if (!isMounted) return
         setMockProfiles({ guest: guestProfile })
         setProductPrices([])
         setProducts(adaptApiProducts(apiProducts))
+        setHomeShowcase(showcaseSlides)
+        setHomeLayout(normalizeHomeLayout(publishedHomeLayout))
         setInquiries([])
         setDataStatus('ready')
         setDataError(null)
       } catch (error) {
         if (!isMounted) return
         setProducts([])
+        setHomeShowcase([])
+        setHomeLayout(cloneHomeLayout(defaultHomeLayout))
         setInquiries([])
         setDataStatus('error')
         setDataError(error?.message || 'Catalog API is unavailable.')
@@ -338,13 +353,21 @@ export function CommerceProvider({ children }) {
     if (!product) return
 
     const selectedOption = getDefaultOption(product, option)
+    if (selectedOption.groups.some((group) => group.required && !selectedOption.selection[group.id])) return false
     const quantity = normalizeQuantity(rawQuantity, price?.moq ?? product.moqDefault ?? 1)
     setInquiryItems((current) => {
       const found = current.find((item) => isSameInquiryItem(item, productId, selectedOption))
       return found
         ? current.map((item) => isSameInquiryItem(item, productId, selectedOption) ? { ...item, quantity: item.quantity + quantity } : item)
-        : [...current, { productId, color: selectedOption.color, size: selectedOption.size, quantity }]
+        : [...current, {
+            productId,
+            color: selectedOption.color,
+            size: selectedOption.size,
+            selectedOptions: selectedOption.selectedOptionPairs,
+            quantity,
+          }]
     })
+    return true
   }
 
   const updateInquiryQuantity = (productId, rawQuantity, option = {}) => {
@@ -397,6 +420,33 @@ export function CommerceProvider({ children }) {
     return inquiry
   }, [isApproved, isMockMode, runtimeConfig.apiBaseUrl])
 
+  const loadInquiryQuote = useCallback(async (inquiryId) => {
+    if (isMockMode || !isApproved || !inquiryId) return null
+    const token = await getCurrentUserIdToken()
+    const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+    const buyerApi = createBuyerApi(apiClient)
+    const result = await buyerApi.getInquiryQuote(inquiryId, token)
+    return result.data?.quote || null
+  }, [isApproved, isMockMode, runtimeConfig.apiBaseUrl])
+
+  const decideInquiryQuote = useCallback(async ({ quoteId, documentId, decision, note = '' } = {}) => {
+    if (isMockMode || !isApproved || !quoteId || !documentId) return null
+    const token = await getCurrentUserIdToken()
+    const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+    const buyerApi = createBuyerApi(apiClient)
+    const result = await buyerApi.decideQuote(quoteId, { documentId, decision, note }, token)
+    return result.data?.quote || null
+  }, [isApproved, isMockMode, runtimeConfig.apiBaseUrl])
+
+  const downloadInquiryQuoteDocument = useCallback(async ({ quoteId, documentId } = {}) => {
+    if (isMockMode || !isApproved || !quoteId || !documentId) return null
+    const token = await getCurrentUserIdToken()
+    const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+    const buyerApi = createBuyerApi(apiClient)
+    const result = await buyerApi.downloadQuoteDocument(quoteId, documentId, token)
+    return result.data || null
+  }, [isApproved, isMockMode, runtimeConfig.apiBaseUrl])
+
   const submitRequestQuote = async (requestMemo) => {
     if (!isMockMode) {
       if (!isApproved || inquiryRows.length === 0) return null
@@ -409,6 +459,7 @@ export function CommerceProvider({ children }) {
           productCode: row.productCode,
           color: row.color,
           size: row.size,
+          selectedOptions: row.selectedOptionPairs || [],
           quantity: row.quantity,
         })),
       }, token)
@@ -436,6 +487,7 @@ export function CommerceProvider({ children }) {
     if (!isApproved || !product) return null
     const price = getPrice(product.productId)
     const selectedOption = getDefaultOption(product, option)
+    if (selectedOption.groups.some((group) => group.required && !selectedOption.selection[group.id])) return null
     const quantity = normalizeQuantity(rawQuantity, price?.moq ?? product.moqDefault ?? 1)
 
     if (!isMockMode) {
@@ -448,6 +500,7 @@ export function CommerceProvider({ children }) {
           productCode: product.code,
           color: selectedOption.color,
           size: selectedOption.size,
+          selectedOptions: selectedOption.selectedOptionPairs,
           quantity,
         }],
       }, token)
@@ -459,7 +512,13 @@ export function CommerceProvider({ children }) {
     }
 
     const singleRow = buildInquiryRows(
-      [{ productId: product.productId, color: selectedOption.color, size: selectedOption.size, quantity }],
+      [{
+        productId: product.productId,
+        color: selectedOption.color,
+        size: selectedOption.size,
+        selectedOptions: selectedOption.selectedOptionPairs,
+        quantity,
+      }],
       products,
       buyer,
       isApproved,
@@ -490,6 +549,8 @@ export function CommerceProvider({ children }) {
     estimatedTotal,
     getPrice,
     getAdminPriceBooks,
+    homeShowcase,
+    homeLayout,
     inquiries,
     inquiryItems,
     inquiryRows,
@@ -502,6 +563,9 @@ export function CommerceProvider({ children }) {
     removeInquiryItem,
     registerBuyer,
     loadInquiry,
+    loadInquiryQuote,
+    decideInquiryQuote,
+    downloadInquiryQuoteDocument,
     refreshInquiries,
     setViewerState,
     signIn,

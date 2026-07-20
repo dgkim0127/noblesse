@@ -50,6 +50,26 @@ export function createBuyerApi(apiClient) {
       return unwrap(await apiClient.apiFetch(`/buyer/inquiries/${encodeURIComponent(inquiryId)}`, { token: requireToken(token) }))
     },
 
+    async getInquiryQuote(inquiryId, token) {
+      return unwrap(await apiClient.apiFetch(`/buyer/inquiries/${encodeURIComponent(inquiryId)}/quote`, { token: requireToken(token) }))
+    },
+
+    async decideQuote(quoteId, input, token) {
+      return unwrap(await apiClient.apiFetch(`/buyer/quotes/${encodeURIComponent(quoteId)}/decision`, {
+        method: 'POST',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async downloadQuoteDocument(quoteId, documentId, token) {
+      return apiClient.apiFetch(`/buyer/quotes/${encodeURIComponent(quoteId)}/documents/${encodeURIComponent(documentId)}/pdf`, {
+        token: requireToken(token),
+        headers: { accept: 'application/pdf' },
+        responseType: 'blob',
+      })
+    },
+
     async createInquiry({ requestMemo = '', items = [] } = {}, token) {
       return unwrap(await apiClient.apiFetch('/buyer/inquiries', {
         method: 'POST',

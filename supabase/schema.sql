@@ -88,6 +88,7 @@ create table if not exists public.categories (
   name_ko text,
   name_en text,
   name_ja text,
+  name_zh_tw text,
   slug text unique not null,
   cover_url text,
   is_visible boolean default true,
@@ -100,12 +101,14 @@ create table if not exists public.products (
   id uuid primary key default gen_random_uuid(),
   code text unique not null,
   name_ko text,
-  name_en text not null,
+  name_en text,
   name_ja text,
+  name_zh_tw text,
   category_id uuid references public.categories(id),
   material text,
   colors jsonb default '[]'::jsonb,
   sizes jsonb default '[]'::jsonb,
+  option_groups jsonb not null default '[]'::jsonb,
   moq_default integer default 1 check (moq_default > 0),
   lead_time text,
   origin text default 'KR',
@@ -124,6 +127,7 @@ create table if not exists public.products (
   description_ko text,
   description_en text,
   description_ja text,
+  description_zh_tw text,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -288,6 +292,7 @@ create table if not exists public.inquiry_items (
   material text,
   color text,
   size text,
+  selected_options jsonb not null default '[]'::jsonb,
   quantity integer not null check (quantity > 0),
   moq integer not null check (moq > 0),
   price_snapshot numeric(14,2) not null check (price_snapshot >= 0),
@@ -298,14 +303,23 @@ create table if not exists public.inquiry_items (
 create table if not exists public.admin_quotes (
   id uuid primary key default gen_random_uuid(),
   inquiry_id uuid references public.inquiries(id) on delete cascade,
-  status text not null check (status in ('draft', 'sent', 'accepted', 'cancelled')),
+  quote_number text,
+  status text not null check (status in ('draft', 'sent', 'accepted', 'rejected', 'cancelled')),
   confirmed_total numeric(14,2) default 0 check (confirmed_total >= 0),
   currency text not null check (currency in ('KRW', 'JPY', 'USD', 'TWD')),
   lead_time text,
   shipping_note text,
+  valid_until date,
+  document_locale text not null default 'en' check (document_locale in ('kr', 'en', 'jp', 'zh-TW')),
+  customer_note text,
   admin_memo text,
   quoted_by uuid references public.users(id),
   quoted_at timestamptz,
+  current_document_id uuid,
+  accepted_document_id uuid,
+  decision_note text,
+  accepted_at timestamptz,
+  rejected_at timestamptz,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -320,8 +334,46 @@ create table if not exists public.admin_quote_items (
   requested_price_snapshot numeric(14,2) check (requested_price_snapshot is null or requested_price_snapshot >= 0),
   confirmed_unit_price numeric(14,2) check (confirmed_unit_price is null or confirmed_unit_price >= 0),
   confirmed_subtotal numeric(14,2) check (confirmed_subtotal is null or confirmed_subtotal >= 0),
+  product_name text,
+  color text,
+  size text,
+  selected_options jsonb not null default '[]'::jsonb,
+  item_note text,
   created_at timestamptz default now()
 );
+
+create table if not exists public.admin_quote_documents (
+  id uuid primary key default gen_random_uuid(),
+  admin_quote_id uuid not null references public.admin_quotes(id) on delete cascade,
+  revision integer not null check (revision > 0),
+  document_locale text not null check (document_locale in ('kr', 'en', 'jp', 'zh-TW')),
+  snapshot jsonb not null,
+  pdf_object_key text not null,
+  pdf_sha256 text not null,
+  issued_by uuid references public.users(id),
+  issued_at timestamptz not null default now(),
+  unique(admin_quote_id, revision)
+);
+
+create table if not exists public.admin_quote_status_history (
+  id uuid primary key default gen_random_uuid(),
+  admin_quote_id uuid not null references public.admin_quotes(id) on delete cascade,
+  document_id uuid references public.admin_quote_documents(id) on delete set null,
+  from_status text,
+  to_status text not null,
+  actor_user_id uuid references public.users(id),
+  actor_type text not null check (actor_type in ('admin', 'buyer', 'system')),
+  note text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.admin_quotes
+  add constraint admin_quotes_current_document_id_fkey
+  foreign key (current_document_id) references public.admin_quote_documents(id) on delete set null;
+
+alter table public.admin_quotes
+  add constraint admin_quotes_accepted_document_id_fkey
+  foreign key (accepted_document_id) references public.admin_quote_documents(id) on delete set null;
 
 create table if not exists public.banners (
   id uuid primary key default gen_random_uuid(),
@@ -343,6 +395,43 @@ create table if not exists public.banners (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+create table if not exists public.home_showcase_slides (
+  id uuid primary key default gen_random_uuid(),
+  internal_name text not null,
+  label text,
+  title jsonb not null default '{}'::jsonb,
+  eyebrow jsonb not null default '{}'::jsonb,
+  description jsonb not null default '{}'::jsonb,
+  target_url text not null default '/products',
+  image_set jsonb not null default '{}'::jsonb,
+  image_alt jsonb not null default '{}'::jsonb,
+  sort_order integer not null default 0 check (sort_order >= 0),
+  is_active boolean not null default false,
+  created_by uuid references public.users(id) on delete set null,
+  updated_by uuid references public.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint home_showcase_slides_target_url_check
+    check (target_url like '/%' and target_url not like '//%')
+);
+
+create table if not exists public.home_page_configs (
+  id text primary key default 'default' check (id = 'default'),
+  draft_config jsonb not null default '{}'::jsonb check (jsonb_typeof(draft_config) = 'object'),
+  published_config jsonb not null default '{}'::jsonb check (jsonb_typeof(published_config) = 'object'),
+  draft_revision integer not null default 1 check (draft_revision >= 1),
+  published_revision integer not null default 1 check (published_revision >= 1),
+  updated_by uuid references public.users(id) on delete set null,
+  published_by uuid references public.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  published_at timestamptz
+);
+
+insert into public.home_page_configs (id)
+values ('default')
+on conflict (id) do nothing;
 
 create table if not exists public.catalog_files (
   id uuid primary key default gen_random_uuid(),
@@ -491,11 +580,15 @@ create index if not exists idx_inquiry_items_color_size on public.inquiry_items(
 create index if not exists idx_admin_quotes_inquiry_id on public.admin_quotes(inquiry_id);
 create index if not exists idx_admin_quotes_status_quoted on public.admin_quotes(status, quoted_at);
 create index if not exists idx_admin_quotes_quoted_by on public.admin_quotes(quoted_by);
+create unique index if not exists idx_admin_quotes_quote_number on public.admin_quotes(quote_number) where quote_number is not null;
 create index if not exists idx_admin_quote_items_admin_quote_id on public.admin_quote_items(admin_quote_id);
 create index if not exists idx_admin_quote_items_product_id on public.admin_quote_items(product_id);
 create index if not exists idx_admin_quote_items_product_code on public.admin_quote_items(product_code);
+create index if not exists idx_admin_quote_documents_quote_revision on public.admin_quote_documents(admin_quote_id, revision desc);
+create index if not exists idx_admin_quote_status_history_quote_created on public.admin_quote_status_history(admin_quote_id, created_at asc);
 create index if not exists idx_banners_visible_sort on public.banners(is_visible, sort_order);
 create index if not exists idx_banners_starts_ends on public.banners(starts_at, ends_at);
+create index if not exists idx_home_showcase_slides_public_order on public.home_showcase_slides(is_active, sort_order, created_at);
 create index if not exists idx_catalog_files_market_visible on public.catalog_files(market, visible_to);
 create index if not exists idx_catalog_files_uploaded_at on public.catalog_files(uploaded_at);
 create index if not exists idx_terms_versions_key_version on public.terms_versions(agreement_key, version);

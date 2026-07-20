@@ -14,6 +14,7 @@ const categoryWriteFields = [
   "nameKo",
   "nameEn",
   "nameJa",
+  "nameZhTw",
   "slug",
   "coverUrl",
   "isVisible",
@@ -48,6 +49,7 @@ function parseCategoryBody(body = {}, { partial = false } = {}) {
     nameKo: parseOptionalString(safeBody.nameKo, { maxLength: 160 }),
     nameEn: partial ? parseOptionalString(safeBody.nameEn, { maxLength: 160 }) : parseRequiredString(safeBody.nameEn, { fieldName: "nameEn", maxLength: 160 }),
     nameJa: parseOptionalString(safeBody.nameJa, { maxLength: 160 }),
+    nameZhTw: parseOptionalString(safeBody.nameZhTw, { maxLength: 160 }),
     slug: partial ? parseOptionalString(safeBody.slug, { maxLength: 120 }) : parseRequiredString(safeBody.slug, { fieldName: "slug", maxLength: 120 }),
     coverUrl: parseOptionalString(safeBody.coverUrl, { maxLength: 1000 }),
     isVisible: parseBooleanLike(safeBody.isVisible, "isVisible"),
@@ -58,6 +60,9 @@ function parseCategoryBody(body = {}, { partial = false } = {}) {
     throw validationError("categoryId cannot be changed");
   }
   if (!partial) {
+    if (![parsed.nameKo, parsed.nameEn, parsed.nameJa, parsed.nameZhTw].some(Boolean)) {
+      throw validationError("At least one localized category name is required");
+    }
     parsed.isVisible = parsed.isVisible ?? false;
     parsed.sortOrder = parsed.sortOrder || 0;
   }

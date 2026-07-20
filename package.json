@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:production": "node scripts/validateProductionBuildEnv.mjs && vite build",
+    "check:performance-budget": "node scripts/checkPerformanceBudget.mjs",
     "lint": "eslint .",
     "postgres:transform-sample": "node scripts/postgres/transformFirebaseSalesSample.mjs",
     "preview": "vite preview",
@@ -15,6 +16,7 @@
     "test:production-uat": "node scripts/productionUatE2e.mjs"
   },
   "dependencies": {
+    "fflate": "^0.8.2",
     "firebase": "12.6.0",
     "lucide-react": "^1.16.0",
     "react": "^19.2.6",

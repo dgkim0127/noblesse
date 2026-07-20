@@ -4,21 +4,33 @@ import {
   Images,
   LockKeyhole,
   Minus,
+  Pencil,
   Plus,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { CatalogCard } from '../components/CatalogCard'
+import { ProductDetailBlocks } from '../components/ProductDetailBlocks'
 import { getInquiryKey, getInquiryRoutePath } from '../commerce/inquiryKeys'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatAdminPriceBook } from '../config/currency'
 import { formatMoney } from '../utils/commerce'
 import {
   getLocalizedProductAlt,
+  getLocalizedProductDetailContent,
   getLocalizedProductDescription,
   getLocalizedProductName,
   useLocalePath,
 } from '../utils/locale'
+import { imagePresentationStyle, productGalleryEntries } from '../utils/productImageGallery'
+import {
+  getEffectiveProductOptionGroups,
+  getLegacySelectionFromSnapshots,
+  getLocalizedOptionLabel,
+  getMissingRequiredProductOptions,
+  getSelectedOptionSnapshots,
+  selectedOptionPairs,
+} from '../utils/productOptions'
 
 const normalizeQuantity = (rawQuantity, moq) => {
   const numeric = Number(rawQuantity)
@@ -366,7 +378,30 @@ const detailCopy = {
 }
 
 const cleanDetailCopy = {
-  en: detailCopy.en,
+  en: {
+    ...detailCopy.en,
+    careGuide: 'Care guide',
+    closureType: 'Closure',
+    detailImages: 'Product details',
+    detailImagesIntro: 'Review the product from multiple angles and in actual wearing context.',
+    finish: 'Finish',
+    keyFacts: 'Key specifications',
+    materialAndCare: 'Material & care',
+    piercingType: 'Piercing type',
+    plating: 'Plating',
+    productStructure: 'Product structure',
+    saleType: 'Sales unit',
+    saleTypePair: 'Pair',
+    saleTypeSet: 'Set',
+    saleTypeSingle: 'Single piece',
+    sectionDelivery: 'Quote guide',
+    sectionMaterial: 'Material & care',
+    sectionOverview: 'Detail images',
+    sectionSpecification: 'Exact specifications',
+    stoneType: 'Stone',
+    wearingGuide: 'Fit & wearing',
+    wearingLocation: 'Recommended placement',
+  },
   kr: {
     ...detailCopy.en,
     addToInquiry: '견적 리스트에 담기',
@@ -435,10 +470,10 @@ const cleanDetailCopy = {
     sizes: '사이즈',
     specification: '상세 사양',
     specificationIntro: '견적 검토에는 장식 문구보다 등록된 구조와 사양을 사용합니다.',
-    sectionDelivery: '출고 안내',
-    sectionMaterial: '소재 안내',
-    sectionOverview: '개요',
-    sectionSpecification: '상세 사양',
+    sectionDelivery: '견적 안내',
+    sectionMaterial: '소재·관리',
+    sectionOverview: '상세 이미지',
+    sectionSpecification: '정확한 규격',
     quietDetailHeadline: '작은 피어싱도 한눈에 검토할 수 있게 정리했습니다.',
     quietDetailLead: '이미지, 소재, 옵션, 견적 안내를 분리해 바이어가 필요한 정보를 빠르게 확인할 수 있습니다.',
     statusGuest: '회원가입 후 거래처 승인을 요청하면 가격과 견적 기능을 사용할 수 있습니다.',
@@ -462,6 +497,23 @@ const cleanDetailCopy = {
     decorationCount: '장식 수량',
     settingMethod: '세팅 방식',
     specNote: '사양 메모',
+    careGuide: '보관·관리 안내',
+    closureType: '잠금 방식',
+    detailImages: '상품 상세',
+    detailImagesIntro: '제품의 구조와 실제 착용 느낌을 여러 각도에서 확인하세요.',
+    finish: '표면 마감',
+    keyFacts: '핵심 사양',
+    materialAndCare: '소재·관리',
+    piercingType: '피어싱 유형',
+    plating: '도금',
+    productStructure: '제품 구조',
+    saleType: '판매 단위',
+    saleTypePair: '한 쌍',
+    saleTypeSet: '세트',
+    saleTypeSingle: '낱개',
+    stoneType: '스톤',
+    wearingGuide: '착용 안내',
+    wearingLocation: '권장 착용 부위',
   },
   jp: {
     ...detailCopy.en,
@@ -478,10 +530,10 @@ const cleanDetailCopy = {
     quoteNotice: '見積案内',
     requestAccess: '取引先承認を申請',
     reviewStatus: '承認状況を見る',
-    sectionDelivery: '出荷案内',
-    sectionMaterial: '素材案内',
-    sectionOverview: '概要',
-    sectionSpecification: '詳細仕様',
+    sectionDelivery: '見積案内',
+    sectionMaterial: '素材・お手入れ',
+    sectionOverview: '詳細画像',
+    sectionSpecification: '正確な仕様',
     specification: '詳細仕様',
     specificationIntro: '見積検討には装飾的な説明ではなく登録された仕様を使用します。',
     statusGuest: '会員登録後、取引先承認を申請すると価格と見積機能を利用できます。',
@@ -510,6 +562,23 @@ const cleanDetailCopy = {
     decorationCount: '装飾数',
     settingMethod: 'セッティング方式',
     specNote: '仕様メモ',
+    careGuide: '保管・お手入れ',
+    closureType: '留め方',
+    detailImages: '商品詳細',
+    detailImagesIntro: '商品の構造と着用イメージを複数の角度から確認できます。',
+    finish: '表面仕上げ',
+    keyFacts: '主要仕様',
+    materialAndCare: '素材・お手入れ',
+    piercingType: 'ピアスタイプ',
+    plating: 'メッキ',
+    productStructure: '商品構造',
+    saleType: '販売単位',
+    saleTypePair: 'ペア',
+    saleTypeSet: 'セット',
+    saleTypeSingle: '片耳',
+    stoneType: 'ストーン',
+    wearingGuide: '着用案内',
+    wearingLocation: '推奨部位',
   },
   cn: {
     ...detailCopy.en,
@@ -526,10 +595,10 @@ const cleanDetailCopy = {
     quoteNotice: '詢價說明',
     requestAccess: '申請買家核准',
     reviewStatus: '查看核准狀態',
-    sectionDelivery: '出貨說明',
-    sectionMaterial: '材質說明',
-    sectionOverview: '概要',
-    sectionSpecification: '詳細規格',
+    sectionDelivery: '詢價說明',
+    sectionMaterial: '材質與保養',
+    sectionOverview: '詳細圖片',
+    sectionSpecification: '精確規格',
     specification: '詳細規格',
     specificationIntro: '詢價判斷以登錄的結構與規格為準，而不是裝飾文案。',
     statusGuest: '註冊並申請買家核准後，即可使用價格與詢價功能。',
@@ -558,6 +627,23 @@ const cleanDetailCopy = {
     decorationCount: '裝飾數量',
     settingMethod: '鑲嵌方式',
     specNote: '規格備註',
+    careGuide: '保存與保養',
+    closureType: '固定方式',
+    detailImages: '商品詳細',
+    detailImagesIntro: '從多個角度確認商品結構與實際配戴效果。',
+    finish: '表面處理',
+    keyFacts: '主要規格',
+    materialAndCare: '材質與保養',
+    piercingType: '穿孔飾品類型',
+    plating: '電鍍',
+    productStructure: '商品結構',
+    saleType: '販售單位',
+    saleTypePair: '一對',
+    saleTypeSet: '套組',
+    saleTypeSingle: '單件',
+    stoneType: '寶石',
+    wearingGuide: '配戴說明',
+    wearingLocation: '建議配戴部位',
   },
 }
 
@@ -572,6 +658,8 @@ const directInquiryCopy = {
     directInquiryTitle: 'Product quote request',
     inquiryRef: 'Inquiry number',
     inquiryStatus: 'Status',
+    optionRequired: 'Select all required options before adding this item.',
+    required: 'Required',
     viewInquiry: 'View my inquiry',
   },
   kr: {
@@ -584,6 +672,8 @@ const directInquiryCopy = {
     directInquiryTitle: '상품 견적 요청',
     inquiryRef: '문의 번호',
     inquiryStatus: '상태',
+    optionRequired: '필수 옵션을 모두 선택한 뒤 견적 리스트에 담아주세요.',
+    required: '필수',
     viewInquiry: '내 견적 요청 보기',
   },
   jp: {
@@ -596,6 +686,8 @@ const directInquiryCopy = {
     directInquiryTitle: '商品の見積依頼',
     inquiryRef: '依頼番号',
     inquiryStatus: '状態',
+    optionRequired: '必須オプションをすべて選択してください。',
+    required: '必須',
     viewInquiry: '見積依頼を見る',
   },
   cn: {
@@ -608,6 +700,8 @@ const directInquiryCopy = {
     directInquiryTitle: '商品詢價',
     inquiryRef: '詢價編號',
     inquiryStatus: '狀態',
+    optionRequired: '請先選擇所有必填選項。',
+    required: '必填',
     viewInquiry: '查看我的詢價',
   },
 }
@@ -635,25 +729,16 @@ const withUnit = (value, unit = 'mm') => {
 }
 
 const buildGalleryImages = (product, productAlt, copy) => {
-  const imageSet = product?.imageSet || {}
-  const candidates = [
-    { id: 'detail', src: imageSet.detail, label: copy.selectedImage },
-    { id: 'zoom', src: imageSet.zoom, label: copy.viewLarge },
-    { id: 'card', src: imageSet.card, label: copy.gallery },
-    { id: 'thumb', src: imageSet.thumb, label: copy.thumbnail },
-  ]
-  const seen = new Set()
-  return candidates.filter((image) => {
-    if (!image.src || seen.has(image.src)) return false
-    seen.add(image.src)
-    return true
-  }).map((image) => ({ ...image, alt: productAlt }))
+  return productGalleryEntries(product, productAlt).map((image, index) => ({
+    ...image,
+    label: index === 0 ? copy.selectedImage : `${copy.gallery} ${index + 1}`,
+  }))
 }
 
 const getLocalizedCategoryName = (product, contentLocale) => {
   if (contentLocale === 'kr') return product.categoryNameKo || product.categoryNameEn || product.categoryId
   if (contentLocale === 'jp') return product.categoryNameJa || product.categoryNameEn || product.categoryNameKo || product.categoryId
-  if (contentLocale === 'cn') return product.categoryNameCn || product.categoryNameEn || product.categoryNameKo || product.categoryId
+  if (contentLocale === 'cn') return product.categoryNameZhTw || product.categoryNameCn || product.categoryNameEn || product.categoryNameKo || product.categoryId
   return product.categoryNameEn || product.categoryNameKo || product.categoryId
 }
 
@@ -674,103 +759,190 @@ const getRelatedProducts = (products, product) => {
     .map(({ item }) => item)
 }
 
-function ProductGallery({ copy, product, productAlt }) {
+function ProductGallery({ activeImageId = '', copy, editor, product, productAlt }) {
   const images = useMemo(() => buildGalleryImages(product, productAlt, copy), [copy, product, productAlt])
-  const [selectedSrc, setSelectedSrc] = useState(images[0]?.src || '')
+  const [selectedId, setSelectedId] = useState(images[0]?.id || '')
 
   useEffect(() => {
-    setSelectedSrc(images[0]?.src || '')
-  }, [images])
+    setSelectedId((current) => {
+      if (activeImageId && images.some((image) => image.id === activeImageId)) return activeImageId
+      if (editor?.selectedImageId && images.some((image) => image.id === editor.selectedImageId)) return editor.selectedImageId
+      return images.some((image) => image.id === current) ? current : images[0]?.id || ''
+    })
+  }, [activeImageId, editor?.selectedImageId, images])
 
-  const selectedImage = images.find((image) => image.src === selectedSrc) || images[0] || null
-  const secondaryImages = images.filter((image) => image.src !== selectedImage?.src).slice(0, 2)
+  const selectedImage = images.find((image) => image.id === selectedId) || images[0] || null
+  const secondaryImages = images.filter((image) => image.id !== selectedImage?.id).slice(0, 2)
 
   return <section className={`pd-gallery ${secondaryImages.length > 0 ? 'has-side-images' : 'is-single'}`} aria-label={copy.gallery}>
     <div className="pd-gallery-grid">
       <figure className={`pd-main-image tone-${product.tone}`}>
         {selectedImage
-          ? <img src={selectedImage.src} alt={selectedImage.alt} loading="eager" width="1200" height="1200" onError={(event) => { event.currentTarget.hidden = true }} />
+          ? <img src={selectedImage.detailSrc} alt={selectedImage.alt} loading="eager" width="1200" height="1200" style={imagePresentationStyle(selectedImage)} onError={(event) => { event.currentTarget.hidden = true }} />
           : <div className="pd-image-placeholder"><Images size={32} /><span>{copy.noImage}</span></div>}
       </figure>
       {secondaryImages.length > 0 && <div className="pd-side-images" aria-hidden="true">
         {secondaryImages.map((image) => <figure className="pd-side-image" key={`side-${image.id}`}>
-          <img src={image.src} alt="" loading="lazy" width="600" height="600" onError={(event) => { event.currentTarget.hidden = true }} />
+          <img src={image.cardSrc || image.detailSrc} alt="" loading="lazy" width="600" height="600" style={imagePresentationStyle(image)} onError={(event) => { event.currentTarget.hidden = true }} />
         </figure>)}
       </div>}
     </div>
     {images.length > 1 && <div className="pd-thumbs" role="list" aria-label={copy.thumbnail}>
       {images.map((image) => <button
         aria-label={image.label}
-        aria-pressed={selectedImage?.src === image.src}
-        className={selectedImage?.src === image.src ? 'pd-thumb is-active' : 'pd-thumb'}
+        aria-pressed={selectedImage?.id === image.id}
+        className={selectedImage?.id === image.id ? 'pd-thumb is-active' : 'pd-thumb'}
         key={image.id}
-        onClick={() => setSelectedSrc(image.src)}
+        onClick={() => {
+          setSelectedId(image.id)
+          editor?.selectImage?.(image.id)
+        }}
         type="button"
       >
-        <img src={image.src} alt="" loading="lazy" width="300" height="300" onError={(event) => { event.currentTarget.hidden = true }} />
+        <img src={image.thumbSrc || image.detailSrc} alt="" loading="lazy" width="300" height="300" style={imagePresentationStyle(image)} onError={(event) => { event.currentTarget.hidden = true }} />
       </button>)}
     </div>}
-    {product.imageSet?.zoom && <a className="pd-large-link" href={product.imageSet.zoom} rel="noreferrer" target="_blank">{copy.viewLarge}<ChevronRight size={14} /></a>}
+    {selectedImage?.zoomSrc && <a className="pd-large-link" href={selectedImage.zoomSrc} rel="noreferrer" target="_blank">{copy.viewLarge}<ChevronRight size={14} /></a>}
   </section>
 }
 
-function OptionButtons({ label, options, selected, onSelect }) {
-  const safeOptions = asList(options)
-  if (safeOptions.length === 0) return null
-  return <div className="pd-option-group">
-    <span>{label}</span>
+function ProductOptionGroup({ copy, editor, group, locale, onSelect, selectedValueId }) {
+  const normalizedLocale = locale === 'cn' ? 'zh-TW' : locale
+  const activeValues = group.values.filter((value) => value.active)
+  const groupLabel = editor
+    ? String(group.labels?.[normalizedLocale] || '')
+    : getLocalizedOptionLabel(group.labels, normalizedLocale)
+  return <div className={`pd-option-group${group.required && !selectedValueId ? ' is-required' : ''}`}>
+    <span>{groupLabel || `${editor?.localeLabel || ''} 옵션 이름 입력`.trim()}{group.required && <small>{copy.required}</small>}</span>
     <div className="pd-option-buttons">
-      {safeOptions.map((option) => <button className={selected === option ? 'pd-option-button is-active' : 'pd-option-button'} key={option} type="button" onClick={() => onSelect(option)}>{option}</button>)}
+      {activeValues.map((value) => {
+        const valueLabel = editor
+          ? String(value.labels?.[normalizedLocale] || '')
+          : getLocalizedOptionLabel(value.labels, normalizedLocale)
+        return <button
+          aria-pressed={selectedValueId === value.id}
+          className={`pd-option-button${group.type === 'swatch' ? ' has-swatch' : ''}${selectedValueId === value.id ? ' is-active' : ''}`}
+          key={value.id}
+          type="button"
+          onClick={() => onSelect(group.id, value.id)}
+        >
+          {group.type === 'swatch' && <i aria-hidden="true" style={{ backgroundColor: value.swatch || '#f4f1f2' }} />}
+          <span>{valueLabel || `${editor?.localeLabel || ''} 옵션 값 입력`.trim()}</span>
+        </button>
+      })}
+      {!activeValues.length && editor && <small>옵션 값을 추가하세요.</small>}
     </div>
   </div>
 }
 
-export function ProductDetailPage() {
-  const { productId } = useParams()
-  const {
-    addInquiryItem,
-    approvedPrice,
-    dataError,
-    dataStatus,
-    getAdminPriceBooks,
-    getPrice,
-    isAdmin,
-    isApproved,
-    products,
-    submitProductInquiry,
-    viewerState,
-  } = useCommerce()
-  const { contentLocale, locale, toLocalePath } = useLocalePath()
+function ProductEditorTarget({ align = 'start', children, editor, field, label }) {
+  if (!editor) return children
+  const active = editor.selectedField === field
+  return <div className={`pd-editor-target is-${align}${active ? ' is-active' : ''}`}>
+    {children}
+    <button
+      aria-controls="admin-product-inspector"
+      aria-label={`${label} 편집`}
+      aria-pressed={active}
+      className="pd-editor-target-trigger"
+      title={`${label} 편집`}
+      type="button"
+      onClick={(event) => editor.selectField(field, event.currentTarget)}
+    ><Pencil aria-hidden="true" size={15} /></button>
+  </div>
+}
+
+function ProductInlineEditor({ as: Tag = 'p', className = '', editor, field, label, multiline = false, placeholder, value }) {
+  if (!editor) return value ? <Tag className={className}>{value}</Tag> : null
+  const active = editor.active?.kind === 'inline' && editor.active.field === field
+  if (active) {
+    const sharedProps = {
+      'aria-label': `${label} 편집`,
+      autoFocus: true,
+      className: 'pd-inline-editor-input',
+      maxLength: multiline ? 4000 : 240,
+      value,
+      onBlur: () => editor.commitInline(field),
+      onChange: (event) => editor.changeInline(field, event.target.value),
+      onKeyDown: (event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault()
+          editor.cancelInline(field)
+          return
+        }
+        if ((!multiline && event.key === 'Enter') || (multiline && event.key === 'Enter' && (event.ctrlKey || event.metaKey))) {
+          event.preventDefault()
+          editor.commitInline(field)
+        }
+      },
+    }
+    return <Tag className={`${className} pd-inline-editor is-active`.trim()}>
+      {multiline ? <textarea {...sharedProps} rows={field === 'body' ? 8 : 3} /> : <input {...sharedProps} type="text" />}
+    </Tag>
+  }
+  return <Tag className={`${className} pd-inline-editor${value ? '' : ' is-placeholder'}`.trim()}>
+    <button aria-label={`${label} 편집`} type="button" onClick={() => editor.beginInline(field, value)}>
+      <span>{value || placeholder}</span><Pencil aria-hidden="true" size={14} />
+    </button>
+  </Tag>
+}
+
+export function ProductDetailView({
+  addInquiryItem = () => {},
+  adminPriceBooks = [],
+  approvedAmount = null,
+  contentLocale = 'kr',
+  editor = null,
+  isAdmin = false,
+  isApproved = false,
+  locale = 'kr',
+  price = null,
+  product,
+  products = [],
+  submitProductInquiry = async () => null,
+  toLocalePath = (path) => path,
+  viewerState = 'guest',
+}) {
   const copy = getDetailCopy(contentLocale)
-  const product = products.find((item) => item.productId === productId)
-  const productName = product ? getLocalizedProductName(product, locale) : ''
+  const productName = editor ? editor.values.name : product ? getLocalizedProductName(product, locale) : ''
   const productAlt = product ? getLocalizedProductAlt(product, locale) : ''
-  const description = product ? getLocalizedProductDescription(product, locale) : ''
-  const [selectedColor, setSelectedColor] = useState('')
-  const [selectedSize, setSelectedSize] = useState('')
-  const price = product ? getPrice(product.productId) : null
-  const approvedAmount = product ? approvedPrice(product.productId) : null
-  const adminPriceBooks = product && isAdmin ? getAdminPriceBooks(product.productId) : []
+  const description = editor ? editor.values.summary : product ? getLocalizedProductDescription(product, locale) : ''
+  const optionGroups = useMemo(() => getEffectiveProductOptionGroups(product || {}), [product])
+  const optionSignature = useMemo(() => optionGroups.map((group) => `${group.id}:${group.values.filter((value) => value.active).map((value) => value.id).join(',')}`).join('|'), [optionGroups])
+  const [selectedOptionValues, setSelectedOptionValues] = useState({})
   const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
   const canUseTradeTerms = Boolean(isApproved && price && approvedAmount !== null)
   const canRequestProductQuote = Boolean(isApproved && product)
   const canViewAdminPrices = Boolean(isAdmin && adminPriceBooks.length > 0)
   const requestMoq = canUseTradeTerms ? price.moq : product?.moqDefault || 1
   const visibleMoq = canUseTradeTerms ? price.moq : canRequestProductQuote ? requestMoq : canViewAdminPrices ? adminPriceBooks[0]?.moq : null
-  const [quantity, setQuantity] = useState(visibleMoq || 1)
+  const editorCanUseTradeTerms = Boolean(editor && price && approvedAmount !== null)
+  const showTradeTerms = canUseTradeTerms || editorCanUseTradeTerms
+  const showQuoteTools = Boolean(editor) || canRequestProductQuote
+  const effectiveRequestMoq = editor
+    ? editorCanUseTradeTerms ? price.moq : product?.moqDefault || 1
+    : requestMoq
+  const effectiveVisibleMoq = editor ? effectiveRequestMoq : visibleMoq
+  const [quantity, setQuantity] = useState(effectiveVisibleMoq || 1)
   const [directMemo, setDirectMemo] = useState('')
   const [directStatus, setDirectStatus] = useState('idle')
   const [directError, setDirectError] = useState('')
   const [directInquiry, setDirectInquiry] = useState(null)
 
   useEffect(() => {
-    setSelectedColor(product?.colors?.[0] ?? '')
-    setSelectedSize(product?.sizes?.[0] ?? '')
-  }, [product?.productId, product?.colors, product?.sizes])
+    const explicitGroups = Array.isArray(product?.optionGroups) && product.optionGroups.length > 0
+    setSelectedOptionValues((current) => Object.fromEntries(optionGroups.flatMap((group) => {
+      const activeValues = group.values.filter((value) => value.active)
+      const currentValue = activeValues.find((value) => value.id === current[group.id])
+      if (currentValue) return [[group.id, currentValue.id]]
+      if (!explicitGroups && activeValues[0]) return [[group.id, activeValues[0].id]]
+      return []
+    })))
+  }, [optionGroups, optionSignature, product?.optionGroups, product?.productId])
 
   useEffect(() => {
-    if (visibleMoq) setQuantity(visibleMoq)
-  }, [visibleMoq])
+    if (effectiveVisibleMoq) setQuantity(effectiveVisibleMoq)
+  }, [effectiveVisibleMoq])
 
   useEffect(() => {
     setDirectMemo('')
@@ -779,30 +951,36 @@ export function ProductDetailPage() {
     setDirectInquiry(null)
   }, [product?.productId])
 
-  if (dataStatus === 'loading') {
-    return <main className="content pd-page"><div className="empty">Loading product details...</div></main>
-  }
-
-  if (dataStatus === 'error') {
-    return <main className="content pd-page"><div className="empty"><h1>Catalog API unavailable</h1><p>{dataError || 'Unable to load product details.'}</p></div></main>
-  }
-
   if (!product) return <main className="content pd-page"><div className="empty">{copy.notFound}</div></main>
 
   const categoryName = getLocalizedCategoryName(product, contentLocale)
   const colors = asList(product.colors)
   const sizes = asList(product.sizes)
-  const activeColor = colors.includes(selectedColor) ? selectedColor : colors[0] ?? ''
-  const activeSize = sizes.includes(selectedSize) ? selectedSize : sizes[0] ?? ''
+  const selectedOptionSnapshots = getSelectedOptionSnapshots(optionGroups, selectedOptionValues)
+  const selectedLegacyOptions = getLegacySelectionFromSnapshots(selectedOptionSnapshots, contentLocale)
+  const selectedOptionIds = selectedOptionPairs(selectedOptionValues)
+  const missingRequiredOptions = getMissingRequiredProductOptions(optionGroups, selectedOptionValues)
+  const selectedOptionImageId = [...selectedOptionSnapshots].reverse().find((item) => item.imageId)?.imageId || ''
   const productSpecs = product.specs || {}
-  const productDetailContent = product.detailContent || {}
+  const localizedDetailContent = getLocalizedProductDetailContent(product, locale)
+  const productDetailContent = editor
+    ? { ...localizedDetailContent, headline: editor.values.headline, body: editor.values.body, description: editor.values.body }
+    : localizedDetailContent
   const specUnit = productSpecs.unit || 'mm'
-  const overviewBody = productDetailContent.description || productDetailContent.body || description || copy.quietDetailLead
   const materialGuideBody = productDetailContent.materialInfo || (product.material ? copy.materialGuideText(product.material) : '')
   const sizeGuideBody = productDetailContent.sizeGuide || copy.sizeGuideText
+  const wearingGuideBody = productDetailContent.wearingGuide || ''
+  const careGuideBody = productDetailContent.careGuide || productDetailContent.care || ''
   const shippingNoticeBody = productDetailContent.exchangeNotice || copy.shippingNoticeText
   const quoteWorkflowLead = productDetailContent.wholesaleNotice || copy.quoteWorkflowLead
-  const currentQuantity = normalizeQuantity(quantity, requestMoq || 1)
+  const productTaxonomy = product.taxonomy || {}
+  const galleryImages = buildGalleryImages(product, productAlt, copy)
+  const saleTypeLabels = {
+    pair: copy.saleTypePair,
+    set: copy.saleTypeSet,
+    single: copy.saleTypeSingle,
+  }
+  const currentQuantity = normalizeQuantity(quantity, effectiveRequestMoq || 1)
   const accessLink = viewerState === 'pending' ? '/approval-pending' : '/register'
   const accessLabel = viewerState === 'pending' ? copy.reviewStatus : copy.requestAccess
   const relatedProducts = getRelatedProducts(products, product)
@@ -818,35 +996,83 @@ export function ProductDetailPage() {
     [copy.exportAvailability, product.isExportAvailable ? copy.available : copy.unavailable],
   ].filter(([, value]) => value !== undefined && value !== null && value !== '')
 
-  const specificationRows = [
-    [copy.gauge, productSpecs.gauge],
-    [copy.length, withUnit(productSpecs.length, specUnit)],
-    [copy.barLength, withUnit(productSpecs.barLength, specUnit)],
-    [copy.postLength, withUnit(productSpecs.postLength, specUnit)],
-    [copy.ballSize, withUnit(productSpecs.ballSize, specUnit)],
-    [copy.charmSize, withUnit(productSpecs.charmSize, specUnit)],
-    [copy.totalLength, withUnit(productSpecs.totalLength, specUnit)],
-    [copy.innerDiameter, withUnit(productSpecs.innerDiameter, specUnit)],
-    [copy.barThickness, withUnit(productSpecs.barThickness, specUnit)],
-    [copy.decorationType, productSpecs.decorationType],
-    [copy.decorationColor, productSpecs.decorationColor],
-    [copy.decorationSize, withUnit(productSpecs.decorationSize, specUnit)],
-    [copy.decorationCount, productSpecs.decorationCount],
+  const heroInfoRows = [
+    [copy.category, categoryName],
+    [copy.material, product.material || productTaxonomy.baseMaterial],
+    [copy.origin, product.origin],
+    [copy.leadTime, product.leadTime],
+  ].filter(([, value]) => value !== undefined && value !== null && value !== '')
+
+  const specificationItems = [
+    { key: 'gauge', label: copy.gauge, value: productSpecs.gauge },
+    { key: 'length', label: copy.length, value: withUnit(productSpecs.length, specUnit) },
+    { key: 'barLength', label: copy.barLength, value: withUnit(productSpecs.barLength, specUnit) },
+    { key: 'postLength', label: copy.postLength, value: withUnit(productSpecs.postLength, specUnit) },
+    { key: 'ballSize', label: copy.ballSize, value: withUnit(productSpecs.ballSize, specUnit) },
+    { key: 'charmSize', label: copy.charmSize, value: withUnit(productSpecs.charmSize, specUnit) },
+    { key: 'totalLength', label: copy.totalLength, value: withUnit(productSpecs.totalLength, specUnit) },
+    { key: 'innerDiameter', label: copy.innerDiameter, value: withUnit(productSpecs.innerDiameter, specUnit) },
+    { key: 'barThickness', label: copy.barThickness, value: withUnit(productSpecs.barThickness, specUnit) },
+    { key: 'decorationType', label: copy.decorationType, value: productSpecs.decorationType },
+    { key: 'decorationColor', label: copy.decorationColor, value: productSpecs.decorationColor },
+    { key: 'decorationSize', label: copy.decorationSize, value: withUnit(productSpecs.decorationSize, specUnit) },
+    { key: 'decorationCount', label: copy.decorationCount, value: productSpecs.decorationCount },
+    { key: 'stoneType', label: copy.stoneType, value: productSpecs.stoneType },
+    { key: 'closureType', label: copy.closureType, value: productSpecs.closureType },
+    { key: 'settingMethod', label: copy.settingMethod, value: productSpecs.settingMethod },
+    { key: 'plating', label: copy.plating, value: productSpecs.plating },
+    { key: 'finish', label: copy.finish, value: productSpecs.finish },
+    { key: 'specNote', label: copy.specNote, value: productSpecs.specNote || productSpecs.decorationNote },
+  ].filter((item) => item.value)
+  const specificationRows = specificationItems.map((item) => [item.label, item.value])
+
+  const structureRows = [
+    [copy.piercingType, productTaxonomy.piercingType],
+    [copy.wearingLocation, productTaxonomy.wearingLocation],
+    [copy.material, product.material || productTaxonomy.baseMaterial],
+    [copy.plating, productSpecs.plating],
+    [copy.finish, productSpecs.finish],
+    [copy.stoneType, productSpecs.stoneType],
+    [copy.closureType, productSpecs.closureType],
     [copy.settingMethod, productSpecs.settingMethod],
-    [copy.specNote, productSpecs.specNote || productSpecs.decorationNote],
+    [copy.saleType, saleTypeLabels[productTaxonomy.saleType] || productTaxonomy.saleType],
   ].filter(([, value]) => value)
 
-  const addSelectedItem = () => addInquiryItem(product.productId, { color: activeColor, size: activeSize }, currentQuantity)
-  const updateQuantity = (nextQuantity) => setQuantity(normalizeQuantity(nextQuantity, requestMoq || 1))
+  const keyFacts = [
+    [copy.piercingType, productTaxonomy.piercingType || categoryName],
+    [copy.material, product.material || productTaxonomy.baseMaterial],
+    [copy.gauge, productSpecs.gauge || (productSpecs.barThickness ? withUnit(productSpecs.barThickness, specUnit) : '')],
+    [copy.barLength, withUnit(productSpecs.barLength || productSpecs.postLength || productSpecs.innerDiameter || productSpecs.length, specUnit)],
+    [copy.wearingLocation, productTaxonomy.wearingLocation],
+    [copy.moq, effectiveVisibleMoq ? `${effectiveVisibleMoq} pcs` : ''],
+  ].filter(([, value]) => value)
+
+  const detailBlocks = product.detailContent?.blocks || []
+  const hasDetailStory = detailBlocks.length > 0 || galleryImages.length > 1 || productDetailContent.headline || productDetailContent.body || editor
+  const hasMaterialAndCare = structureRows.length > 0 || materialGuideBody || wearingGuideBody || careGuideBody || editor
+
+  const addSelectedItem = () => {
+    if (editor || missingRequiredOptions.length > 0) return
+    addInquiryItem(product.productId, {
+      color: selectedLegacyOptions.color,
+      size: selectedLegacyOptions.size,
+      selectedOptions: selectedOptionIds,
+    }, currentQuantity)
+  }
+  const updateQuantity = (nextQuantity) => setQuantity(normalizeQuantity(nextQuantity, effectiveRequestMoq || 1))
   const submitSelectedProductInquiry = async () => {
-    if (!canRequestProductQuote || directStatus === 'submitting') return
+    if (editor || !canRequestProductQuote || directStatus === 'submitting' || missingRequiredOptions.length > 0) return
     setDirectStatus('submitting')
     setDirectError('')
     setDirectInquiry(null)
     try {
       const inquiry = await submitProductInquiry({
         productId: product.productId,
-        option: { color: activeColor, size: activeSize },
+        option: {
+          color: selectedLegacyOptions.color,
+          size: selectedLegacyOptions.size,
+          selectedOptions: selectedOptionIds,
+        },
         quantity: currentQuantity,
         requestMemo: directMemo.trim(),
       })
@@ -861,30 +1087,32 @@ export function ProductDetailPage() {
     }
   }
 
-  return <main className="content pd-page">
+  return <main className={`content pd-page${editor ? ' is-editor-preview' : ''}`}>
     <nav className="pd-breadcrumb" aria-label="Breadcrumb">
-      <Link to={toLocalePath('/products')}><ChevronLeft size={16} />{copy.back}</Link>
-      <span>{categoryName}</span>
-      <span>{product.code}</span>
+      {editor ? <span><ChevronLeft size={16} />{copy.back}</span> : <Link to={toLocalePath('/products')}><ChevronLeft size={16} />{copy.back}</Link>}
+      <ProductEditorTarget editor={editor} field="category" label="카테고리"><span>{categoryName || '카테고리 선택'}</span></ProductEditorTarget>
+      <ProductEditorTarget align="end" editor={editor} field="code" label="상품 코드"><span>{product.code || '상품 코드 입력'}</span></ProductEditorTarget>
     </nav>
 
     <section className="pd-hero">
-      <ProductGallery copy={copy} product={product} productAlt={productAlt} />
+      <ProductEditorTarget editor={editor} field="image" label="상품 이미지"><ProductGallery activeImageId={selectedOptionImageId} copy={copy} editor={editor} product={product} productAlt={productAlt} /></ProductEditorTarget>
 
       <aside className="pd-panel" aria-label={copy.productInfo}>
         <div className="pd-badges">
           <span>{copy.badgesNew}</span>
           {product.isExportAvailable && <span>{copy.badgesExportReady}</span>}
         </div>
-        <p className="pd-eyebrow">{copy.productCode} {product.code}</p>
-        <h1>{productName}</h1>
-        {product.nameEn && product.nameEn !== productName && <p className="pd-alt-name">{product.nameEn}</p>}
-        {description && <p className="pd-summary">{description}</p>}
+        <ProductEditorTarget align="end" editor={editor} field="code" label="상품 코드"><p className="pd-eyebrow">{copy.productCode} {product.code || '상품 코드 입력'}</p></ProductEditorTarget>
+        <ProductInlineEditor as="h1" editor={editor} field="name" label="상품명" placeholder={`${editor?.localeLabel || ''} 상품명 입력`.trim()} value={productName} />
+        {!editor && product.nameEn && product.nameEn !== productName && <p className="pd-alt-name">{product.nameEn}</p>}
+        <ProductInlineEditor className="pd-summary" editor={editor} field="summary" label="한 줄 요약" multiline placeholder={`${editor?.localeLabel || ''} 한 줄 요약 입력`.trim()} value={description} />
 
-        <dl className="pd-meta-list">
-          {productInfoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
-          {visibleMoq && <div><dt>{copy.moq}</dt><dd>{visibleMoq} pcs</dd></div>}
-        </dl>
+        <ProductEditorTarget align="end" editor={editor} field="productInfo" label="상품 정보">
+          <dl className="pd-meta-list">
+            {heroInfoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+            {effectiveVisibleMoq && <div><dt>{copy.moq}</dt><dd>{effectiveVisibleMoq} pcs</dd></div>}
+          </dl>
+        </ProductEditorTarget>
 
         {canViewAdminPrices && <div className="pd-admin-prices">
           <small>{copy.adminPriceBooks}</small>
@@ -897,9 +1125,11 @@ export function ProductDetailPage() {
           </div>
         </div>}
 
-        {canRequestProductQuote ? <div className="pd-trade-box">
+        {showQuoteTools ? <div className="pd-trade-box">
           <small>{copy.approvalRequired}</small>
-          {canUseTradeTerms
+          <ProductEditorTarget align="end" editor={editor} field="price" label="승인 회원 가격">
+            <div className="pd-editor-price-target">
+          {showTradeTerms
             ? <>
               <strong>{formatMoney(approvedAmount, price.currency)}</strong>
               <span>{copy.moq} {price.moq} pcs · {price.market} · {price.currency}</span>
@@ -908,20 +1138,38 @@ export function ProductDetailPage() {
               <strong>{copy.priceUnavailable}</strong>
               <span>{copy.quoteNoticeText}</span>
             </>}
-          <OptionButtons label={copy.color} options={colors} selected={activeColor} onSelect={setSelectedColor} />
-          <OptionButtons label={copy.size} options={sizes} selected={activeSize} onSelect={setSelectedSize} />
+            </div>
+          </ProductEditorTarget>
+          <ProductEditorTarget align="end" editor={editor} field="options" label="상품 옵션">
+            <div className="pd-option-groups">
+              {optionGroups.map((group) => <ProductOptionGroup
+                copy={copy}
+                editor={editor}
+                group={group}
+                key={group.id}
+                locale={contentLocale}
+                selectedValueId={selectedOptionValues[group.id] || ''}
+                onSelect={(groupId, valueId) => setSelectedOptionValues((current) => ({ ...current, [groupId]: valueId }))}
+              />)}
+              {!optionGroups.length && editor && <div className="pd-option-group is-empty"><span>상품 옵션</span><small>옵션 그룹을 추가하세요.</small></div>}
+            </div>
+          </ProductEditorTarget>
+          {missingRequiredOptions.length > 0 && !editor && <p className="pd-option-required-message" role="alert">{copy.optionRequired}</p>}
+          <ProductEditorTarget align="end" editor={editor} field="moq" label="MOQ">
           <div className="pd-option-group">
             <span>{copy.quantity}</span>
             <div className="pd-quantity-control">
-              <button type="button" aria-label="Decrease quantity" onClick={() => updateQuantity(currentQuantity - requestMoq)}><Minus size={15} /></button>
-              <input value={currentQuantity} type="number" min={requestMoq} step={requestMoq} onBlur={(event) => updateQuantity(event.target.value)} onChange={(event) => updateQuantity(event.target.value)} />
-              <button type="button" aria-label="Increase quantity" onClick={() => updateQuantity(currentQuantity + requestMoq)}><Plus size={15} /></button>
+              <button disabled={Boolean(editor)} type="button" aria-label="Decrease quantity" onClick={() => updateQuantity(currentQuantity - effectiveRequestMoq)}><Minus size={15} /></button>
+              <input disabled={Boolean(editor)} value={currentQuantity} type="number" min={effectiveRequestMoq} step={effectiveRequestMoq} onBlur={(event) => updateQuantity(event.target.value)} onChange={(event) => updateQuantity(event.target.value)} />
+              <button disabled={Boolean(editor)} type="button" aria-label="Increase quantity" onClick={() => updateQuantity(currentQuantity + effectiveRequestMoq)}><Plus size={15} /></button>
             </div>
-            <small>{copy.quantityNote(requestMoq)}</small>
+            <small>{copy.quantityNote(effectiveRequestMoq)}</small>
           </div>
+          </ProductEditorTarget>
           <div className="pd-direct-inquiry-form" id="pd-inquiry-form">
             <label htmlFor="pd-direct-inquiry-memo">{copy.directInquiryTitle}</label>
             <textarea
+              disabled={Boolean(editor)}
               id="pd-direct-inquiry-memo"
               maxLength={1000}
               onChange={(event) => setDirectMemo(event.target.value)}
@@ -930,10 +1178,10 @@ export function ProductDetailPage() {
               value={directMemo}
             />
             <div className="pd-direct-actions">
-              <button className="pd-secondary-action" type="button" onClick={addSelectedItem}><Plus size={17} />{copy.addToInquiry}</button>
+              <button className="pd-secondary-action" disabled={Boolean(editor) || missingRequiredOptions.length > 0} type="button" onClick={addSelectedItem}><Plus size={17} />{copy.addToInquiry}</button>
               <button
                 className="pd-primary-action"
-                disabled={directStatus === 'submitting'}
+                disabled={Boolean(editor) || directStatus === 'submitting' || missingRequiredOptions.length > 0}
                 type="button"
                 onClick={submitSelectedProductInquiry}
               >
@@ -959,77 +1207,75 @@ export function ProductDetailPage() {
       </aside>
     </section>
 
-    <section className="pd-assurance-strip" aria-label={copy.guide}>
-      <article><strong>{copy.assuranceMoqTitle}</strong><span>{copy.assuranceMoqBody}</span></article>
-      <article><strong>{copy.assuranceMarketTitle}</strong><span>{copy.assuranceMarketBody}</span></article>
-      <article><strong>{copy.assuranceAssetsTitle}</strong><span>{copy.assuranceAssetsBody}</span></article>
-      <article><strong>{copy.assuranceQcTitle}</strong><span>{copy.assuranceQcBody}</span></article>
-    </section>
+    {keyFacts.length > 0 && <section className="pd-key-facts" aria-label={copy.keyFacts}>
+      <p>{copy.keyFacts}</p>
+      <dl>{keyFacts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+    </section>}
 
     <nav className="pd-section-nav" aria-label={copy.productInfo}>
-      <a href="#pd-overview">{copy.sectionOverview}</a>
+      {hasDetailStory && <a href="#pd-overview">{copy.sectionOverview}</a>}
       <a href="#pd-specification">{copy.sectionSpecification}</a>
-      <a href="#pd-material">{copy.sectionMaterial}</a>
+      {hasMaterialAndCare && <a href="#pd-material">{copy.sectionMaterial}</a>}
       <a href="#pd-delivery">{copy.sectionDelivery}</a>
     </nav>
 
-    <section className="pd-editorial pd-overview" id="pd-overview">
-      <div className="pd-editorial-copy">
-        <p className="pd-editorial-eyebrow">{copy.quietDetailEyebrow}</p>
-        <h2>{productDetailContent.headline || copy.quietDetailHeadline}</h2>
-        <p>{overviewBody}</p>
-      </div>
-      <div className="pd-overview-grid">
-        <div className="pd-overview-media">
-          {product.imageSet?.card || product.imageSet?.detail
-            ? <img src={product.imageSet.card || product.imageSet.detail} alt={productAlt} loading="lazy" />
-            : <div className="pd-image-placeholder"><Images size={30} /><span>{copy.noImage}</span></div>}
-        </div>
-        <article className="pd-overview-note">
-          <span>01 / FORM</span>
-          <h3>{productDetailContent.decoration || copy.buyerPointTitleOne}</h3>
-          <p>{productDetailContent.fit || copy.buyerPointBodyOne}</p>
-        </article>
-      </div>
-      <div className="pd-buyer-points" aria-label={copy.buyerPoint}>
-        <p>{copy.buyerPoint}</p>
-        <article><strong>01</strong><h3>{copy.buyerPointTitleOne}</h3><span>{copy.buyerPointBodyOne}</span></article>
-        <article><strong>02</strong><h3>{copy.buyerPointTitleTwo}</h3><span>{copy.buyerPointBodyTwo}</span></article>
-        <article><strong>03</strong><h3>{copy.buyerPointTitleThree}</h3><span>{copy.buyerPointBodyThree}</span></article>
-      </div>
-    </section>
+    {hasDetailStory && <section className="pd-editorial pd-detail-story" id="pd-overview">
+      <ProductEditorTarget editor={editor} field="detailBlocks" label="상세 콘텐츠">
+        <ProductDetailBlocks
+          blocks={detailBlocks}
+          care={careGuideBody}
+          careTitle={copy.careGuide}
+          description={productDetailContent.body || description || copy.detailImagesIntro}
+          editor={editor}
+          galleryImages={galleryImages}
+          headline={productDetailContent.headline || productName}
+          locale={contentLocale}
+          noImageCopy={copy.noImage}
+          specificationTitle={copy.specification}
+          specifications={specificationItems}
+        />
+      </ProductEditorTarget>
+    </section>}
 
     <section className="pd-editorial pd-specification-section" id="pd-specification">
       <div className="pd-section-heading">
         <div><p>{copy.productInfo}</p><h2>{copy.specification}</h2></div>
         <span>{copy.specificationIntro}</span>
       </div>
-      <div className="pd-spec-layout">
-        <div className="pd-spec-image">
-          {product.imageSet?.detail || product.imageSet?.card
-            ? <img src={product.imageSet.detail || product.imageSet.card} alt={productAlt} loading="lazy" />
-            : <div className="pd-image-placeholder"><Images size={30} /><span>{copy.noImage}</span></div>}
-        </div>
-        <dl className="pd-spec-table">
-          {productInfoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
-          {visibleMoq && <div><dt>{copy.moq}</dt><dd>{visibleMoq} pcs</dd></div>}
-          {specificationRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
-        </dl>
+      <div className="pd-spec-layout is-data-only">
+        <ProductEditorTarget align="end" editor={editor} field="specs" label="상세 스펙"><dl className="pd-spec-table">
+            {productInfoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+            {effectiveVisibleMoq && <div><dt>{copy.moq}</dt><dd>{effectiveVisibleMoq} pcs</dd></div>}
+            {specificationRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+          </dl></ProductEditorTarget>
+        <ProductEditorTarget align="end" editor={editor} field="care" label="사이즈 안내">
+          <aside className="pd-size-note"><strong>{copy.sizeGuide}</strong><p>{sizeGuideBody}</p></aside>
+        </ProductEditorTarget>
       </div>
     </section>
 
-    <section className="pd-editorial pd-material-section" id="pd-material">
-      <div className="pd-material-copy">
-        <p className="pd-editorial-eyebrow">{copy.materialGuide}</p>
-        <h2>{copy.materialHeadline}</h2>
-        {materialGuideBody && <p>{materialGuideBody}</p>}
+    {hasMaterialAndCare && <section className="pd-editorial pd-material-care-section" id="pd-material">
+      <div className="pd-section-heading">
+        <div><p>{copy.productStructure}</p><h2>{copy.materialAndCare}</h2></div>
+        {materialGuideBody && <span>{materialGuideBody}</span>}
       </div>
-      <div className="pd-material-cards">
-        {product.material && <article><span>{product.material}</span><strong>{copy.material}</strong></article>}
-        {joinList(colors) && <article><span>{joinList(colors)}</span><strong>{copy.colors}</strong></article>}
-        {copy.quoteNotice && <article><span>QC</span><strong>{copy.assuranceQcTitle}</strong></article>}
+      <div className="pd-material-care-grid">
+        <ProductEditorTarget editor={editor} field="productInfo" label="제품 구조">
+          <dl className="pd-structure-list">
+            {structureRows.length > 0
+              ? structureRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)
+              : <div><dt>{copy.material}</dt><dd>—</dd></div>}
+          </dl>
+        </ProductEditorTarget>
+        <ProductEditorTarget align="end" editor={editor} field="care" label="착용 및 관리 안내">
+          <div className="pd-care-guides">
+            {(wearingGuideBody || editor) && <article><strong>{copy.wearingGuide}</strong><p>{wearingGuideBody || '—'}</p></article>}
+            {(sizeGuideBody || editor) && <article><strong>{copy.sizeGuide}</strong><p>{sizeGuideBody || '—'}</p></article>}
+            {(careGuideBody || editor) && <article><strong>{copy.careGuide}</strong><p>{careGuideBody || '—'}</p></article>}
+          </div>
+        </ProductEditorTarget>
       </div>
-    </section>
+    </section>}
 
     <section className="pd-editorial pd-delivery-section" id="pd-delivery">
       <div className="pd-section-heading">
@@ -1040,14 +1286,14 @@ export function ProductDetailPage() {
         <article><strong>01</strong><h3>{copy.quoteStepSelect}</h3><p>{copy.quoteStepSelectBody}</p></article>
         <article><strong>02</strong><h3>{copy.quoteStepReceive}</h3><p>{copy.quoteStepReceiveBody}</p></article>
         <article><strong>03</strong><h3>{copy.quoteStepConfirm}</h3><p>{copy.quoteStepConfirmBody}</p></article>
-        <article><strong>04</strong><h3>{copy.shippingNotice}</h3><p>{shippingNoticeBody}</p>{sizeGuideBody && <small>{sizeGuideBody}</small>}</article>
       </div>
+      <aside className="pd-shipping-note"><strong>{copy.shippingNotice}</strong><p>{shippingNoticeBody}</p></aside>
     </section>
 
     <section className="pd-related">
       <div className="pd-section-heading">
         <div><p>{copy.category}</p><h2>{copy.categoryProducts}</h2></div>
-        <Link to={toLocalePath(`/products?category=${product.categoryId}`)}>{copy.categoryView}</Link>
+        {editor ? <span>{copy.categoryView}</span> : <Link to={toLocalePath(`/products?category=${product.categoryId}`)}>{copy.categoryView}</Link>}
       </div>
       {relatedProducts.length > 0
         ? <div className="catalog-grid">{relatedProducts.map((item) => <CatalogCard key={item.productId} product={item} />)}</div>
@@ -1055,9 +1301,51 @@ export function ProductDetailPage() {
     </section>
 
     <div className="pd-mobile-action" aria-label={copy.quoteNotice}>
-      {canRequestProductQuote
-        ? <a className="pd-primary-action" href="#pd-inquiry-form">{copy.directInquirySubmit}</a>
+      {showQuoteTools
+        ? editor ? <button className="pd-primary-action" disabled type="button">{copy.directInquirySubmit}</button> : <a className="pd-primary-action" href="#pd-inquiry-form">{copy.directInquirySubmit}</a>
         : !canViewAdminPrices && <Link className="pd-secondary-action" to={toLocalePath(accessLink)}>{accessLabel}</Link>}
     </div>
   </main>
+}
+
+export function ProductDetailPage() {
+  const { productId } = useParams()
+  const {
+    addInquiryItem,
+    approvedPrice,
+    dataError,
+    dataStatus,
+    getAdminPriceBooks,
+    getPrice,
+    isAdmin,
+    isApproved,
+    products,
+    submitProductInquiry,
+    viewerState,
+  } = useCommerce()
+  const { contentLocale, locale, toLocalePath } = useLocalePath()
+  const product = products.find((item) => item.productId === productId)
+
+  if (dataStatus === 'loading') {
+    return <main className="content pd-page"><div className="empty">Loading product details...</div></main>
+  }
+  if (dataStatus === 'error') {
+    return <main className="content pd-page"><div className="empty"><h1>Catalog API unavailable</h1><p>{dataError || 'Unable to load product details.'}</p></div></main>
+  }
+
+  return <ProductDetailView
+    addInquiryItem={addInquiryItem}
+    adminPriceBooks={product && isAdmin ? getAdminPriceBooks(product.productId) : []}
+    approvedAmount={product ? approvedPrice(product.productId) : null}
+    contentLocale={contentLocale}
+    isAdmin={isAdmin}
+    isApproved={isApproved}
+    locale={locale}
+    price={product ? getPrice(product.productId) : null}
+    product={product}
+    products={products}
+    submitProductInquiry={submitProductInquiry}
+    toLocalePath={toLocalePath}
+    viewerState={viewerState}
+  />
 }

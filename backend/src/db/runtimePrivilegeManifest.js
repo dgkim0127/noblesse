@@ -17,10 +17,14 @@ export const runtimePrivilegeManifest = Object.freeze({
   fx_auto_price_events: ["SELECT", "INSERT"],
   collections: [],
   product_collections: [],
+  home_showcase_slides: ["SELECT", "INSERT", "UPDATE", "DELETE"],
+  home_page_configs: ["SELECT", "UPDATE"],
   inquiries: ["SELECT", "INSERT", "UPDATE"],
   inquiry_items: ["SELECT", "INSERT"],
   admin_quotes: ["SELECT", "INSERT", "UPDATE"],
-  admin_quote_items: ["SELECT", "INSERT"],
+  admin_quote_items: ["SELECT", "INSERT", "UPDATE"],
+  admin_quote_documents: ["SELECT", "INSERT"],
+  admin_quote_status_history: ["SELECT", "INSERT"],
   banners: [],
   catalog_files: [],
   audit_logs: ["SELECT", "INSERT"],
@@ -43,6 +47,7 @@ const querySourceModules = Object.freeze([
   "buyerQueries.js",
   "buyerRegistrationQueries.js",
   "buyerInquiryQueries.js",
+  "buyerQuoteQueries.js",
   "adminAccessQueries.js",
   "adminDashboardQueries.js",
   "adminBuyerQueries.js",
@@ -51,7 +56,9 @@ const querySourceModules = Object.freeze([
   "adminFxQueries.js",
   "adminPriceQueries.js",
   "adminProductQueries.js",
-  "adminQuoteQueries.js"
+  "adminQuoteQueries.js",
+  "homeShowcaseQueries.js",
+  "homeLayoutQueries.js"
 ]);
 
 export function getRuntimePrivilegeEntries() {
@@ -94,7 +101,9 @@ export function extractReferencedTablesFromQuerySource(sourceText) {
     /\b(?:from|join|into|update|delete\s+from)\s+(?:public\.)?([a-z_][a-z0-9_]*)\b/gi;
   let match = pattern.exec(sourceText);
   while (match) {
-    if (match[1] !== "set" && match[1] !== "lateral" && match[1] !== "of") {
+    const nextToken = sourceText.slice(pattern.lastIndex).trimStart();
+    const isTableFunction = nextToken.startsWith("(");
+    if (!isTableFunction && match[1] !== "set" && match[1] !== "lateral" && match[1] !== "of") {
       tables.add(match[1]);
     }
     match = pattern.exec(sourceText);

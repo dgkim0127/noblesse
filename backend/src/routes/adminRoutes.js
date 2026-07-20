@@ -28,6 +28,18 @@ export function createAdminRoutes({
 }) {
   const router = Router();
   const can = (permissionKey) => requirePermission(permissionKey);
+  const requireBulkPublishPermission = (req, res, next) => {
+    if (["publish", "unpublish"].includes(req.body?.action)) {
+      return can("catalog.publish")(req, res, next);
+    }
+    return next();
+  };
+  const requireShowcasePublishPermission = (req, res, next) => {
+    if (Object.hasOwn(req.body || {}, "isActive")) {
+      return can("catalog.publish")(req, res, next);
+    }
+    return next();
+  };
 
   router.get(
     "/me",
@@ -128,6 +140,16 @@ export function createAdminRoutes({
     can("dashboard.read"),
     asyncRoute(async (req, res) => {
       const data = await services.dashboard.getDashboard(req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/analytics",
+    requireAdmin,
+    can("analytics.read"),
+    asyncRoute(async (req, res) => {
+      const data = await services.analytics.getAnalytics(req.adminViewer);
       res.json({ data, meta: withRequestId(req) });
     })
   );
@@ -484,6 +506,156 @@ export function createAdminRoutes({
   );
 
   router.patch(
+    "/products/bulk",
+    requireAdmin,
+    can("catalog.write"),
+    requireBulkPublishPermission,
+    asyncRoute(async (req, res) => {
+      const data = await services.products.bulkUpdateProducts(req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/home-showcase",
+    requireAdmin,
+    can("catalog.read"),
+    asyncRoute(async (req, res) => {
+      const slides = await services.homeShowcase.listSlides(req.adminViewer);
+      res.json({ data: { slides }, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/home-layout",
+    requireAdmin,
+    can("catalog.read"),
+    asyncRoute(async (req, res) => {
+      const data = await services.homeLayout.getLayout(req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.put(
+    "/home-layout/draft",
+    requireAdmin,
+    can("catalog.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.homeLayout.saveDraft(req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/home-layout/publish",
+    requireAdmin,
+    can("catalog.publish"),
+    asyncRoute(async (req, res) => {
+      const data = await services.homeLayout.publish(req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/home-layout/reset-draft",
+    requireAdmin,
+    can("catalog.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.homeLayout.resetDraft(req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/home-showcase",
+    requireAdmin,
+    can("catalog.write"),
+    requireShowcasePublishPermission,
+    asyncRoute(async (req, res) => {
+      const data = await services.homeShowcase.createSlide(req.body, req.adminViewer);
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.put(
+    "/home-showcase/order",
+    requireAdmin,
+    can("catalog.write"),
+    asyncRoute(async (req, res) => {
+      const slides = await services.homeShowcase.reorderSlides(req.body, req.adminViewer);
+      res.json({ data: { slides }, meta: withRequestId(req) });
+    })
+  );
+
+  router.patch(
+    "/home-showcase/:slideId",
+    requireAdmin,
+    can("catalog.write"),
+    requireShowcasePublishPermission,
+    asyncRoute(async (req, res) => {
+      const data = await services.homeShowcase.updateSlide(
+        req.params.slideId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/home-showcase/:slideId/image",
+    requireAdmin,
+    can("catalog.write"),
+    imageUploadParser,
+    asyncRoute(async (req, res) => {
+      const data = await services.homeShowcase.uploadImage(
+        req.params.slideId,
+        {
+          contentType: req.headers["content-type"] || "",
+          body: req.body
+        },
+        req.adminViewer
+      );
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.delete(
+    "/home-showcase/:slideId",
+    requireAdmin,
+    can("catalog.write"),
+    can("catalog.publish"),
+    asyncRoute(async (req, res) => {
+      const data = await services.homeShowcase.deleteSlide(req.params.slideId, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/products/:productId",
+    requireAdmin,
+    can("catalog.read"),
+    asyncRoute(async (req, res) => {
+      const data = await services.products.getProduct(req.params.productId, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/products/:productId/duplicate",
+    requireAdmin,
+    can("catalog.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.products.duplicateProduct(
+        req.params.productId,
+        req.body,
+        req.adminViewer
+      );
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.patch(
     "/products/:productId/visibility",
     requireAdmin,
     can("catalog.publish"),
@@ -559,6 +731,44 @@ export function createAdminRoutes({
     asyncRoute(async (req, res) => {
       const data = await services.quotes.getQuoteById(req.params.quoteId, req.adminViewer);
       res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.patch(
+    "/quotes/:quoteId",
+    requireAdmin,
+    can("quotes.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.quotes.updateQuote(req.params.quoteId, req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/quotes/:quoteId/issue",
+    requireAdmin,
+    can("quotes.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.quotes.issueQuote(req.params.quoteId, req.adminViewer);
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/quotes/:quoteId/documents/:documentId/pdf",
+    requireAdmin,
+    can("quotes.read"),
+    asyncRoute(async (req, res, next) => {
+      const document = await services.quotes.getQuoteDocument(
+        req.params.quoteId,
+        req.params.documentId,
+        req.adminViewer
+      );
+      res.setHeader("content-type", "application/pdf");
+      res.setHeader("cache-control", "private, no-store");
+      res.setHeader("content-disposition", `attachment; filename="${document.filename.replace(/[^A-Za-z0-9._-]/g, "-")}"`);
+      document.stream.on("error", next);
+      document.stream.pipe(res);
     })
   );
 

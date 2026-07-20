@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useAdminAccess } from '../../components/AdminAccessContext'
+import { useLocalePath } from '../../utils/locale'
+import { formatSelectedProductOptions } from '../../utils/productOptions'
 import { AdminLink, AdminMoney, AdminPageHeader, AdminStatus } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy, getAdminStatusLabel, useAdminCopy } from './adminCopy'
@@ -9,6 +12,10 @@ const statusOptions = ['requested', 'checking', 'quoted', 'confirmed', 'cancelle
 export function AdminInquiryDetailPage() {
   const t = useAdminCopy()
   const { inquiryId } = useParams()
+  const navigate = useNavigate()
+  const { toLocalePath } = useLocalePath()
+  const { hasPermission } = useAdminAccess()
+  const canManage = hasPermission('inquiries.manage')
   const [memoDraft, setMemoDraft] = useState('')
   const [saveStatus, setSaveStatus] = useState('idle')
   const [saveMessage, setSaveMessage] = useState('')
@@ -54,8 +61,24 @@ export function AdminInquiryDetailPage() {
     }
   }
 
+  const createQuoteDraft = async () => {
+    if (saveStatus === 'saving') return
+    setSaveStatus('saving')
+    setSaveMessage('')
+    try {
+      const result = await mutate((api, token) => api.createQuote({ inquiryId }, token))
+      const quoteId = result.data?.quote?.id
+      if (!quoteId) throw new Error('생성된 견적 ID를 확인할 수 없습니다.')
+      navigate(toLocalePath(`/admin/quotes/${quoteId}`))
+    } catch (quoteError) {
+      setSaveMessage(quoteError?.message || '견적 초안을 만들지 못했습니다.')
+    } finally {
+      setSaveStatus('idle')
+    }
+  }
+
   return <>
-    <AdminPageHeader title={inquiry.inquiryNumber || inquiry.id || inquiryId} description={t.inquiries.detailDescription} actions={<AdminLink to="/admin/inquiries">{t.inquiries.backToInquiries}</AdminLink>} />
+    <AdminPageHeader title={inquiry.inquiryNumber || inquiry.id || inquiryId} description={t.inquiries.detailDescription} actions={<><AdminLink to="/admin/inquiries">{t.inquiries.backToInquiries}</AdminLink>{hasPermission('quotes.write') && <button className="primary-action" disabled={saveStatus === 'saving'} type="button" onClick={createQuoteDraft}>견적 초안 만들기</button>}</>} />
 
     <section className="admin-detail-grid">
       <article className="admin-card">
@@ -71,7 +94,7 @@ export function AdminInquiryDetailPage() {
         <h2>{t.inquiries.inquiryStatus}</h2>
         <AdminStatus status={inquiry.status} />
         <div className="admin-actions">
-          {statusOptions.filter((item) => item !== inquiry.status).map((nextStatus) => <button
+          {canManage && statusOptions.filter((item) => item !== inquiry.status).map((nextStatus) => <button
             disabled={statusSaveState === 'saving'}
             key={nextStatus}
             onClick={() => updateStatus(nextStatus)}
@@ -88,8 +111,8 @@ export function AdminInquiryDetailPage() {
       </article>
       <article className="admin-card wide-card">
         <h2>{t.inquiries.adminMemo}</h2>
-        <textarea value={memoDraft || inquiry.adminMemo || ''} onChange={(event) => setMemoDraft(event.target.value)} />
-        <div className="admin-actions"><button type="button" disabled={saveStatus === 'saving'} onClick={saveMemo}>{saveStatus === 'saving' ? t.common.saving : t.common.save}</button></div>
+        <textarea disabled={!canManage} value={memoDraft || inquiry.adminMemo || ''} onChange={(event) => setMemoDraft(event.target.value)} />
+        {canManage && <div className="admin-actions"><button type="button" disabled={saveStatus === 'saving'} onClick={saveMemo}>{saveStatus === 'saving' ? t.common.saving : t.common.save}</button></div>}
         {saveMessage && <p className="admin-local-message">{saveMessage}</p>}
       </article>
     </section>
@@ -98,17 +121,20 @@ export function AdminInquiryDetailPage() {
       <h2>{t.inquiries.itemSnapshot}</h2>
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th>{t.fields.productCode}</th><th>{t.fields.productName}</th><th>{t.fields.color}</th><th>{t.fields.size}</th><th>{t.fields.quantity}</th><th>{t.products.moq}</th><th>{t.inquiries.priceSnapshot}</th><th>{t.inquiries.subtotal}</th></tr></thead>
-          <tbody>{items.map((item) => <tr key={`${item.id || item.productCode}-${item.color}-${item.size}`}>
-            <td>{item.productCode}</td>
-            <td>{item.productName}</td>
-            <td>{item.color}</td>
-            <td>{item.size}</td>
-            <td>{item.quantity}</td>
-            <td>{item.moq}</td>
-            <td><AdminMoney unavailable={item.priceUnavailable} value={item.priceSnapshot} currency={inquiry.currency} /></td>
-            <td><AdminMoney unavailable={item.priceUnavailable} value={item.subtotal} currency={inquiry.currency} /></td>
-          </tr>)}</tbody>
+          <thead><tr><th>{t.fields.productCode}</th><th>{t.fields.productName}</th><th>선택 옵션</th><th>{t.fields.quantity}</th><th>{t.products.moq}</th><th>{t.inquiries.priceSnapshot}</th><th>{t.inquiries.subtotal}</th></tr></thead>
+          <tbody>{items.map((item, index) => {
+            const optionSummary = formatSelectedProductOptions(item.selectedOptions, 'kr')
+            const legacySummary = [item.color, item.size].filter(Boolean)
+            return <tr key={item.id || `${item.productCode}-${index}`}>
+            <td data-label={t.fields.productCode}>{item.productCode}</td>
+            <td data-label={t.fields.productName}>{item.productName}</td>
+            <td data-label="선택 옵션">{(optionSummary.length ? optionSummary : legacySummary).join(' / ') || '-'}</td>
+            <td data-label={t.fields.quantity}>{item.quantity}</td>
+            <td data-label={t.products.moq}>{item.moq}</td>
+            <td data-label={t.inquiries.priceSnapshot}><AdminMoney unavailable={item.priceUnavailable} value={item.priceSnapshot} currency={inquiry.currency} /></td>
+            <td data-label={t.inquiries.subtotal}><AdminMoney unavailable={item.priceUnavailable} value={item.subtotal} currency={inquiry.currency} /></td>
+          </tr>
+          })}</tbody>
         </table>
       </div>
     </section>

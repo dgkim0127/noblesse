@@ -1,90 +1,40 @@
-import { Activity, FileText, Handshake, ListChecks, Tags, UserCheck } from 'lucide-react'
-import { Fragment } from 'react'
+import { Building2, FilePenLine, FileText, PackageSearch } from 'lucide-react'
 import { useAdminAccess } from '../../components/AdminAccessContext'
-import { AdminLink, AdminPageHeader, AdminStatus } from './AdminPageParts'
+import { AdminEmptyState, AdminLink, AdminPageHeader } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiResource } from './adminApiPageUtils'
-import { getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
 export function AdminDashboardPage() {
-  const t = useAdminCopy()
-  const { admin, hasPermission } = useAdminAccess()
-  const { data, error, status } = useAdminApiResource((api, token) => api.getDashboard(token), [])
-  const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
+  const { hasPermission } = useAdminAccess()
+  const resource = useAdminApiResource((api, token) => api.getDashboard(token), [])
+  const apiState = shouldShowAdminApiState(resource.status) ? <AdminApiState error={resource.error} status={resource.status} /> : null
   if (apiState) return apiState
 
-  const inquiries = data?.inquiries || {}
-  const buyers = data?.buyers || {}
-  const products = data?.products || {}
-  const accountFunnel = data?.accountFunnel || {}
-  const workQueue = data?.workQueue || {}
-  const catalogHealth = data?.catalogHealth || {}
-  const recentActivity = data?.recentActivity || {}
-  const quickActions = [
-    hasPermission('buyers.review') && <AdminLink key="buyers" to="/admin/buyers">{t.dashboard.reviewBuyers || 'Review buyers'}</AdminLink>,
-    hasPermission('catalog.write') && <AdminLink key="catalog" className="primary-action" to="/admin/catalog/new">{t.dashboard.addProduct}</AdminLink>,
-    hasPermission('inquiries.read') && <AdminLink key="inquiries" to="/admin/inquiries">{t.dashboard.viewInquiries}</AdminLink>,
-    hasPermission('audit.read') && <AdminLink key="audit" to="/admin/audit">{t.dashboard.viewAudit || 'View audit log'}</AdminLink>,
-  ].filter(Boolean)
+  const data = resource.data || {}
+  const inquiries = data.inquiries || {}
+  const buyers = data.buyers || {}
+  const workQueue = data.workQueue || {}
+  const catalogHealth = data.catalogHealth || {}
+  const tasks = [
+    { key: 'inquiries', title: '새 문의 확인', description: '고객 요청을 확인하고 견적 초안을 만드세요.', count: workQueue.inquiryFollowUp ?? inquiries.requested ?? 0, to: '/admin/inquiries', permission: 'inquiries.read', icon: FileText },
+    { key: 'quotes', title: '견적 초안 및 후속 처리', description: '초안을 완성하고 유효한 PDF 견적서를 발행하세요.', count: workQueue.quoteFollowUp ?? 0, to: '/admin/quotes', permission: 'quotes.read', icon: FilePenLine },
+    { key: 'buyers', title: '승인 대기 거래처', description: '회사 정보와 가격 접근 권한을 검토하세요.', count: workQueue.buyerReviews ?? buyers.pending ?? 0, to: '/admin/buyers', permission: 'buyers.read', icon: Building2 },
+    { key: 'products', title: '보완이 필요한 상품', description: '번역, 사진, 카테고리와 KR 가격을 완성하세요.', count: catalogHealth.needsReview ?? 0, to: '/admin/products?completion=incomplete', permission: 'catalog.read', icon: PackageSearch },
+  ].filter((item) => hasPermission(item.permission))
 
   return <>
-    <AdminPageHeader
-      title={t.dashboard.title}
-      description={t.dashboard.description}
-      actions={<>{quickActions}</>}
-    />
-
-    <section className="admin-grid compact">
-      <article className="admin-stat-card"><UserCheck size={20} /><span>{t.dashboard.currentRole || 'Current role'}</span><strong>{t.shell.roles?.[admin?.adminRole] || admin?.adminRole || '-'}</strong></article>
-      <article className="admin-stat-card"><Handshake size={20} /><span>{t.dashboard.pendingBuyers}</span><strong>{buyers.pending ?? 0}</strong></article>
-      <article className="admin-stat-card"><FileText size={20} /><span>{t.dashboard.requestedInquiries}</span><strong>{inquiries.requested ?? 0}</strong></article>
-      <article className="admin-stat-card"><Tags size={20} /><span>{t.dashboard.visibleProducts}</span><strong>{products.visible ?? 0}</strong></article>
-      <article className="admin-stat-card"><ListChecks size={20} /><span>{t.dashboard.manualFollowUp}</span><strong>{data?.manualFollowUp?.count ?? 0}</strong></article>
-    </section>
-
-    <section className="admin-grid two-column">
-      <article className="admin-card">
-        <h2>{t.dashboard.workQueue || 'Today work queue'}</h2>
-        <dl className="admin-definition-list">
-          <dt>{t.dashboard.buyerReviews || 'Buyer reviews'}</dt><dd>{workQueue.buyerReviews ?? 0}</dd>
-          <dt>{t.dashboard.inquiryFollowUp || 'Inquiry follow-up'}</dt><dd>{workQueue.inquiryFollowUp ?? 0}</dd>
-          <dt>{t.dashboard.quoteFollowUp || 'Quote follow-up'}</dt><dd>{workQueue.quoteFollowUp ?? 0}</dd>
-        </dl>
-      </article>
-      <article className="admin-card">
-        <h2>{t.dashboard.accountFunnel || 'Buyer verification funnel'}</h2>
-        <dl className="admin-definition-list">
-          {['draft', 'pending', 'approved', 'rejected', 'suspended', 'blocked'].map((item) => <Fragment key={item}><dt>{getAdminStatusLabel(t, item)}</dt><dd>{accountFunnel[item] ?? 0}</dd></Fragment>)}
-        </dl>
-      </article>
-    </section>
-
-    <section className="admin-grid two-column">
-      <article className="admin-card">
-        <h2>{t.dashboard.catalogHealth || 'Catalog health'}</h2>
-        <dl className="admin-definition-list">
-          <dt>{t.dashboard.catalogReady || 'Ready'}</dt><dd>{catalogHealth.ready ?? 0}</dd>
-          <dt>{t.dashboard.catalogNeedsReview || 'Needs review'}</dt><dd>{catalogHealth.needsReview ?? 0}</dd>
-          <dt>{t.dashboard.catalogHidden || 'Hidden'}</dt><dd>{catalogHealth.hidden ?? 0}</dd>
-        </dl>
-      </article>
-      <article className="admin-card">
-        <h2>{t.dashboard.recentActivity || 'Recent activity'}</h2>
-        <div className="admin-empty">
-          <Activity size={18} />
-          <p>{recentActivity.label || t.dashboard.auditPending || 'Audit rows are available in the audit log.'}</p>
-          {hasPermission('audit.read') && <AdminLink to="/admin/audit">{t.dashboard.viewAudit || 'View audit log'}</AdminLink>}
-        </div>
-      </article>
-    </section>
-
-    <section className="admin-card">
-      <h2>{t.dashboard.inquiryStatus}</h2>
-      <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead><tr><th>{t.common.status}</th><th>{t.common.count}</th></tr></thead>
-          <tbody>{['requested', 'checking', 'quoted', 'confirmed', 'cancelled'].map((item) => <tr key={item}><td><AdminStatus status={item} /></td><td>{inquiries[item] ?? 0}</td></tr>)}</tbody>
-        </table>
-      </div>
+    <AdminPageHeader title="홈" description="먼저 처리해야 할 운영 업무를 확인하세요." actions={hasPermission('catalog.write') && <AdminLink className="primary-action" to="/admin/products/new">새 상품</AdminLink>} />
+    {tasks.length === 0 ? <AdminEmptyState title="표시할 운영 업무가 없습니다." /> : <section className="admin-task-list" aria-label="오늘 할 일">
+      <header><h2>오늘 할 일</h2><span>{tasks.reduce((sum, item) => sum + Number(item.count || 0), 0)}건</span></header>
+      {tasks.map(({ count, description, icon: Icon, key, title, to }) => <AdminLink className="admin-task-row" key={key} to={to}>
+        <Icon aria-hidden="true" size={20} />
+        <span><strong>{title}</strong><small>{description}</small></span>
+        <b>{count || 0}</b>
+      </AdminLink>)}
+    </section>}
+    <section className="admin-dashboard-summary">
+      <div><span>공개 상품</span><strong>{data.products?.visible ?? 0}</strong></div>
+      <div><span>숨김 상품</span><strong>{catalogHealth.hidden ?? 0}</strong></div>
+      <div><span>진행 중 문의</span><strong>{(inquiries.requested ?? 0) + (inquiries.checking ?? 0)}</strong></div>
     </section>
   </>
 }

@@ -16,6 +16,7 @@ function printSanitized(result) {
       adminFirebaseUserFound: result.adminFirebaseUserFound === true,
       buyerRegistered: result.buyerRegistered === true,
       adminReady: result.adminReady === true,
+      ownerReady: result.ownerReady === true,
       buyerApproved: result.buyerApproved === true,
       adminAlreadyReady: result.adminAlreadyReady === true,
       buyerAlreadyApproved: result.buyerAlreadyApproved === true

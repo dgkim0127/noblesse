@@ -379,6 +379,142 @@ test("packaged product catalog attribute detail migration matches canonical migr
   assert.equal(packaged, canonical);
 });
 
+test("admin operations redesign migration is additive and supports localized drafts and quote documents", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260713_admin_operations_redesign.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.match(sqlText, /add column if not exists name_zh_tw text/i);
+  assert.match(sqlText, /add column if not exists description_zh_tw text/i);
+  assert.match(sqlText, /alter column name_en drop not null/i);
+  assert.match(sqlText, /create table if not exists public\.admin_quote_documents/i);
+  assert.match(sqlText, /create table if not exists public\.admin_quote_status_history/i);
+  assert.match(sqlText, /document_locale in \('kr', 'en', 'jp', 'zh-TW'\)/i);
+  assert.match(sqlText, /status in \('draft', 'sent', 'accepted', 'rejected', 'cancelled'\)/i);
+  assert.doesNotMatch(sqlText, /\bdrop\s+table\b|\btruncate\b|\bdelete\s+from\b/i);
+});
+
+test("packaged admin operations redesign migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260713_admin_operations_redesign.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260713_admin_operations_redesign.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
+test("home showcase migration is additive and keeps storefront content draft-first", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260714_home_showcase_management.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.match(sqlText, /create table if not exists public\.home_showcase_slides/i);
+  assert.match(sqlText, /title jsonb not null default '\{\}'::jsonb/i);
+  assert.match(sqlText, /image_set jsonb not null default '\{\}'::jsonb/i);
+  assert.match(sqlText, /is_active boolean not null default false/i);
+  assert.match(sqlText, /target_url like '\/%'/i);
+  assert.doesNotMatch(sqlText, /\bdrop\s+table\b|\btruncate\b|\bdelete\s+from\b/i);
+});
+
+test("packaged home showcase migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260714_home_showcase_management.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260714_home_showcase_management.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
+test("home layout editor migration is additive and stores draft and published configurations separately", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260716_home_layout_editor.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.match(sqlText, /create table if not exists public\.home_page_configs/i);
+  assert.match(sqlText, /draft_config jsonb not null default '\{\}'::jsonb/i);
+  assert.match(sqlText, /published_config jsonb not null default '\{\}'::jsonb/i);
+  assert.match(sqlText, /draft_revision integer not null default 1/i);
+  assert.doesNotMatch(sqlText, /\bdrop\s+table\b|\btruncate\b|\bdelete\s+from\b/i);
+});
+
+test("packaged home layout editor migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260716_home_layout_editor.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260716_home_layout_editor.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
+test("quote status trend index migration is additive and read optimized", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260714_quote_status_trend_index.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.match(sqlText, /create index if not exists idx_admin_quote_status_history_created_status/i);
+  assert.match(sqlText, /admin_quote_status_history\(created_at desc, to_status\)/i);
+  assert.doesNotMatch(sqlText, /\bdrop\s+table\b|\btruncate\b|\bdelete\s+from\b/i);
+});
+
+test("packaged quote status trend index migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260714_quote_status_trend_index.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260714_quote_status_trend_index.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
+test("product option and quote snapshot migration is additive", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260716_product_options_and_quote_snapshots.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.match(sqlText, /add column if not exists option_groups jsonb not null default '\[\]'::jsonb/i);
+  assert.match(sqlText, /inquiry_items\s+add column if not exists selected_options jsonb not null default '\[\]'::jsonb/i);
+  assert.match(sqlText, /admin_quote_items\s+add column if not exists selected_options jsonb not null default '\[\]'::jsonb/i);
+  assert.doesNotMatch(sqlText, /\bdrop\b|\btruncate\b|\bdelete\s+from\b|\brename\b/i);
+});
+
+test("packaged product option migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260716_product_options_and_quote_snapshots.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260716_product_options_and_quote_snapshots.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
 test("migration runner resolves packaged lifecycle migration path explicitly", () => {
   const resolved = resolveSchemaSqlPath({
     SCHEMA_SQL_PATH: "migrations/20260622_admin_rbac_account_lifecycle.sql"
@@ -473,6 +609,22 @@ test("fresh install schema includes product catalog attribute detail fields", ()
   ]) {
     assert.match(schema, new RegExp(fragment.replace(/[{}()[\]]/g, "\\$&"), "i"));
   }
+});
+
+test("fresh install schema includes administrator-managed home showcase slides", () => {
+  const schema = readFileSync(join(process.cwd(), "..", "supabase", "schema.sql"), "utf8");
+
+  assert.match(schema, /create table if not exists public\.home_showcase_slides/i);
+  assert.match(schema, /idx_home_showcase_slides_public_order/i);
+  assert.match(schema, /target_url like '\/%'/i);
+});
+
+test("fresh install schema includes draft and published home layout configuration", () => {
+  const schema = readFileSync(join(process.cwd(), "..", "supabase", "schema.sql"), "utf8");
+
+  assert.match(schema, /create table if not exists public\.home_page_configs/i);
+  assert.match(schema, /draft_config jsonb not null default '\{\}'::jsonb/i);
+  assert.match(schema, /published_config jsonb not null default '\{\}'::jsonb/i);
 });
 
 test("migration runner does not access Secret Manager or open real DB in tests", () => {

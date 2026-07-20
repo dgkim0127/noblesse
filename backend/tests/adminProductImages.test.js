@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import express from "express";
+import sharp from "sharp";
 import { createApp } from "../src/app.js";
 import { createAdminRoutes } from "../src/routes/adminRoutes.js";
-import { createAdminProductImageService } from "../src/services/adminProductImageService.js";
+import { createAdminProductImageService, transformProductImage } from "../src/services/adminProductImageService.js";
 import { createAdminProductService } from "../src/services/adminProductService.js";
 import { errorHandler } from "../src/middleware/errorHandler.js";
 import { requestId } from "../src/middleware/requestId.js";
@@ -29,8 +30,29 @@ function multipartBody({ boundary = "noblesse-test-boundary", file = pngBytes, c
   };
 }
 
-function createImageApp({ updateProductImages, objectStore }) {
+function multipartManifestBody({ boundary = "noblesse-manifest-boundary", files = [], metadata = {} } = {}) {
+  const chunks = [
+    Buffer.from(`--${boundary}\r\ncontent-disposition: form-data; name="metadata"\r\ncontent-type: application/json\r\n\r\n${JSON.stringify(metadata)}\r\n`)
+  ];
+  files.forEach((file, index) => {
+    chunks.push(
+      Buffer.from(`--${boundary}\r\ncontent-disposition: form-data; name="images"; filename="${file.filename || `photo-${index}.png`}"\r\ncontent-type: ${file.contentType || "image/png"}\r\n\r\n`),
+      file.buffer || pngBytes,
+      Buffer.from("\r\n")
+    );
+  });
+  chunks.push(Buffer.from(`--${boundary}--\r\n`));
+  return {
+    body: Buffer.concat(chunks),
+    contentType: `multipart/form-data; boundary=${boundary}`
+  };
+}
+
+function createImageApp({ getProduct = async () => null, updateProductImages, objectStore }) {
   const queries = {
+    async getProduct(...args) {
+      return getProduct(...args);
+    },
     async updateProductImages(...args) {
       return updateProductImages(...args);
     }
@@ -44,7 +66,16 @@ function createImageApp({ updateProductImages, objectStore }) {
         buyers: {},
         products: createAdminProductService({
           queries,
-          imageService: createAdminProductImageService({ queries, objectStore })
+          imageService: createAdminProductImageService({
+            queries,
+            objectStore,
+            imageTransformer: async (buffer) => ({
+              thumb: Buffer.from(buffer),
+              card: Buffer.from(buffer),
+              detail: Buffer.from(buffer),
+              zoom: Buffer.from(buffer)
+            })
+          })
         })
       }
     },
@@ -130,14 +161,195 @@ test("POST /api/admin/products/:productId/images stores images and updates produ
   });
 
   assert.equal(response.status, 201);
-  assert.equal(saved.length, 1);
+  assert.equal(saved.length, 4);
   assert.equal(deleted.length, 0);
-  assert.equal(saved[0].contentType, "image/png");
-  assert.match(saved[0].objectKey, /^products\/11111111-1111-4111-8111-111111111111\//);
+  assert.ok(saved.every((entry) => entry.contentType === "image/webp"));
+  assert.ok(saved.every((entry) => /^products\/11111111-1111-4111-8111-111111111111\//.test(entry.objectKey)));
+  assert.ok(["thumb", "card", "detail", "zoom"].every((variant) => receivedInput.imageSet[variant]));
   assert.match(receivedInput.imageSet.card, /^\/api\/catalog\/media\//);
   assert.equal(receivedInput.imageSet.gallery[0].isPrimary, true);
   assert.equal(receivedInput.imageAlt.default, "Primary alt");
   assert.equal(response.body.data.auditLogId, "audit-image-1");
+});
+
+test("product image variants preserve the source aspect ratio", async () => {
+  const source = await sharp({
+    create: { width: 240, height: 120, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 1 } }
+  }).png().toBuffer();
+  const variants = await transformProductImage(source);
+
+  for (const buffer of Object.values(variants)) {
+    const metadata = await sharp(buffer).metadata();
+    assert.equal(metadata.width / metadata.height, 2);
+  }
+});
+
+test("manifest image upload preserves retained objects, appends new files, and makes the first item primary", async () => {
+  const saved = [];
+  const deleted = [];
+  let receivedInput;
+  const existingImage = (id, prefix, sortOrder) => ({
+    id,
+    filename: `${prefix}.webp`,
+    thumb: `/media/${prefix}-thumb`,
+    card: `/media/${prefix}-card`,
+    detail: `/media/${prefix}-detail`,
+    zoom: `/media/${prefix}-zoom`,
+    objectKeys: {
+      thumb: `products/${productId}/${prefix}-thumb.webp`,
+      card: `products/${productId}/${prefix}-card.webp`,
+      detail: `products/${productId}/${prefix}-detail.webp`,
+      zoom: `products/${productId}/${prefix}-zoom.webp`
+    },
+    sortOrder,
+    isPrimary: sortOrder === 0,
+    position: { x: 50, y: 50 },
+    scale: 1
+  });
+  const first = existingImage("existing-1", "first", 0);
+  const second = existingImage("existing-2", "second", 1);
+  const replacedObjectKeys = [...Object.values(first.objectKeys), ...Object.values(second.objectKeys)];
+  const objectStore = {
+    async save(input) {
+      saved.push(input.objectKey);
+    },
+    async deleteMany(keys) {
+      deleted.push(...keys);
+    }
+  };
+  const app = createImageApp({
+    objectStore,
+    async getProduct() {
+      return {
+        id: productId,
+        isVisible: true,
+        imageSet: { gallery: [first, second], ...first },
+        imageAlt: { gallery: [{ id: first.id, altText: "First" }, { id: second.id, altText: "Second" }] }
+      };
+    },
+    async updateProductImages(id, input) {
+      receivedInput = input;
+      return {
+        product: { id, imageSet: input.imageSet, imageAlt: input.imageAlt },
+        auditLogId: "audit-manifest-1",
+        replacedObjectKeys
+      };
+    }
+  });
+  const multipart = multipartManifestBody({
+    files: [{ filename: "03-new.png" }],
+    metadata: {
+      items: [
+        { existingId: second.id, altText: "Second updated", position: { x: 68, y: 24 }, scale: 1.6 },
+        { uploadIndex: 0, altText: "New image", position: { x: 35, y: 55 }, scale: 1.2 }
+      ],
+      localizedAlt: { kr: "상품" }
+    }
+  });
+
+  const response = await request(app, `/api/admin/products/${productId}/images`, {
+    method: "POST",
+    headers: { authorization: "Bearer admin-token", "content-type": multipart.contentType },
+    body: multipart.body
+  });
+
+  assert.equal(response.status, 201);
+  assert.equal(saved.length, 4);
+  assert.deepEqual(new Set(deleted), new Set(Object.values(first.objectKeys)));
+  assert.equal(receivedInput.imageSet.gallery.length, 2);
+  assert.equal(receivedInput.imageSet.gallery[0].id, second.id);
+  assert.equal(receivedInput.imageSet.gallery[0].isPrimary, true);
+  assert.deepEqual(receivedInput.imageSet.gallery[0].position, { x: 68, y: 24 });
+  assert.equal(receivedInput.imageSet.gallery[0].scale, 1.6);
+  assert.equal(receivedInput.imageSet.gallery[1].filename, "03-new.png");
+  assert.equal(receivedInput.imageSet.detail, second.detail);
+  assert.equal(receivedInput.imageAlt.gallery[0].altText, "Second updated");
+});
+
+test("manifest reorder without uploads keeps existing Storage objects", async () => {
+  const saved = [];
+  const deleted = [];
+  let receivedInput;
+  const gallery = ["one", "two"].map((id, index) => ({
+    id,
+    filename: `${id}.webp`,
+    thumb: `/media/${id}-thumb`,
+    card: `/media/${id}-card`,
+    detail: `/media/${id}-detail`,
+    zoom: `/media/${id}-zoom`,
+    objectKeys: Object.fromEntries(["thumb", "card", "detail", "zoom"].map((variant) => [variant, `products/${productId}/${id}-${variant}.webp`])),
+    sortOrder: index
+  }));
+  const allKeys = gallery.flatMap((image) => Object.values(image.objectKeys));
+  const app = createImageApp({
+    objectStore: {
+      async save(input) { saved.push(input.objectKey); },
+      async deleteMany(keys) { deleted.push(...keys); }
+    },
+    async getProduct() {
+      return { id: productId, isVisible: false, imageSet: { gallery }, imageAlt: {} };
+    },
+    async updateProductImages(id, input) {
+      receivedInput = input;
+      return { product: { id, ...input }, replacedObjectKeys: allKeys };
+    }
+  });
+  const multipart = multipartManifestBody({
+    metadata: {
+      items: [
+        { existingId: "two", position: { x: 50, y: 50 }, scale: 1 },
+        { existingId: "one", position: { x: 50, y: 50 }, scale: 1 }
+      ]
+    }
+  });
+
+  const response = await request(app, `/api/admin/products/${productId}/images`, {
+    method: "POST",
+    headers: { authorization: "Bearer admin-token", "content-type": multipart.contentType },
+    body: multipart.body
+  });
+
+  assert.equal(response.status, 201);
+  assert.deepEqual(receivedInput.imageSet.gallery.map((image) => image.id), ["two", "one"]);
+  assert.equal(receivedInput.imageSet.gallery[0].isPrimary, true);
+  assert.equal(saved.length, 0);
+  assert.equal(deleted.length, 0);
+});
+
+test("manifest validation rejects an empty visible gallery and invalid presentation values", async () => {
+  let updates = 0;
+  const product = {
+    id: productId,
+    isVisible: true,
+    imageSet: {
+      gallery: [{ id: "one", detail: "/one.webp", objectKeys: { detail: `products/${productId}/one.webp` } }]
+    },
+    imageAlt: {}
+  };
+  const app = createImageApp({
+    objectStore: { async save() {}, async deleteMany() {} },
+    async getProduct() { return product; },
+    async updateProductImages() { updates += 1; return null; }
+  });
+
+  const empty = multipartManifestBody({ metadata: { items: [] } });
+  const emptyResponse = await request(app, `/api/admin/products/${productId}/images`, {
+    method: "POST",
+    headers: { authorization: "Bearer admin-token", "content-type": empty.contentType },
+    body: empty.body
+  });
+  assert.equal(emptyResponse.status, 400);
+
+  const invalid = multipartManifestBody({
+    metadata: { items: [{ existingId: "one", position: { x: 101, y: 50 }, scale: 3 }] }
+  });
+  const invalidResponse = await request(app, `/api/admin/products/${productId}/images`, {
+    method: "POST",
+    headers: { authorization: "Bearer admin-token", "content-type": invalid.contentType },
+    body: invalid.body
+  });
+  assert.equal(invalidResponse.status, 400);
+  assert.equal(updates, 0);
 });
 
 test("POST /api/admin/products/:productId/images rejects unauthenticated multipart before parsing", async () => {
@@ -338,7 +550,7 @@ test("POST /api/admin/products/:productId/images cleans up uploaded objects when
   });
 
   assert.equal(response.status, 500);
-  assert.equal(saved.length, 1);
+  assert.equal(saved.length, 4);
   assert.deepEqual(deleted, saved);
 });
 
@@ -372,7 +584,7 @@ test("POST /api/admin/products/:productId/images cleans up uploaded objects when
 
   assert.equal(response.status, 404);
   assert.equal(response.body.error.code, "NOT_FOUND");
-  assert.equal(saved.length, 1);
+  assert.equal(saved.length, 4);
   assert.deepEqual(deleted, saved);
 });
 
@@ -405,5 +617,5 @@ test("POST /api/admin/products/:productId/images preserves DB failure when clean
 
   assert.equal(response.status, 500);
   assert.equal(response.body.error.code, "INTERNAL_ERROR");
-  assert.equal(saved.length, 1);
+  assert.equal(saved.length, 4);
 });

@@ -30,18 +30,20 @@ export function validateStagingBootstrapEnv(source = process.env) {
 
   const adminEmail = cleanEmail(source.NOBLESSE_STAGING_ADMIN_EMAIL);
   const buyerEmail = cleanEmail(source.NOBLESSE_STAGING_BUYER_EMAIL);
-  if (!adminEmail || !buyerEmail) {
+  const adminOnly = source.NOBLESSE_STAGING_ADMIN_ONLY === "YES";
+  if (!adminEmail || (!adminOnly && !buyerEmail)) {
     return { ok: false, category: "MISSING_EMAIL_INPUT" };
   }
 
-  if (adminEmail === buyerEmail) {
+  if (!adminOnly && adminEmail === buyerEmail) {
     return { ok: false, category: "IDENTICAL_EMAILS_REJECTED" };
   }
 
   return {
     ok: true,
     adminEmail,
-    buyerEmail
+    buyerEmail: adminOnly ? "" : buyerEmail,
+    adminOnly
   };
 }
 
@@ -56,6 +58,7 @@ function toSanitizedResult(result = {}) {
     adminFirebaseUserFound: result.adminFirebaseUserFound === true,
     buyerRegistered: result.buyerRegistered === true,
     adminReady: result.adminReady === true,
+    ownerReady: result.ownerReady === true,
     buyerApproved: result.buyerApproved === true,
     adminAlreadyReady: result.adminAlreadyReady === true,
     buyerAlreadyApproved: result.buyerAlreadyApproved === true
@@ -90,6 +93,20 @@ export function createStagingE2eBootstrapService({ firebaseUserLookup, queries, 
         return toSanitizedResult({
           ok: false,
           category: "ADMIN_FIREBASE_USER_NOT_FOUND"
+        });
+      }
+
+      if (envCheck.adminOnly) {
+        const adminResult = await queries.bootstrapAdmin({
+          adminIdentity: {
+            authUid: adminFirebaseUser.uid,
+            email: envCheck.adminEmail
+          }
+        });
+
+        return toSanitizedResult({
+          adminFirebaseUserFound: true,
+          ...adminResult
         });
       }
 

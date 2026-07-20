@@ -1,8 +1,11 @@
 import { ArrowRight, LockKeyhole, Minus, PackageCheck, Plus, ShoppingCart, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { getInquiryItemKey } from '../commerce/commerceUtils'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatMoney } from '../utils/commerce'
 import { getLocaleContentKey, getLocalizedProductAlt, getLocalizedProductName, useLocalePath } from '../utils/locale'
+import { imagePresentationStyle } from '../utils/productImageGallery'
+import { formatSelectedProductOptions } from '../utils/productOptions'
 
 const inquiryListCopy = {
   kr: {
@@ -286,10 +289,12 @@ export function InquiryListPage() {
           {hasItems && (
             <div className="quote-cart-list">
               {inquiryRows.map((row, index) => {
-                const option = { color: row.color, size: row.size }
-                const rowKey = `${row.productId}-${row.color}-${row.size}`
+                const option = { color: row.color, size: row.size, selectedOptions: row.selectedOptionPairs }
+                const rowKey = getInquiryItemKey(row.productId, option)
                 const productName = getLocalizedProductName(row.product, locale) || row.productName
                 const imageAlt = getLocalizedProductAlt(row.product, locale) || productName
+                const optionSummary = formatSelectedProductOptions(row.selectedOptions, locale)
+                const legacySummary = [row.color, row.size].filter(Boolean)
                 return (
                   <article className="quote-cart-item" key={rowKey}>
                     <span className="quote-cart-index">{String(index + 1).padStart(2, '0')}</span>
@@ -302,6 +307,7 @@ export function InquiryListPage() {
                           loading="lazy"
                           width="300"
                           height="300"
+                          style={{ objectFit: 'cover', ...imagePresentationStyle(row.product?.imageSet) }}
                           onError={(event) => { event.currentTarget.hidden = true }}
                         />
                       )}
@@ -309,7 +315,7 @@ export function InquiryListPage() {
                     <div className="quote-cart-product">
                       <strong>{productName}</strong>
                       <span>{row.productCode}</span>
-                      <small>{row.material} / {row.color} / {row.size}</small>
+                      <small>{[row.material, ...(optionSummary.length ? optionSummary : legacySummary)].filter(Boolean).join(' / ')}</small>
                       <small>{copy.moq} {row.moq} / {copy.market} {row.market}</small>
                     </div>
                     <div className="quote-cart-term">

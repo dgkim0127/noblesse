@@ -14,7 +14,10 @@ function buildUrl(baseUrl, path) {
   return `${normalizeBaseUrl(baseUrl)}${normalizePath(path)}`;
 }
 
-async function parseResponseBody(response) {
+async function parseResponseBody(response, responseType = "json") {
+  if (responseType === "blob" && response.ok) {
+    return response.blob();
+  }
   const contentType = response.headers?.get?.("content-type") || "";
   if (!contentType.includes("application/json")) {
     return null;
@@ -33,7 +36,7 @@ function buildRequestBody(body, headers) {
 
 export function createApiClient({ baseUrl = "/api", fetchImpl = fetch } = {}) {
   async function apiFetch(path, options = {}) {
-    const { token, headers: inputHeaders, body, ...fetchOptions } = options;
+    const { token, headers: inputHeaders, body, responseType = "json", ...fetchOptions } = options;
     const headers = new Headers(inputHeaders || {});
 
     if (!headers.has("accept")) {
@@ -58,7 +61,7 @@ export function createApiClient({ baseUrl = "/api", fetchImpl = fetch } = {}) {
       throw createNetworkError();
     }
 
-    const responseBody = await parseResponseBody(response);
+    const responseBody = await parseResponseBody(response, responseType);
     if (!response.ok) {
       const normalized = normalizeApiError(responseBody);
       throw new ApiClientError({
@@ -70,6 +73,7 @@ export function createApiClient({ baseUrl = "/api", fetchImpl = fetch } = {}) {
 
     return {
       data: responseBody,
+      headers: response.headers,
       requestId: getRequestIdFromResponse(response),
       status: response.status
     };

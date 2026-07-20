@@ -7,6 +7,7 @@ import { createPostgresViewerLoader, createRequireFirebaseIdentity, createRequir
 import { createPool } from "./db/pool.js";
 import { createAdminBuyerQueries } from "./db/queries/adminBuyerQueries.js";
 import { createAdminAccessQueries } from "./db/queries/adminAccessQueries.js";
+import { createAdminAnalyticsQueries } from "./db/queries/adminAnalyticsQueries.js";
 import { createAdminCategoryQueries } from "./db/queries/adminCategoryQueries.js";
 import { createAdminDashboardQueries } from "./db/queries/adminDashboardQueries.js";
 import { createAdminInquiryQueries } from "./db/queries/adminInquiryQueries.js";
@@ -15,8 +16,11 @@ import { createAdminPriceQueries } from "./db/queries/adminPriceQueries.js";
 import { createAdminProductQueries } from "./db/queries/adminProductQueries.js";
 import { createAdminQuoteQueries } from "./db/queries/adminQuoteQueries.js";
 import { createBuyerInquiryQueries } from "./db/queries/buyerInquiryQueries.js";
+import { createBuyerQuoteQueries } from "./db/queries/buyerQuoteQueries.js";
 import { createBuyerRegistrationQueries } from "./db/queries/buyerRegistrationQueries.js";
 import { createLoginIdentifierQueries } from "./db/queries/loginIdentifierQueries.js";
+import { createHomeShowcaseQueries } from "./db/queries/homeShowcaseQueries.js";
+import { createHomeLayoutQueries } from "./db/queries/homeLayoutQueries.js";
 import * as catalogQueries from "./db/queries/catalogQueries.js";
 import * as buyerQueries from "./db/queries/buyerQueries.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -28,9 +32,12 @@ import { createCatalogRoutes } from "./routes/catalogRoutes.js";
 import { createHealthRoutes } from "./routes/healthRoutes.js";
 import { createAdminBuyerService } from "./services/adminBuyerService.js";
 import { createAdminAccessService } from "./services/adminAccessService.js";
+import { createAdminAnalyticsService } from "./services/adminAnalyticsService.js";
 import { createAdminCategoryService } from "./services/adminCategoryService.js";
 import { createAdminDashboardService } from "./services/adminDashboardService.js";
 import { createAdminInquiryService } from "./services/adminInquiryService.js";
+import { createAdminHomeShowcaseService } from "./services/adminHomeShowcaseService.js";
+import { createAdminHomeLayoutService } from "./services/adminHomeLayoutService.js";
 import { createAdminFxService } from "./services/adminFxService.js";
 import { createAdminPriceService } from "./services/adminPriceService.js";
 import { createAdminProductService } from "./services/adminProductService.js";
@@ -41,10 +48,13 @@ import {
 } from "./services/adminProductImageService.js";
 import { createAdminQuoteService } from "./services/adminQuoteService.js";
 import { createBuyerInquiryService } from "./services/buyerInquiryService.js";
+import { createBuyerQuoteService } from "./services/buyerQuoteService.js";
 import { createBuyerRegistrationService } from "./services/buyerRegistrationService.js";
 import { createBuyerService } from "./services/buyerService.js";
 import { createCatalogService } from "./services/catalogService.js";
 import { createLoginIdentifierService } from "./services/loginIdentifierService.js";
+import { createHomeShowcaseService } from "./services/homeShowcaseService.js";
+import { createHomeLayoutService } from "./services/homeLayoutService.js";
 
 function buildCorsOptions(env) {
   if (!env.allowedOrigins.length) {
@@ -77,6 +87,14 @@ export function createApp(options = {}) {
       queries: options.queries?.admin?.prices || createAdminPriceQueries(pool),
       fxService: adminFxService
     });
+  const homeShowcaseQueries =
+    options.queries?.homeShowcase || createHomeShowcaseQueries(pool);
+  const homeShowcaseService =
+    options.services?.homeShowcase || createHomeShowcaseService({ queries: homeShowcaseQueries });
+  const homeLayoutQueries =
+    options.queries?.homeLayout || createHomeLayoutQueries(pool);
+  const homeLayoutService =
+    options.services?.homeLayout || createHomeLayoutService({ queries: homeLayoutQueries });
   const services = {
     catalog:
       options.services?.catalog ||
@@ -96,11 +114,19 @@ export function createApp(options = {}) {
       createBuyerInquiryService({
         queries: options.queries?.buyerInquiries || createBuyerInquiryQueries(pool)
       }),
+    buyerQuotes:
+      options.services?.buyerQuotes ||
+      createBuyerQuoteService({
+        queries: options.queries?.buyerQuotes || createBuyerQuoteQueries(pool),
+        objectStore: imageObjectStore
+      }),
     auth:
       options.services?.auth ||
       createLoginIdentifierService({
         queries: options.queries?.auth || createLoginIdentifierQueries(pool)
       }),
+    homeShowcase: homeShowcaseService,
+    homeLayout: homeLayoutService,
     admin: {
       access:
         options.services?.admin?.access ||
@@ -112,6 +138,12 @@ export function createApp(options = {}) {
         createAdminDashboardService({
           queries:
             options.queries?.admin?.dashboard || createAdminDashboardQueries(pool)
+        }),
+      analytics:
+        options.services?.admin?.analytics ||
+        createAdminAnalyticsService({
+          queries:
+            options.queries?.admin?.analytics || createAdminAnalyticsQueries(pool)
         }),
       inquiries:
         options.services?.admin?.inquiries ||
@@ -128,6 +160,15 @@ export function createApp(options = {}) {
         createAdminCategoryService({
           queries: options.queries?.admin?.categories || createAdminCategoryQueries(pool)
         }),
+      homeShowcase:
+        options.services?.admin?.homeShowcase ||
+        createAdminHomeShowcaseService({
+          queries: homeShowcaseQueries,
+          objectStore: imageObjectStore
+        }),
+      homeLayout:
+        options.services?.admin?.homeLayout ||
+        createAdminHomeLayoutService({ queries: homeLayoutQueries }),
       prices:
         adminPriceService,
       fx:
@@ -146,7 +187,8 @@ export function createApp(options = {}) {
       quotes:
         options.services?.admin?.quotes ||
         createAdminQuoteService({
-          queries: options.queries?.admin?.quotes || createAdminQuoteQueries(pool)
+          queries: options.queries?.admin?.quotes || createAdminQuoteQueries(pool),
+          objectStore: imageObjectStore
         })
     }
   };
@@ -179,13 +221,22 @@ export function createApp(options = {}) {
 
   app.use("/api/health", createHealthRoutes());
   app.use("/api/auth", createAuthRoutes({ loginIdentifierService: services.auth }));
-  app.use("/api/catalog", createCatalogRoutes({ catalogService: services.catalog, mediaService }));
+  app.use(
+    "/api/catalog",
+    createCatalogRoutes({
+      catalogService: services.catalog,
+      homeShowcaseService: services.homeShowcase,
+      homeLayoutService: services.homeLayout,
+      mediaService
+    })
+  );
   app.use(
     "/api/buyer",
     createBuyerRoutes({
       buyerService: services.buyer,
       buyerRegistrationService: services.buyerRegistration,
       buyerInquiryService: services.buyerInquiries,
+      buyerQuoteService: services.buyerQuotes,
       requireFirebaseIdentity,
       requireUser
     })

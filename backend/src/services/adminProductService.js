@@ -10,6 +10,8 @@ import {
   validationError
 } from "../utils/validators.js";
 import { conflict, notFound } from "../utils/errors.js";
+import { normalizeDetailContent } from "../utils/productDetailContent.js";
+import { normalizeOptionGroups, syncLegacyOptionArrays } from "../utils/productOptions.js";
 import { createAdminProductImageService } from "./adminProductImageService.js";
 
 function parseProductFilters(filters) {
@@ -19,6 +21,11 @@ function parseProductFilters(filters) {
     category: parseOptionalString(filters.category, { maxLength: 80 }),
     q: parseOptionalString(filters.q, { maxLength: 120 }),
     market: parseOptionalEnum(filters.market, MARKETS, "market"),
+    completion: parseOptionalEnum(
+      filters.completion,
+      ["incomplete", "language", "image", "price", "category"],
+      "completion"
+    ),
     limit: pagination.limit,
     offset: pagination.offset,
     dbLimit: pagination.dbLimit,
@@ -31,10 +38,12 @@ const productWriteFields = [
   "nameKo",
   "nameEn",
   "nameJa",
+  "nameZhTw",
   "categoryKey",
   "material",
   "colors",
   "sizes",
+  "optionGroups",
   "moqDefault",
   "leadTime",
   "origin",
@@ -52,7 +61,8 @@ const productWriteFields = [
   "sortOrder",
   "descriptionKo",
   "descriptionEn",
-  "descriptionJa"
+  "descriptionJa",
+  "descriptionZhTw"
 ];
 
 function parseStringArray(value, fieldName) {
@@ -94,8 +104,9 @@ function parseProductBody(body = {}, { partial = false } = {}) {
   const parsed = {
     code: partial ? parseOptionalString(safeBody.code, { maxLength: 80 }) : parseRequiredString(safeBody.code, { fieldName: "code", maxLength: 80 }),
     nameKo: parseOptionalString(safeBody.nameKo, { maxLength: 200 }),
-    nameEn: partial ? parseOptionalString(safeBody.nameEn, { maxLength: 200 }) : parseRequiredString(safeBody.nameEn, { fieldName: "nameEn", maxLength: 200 }),
+    nameEn: parseOptionalString(safeBody.nameEn, { maxLength: 200 }),
     nameJa: parseOptionalString(safeBody.nameJa, { maxLength: 200 }),
+    nameZhTw: parseOptionalString(safeBody.nameZhTw, { maxLength: 200 }),
     categoryKey: parseOptionalString(safeBody.categoryKey, { maxLength: 80 }),
     material: parseOptionalString(safeBody.material, { maxLength: 160 }),
     colors: parseStringArray(safeBody.colors, "colors"),
@@ -107,7 +118,8 @@ function parseProductBody(body = {}, { partial = false } = {}) {
     imageAlt: parseObject(safeBody.imageAlt, "imageAlt"),
     taxonomy: parseOptionalObject(safeBody.taxonomy, "taxonomy"),
     specs: parseOptionalObject(safeBody.specs, "specs"),
-    detailContent: parseOptionalObject(safeBody.detailContent, "detailContent"),
+    detailContent: normalizeDetailContent(safeBody.detailContent),
+    optionGroups: normalizeOptionGroups(safeBody.optionGroups),
     homePlacement: parseOptionalObject(safeBody.homePlacement, "homePlacement"),
     badge: parseOptionalBadge(safeBody.badge),
     isVisible: parseBooleanLike(safeBody.isVisible, "isVisible"),
@@ -117,10 +129,14 @@ function parseProductBody(body = {}, { partial = false } = {}) {
     sortOrder: parseInteger(safeBody.sortOrder, "sortOrder"),
     descriptionKo: parseOptionalString(safeBody.descriptionKo, { maxLength: 2000 }),
     descriptionEn: parseOptionalString(safeBody.descriptionEn, { maxLength: 2000 }),
-    descriptionJa: parseOptionalString(safeBody.descriptionJa, { maxLength: 2000 })
+    descriptionJa: parseOptionalString(safeBody.descriptionJa, { maxLength: 2000 }),
+    descriptionZhTw: parseOptionalString(safeBody.descriptionZhTw, { maxLength: 2000 })
   };
 
   if (!partial) {
+    if (![parsed.nameKo, parsed.nameEn, parsed.nameJa, parsed.nameZhTw].some(Boolean)) {
+      throw validationError("At least one localized product name is required");
+    }
     parsed.colors = parsed.colors || [];
     parsed.sizes = parsed.sizes || [];
     parsed.moqDefault = parsed.moqDefault || 1;
@@ -130,12 +146,22 @@ function parseProductBody(body = {}, { partial = false } = {}) {
     parsed.taxonomy = parsed.taxonomy || {};
     parsed.specs = parsed.specs || {};
     parsed.detailContent = parsed.detailContent || {};
+    parsed.optionGroups = parsed.optionGroups || [];
     parsed.homePlacement = parsed.homePlacement || {};
     parsed.isVisible = parsed.isVisible ?? false;
     parsed.isExportAvailable = parsed.isExportAvailable ?? true;
     parsed.isNew = parsed.isNew ?? false;
     parsed.isBest = parsed.isBest ?? false;
     parsed.sortOrder = parsed.sortOrder || 0;
+  }
+
+  if (parsed.optionGroups !== undefined) {
+    const legacy = syncLegacyOptionArrays(parsed.optionGroups, {
+      colors: parsed.colors || [],
+      sizes: parsed.sizes || []
+    });
+    parsed.colors = legacy.colors;
+    parsed.sizes = legacy.sizes;
   }
 
   return Object.fromEntries(Object.entries(parsed).filter(([, value]) => value !== undefined));
@@ -155,6 +181,9 @@ export function createAdminProductService({ queries, imageService }) {
 
     async createProduct(body = {}, adminViewer) {
       const parsed = parseProductBody(body);
+      if (parsed.isVisible) {
+        throw validationError("Create the product as a draft, then publish it after images and prices are ready");
+      }
       const result = await queries.createProduct(parsed, adminViewer);
       if (result?.conflict) {
         throw conflict("Product code already exists");
@@ -189,6 +218,50 @@ export function createAdminProductService({ queries, imageService }) {
       const result = await queries.updateProductVisibility(id, isVisible, adminViewer);
       if (!result) {
         throw notFound("Product not found");
+      }
+      if (result.incomplete) {
+        const error = validationError("Product is not ready to publish");
+        error.details = { missing: result.missing };
+        throw error;
+      }
+      return result;
+    },
+
+    async getProduct(productId, adminViewer) {
+      const id = validateUuid(productId, "productId");
+      const product = await queries.getProduct(id, { adminViewer });
+      if (!product) throw notFound("Product not found");
+      return { product };
+    },
+
+    async duplicateProduct(productId, body = {}, adminViewer) {
+      const id = validateUuid(productId, "productId");
+      const safeBody = rejectUnknownFields(body, ["code"]);
+      const code = parseRequiredString(safeBody.code, { fieldName: "code", maxLength: 80 });
+      const result = await queries.duplicateProduct(id, code, adminViewer);
+      if (!result) throw notFound("Product not found");
+      if (result.conflict) throw conflict("Product code already exists");
+      return result;
+    },
+
+    async bulkUpdateProducts(body = {}, adminViewer) {
+      const safeBody = rejectUnknownFields(body, ["ids", "action", "categoryKey"]);
+      if (!Array.isArray(safeBody.ids) || safeBody.ids.length < 1 || safeBody.ids.length > 100) {
+        throw validationError("ids must contain between 1 and 100 product IDs");
+      }
+      const ids = [...new Set(safeBody.ids.map((id) => validateUuid(id, "productId")))];
+      const action = parseOptionalEnum(safeBody.action, ["publish", "unpublish", "setCategory"], "action");
+      if (!action) throw validationError("action is required");
+      const categoryKey = action === "setCategory"
+        ? parseRequiredString(safeBody.categoryKey, { fieldName: "categoryKey", maxLength: 80 })
+        : undefined;
+      const result = await queries.bulkUpdateProducts({ ids, action, categoryKey }, adminViewer);
+      if (result?.missingIds?.length) throw notFound("One or more products were not found");
+      if (result?.missingCategory) throw validationError("Unknown categoryKey");
+      if (result?.incomplete?.length) {
+        const error = validationError("One or more products are not ready to publish");
+        error.details = { products: result.incomplete };
+        throw error;
       }
       return result;
     },

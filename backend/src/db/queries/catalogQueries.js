@@ -1,3 +1,5 @@
+import { getEffectiveOptionGroups } from "../../utils/productOptions.js";
+
 function mapProduct(row) {
   return {
     id: row.id,
@@ -5,12 +7,15 @@ function mapProduct(row) {
     nameKo: row.name_ko,
     nameEn: row.name_en,
     nameJa: row.name_ja,
+    nameZhTw: row.name_zh_tw,
     categoryId: row.category_key,
     categoryNameKo: row.category_name_ko,
     categoryNameEn: row.category_name_en,
+    categoryNameZhTw: row.category_name_zh_tw,
     material: row.material,
     colors: row.colors || [],
     sizes: row.sizes || [],
+    optionGroups: getEffectiveOptionGroups(row),
     moqDefault: row.moq_default,
     leadTime: row.lead_time,
     origin: row.origin,
@@ -25,7 +30,8 @@ function mapProduct(row) {
     isBest: row.is_best,
     descriptionKo: row.description_ko,
     descriptionEn: row.description_en,
-    descriptionJa: row.description_ja
+    descriptionJa: row.description_ja,
+    descriptionZhTw: row.description_zh_tw
   };
 }
 
@@ -36,12 +42,15 @@ const visibleProductSelect = `
     p.name_ko,
     p.name_en,
     p.name_ja,
+    p.name_zh_tw,
     c.category_id as category_key,
     c.name_ko as category_name_ko,
     c.name_en as category_name_en,
+    c.name_zh_tw as category_name_zh_tw,
     p.material,
     p.colors,
     p.sizes,
+    p.option_groups,
     p.moq_default,
     p.lead_time,
     p.origin,
@@ -56,7 +65,8 @@ const visibleProductSelect = `
     p.is_best,
     p.description_ko,
     p.description_en,
-    p.description_ja
+    p.description_ja,
+    p.description_zh_tw
   from public.products p
   left join public.categories c on c.id = p.category_id
   where p.is_visible = true

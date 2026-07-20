@@ -40,6 +40,81 @@ export function createAdminApi(apiClient) {
       return unwrap(await apiClient.apiFetch('/admin/dashboard', { token: requireToken(token) }))
     },
 
+    async getAnalytics(token) {
+      return unwrap(await apiClient.apiFetch('/admin/analytics', { token: requireToken(token) }))
+    },
+
+    async getHomeShowcase(token) {
+      return unwrap(await apiClient.apiFetch('/admin/home-showcase', { token: requireToken(token) }))
+    },
+
+    async getHomeLayout(token) {
+      return unwrap(await apiClient.apiFetch('/admin/home-layout', { token: requireToken(token) }))
+    },
+
+    async saveHomeLayoutDraft(config, expectedRevision, token) {
+      return unwrap(await apiClient.apiFetch('/admin/home-layout/draft', {
+        method: 'PUT',
+        token: requireToken(token),
+        body: { config, expectedRevision },
+      }))
+    },
+
+    async publishHomeLayout(expectedRevision, token) {
+      return unwrap(await apiClient.apiFetch('/admin/home-layout/publish', {
+        method: 'POST',
+        token: requireToken(token),
+        body: { expectedRevision },
+      }))
+    },
+
+    async resetHomeLayoutDraft(expectedRevision, token) {
+      return unwrap(await apiClient.apiFetch('/admin/home-layout/reset-draft', {
+        method: 'POST',
+        token: requireToken(token),
+        body: { expectedRevision },
+      }))
+    },
+
+    async createHomeShowcaseSlide(input = {}, token) {
+      return unwrap(await apiClient.apiFetch('/admin/home-showcase', {
+        method: 'POST',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async updateHomeShowcaseSlide(slideId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/home-showcase/${encodeURIComponent(slideId)}`, {
+        method: 'PATCH',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async uploadHomeShowcaseImage(slideId, formData, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/home-showcase/${encodeURIComponent(slideId)}/image`, {
+        method: 'POST',
+        token: requireToken(token),
+        body: formData,
+      }))
+    },
+
+    async reorderHomeShowcase(ids, token) {
+      return unwrap(await apiClient.apiFetch('/admin/home-showcase/order', {
+        method: 'PUT',
+        token: requireToken(token),
+        body: { ids },
+      }))
+    },
+
+    async deleteHomeShowcaseSlide(slideId, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/home-showcase/${encodeURIComponent(slideId)}`, {
+        method: 'DELETE',
+        token: requireToken(token),
+      }))
+    },
+
     async getInquiries(params = {}, token) {
       return unwrap(await apiClient.apiFetch(`/admin/inquiries${buildQuery(params)}`, { token: requireToken(token) }))
     },
@@ -100,11 +175,31 @@ export function createAdminApi(apiClient) {
       return unwrap(await apiClient.apiFetch(`/admin/products${buildQuery(params)}`, { token: requireToken(token) }))
     },
 
+    async getProduct(productId, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/products/${encodeURIComponent(productId)}`, { token: requireToken(token) }))
+    },
+
     async createProduct(input = {}, token) {
       return unwrap(await apiClient.apiFetch('/admin/products', {
         method: 'POST',
         token: requireToken(token),
         body: input,
+      }))
+    },
+
+    async duplicateProduct(productId, code, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/products/${encodeURIComponent(productId)}/duplicate`, {
+        method: 'POST',
+        token: requireToken(token),
+        body: { code },
+      }))
+    },
+
+    async bulkUpdateProducts(ids, action, categoryKey, token) {
+      return unwrap(await apiClient.apiFetch('/admin/products/bulk', {
+        method: 'PATCH',
+        token: requireToken(token),
+        body: { ids, action, ...(categoryKey ? { categoryKey } : {}) },
       }))
     },
 
@@ -253,6 +348,29 @@ export function createAdminApi(apiClient) {
         token: requireToken(token),
         body: { status },
       }))
+    },
+
+    async updateQuote(quoteId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/quotes/${encodeURIComponent(quoteId)}`, {
+        method: 'PATCH',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async issueQuote(quoteId, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/quotes/${encodeURIComponent(quoteId)}/issue`, {
+        method: 'POST',
+        token: requireToken(token),
+      }))
+    },
+
+    async downloadQuoteDocument(quoteId, documentId, token) {
+      return apiClient.apiFetch(`/admin/quotes/${encodeURIComponent(quoteId)}/documents/${encodeURIComponent(documentId)}/pdf`, {
+        token: requireToken(token),
+        headers: { accept: 'application/pdf' },
+        responseType: 'blob',
+      })
     },
 
     async createQuote({ inquiryId, leadTime = '', shippingNote = '', adminMemo = '' } = {}, token) {

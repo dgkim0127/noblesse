@@ -58,3 +58,11 @@ test('mock preview controls are not rendered in the storefront shell', () => {
   assert.match(shell, /\{shouldShowPreviewControls && isMockMode && !isPreviewBarHidden && <div className="preview-bar"/)
   assert.match(shell, /\{shouldShowPreviewControls && isMockMode && <button/)
 })
+
+test('admin routes do not run storefront scroll-collapse behavior', () => {
+  const shell = readWorkspaceFile('src/components/StoreShell.jsx')
+
+  assert.match(shell, /const isAdminRoute = \/\^\\\/admin\(\?:\\\/\|\$\)\//)
+  assert.match(shell, /useEffect\(\(\) => \{\s+if \(isAdminRoute\) \{[\s\S]*setIsMarqueeCollapsed\(false\)[\s\S]*setIsHeaderCompact\(false\)[\s\S]*return undefined/)
+  assert.match(shell, /useEffect\(\(\) => \{\s+if \(isAdminRoute\) return undefined\s+\s*let wheelLock = false/)
+})

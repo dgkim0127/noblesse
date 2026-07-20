@@ -11,6 +11,7 @@ import {
 } from "../utils/validators.js";
 
 const productCodePattern = /^[A-Z0-9][A-Z0-9-]{1,39}$/i;
+const optionIdPattern = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
 
 function requireApprovedBuyer(viewer) {
   if (!isApprovedBuyerLifecycle(viewer)) {
@@ -34,6 +35,25 @@ function parseProductCode(value) {
   return value.trim().toUpperCase();
 }
 
+function parseSelectedOptions(value) {
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value) || value.length > 6) {
+    throw validationError("selectedOptions must contain at most 6 values");
+  }
+  const groups = new Set();
+  return value.map((raw, index) => {
+    const item = rejectUnknownFields(raw || {}, ["groupId", "valueId"]);
+    const groupId = parseOptionalString(item.groupId, { maxLength: 64 });
+    const valueId = parseOptionalString(item.valueId, { maxLength: 64 });
+    if (!optionIdPattern.test(groupId || "") || !optionIdPattern.test(valueId || "")) {
+      throw validationError(`Invalid selectedOptions[${index}]`);
+    }
+    if (groups.has(groupId)) throw validationError(`Duplicate selected option group: ${groupId}`);
+    groups.add(groupId);
+    return { groupId, valueId };
+  });
+}
+
 function parseInquiryFilters(filters) {
   const pagination = parsePagination(filters);
   return {
@@ -54,11 +74,12 @@ function parseCreateInquiryBody(body = {}) {
   return {
     requestMemo: parseOptionalString(safeBody.requestMemo, { maxLength: 2000 }) || "",
     items: safeBody.items.map((rawItem) => {
-      const item = rejectUnknownFields(rawItem, ["productCode", "color", "size", "quantity"]);
+      const item = rejectUnknownFields(rawItem, ["productCode", "color", "size", "selectedOptions", "quantity"]);
       return {
         productCode: parseProductCode(item.productCode),
         color: parseOptionalString(item.color, { maxLength: 80 }) || "",
         size: parseOptionalString(item.size, { maxLength: 80 }) || "",
+        selectedOptions: parseSelectedOptions(item.selectedOptions),
         quantity: parsePositiveInteger(item.quantity, "quantity")
       };
     })

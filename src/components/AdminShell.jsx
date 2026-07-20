@@ -1,114 +1,61 @@
 import {
   BarChart3,
-  ClipboardList,
+  Building2,
   FileText,
-  Gauge,
-  Gem,
-  Handshake,
-  Landmark,
-  LayoutDashboard,
-  PlusCircle,
-  ShieldCheck,
-  Tags,
-  UsersRound,
+  Home,
+  PackageSearch,
+  Settings2,
+  Store,
 } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { getRuntimeConfig } from '../config/runtimeConfig'
 import { getAdminRuntimeKind, useAdminCopy } from '../pages/admin/adminCopy'
 import { useLocalePath } from '../utils/locale'
 import { useAdminAccess } from './AdminAccessContext'
 import '../styles/admin-console.css'
 
-const adminNavGroups = [
-  {
-    key: 'overview',
-    items: [{ key: 'dashboard', path: '/admin', icon: LayoutDashboard, permission: 'dashboard.read', end: true }],
-  },
-  {
-    key: 'operations',
-    items: [
-      { key: 'inquiries', path: '/admin/inquiries', icon: FileText, permission: 'inquiries.read' },
-      { key: 'quotes', path: '/admin/quotes', icon: ClipboardList, permission: 'quotes.read' },
-    ],
-  },
-  {
-    key: 'members',
-    items: [
-      { key: 'team', path: '/admin/team', icon: UsersRound, permission: 'admins.read' },
-      { key: 'buyers', path: '/admin/buyers', icon: Handshake, permission: 'buyers.read' },
-    ],
-  },
-  {
-    key: 'catalog',
-    items: [
-      { key: 'catalogEntry', path: '/admin/catalog/new', icon: PlusCircle, permission: 'catalog.write' },
-      { key: 'products', path: '/admin/products', icon: Gem, permission: 'catalog.read' },
-      { key: 'categories', path: '/admin/categories', icon: Tags, permission: 'catalog.read' },
-    ],
-  },
-  {
-    key: 'pricing',
-    items: [
-      { key: 'prices', path: '/admin/prices', icon: Tags, permission: 'prices.read' },
-      { key: 'fx', path: '/admin/fx', icon: Landmark, permission: 'prices.read' },
-    ],
-  },
-  {
-    key: 'insights',
-    items: [{ key: 'analytics', path: '/admin/analytics', icon: BarChart3, permission: 'analytics.read' }],
-  },
-  {
-    key: 'governance',
-    items: [
-      { key: 'audit', path: '/admin/audit', icon: ShieldCheck, permission: 'audit.read' },
-    ],
-  },
+const adminNavigation = [
+  { key: 'dashboard', label: '홈', path: '/admin', icon: Home, permissions: ['dashboard.read'], end: true },
+  { key: 'products', label: '상품', path: '/admin/products', icon: PackageSearch, permissions: ['catalog.read'] },
+  { key: 'quotes', label: '견적', path: '/admin/quotes', fallbackPath: '/admin/inquiries', icon: FileText, permissions: ['quotes.read', 'inquiries.read'] },
+  { key: 'buyers', label: '고객', path: '/admin/buyers', icon: Building2, permissions: ['buyers.read'] },
+  { key: 'operations', label: '운영', path: '/admin/operations', icon: Settings2, permissions: ['catalog.read', 'prices.read', 'admins.read', 'audit.read'] },
+  { key: 'analytics', label: '분석', path: '/admin/analytics', icon: BarChart3, permissions: ['analytics.read'] },
 ]
 
-const fallbackGroups = {
-  overview: 'Overview',
-  operations: 'Operations',
-  members: 'Members',
-  catalog: 'Catalog',
-  pricing: 'Pricing',
-  insights: 'Insights',
-  governance: 'Governance',
-}
-
 export function AdminShell() {
+  const location = useLocation()
   const { toLocalePath } = useLocalePath()
   const t = useAdminCopy()
   const runtimeKind = getAdminRuntimeKind(getRuntimeConfig())
   const { admin, hasPermission, status } = useAdminAccess()
   const roleLabel = t.shell.roles?.[admin?.adminRole] || admin?.adminRole || 'admin'
+  const isVisualEditorRoute = /\/admin\/(?:home-editor|products\/(?:new|[^/]+\/edit))\/?$/.test(location.pathname)
 
-  return <main className="admin-shell admin-console-shell">
+  return <main className={`admin-shell admin-console-shell${isVisualEditorRoute ? ' is-visual-editor-route' : ''}`}>
     <aside className="admin-sidebar admin-console-sidebar" aria-label={t.shell.aria}>
       <div className="admin-brand-block">
-        <Gauge size={24} />
+        <Store size={22} />
         <div>
-          <strong>{t.shell.brand}</strong>
-          <span>{t.shell.serverVerified[runtimeKind]}</span>
+          <strong>Noblesse</strong>
+          <span>운영 관리자</span>
         </div>
       </div>
-      <div className="admin-console-badges">
-        <span className="admin-preview-badge">{t.shell.badge[runtimeKind]}</span>
-        <span className="admin-role-badge">{roleLabel}</span>
-      </div>
       <nav>
-        {adminNavGroups.map((group) => {
-          const visibleItems = group.items.filter((item) => status !== 'ready' || hasPermission(item.permission))
-          if (visibleItems.length === 0) return null
-          return <div className="admin-nav-group" key={group.key}>
-            <p>{t.shell.groups?.[group.key] || fallbackGroups[group.key]}</p>
-            {visibleItems.map(({ end, icon: Icon, key, path }) => <NavLink end={end} key={path} to={toLocalePath(path)}>
-              <Icon size={17} />
-              <span>{t.shell.nav[key] || key}</span>
-            </NavLink>)}
-          </div>
+        {adminNavigation.map(({ end, fallbackPath, icon: Icon, key, label, path, permissions }) => {
+          const visible = status !== 'ready' || permissions.some((permission) => hasPermission(permission))
+          if (!visible) return null
+          const destination = key === 'quotes' && !hasPermission('quotes.read') ? fallbackPath : path
+          return <NavLink aria-label={label} end={end} key={key} title={label} to={toLocalePath(destination)}>
+            <Icon size={18} />
+            <span>{label}</span>
+          </NavLink>
         })}
       </nav>
-      <NavLink className="admin-back-link" to={toLocalePath('/products')}>{t.shell.backToCatalog}</NavLink>
+      <div className="admin-sidebar-footer">
+        <span className="admin-role-badge">{roleLabel}</span>
+        <NavLink className="admin-back-link" to={toLocalePath('/products')}>쇼핑몰 보기</NavLink>
+      </div>
     </aside>
     <section className="admin-main admin-console-main">
       <div className="admin-console-topbar">
@@ -116,7 +63,7 @@ export function AdminShell() {
           <span>{t.shell.currentAdmin || 'Current admin'}</span>
           <strong>{admin?.email || t.shell.brand}</strong>
         </div>
-        <span className="admin-preview-badge">{t.shell.badge[runtimeKind]}</span>
+        <span className="admin-runtime-label">{t.shell.badge[runtimeKind]}</span>
       </div>
       <Outlet />
     </section>

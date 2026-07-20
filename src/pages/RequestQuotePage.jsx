@@ -5,6 +5,7 @@ import { getInquiryRoutePath } from '../commerce/inquiryKeys'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatMoney } from '../utils/commerce'
 import { useLocalePath } from '../utils/locale'
+import { imagePresentationStyle } from '../utils/productImageGallery'
 
 const pricePendingLabel = '가격 확인중'
 const formatQuoteAmount = (value, currency, unavailable = false) => (
@@ -17,7 +18,7 @@ function QuoteLine({ row, currency }) {
   return <div className="quote-line" key={`${row.productId}-${row.color}-${row.size}`}>
     <div className={`quote-thumb tone-${row.tone}`}>
       <span className="jewel-shape" />
-      {thumbnailUrl && <img src={thumbnailUrl} alt={row.productName} loading="lazy" width="300" height="300" onError={(event) => { event.currentTarget.hidden = true }} />}
+      {thumbnailUrl && <img src={thumbnailUrl} alt={row.productName} loading="lazy" width="300" height="300" style={{ objectFit: 'cover', ...imagePresentationStyle(row.product?.imageSet) }} onError={(event) => { event.currentTarget.hidden = true }} />}
     </div>
     <span>
       <strong>{row.productCode}</strong>

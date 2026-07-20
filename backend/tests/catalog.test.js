@@ -87,7 +87,12 @@ test("catalog service does not expose protected price fields for public product 
             nameEn: "Titanium Labret",
             price: 12000,
             wholesalePrice: 9000,
-            priceSnapshot: 9000
+            priceSnapshot: 9000,
+            imageSet: {
+              detail: "/media/detail",
+              objectKeys: { detail: "products/private-detail.webp" },
+              gallery: [{ id: "image-1", detail: "/media/detail", objectKeys: { detail: "products/private-detail.webp" }, sources: { detail: { url: "/media/detail", objectKey: "products/private-detail.webp" } } }]
+            }
           }
         ];
       },
@@ -97,7 +102,12 @@ test("catalog service does not expose protected price fields for public product 
           nameEn: "Titanium Labret",
           price: 12000,
           wholesalePrice: 9000,
-          priceSnapshot: 9000
+          priceSnapshot: 9000,
+          imageSet: {
+            detail: "/media/detail",
+            objectKeys: { detail: "products/private-detail.webp" },
+            gallery: [{ id: "image-1", detail: "/media/detail", objectKeys: { detail: "products/private-detail.webp" }, sources: { detail: { url: "/media/detail", objectKey: "products/private-detail.webp" } } }]
+          }
         };
       }
     }
@@ -112,4 +122,9 @@ test("catalog service does not expose protected price fields for public product 
   assert.equal("price" in detail, false);
   assert.equal("wholesalePrice" in detail, false);
   assert.equal("priceSnapshot" in detail, false);
+  assert.equal("objectKeys" in list[0].imageSet, false);
+  assert.equal("objectKeys" in list[0].imageSet.gallery[0], false);
+  assert.equal("objectKeys" in detail.imageSet, false);
+  assert.equal("objectKeys" in detail.imageSet.gallery[0], false);
+  assert.equal("objectKey" in detail.imageSet.gallery[0].sources.detail, false);
 });
