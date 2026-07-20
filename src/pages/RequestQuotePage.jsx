@@ -6,14 +6,18 @@ import { useCommerce } from '../commerce/commerceStore'
 import { formatMoney } from '../utils/commerce'
 import { useLocalePath } from '../utils/locale'
 import { imagePresentationStyle } from '../utils/productImageGallery'
+import { formatSelectedProductOptions } from '../utils/productOptions'
 
 const pricePendingLabel = '가격 확인중'
 const formatQuoteAmount = (value, currency, unavailable = false) => (
   unavailable ? pricePendingLabel : formatMoney(value, currency)
 )
 
-function QuoteLine({ row, currency }) {
+function QuoteLine({ row, currency, locale }) {
   const thumbnailUrl = row.thumbnailUrl ?? row.product?.imageSet?.thumb
+  const optionSummary = formatSelectedProductOptions(row.selectedOptions, locale)
+  const legacySummary = [row.color, row.size].filter(Boolean)
+  const visibleOptions = optionSummary.length ? optionSummary : legacySummary
 
   return <div className="quote-line" key={`${row.productId}-${row.color}-${row.size}`}>
     <div className={`quote-thumb tone-${row.tone}`}>
@@ -23,7 +27,7 @@ function QuoteLine({ row, currency }) {
     <span>
       <strong>{row.productCode}</strong>
       <small>{row.productName}</small>
-      <small>{row.color} / {row.size} / {row.quantity} pcs</small>
+      <small>{[...visibleOptions, `${row.quantity} pcs`].join(' / ')}</small>
     </span>
     <strong>{formatQuoteAmount(row.subtotal, currency, row.priceUnavailable)}</strong>
   </div>
@@ -49,7 +53,7 @@ function AccessNotice({ viewerState }) {
 export function RequestQuotePage() {
   const navigate = useNavigate()
   const { authError, authStatus, buyer, dataError, dataStatus, estimatedTotal, inquiryRows, isApproved, submitRequestQuote, totalQuantity, viewerState } = useCommerce()
-  const { toLocalePath } = useLocalePath()
+  const { locale, toLocalePath } = useLocalePath()
   const [memo, setMemo] = useState('')
   const [submitStatus, setSubmitStatus] = useState('idle')
   const [submitError, setSubmitError] = useState('')
@@ -96,7 +100,7 @@ export function RequestQuotePage() {
         <h3>견적 요약</h3>
         <dl><dt>상품 수</dt><dd>{inquiryRows.length}</dd><dt>총 수량</dt><dd>{totalQuantity}</dd><dt>예상 합계</dt><dd>{formatQuoteAmount(estimatedTotal, inquiryRows[0]?.currency || buyer.currency, hasUnavailablePrice)}</dd></dl>
       </div>
-      {inquiryRows.map((row) => <QuoteLine key={`${row.productId}-${row.color}-${row.size}`} row={row} currency={row.currency || buyer.currency} />)}
+      {inquiryRows.map((row) => <QuoteLine key={`${row.productId}-${row.color}-${row.size}`} row={row} currency={row.currency || buyer.currency} locale={locale} />)}
       <textarea value={memo} onChange={(event) => setMemo(event.target.value)} placeholder="요청 메모" />
       {submitError && <p className="auth-notice" role="alert">{submitError}</p>}
       <button className="primary-action" type="button" disabled={submitStatus === 'submitting'} onClick={submit}>{submitStatus === 'submitting' ? '전송 중...' : '견적 요청 보내기'}</button>
