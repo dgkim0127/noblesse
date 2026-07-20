@@ -27,6 +27,7 @@ import { adaptApiProducts } from '../services/apiProductAdapter'
 import { CommerceContext } from './commerceStore'
 import { getInquiryKey } from './inquiryKeys'
 import { cloneHomeLayout, defaultHomeLayout, normalizeHomeLayout } from '../config/homeLayout'
+import { clearInquiryDraft, loadInquiryDraft, saveInquiryDraft } from './inquiryDraftStorage'
 
 const formatInquiryId = () => `INQ-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${String(Date.now()).slice(-3)}`
 const viewerStates = new Set(['guest', 'pending', 'approved', 'admin'])
@@ -119,6 +120,8 @@ export function CommerceProvider({ children }) {
   const [dataStatus, setDataStatus] = useState('loading')
   const [dataError, setDataError] = useState(null)
   const [inquiryItems, setInquiryItems] = useState([])
+  const inquiryDraftHydratedForRef = useRef(null)
+  const skipNextInquiryDraftPersistRef = useRef(false)
   const [inquiries, setInquiries] = useState([])
   const inquiriesRef = useRef([])
   const [mockProfiles, setMockProfiles] = useState({ guest: guestProfile })
@@ -135,6 +138,33 @@ export function CommerceProvider({ children }) {
   const isGuest = isGuestViewer(effectiveViewerState)
   const isAdminViewer = isAdmin(buyer)
   const buyerAccess = getBuyerAccessFeatures(effectiveViewerState, buyer)
+  const inquiryDraftBuyerId = isApproved ? buyer?.uid : null
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    if (!inquiryDraftBuyerId) {
+      inquiryDraftHydratedForRef.current = null
+      skipNextInquiryDraftPersistRef.current = true
+      setInquiryItems([])
+      return
+    }
+
+    skipNextInquiryDraftPersistRef.current = true
+    inquiryDraftHydratedForRef.current = inquiryDraftBuyerId
+    setInquiryItems(loadInquiryDraft(window.sessionStorage, inquiryDraftBuyerId))
+  }, [inquiryDraftBuyerId])
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !inquiryDraftBuyerId) return
+    if (inquiryDraftHydratedForRef.current !== inquiryDraftBuyerId) return
+    if (skipNextInquiryDraftPersistRef.current) {
+      skipNextInquiryDraftPersistRef.current = false
+      return
+    }
+
+    saveInquiryDraft(window.sessionStorage, inquiryDraftBuyerId, inquiryItems)
+  }, [inquiryDraftBuyerId, inquiryItems])
 
   useEffect(() => {
     inquiriesRef.current = inquiries
@@ -338,13 +368,17 @@ export function CommerceProvider({ children }) {
       return
     }
 
+    if (typeof window !== 'undefined') {
+      clearInquiryDraft(window.sessionStorage, buyer?.uid)
+    }
     await signOutCurrentUser()
+    setInquiryItems([])
     setApiProfile(null)
     setProductPrices([])
     setInquiries([])
     setAuthStatus(isAuthConfigured() ? 'signed-out' : 'config-missing')
     setAuthError('')
-  }, [isMockMode, setViewerState])
+  }, [buyer?.uid, isMockMode, setViewerState])
 
   const addInquiryItem = (productId, option = {}, rawQuantity) => {
     if (!isApproved) return

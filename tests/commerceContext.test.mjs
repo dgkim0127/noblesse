@@ -18,3 +18,12 @@ test('authenticated commerce state loads admin catalog prices through admin read
   assert.doesNotMatch(source, /if \(isApprovedProfile \|\| isAdminProfile\) \{[\s\S]*?buyerApi\.getProductPrices\(token\)/)
   assert.match(source, /<CommerceContext\.Provider value=\{\{[\s\S]*?productPrices,/)
 })
+
+test('approved buyer inquiry draft hydrates, persists, and clears on sign out', () => {
+  const source = readSource('src/commerce/CommerceContext.jsx')
+
+  assert.match(source, /loadInquiryDraft\(window\.sessionStorage, inquiryDraftBuyerId\)/)
+  assert.match(source, /saveInquiryDraft\(window\.sessionStorage, inquiryDraftBuyerId, inquiryItems\)/)
+  assert.match(source, /clearInquiryDraft\(window\.sessionStorage, buyer\?\.uid\)/)
+  assert.match(source, /setInquiryItems\(\[\]\)/)
+})
