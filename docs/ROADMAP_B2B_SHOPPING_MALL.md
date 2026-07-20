@@ -135,6 +135,12 @@ Needed:
 
 If a future back-office order or settlement workflow is needed, it should be designed as an internal B2B operations workflow after quote management is stable, not as a public instant-purchase flow.
 
+## 2026-07-20 Production Release Status
+
+PR #7 is live on backend revision `noblesse-backend-00023-gah` and Firebase Hosting target `noblesse`. The release includes the task-oriented admin redesign, visual home and product editors, structured product options, structured product-detail blocks, quote snapshot v2 support, and PDF option-label support. Public storefront and API checks passed across KR, EN, JP, Traditional Chinese, legacy CN, desktop, tablet, and mobile widths.
+
+The next release gate is a controlled authenticated E2E using dedicated test accounts. It must verify two distinct option combinations through buyer inquiry, admin inquiry, official quote, PDF, and buyer accept/reject ownership without creating checkout, payment, order, inventory, or option-surcharge behavior. Bundle splitting is the main post-release performance optimization because the production build still reports a large entry chunk even though the enforced performance budget passes.
+
 ## Next Recommended Task
 
 `Post-N74 product operations hardening`
