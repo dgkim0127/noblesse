@@ -36,6 +36,15 @@ test('logged-in header has an explicit sign-out action that returns home', () =>
   assert.match(shell, /\{!isGuest && <IconAction label=\{copy\.logout\} onClick=\{handleHeaderSignOut\}><LogOut size=\{18\} \/><\/IconAction>\}/)
 })
 
+test('login modal submit action keeps visible contrast in every button state', () => {
+  const shell = readWorkspaceFile('src/components/StoreShell.jsx')
+  const styles = readWorkspaceFile('src/App.css')
+
+  assert.match(shell, /className="primary-action login-submit-action"/)
+  assert.match(styles, /\.login-modal \.login-submit-action \{[\s\S]*color: #fff;[\s\S]*background: #2a2457;[\s\S]*opacity: 1;/)
+  assert.match(styles, /\.login-modal \.login-submit-action:disabled \{[\s\S]*color: #5f586a;[\s\S]*background: #e8e4ec;[\s\S]*opacity: 1;/)
+})
+
 test('header icon actions do not show browser title tooltips', () => {
   const shell = readWorkspaceFile('src/components/StoreShell.jsx')
 

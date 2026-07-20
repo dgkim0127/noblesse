@@ -8789,10 +8789,35 @@ h6 {
   gap: 6px;
 }
 
-.login-modal .primary-action {
+.login-modal .login-submit-action {
   width: 100%;
+  min-height: 46px;
   margin-top: 2px;
+  border: 1px solid #2a2457;
+  color: #fff;
+  background: #2a2457;
+  box-shadow: 0 10px 24px rgb(42 36 87 / 18%);
   justify-content: center;
+  font-weight: 800;
+  opacity: 1;
+}
+
+.login-modal .login-submit-action:hover {
+  border-color: #3b326f;
+  background: #3b326f;
+}
+
+.login-modal .login-submit-action:focus-visible {
+  outline: 3px solid rgb(255 143 169 / 55%);
+  outline-offset: 2px;
+}
+
+.login-modal .login-submit-action:disabled {
+  border-color: #d9d2df;
+  color: #5f586a;
+  background: #e8e4ec;
+  box-shadow: none;
+  opacity: 1;
 }
 
 .auth-form .auto-login-check {
