@@ -232,4 +232,39 @@ The single controlled retry returned `201` and produced:
 
 ### Remaining Gate
 
-The admin-side inquiry, official quote issue, immutable PDF version, and download path are verified. Buyer accept/reject and two distinct structured option combinations remain pending a dedicated approved-buyer session before the complete option-aware workflow is considered finished.
+The admin-side inquiry, official quote issue, immutable PDF version, and download path are verified. Buyer decisioning and two distinct structured option combinations remained as separate controlled gates.
+
+## N77Q6 Approved Buyer Quote Acceptance Verification
+
+Date: 2026-07-20
+
+Decision: `PRODUCT_QUOTE_REQUEST_E2E_VERIFIED`
+
+### Buyer Visibility And PDF
+
+An authenticated approved-buyer session opened the production inquiry list and found the existing canary as `Quote Sent`. The inquiry detail showed quote `QT-20260720-96203C3E`, immutable version `1`, KRW `1,800`, valid-until date `2026-07-27`, lead time, shipping terms, and the intended product/color/quantity snapshot.
+
+The buyer downloaded the authenticated quote PDF through the site. The downloaded file was `6,198,401` bytes and began with `%PDF-`.
+
+### Buyer Decision
+
+The buyer selected `견적 승인` exactly once. The confirmation dialog explicitly stated that approval does not create an order or payment and records only an administrator follow-up request. After confirmation, the quote status changed from `sent` to `accepted`, and the accept/reject controls were no longer rendered.
+
+### Safety
+
+| Check | Result |
+| --- | --- |
+| Buyer quote decision | Exactly one intended `accepted` decision |
+| Order/payment/cart created | No |
+| Product or price mutation | No |
+| Buyer account approval mutation | No |
+| Seed product API | `200` |
+| Seed product SHA-256 | `ff621c331f05bb91678d504f492fbe35f539c8ca7a8ae54b15acee54af19162a` |
+| Hidden canary detail | `404` |
+| Hidden canary public list | Absent |
+| Horizontal overflow | `0` |
+| Password, token, cookie, or local storage read | No |
+
+### Remaining Gate
+
+The single-product request, admin quote issue, buyer visibility, PDF download, and buyer acceptance flow are complete. The remaining controlled option-aware gate is to submit two distinct structured option combinations, such as Gold + 6mm and Pink + 8mm, as separate inquiry items and verify the same labels through admin quote and PDF snapshots. No additional inquiry was created during N77Q6.

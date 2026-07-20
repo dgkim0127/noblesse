@@ -6,7 +6,7 @@
 
 The admin operations redesign, product option model, structured product-detail content, quote snapshot v2 support, and visual editor release from PR #7 are live on the production backend and Firebase Hosting. Backend hotfix PR #9 is also live and fixes numeric parameter typing when an administrator saves a quote draft.
 
-The public storefront, public APIs, locale routes, responsive layouts, and hidden-product policy passed production checks. An authenticated owner session then verified the existing buyer inquiry in the admin list and detail, created exactly one quote draft, issued immutable document version 1, and downloaded its PDF. Buyer accept/reject remains pending a separate approved-buyer session. No password, token, cookie, local storage, or secret value was read.
+The public storefront, public APIs, locale routes, responsive layouts, and hidden-product policy passed production checks. An authenticated owner session then verified the existing buyer inquiry in the admin list and detail, created exactly one quote draft, issued immutable document version 1, and downloaded its PDF. A separate approved-buyer session later verified issued-quote visibility, authenticated PDF download, and one accepted decision without creating an order or payment. No password, token, cookie, local storage, or secret value was read.
 
 ## Release Baseline
 
@@ -59,6 +59,15 @@ The hotfix candidate passed health, seed-product, hidden-canary, home-layout, an
 
 No additional inquiry, quote draft, document revision, product, price, buyer approval, order, payment, or cart mutation was created during the retry.
 
+## Authenticated Buyer Quote E2E
+
+- The approved buyer found the existing inquiry in `/kr/my-inquiries` with `Quote Sent` status.
+- The detail rendered quote `QT-20260720-96203C3E`, immutable version `1`, KRW `1,800`, validity, lead time, shipping terms, and the intended product snapshot.
+- The authenticated buyer PDF download returned a valid `%PDF-` file of `6,198,401` bytes.
+- The buyer accepted the quote exactly once after a confirmation that the action creates no order or payment.
+- The quote status changed to `accepted`, and no decision buttons remained.
+- No additional inquiry, quote document, product, price, buyer-account approval, order, payment, or cart mutation occurred.
+
 ## Hosting And Public QA
 
 - Firebase Hosting target `noblesse` deployed successfully.
@@ -84,14 +93,15 @@ No additional inquiry, quote draft, document revision, product, price, buyer app
 | Public browser QA | Pass |
 | Authenticated admin inquiry/quote/PDF E2E | Pass |
 | Approved-buyer inquiry submit | Pass from the existing N77 canary |
-| Approved-buyer accept/reject | Pending separate approved-buyer session |
+| Approved-buyer issued quote/PDF/accept | Pass |
 
 The production build reported a large-entry-chunk warning, but the repository performance budget passed. Bundle splitting remains a post-release optimization item.
 
 ## Safety
 
 - Product or price mutation during release QA: No.
-- Buyer approval mutation: No.
+- Buyer account approval mutation: No.
+- Buyer quote decision mutation: Exactly one intended `accepted` decision.
 - Additional inquiry creation: No.
 - Order, payment, cart, FX Job, or Scheduler execution: No.
 - IAM mutation: One bucket-level conditional object binding restricted to the `quotes/` prefix for the production runtime service account.
@@ -109,11 +119,11 @@ The production build reported a large-entry-chunk warning, but the repository pe
 
 ## Next Gate
 
-Use a dedicated approved-buyer session for the remaining controlled E2E covering:
+Use a dedicated approved-buyer session for the remaining controlled structured-option E2E covering:
 
 1. Approved buyer option combinations such as Gold + 6mm and Pink + 8mm as separate inquiry items.
 2. PDF option labels for those structured combinations.
-3. Buyer accept/reject ownership and stale-document checks.
+3. Stale-document decision blocking and the reject path on a separate controlled quote, if required.
 4. Admin product option and structured-detail canary using a dedicated hidden product, not the public seed product.
 
 Do not add checkout, payment, order creation, inventory deduction, or option surcharges.
