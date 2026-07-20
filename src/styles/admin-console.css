@@ -5039,6 +5039,73 @@ button:disabled,
   grid-template-columns: 32px auto minmax(0, 1fr) auto 32px;
 }
 
+.admin-option-value-row.is-gauge {
+  align-items: start;
+  grid-template-columns: 32px minmax(0, 1fr) auto 32px;
+}
+
+.admin-gauge-value-editor {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.admin-gauge-value-inputs {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: minmax(80px, 1fr) minmax(78px, .8fr);
+}
+
+.admin-gauge-authority {
+  align-items: center;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: auto 34px 34px minmax(0, 1fr);
+}
+
+.admin-gauge-authority > span {
+  color: var(--admin-muted);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.admin-gauge-authority button {
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  border-radius: 4px;
+  color: var(--admin-muted);
+  font-size: 9px;
+  font-weight: 700;
+  height: 26px;
+  padding: 0;
+}
+
+.admin-gauge-authority button.is-active {
+  background: var(--admin-primary);
+  border-color: var(--admin-primary);
+  color: #fff;
+}
+
+.admin-gauge-authority output {
+  color: var(--admin-primary);
+  font-size: 10px;
+  font-weight: 800;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.admin-gauge-status {
+  color: #8b5b0f;
+  font-size: 9px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.admin-gauge-status.is-conflict {
+  color: #a62735;
+}
+
 .admin-option-color {
   background: #fff;
   border: 1px solid var(--admin-border);
@@ -5312,6 +5379,30 @@ button:disabled,
 }
 
 @media (max-width: 620px) {
+  .admin-option-value-row.is-gauge {
+    grid-template-columns: 32px minmax(0, 1fr) auto 32px;
+  }
+
+  .admin-option-value-row.is-gauge .admin-gauge-value-editor {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .admin-option-value-row.is-gauge > .admin-option-order-actions {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .admin-option-value-row.is-gauge > .admin-icon-button {
+    grid-column: 4;
+    grid-row: 1;
+  }
+
+  .admin-gauge-authority output {
+    overflow-wrap: normal;
+    white-space: nowrap;
+  }
+
   .admin-product-visual-editor {
     margin-inline: -16px;
   }

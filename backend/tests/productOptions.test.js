@@ -7,6 +7,10 @@ import {
   resolveSelectedOptions,
   syncLegacyOptionArrays
 } from "../src/utils/productOptions.js";
+import {
+  getGaugePairByGauge,
+  getGaugePairByMillimeters
+} from "../src/utils/bodyJewelryGauge.js";
 
 const labels = (kr, en = kr, jp = kr, zhTw = kr) => ({ kr, en, jp, "zh-TW": zhTw });
 
@@ -81,5 +85,48 @@ test("option publication reports missing translations and gallery references", (
       "optionGroups.color.values.gold.imageId",
       "optionGroups.bar-length.labels.zh-TW"
     ]
+  );
+});
+
+test("gauge values preserve a canonical mm and G pair while accepting legacy labels", () => {
+  const groups = normalizeOptionGroups([{
+    id: "gauge",
+    type: "text",
+    required: true,
+    labels: labels("바 두께 (게이지)", "Bar thickness (gauge)", "バーの太さ（ゲージ）", "耳針粗細（規格）"),
+    values: [{ id: "16g", active: true, labels: labels("16G"), swatch: "", imageId: "" }]
+  }]);
+
+  assert.deepEqual(getGaugePairByGauge("16g"), { gauge: "16G", mm: "1.2" });
+  assert.deepEqual(getGaugePairByMillimeters("1.0mm"), { gauge: "18G", mm: "1.0" });
+  assert.deepEqual(groups[0].values[0].measurement, {
+    system: "body-jewelry-gauge",
+    mm: "1.2",
+    gauge: "16G",
+    authority: "gauge"
+  });
+  assert.equal(groups[0].values[0].labels.en, "1.2mm / 16G");
+});
+
+test("mismatched gauge measurements block publication and quote selection", () => {
+  const groups = normalizeOptionGroups([{
+    id: "gauge",
+    type: "text",
+    required: true,
+    labels: labels("바 두께", "Bar thickness", "バーの太さ", "耳針粗細"),
+    values: [{
+      id: "conflict",
+      active: true,
+      labels: labels("1.2mm / 18G"),
+      swatch: "",
+      imageId: "",
+      measurement: { system: "body-jewelry-gauge", mm: "1.2", gauge: "18G", authority: "mm" }
+    }]
+  }]);
+
+  assert.deepEqual(getOptionPublishIssues(groups), ["optionGroups.gauge.values.conflict.measurement"]);
+  assert.throws(
+    () => resolveSelectedOptions({ optionGroups: groups }, { selectedOptions: [{ groupId: "gauge", valueId: "conflict" }] }),
+    /Invalid gauge option value/
   );
 });
