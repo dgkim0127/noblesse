@@ -350,6 +350,14 @@ export function createAdminApi(apiClient) {
       }))
     },
 
+    async updateQuoteWorkflow(quoteId, status, note = '', token) {
+      return unwrap(await apiClient.apiFetch(`/admin/quotes/${encodeURIComponent(quoteId)}/workflow`, {
+        method: 'PATCH',
+        token: requireToken(token),
+        body: { status, note },
+      }))
+    },
+
     async updateQuote(quoteId, input = {}, token) {
       return unwrap(await apiClient.apiFetch(`/admin/quotes/${encodeURIComponent(quoteId)}`, {
         method: 'PATCH',

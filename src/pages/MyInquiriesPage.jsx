@@ -1,4 +1,4 @@
-import { CheckCircle2, Download, FileText, XCircle } from 'lucide-react'
+import { Download, FileText } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getInquiryKey } from '../commerce/inquiryKeys'
@@ -19,10 +19,24 @@ const statusTabs = ['all', 'requested', 'checking', 'quoted', 'confirmed', 'canc
 const pricePendingLabel = '가격 확인중'
 
 const quoteCopy = {
-  kr: { title: '공식 견적서', download: 'PDF 다운로드', accept: '견적 승인', reject: '견적 거절', validUntil: '유효기간', leadTime: '납기', shipping: '배송 조건', total: '견적 합계', note: '안내', decisionHelp: '견적 승인은 주문이나 결제를 만들지 않으며, 관리자 후속 처리 요청으로만 기록됩니다.', confirmAccept: '이 견적을 승인할까요?', confirmReject: '이 견적을 거절할까요?', confirm: '확인', cancel: '취소', reason: '메모 (선택)' },
-  en: { title: 'Official quotation', download: 'Download PDF', accept: 'Accept quote', reject: 'Reject quote', validUntil: 'Valid until', leadTime: 'Lead time', shipping: 'Shipping terms', total: 'Quote total', note: 'Note', decisionHelp: 'Accepting this quote requests administrator follow-up. It does not create an order or payment.', confirmAccept: 'Accept this quote?', confirmReject: 'Reject this quote?', confirm: 'Confirm', cancel: 'Cancel', reason: 'Note (optional)' },
-  jp: { title: '正式見積書', download: 'PDFダウンロード', accept: '見積を承認', reject: '見積を拒否', validUntil: '有効期限', leadTime: '納期', shipping: '配送条件', total: '見積合計', note: 'ご案内', decisionHelp: '見積承認は注文・決済を作成せず、管理者の後続対応依頼として記録されます。', confirmAccept: 'この見積を承認しますか？', confirmReject: 'この見積を拒否しますか？', confirm: '確認', cancel: 'キャンセル', reason: 'メモ（任意）' },
-  'zh-TW': { title: '正式報價單', download: '下載 PDF', accept: '接受報價', reject: '拒絕報價', validUntil: '有效期限', leadTime: '交期', shipping: '運送條件', total: '報價合計', note: '說明', decisionHelp: '接受報價只會提出管理員後續處理需求，不會建立訂單或付款。', confirmAccept: '要接受這份報價嗎？', confirmReject: '要拒絕這份報價嗎？', confirm: '確認', cancel: '取消', reason: '備註（選填）' },
+  kr: { title: '상품 준비 현황', document: '준비 결과 견적서', download: 'PDF 다운로드', validUntil: '유효기간', leadTime: '납기', shipping: '배송 조건', total: '준비 상품 합계', note: '안내', requested: '요청', prepared: '준비', cancelled: '취소', externalPayment: '준비가 끝나면 영수증과 계좌 안내를 별도 SNS로 보내드립니다. 사이트에서는 주문이나 결제가 생성되지 않습니다.' },
+  en: { title: 'Preparation status', document: 'Prepared-items quotation', download: 'Download PDF', validUntil: 'Valid until', leadTime: 'Lead time', shipping: 'Shipping terms', total: 'Prepared total', note: 'Note', requested: 'Requested', prepared: 'Prepared', cancelled: 'Cancelled', externalPayment: 'After preparation, Noblesse sends the receipt and bank-transfer instructions separately by SNS. No online order or payment is created.' },
+  jp: { title: '商品準備状況', document: '準備結果見積書', download: 'PDFダウンロード', validUntil: '有効期限', leadTime: '納期', shipping: '配送条件', total: '準備商品合計', note: 'ご案内', requested: '依頼', prepared: '準備', cancelled: '取消', externalPayment: '準備完了後、領収書と振込案内を別途SNSでお送りします。サイト上では注文・決済は作成されません。' },
+  'zh-TW': { title: '商品備貨狀態', document: '備貨結果報價單', download: '下載 PDF', validUntil: '有效期限', leadTime: '交期', shipping: '運送條件', total: '備貨合計', note: '說明', requested: '需求', prepared: '備妥', cancelled: '取消', externalPayment: '備貨完成後，我們會另行透過 SNS 傳送收據與銀行匯款說明。網站不會建立訂單或付款。' },
+}
+
+const workflowCopy = {
+  kr: { received: '요청 접수', picking: '상품 준비 중', receipt_sent: 'SNS 영수증 발송', payment_confirmed: '입금 확인', shipped: '발송 완료', completed: '거래 종료', cancelled: '전체 취소' },
+  en: { received: 'Received', picking: 'Preparing items', receipt_sent: 'SNS receipt sent', payment_confirmed: 'Payment confirmed', shipped: 'Shipped', completed: 'Completed', cancelled: 'Cancelled' },
+  jp: { received: '受付済み', picking: '商品準備中', receipt_sent: 'SNS領収書送信', payment_confirmed: '入金確認', shipped: '発送済み', completed: '取引終了', cancelled: '全体取消' },
+  'zh-TW': { received: '已受理', picking: '備貨中', receipt_sent: '已傳送 SNS 收據', payment_confirmed: '已確認匯款', shipped: '已出貨', completed: '交易完成', cancelled: '全部取消' },
+}
+
+const cancellationCopy = {
+  kr: { out_of_stock: '재고 없음', quantity_shortage: '수량 부족', quality_issue: '품질 확인 불가', discontinued: '취급 종료', other: '기타' },
+  en: { out_of_stock: 'Out of stock', quantity_shortage: 'Quantity shortage', quality_issue: 'Quality issue', discontinued: 'Discontinued', other: 'Other' },
+  jp: { out_of_stock: '在庫なし', quantity_shortage: '数量不足', quality_issue: '品質確認不可', discontinued: '取扱終了', other: 'その他' },
+  'zh-TW': { out_of_stock: '缺貨', quantity_shortage: '數量不足', quality_issue: '品質問題', discontinued: '停止供應', other: '其他' },
 }
 
 function triggerQuoteDownload(blob, filename) {
@@ -77,7 +91,6 @@ export function MyInquiriesPage() {
     isApproved,
     loadInquiry,
     loadInquiryQuote,
-    decideInquiryQuote,
     downloadInquiryQuoteDocument,
     refreshInquiries,
     viewerState,
@@ -93,8 +106,6 @@ export function MyInquiriesPage() {
   const [issuedQuote, setIssuedQuote] = useState(null)
   const [quoteStatus, setQuoteStatus] = useState('idle')
   const [quoteError, setQuoteError] = useState('')
-  const [decision, setDecision] = useState(null)
-  const [decisionNote, setDecisionNote] = useState('')
   const filteredInquiries = useMemo(
     () => statusFilter === 'all' ? inquiries : inquiries.filter((item) => item.status === statusFilter),
     [inquiries, statusFilter]
@@ -246,21 +257,20 @@ export function MyInquiriesPage() {
       }
     }
 
-    const submitDecision = async () => {
-      if (!decision || !issuedQuote?.id || !issuedQuote.documentId) return
-      setQuoteStatus('loading')
-      setQuoteError('')
-      try {
-        const nextQuote = await decideInquiryQuote({ quoteId: issuedQuote.id, documentId: issuedQuote.documentId, decision, note: decisionNote })
-        if (nextQuote) setIssuedQuote(nextQuote)
-        setDecision(null)
-        setDecisionNote('')
-        setQuoteStatus('ready')
-      } catch (error) {
-        setQuoteStatus('error')
-        setQuoteError(error?.message || 'Unable to save the quote decision.')
-      }
-    }
+    const livePreparationItems = issuedQuote?.items?.length
+      ? issuedQuote.items
+      : (issuedQuote?.snapshot?.items || []).map((item) => ({
+        ...item,
+        requestedQuantity: item.requestedQuantity ?? item.quantity,
+        confirmedQuantity: item.quantity,
+        cancelledQuantity: item.cancelledQuantity ?? 0,
+        confirmedUnitPrice: item.unitPrice,
+        confirmedSubtotal: item.subtotal,
+        fulfillmentStatus: item.fulfillmentStatus || 'ready',
+      }))
+    const quoteCurrency = issuedQuote?.currency || issuedQuote?.snapshot?.currency || selectedCurrency
+    const localizedWorkflow = workflowCopy[locale] || workflowCopy.en
+    const localizedCancellation = cancellationCopy[locale] || cancellationCopy.en
 
     return <main className="content">
       <Link className="back" to={toLocalePath('/my-inquiries')}>Inquiry history</Link>
@@ -290,23 +300,35 @@ export function MyInquiriesPage() {
       {quoteStatus === 'loading' && !issuedQuote && <p className="auth-notice" role="status">Loading issued quote...</p>}
       {quoteStatus === 'error' && <p className="auth-notice" role="alert">{quoteError}</p>}
       {issuedQuote && <section className="buyer-quote-document">
-        <header><div><span>Version {issuedQuote.revision}</span><h2>{quotationCopy.title}</h2><p>{issuedQuote.quoteNumber}</p></div><span className={`status status-${issuedQuote.displayStatus || issuedQuote.status}`}>{issuedQuote.displayStatus || issuedQuote.status}</span></header>
-        <dl className="buyer-quote-terms">
-          <dt>{quotationCopy.validUntil}</dt><dd>{issuedQuote.validUntil ? new Date(`${String(issuedQuote.validUntil).slice(0, 10)}T00:00:00`).toLocaleDateString({ kr: 'ko-KR', en: 'en-US', jp: 'ja-JP', 'zh-TW': 'zh-TW' }[locale] || 'en-US') : '-'}</dd>
-          <dt>{quotationCopy.leadTime}</dt><dd>{issuedQuote.snapshot?.leadTime || '-'}</dd>
-          <dt>{quotationCopy.shipping}</dt><dd>{issuedQuote.snapshot?.shippingNote || '-'}</dd>
-        </dl>
-        <div className="buyer-quote-lines">{(issuedQuote.snapshot?.items || []).map((item, index) => {
+        <header><div><span>{issuedQuote.revision ? `Version ${issuedQuote.revision}` : quotationCopy.title}</span><h2>{issuedQuote.documentId ? quotationCopy.document : quotationCopy.title}</h2><p>{issuedQuote.quoteNumber || selected.inquiryNumber}</p></div><span className={`status status-${issuedQuote.workflowStatus}`}>{localizedWorkflow[issuedQuote.workflowStatus] || issuedQuote.workflowStatus}</span></header>
+        <ol className="buyer-quote-workflow" aria-label={quotationCopy.title}>{['received', 'picking', 'receipt_sent', 'payment_confirmed', 'shipped', 'completed'].map((step, index, steps) => {
+          const currentIndex = steps.indexOf(issuedQuote.workflowStatus)
+          return <li className={`${index <= currentIndex ? 'is-complete' : ''} ${step === issuedQuote.workflowStatus ? 'is-current' : ''}`} key={step}><span>{index + 1}</span><small>{localizedWorkflow[step]}</small></li>
+        })}</ol>
+        <div className="buyer-preparation-heading"><strong>{quotationCopy.title}</strong><span>{quotationCopy.requested} / {quotationCopy.prepared} / {quotationCopy.cancelled}</span></div>
+        <div className="buyer-quote-lines buyer-preparation-lines">{livePreparationItems.map((item, index) => {
           const optionSummary = formatSelectedProductOptions(item.selectedOptions, locale)
           const legacySummary = [item.color, item.size].filter(Boolean)
-          return <div key={item.id || `${item.productCode}-${index}`}><span><strong>{item.productName || item.productCode}</strong><small>{[item.productCode, ...(optionSummary.length ? optionSummary : legacySummary)].filter(Boolean).join(' · ')}</small></span><span>{item.quantity}</span><span>{formatMoney(item.unitPrice, issuedQuote.snapshot.currency)}</span><strong>{formatMoney(item.subtotal, issuedQuote.snapshot.currency)}</strong></div>
+          const cancelledQuantity = Number(item.cancelledQuantity ?? Math.max(Number(item.requestedQuantity || 0) - Number(item.confirmedQuantity || 0), 0))
+          const cancellationReason = cancelledQuantity > 0 ? localizedCancellation[item.cancellationReason] || localizedCancellation.other : ''
+          return <div className={`fulfillment-${item.fulfillmentStatus}`} key={item.id || `${item.productCode}-${index}`}>
+            <span><strong>{item.productName || item.productCode}</strong><small>{[item.productCode, ...(optionSummary.length ? optionSummary : legacySummary)].filter(Boolean).join(' · ')}</small>{cancelledQuantity > 0 && <em>{[cancellationReason, item.cancellationNote].filter(Boolean).join(' · ')}</em>}</span>
+            <span><small>{quotationCopy.requested}</small>{item.requestedQuantity ?? item.confirmedQuantity}</span>
+            <span><small>{quotationCopy.prepared}</small>{item.confirmedQuantity ?? item.quantity}</span>
+            <span className={cancelledQuantity > 0 ? 'is-cancelled' : ''}><small>{quotationCopy.cancelled}</small>{cancelledQuantity}</span>
+            <strong>{formatMoney(item.confirmedSubtotal ?? item.subtotal, quoteCurrency)}</strong>
+          </div>
         })}</div>
-        <div className="buyer-quote-total"><span>{quotationCopy.total}</span><strong>{formatMoney(issuedQuote.snapshot?.total, issuedQuote.snapshot?.currency)}</strong></div>
-        {issuedQuote.snapshot?.customerNote && <div className="buyer-quote-note"><strong>{quotationCopy.note}</strong><p>{issuedQuote.snapshot.customerNote}</p></div>}
-        <div className="buyer-quote-actions"><button className="secondary-action" disabled={quoteStatus === 'loading'} type="button" onClick={downloadQuote}><Download size={17} />{quotationCopy.download}</button>{issuedQuote.status === 'sent' && !issuedQuote.isExpired && <><button className="primary-action" disabled={quoteStatus === 'loading'} type="button" onClick={() => setDecision('accepted')}><CheckCircle2 size={17} />{quotationCopy.accept}</button><button className="secondary-action" disabled={quoteStatus === 'loading'} type="button" onClick={() => setDecision('rejected')}><XCircle size={17} />{quotationCopy.reject}</button></>}</div>
-        {issuedQuote.status === 'sent' && !issuedQuote.isExpired && <p className="buyer-quote-decision-help">{quotationCopy.decisionHelp}</p>}
+        <div className="buyer-quote-total"><span>{quotationCopy.total}</span><strong>{formatMoney(issuedQuote.confirmedTotal ?? issuedQuote.snapshot?.total, quoteCurrency)}</strong></div>
+        {(issuedQuote.documentId || issuedQuote.validUntil || issuedQuote.leadTime || issuedQuote.shippingNote) && <dl className="buyer-quote-terms">
+          <dt>{quotationCopy.validUntil}</dt><dd>{issuedQuote.validUntil ? new Date(`${String(issuedQuote.validUntil).slice(0, 10)}T00:00:00`).toLocaleDateString({ kr: 'ko-KR', en: 'en-US', jp: 'ja-JP', 'zh-TW': 'zh-TW' }[locale] || 'en-US') : '-'}</dd>
+          <dt>{quotationCopy.leadTime}</dt><dd>{issuedQuote.leadTime || issuedQuote.snapshot?.leadTime || '-'}</dd>
+          <dt>{quotationCopy.shipping}</dt><dd>{issuedQuote.shippingNote || issuedQuote.snapshot?.shippingNote || '-'}</dd>
+        </dl>}
+        {(issuedQuote.customerNote || issuedQuote.snapshot?.customerNote) && <div className="buyer-quote-note"><strong>{quotationCopy.note}</strong><p>{issuedQuote.customerNote || issuedQuote.snapshot.customerNote}</p></div>}
+        <p className="buyer-quote-external-payment">{quotationCopy.externalPayment}</p>
+        {issuedQuote.documentId && <div className="buyer-quote-actions"><button className="secondary-action" disabled={quoteStatus === 'loading'} type="button" onClick={downloadQuote}><Download size={17} />{quotationCopy.download}</button></div>}
       </section>}
-      {decision && <div className="buyer-quote-dialog-backdrop" role="presentation"><section aria-modal="true" className="buyer-quote-dialog" role="dialog"><h2>{decision === 'accepted' ? quotationCopy.confirmAccept : quotationCopy.confirmReject}</h2><p>{quotationCopy.decisionHelp}</p><label><span>{quotationCopy.reason}</span><textarea rows="4" value={decisionNote} onChange={(event) => setDecisionNote(event.target.value)} /></label><div><button className="secondary-action" type="button" onClick={() => setDecision(null)}>{quotationCopy.cancel}</button><button className="primary-action" disabled={quoteStatus === 'loading'} type="button" onClick={submitDecision}>{quotationCopy.confirm}</button></div></section></div>}
     </main>
   }
 

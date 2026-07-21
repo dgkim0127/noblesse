@@ -110,6 +110,110 @@
   text-align: right;
 }
 
+.buyer-quote-workflow {
+  counter-reset: workflow;
+  display: grid;
+  gap: 0;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.buyer-quote-workflow li {
+  align-items: center;
+  color: #918d97;
+  display: grid;
+  font-size: 11px;
+  gap: 7px;
+  grid-template-columns: 24px minmax(0, 1fr);
+  position: relative;
+}
+
+.buyer-quote-workflow li::after {
+  background: #e5e2e8;
+  content: "";
+  height: 1px;
+  left: 24px;
+  position: absolute;
+  right: 0;
+  top: 12px;
+}
+
+.buyer-quote-workflow li:last-child::after {
+  display: none;
+}
+
+.buyer-quote-workflow li > span {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #d8d4dd;
+  border-radius: 50%;
+  display: inline-flex;
+  font-size: 10px;
+  height: 24px;
+  justify-content: center;
+  position: relative;
+  width: 24px;
+  z-index: 1;
+}
+
+.buyer-quote-workflow li.is-complete {
+  color: #2a234f;
+}
+
+.buyer-quote-workflow li.is-complete::after,
+.buyer-quote-workflow li.is-complete > span {
+  background: #2a234f;
+  border-color: #2a234f;
+  color: #fff;
+}
+
+.buyer-quote-workflow li.is-current small {
+  font-weight: 800;
+}
+
+.buyer-preparation-heading {
+  align-items: baseline;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.buyer-preparation-heading > span {
+  color: #817c86;
+  font-size: 11px;
+}
+
+.buyer-preparation-lines > div {
+  grid-template-columns: minmax(210px, 1fr) 58px 58px 58px 128px;
+}
+
+.buyer-preparation-lines > div > span:not(:first-child) {
+  display: grid;
+  gap: 3px;
+}
+
+.buyer-preparation-lines em {
+  color: #a62735;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.buyer-preparation-lines .is-cancelled {
+  color: #a62735;
+  font-weight: 800;
+}
+
+.buyer-preparation-lines .fulfillment-cancelled {
+  background: #fff8f8;
+}
+
+.buyer-preparation-lines .fulfillment-partial {
+  background: #fffbf1;
+}
+
 .buyer-quote-total {
   align-items: center;
   color: #2a234f;
@@ -129,11 +233,17 @@
 }
 
 .buyer-quote-note p,
-.buyer-quote-decision-help {
+.buyer-quote-external-payment {
   color: #68646e;
   font-size: 12px;
   line-height: 1.55;
   margin: 5px 0 0;
+}
+
+.buyer-quote-external-payment {
+  border-top: 1px solid #e6e3ea;
+  margin: 0;
+  padding-top: 16px;
 }
 
 .buyer-quote-actions {
@@ -147,68 +257,6 @@
   align-items: center;
   display: inline-flex;
   gap: 7px;
-}
-
-.buyer-quote-decision-help {
-  text-align: right;
-}
-
-.buyer-quote-dialog-backdrop {
-  align-items: center;
-  background: rgba(24, 22, 31, 0.52);
-  display: flex;
-  inset: 0;
-  justify-content: center;
-  padding: 18px;
-  position: fixed;
-  z-index: 200;
-}
-
-.buyer-quote-dialog {
-  background: #fff;
-  border: 1px solid #dedbe5;
-  border-radius: 8px;
-  display: grid;
-  gap: 14px;
-  max-width: 460px;
-  padding: 22px;
-  width: 100%;
-}
-
-.buyer-quote-dialog h2 {
-  color: #2a234f;
-  font-size: 20px;
-  letter-spacing: 0;
-  margin: 0;
-}
-
-.buyer-quote-dialog p {
-  color: #68646e;
-  font-size: 13px;
-  line-height: 1.55;
-  margin: 0;
-}
-
-.buyer-quote-dialog label {
-  display: grid;
-  font-size: 12px;
-  font-weight: 700;
-  gap: 6px;
-}
-
-.buyer-quote-dialog textarea {
-  border: 1px solid #cbc7d1;
-  border-radius: 5px;
-  font: inherit;
-  padding: 9px;
-  resize: vertical;
-  width: 100%;
-}
-
-.buyer-quote-dialog > div {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
 }
 
 @media (max-width: 680px) {
@@ -230,6 +278,35 @@
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
+  .buyer-quote-workflow {
+    gap: 14px 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .buyer-quote-workflow li::after {
+    display: none;
+  }
+
+  .buyer-preparation-heading {
+    align-items: flex-start;
+    display: grid;
+  }
+
+  .buyer-preparation-lines > div {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .buyer-preparation-lines > div > span:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .buyer-preparation-lines > div > strong {
+    border-top: 1px dashed #e1dde4;
+    grid-column: 1 / -1;
+    padding-top: 8px;
+    text-align: right;
+  }
+
   .buyer-quote-lines > div > span:first-child {
     grid-column: 1 / -1;
   }
@@ -239,14 +316,9 @@
     text-align: left;
   }
 
-  .buyer-quote-actions,
-  .buyer-quote-dialog > div {
+  .buyer-quote-actions {
     display: grid;
     grid-template-columns: 1fr;
-  }
-
-  .buyer-quote-decision-help {
-    text-align: left;
   }
 }
 

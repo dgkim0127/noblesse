@@ -44,6 +44,13 @@ function createAppWithQuotes({ duplicate = false } = {}) {
                 quote: { id, inquiryId, status, currency: "JPY" },
                 auditLogId: "audit-status-1"
               };
+            },
+            async updateWorkflowStatus(id, input) {
+              if (id !== quoteId) return null;
+              return {
+                quote: { id, inquiryId, status: "sent", workflowStatus: input.status, workflowNote: input.note },
+                auditLogId: "audit-workflow-1"
+              };
             }
           }
         })
@@ -143,6 +150,36 @@ test("PATCH /api/admin/quotes/:quoteId/status rejects unknown fields", async () 
       "content-type": "application/json"
     },
     body: JSON.stringify({ status: "cancelled", quotedBy: "client" })
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(response.body.error.code, "VALIDATION_ERROR");
+});
+
+test("PATCH /api/admin/quotes/:quoteId/workflow advances the offline fulfillment workflow", async () => {
+  const response = await request(createAppWithQuotes(), `/api/admin/quotes/${quoteId}/workflow`, {
+    method: "PATCH",
+    headers: {
+      authorization: "Bearer admin-token",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({ status: "receipt_sent", note: "Receipt sent by SNS" })
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.data.quote.workflowStatus, "receipt_sent");
+  assert.equal(response.body.data.quote.workflowNote, "Receipt sent by SNS");
+  assert.equal(response.body.data.auditLogId, "audit-workflow-1");
+});
+
+test("PATCH /api/admin/quotes/:quoteId/workflow requires a reason for whole-quote cancellation", async () => {
+  const response = await request(createAppWithQuotes(), `/api/admin/quotes/${quoteId}/workflow`, {
+    method: "PATCH",
+    headers: {
+      authorization: "Bearer admin-token",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({ status: "cancelled" })
   });
 
   assert.equal(response.status, 400);

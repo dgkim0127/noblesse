@@ -515,6 +515,34 @@ test("packaged product option migration matches canonical migration exactly", ()
   assert.equal(packaged, canonical);
 });
 
+test("quote fulfillment workflow migration is additive and preserves operator results on retry", () => {
+  const sqlText = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260721_quote_fulfillment_workflow.sql"),
+    "utf8"
+  );
+
+  assert.doesNotThrow(() => validateMigrationSql(sqlText));
+  assert.match(sqlText, /add column if not exists workflow_status text not null default 'received'/i);
+  assert.match(sqlText, /add column if not exists fulfillment_status text/i);
+  assert.match(sqlText, /add column if not exists cancelled_quantity integer/i);
+  assert.match(sqlText, /where fulfillment_status is null or cancelled_quantity is null/i);
+  assert.match(sqlText, /event_type in \('quote', 'workflow'\)/i);
+  assert.doesNotMatch(sqlText, /\bdrop\s+table\b|\btruncate\b|\bdelete\s+from\b|\brename\b/i);
+});
+
+test("packaged quote fulfillment workflow migration matches canonical migration exactly", () => {
+  const canonical = readFileSync(
+    join(process.cwd(), "..", "supabase", "migrations", "20260721_quote_fulfillment_workflow.sql"),
+    "utf8"
+  );
+  const packaged = readFileSync(
+    join(process.cwd(), "migrations", "20260721_quote_fulfillment_workflow.sql"),
+    "utf8"
+  );
+
+  assert.equal(packaged, canonical);
+});
+
 test("migration runner resolves packaged lifecycle migration path explicitly", () => {
   const resolved = resolveSchemaSqlPath({
     SCHEMA_SQL_PATH: "migrations/20260622_admin_rbac_account_lifecycle.sql"

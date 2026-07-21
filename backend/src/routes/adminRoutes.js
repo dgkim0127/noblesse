@@ -786,6 +786,20 @@ export function createAdminRoutes({
     })
   );
 
+  router.patch(
+    "/quotes/:quoteId/workflow",
+    requireAdmin,
+    can("quotes.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.quotes.updateWorkflowStatus(
+        req.params.quoteId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
   router.delete("*", () => {
     throw notFound("Admin delete routes are not implemented");
   });

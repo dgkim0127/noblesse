@@ -31,7 +31,12 @@ function createCandidate() {
         valueLabels: { kr: "골드", en: "Gold", jp: "ゴールド", "zh-TW": "金色" }
       }],
       productName: "클로버 바벨",
+      requestedQuantity: 2,
       confirmedQuantity: 1,
+      cancelledQuantity: 1,
+      fulfillmentStatus: "partial",
+      cancellationReason: "quantity_shortage",
+      cancellationNote: "Only one item is available",
       confirmedUnitPrice: 12000,
       confirmedSubtotal: 12000
     }],
@@ -57,8 +62,13 @@ test("issueQuote stores an immutable customer snapshot and excludes internal mem
     },
     async pdfRenderer(snapshot) {
       assert.equal(snapshot.adminMemo, undefined);
-      assert.equal(snapshot.schemaVersion, 2);
+      assert.equal(snapshot.schemaVersion, 3);
       assert.equal(snapshot.customerNote, "고객 안내");
+      assert.equal(snapshot.items[0].requestedQuantity, 2);
+      assert.equal(snapshot.items[0].quantity, 1);
+      assert.equal(snapshot.items[0].cancelledQuantity, 1);
+      assert.equal(snapshot.items[0].fulfillmentStatus, "partial");
+      assert.equal(snapshot.items[0].cancellationReason, "quantity_shortage");
       assert.equal(snapshot.items[0].subtotal, 12000);
       assert.equal(snapshot.items[0].selectedOptions[0].valueLabels.en, "Gold");
       return Buffer.from("%PDF-test");

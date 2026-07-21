@@ -48,6 +48,9 @@ function mapQuote(row) {
     decisionNote: row.decision_note || "",
     acceptedAt: row.accepted_at || null,
     rejectedAt: row.rejected_at || null,
+    workflowVersion: Number(row.workflow_version || 1),
+    workflowStatus: row.workflow_status || "received",
+    workflowNote: row.workflow_note || "",
     quotedBy: row.quoted_by || null,
     quotedAt: row.quoted_at || null,
     createdAt: row.created_at,
@@ -69,7 +72,11 @@ function mapQuoteItem(row) {
     requestedPriceSnapshot: toNumber(row.requested_price_snapshot),
     confirmedUnitPrice: toNumber(row.confirmed_unit_price),
     confirmedSubtotal: toNumber(row.confirmed_subtotal),
-    itemNote: row.item_note || ""
+    itemNote: row.item_note || "",
+    fulfillmentStatus: row.fulfillment_status || "pending",
+    cancelledQuantity: Number(row.cancelled_quantity || 0),
+    cancellationReason: row.cancellation_reason || "",
+    cancellationNote: row.cancellation_note || ""
   };
 }
 
@@ -94,6 +101,7 @@ function mapHistory(row) {
     fromStatus: row.from_status || null,
     toStatus: row.to_status,
     actorType: row.actor_type,
+    eventType: row.event_type || "quote",
     note: row.note || "",
     createdAt: row.created_at
   };
@@ -123,6 +131,8 @@ function quoteSnapshot(row) {
     documentLocale: row.document_locale || "en",
     customerNote: row.customer_note || "",
     currentDocumentId: row.current_document_id || null,
+    workflowStatus: row.workflow_status || "received",
+    workflowNote: row.workflow_note || "",
     updatedAt: row.updated_at
   };
 }
@@ -151,6 +161,9 @@ const quoteSelect = `
     aq.decision_note,
     aq.accepted_at,
     aq.rejected_at,
+    aq.workflow_version,
+    aq.workflow_status,
+    aq.workflow_note,
     aq.quoted_by,
     aq.quoted_at,
     current_document.revision as current_revision,
@@ -176,7 +189,11 @@ const itemSelect = `
     requested_price_snapshot,
     confirmed_unit_price,
     confirmed_subtotal,
-    item_note
+    item_note,
+    fulfillment_status,
+    cancelled_quantity,
+    cancellation_reason,
+    cancellation_note
   from public.admin_quote_items
 `;
 
@@ -209,16 +226,17 @@ export function createAdminQuoteQueries(pool) {
             or ($1 not in ('expired', 'sent') and aq.status = $1)
           )
             and ($2::text is null or i.market = $2)
+            and ($3::text is null or aq.workflow_status = $3)
             and (
-              $3::text is null
-              or aq.quote_number ilike $3
-              or i.inquiry_number ilike $3
-              or b.company_name ilike $3
+              $4::text is null
+              or aq.quote_number ilike $4
+              or i.inquiry_number ilike $4
+              or b.company_name ilike $4
             )
           order by aq.updated_at desc
-          limit $4 offset $5
+          limit $5 offset $6
         `,
-        [filters.status || null, filters.market || null, filters.q ? `%${filters.q}%` : null, filters.dbLimit || filters.limit, filters.offset]
+        [filters.status || null, filters.market || null, filters.workflowStatus || null, filters.q ? `%${filters.q}%` : null, filters.dbLimit || filters.limit, filters.offset]
       );
       return result.rows.map(mapQuote);
     },
@@ -354,41 +372,75 @@ export function createAdminQuoteQueries(pool) {
           await client.query("rollback");
           return null;
         }
-        if (["accepted", "rejected", "cancelled"].includes(existing.status)) {
+        if (["accepted", "rejected", "cancelled"].includes(existing.status) || !["received", "picking"].includes(existing.workflow_status || "received")) {
           await client.query("rollback");
           return { locked: true };
         }
         const missingItems = [];
+        const invalidItems = [];
         for (const item of input.items) {
+          const existingItemResult = await client.query(
+            `select requested_quantity from public.admin_quote_items where admin_quote_id = $1 and id = $2 for update`,
+            [quoteId, item.id]
+          );
+          const existingItem = existingItemResult.rows[0];
+          if (!existingItem) {
+            missingItems.push(item.id);
+            continue;
+          }
+          const requestedQuantity = Number(existingItem.requested_quantity || 0);
+          const confirmedQuantity = Number(item.confirmedQuantity);
+          if (confirmedQuantity > requestedQuantity) {
+            invalidItems.push({ id: item.id, message: "Prepared quantity cannot exceed the original requested quantity" });
+            continue;
+          }
+          const fulfillmentStatus = confirmedQuantity === 0
+            ? "cancelled"
+            : confirmedQuantity < requestedQuantity ? "partial" : "ready";
+          if (item.fulfillmentStatus && item.fulfillmentStatus !== fulfillmentStatus) {
+            invalidItems.push({ id: item.id, message: "Fulfillment status does not match the prepared quantity" });
+            continue;
+          }
+          if (confirmedQuantity < requestedQuantity && !item.cancellationReason) {
+            invalidItems.push({ id: item.id, message: "A cancellation reason is required when any requested quantity is unavailable" });
+            continue;
+          }
           const itemResult = await client.query(
             `
               update public.admin_quote_items
               set confirmed_quantity = $3::integer,
                   confirmed_unit_price = $4::numeric,
                   confirmed_subtotal = round(($3::integer * $4::numeric), 2),
-                  item_note = nullif($5, '')
+                  item_note = nullif($5, ''),
+                  fulfillment_status = $6,
+                  cancelled_quantity = greatest(requested_quantity - $3::integer, 0),
+                  cancellation_reason = case when $3::integer < requested_quantity then $7 else null end,
+                  cancellation_note = case when $3::integer < requested_quantity then nullif($8, '') else null end
               where admin_quote_id = $1 and id = $2
               returning id
             `,
-            [quoteId, item.id, item.confirmedQuantity, item.confirmedUnitPrice, item.itemNote]
+            [quoteId, item.id, confirmedQuantity, item.confirmedUnitPrice, item.itemNote, fulfillmentStatus, item.cancellationReason || null, item.cancellationNote]
           );
           if (!itemResult.rows[0]) missingItems.push(item.id);
         }
-        if (missingItems.length) {
+        if (missingItems.length || invalidItems.length) {
           await client.query("rollback");
-          return { missingItems };
+          return { missingItems, invalidItems };
         }
         const totalResult = await client.query("select coalesce(sum(confirmed_subtotal), 0) as total from public.admin_quote_items where admin_quote_id = $1", [quoteId]);
         await client.query(
           `
             update public.admin_quotes
-            set confirmed_total = $2,
+            set status = 'draft',
+                confirmed_total = $2,
                 lead_time = nullif($3, ''),
                 shipping_note = nullif($4, ''),
                 valid_until = $5,
                 document_locale = $6,
                 customer_note = nullif($7, ''),
                 admin_memo = nullif($8, ''),
+                current_document_id = null,
+                quoted_at = null,
                 updated_at = now()
             where id = $1
           `,
@@ -418,7 +470,7 @@ export function createAdminQuoteQueries(pool) {
       const quoteResult = await pool.query(`${quoteSelect} where aq.id = $1 limit 1`, [quoteId]);
       const row = quoteResult.rows[0];
       if (!row) return null;
-      if (["accepted", "rejected", "cancelled"].includes(row.status)) return { locked: true };
+      if (["accepted", "rejected", "cancelled"].includes(row.status) || !["received", "picking"].includes(row.workflow_status || "received")) return { locked: true };
       const itemsResult = await pool.query(`${itemSelect} where admin_quote_id = $1 order by created_at asc, id asc`, [quoteId]);
       const revisionResult = await pool.query("select coalesce(max(revision), 0) + 1 as next_revision from public.admin_quote_documents where admin_quote_id = $1", [quoteId]);
       return {
@@ -441,7 +493,7 @@ export function createAdminQuoteQueries(pool) {
           await client.query("rollback");
           return null;
         }
-        if (["accepted", "rejected", "cancelled"].includes(existing.status)) {
+        if (["accepted", "rejected", "cancelled"].includes(existing.status) || !["received", "picking"].includes(existing.workflow_status || "received")) {
           await client.query("rollback");
           return { locked: true };
         }
@@ -549,7 +601,10 @@ export function createAdminQuoteQueries(pool) {
           await client.query("rollback");
           return { locked: true };
         }
-        await client.query("update public.admin_quotes set status = $2, updated_at = now() where id = $1", [quoteId, status]);
+        await client.query(
+          `update public.admin_quotes set status = $2, workflow_status = case when $2 = 'cancelled' then 'cancelled' else workflow_status end, updated_at = now() where id = $1`,
+          [quoteId, status]
+        );
         await client.query(
           `insert into public.admin_quote_status_history (admin_quote_id, document_id, from_status, to_status, actor_user_id, actor_type) values ($1, $2, $3, $4, $5, 'admin')`,
           [quoteId, existing.current_document_id, existing.status, status, actor.userId]
@@ -558,6 +613,96 @@ export function createAdminQuoteQueries(pool) {
         const auditLogId = await insertAudit(client, {
           actor,
           action: "admin.quote.status.update",
+          targetId: quoteId,
+          before: quoteSnapshot(existing),
+          after: quoteSnapshot(updatedResult.rows[0])
+        });
+        await client.query("commit");
+        return { quote: mapQuote(updatedResult.rows[0]), auditLogId };
+      } catch (error) {
+        try { await client.query("rollback"); } catch { /* Preserve original error. */ }
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+
+    async updateWorkflowStatus(quoteId, input, adminViewer = {}) {
+      assertTransactionPool(pool);
+      const client = await pool.connect();
+      const actor = getAdminActor(adminViewer);
+      const allowedTransitions = {
+        received: ["picking", "cancelled"],
+        picking: ["receipt_sent", "cancelled"],
+        receipt_sent: ["picking", "payment_confirmed", "cancelled"],
+        payment_confirmed: ["shipped"],
+        shipped: ["completed"]
+      };
+      try {
+        await client.query("begin");
+        const existingResult = await client.query(`${quoteSelect} where aq.id = $1 for update of aq`, [quoteId]);
+        const existing = existingResult.rows[0];
+        if (!existing) {
+          await client.query("rollback");
+          return null;
+        }
+        const fromStatus = existing.workflow_status || "received";
+        if (!(allowedTransitions[fromStatus] || []).includes(input.status)) {
+          await client.query("rollback");
+          return { invalidTransition: true, fromStatus };
+        }
+        if (input.status === "receipt_sent") {
+          if (!existing.current_document_id) {
+            await client.query("rollback");
+            return { documentRequired: true };
+          }
+          const itemStateResult = await client.query(
+            `
+              select
+                count(*) filter (where fulfillment_status = 'pending') as pending_count,
+                count(*) filter (where confirmed_quantity > 0) as prepared_count
+              from public.admin_quote_items
+              where admin_quote_id = $1
+            `,
+            [quoteId]
+          );
+          if (Number(itemStateResult.rows[0].pending_count) > 0) {
+            await client.query("rollback");
+            return { unresolvedItems: true };
+          }
+          if (Number(itemStateResult.rows[0].prepared_count) < 1) {
+            await client.query("rollback");
+            return { noPreparedItems: true };
+          }
+        }
+        await client.query(
+          `
+            update public.admin_quotes
+            set workflow_status = $2,
+                workflow_note = nullif($3, ''),
+                status = case when $2 = 'cancelled' then 'cancelled' else status end,
+                updated_at = now()
+            where id = $1
+          `,
+          [quoteId, input.status, input.note]
+        );
+        await client.query(
+          `
+            insert into public.admin_quote_status_history (
+              admin_quote_id, document_id, from_status, to_status, actor_user_id, actor_type, event_type, note
+            ) values ($1, $2, $3, $4, $5, 'admin', 'workflow', nullif($6, ''))
+          `,
+          [quoteId, existing.current_document_id, fromStatus, input.status, actor.userId, input.note]
+        );
+        const inquiryStatus = input.status === "cancelled"
+          ? "cancelled"
+          : input.status === "picking" ? "checking"
+            : ["payment_confirmed", "shipped", "completed"].includes(input.status) ? "confirmed" : "quoted";
+        await client.query("update public.inquiries set status = $2, updated_at = now() where id = $1", [existing.inquiry_id, inquiryStatus]);
+        const updatedResult = await client.query(`${quoteSelect} where aq.id = $1 limit 1`, [quoteId]);
+        const auditLogId = await insertAudit(client, {
+          actor,
+          action: "admin.quote.workflow.update",
           targetId: quoteId,
           before: quoteSnapshot(existing),
           after: quoteSnapshot(updatedResult.rows[0])

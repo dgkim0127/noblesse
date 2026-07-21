@@ -12,12 +12,16 @@ import {
 import { createQuotePdfBuffer } from "./quotePdfRenderer.js";
 
 const QUOTE_STATUSES = ["draft", "sent", "accepted", "rejected", "cancelled", "expired"];
+const WORKFLOW_STATUSES = ["received", "picking", "receipt_sent", "payment_confirmed", "shipped", "completed", "cancelled"];
+const FULFILLMENT_STATUSES = ["pending", "ready", "partial", "cancelled"];
+const CANCELLATION_REASONS = ["out_of_stock", "quantity_shortage", "quality_issue", "discontinued", "other"];
 const DOCUMENT_LOCALES = ["kr", "en", "jp", "zh-TW"];
 
 function parseQuoteFilters(filters) {
   const pagination = parsePagination(filters);
   return {
     status: parseOptionalEnum(filters.status, QUOTE_STATUSES, "status"),
+    workflowStatus: parseOptionalEnum(filters.workflowStatus, WORKFLOW_STATUSES, "workflowStatus"),
     market: parseOptionalEnum(filters.market, MARKETS, "market"),
     q: parseOptionalString(filters.q, { maxLength: 120 }),
     limit: pagination.limit,
@@ -36,9 +40,9 @@ function parseDate(value, fieldName) {
   return text;
 }
 
-function parsePositiveInteger(value, fieldName) {
+function parseNonnegativeInteger(value, fieldName) {
   const parsed = Number(value);
-  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 1000000) {
+  if (!Number.isInteger(parsed) || parsed < 0 || parsed > 1000000) {
     throw validationError(`Invalid ${fieldName}`);
   }
   return parsed;
@@ -73,12 +77,23 @@ function parseDraftBody(body = {}) {
     customerNote: parseOptionalString(safeBody.customerNote, { maxLength: 2000 }) || "",
     adminMemo: parseOptionalString(safeBody.adminMemo, { maxLength: 4000 }) || "",
     items: safeBody.items.map((rawItem) => {
-      const item = rejectUnknownFields(rawItem || {}, ["id", "confirmedQuantity", "confirmedUnitPrice", "itemNote"]);
+      const item = rejectUnknownFields(rawItem || {}, [
+        "id",
+        "confirmedQuantity",
+        "confirmedUnitPrice",
+        "itemNote",
+        "fulfillmentStatus",
+        "cancellationReason",
+        "cancellationNote"
+      ]);
       return {
         id: validateUuid(item.id, "itemId"),
-        confirmedQuantity: parsePositiveInteger(item.confirmedQuantity, "confirmedQuantity"),
+        confirmedQuantity: parseNonnegativeInteger(item.confirmedQuantity, "confirmedQuantity"),
         confirmedUnitPrice: parseNonnegativeMoney(item.confirmedUnitPrice, "confirmedUnitPrice"),
-        itemNote: parseOptionalString(item.itemNote, { maxLength: 500 }) || ""
+        itemNote: parseOptionalString(item.itemNote, { maxLength: 500 }) || "",
+        fulfillmentStatus: parseOptionalEnum(item.fulfillmentStatus, FULFILLMENT_STATUSES, "fulfillmentStatus"),
+        cancellationReason: parseOptionalEnum(item.cancellationReason, CANCELLATION_REASONS, "cancellationReason"),
+        cancellationNote: parseOptionalString(item.cancellationNote, { maxLength: 500 }) || ""
       };
     })
   };
@@ -92,7 +107,7 @@ function createQuoteNumber(quote) {
 function createDocumentSnapshot(candidate) {
   const quote = candidate.quote;
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     quoteId: quote.id,
     inquiryId: quote.inquiryId,
     inquiryNumber: quote.inquiryNumber,
@@ -117,7 +132,12 @@ function createDocumentSnapshot(candidate) {
       color: item.color || "",
       size: item.size || "",
       selectedOptions: Array.isArray(item.selectedOptions) ? item.selectedOptions : [],
+      requestedQuantity: Number(item.requestedQuantity),
       quantity: Number(item.confirmedQuantity),
+      cancelledQuantity: Number(item.cancelledQuantity || 0),
+      fulfillmentStatus: item.fulfillmentStatus || "ready",
+      cancellationReason: item.cancellationReason || "",
+      cancellationNote: item.cancellationNote || "",
       unitPrice: Number(item.confirmedUnitPrice),
       subtotal: Number(item.confirmedSubtotal),
       itemNote: item.itemNote || ""
@@ -170,8 +190,9 @@ export function createAdminQuoteService({ queries, objectStore, pdfRenderer = cr
       const input = parseDraftBody(body);
       const result = await queries.updateQuoteDraft(id, input, adminViewer);
       if (!result) throw notFound("Quote not found");
-      if (result.locked) throw conflict("Accepted, rejected, or cancelled quotes are locked");
+      if (result.locked) throw conflict("This quote can no longer be edited in its current workflow state");
       if (result.missingItems?.length) throw validationError("One or more quote lines do not belong to this quote");
+      if (result.invalidItems?.length) throw validationError(result.invalidItems[0].message || "One or more quote lines are invalid");
       return result;
     },
 
@@ -182,10 +203,16 @@ export function createAdminQuoteService({ queries, objectStore, pdfRenderer = cr
       }
       const candidate = await queries.getIssueCandidate(id, { adminViewer });
       if (!candidate) throw notFound("Quote not found");
-      if (candidate.locked) throw conflict("Accepted, rejected, or cancelled quotes are locked");
+      if (candidate.locked) throw conflict("This quote cannot be issued in its current workflow state");
       if (!candidate.quote.validUntil) throw validationError("validUntil is required before issue");
-      if (candidate.items.length < 1 || candidate.items.some((item) => Number(item.confirmedQuantity) < 1 || Number(item.confirmedUnitPrice) < 0)) {
-        throw validationError("Every quote line requires a valid quantity and unit price");
+      if (candidate.items.length < 1 || candidate.items.some((item) => item.fulfillmentStatus === "pending")) {
+        throw validationError("Every quote line must be marked ready, partial, or cancelled before issue");
+      }
+      if (!candidate.items.some((item) => Number(item.confirmedQuantity) > 0)) {
+        throw validationError("At least one quote line must be prepared before issue");
+      }
+      if (candidate.items.some((item) => Number(item.confirmedQuantity) < 0 || Number(item.confirmedUnitPrice) < 0)) {
+        throw validationError("Every prepared quote line requires a valid quantity and unit price");
       }
 
       const snapshot = createDocumentSnapshot(candidate);
@@ -236,10 +263,26 @@ export function createAdminQuoteService({ queries, objectStore, pdfRenderer = cr
       const id = validateUuid(quoteId, "quoteId");
       const safeBody = rejectUnknownFields(body, ["status"]);
       const status = parseOptionalEnum(safeBody.status, ["draft", "cancelled"], "status");
-      if (!status) throw validationError("Only draft or cancelled can be set directly; issue or buyer decision controls other statuses");
+      if (!status) throw validationError("Only draft or cancelled can be set directly; issuing and fulfillment controls other statuses");
       const result = await queries.updateQuoteStatus(id, status, adminViewer);
       if (!result) throw notFound("Quote not found");
       if (result.locked) throw conflict("Accepted or rejected quotes are locked");
+      return result;
+    },
+
+    async updateWorkflowStatus(quoteId, body = {}, adminViewer) {
+      const id = validateUuid(quoteId, "quoteId");
+      const safeBody = rejectUnknownFields(body, ["status", "note"]);
+      const status = parseOptionalEnum(safeBody.status, WORKFLOW_STATUSES, "status");
+      const note = parseOptionalString(safeBody.note, { maxLength: 1000 }) || "";
+      if (!status) throw validationError("A workflow status is required");
+      if (status === "cancelled" && !note) throw validationError("A cancellation reason is required");
+      const result = await queries.updateWorkflowStatus(id, { status, note }, adminViewer);
+      if (!result) throw notFound("Quote not found");
+      if (result.invalidTransition) throw conflict(`Workflow cannot move from ${result.fromStatus} to ${status}`);
+      if (result.unresolvedItems) throw conflict("Resolve every line as ready, partial, or cancelled before marking the SNS receipt as sent");
+      if (result.documentRequired) throw conflict("Issue the prepared-items PDF before marking the SNS receipt as sent");
+      if (result.noPreparedItems) throw conflict("At least one item must be prepared before continuing");
       return result;
     }
   };
