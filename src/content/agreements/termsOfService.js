@@ -8,20 +8,20 @@ export const termsOfService = {
     {
       headingKo: '제1조 목적',
       headingEn: 'Article 1. Purpose',
-      bodyKo: '이 약관은 귀족이 운영하는 Noblesse 웹사이트를 통해 제공하는 피어싱 도매 카탈로그, 회원가입, 도매 회원 승인, 회원가 열람, Inquiry List, Request Quote, My Inquiries 및 Admin Quote 관련 서비스 이용 조건을 정합니다.',
-      bodyEn: 'These terms define the service conditions for the Noblesse wholesale piercing catalog, membership request, buyer approval, approved buyer pricing, Inquiry List, Request Quote, My Inquiries, and Admin Quote services.',
+      bodyKo: '이 약관은 귀족이 운영하는 Noblesse 웹사이트를 통해 제공하는 피어싱 도매 카탈로그, 회원가입, 로그인 회원가 열람, Inquiry List, Request Quote, My Inquiries 및 Admin Quote 관련 서비스 이용 조건을 정합니다.',
+      bodyEn: 'These terms define the service conditions for the Noblesse wholesale piercing catalog, membership registration, signed-in buyer pricing, Inquiry List, Request Quote, My Inquiries, and Admin Quote services.',
     },
     {
       headingKo: '제2조 정의',
       headingEn: 'Article 2. Definitions',
-      bodyKo: '사이트는 귀족이 운영하는 Noblesse 웹사이트를 의미합니다. 이용자는 사이트를 방문하거나 이용하는 사람을 의미합니다. 비회원은 로그인하지 않은 방문자입니다. 회원은 도매 회원가입 신청을 제출했거나 서비스를 이용하는 사업자 또는 담당자를 의미합니다. 승인 도매 회원은 귀족이 회원가와 견적 기능 접근을 허용한 회원입니다.',
-      bodyEn: 'The site means the Noblesse website. A user means a visitor or user of the site. A guest means a visitor without sign-in. A member means a business or contact person requesting or using membership access. An approved wholesale member means a member granted pricing and quote access by Noblesse.',
+      bodyKo: '사이트는 귀족이 운영하는 Noblesse 웹사이트를 의미합니다. 이용자는 사이트를 방문하거나 이용하는 사람을 의미합니다. 비회원은 로그인하지 않은 방문자입니다. 회원은 도매 회원가입을 완료하고 서비스를 이용하는 사업자 또는 담당자를 의미합니다.',
+      bodyEn: 'The site means the Noblesse website. A user means a visitor or user of the site. A guest means a visitor without sign-in. A member means a business or contact person who completed registration and uses membership services.',
     },
     {
       headingKo: '제3조 핵심 용어',
       headingEn: 'Article 3. Core Terms',
-      bodyKo: '상품은 사이트에 표시되는 피어싱 및 관련 카탈로그 항목입니다. 회원가는 승인 도매 회원에게만 표시되는 보호 가격입니다. Inquiry List는 견적 검토를 위해 상품을 담아두는 견적 리스트입니다. Request Quote 또는 견적 요청은 선택한 상품과 수량을 기준으로 귀족에 견적 검토를 요청하는 절차이며 최종 거래 확정이 아닙니다. Admin Quote는 관리자가 재고, 단가, MOQ(최소 주문 수량), 납기, 배송 조건을 검토한 뒤 안내하는 최종 견적 기준입니다. priceSnapshot은 견적 요청 시점에 참고용으로 기록하는 가격입니다.',
-      bodyEn: 'Products are piercing and related catalog items displayed on the site. Approved buyer pricing is protected pricing shown only to approved wholesale members. Inquiry List is a saved list for quote review. Request Quote is a request for quote review and is not a final transaction. Admin Quote is the final quote basis provided by an administrator after reviewing availability, unit price, MOQ, lead time, and shipping conditions. priceSnapshot is the reference price recorded at the time of Request Quote.',
+      bodyKo: '상품은 사이트에 표시되는 피어싱 및 관련 카탈로그 항목입니다. 회원가는 로그인한 도매 회원에게 표시되는 보호 가격입니다. Inquiry List는 견적 검토를 위해 상품을 담아두는 견적 리스트입니다. Request Quote 또는 견적 요청은 선택한 상품과 수량을 기준으로 귀족에 견적 검토를 요청하는 절차이며 최종 거래 확정이 아닙니다. Admin Quote는 관리자가 재고, 단가, MOQ(최소 주문 수량), 납기, 배송 조건을 검토한 뒤 안내하는 최종 견적 기준입니다. priceSnapshot은 견적 요청 시점에 참고용으로 기록하는 가격입니다.',
+      bodyEn: 'Products are piercing and related catalog items displayed on the site. Member pricing is protected pricing shown to signed-in wholesale members. Inquiry List is a saved list for quote review. Request Quote is a request for quote review and is not a final transaction. Admin Quote is the final quote basis provided by an administrator after reviewing availability, unit price, MOQ, lead time, and shipping conditions. priceSnapshot is the reference price recorded at the time of Request Quote.',
     },
     {
       headingKo: '제4조 약관 게시 및 개정',
@@ -38,8 +38,8 @@ export const termsOfService = {
     {
       headingKo: '제6조 서비스 제공',
       headingEn: 'Article 6. Service Provision',
-      bodyKo: '귀족은 상품 이미지, 기본 상품 정보, 카테고리, 컬렉션, 회원가입 신청, 회원 상태 안내, 승인 도매 회원 가격 표시, Inquiry List, Request Quote, My Inquiries 및 Admin Quote 확인 기능을 제공할 수 있습니다.',
-      bodyEn: 'Noblesse may provide product images, basic product information, categories, collections, membership requests, member status guidance, approved buyer pricing, Inquiry List, Request Quote, My Inquiries, and Admin Quote review features.',
+      bodyKo: '귀족은 상품 이미지, 기본 상품 정보, 카테고리, 컬렉션, 회원가입, 회원 상태 안내, 로그인 도매 회원 가격 표시, Inquiry List, Request Quote, My Inquiries 및 Admin Quote 확인 기능을 제공할 수 있습니다.',
+      bodyEn: 'Noblesse may provide product images, basic product information, categories, collections, membership registration, member status guidance, signed-in buyer pricing, Inquiry List, Request Quote, My Inquiries, and Admin Quote review features.',
     },
     {
       headingKo: '제7조 서비스 변경 및 중단',
@@ -50,19 +50,19 @@ export const termsOfService = {
     {
       headingKo: '제8조 가입 및 도매 회원가입 신청',
       headingEn: 'Article 8. Sign-Up And Membership Request',
-      bodyKo: '회원은 이메일, 회사명, 담당자명, 국가, 선호 언어, 연락처, 메신저 정보, 판매 채널, 사업자 정보 및 요청 메모를 제출하여 도매 회원가입 신청을 진행할 수 있습니다. 제출 정보는 도매 회원 승인 검토의 기초 자료로 사용됩니다.',
-      bodyEn: 'A member may submit email, company name, contact name, country, preferred language, contact details, messenger information, sales channel, business information, and request memo for membership review. Submitted information is used as a basis for member review.',
+      bodyKo: '회원은 이메일, 회사명, 담당자명, 국가, 선호 언어, 연락처, 메신저 정보, 판매 채널, 사업자 정보 및 요청 메모를 제출하여 도매 회원가입을 진행할 수 있습니다. 제출 정보는 계정 운영과 견적 응대에 사용됩니다.',
+      bodyEn: 'A member may submit email, company name, contact name, country, preferred language, contact details, messenger information, sales channel, business information, and request memo for membership registration. Submitted information is used for account operation and quote support.',
     },
     {
-      headingKo: '제9조 도매 회원 승인 검토 및 접근 권한',
-      headingEn: 'Article 9. Access Review And Access Rights',
-      bodyKo: '귀족은 제출 정보를 검토한 뒤 승인, 보류, 차단 또는 추가 확인을 요청할 수 있습니다. 승인 도매 회원만 회원가, 시장별 가격, MOQ, Inquiry List 및 Request Quote 기능을 사용할 수 있습니다.',
-      bodyEn: 'Noblesse may review, hold, block, or request additional details after reviewing submitted information. Only approved wholesale members may access protected pricing, regional pricing, MOQ details, Inquiry List, and Request Quote features.',
+      headingKo: '제9조 도매 회원 계정 및 접근 권한',
+      headingEn: 'Article 9. Member Account And Access Rights',
+      bodyKo: '등록을 완료한 활성 도매 회원은 로그인 후 회원가, 시장별 가격, MOQ, Inquiry List 및 Request Quote 기능을 사용할 수 있습니다. 귀족은 허위 정보 또는 서비스 오용이 확인되면 계정 접근을 제한할 수 있습니다.',
+      bodyEn: 'Active registered wholesale members may access protected pricing, regional pricing, MOQ details, Inquiry List, and Request Quote after sign-in. Noblesse may restrict account access if false information or service misuse is found.',
     },
     {
       headingKo: '제10조 탈퇴 및 자격 제한',
       headingEn: 'Article 10. Withdrawal And Eligibility Limits',
-      bodyKo: '회원은 서비스 이용 중단 또는 계정 삭제를 요청할 수 있습니다. 허위 정보 제출, 무단 가격 공유, 부정 접근, 시스템 오용 또는 운영 정책 위반이 확인되는 경우 귀족은 접근 권한을 제한하거나 승인을 취소할 수 있습니다.',
+      bodyKo: '회원은 서비스 이용 중단 또는 계정 삭제를 요청할 수 있습니다. 허위 정보 제출, 무단 가격 공유, 부정 접근, 시스템 오용 또는 운영 정책 위반이 확인되는 경우 귀족은 계정 접근을 제한할 수 있습니다.',
       bodyEn: 'A member may request service discontinuation or account removal. Noblesse may restrict access or pause access if false information, unauthorized pricing disclosure, improper access, system misuse, or policy violation is found.',
     },
     {
@@ -74,14 +74,14 @@ export const termsOfService = {
     {
       headingKo: '제12조 가격 정보 제한',
       headingEn: 'Article 12. Price Information Restrictions',
-      bodyKo: '가격 정보는 승인 도매 회원에게만 표시될 수 있습니다. 비회원과 확인 중인 사용자는 회원가, 시장별 가격, MOQ 및 견적 요청 기능에 접근할 수 없습니다.',
-      bodyEn: 'Pricing information may be displayed only to approved wholesale members. Guests and pending users cannot access approved buyer pricing, regional pricing, MOQ, or quote request features.',
+      bodyKo: '가격 정보는 로그인한 활성 도매 회원에게 표시될 수 있습니다. 비회원과 제한된 계정은 회원가, 시장별 가격, MOQ 및 견적 요청 기능에 접근할 수 없습니다.',
+      bodyEn: 'Pricing information may be displayed to signed-in active wholesale members. Guests and restricted accounts cannot access member pricing, regional pricing, MOQ, or quote request features.',
     },
     {
       headingKo: '제13조 Inquiry List',
       headingEn: 'Article 13. Inquiry List',
-      bodyKo: 'Inquiry List는 승인 도매 회원이 견적 검토를 위해 상품, 옵션, 수량을 임시로 보관하는 기능입니다. Inquiry List에 담긴 정보는 최종 공급 가능 여부나 확정 금액을 의미하지 않습니다.',
-      bodyEn: 'Inquiry List lets approved wholesale members temporarily keep products, options, and quantities for quote review. Information in Inquiry List does not mean final availability or a confirmed amount.',
+      bodyKo: 'Inquiry List는 로그인한 도매 회원이 견적 검토를 위해 상품, 옵션, 수량을 임시로 보관하는 기능입니다. Inquiry List에 담긴 정보는 최종 공급 가능 여부나 확정 금액을 의미하지 않습니다.',
+      bodyEn: 'Inquiry List lets signed-in wholesale members temporarily keep products, options, and quantities for quote review. Information in Inquiry List does not mean final availability or a confirmed amount.',
     },
     {
       headingKo: '제14조 Request Quote',
@@ -105,7 +105,7 @@ export const termsOfService = {
       headingKo: '제17조 이용자 의무',
       headingEn: 'Article 17. User Obligations',
       bodyKo: '이용자는 정확한 정보를 제공하고 계정 접근 권한을 안전하게 관리해야 합니다. 회원가와 내부 견적 정보는 외부에 무단 공유해서는 안 됩니다.',
-      bodyEn: 'Users must provide accurate information, manage account access safely, and avoid unauthorized external sharing of approved buyer pricing or internal quote information.',
+      bodyEn: 'Users must provide accurate information, manage account access safely, and avoid unauthorized external sharing of member pricing or internal quote information.',
     },
     {
       headingKo: '제18조 금지 행위',

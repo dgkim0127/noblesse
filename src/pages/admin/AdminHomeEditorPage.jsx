@@ -137,7 +137,7 @@ function EditorInspector({ config, locale, products, selectedId, onChange }) {
       <LocalizedInput label="작은 제목" locale={locale} value={section.eyebrow?.[locale]} onChange={(value) => updateLocalized('eyebrow', value)} />
       <LocalizedInput label="버튼 문구" locale={locale} value={section.ctaLabel?.[locale]} onChange={(value) => updateLocalized('ctaLabel', value)} />
       <label className="admin-home-editor-field"><span>비회원 연결</span><input value={section.ctaPath} onChange={(event) => updateSection({ ctaPath: event.target.value })} /></label>
-      <label className="admin-home-editor-field"><span>승인 회원 연결</span><input value={section.ctaApprovedPath} onChange={(event) => updateSection({ ctaApprovedPath: event.target.value })} /></label>
+      <label className="admin-home-editor-field"><span>로그인 회원 연결</span><input value={section.ctaApprovedPath} onChange={(event) => updateSection({ ctaApprovedPath: event.target.value })} /></label>
     </> : null}
 
     {section.id === 'categories' ? <p className="admin-home-editor-help">카테고리 이름과 연결 상품은 상품 카테고리 설정을 사용합니다.</p> : null}

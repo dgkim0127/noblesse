@@ -810,7 +810,7 @@ export function AdminProductEditorPage() {
   const requestPublish = () => setConfirm({
     title: '상품을 공개할까요?',
     description: readiness.ready
-      ? '저장 후 승인 회원이 상품 목록과 상세에서 확인할 수 있습니다.'
+      ? '저장 후 로그인 거래처가 상품 목록과 상세에서 확인할 수 있습니다.'
       : `아직 완료되지 않은 항목: ${readiness.missing.join(', ')}`,
     confirmLabel: '저장 후 공개',
     action: () => saveProduct({ publish: true }),

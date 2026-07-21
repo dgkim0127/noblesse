@@ -1,22 +1,22 @@
-import { isApprovedBuyerLifecycle } from "../auth/buyerLifecycle.js";
+import { isQuoteEnabledBuyerLifecycle } from "../auth/buyerLifecycle.js";
 import { conflict, forbidden, internalError, notFound, validationError } from "../utils/errors.js";
 import { parseOptionalEnum, parseOptionalString, rejectUnknownFields, validateUuid } from "../utils/validators.js";
 
-function requireApprovedBuyer(viewer) {
-  if (!isApprovedBuyerLifecycle(viewer)) throw forbidden("Approved buyer access required");
+function requireQuoteEnabledBuyer(viewer) {
+  if (!isQuoteEnabledBuyerLifecycle(viewer)) throw forbidden("Active buyer account required");
   return viewer;
 }
 
 export function createBuyerQuoteService({ queries, objectStore }) {
   return {
     async getQuoteForInquiry(inquiryId, viewer) {
-      const buyer = requireApprovedBuyer(viewer);
+      const buyer = requireQuoteEnabledBuyer(viewer);
       const id = validateUuid(inquiryId, "inquiryId");
       return queries.getQuoteForInquiry(buyer, id);
     },
 
     async getQuoteDocument(quoteId, documentId, viewer) {
-      const buyer = requireApprovedBuyer(viewer);
+      const buyer = requireQuoteEnabledBuyer(viewer);
       const id = validateUuid(quoteId, "quoteId");
       const docId = validateUuid(documentId, "documentId");
       const document = await queries.getDocumentAccess(buyer, id, docId);
@@ -31,7 +31,7 @@ export function createBuyerQuoteService({ queries, objectStore }) {
     },
 
     async decideQuote(quoteId, body = {}, viewer) {
-      const buyer = requireApprovedBuyer(viewer);
+      const buyer = requireQuoteEnabledBuyer(viewer);
       const id = validateUuid(quoteId, "quoteId");
       const safeBody = rejectUnknownFields(body, ["documentId", "decision", "note"]);
       const input = {

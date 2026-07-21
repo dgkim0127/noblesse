@@ -9,7 +9,7 @@ export const privacyPolicy = {
       headingKo: '제1조 처리 목적',
       headingEn: 'Article 1. Processing Purpose',
       bodyKo: '귀족은 회원가입 신청, 도매 회원가입 신청, 도매 회원 승인 검토, 회원가 접근, Inquiry List, Request Quote, My Inquiries, Admin Quote 안내, 고객 문의, 서비스 운영 및 부정 이용 방지를 위해 개인정보를 처리합니다.',
-      bodyEn: 'Noblesse processes personal information for membership requests, member review, approved buyer pricing access, Inquiry List, Request Quote, My Inquiries, Admin Quote guidance, customer support, service operation, and misuse prevention.',
+      bodyEn: 'Noblesse processes personal information for membership registration, account operation, signed-in buyer pricing access, Inquiry List, Request Quote, My Inquiries, Admin Quote guidance, customer support, service operation, and misuse prevention.',
     },
     {
       headingKo: '제2조 처리하는 개인정보 항목',

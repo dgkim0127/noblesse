@@ -8,19 +8,19 @@ export const buyerTerms = {
     {
       headingKo: '제1조 목적',
       headingEn: 'Article 1. Purpose Of B2B Member Terms',
-      bodyKo: '이 문서는 귀족이 승인 도매 회원에게 제공하는 회원가, 시장별 가격, MOQ, Inquiry List, Request Quote 및 Admin Quote 운영 기준을 설명합니다.',
-      bodyEn: 'This document describes the B2B member standards for approved buyer pricing, regional pricing, MOQ, Inquiry List, Request Quote, and Admin Quote provided by Noblesse to approved wholesale members.',
+      bodyKo: '이 문서는 귀족이 등록 회원에게 제공하는 회원가, 시장별 가격, MOQ, Inquiry List, Request Quote 및 Admin Quote 운영 기준을 설명합니다.',
+      bodyEn: 'This document describes the B2B member standards for signed-in buyer pricing, regional pricing, MOQ, Inquiry List, Request Quote, and Admin Quote provided by Noblesse to registered wholesale members.',
     },
     {
-      headingKo: '제2조 도매 회원 승인 기준',
-      headingEn: 'Article 2. Access Review Criteria',
-      bodyKo: '귀족은 회사 정보, 판매 채널, 국가, 담당자 정보, 사업자 정보, 기존 거래 가능성 및 공급 정책을 종합적으로 검토한 뒤 도매 회원 접근 권한을 부여할 수 있습니다.',
-      bodyEn: 'Noblesse may grant member access after reviewing company information, sales channel, country, contact details, business information, potential trading fit, and supply policy.',
+      headingKo: '제2조 도매 회원 계정 이용 기준',
+      headingEn: 'Article 2. Member Account Access',
+      bodyKo: '도매 회원은 등록을 완료하고 로그인하면 회원가, MOQ, Inquiry List 및 Request Quote 기능을 이용할 수 있습니다. 귀족은 최종 재고와 공급 조건을 견적 처리 과정에서 별도로 확인합니다.',
+      bodyEn: 'Registered wholesale members may access member pricing, MOQ, Inquiry List, and Request Quote after sign-in. Noblesse separately confirms final availability and supply conditions during quote processing.',
     },
     {
       headingKo: '제3조 제출 정보의 정확성',
       headingEn: 'Article 3. Accuracy Of Submitted Information',
-      bodyKo: '회원은 도매 회원가입 신청 과정에서 정확하고 최신의 정보를 제출해야 합니다. 허위 정보, 타인의 정보 또는 확인이 어려운 정보를 제출한 경우 승인이 보류되거나 취소될 수 있습니다.',
+      bodyKo: '회원은 도매 회원가입 과정에서 정확하고 최신의 정보를 제출해야 합니다. 허위 정보, 타인의 정보 또는 확인이 어려운 정보를 제출한 경우 계정 이용이 제한될 수 있습니다.',
       bodyEn: 'Members must submit accurate and up-to-date information during membership review. Access may be held or paused if false information, another person\'s information, or unverifiable information is submitted.',
     },
     {
@@ -31,9 +31,9 @@ export const buyerTerms = {
     },
     {
       headingKo: '제5조 회원가 제공 조건',
-      headingEn: 'Article 5. Approved Buyer Price Conditions',
-      bodyKo: '귀족은 승인 도매 회원에게만 일부 가격 정보를 제공할 수 있습니다. 회원가는 내부 거래 검토를 위한 정보이며 무단 공개 또는 외부 공유가 제한됩니다.',
-      bodyEn: 'Noblesse may provide selected pricing information only to approved wholesale members. Pricing information is for internal trading review and unauthorized disclosure or external sharing is restricted.',
+      headingEn: 'Article 5. Member Price Conditions',
+      bodyKo: '귀족은 로그인한 도매 회원에게 일부 가격 정보를 제공할 수 있습니다. 회원가는 내부 거래 검토를 위한 정보이며 무단 공개 또는 외부 공유가 제한됩니다.',
+      bodyEn: 'Noblesse may provide selected pricing information to signed-in wholesale members. Pricing information is for internal trading review and unauthorized disclosure or external sharing is restricted.',
     },
     {
       headingKo: '제6조 MOQ',
@@ -90,10 +90,10 @@ export const buyerTerms = {
       bodyEn: 'If requested quantities do not match MOQ, production units, or available supply conditions, Noblesse may adjust quantities, options, unit prices, or lead time.',
     },
     {
-      headingKo: '제15조 접근 제한 및 승인 취소',
-      headingEn: 'Article 15. Access Limitation And Review Changes',
-      bodyKo: '허위 정보, 무단 접근, 가격 정보 오용, 타인 계정 사용, 시스템 남용, 부정 목적 이용이 확인되면 귀족은 도매 회원 승인을 취소하거나 접근을 제한할 수 있습니다.',
-      bodyEn: 'If false information, unauthorized access, pricing misuse, use of another account, system abuse, or improper purpose is found, Noblesse may revoke approval or restrict access.',
+      headingKo: '제15조 계정 접근 제한',
+      headingEn: 'Article 15. Account Access Restrictions',
+      bodyKo: '허위 정보, 무단 접근, 가격 정보 오용, 타인 계정 사용, 시스템 남용, 부정 목적 이용이 확인되면 귀족은 도매 회원 계정 접근을 제한할 수 있습니다.',
+      bodyEn: 'If false information, unauthorized access, pricing misuse, use of another account, system abuse, or improper purpose is found, Noblesse may restrict account access.',
     },
     {
       headingKo: '제16조 데이터 오류 및 회원 책임',
@@ -104,8 +104,8 @@ export const buyerTerms = {
     {
       headingKo: '제17조 오용 및 계정 제한',
       headingEn: 'Article 17. Misuse And Account Limits',
-      bodyKo: '승인 도매 회원 기능은 해당 회원의 내부 검토 목적을 위해 제공됩니다. 가격 수집, 경쟁사 전달, 자동화된 대량 조회, 무단 스크래핑, 계정 공유는 제한됩니다.',
-      bodyEn: 'Approved wholesale member features are provided only for internal review by the relevant member. Price harvesting, competitor sharing, automated bulk lookup, unauthorized scraping, and account sharing are restricted.',
+      bodyKo: '로그인 도매 회원 기능은 해당 회원의 내부 검토 목적을 위해 제공됩니다. 가격 수집, 경쟁사 전달, 자동화된 대량 조회, 무단 스크래핑, 계정 공유는 제한됩니다.',
+      bodyEn: 'Signed-in wholesale member features are provided only for internal review by the relevant member. Price harvesting, competitor sharing, automated bulk lookup, unauthorized scraping, and account sharing are restricted.',
     },
     {
       headingKo: '제18조 분쟁 및 문의',

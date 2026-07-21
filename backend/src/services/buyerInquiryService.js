@@ -1,5 +1,5 @@
 import { forbidden, notFound } from "../utils/errors.js";
-import { isApprovedBuyerLifecycle } from "../auth/buyerLifecycle.js";
+import { isQuoteEnabledBuyerLifecycle } from "../auth/buyerLifecycle.js";
 import { createPaginationMeta, parsePagination, slicePageRows } from "../utils/pagination.js";
 import {
   INQUIRY_STATUSES,
@@ -13,9 +13,9 @@ import {
 const productCodePattern = /^[A-Z0-9][A-Z0-9-]{1,39}$/i;
 const optionIdPattern = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
 
-function requireApprovedBuyer(viewer) {
-  if (!isApprovedBuyerLifecycle(viewer)) {
-    throw forbidden("Approved buyer access required");
+function requireQuoteEnabledBuyer(viewer) {
+  if (!isQuoteEnabledBuyerLifecycle(viewer)) {
+    throw forbidden("Active buyer account required");
   }
   return viewer;
 }
@@ -89,12 +89,12 @@ function parseCreateInquiryBody(body = {}) {
 export function createBuyerInquiryService({ queries }) {
   return {
     async listProductPrices(viewer) {
-      const priceBookViewer = requireApprovedBuyer(viewer);
+      const priceBookViewer = requireQuoteEnabledBuyer(viewer);
       return queries.listProductPrices(priceBookViewer);
     },
 
     async listInquiries(filters = {}, viewer) {
-      const buyer = requireApprovedBuyer(viewer);
+      const buyer = requireQuoteEnabledBuyer(viewer);
       const parsed = parseInquiryFilters(filters);
       const inquiries = await queries.listInquiries(buyer, parsed);
       return {
@@ -104,7 +104,7 @@ export function createBuyerInquiryService({ queries }) {
     },
 
     async getInquiryById(inquiryId, viewer) {
-      const buyer = requireApprovedBuyer(viewer);
+      const buyer = requireQuoteEnabledBuyer(viewer);
       const id = validateUuid(inquiryId, "inquiryId");
       const inquiry = await queries.getInquiryById(buyer, id);
       if (!inquiry) {
@@ -114,7 +114,7 @@ export function createBuyerInquiryService({ queries }) {
     },
 
     async createInquiry(body = {}, viewer) {
-      const buyer = requireApprovedBuyer(viewer);
+      const buyer = requireQuoteEnabledBuyer(viewer);
       const parsed = parseCreateInquiryBody(body);
       const inquiry = await queries.createInquiry(buyer, parsed);
       if (!inquiry) {

@@ -57,10 +57,13 @@ export const getBuyerLifecycle = (profile = {}) => {
   return { accountStatus, verificationStatus }
 }
 
-export const isApprovedBuyer = (profile) => {
+export const isQuoteEnabledBuyer = (profile) => {
   const { accountStatus, verificationStatus } = getBuyerLifecycle(profile)
-  return profile?.role === 'buyer' && accountStatus === 'active' && verificationStatus === 'approved'
+  return profile?.role === 'buyer' && accountStatus === 'active' && ['draft', 'pending', 'approved'].includes(verificationStatus)
 }
+
+// Compatibility export for older callers; quote access no longer requires manual approval.
+export const isApprovedBuyer = isQuoteEnabledBuyer
 
 export const isPendingBuyer = (profile) => {
   const { accountStatus, verificationStatus } = getBuyerLifecycle(profile)
@@ -89,10 +92,9 @@ export const isGuestViewer = (viewerState) => viewerState === 'guest'
 export const getViewerStateFromProfile = (profile) => {
   if (isAdmin(profile)) return 'admin'
   if (isBlockedBuyer(profile)) return 'blocked'
-  if (isApprovedBuyer(profile)) return 'approved'
   if (isRejectedBuyer(profile)) return 'rejected'
   if (isSuspendedBuyer(profile)) return 'suspended'
-  if (isPendingBuyer(profile)) return 'pending'
+  if (isQuoteEnabledBuyer(profile)) return 'approved'
   return 'guest'
 }
 
@@ -117,7 +119,7 @@ export const normalizeBuyerProfile = (profile) => {
   }
 }
 
-export const getBuyerAccessFeatures = (viewerState, profile) => {
+export const getBuyerAccessFeatures = (_viewerState, profile) => {
   const base = {
     canViewProducts: true,
     canViewPrices: false,
@@ -126,9 +128,7 @@ export const getBuyerAccessFeatures = (viewerState, profile) => {
     canViewMyInquiries: false,
   }
 
-  if (viewerState === 'guest' || isPendingBuyer(profile)) return base
-
-  if (isApprovedBuyer(profile)) {
+  if (isQuoteEnabledBuyer(profile)) {
     return {
       ...base,
       canViewPrices: true,
@@ -165,7 +165,7 @@ export const getMarketPrice = (productPrices, productId, market, isApproved) => 
 }
 
 export const selectProductPrice = ({ prices, viewer, locale, productId } = {}) => {
-  const isApproved = isApprovedBuyer(viewer) || isAdmin(viewer)
+  const isApproved = isQuoteEnabledBuyer(viewer) || isAdmin(viewer)
   const displayCurrency = getDisplayCurrency({ viewer, locale })
 
   if (!isApproved) {

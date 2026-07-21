@@ -15,10 +15,10 @@ import {
   getAdminPriceBooksForProduct,
   getPriceForBuyer,
   getViewerStateFromProfile,
-  isApprovedBuyer,
   isAdmin,
   isGuestViewer,
   isPendingBuyer,
+  isQuoteEnabledBuyer,
   isSameInquiryItem,
   normalizeBuyerProfile,
   normalizeQuantity,
@@ -77,12 +77,12 @@ async function loadAuthenticatedCommerceState({ apiBaseUrl, token }) {
   const adminApi = createAdminApi(apiClient)
   const buyerApi = createBuyerApi(apiClient)
   const profile = normalizeBuyerProfile(await buyerApi.getCurrentBuyerProfile(token))
-  const isApprovedProfile = isApprovedBuyer(profile)
+  const isQuoteEnabledProfile = isQuoteEnabledBuyer(profile)
   const isAdminProfile = isAdmin(profile)
   let prices = []
   let inquiryResult = { data: { inquiries: [] } }
 
-  if (isApprovedProfile) {
+  if (isQuoteEnabledProfile) {
     try {
       prices = await buyerApi.getProductPrices(token)
     } catch {
@@ -96,7 +96,7 @@ async function loadAuthenticatedCommerceState({ apiBaseUrl, token }) {
     }
   }
 
-  if (isApprovedProfile) {
+  if (isQuoteEnabledProfile) {
     try {
       inquiryResult = await buyerApi.getInquiries({}, token)
     } catch {
@@ -133,8 +133,8 @@ export function CommerceProvider({ children }) {
   const normalizedApiProfile = normalizeBuyerProfile(apiProfile)
   const effectiveViewerState = isMockMode ? viewerState : getViewerStateFromProfile(normalizedApiProfile)
   const buyer = isMockMode ? (mockProfiles[effectiveViewerState] ?? mockProfiles.guest ?? guestProfile) : normalizedApiProfile
-  const isApproved = isApprovedBuyer(buyer)
-  const isPending = isPendingBuyer(buyer)
+  const isApproved = isQuoteEnabledBuyer(buyer)
+  const isPending = isPendingBuyer(buyer) && !isApproved
   const isGuest = isGuestViewer(effectiveViewerState)
   const isAdminViewer = isAdmin(buyer)
   const buyerAccess = getBuyerAccessFeatures(effectiveViewerState, buyer)
@@ -349,10 +349,24 @@ export function CommerceProvider({ children }) {
       const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
       const buyerApi = createBuyerApi(apiClient)
       const result = await buyerApi.registerBuyer(profile, token)
-      const registeredProfile = result.data?.profile || null
+      const registeredProfile = normalizeBuyerProfile(result.data?.profile || null)
+      let prices = []
+      let inquiryResult = { data: { inquiries: [] } }
+      if (isQuoteEnabledBuyer(registeredProfile)) {
+        try {
+          prices = await buyerApi.getProductPrices(token)
+        } catch {
+          prices = []
+        }
+        try {
+          inquiryResult = await buyerApi.getInquiries({}, token)
+        } catch {
+          inquiryResult = { data: { inquiries: [] } }
+        }
+      }
       setApiProfile(registeredProfile)
-      setProductPrices([])
-      setInquiries([])
+      setProductPrices(prices)
+      setInquiries(inquiryResult.data?.inquiries || [])
       setAuthStatus('authenticated')
       return registeredProfile
     } catch (error) {
@@ -590,6 +604,7 @@ export function CommerceProvider({ children }) {
     inquiryRows,
     isAdmin: isAdminViewer,
     isApproved,
+    canUseQuoteFlow: isApproved,
     isGuest,
     isPending,
     productPrices,
