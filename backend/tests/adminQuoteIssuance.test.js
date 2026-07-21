@@ -102,6 +102,38 @@ test("issueQuote stores an immutable customer snapshot and excludes internal mem
   assert.equal(issuedInput.pdfSha256.length, 64);
 });
 
+test("issueQuote loads legacy product images from catalog media URLs", async () => {
+  const candidate = createCandidate();
+  const objectKey = "products/NB-001/legacy-thumb.jpg";
+  candidate.items[0].productImage.objectKey = "";
+  candidate.items[0].productImage.url = `/api/catalog/media/${Buffer.from(objectKey).toString("base64url")}`;
+
+  let readObjectKey = "";
+  const service = createAdminQuoteService({
+    queries: {
+      async getIssueCandidate() { return candidate; },
+      async issueQuote(id) { return { quote: { id, status: "sent" }, document: { revision: 1 } }; }
+    },
+    objectStore: {
+      async save() {},
+      async deleteMany() {},
+      async createReadStream(key) {
+        readObjectKey = key;
+        return Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" fill="#ff8fa9"/></svg>');
+      }
+    },
+    async pdfRenderer(snapshot) {
+      assert.ok(Buffer.isBuffer(snapshot.items[0].imageBuffer));
+      assert.ok(snapshot.items[0].imageBuffer.length > 0);
+      return Buffer.from("%PDF-test");
+    }
+  });
+
+  await service.issueQuote(quoteId, { userId: "admin-1" });
+
+  assert.equal(readObjectKey, objectKey);
+});
+
 test("issueQuote removes the uploaded object when the database detects a stale draft", async () => {
   let savedObjectKey;
   const deleted = [];
