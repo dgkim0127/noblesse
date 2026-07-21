@@ -168,9 +168,9 @@ async function readObjectBuffer(objectStore, objectKey) {
   return Buffer.concat(chunks);
 }
 
-async function createPickingThumbnail(objectStore, productImage) {
+async function createPickingThumbnail(objectStore, objectKey) {
   try {
-    const source = await readObjectBuffer(objectStore, productImage?.objectKey);
+    const source = await readObjectBuffer(objectStore, objectKey);
     if (!source?.length) return null;
     return await sharp(source, { failOn: "error" })
       .rotate()
@@ -183,6 +183,18 @@ async function createPickingThumbnail(objectStore, productImage) {
   }
 }
 
+function decodeCatalogMediaObjectKey(url) {
+  const match = String(url || "").match(/(?:^|\/)api\/catalog\/media\/([^/?#]+)/);
+  if (!match) return "";
+
+  try {
+    const objectKey = Buffer.from(decodeURIComponent(match[1]), "base64url").toString("utf8");
+    return objectKey.startsWith("products/") ? objectKey : "";
+  } catch {
+    return "";
+  }
+}
+
 async function createPdfRenderSnapshot(snapshot, candidateItems, objectStore) {
   const sourceById = new Map((candidateItems || []).map((item) => [item.id, item.productImage]));
   const imageCache = new Map();
@@ -190,11 +202,11 @@ async function createPdfRenderSnapshot(snapshot, candidateItems, objectStore) {
 
   for (const item of snapshot.items || []) {
     const productImage = sourceById.get(item.id);
-    const objectKey = productImage?.objectKey || "";
+    const objectKey = productImage?.objectKey || decodeCatalogMediaObjectKey(productImage?.url);
     let imageBuffer = null;
     if (objectKey) {
       if (!imageCache.has(objectKey)) {
-        imageCache.set(objectKey, await createPickingThumbnail(objectStore, productImage));
+        imageCache.set(objectKey, await createPickingThumbnail(objectStore, objectKey));
       }
       imageBuffer = imageCache.get(objectKey);
     }
