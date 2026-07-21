@@ -163,12 +163,12 @@ test("PATCH /api/admin/quotes/:quoteId/workflow advances the offline fulfillment
       authorization: "Bearer admin-token",
       "content-type": "application/json"
     },
-    body: JSON.stringify({ status: "receipt_sent", note: "Receipt sent by SNS" })
+    body: JSON.stringify({ status: "receipt_sent", note: "Picking completed from the issued PDF" })
   });
 
   assert.equal(response.status, 200);
   assert.equal(response.body.data.quote.workflowStatus, "receipt_sent");
-  assert.equal(response.body.data.quote.workflowNote, "Receipt sent by SNS");
+  assert.equal(response.body.data.quote.workflowNote, "Picking completed from the issued PDF");
   assert.equal(response.body.data.auditLogId, "audit-workflow-1");
 });
 

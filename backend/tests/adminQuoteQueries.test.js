@@ -226,7 +226,7 @@ test("updateQuoteStatus cancels a quote and writes status history and audit log"
   assert.equal(result.auditLogId, "audit-1");
 });
 
-test("updateWorkflowStatus records the offline receipt handoff without creating an order or payment", async () => {
+test("updateWorkflowStatus records picking completion without creating an order or payment", async () => {
   const calls = [];
   let workflowStatus = "picking";
   const quoteRow = {
@@ -271,7 +271,7 @@ test("updateWorkflowStatus records the offline receipt handoff without creating 
 
   const result = await createAdminQuoteQueries({ async connect() { return client; } }).updateWorkflowStatus(
     quoteId,
-    { status: "receipt_sent", note: "Receipt sent by SNS" },
+    { status: "receipt_sent", note: "Picking completed from the issued PDF" },
     adminViewer
   );
 

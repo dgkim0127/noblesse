@@ -28,6 +28,7 @@ for (const documentLocale of ["kr", "en", "jp", "zh-TW"]) {
     });
 
     assert.equal(buffer.subarray(0, 4).toString("ascii"), "%PDF");
+    assert.equal((buffer.toString("latin1").match(/\/Type\s*\/Page\b/g) || []).length, 1);
     assert.ok(buffer.length > 1000);
     assert.ok(buffer.length < 12 * 1024 * 1024);
   });

@@ -80,6 +80,35 @@ function mapQuoteItem(row) {
   };
 }
 
+function resolveQuoteProductImage(row) {
+  const imageSet = row.product_image_set || {};
+  const imageAlt = row.product_image_alt || {};
+  const gallery = Array.isArray(imageSet.gallery) ? imageSet.gallery : [];
+  const image = gallery.find((entry) => entry?.isPrimary) || gallery[0] || {};
+  const altEntry = Array.isArray(imageAlt.gallery)
+    ? imageAlt.gallery.find((entry) => entry?.id && entry.id === image.id) || imageAlt.gallery[0]
+    : null;
+  const objectKeys = image.objectKeys || imageSet.objectKeys || {};
+  const objectKey = objectKeys.thumb || objectKeys.card || objectKeys.detail || objectKeys.zoom || "";
+  const url = image.thumb || image.card || image.detail || image.url
+    || imageSet.thumb || imageSet.card || imageSet.detail || imageSet.primary || "";
+
+  if (!objectKey && !url) return null;
+  return {
+    id: image.id || "",
+    url,
+    objectKey,
+    altText: altEntry?.altText || image.altText || imageAlt.default || ""
+  };
+}
+
+function mapIssueQuoteItem(row) {
+  return {
+    ...mapQuoteItem(row),
+    productImage: resolveQuoteProductImage(row)
+  };
+}
+
 function mapDocument(row) {
   return {
     id: row.id,
@@ -195,6 +224,15 @@ const itemSelect = `
     cancellation_reason,
     cancellation_note
   from public.admin_quote_items
+`;
+
+const issueItemSelect = `
+  select
+    aqi.*,
+    p.image_set as product_image_set,
+    p.image_alt as product_image_alt
+  from public.admin_quote_items aqi
+  left join public.products p on p.id = aqi.product_id
 `;
 
 async function insertAudit(client, { actor, action, targetId, before, after }) {
@@ -471,12 +509,12 @@ export function createAdminQuoteQueries(pool) {
       const row = quoteResult.rows[0];
       if (!row) return null;
       if (["accepted", "rejected", "cancelled"].includes(row.status) || !["received", "picking"].includes(row.workflow_status || "received")) return { locked: true };
-      const itemsResult = await pool.query(`${itemSelect} where admin_quote_id = $1 order by created_at asc, id asc`, [quoteId]);
+      const itemsResult = await pool.query(`${issueItemSelect} where aqi.admin_quote_id = $1 order by aqi.created_at asc, aqi.id asc`, [quoteId]);
       const revisionResult = await pool.query("select coalesce(max(revision), 0) + 1 as next_revision from public.admin_quote_documents where admin_quote_id = $1", [quoteId]);
       return {
         quote: mapQuote(row),
         buyer: { companyName: row.company_name || "", country: row.country || "" },
-        items: itemsResult.rows.map(mapQuoteItem),
+        items: itemsResult.rows.map(mapIssueQuoteItem),
         nextRevision: Number(revisionResult.rows[0].next_revision || 1)
       };
     },
