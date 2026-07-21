@@ -15,12 +15,12 @@ import { useAdminAccess } from './AdminAccessContext'
 import '../styles/admin-console.css'
 
 const adminNavigation = [
-  { key: 'dashboard', label: '홈', path: '/admin', icon: Home, permissions: ['dashboard.read'], end: true },
-  { key: 'products', label: '상품', path: '/admin/products', icon: PackageSearch, permissions: ['catalog.read'] },
-  { key: 'quotes', label: '견적', path: '/admin/quotes', fallbackPath: '/admin/inquiries', icon: FileText, permissions: ['quotes.read', 'inquiries.read'] },
-  { key: 'buyers', label: '고객', path: '/admin/buyers', icon: Building2, permissions: ['buyers.read'] },
-  { key: 'operations', label: '운영', path: '/admin/operations', icon: Settings2, permissions: ['catalog.read', 'prices.read', 'admins.read', 'audit.read'] },
-  { key: 'analytics', label: '분석', path: '/admin/analytics', icon: BarChart3, permissions: ['analytics.read'] },
+  { key: 'dashboard', path: '/admin', icon: Home, permissions: ['dashboard.read'], end: true },
+  { key: 'products', path: '/admin/products', icon: PackageSearch, permissions: ['catalog.read'] },
+  { key: 'quotes', path: '/admin/quotes', fallbackPath: '/admin/inquiries', icon: FileText, permissions: ['quotes.read', 'inquiries.read'] },
+  { key: 'buyers', path: '/admin/buyers', icon: Building2, permissions: ['buyers.read'] },
+  { key: 'operations', path: '/admin/operations', icon: Settings2, permissions: ['catalog.read', 'prices.read', 'admins.read', 'audit.read'] },
+  { key: 'analytics', path: '/admin/analytics', icon: BarChart3, permissions: ['analytics.read'] },
 ]
 
 export function AdminShell() {
@@ -38,13 +38,14 @@ export function AdminShell() {
         <Store size={22} />
         <div>
           <strong>Noblesse</strong>
-          <span>운영 관리자</span>
+          <span>{t.shell.brand}</span>
         </div>
       </div>
       <nav>
-        {adminNavigation.map(({ end, fallbackPath, icon: Icon, key, label, path, permissions }) => {
+        {adminNavigation.map(({ end, fallbackPath, icon: Icon, key, path, permissions }) => {
           const visible = status !== 'ready' || permissions.some((permission) => hasPermission(permission))
           if (!visible) return null
+          const label = key === 'operations' ? t.shell.groups?.operations : t.shell.nav?.[key]
           const destination = key === 'quotes' && !hasPermission('quotes.read') ? fallbackPath : path
           return <NavLink aria-label={label} end={end} key={key} title={label} to={toLocalePath(destination)}>
             <Icon size={18} />
@@ -54,7 +55,7 @@ export function AdminShell() {
       </nav>
       <div className="admin-sidebar-footer">
         <span className="admin-role-badge">{roleLabel}</span>
-        <NavLink className="admin-back-link" to={toLocalePath('/products')}>쇼핑몰 보기</NavLink>
+        <NavLink className="admin-back-link" to={toLocalePath('/products')}>{t.shell.backToCatalog}</NavLink>
       </div>
     </aside>
     <section className="admin-main admin-console-main">
