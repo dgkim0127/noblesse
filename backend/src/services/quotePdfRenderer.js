@@ -35,7 +35,7 @@ const labels = {
     footer: "\uc774 \ubb38\uc11c\ub294 \ub9e4\uc7a5\uc5d0\uc11c \uc0c1\ud488\uc744 \ucc59\uae30\uace0 \ubd84\ub958\ud558\uae30 \uc704\ud55c \uc900\ube44 \uacb0\uacfc \uacac\uc801\uc11c\uc785\ub2c8\ub2e4. \uc120\ud0dd \uc635\uc158\uacfc \uc900\ube44\u00b7\ucde8\uc18c \uc218\ub7c9\uc744 \ud655\uc778\ud55c \ub4a4 \ubcc4\ub3c4 \uacc4\uc88c \uc548\ub0b4\uc640 \ubc1c\uc1a1 \uc808\ucc28\ub97c \uc9c4\ud589\ud569\ub2c8\ub2e4. \uc0ac\uc774\ud2b8\uc5d0\uc11c\ub294 \uc8fc\ubb38\uc774\ub098 \uacb0\uc81c\uac00 \uc0dd\uc131\ub418\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4."
   },
   en: {
-    title: "PICKING QUOTATION",
+    title: "PRODUCT PREPARATION QUOTATION",
     quoteNumber: "Quote No.",
     issuedAt: "Issued",
     validUntil: "Valid until",
@@ -55,7 +55,7 @@ const labels = {
     note: "Buyer note",
     noImage: "No image",
     page: "Page",
-    footer: "Use this document to pick and sort products. Verify selected options and prepared or cancelled quantities before providing bank-transfer and shipping instructions. No online order or payment is created."
+    footer: "Use this document to check, prepare, and sort products. Verify selected options and prepared or cancelled quantities before providing bank-transfer and shipping instructions. No online order or payment is created."
   },
   jp: {
     title: "\u5546\u54c1\u6e96\u5099\u898b\u7a4d\u66f8",
@@ -78,10 +78,10 @@ const labels = {
     note: "\u8cfc\u5165\u8005\u6848\u5185",
     noImage: "\u753b\u50cf\u306a\u3057",
     page: "\u30da\u30fc\u30b8",
-    footer: "\u3053\u306e\u6587\u66f8\u306f\u5e97\u8217\u3067\u5546\u54c1\u3092\u30d4\u30c3\u30ad\u30f3\u30b0\u30fb\u4ed5\u5206\u3051\u3059\u308b\u305f\u3081\u306e\u6e96\u5099\u7d50\u679c\u898b\u7a4d\u66f8\u3067\u3059\u3002\u9078\u629e\u30aa\u30d7\u30b7\u30e7\u30f3\u3068\u6e96\u5099\u30fb\u53d6\u6d88\u6570\u91cf\u3092\u78ba\u8a8d\u3057\u3001\u5225\u9014\u632f\u8fbc\u6848\u5185\u3068\u767a\u9001\u624b\u7d9a\u304d\u3092\u884c\u3044\u307e\u3059\u3002\u30b5\u30a4\u30c8\u4e0a\u3067\u306f\u6ce8\u6587\u3084\u6c7a\u6e08\u306f\u4f5c\u6210\u3055\u308c\u307e\u305b\u3093\u3002"
+    footer: "この文書は店舗で商品を確認・仕分けするための準備結果見積書です。選択オプションと準備・取消数量を確認し、別途振込案内と発送手続きを行います。サイト上では注文や決済は作成されません。"
   },
   "zh-TW": {
-    title: "\u5099\u8ca8\u63c0\u8ca8\u5831\u50f9\u55ae",
+    title: "商品備貨報價單",
     quoteNumber: "\u5831\u50f9\u55ae\u865f",
     issuedAt: "\u767c\u884c\u65e5",
     validUntil: "\u6709\u6548\u671f\u9650",
@@ -101,7 +101,7 @@ const labels = {
     note: "\u8cb7\u5bb6\u8aaa\u660e",
     noImage: "\u7121\u5716\u7247",
     page: "\u9801",
-    footer: "\u672c\u6587\u4ef6\u4f9b\u9580\u5e02\u63c0\u8ca8\u8207\u5206\u985e\u4f7f\u7528\u3002\u8acb\u78ba\u8a8d\u6240\u9078\u898f\u683c\u53ca\u5099\u59a5\u3001\u53d6\u6d88\u6578\u91cf\u5f8c\uff0c\u518d\u53e6\u884c\u63d0\u4f9b\u532f\u6b3e\u8cc7\u8a0a\u4e26\u5b89\u6392\u51fa\u8ca8\u3002\u7db2\u7ad9\u4e0d\u6703\u5efa\u7acb\u8a02\u55ae\u6216\u7dda\u4e0a\u4ed8\u6b3e\u3002"
+    footer: "本文件供門市確認與分類商品使用。請確認所選規格及備妥、取消數量後，再另行提供匯款資訊並安排出貨。網站不會建立訂單或線上付款。"
   }
 };
 

@@ -109,6 +109,18 @@ function mapIssueQuoteItem(row) {
   };
 }
 
+function mapQuoteItemWithImage(row) {
+  const productImage = resolveQuoteProductImage(row);
+  return {
+    ...mapQuoteItem(row),
+    productImage: productImage ? {
+      id: productImage.id,
+      url: productImage.url,
+      altText: productImage.altText
+    } : null
+  };
+}
+
 function mapDocument(row) {
   return {
     id: row.id,
@@ -204,28 +216,6 @@ const quoteSelect = `
   left join public.admin_quote_documents current_document on current_document.id = aq.current_document_id
 `;
 
-const itemSelect = `
-  select
-    id,
-    product_id,
-    product_code,
-    product_name,
-    color,
-    size,
-    selected_options,
-    requested_quantity,
-    confirmed_quantity,
-    requested_price_snapshot,
-    confirmed_unit_price,
-    confirmed_subtotal,
-    item_note,
-    fulfillment_status,
-    cancelled_quantity,
-    cancellation_reason,
-    cancellation_note
-  from public.admin_quote_items
-`;
-
 const issueItemSelect = `
   select
     aqi.*,
@@ -285,13 +275,13 @@ export function createAdminQuoteQueries(pool) {
       const quoteRow = quoteResult.rows[0];
       if (!quoteRow) return null;
       const [itemsResult, documentsResult, historyResult] = await Promise.all([
-        pool.query(`${itemSelect} where admin_quote_id = $1 order by created_at asc, id asc`, [quoteId]),
+        pool.query(`${issueItemSelect} where aqi.admin_quote_id = $1 order by aqi.created_at asc, aqi.id asc`, [quoteId]),
         pool.query(`select * from public.admin_quote_documents where admin_quote_id = $1 order by revision desc`, [quoteId]),
         pool.query(`select * from public.admin_quote_status_history where admin_quote_id = $1 order by created_at asc, id asc`, [quoteId])
       ]);
       return {
         quote: mapQuote(quoteRow),
-        items: itemsResult.rows.map(mapQuoteItem),
+        items: itemsResult.rows.map(mapQuoteItemWithImage),
         documents: documentsResult.rows.map(mapDocument),
         history: historyResult.rows.map(mapHistory)
       };
@@ -485,7 +475,7 @@ export function createAdminQuoteQueries(pool) {
           [quoteId, totalResult.rows[0].total, input.leadTime, input.shippingNote, input.validUntil, input.documentLocale, input.customerNote, input.adminMemo]
         );
         const updatedResult = await client.query(`${quoteSelect} where aq.id = $1 limit 1`, [quoteId]);
-        const updatedItems = await client.query(`${itemSelect} where admin_quote_id = $1 order by created_at asc, id asc`, [quoteId]);
+        const updatedItems = await client.query(`${issueItemSelect} where aqi.admin_quote_id = $1 order by aqi.created_at asc, aqi.id asc`, [quoteId]);
         const auditLogId = await insertAudit(client, {
           actor,
           action: "admin.quote.draft.update",
@@ -494,7 +484,7 @@ export function createAdminQuoteQueries(pool) {
           after: quoteSnapshot(updatedResult.rows[0])
         });
         await client.query("commit");
-        return { quote: mapQuote(updatedResult.rows[0]), items: updatedItems.rows.map(mapQuoteItem), auditLogId };
+        return { quote: mapQuote(updatedResult.rows[0]), items: updatedItems.rows.map(mapQuoteItemWithImage), auditLogId };
       } catch (error) {
         try { await client.query("rollback"); } catch { /* Preserve original error. */ }
         throw error;

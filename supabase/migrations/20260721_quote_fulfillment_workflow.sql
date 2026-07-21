@@ -1,4 +1,4 @@
--- Quote fulfillment workflow for offline SNS receipt, bank transfer, and shipment handling.
+-- Quote fulfillment workflow for product preparation, bank transfer, and shipment handling.
 
 alter table public.admin_quotes
   add column if not exists workflow_version smallint,

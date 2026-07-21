@@ -19,17 +19,17 @@ const statusTabs = ['all', 'requested', 'checking', 'quoted', 'confirmed', 'canc
 const pricePendingLabel = '가격 확인중'
 
 const quoteCopy = {
-  kr: { title: '상품 준비 현황', document: '피킹 결과 견적서', download: 'PDF 다운로드', validUntil: '유효기간', leadTime: '납기', shipping: '배송 조건', total: '준비 상품 합계', note: '안내', requested: '요청', prepared: '준비', cancelled: '취소', externalPayment: '피킹 견적서에서 선택 옵션과 준비·취소 수량을 확인한 뒤 별도로 계좌 안내와 발송 절차를 진행합니다. 사이트에서는 주문이나 결제가 생성되지 않습니다.' },
-  en: { title: 'Preparation status', document: 'Picking quotation', download: 'Download PDF', validUntil: 'Valid until', leadTime: 'Lead time', shipping: 'Shipping terms', total: 'Prepared total', note: 'Note', requested: 'Requested', prepared: 'Prepared', cancelled: 'Cancelled', externalPayment: 'Review selected options and prepared or cancelled quantities in the picking quotation before separate bank-transfer and shipping arrangements. No online order or payment is created.' },
-  jp: { title: '商品準備状況', document: 'ピッキング結果見積書', download: 'PDFダウンロード', validUntil: '有効期限', leadTime: '納期', shipping: '配送条件', total: '準備商品合計', note: 'ご案内', requested: '依頼', prepared: '準備', cancelled: '取消', externalPayment: 'ピッキング見積書で選択オプションと準備・取消数量を確認した後、別途振込案内と発送手続きを行います。サイト上では注文・決済は作成されません。' },
-  'zh-TW': { title: '商品備貨狀態', document: '揀貨結果報價單', download: '下載 PDF', validUntil: '有效期限', leadTime: '交期', shipping: '運送條件', total: '備貨合計', note: '說明', requested: '需求', prepared: '備妥', cancelled: '取消', externalPayment: '請先在揀貨報價單確認所選規格及備妥、取消數量，再另行安排匯款與出貨。網站不會建立訂單或付款。' },
+  kr: { title: '상품 준비 현황', document: '상품 준비 견적서', download: 'PDF 다운로드', validUntil: '유효기간', leadTime: '납기', shipping: '배송 조건', total: '준비 상품 합계', note: '안내', requested: '요청', prepared: '준비', cancelled: '취소', externalPayment: '상품 준비 견적서에서 선택 옵션과 준비·취소 수량을 확인한 뒤 별도로 계좌 안내와 발송 절차를 진행합니다. 사이트에서는 주문이나 결제가 생성되지 않습니다.' },
+  en: { title: 'Preparation status', document: 'Product preparation quotation', download: 'Download PDF', validUntil: 'Valid until', leadTime: 'Lead time', shipping: 'Shipping terms', total: 'Prepared total', note: 'Note', requested: 'Requested', prepared: 'Prepared', cancelled: 'Cancelled', externalPayment: 'Review selected options and prepared or cancelled quantities in the product preparation quotation before separate bank-transfer and shipping arrangements. No online order or payment is created.' },
+  jp: { title: '商品準備状況', document: '商品準備見積書', download: 'PDFダウンロード', validUntil: '有効期限', leadTime: '納期', shipping: '配送条件', total: '準備商品合計', note: 'ご案内', requested: '依頼', prepared: '準備', cancelled: '取消', externalPayment: '商品準備見積書で選択オプションと準備・取消数量を確認した後、別途振込案内と発送手続きを行います。サイト上では注文・決済は作成されません。' },
+  'zh-TW': { title: '商品備貨狀態', document: '商品備貨報價單', download: '下載 PDF', validUntil: '有效期限', leadTime: '交期', shipping: '運送條件', total: '備貨合計', note: '說明', requested: '需求', prepared: '備妥', cancelled: '取消', externalPayment: '請先在商品備貨報價單確認所選規格及備妥、取消數量，再另行安排匯款與出貨。網站不會建立訂單或付款。' },
 }
 
 const workflowCopy = {
-  kr: { received: '요청 접수', picking: '상품 준비 중', receipt_sent: '피킹 완료', payment_confirmed: '입금 확인', shipped: '발송 완료', completed: '거래 종료', cancelled: '전체 취소' },
-  en: { received: 'Received', picking: 'Preparing items', receipt_sent: 'Picking complete', payment_confirmed: 'Payment confirmed', shipped: 'Shipped', completed: 'Completed', cancelled: 'Cancelled' },
-  jp: { received: '受付済み', picking: '商品準備中', receipt_sent: 'ピッキング完了', payment_confirmed: '入金確認', shipped: '発送済み', completed: '取引終了', cancelled: '全体取消' },
-  'zh-TW': { received: '已受理', picking: '備貨中', receipt_sent: '揀貨完成', payment_confirmed: '已確認匯款', shipped: '已出貨', completed: '交易完成', cancelled: '全部取消' },
+  kr: { received: '견적 접수', picking: '물건 확인·챙기기', receipt_sent: '준비 완료', payment_confirmed: '입금 확인', shipped: '발송 완료', completed: '거래 종료', cancelled: '전체 취소' },
+  en: { received: 'Quote received', picking: 'Check and pack', receipt_sent: 'Preparation complete', payment_confirmed: 'Payment confirmed', shipped: 'Shipped', completed: 'Completed', cancelled: 'Cancelled' },
+  jp: { received: '見積受付', picking: '商品確認・準備', receipt_sent: '準備完了', payment_confirmed: '入金確認', shipped: '発送済み', completed: '取引終了', cancelled: '全体取消' },
+  'zh-TW': { received: '報價已受理', picking: '確認與備貨', receipt_sent: '備貨完成', payment_confirmed: '已確認匯款', shipped: '已出貨', completed: '交易完成', cancelled: '全部取消' },
 }
 
 const cancellationCopy = {
