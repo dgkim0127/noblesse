@@ -320,6 +320,9 @@ create table if not exists public.admin_quotes (
   decision_note text,
   accepted_at timestamptz,
   rejected_at timestamptz,
+  workflow_version smallint not null default 2,
+  workflow_status text not null default 'received' check (workflow_status in ('received', 'picking', 'receipt_sent', 'payment_confirmed', 'shipped', 'completed', 'cancelled')),
+  workflow_note text,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -339,6 +342,10 @@ create table if not exists public.admin_quote_items (
   size text,
   selected_options jsonb not null default '[]'::jsonb,
   item_note text,
+  fulfillment_status text not null default 'pending' check (fulfillment_status in ('pending', 'ready', 'partial', 'cancelled')),
+  cancelled_quantity integer not null default 0 check (cancelled_quantity >= 0 and (requested_quantity is null or cancelled_quantity <= requested_quantity)),
+  cancellation_reason text check (cancellation_reason is null or cancellation_reason in ('out_of_stock', 'quantity_shortage', 'quality_issue', 'discontinued', 'other')),
+  cancellation_note text,
   created_at timestamptz default now()
 );
 
@@ -363,6 +370,7 @@ create table if not exists public.admin_quote_status_history (
   to_status text not null,
   actor_user_id uuid references public.users(id),
   actor_type text not null check (actor_type in ('admin', 'buyer', 'system')),
+  event_type text not null default 'quote' check (event_type in ('quote', 'workflow')),
   note text,
   created_at timestamptz not null default now()
 );
@@ -586,6 +594,7 @@ create index if not exists idx_admin_quote_items_product_id on public.admin_quot
 create index if not exists idx_admin_quote_items_product_code on public.admin_quote_items(product_code);
 create index if not exists idx_admin_quote_documents_quote_revision on public.admin_quote_documents(admin_quote_id, revision desc);
 create index if not exists idx_admin_quote_status_history_quote_created on public.admin_quote_status_history(admin_quote_id, created_at asc);
+create index if not exists idx_admin_quotes_workflow_status_updated on public.admin_quotes(workflow_status, updated_at desc);
 create index if not exists idx_banners_visible_sort on public.banners(is_visible, sort_order);
 create index if not exists idx_banners_starts_ends on public.banners(starts_at, ends_at);
 create index if not exists idx_home_showcase_slides_public_order on public.home_showcase_slides(is_active, sort_order, created_at);

@@ -1805,6 +1805,71 @@ button:disabled,
   grid-template-columns: minmax(0, 1fr) 280px;
 }
 
+.admin-quote-workflow {
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.admin-quote-workflow > div {
+  align-items: center;
+  color: var(--admin-muted);
+  display: grid;
+  font-size: 11px;
+  gap: 8px;
+  grid-template-columns: 26px minmax(0, 1fr);
+  min-height: 54px;
+  padding: 10px 12px;
+  position: relative;
+}
+
+.admin-quote-workflow > div + div {
+  border-left: 1px solid var(--admin-border);
+}
+
+.admin-quote-workflow span {
+  align-items: center;
+  border: 1px solid var(--admin-border-strong);
+  border-radius: 50%;
+  display: inline-flex;
+  height: 26px;
+  justify-content: center;
+  width: 26px;
+}
+
+.admin-quote-workflow strong {
+  font-weight: 750;
+}
+
+.admin-quote-workflow .is-complete {
+  color: var(--admin-primary);
+}
+
+.admin-quote-workflow .is-complete span {
+  background: var(--admin-primary);
+  border-color: var(--admin-primary);
+  color: #fff;
+}
+
+.admin-quote-workflow .is-current {
+  background: #f1f0f7;
+  box-shadow: inset 0 -3px 0 var(--admin-primary);
+}
+
+.admin-quote-workflow .is-cancelled {
+  color: #a62735;
+  grid-column: 1 / -1;
+}
+
+.admin-quote-workflow .is-cancelled span {
+  background: #f7e6e8;
+  border-color: #edc4c9;
+}
+
 .admin-quote-lines td:first-child {
   min-width: 150px;
 }
@@ -1842,6 +1907,126 @@ button:disabled,
 
 .admin-quote-items-table td:first-child {
   min-width: 150px;
+}
+
+.admin-picking-table {
+  table-layout: fixed !important;
+}
+
+.admin-picking-table th:nth-child(1) { width: 23%; }
+.admin-picking-table th:nth-child(2) { width: 7%; }
+.admin-picking-table th:nth-child(3) { width: 14%; }
+.admin-picking-table th:nth-child(4) { width: 7%; }
+.admin-picking-table th:nth-child(5) { width: 21%; }
+.admin-picking-table th:nth-child(6) { width: 13%; }
+.admin-picking-table th:nth-child(7) { width: 15%; }
+
+.admin-picking-table tr.fulfillment-partial {
+  background: #fffbf1;
+}
+
+.admin-picking-table tr.fulfillment-cancelled {
+  background: #fff7f8;
+}
+
+.admin-picking-shortcuts {
+  display: flex;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.admin-picking-shortcuts button {
+  background: #fff;
+  border: 1px solid var(--admin-border-strong);
+  border-radius: 4px;
+  color: var(--admin-primary);
+  font-size: 10px;
+  min-height: 27px;
+  padding: 3px 6px;
+}
+
+.admin-cancelled-quantity {
+  color: #a62735;
+}
+
+.admin-cancellation-fields {
+  display: grid;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.admin-cancellation-fields select,
+.admin-cancellation-fields input {
+  font-size: 11px;
+  min-height: 32px;
+}
+
+.admin-status.ready {
+  background: #e3f2ea;
+  color: var(--admin-success);
+}
+
+.admin-status.partial {
+  background: #fff0cc;
+  color: #825600;
+}
+
+.admin-quote-exceptions ul {
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-quote-exceptions li {
+  align-items: center;
+  display: grid;
+  font-size: 12px;
+  gap: 12px;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(180px, .8fr);
+  padding: 12px;
+}
+
+.admin-quote-exceptions li + li {
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-quote-exceptions li > span {
+  display: grid;
+  gap: 2px;
+}
+
+.admin-quote-exceptions li small {
+  color: var(--admin-muted);
+}
+
+.admin-quote-exceptions li em {
+  color: #a62735;
+  font-style: normal;
+}
+
+.admin-editor-summary > button {
+  align-items: center;
+  display: inline-flex;
+  gap: 7px;
+  justify-content: center;
+  padding: 0 10px;
+}
+
+.admin-editor-summary > button.admin-workflow-next {
+  background: #eef5f1;
+  border-color: #b9d7c6;
+  color: #176b46;
+}
+
+.admin-editor-summary > button.admin-danger-text {
+  color: #a62735;
+}
+
+.admin-workflow-note {
+  border-top: 1px solid var(--admin-border);
+  padding-top: 12px;
 }
 
 .admin-internal-note,
@@ -2821,7 +3006,22 @@ button:disabled,
   }
 
   .admin-quote-workspace {
-    grid-template-columns: minmax(0, 1fr) 240px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-quote-workspace .admin-editor-summary {
+    position: static;
+  }
+
+  .admin-quote-workflow > div {
+    gap: 5px;
+    grid-template-columns: 22px minmax(0, 1fr);
+    padding: 8px;
+  }
+
+  .admin-quote-workflow span {
+    height: 22px;
+    width: 22px;
   }
 
   .admin-save-bar {
@@ -2958,6 +3158,27 @@ button:disabled,
   .admin-bulk-bar {
     align-items: stretch;
     display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .admin-quote-workflow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-quote-workflow > div:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .admin-quote-workflow > div:nth-child(n + 3) {
+    border-top: 1px solid var(--admin-border);
+  }
+
+  .admin-picking-shortcuts {
+    flex-wrap: wrap;
+  }
+
+  .admin-quote-exceptions li {
+    align-items: start;
     grid-template-columns: 1fr;
   }
 

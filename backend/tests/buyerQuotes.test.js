@@ -113,3 +113,26 @@ test("buyer quote query rejects a stale document before mutation", async () => {
   assert.equal(calls.some((call) => call.startsWith("update public.admin_quotes")), false);
   assert.equal(calls.includes("rollback"), true);
 });
+
+test("buyer quote query disables accept and reject for the offline fulfillment workflow", async () => {
+  const calls = [];
+  const client = {
+    async query(sql) {
+      const normalized = String(sql).toLowerCase().replace(/\s+/g, " ").trim();
+      calls.push(normalized);
+      if (["begin", "rollback"].includes(normalized)) return { rows: [] };
+      if (normalized.includes("select q.*, i.buyer_id")) {
+        return { rows: [{ ...buyerQuoteRow(), workflow_version: 2, workflow_status: "picking", buyer_id: viewer.buyerId }] };
+      }
+      throw new Error(`Unexpected query: ${sql}`);
+    },
+    release() {}
+  };
+  const queries = createBuyerQuoteQueries({ async connect() { return client; } });
+
+  const result = await queries.decideQuote(viewer, quoteId, { documentId, decision: "accepted", note: "" });
+
+  assert.equal(result.decisionDisabled, true);
+  assert.equal(calls.some((sql) => sql.startsWith("update public.admin_quotes")), false);
+  assert.equal(calls.includes("rollback"), true);
+});

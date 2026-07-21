@@ -42,6 +42,7 @@ export function createBuyerQuoteService({ queries, objectStore }) {
       if (!input.decision) throw validationError("A quote decision is required");
       const result = await queries.decideQuote(buyer, id, input);
       if (!result) throw notFound("Quote not found");
+      if (result.decisionDisabled) throw conflict("Buyer quote decisions are not used for this fulfillment workflow");
       if (result.stale) throw conflict("This quote document is no longer current");
       if (result.expired) throw conflict("This quote has expired");
       if (result.locked) throw conflict("This quote has already been decided or cancelled");

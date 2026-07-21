@@ -19,14 +19,16 @@ const labels = {
     buyer: "거래처",
     product: "상품",
     option: "옵션",
-    quantity: "수량",
+    requested: "요청",
+    prepared: "준비",
+    cancelled: "취소",
     unitPrice: "단가",
     subtotal: "금액",
     total: "합계",
     leadTime: "납기",
     shipping: "배송 조건",
     note: "고객 안내",
-    footer: "견적 승인은 주문 또는 결제를 생성하지 않으며, 관리자 후속 처리 요청으로 기록됩니다."
+    footer: "이 문서는 준비 가능한 품목을 정리한 견적 결과입니다. 영수증과 입금 안내는 별도 SNS로 전달되며 사이트에서 주문 또는 결제가 생성되지 않습니다."
   },
   en: {
     title: "OFFICIAL QUOTATION",
@@ -36,14 +38,16 @@ const labels = {
     buyer: "Buyer",
     product: "Product",
     option: "Option",
-    quantity: "Qty",
+    requested: "Req.",
+    prepared: "Ready",
+    cancelled: "Cancel",
     unitPrice: "Unit price",
     subtotal: "Amount",
     total: "Total",
     leadTime: "Lead time",
     shipping: "Shipping terms",
     note: "Customer note",
-    footer: "Accepting this quote requests administrator follow-up. It does not create an order or payment."
+    footer: "This document lists the items Noblesse can prepare. Receipt and bank-transfer instructions are sent separately by SNS; no online order or payment is created."
   },
   jp: {
     title: "正式見積書",
@@ -53,14 +57,16 @@ const labels = {
     buyer: "取引先",
     product: "商品",
     option: "オプション",
-    quantity: "数量",
+    requested: "依頼",
+    prepared: "準備",
+    cancelled: "取消",
     unitPrice: "単価",
     subtotal: "金額",
     total: "合計",
     leadTime: "納期",
     shipping: "配送条件",
     note: "お客様向けメモ",
-    footer: "見積承認は注文・決済を作成せず、管理者による後続対応の依頼として記録されます。"
+    footer: "本書は準備可能な商品をまとめた見積結果です。領収書と振込案内は別途SNSでお送りし、サイト上で注文・決済は作成されません。"
   },
   "zh-TW": {
     title: "正式報價單",
@@ -70,14 +76,16 @@ const labels = {
     buyer: "客戶",
     product: "商品",
     option: "選項",
-    quantity: "數量",
+    requested: "需求",
+    prepared: "備妥",
+    cancelled: "取消",
     unitPrice: "單價",
     subtotal: "金額",
     total: "合計",
     leadTime: "交期",
     shipping: "運送條件",
     note: "客戶備註",
-    footer: "接受報價只會提出管理員後續處理需求，不會建立訂單或付款。"
+    footer: "本文件列出可備妥的品項。收據與銀行匯款說明將另行透過 SNS 傳送，網站不會建立訂單或付款。"
   }
 };
 
@@ -121,6 +129,19 @@ function formatItemOptions(item, locale) {
   return [item.color, item.size].filter(Boolean).join(" / ");
 }
 
+const cancellationLabels = {
+  kr: { out_of_stock: "재고 없음", quantity_shortage: "수량 부족", quality_issue: "품질 확인 불가", discontinued: "취급 종료", other: "기타" },
+  en: { out_of_stock: "Out of stock", quantity_shortage: "Quantity shortage", quality_issue: "Quality issue", discontinued: "Discontinued", other: "Other" },
+  jp: { out_of_stock: "在庫なし", quantity_shortage: "数量不足", quality_issue: "品質確認不可", discontinued: "取扱終了", other: "その他" },
+  "zh-TW": { out_of_stock: "缺貨", quantity_shortage: "數量不足", quality_issue: "品質問題", discontinued: "停止供應", other: "其他" }
+};
+
+function formatCancellation(item, locale) {
+  if (!item.cancelledQuantity) return "";
+  const reason = cancellationLabels[locale]?.[item.cancellationReason] || item.cancellationReason || cancellationLabels[locale]?.other;
+  return [reason, item.cancellationNote].filter(Boolean).join(" - ");
+}
+
 function writeKeyValue(doc, label, value, y) {
   doc.fillColor("#6b6b73").fontSize(8).text(label, 48, y, { width: 100 });
   doc.fillColor("#20212a").fontSize(9).text(value || "-", 150, y, { width: 390 });
@@ -152,28 +173,39 @@ export async function createQuotePdfBuffer(snapshot) {
   let y = 226;
   doc.fillColor("#f3f3f6").rect(48, y, 499, 25).fill();
   doc.fillColor("#34353d").fontSize(8);
-  doc.text(t.product, 56, y + 8, { width: 180 });
-  doc.text(t.option, 238, y + 8, { width: 90 });
-  doc.text(t.quantity, 330, y + 8, { width: 38, align: "right" });
-  doc.text(t.unitPrice, 375, y + 8, { width: 75, align: "right" });
-  doc.text(t.subtotal, 455, y + 8, { width: 84, align: "right" });
+  doc.text(t.product, 56, y + 8, { width: 132 });
+  doc.text(t.option, 192, y + 8, { width: 79 });
+  doc.text(t.requested, 275, y + 8, { width: 31, align: "right" });
+  doc.text(t.prepared, 309, y + 8, { width: 36, align: "right" });
+  doc.text(t.cancelled, 348, y + 8, { width: 38, align: "right" });
+  doc.text(t.unitPrice, 390, y + 8, { width: 67, align: "right" });
+  doc.text(t.subtotal, 461, y + 8, { width: 78, align: "right" });
   y += 25;
 
   for (const item of snapshot.items || []) {
     const optionText = formatItemOptions(item, locale) || "-";
+    const cancellationText = formatCancellation(item, locale);
     doc.fontSize(7.5);
-    const rowHeight = Math.max(38, Math.min(68, doc.heightOfString(optionText, { width: 88, lineGap: 1 }) + 16));
+    const rowHeight = Math.max(42, Math.min(78, Math.max(
+      doc.heightOfString(optionText, { width: 77, lineGap: 1 }) + 16,
+      cancellationText ? doc.heightOfString(cancellationText, { width: 132, lineGap: 1 }) + 31 : 42
+    )));
     if (y + rowHeight > 705) {
       doc.addPage();
       y = 48;
     }
     doc.moveTo(48, y + rowHeight).lineTo(547, y + rowHeight).strokeColor("#ececf0").lineWidth(0.6).stroke();
-    doc.fillColor("#20212a").fontSize(8).text(item.productName || item.productCode, 56, y + 8, { width: 176, ellipsis: true });
-    doc.fillColor("#6b6b73").fontSize(7).text(item.productCode, 56, y + 21, { width: 176, ellipsis: true });
-    doc.fillColor("#34353d").fontSize(7.5).text(optionText, 238, y + 8, { width: 88, height: rowHeight - 12, lineGap: 1, ellipsis: true });
-    doc.text(String(item.quantity), 330, y + 12, { width: 38, align: "right" });
-    doc.text(formatMoney(item.unitPrice, snapshot.currency), 375, y + 12, { width: 75, align: "right" });
-    doc.text(formatMoney(item.subtotal, snapshot.currency), 455, y + 12, { width: 84, align: "right" });
+    doc.fillColor("#20212a").fontSize(8).text(item.productName || item.productCode, 56, y + 8, { width: 132, ellipsis: true });
+    doc.fillColor("#6b6b73").fontSize(7).text(item.productCode, 56, y + 21, { width: 132, ellipsis: true });
+    if (cancellationText) doc.fillColor("#b0445a").fontSize(6.5).text(cancellationText, 56, y + 32, { width: 132, height: rowHeight - 34, lineGap: 1, ellipsis: true });
+    doc.fillColor("#34353d").fontSize(7.5).text(optionText, 192, y + 8, { width: 79, height: rowHeight - 12, lineGap: 1, ellipsis: true });
+    const requestedQuantity = item.requestedQuantity ?? item.quantity;
+    const cancelledQuantity = item.cancelledQuantity ?? Math.max(Number(requestedQuantity || 0) - Number(item.quantity || 0), 0);
+    doc.text(String(requestedQuantity), 275, y + 12, { width: 31, align: "right" });
+    doc.text(String(item.quantity), 309, y + 12, { width: 36, align: "right" });
+    doc.text(String(cancelledQuantity), 348, y + 12, { width: 38, align: "right" });
+    doc.text(formatMoney(item.unitPrice, snapshot.currency), 390, y + 12, { width: 67, align: "right" });
+    doc.text(formatMoney(item.subtotal, snapshot.currency), 461, y + 12, { width: 78, align: "right" });
     y += rowHeight;
   }
 

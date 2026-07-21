@@ -129,7 +129,7 @@ test("updateQuoteDraft keeps quantity parameters consistently typed", async () =
     inquiry_id: inquiryId,
     inquiry_number: "INQ-001",
     company_name: "Buyer Co",
-    status: "draft",
+    status: "sent",
     confirmed_total: 1800,
     requested_total: 1800,
     currency: "KRW",
@@ -139,6 +139,8 @@ test("updateQuoteDraft keeps quantity parameters consistently typed", async () =
     document_locale: "kr",
     customer_note: "Quote note",
     admin_memo: null,
+    current_document_id: "55555555-5555-4555-8555-555555555555",
+    quoted_at: "2026-07-20T01:00:00.000Z",
     created_at: "2026-07-20T00:00:00.000Z",
     updated_at: "2026-07-20T00:00:00.000Z"
   };
@@ -147,11 +149,15 @@ test("updateQuoteDraft keeps quantity parameters consistently typed", async () =
     product_id: "product-1",
     product_code: "NB-001",
     product_name: "Test product",
-    requested_quantity: 1,
+    requested_quantity: 2,
     confirmed_quantity: 1,
     requested_price_snapshot: 1800,
     confirmed_unit_price: 1800,
-    confirmed_subtotal: 1800
+    confirmed_subtotal: 1800,
+    fulfillment_status: "partial",
+    cancelled_quantity: 1,
+    cancellation_reason: "quantity_shortage",
+    cancellation_note: "One item unavailable"
   };
   const client = {
     async query(sql, params = []) {
@@ -182,15 +188,26 @@ test("updateQuoteDraft keeps quantity parameters consistently typed", async () =
       id: itemRow.id,
       confirmedQuantity: 1,
       confirmedUnitPrice: 1800,
-      itemNote: ""
+      itemNote: "",
+      fulfillmentStatus: "partial",
+      cancellationReason: "quantity_shortage",
+      cancellationNote: "One item unavailable"
     }]
   }, adminViewer);
 
   const itemUpdate = calls.find((call) => call.sql.toLowerCase().startsWith("update public.admin_quote_items"));
+  const quoteUpdate = calls.find((call) => call.sql.toLowerCase().startsWith("update public.admin_quotes"));
   assert.match(itemUpdate.sql, /confirmed_quantity = \$3::integer/i);
   assert.match(itemUpdate.sql, /round\(\(\$3::integer \* \$4::numeric\), 2\)/i);
+  assert.match(itemUpdate.sql, /cancelled_quantity = greatest\(requested_quantity - \$3::integer, 0\)/i);
+  assert.deepEqual(itemUpdate.params.slice(5), ["partial", "quantity_shortage", "One item unavailable"]);
+  assert.match(quoteUpdate.sql, /set status = 'draft'/i);
+  assert.match(quoteUpdate.sql, /current_document_id = null/i);
+  assert.match(quoteUpdate.sql, /quoted_at = null/i);
   assert.equal(result.quote.confirmedTotal, 1800);
   assert.equal(result.items[0].confirmedQuantity, 1);
+  assert.equal(result.items[0].cancelledQuantity, 1);
+  assert.equal(result.items[0].cancellationReason, "quantity_shortage");
 });
 
 test("updateQuoteStatus cancels a quote and writes status history and audit log", async () => {
@@ -207,4 +224,62 @@ test("updateQuoteStatus cancels a quote and writes status history and audit log"
   assert.equal(fake.releaseCount, 1);
   assert.equal(result.quote.status, "cancelled");
   assert.equal(result.auditLogId, "audit-1");
+});
+
+test("updateWorkflowStatus records the offline receipt handoff without creating an order or payment", async () => {
+  const calls = [];
+  let workflowStatus = "picking";
+  const quoteRow = {
+    id: quoteId,
+    inquiry_id: inquiryId,
+    inquiry_number: "INQ-001",
+    quote_number: "Q-001",
+    company_name: "Buyer Co",
+    status: "sent",
+    confirmed_total: 1800,
+    requested_total: 3600,
+    currency: "KRW",
+    current_document_id: "55555555-5555-4555-8555-555555555555",
+    workflow_version: 2,
+    workflow_status: workflowStatus,
+    workflow_note: null,
+    updated_at: "2026-07-21T00:00:00.000Z"
+  };
+  const client = {
+    async query(sql, params = []) {
+      const text = String(sql).trim();
+      const normalized = text.toLowerCase();
+      calls.push({ sql: text, params });
+      if (["begin", "commit", "rollback"].includes(normalized)) return { rows: [] };
+      if (normalized.includes("from public.admin_quotes") && normalized.includes("where aq.id")) {
+        return { rows: [{ ...quoteRow, workflow_status: workflowStatus }] };
+      }
+      if (normalized.includes("count(*) filter") && normalized.includes("from public.admin_quote_items")) {
+        return { rows: [{ pending_count: 0, prepared_count: 1 }] };
+      }
+      if (normalized.startsWith("update public.admin_quotes")) {
+        workflowStatus = params[1];
+        return { rows: [] };
+      }
+      if (normalized.startsWith("insert into public.admin_quote_status_history")) return { rows: [] };
+      if (normalized.startsWith("update public.inquiries")) return { rows: [] };
+      if (normalized.startsWith("insert into public.audit_logs")) return { rows: [{ id: "audit-1" }] };
+      throw new Error(`Unexpected query: ${text}`);
+    },
+    release() {}
+  };
+
+  const result = await createAdminQuoteQueries({ async connect() { return client; } }).updateWorkflowStatus(
+    quoteId,
+    { status: "receipt_sent", note: "Receipt sent by SNS" },
+    adminViewer
+  );
+
+  const historyInsert = calls.find((call) => call.sql.toLowerCase().startsWith("insert into public.admin_quote_status_history"));
+  const inquiryUpdate = calls.find((call) => call.sql.toLowerCase().startsWith("update public.inquiries"));
+  assert.equal(result.quote.workflowStatus, "receipt_sent");
+  assert.match(historyInsert.sql, /event_type/i);
+  assert.deepEqual(historyInsert.params.slice(2, 4), ["picking", "receipt_sent"]);
+  assert.equal(inquiryUpdate.params[1], "quoted");
+  assert.equal(calls.some((call) => /\b(insert into|update)\s+public\.(orders|payments|carts)\b/i.test(call.sql)), false);
 });
