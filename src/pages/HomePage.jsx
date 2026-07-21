@@ -1140,10 +1140,10 @@ const formatWeeklyDemand = (weeklyDemand, locale) => {
 }
 
 const priceAfterApprovalLabel = {
-  kr: '승인 후 가격 확인 가능',
-  en: 'Price available after approval',
-  jp: '承認後に価格を確認できます',
-  cn: '審核後可查看價格',
+  kr: '로그인 후 가격 확인 가능',
+  en: 'Price available after sign-in',
+  jp: 'ログイン後に価格を確認できます',
+  cn: '登入後可查看價格',
 }
 
 function HomeProductCard({ product, index, variant = 'default', localeOverride = '' }) {
@@ -1196,7 +1196,7 @@ function HomeProductCard({ product, index, variant = 'default', localeOverride =
     event.stopPropagation()
 
     if (!isApproved) {
-      setFavoriteNotice('승인 후 이용 가능')
+      setFavoriteNotice('로그인 후 이용 가능')
       window.clearTimeout(window.__noblesseFavoriteNoticeTimer)
       window.__noblesseFavoriteNoticeTimer = window.setTimeout(() => setFavoriteNotice(''), 1800)
       return

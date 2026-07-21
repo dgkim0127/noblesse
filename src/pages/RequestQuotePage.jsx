@@ -34,16 +34,15 @@ function QuoteLine({ row, currency, locale }) {
 }
 
 function AccessNotice({ viewerState }) {
-  const isPending = viewerState === 'pending'
   const { toLocalePath } = useLocalePath()
   return <main className="content">
     <div className="approval-page">
       <LockKeyhole size={25} />
-      <h1>{isPending ? '거래처 정보를 확인 중입니다.' : '견적 요청은 승인된 거래처만 이용할 수 있습니다.'}</h1>
-      <p>{isPending ? '담당자 확인 후 견적 요청 기능을 안내드립니다.' : '로그인하거나 거래처 신청을 먼저 진행해주세요.'}</p>
+      <h1>견적 요청은 로그인한 거래처 계정에서 이용할 수 있습니다.</h1>
+      <p>로그인하거나 거래처 등록을 먼저 진행해주세요.</p>
       <p>거래 조건 확인이 급한 경우 이메일로 문의할 수 있습니다.</p>
       <div className="account-actions">
-        <Link to={toLocalePath('/account')}>확인 상태 보기</Link>
+        <Link to={toLocalePath(viewerState === 'guest' ? '/login' : '/account')}>{viewerState === 'guest' ? '로그인' : '계정 상태 보기'}</Link>
         <a className="secondary-action" href="mailto:dgkim0127@gmail.com"><Mail size={15} />이메일 문의</a>
       </div>
     </div>

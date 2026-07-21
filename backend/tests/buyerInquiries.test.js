@@ -135,10 +135,22 @@ function authHeaders() {
   return { authorization: "Bearer valid-token" };
 }
 
-test("GET /api/buyer/product-prices requires approved buyer", async () => {
+test("GET /api/buyer/product-prices allows active registered buyers without manual approval", async () => {
   for (const viewer of [
     createBuyerViewer({ status: "pending", verificationStatus: "pending" }),
     createBuyerViewer({ status: "pending", verificationStatus: "draft" }),
+    createBuyerViewer({ status: "approved", verificationStatus: "approved" })
+  ]) {
+    const app = createBuyerInquiryApp({ viewer });
+    const response = await request(app, "/api/buyer/product-prices", { headers: authHeaders() });
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.productPrices[0].productCode, "NB-001");
+  }
+});
+
+test("GET /api/buyer/product-prices rejects restricted or incomplete buyer accounts", async () => {
+  for (const viewer of [
     createBuyerViewer({ status: "pending", verificationStatus: "rejected" }),
     createBuyerViewer({ status: "blocked", verificationStatus: "suspended" }),
     createBuyerViewer({ status: "blocked", accountStatus: "blocked", verificationStatus: "approved" }),
@@ -237,4 +249,20 @@ test("POST /api/buyer/inquiries creates requested inquiry", async () => {
   assert.equal(response.body.data.inquiry.inquiryId, inquiryId);
   assert.equal(response.body.data.inquiry.requestMemo, "Please check stock");
   assert.equal(response.body.data.inquiry.items[0].productCode, "NB-001");
+});
+
+test("POST /api/buyer/inquiries accepts an active pending buyer", async () => {
+  const viewer = createBuyerViewer({ status: "pending", verificationStatus: "pending" });
+  const app = createBuyerInquiryApp({ viewer });
+  const response = await request(app, "/api/buyer/inquiries", {
+    method: "POST",
+    headers: { ...authHeaders(), "content-type": "application/json" },
+    body: JSON.stringify({
+      requestMemo: "No manual approval gate",
+      items: [{ productCode: "NB-001", quantity: 20 }]
+    })
+  });
+
+  assert.equal(response.status, 201);
+  assert.equal(response.body.data.inquiry.requestMemo, "No manual approval gate");
 });

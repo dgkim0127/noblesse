@@ -10,8 +10,8 @@ import { getEffectiveProductOptionGroups } from '../utils/productOptions'
 const cardCopy = {
   kr: {
     add: '제품 문의하기',
-    locked: '거래 조건은 문의 후 안내',
-    lockedButton: '거래처 문의 필요',
+    locked: '로그인 후 가격 확인 가능',
+    lockedButton: '로그인 필요',
     minQty: 'MOQ',
     memberPrice: '거래 조건',
     selectOptions: '옵션 선택',
@@ -19,8 +19,8 @@ const cardCopy = {
   },
   en: {
     add: 'Ask about this product',
-    locked: 'Trade terms after inquiry',
-    lockedButton: 'Trade inquiry needed',
+    locked: 'Price available after sign-in',
+    lockedButton: 'Sign in required',
     minQty: 'Minimum qty',
     memberPrice: 'Trade terms',
     selectOptions: 'Select options',
@@ -28,8 +28,8 @@ const cardCopy = {
   },
   jp: {
     add: 'この商品を問い合わせる',
-    locked: '取引条件はお問い合わせ後にご案内',
-    lockedButton: '取引先お問い合わせが必要',
+    locked: 'ログイン後に価格を確認できます',
+    lockedButton: 'ログインが必要です',
     minQty: '最小数量',
     memberPrice: '取引条件',
     selectOptions: 'オプションを選択',
@@ -37,8 +37,8 @@ const cardCopy = {
   },
   cn: {
     add: '咨询此商品',
-    locked: '交易条件将在咨询后提供',
-    lockedButton: '需要贸易咨询',
+    locked: '登入後可查看價格',
+    lockedButton: '需要登入',
     minQty: '最小数量',
     memberPrice: '交易条件',
     selectOptions: '选择选项',

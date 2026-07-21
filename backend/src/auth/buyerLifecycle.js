@@ -29,3 +29,15 @@ export function isApprovedBuyerLifecycle(viewer = {}) {
     Boolean(viewer.buyerId)
   );
 }
+
+export function isQuoteEnabledBuyerLifecycle(viewer = {}) {
+  const accountStatus = normalizeAccountStatus(viewer.accountStatus, viewer.status);
+  const verificationStatus = normalizeVerificationStatus(viewer.verificationStatus, viewer.status);
+
+  return (
+    viewer.role === "buyer" &&
+    accountStatus === "active" &&
+    ["draft", "pending", "approved"].includes(verificationStatus) &&
+    Boolean(viewer.buyerId)
+  );
+}

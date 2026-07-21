@@ -9,7 +9,7 @@ export const privacyCollectionUse = {
       headingKo: '1. 수집 및 이용 목적',
       headingEn: '1. Purpose',
       bodyKo: '귀족은 도매 회원가입 신청 처리, 회원 확인, 국가 및 시장 배정, 회원가 접근 권한 부여, Inquiry List 이용, Request Quote 처리, 고객 문의 응대, 분쟁 및 기록 관리, 부정 이용 방지를 위해 개인정보를 수집·이용합니다.',
-      bodyEn: 'Noblesse collects and uses personal information for member review, member identification, country and market assignment, approved buyer pricing access, Inquiry List use, Request Quote processing, customer support, dispute and record management, and misuse prevention.',
+      bodyEn: 'Noblesse collects and uses personal information for account operation, member identification, country and market assignment, signed-in buyer pricing access, Inquiry List use, Request Quote processing, customer support, dispute and record management, and misuse prevention.',
     },
     {
       headingKo: '2. 수집 항목',
@@ -33,7 +33,7 @@ export const privacyCollectionUse = {
       headingKo: '5. 동의 거부 시 불이익',
       headingEn: '5. Consequences Of Refusal',
       bodyKo: '필수 개인정보 수집·이용에 동의하지 않을 경우 도매 회원가입 신청 처리가 제한되며 회원가, Inquiry List, Request Quote 기능을 사용할 수 없습니다.',
-      bodyEn: 'If required privacy collection and use consent is not accepted, the membership request cannot be processed and approved buyer pricing, Inquiry List, and Request Quote features cannot be used.',
+      bodyEn: 'If required privacy collection and use consent is not accepted, registration cannot be processed and member pricing, Inquiry List, and Request Quote features cannot be used.',
     },
   ],
 }

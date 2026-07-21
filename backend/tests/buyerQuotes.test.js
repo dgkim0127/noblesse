@@ -32,17 +32,37 @@ function buyerQuoteRow(status = "sent") {
   };
 }
 
-test("buyer quote service requires an approved buyer before query access", async () => {
+test("buyer quote service allows an active registered buyer before manual approval", async () => {
+  let called = false;
+  const service = createBuyerQuoteService({
+    queries: { async getQuoteForInquiry() { called = true; return { quoteId }; } },
+    objectStore: {}
+  });
+
+  const result = await service.getQuoteForInquiry(inquiryId, { ...viewer, verificationStatus: "pending" });
+
+  assert.equal(called, true);
+  assert.equal(result.quoteId, quoteId);
+});
+
+test("buyer quote service rejects restricted or incomplete buyer accounts", async () => {
   let called = false;
   const service = createBuyerQuoteService({
     queries: { async getQuoteForInquiry() { called = true; } },
     objectStore: {}
   });
 
-  await assert.rejects(
-    () => service.getQuoteForInquiry(inquiryId, { ...viewer, verificationStatus: "pending" }),
-    (error) => error.code === "FORBIDDEN"
-  );
+  for (const currentViewer of [
+    { ...viewer, verificationStatus: "rejected" },
+    { ...viewer, verificationStatus: "suspended" },
+    { ...viewer, accountStatus: "blocked" },
+    { ...viewer, buyerId: null }
+  ]) {
+    await assert.rejects(
+      () => service.getQuoteForInquiry(inquiryId, currentViewer),
+      (error) => error.code === "FORBIDDEN"
+    );
+  }
   assert.equal(called, false);
 });
 

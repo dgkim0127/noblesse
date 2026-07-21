@@ -8,6 +8,8 @@ import {
   getDiscountedPrice,
   getViewerStateFromProfile,
   guestProfile,
+  isApprovedBuyer,
+  isQuoteEnabledBuyer,
   normalizeBuyerProfile,
   selectProductPrice,
 } from '../src/commerce/commerceUtils.js'
@@ -15,11 +17,27 @@ import {
 test('viewer state is derived from backend buyer/admin profile', () => {
   assert.equal(getViewerStateFromProfile({ role: 'admin', status: 'approved' }), 'admin')
   assert.equal(getViewerStateFromProfile({ role: 'buyer', status: 'approved' }), 'approved')
-  assert.equal(getViewerStateFromProfile({ role: 'buyer', status: 'pending' }), 'pending')
+  assert.equal(getViewerStateFromProfile({ role: 'buyer', status: 'pending' }), 'approved')
   assert.equal(getViewerStateFromProfile({ role: 'buyer', status: 'approved', accountStatus: 'blocked', verificationStatus: 'approved' }), 'blocked')
   assert.equal(getViewerStateFromProfile({ role: 'buyer', status: 'pending', accountStatus: 'active', verificationStatus: 'rejected' }), 'rejected')
   assert.equal(getViewerStateFromProfile({ role: 'buyer', status: 'blocked', accountStatus: 'active', verificationStatus: 'suspended' }), 'suspended')
   assert.equal(getViewerStateFromProfile(null), 'guest')
+})
+
+test('active registered buyers can use quote features without manual approval', () => {
+  for (const verificationStatus of ['draft', 'pending', 'approved']) {
+    const profile = { role: 'buyer', accountStatus: 'active', verificationStatus }
+    assert.equal(isQuoteEnabledBuyer(profile), true)
+    assert.equal(isApprovedBuyer(profile), true)
+  }
+  for (const profile of [
+    { role: 'buyer', accountStatus: 'active', verificationStatus: 'rejected' },
+    { role: 'buyer', accountStatus: 'active', verificationStatus: 'suspended' },
+    { role: 'buyer', accountStatus: 'blocked', verificationStatus: 'approved' },
+    { role: null, accountStatus: 'active', verificationStatus: 'pending' },
+  ]) {
+    assert.equal(isQuoteEnabledBuyer(profile), false)
+  }
 })
 
 test('buyer profile normalization keeps guest defaults and maps userId', () => {
@@ -71,6 +89,20 @@ test('approved buyer exact market and currency price is available', () => {
   assert.equal(selected.price.market, 'JP')
   assert.equal(selected.price.currency, 'JPY')
   assert.equal(selected.reason, 'exact')
+})
+
+test('active pending buyer exact market and currency price is available', () => {
+  const selected = selectProductPrice({
+    prices: [
+      { productId: 'NB-001', market: 'KR', currency: 'KRW', visibleTo: 'approved_only', isActive: true, wholesalePrice: 12000 },
+    ],
+    productId: 'NB-001',
+    locale: 'kr',
+    viewer: { role: 'buyer', accountStatus: 'active', verificationStatus: 'pending', assignedMarket: 'KR', currency: 'KRW' },
+  })
+
+  assert.equal(selected.isAvailable, true)
+  assert.equal(selected.price.wholesalePrice, 12000)
 })
 
 test('missing exact price is unavailable instead of using another market amount', () => {

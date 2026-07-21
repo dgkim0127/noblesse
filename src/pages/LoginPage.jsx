@@ -8,7 +8,7 @@ import { resolveLocaleCopy, useLocalePath } from '../utils/locale'
 const loginPageCopy = {
   kr: {
     eyebrow: '거래처 로그인',
-    summary: '승인된 거래처는 거래 조건, 견적 리스트, 견적 요청 기능을 사용할 수 있습니다. 견적 요청은 최종 주문이 아닙니다.',
+    summary: '등록한 거래처는 로그인 후 가격, 견적 리스트, 견적 요청 기능을 사용할 수 있습니다. 견적 요청은 최종 주문이 아닙니다.',
     identifier: '아이디 또는 이메일',
     identifierPlaceholder: '아이디 또는 이메일을 입력하세요',
     password: '비밀번호',
@@ -22,7 +22,7 @@ const loginPageCopy = {
   },
   en: {
     eyebrow: 'Buyer login',
-    summary: 'Approved buyers can view trade terms, inquiry lists, and request quotes. Quote requests are not final orders.',
+    summary: 'Registered buyers can view prices, use Inquiry List, and request quotes after sign-in. Quote requests are not final orders.',
     identifier: 'ID or email',
     identifierPlaceholder: 'Enter ID or email',
     password: 'Password',
@@ -36,7 +36,7 @@ const loginPageCopy = {
   },
   jp: {
     eyebrow: '取引先ログイン',
-    summary: '承認済みの取引先は、取引条件、見積もりリスト、見積もり依頼機能を利用できます。見積もり依頼は最終注文ではありません。',
+    summary: '登録済みの取引先は、ログイン後に価格、見積リスト、見積依頼機能を利用できます。見積依頼は最終注文ではありません。',
     identifier: 'ID またはメール',
     identifierPlaceholder: 'ID またはメールを入力',
     password: 'パスワード',
@@ -50,7 +50,7 @@ const loginPageCopy = {
   },
   cn: {
     eyebrow: '客户登录',
-    summary: '已批准的客户可以查看交易条件、询价列表并提交报价请求。报价请求不是最终订单。',
+    summary: '已註冊買家登入後可查看價格、使用詢價清單並提交報價詢問。報價詢問不是最終訂單。',
     identifier: 'ID 或电子邮箱',
     identifierPlaceholder: '请输入 ID 或电子邮箱',
     password: '密码',

@@ -4,10 +4,10 @@ import { useCommerce } from '../commerce/commerceStore'
 import { useLocalePath } from '../utils/locale'
 
 const approvalSteps = [
-  '거래처 정보 검토',
-  '담당 시장 배정',
-  '거래 조건 확인',
-  '견적 이용 안내',
+  '거래처 등록',
+  '상품과 가격 확인',
+  '견적 리스트 작성',
+  '견적 요청 전송',
 ]
 
 export function ApprovalPendingPage() {
@@ -19,10 +19,10 @@ export function ApprovalPendingPage() {
     <section className="account-panel auth-panel">
       {isApproved ? <BadgeCheck size={25} /> : isGuest ? <UserRound size={25} /> : <Clock3 size={25} />}
       <p className="eyebrow">거래처 확인</p>
-      <h1>{isApproved ? '거래 조건 안내가 가능한 계정입니다.' : isGuest ? '거래처 신청을 진행해주세요.' : '거래처 정보를 확인 중입니다.'}</h1>
-      {isPending && <p>제출한 거래처 정보를 담당자가 검토하고 있습니다. 확인 후 가격과 견적 요청 가능 여부를 안내드립니다.</p>}
+      <h1>{isApproved ? '가격과 견적 기능을 사용할 수 있습니다.' : isGuest ? '거래처 등록을 진행해주세요.' : '계정 상태 확인이 필요합니다.'}</h1>
+      {isPending && <p>거래처 등록 정보를 확인하거나 담당자에게 문의해주세요.</p>}
       {isApproved && <p>{buyer.companyName} 계정은 거래 조건, 견적 리스트, 견적 요청 기능을 사용할 수 있습니다. 견적 요청은 최종 주문이 아닙니다.</p>}
-      {isGuest && <p>거래처 신청과 확인 절차가 완료되면 가격과 견적 기능을 이용할 수 있습니다.</p>}
+      {isGuest && <p>거래처 계정을 등록하고 로그인하면 가격과 견적 기능을 바로 이용할 수 있습니다.</p>}
       <div className="approval-steps">
         {approvalSteps.map((step) => <span key={step}>{step}</span>)}
       </div>
@@ -33,7 +33,7 @@ export function ApprovalPendingPage() {
       <div className="account-actions">
         <Link className="primary-action" to={toLocalePath('/products')}>상품 목록 보기</Link>
         <Link className="secondary-action" to={toLocalePath('/account')}>마이페이지로 이동</Link>
-        <Link className="secondary-action" to={toLocalePath('/register')}>거래처 신청</Link>
+        <Link className="secondary-action" to={toLocalePath('/register')}>거래처 등록</Link>
         <a className="secondary-action" href="mailto:dgkim0127@gmail.com"><Mail size={15} />이메일 문의</a>
         {isApproved && <Link className="secondary-action" to={toLocalePath('/inquiry-list')}>견적 리스트</Link>}
       </div>

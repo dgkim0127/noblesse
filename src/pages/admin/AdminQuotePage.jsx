@@ -342,7 +342,7 @@ export function AdminQuotePage() {
     </section>
 
     <AdminNotice tone="info">
-      <strong>승인 회원의 견적 요청을 매장에서 직접 준비하는 화면입니다.</strong>
+      <strong>로그인 구매자의 견적 요청을 매장에서 직접 준비하는 화면입니다.</strong>
       <p>사이트 결제는 없습니다. 준비 결과를 PDF로 남긴 뒤 별도 SNS로 영수증과 계좌 안내를 보내고, 입금 확인 후 발송 상태를 기록합니다.</p>
     </AdminNotice>
     {!canWrite && <AdminNotice><strong>조회 전용 견적입니다.</strong><p>상품 준비와 상태 변경에는 견적 작성 권한이 필요합니다.</p></AdminNotice>}

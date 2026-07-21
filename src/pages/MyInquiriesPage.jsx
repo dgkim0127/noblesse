@@ -60,10 +60,10 @@ function InquiryAccessNotice({ viewerState }) {
   return <main className="content">
     <div className="approval-page">
       <FileText size={25} />
-      <h1>{viewerState === 'pending' ? 'Trade profile under review' : 'Inquiry history opens after buyer approval'}</h1>
-      <p>{viewerState === 'pending'
-        ? 'Submitted trade information is being reviewed.'
-        : 'Send a trade inquiry first so Noblesse can review buyer access and trade terms.'}</p>
+      <h1>Inquiry history is available after sign-in</h1>
+      <p>{viewerState === 'guest'
+        ? 'Sign in or register a buyer account to create and review quote requests.'
+        : 'Please check the current buyer account status.'}</p>
     </div>
   </main>
 }
@@ -232,7 +232,7 @@ export function MyInquiriesPage() {
   if (inquiryId && !selected) {
     return <InquiryStateNotice
       title="Inquiry not found"
-      body="The requested inquiry was not found for this approved buyer session."
+      body="The requested inquiry was not found for this buyer session."
       action={<Link className="secondary-action" to={toLocalePath('/my-inquiries')}>Back to inquiry history</Link>}
     />
   }
@@ -347,6 +347,6 @@ export function MyInquiriesPage() {
           <b>{formatInquiryMoney(item.estimatedTotal, item.currency || buyer.currency, hasUnavailablePrice(item))}</b>
         </Link>
       })}</div>
-      : <section className="empty"><h2>No inquiry records found.</h2><p>Create a quote request from the Inquiry List after selecting approved buyer products.</p><Link className="secondary-action" to={toLocalePath('/products')}>Product List</Link></section>}
+      : <section className="empty"><h2>No inquiry records found.</h2><p>Select products, add them to the Inquiry List, and create a quote request.</p><Link className="secondary-action" to={toLocalePath('/products')}>Product List</Link></section>}
   </main>
 }
