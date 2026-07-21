@@ -103,16 +103,18 @@ test('visual product editor keeps both navigation and the inspector stable witho
 
 test('quote workflow separates customer documents from internal notes and direct payment', () => {
   const adminQuote = read('src/pages/admin/AdminQuotePage.jsx')
+  const adminQuoteCopy = read('src/pages/admin/adminQuoteWorkflowCopy.js')
+  const adminQuoteFeature = `${adminQuote}\n${adminQuoteCopy}`
   const buyerQuotes = read('src/pages/MyInquiriesPage.jsx')
 
   assert.match(adminQuote, /issueQuote/)
-  assert.match(adminQuote, /새 버전 발행/)
-  assert.match(adminQuote, /내부 메모/)
-  assert.match(adminQuote, /구매자 화면과 PDF에는 표시되지 않습니다/)
-  assert.match(adminQuote, /1\. 상품 준비/)
-  assert.match(adminQuote, /취소·수량 부족 품목/)
-  assert.match(adminQuote, /준비 수량은 0 이상이며 원 요청 수량을 넘을 수 없습니다/)
-  assert.match(adminQuote, /SNS 영수증 발송 완료/)
+  assert.match(adminQuoteFeature, /새 버전 발행/)
+  assert.match(adminQuoteFeature, /내부 메모/)
+  assert.match(adminQuoteFeature, /구매자 화면과 PDF에는 표시되지 않습니다/)
+  assert.match(adminQuoteFeature, /1\. 상품 준비/)
+  assert.match(adminQuoteFeature, /취소·수량 부족 품목/)
+  assert.match(adminQuoteFeature, /준비 수량은 0 이상이며 원 요청 수량을 넘을 수 없습니다/)
+  assert.match(adminQuoteFeature, /SNS 영수증 발송 완료/)
   assert.match(adminQuote, /updateQuoteWorkflow/)
   assert.match(adminQuote, /quotes\.write/)
   assert.doesNotMatch(buyerQuotes, /decideInquiryQuote/)

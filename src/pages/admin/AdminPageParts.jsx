@@ -68,15 +68,15 @@ export function AdminNotice({ children, tone = 'info' }) {
   </div>
 }
 
-export function AdminToast({ message, tone = 'success', onClose }) {
+export function AdminToast({ message, tone = 'success', closeLabel = '알림 닫기', onClose }) {
   if (!message) return null
   return <div className={`admin-toast admin-toast-${tone}`} role={tone === 'error' ? 'alert' : 'status'}>
     <span>{message}</span>
-    {onClose && <button aria-label="알림 닫기" title="알림 닫기" type="button" onClick={onClose}><X size={16} /></button>}
+    {onClose && <button aria-label={closeLabel} title={closeLabel} type="button" onClick={onClose}><X size={16} /></button>}
   </div>
 }
 
-export function AdminConfirmDialog({ open, title, description, children, confirmLabel = '확인', cancelLabel = '취소', danger = false, busy = false, confirmDisabled = false, onConfirm, onCancel }) {
+export function AdminConfirmDialog({ open, title, description, children, confirmLabel = '확인', cancelLabel = '취소', busyLabel = '처리 중...', danger = false, busy = false, confirmDisabled = false, onConfirm, onCancel }) {
   if (!open) return null
   return <div className="admin-dialog-backdrop" role="presentation" onMouseDown={(event) => {
     if (event.target === event.currentTarget && !busy) onCancel?.()
@@ -87,19 +87,19 @@ export function AdminConfirmDialog({ open, title, description, children, confirm
       {children}
       <div className="admin-actions">
         <button disabled={busy} type="button" onClick={onCancel}>{cancelLabel}</button>
-        <button className={danger ? 'danger-action' : 'primary-action'} disabled={busy || confirmDisabled} type="button" onClick={onConfirm}>{busy ? '처리 중...' : confirmLabel}</button>
+        <button className={danger ? 'danger-action' : 'primary-action'} disabled={busy || confirmDisabled} type="button" onClick={onConfirm}>{busy ? busyLabel : confirmLabel}</button>
       </div>
     </section>
   </div>
 }
 
-export function AdminSaveBar({ visible, dirtyLabel = '저장하지 않은 변경사항이 있습니다.', saveLabel = '저장', discardLabel = '되돌리기', saving = false, onSave, onDiscard }) {
+export function AdminSaveBar({ visible, dirtyLabel = '저장하지 않은 변경사항이 있습니다.', saveLabel = '저장', discardLabel = '되돌리기', savingLabel = '저장 중...', ariaLabel = '변경사항 저장', saving = false, onSave, onDiscard }) {
   if (!visible) return null
-  return <div className="admin-save-bar" role="region" aria-label="변경사항 저장">
+  return <div className="admin-save-bar" role="region" aria-label={ariaLabel}>
     <strong>{dirtyLabel}</strong>
     <div className="admin-actions">
       <button disabled={saving} type="button" onClick={onDiscard}>{discardLabel}</button>
-      <button className="primary-action" disabled={saving} type="button" onClick={onSave}>{saving ? '저장 중...' : saveLabel}</button>
+      <button className="primary-action" disabled={saving} type="button" onClick={onSave}>{saving ? savingLabel : saveLabel}</button>
     </div>
   </div>
 }

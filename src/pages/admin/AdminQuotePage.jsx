@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
 import { formatMoney } from '../../utils/commerce'
+import { useLocalePath } from '../../utils/locale'
 import { formatSelectedProductOptions } from '../../utils/productOptions'
 import {
   AdminConfirmDialog,
@@ -14,46 +15,20 @@ import {
   AdminToast,
 } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
-
-const localeOptions = [
-  ['kr', '한국어'],
-  ['en', 'English'],
-  ['jp', '日本語'],
-  ['zh-TW', '繁體中文'],
-]
+import { formatAdminCopy } from './adminCopy'
+import { getAdminQuoteDateLocale, useAdminQuoteWorkflowCopy } from './adminQuoteWorkflowCopy'
 
 const legacyLockedStatuses = new Set(['accepted', 'rejected', 'cancelled'])
 const lineEditableWorkflowStatuses = new Set(['received', 'picking'])
 const cancellableWorkflowStatuses = new Set(['received', 'picking', 'receipt_sent'])
 const workflowSteps = ['received', 'picking', 'receipt_sent', 'payment_confirmed', 'shipped', 'completed']
-const workflowLabels = {
-  received: '요청 접수',
-  picking: '상품 준비 중',
-  receipt_sent: 'SNS 영수증 발송',
-  payment_confirmed: '입금 확인',
-  shipped: '발송 완료',
-  completed: '거래 종료',
-  cancelled: '전체 취소',
-}
-const fulfillmentLabels = {
-  pending: '미확인',
-  ready: '준비 완료',
-  partial: '일부 취소',
-  cancelled: '전체 취소',
-}
-const cancellationReasons = [
-  ['out_of_stock', '재고 없음'],
-  ['quantity_shortage', '수량 부족'],
-  ['quality_issue', '품질 확인 불가'],
-  ['discontinued', '취급 종료'],
-  ['other', '기타'],
-]
+const cancellationReasonKeys = ['out_of_stock', 'quantity_shortage', 'quality_issue', 'discontinued', 'other']
 const nextWorkflowAction = {
-  received: { status: 'picking', label: '피킹 시작', icon: PackageCheck },
-  picking: { status: 'receipt_sent', label: 'SNS 영수증 발송 완료', icon: Send },
-  receipt_sent: { status: 'payment_confirmed', label: '입금 확인', icon: Banknote },
-  payment_confirmed: { status: 'shipped', label: '발송 완료', icon: Truck },
-  shipped: { status: 'completed', label: '거래 종료', icon: Check },
+  received: { status: 'picking', icon: PackageCheck },
+  picking: { status: 'receipt_sent', icon: Send },
+  receipt_sent: { status: 'payment_confirmed', icon: Banknote },
+  payment_confirmed: { status: 'shipped', icon: Truck },
+  shipped: { status: 'completed', icon: Check },
 }
 
 function deriveFulfillmentStatus(confirmedQuantity, requestedQuantity) {
@@ -116,6 +91,9 @@ function triggerBlobDownload(blob, filename) {
 
 export function AdminQuotePage() {
   const { quoteId } = useParams()
+  const t = useAdminQuoteWorkflowCopy()
+  const { locale } = useLocalePath()
+  const dateLocale = getAdminQuoteDateLocale(locale)
   const { hasPermission } = useAdminAccess()
   const canWrite = hasPermission('quotes.write')
   const mutate = useAdminApiMutation()
@@ -171,9 +149,11 @@ export function AdminQuotePage() {
     return !Number.isFinite(prepared) || prepared < 0 || prepared > requested
   }).length, [form?.items])
   const publicationBlocked = unresolvedCount > 0 || missingCancellationReasonCount > 0 || invalidPreparedQuantityCount > 0
+  const localeOptions = Object.entries(t.documentLanguages)
+  const cancellationReasons = cancellationReasonKeys.map((value) => [value, t.cancellationReasons[value]])
 
   if (apiState) return apiState
-  if (!quote || !form) return <AdminEmptyState title="견적을 찾을 수 없습니다." action={<AdminLink to="/admin/quotes">견적 목록</AdminLink>} />
+  if (!quote || !form) return <AdminEmptyState title={t.detail.notFound} action={<AdminLink to="/admin/quotes">{t.detail.quotesList}</AdminLink>} />
 
   const setField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }))
@@ -239,10 +219,10 @@ export function AdminQuotePage() {
       setForm(next)
       setDirty(false)
       setRefreshKey((current) => current + 1)
-      if (!quiet) setToast({ message: '상품 준비 결과와 견적 초안을 저장했습니다.', tone: 'success' })
+      if (!quiet) setToast({ message: t.detail.saved, tone: 'success' })
       return result
     } catch (saveError) {
-      setToast({ message: saveError?.message || '견적을 저장하지 못했습니다.', tone: 'error' })
+      setToast({ message: saveError?.message || t.detail.saveFailed, tone: 'error' })
       return null
     } finally {
       setSaving(false)
@@ -252,7 +232,7 @@ export function AdminQuotePage() {
   const issueQuote = async () => {
     setConfirm(null)
     if (!form.validUntil) {
-      setToast({ message: '견적 유효기간을 입력해 주세요.', tone: 'error' })
+      setToast({ message: t.detail.validUntilRequired, tone: 'error' })
       return
     }
     setSaving(true)
@@ -260,10 +240,10 @@ export function AdminQuotePage() {
       await mutate((api, token) => api.updateQuote(quoteId, buildPayload(form), token))
       const issued = await mutate((api, token) => api.issueQuote(quoteId, token))
       setDirty(false)
-      setToast({ message: `준비 결과 PDF v${issued.data?.document?.revision || ''}를 발행했습니다.`, tone: 'success' })
+      setToast({ message: formatAdminCopy(t.detail.issueSuccess, { revision: issued.data?.document?.revision || '' }), tone: 'success' })
       setRefreshKey((current) => current + 1)
     } catch (issueError) {
-      setToast({ message: issueError?.message || '견적서를 발행하지 못했습니다.', tone: 'error' })
+      setToast({ message: issueError?.message || t.detail.issueFailed, tone: 'error' })
     } finally {
       setSaving(false)
     }
@@ -271,11 +251,11 @@ export function AdminQuotePage() {
 
   const transitionWorkflow = async (targetStatus) => {
     if (targetStatus === 'receipt_sent' && dirty) {
-      setToast({ message: '변경 내용을 저장하고 준비 결과 PDF를 다시 발행한 뒤 SNS 발송 완료로 변경해 주세요.', tone: 'error' })
+      setToast({ message: t.detail.saveBeforeReceipt, tone: 'error' })
       return
     }
     if (targetStatus === 'cancelled' && !workflowNote.trim()) {
-      setToast({ message: '전체 취소 사유를 운영 메모에 입력해 주세요.', tone: 'error' })
+      setToast({ message: t.detail.cancellationNoteRequired, tone: 'error' })
       return
     }
     setSaving(true)
@@ -285,10 +265,10 @@ export function AdminQuotePage() {
       }
       await mutate((api, token) => api.updateQuoteWorkflow(quoteId, targetStatus, workflowNote.trim(), token))
       setDirty(false)
-      setToast({ message: `운영 상태를 '${workflowLabels[targetStatus]}'로 변경했습니다.`, tone: 'success' })
+      setToast({ message: formatAdminCopy(t.detail.workflowChanged, { status: t.workflow[targetStatus] || targetStatus }), tone: 'success' })
       setRefreshKey((current) => current + 1)
     } catch (workflowError) {
-      setToast({ message: workflowError?.message || '운영 상태를 변경하지 못했습니다.', tone: 'error' })
+      setToast({ message: workflowError?.message || t.detail.workflowFailed, tone: 'error' })
     } finally {
       setSaving(false)
     }
@@ -300,7 +280,7 @@ export function AdminQuotePage() {
       const result = await mutate((api, token) => api.downloadQuoteDocument(quoteId, document.id, token))
       triggerBlobDownload(result.data, `${quote.quoteNumber || 'quotation'}-v${document.revision}.pdf`)
     } catch (downloadError) {
-      setToast({ message: downloadError?.message || 'PDF를 내려받지 못했습니다.', tone: 'error' })
+      setToast({ message: downloadError?.message || t.detail.downloadFailed, tone: 'error' })
     } finally {
       setSaving(false)
     }
@@ -312,9 +292,9 @@ export function AdminQuotePage() {
   }
 
   const openIssueDialog = () => setConfirm({
-    title: quote.currentDocumentId ? '새 버전으로 발행할까요?' : '준비 결과 견적서를 발행할까요?',
-    description: '원 요청 수량과 준비·취소 수량을 함께 표시한 PDF가 생성됩니다. 발행 후에도 SNS 영수증 발송 완료 전까지 다시 피킹하고 재발행할 수 있습니다.',
-    confirmLabel: quote.currentDocumentId ? '재발행' : '발행',
+    title: quote.currentDocumentId ? t.detail.issueNewTitle : t.detail.issueTitle,
+    description: t.detail.issueDescription,
+    confirmLabel: quote.currentDocumentId ? t.detail.reissue : t.detail.issue,
     action: issueQuote,
   })
 
@@ -324,108 +304,108 @@ export function AdminQuotePage() {
 
   return <>
     <AdminPageHeader
-      eyebrow="견적 피킹"
-      title={quote.quoteNumber || quote.inquiryNumber || '견적 요청'}
-      description={`${quote.companyName || '거래처'} / ${quote.currency} / ${workflowLabels[workflowStatus] || workflowStatus}`}
+      eyebrow={t.detail.eyebrow}
+      title={quote.quoteNumber || quote.inquiryNumber || t.detail.fallbackTitle}
+      description={`${quote.companyName || t.detail.companyFallback} / ${quote.currency} / ${t.workflow[workflowStatus] || workflowStatus}`}
       actions={<>
-        <AdminLink to="/admin/quotes">목록</AdminLink>
-        <AdminLink to={`/admin/inquiries/${quote.inquiryId}`}>원본 요청</AdminLink>
-        {editable && <button className="primary-action" disabled={saving || publicationBlocked} type="button" onClick={openIssueDialog}><Send size={17} />{quote.currentDocumentId ? 'PDF 재발행' : 'PDF 발행'}</button>}
+        <AdminLink to="/admin/quotes">{t.detail.list}</AdminLink>
+        <AdminLink to={`/admin/inquiries/${quote.inquiryId}`}>{t.detail.sourceRequest}</AdminLink>
+        {editable && <button className="primary-action" disabled={saving || publicationBlocked} type="button" onClick={openIssueDialog}><Send size={17} />{quote.currentDocumentId ? t.detail.pdfReissue : t.detail.pdfIssue}</button>}
       </>}
     />
 
-    <section className="admin-quote-workflow" aria-label="견적 처리 단계">
+    <section className="admin-quote-workflow" aria-label={t.detail.workflowAria}>
       {workflowSteps.map((step, index) => <div className={`${index <= activeStepIndex ? 'is-complete' : ''} ${step === workflowStatus ? 'is-current' : ''}`} key={step}>
-        <span>{index + 1}</span><strong>{workflowLabels[step]}</strong>
+        <span>{index + 1}</span><strong>{t.workflow[step]}</strong>
       </div>)}
-      {workflowStatus === 'cancelled' && <div className="is-cancelled"><span><Ban size={15} /></span><strong>{workflowLabels.cancelled}</strong></div>}
+      {workflowStatus === 'cancelled' && <div className="is-cancelled"><span><Ban size={15} /></span><strong>{t.workflow.cancelled}</strong></div>}
     </section>
 
     <AdminNotice tone="info">
-      <strong>로그인 구매자의 견적 요청을 매장에서 직접 준비하는 화면입니다.</strong>
-      <p>사이트 결제는 없습니다. 준비 결과를 PDF로 남긴 뒤 별도 SNS로 영수증과 계좌 안내를 보내고, 입금 확인 후 발송 상태를 기록합니다.</p>
+      <strong>{t.detail.operationTitle}</strong>
+      <p>{t.detail.operationBody}</p>
     </AdminNotice>
-    {!canWrite && <AdminNotice><strong>조회 전용 견적입니다.</strong><p>상품 준비와 상태 변경에는 견적 작성 권한이 필요합니다.</p></AdminNotice>}
-    {legacyLocked && <AdminNotice tone="warning"><strong>기존 방식으로 종료된 견적입니다.</strong><p>과거 기록은 그대로 보존되며 새 피킹 흐름으로 수정할 수 없습니다.</p></AdminNotice>}
+    {!canWrite && <AdminNotice><strong>{t.detail.readOnlyTitle}</strong><p>{t.detail.readOnlyBody}</p></AdminNotice>}
+    {legacyLocked && <AdminNotice tone="warning"><strong>{t.detail.legacyTitle}</strong><p>{t.detail.legacyBody}</p></AdminNotice>}
 
     <form className="admin-quote-workspace" onSubmit={(event) => { event.preventDefault(); saveDraft() }}>
       <div className="admin-editor-main">
         <section className="admin-editor-section">
-          <div className="admin-section-heading"><div><h2>1. 상품 준비</h2><p>원 요청 수량은 바뀌지 않습니다. 실제로 챙긴 수량만 입력하면 취소 수량이 자동 계산됩니다.</p></div>{editable && <button type="button" onClick={markAllReady}><PackageCheck size={17} />모든 품목 준비</button>}</div>
+          <div className="admin-section-heading"><div><h2>{t.detail.prepareTitle}</h2><p>{t.detail.prepareBody}</p></div>{editable && <button type="button" onClick={markAllReady}><PackageCheck size={17} />{t.detail.prepareAll}</button>}</div>
           <div className="admin-table-wrap">
             <table className="admin-table admin-quote-items-table admin-picking-table">
-              <thead><tr><th>상품·옵션</th><th>요청</th><th>준비</th><th>취소</th><th>처리 결과</th><th>단가</th><th>금액</th></tr></thead>
+              <thead><tr><th>{t.detail.columns.product}</th><th>{t.detail.columns.requested}</th><th>{t.detail.columns.prepared}</th><th>{t.detail.columns.cancelled}</th><th>{t.detail.columns.result}</th><th>{t.detail.columns.unitPrice}</th><th>{t.detail.columns.amount}</th></tr></thead>
               <tbody>{form.items.map((item) => {
                 const requested = Number(item.requestedQuantity || 0)
                 const prepared = Number(item.confirmedQuantity || 0)
                 const cancelled = Math.max(requested - prepared, 0)
                 const subtotal = prepared * Number(item.confirmedUnitPrice || 0)
-                const optionSummary = formatSelectedProductOptions(item.selectedOptions, form.documentLocale)
+                const optionSummary = formatSelectedProductOptions(item.selectedOptions, locale)
                 const legacySummary = [item.color, item.size].filter(Boolean)
                 const needsCancellationReason = ['partial', 'cancelled'].includes(item.fulfillmentStatus)
                 return <tr className={`fulfillment-${item.fulfillmentStatus}`} key={item.id}>
-                  <td data-label="상품·옵션"><strong>{item.productName || item.productCode}</strong><small>{[item.productCode, ...(optionSummary.length ? optionSummary : legacySummary)].filter(Boolean).join(' / ')}</small></td>
-                  <td data-label="요청"><strong>{requested}</strong></td>
-                  <td data-label="준비"><input aria-label={`${item.productCode} 준비 수량`} disabled={!editable} max={requested} min="0" type="number" value={item.confirmedQuantity} onChange={(event) => setPreparedQuantity(item.id, event.target.value)} /><div className="admin-picking-shortcuts"><button disabled={!editable} type="button" onClick={() => markItem(item.id, 'ready')}>전부 준비</button><button disabled={!editable} type="button" onClick={() => markItem(item.id, 'cancelled')}>품절</button></div></td>
-                  <td data-label="취소"><strong className={cancelled > 0 ? 'admin-cancelled-quantity' : ''}>{cancelled}</strong></td>
-                  <td data-label="처리 결과"><span className={`admin-status ${item.fulfillmentStatus}`}>{fulfillmentLabels[item.fulfillmentStatus]}</span>{needsCancellationReason && <div className="admin-cancellation-fields"><select aria-label={`${item.productCode} 취소 사유`} disabled={!editable} value={item.cancellationReason} onChange={(event) => setItemField(item.id, 'cancellationReason', event.target.value)}><option value="">사유 선택</option>{cancellationReasons.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select><input aria-label={`${item.productCode} 취소 메모`} disabled={!editable} placeholder="구매자에게 보일 추가 설명" value={item.cancellationNote} onChange={(event) => setItemField(item.id, 'cancellationNote', event.target.value)} /></div>}</td>
-                  <td data-label="단가"><input aria-label={`${item.productCode} 단가`} disabled={!editable || prepared === 0} min="0" step="0.01" type="number" value={item.confirmedUnitPrice} onChange={(event) => setItemField(item.id, 'confirmedUnitPrice', event.target.value)} /></td>
-                  <td data-label="금액"><strong>{formatMoney(subtotal, quote.currency)}</strong></td>
+                  <td data-label={t.detail.columns.product}><strong>{item.productName || item.productCode}</strong><small>{[item.productCode, ...(optionSummary.length ? optionSummary : legacySummary)].filter(Boolean).join(' / ')}</small></td>
+                  <td data-label={t.detail.columns.requested}><strong>{requested}</strong></td>
+                  <td data-label={t.detail.columns.prepared}><input aria-label={formatAdminCopy(t.detail.preparedQuantityAria, { code: item.productCode })} disabled={!editable} max={requested} min="0" type="number" value={item.confirmedQuantity} onChange={(event) => setPreparedQuantity(item.id, event.target.value)} /><div className="admin-picking-shortcuts"><button disabled={!editable} type="button" onClick={() => markItem(item.id, 'ready')}>{t.detail.prepareItemAll}</button><button disabled={!editable} type="button" onClick={() => markItem(item.id, 'cancelled')}>{t.detail.outOfStock}</button></div></td>
+                  <td data-label={t.detail.columns.cancelled}><strong className={cancelled > 0 ? 'admin-cancelled-quantity' : ''}>{cancelled}</strong></td>
+                  <td data-label={t.detail.columns.result}><span className={`admin-status ${item.fulfillmentStatus}`}>{t.fulfillment[item.fulfillmentStatus]}</span>{needsCancellationReason && <div className="admin-cancellation-fields"><select aria-label={formatAdminCopy(t.detail.cancellationReasonAria, { code: item.productCode })} disabled={!editable} value={item.cancellationReason} onChange={(event) => setItemField(item.id, 'cancellationReason', event.target.value)}><option value="">{t.detail.selectReason}</option>{cancellationReasons.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select><input aria-label={formatAdminCopy(t.detail.cancellationNoteAria, { code: item.productCode })} disabled={!editable} placeholder={t.detail.cancellationNotePlaceholder} value={item.cancellationNote} onChange={(event) => setItemField(item.id, 'cancellationNote', event.target.value)} /></div>}</td>
+                  <td data-label={t.detail.columns.unitPrice}><input aria-label={formatAdminCopy(t.detail.unitPriceAria, { code: item.productCode })} disabled={!editable || prepared === 0} min="0" step="0.01" type="number" value={item.confirmedUnitPrice} onChange={(event) => setItemField(item.id, 'confirmedUnitPrice', event.target.value)} /></td>
+                  <td data-label={t.detail.columns.amount}><strong>{formatMoney(subtotal, quote.currency)}</strong></td>
                 </tr>
               })}</tbody>
             </table>
           </div>
-          {unresolvedCount > 0 && <AdminNotice tone="warning"><strong>아직 확인하지 않은 품목이 {unresolvedCount}개 있습니다.</strong><p>각 품목을 준비 완료, 일부 취소 또는 전체 취소로 정리해야 PDF를 발행할 수 있습니다.</p></AdminNotice>}
-          {missingCancellationReasonCount > 0 && <AdminNotice tone="warning"><strong>취소 사유가 필요한 품목이 {missingCancellationReasonCount}개 있습니다.</strong><p>일부 또는 전체 취소 품목의 사유를 선택해야 준비 결과 PDF를 발행할 수 있습니다.</p></AdminNotice>}
-          {invalidPreparedQuantityCount > 0 && <AdminNotice tone="error"><strong>준비 수량을 확인해야 하는 품목이 {invalidPreparedQuantityCount}개 있습니다.</strong><p>준비 수량은 0 이상이며 원 요청 수량을 넘을 수 없습니다.</p></AdminNotice>}
+          {unresolvedCount > 0 && <AdminNotice tone="warning"><strong>{formatAdminCopy(t.detail.unresolvedTitle, { count: unresolvedCount })}</strong><p>{t.detail.unresolvedBody}</p></AdminNotice>}
+          {missingCancellationReasonCount > 0 && <AdminNotice tone="warning"><strong>{formatAdminCopy(t.detail.missingReasonTitle, { count: missingCancellationReasonCount })}</strong><p>{t.detail.missingReasonBody}</p></AdminNotice>}
+          {invalidPreparedQuantityCount > 0 && <AdminNotice tone="error"><strong>{formatAdminCopy(t.detail.invalidQuantityTitle, { count: invalidPreparedQuantityCount })}</strong><p>{t.detail.invalidQuantityBody}</p></AdminNotice>}
         </section>
 
         {exceptionItems.length > 0 && <section className="admin-editor-section admin-quote-exceptions">
-          <div className="admin-section-heading"><div><h2>취소·수량 부족 품목</h2><p>원 견적 요청과 분리해 구매자에게 그대로 표시됩니다.</p></div></div>
-          <ul>{exceptionItems.map((item) => <li key={item.id}><span><strong>{item.productName || item.productCode}</strong><small>{item.productCode}</small></span><b>요청 {item.requestedQuantity} / 준비 {item.confirmedQuantity} / 취소 {Math.max(Number(item.requestedQuantity) - Number(item.confirmedQuantity), 0)}</b><em>{cancellationReasons.find(([value]) => value === item.cancellationReason)?.[1] || '사유 미입력'}{item.cancellationNote ? ` · ${item.cancellationNote}` : ''}</em></li>)}</ul>
+          <div className="admin-section-heading"><div><h2>{t.detail.exceptionsTitle}</h2><p>{t.detail.exceptionsBody}</p></div></div>
+          <ul>{exceptionItems.map((item) => <li key={item.id}><span><strong>{item.productName || item.productCode}</strong><small>{item.productCode}</small></span><b>{formatAdminCopy(t.detail.exceptionCounts, { requested: item.requestedQuantity, prepared: item.confirmedQuantity, cancelled: Math.max(Number(item.requestedQuantity) - Number(item.confirmedQuantity), 0) })}</b><em>{cancellationReasons.find(([value]) => value === item.cancellationReason)?.[1] || t.detail.reasonMissing}{item.cancellationNote ? ` · ${item.cancellationNote}` : ''}</em></li>)}</ul>
         </section>}
 
         <section className="admin-editor-section">
-          <div className="admin-section-heading"><div><h2>2. 준비 결과 견적</h2><p>준비된 수량만 합산하고 취소 품목은 수량과 사유를 함께 문서에 남깁니다.</p></div></div>
+          <div className="admin-section-heading"><div><h2>{t.detail.resultTitle}</h2><p>{t.detail.resultBody}</p></div></div>
           <div className="admin-form-grid">
-            <label className="admin-field"><span>유효기간 <b>*</b></span><input disabled={!editable} type="date" value={form.validUntil} onChange={(event) => setField('validUntil', event.target.value)} /></label>
-            <label className="admin-field"><span>문서 언어</span><select disabled={!editable} value={form.documentLocale} onChange={(event) => setField('documentLocale', event.target.value)}>{localeOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-            <label className="admin-field"><span>납기</span><input disabled={!editable} placeholder="영업일 기준 7-10일" value={form.leadTime} onChange={(event) => setField('leadTime', event.target.value)} /></label>
-            <label className="admin-field"><span>배송 조건</span><input disabled={!editable} placeholder="택배 / 운임 별도" value={form.shippingNote} onChange={(event) => setField('shippingNote', event.target.value)} /></label>
-            <label className="admin-field admin-field-wide"><span>구매자 안내</span><textarea disabled={!editable} rows="3" value={form.customerNote} onChange={(event) => setField('customerNote', event.target.value)} /></label>
+            <label className="admin-field"><span>{t.detail.validUntil} <b>*</b></span><input disabled={!editable} type="date" value={form.validUntil} onChange={(event) => setField('validUntil', event.target.value)} /></label>
+            <label className="admin-field"><span>{t.detail.documentLanguage}</span><select disabled={!editable} value={form.documentLocale} onChange={(event) => setField('documentLocale', event.target.value)}>{localeOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+            <label className="admin-field"><span>{t.detail.leadTime}</span><input disabled={!editable} placeholder={t.detail.leadTimePlaceholder} value={form.leadTime} onChange={(event) => setField('leadTime', event.target.value)} /></label>
+            <label className="admin-field"><span>{t.detail.shippingTerms}</span><input disabled={!editable} placeholder={t.detail.shippingPlaceholder} value={form.shippingNote} onChange={(event) => setField('shippingNote', event.target.value)} /></label>
+            <label className="admin-field admin-field-wide"><span>{t.detail.buyerNote}</span><textarea disabled={!editable} rows="3" value={form.customerNote} onChange={(event) => setField('customerNote', event.target.value)} /></label>
           </div>
         </section>
 
         <section className="admin-editor-section admin-internal-note-section">
-          <div className="admin-section-heading"><div><h2>내부 메모</h2><p>관리자만 볼 수 있으며 구매자 화면과 PDF에는 표시되지 않습니다.</p></div></div>
+          <div className="admin-section-heading"><div><h2>{t.detail.internalMemoTitle}</h2><p>{t.detail.internalMemoBody}</p></div></div>
           <label className="admin-field"><textarea disabled={!editable} rows="4" value={form.adminMemo} onChange={(event) => setField('adminMemo', event.target.value)} /></label>
         </section>
 
         {documents.length > 0 && <section className="admin-editor-section">
-          <div className="admin-section-heading"><div><h2>발행 문서</h2><p>각 버전은 수정되지 않으며 당시의 준비·취소 결과를 보존합니다.</p></div></div>
-          <div className="admin-document-list">{documents.map((document) => <div key={document.id}><FileCheck2 size={19} /><span><strong>버전 {document.revision}</strong><small>{document.documentLocale} / {new Date(document.issuedAt).toLocaleString('ko-KR')}</small></span><button aria-label={`버전 ${document.revision} PDF 내려받기`} disabled={saving} title="PDF 내려받기" type="button" onClick={() => downloadDocument(document)}><Download size={17} /></button></div>)}</div>
+          <div className="admin-section-heading"><div><h2>{t.detail.documentsTitle}</h2><p>{t.detail.documentsBody}</p></div></div>
+          <div className="admin-document-list">{documents.map((document) => <div key={document.id}><FileCheck2 size={19} /><span><strong>{formatAdminCopy(t.detail.version, { revision: document.revision })}</strong><small>{t.documentLanguages[document.documentLocale] || document.documentLocale} / {new Date(document.issuedAt).toLocaleString(dateLocale)}</small></span><button aria-label={formatAdminCopy(t.detail.downloadAria, { revision: document.revision })} disabled={saving} title={t.detail.downloadTitle} type="button" onClick={() => downloadDocument(document)}><Download size={17} /></button></div>)}</div>
         </section>}
 
         {history.length > 0 && <section className="admin-editor-section">
-          <div className="admin-section-heading"><div><h2>처리 이력</h2><p>문서 발행과 운영 상태 변경을 시간순으로 기록합니다.</p></div></div>
-          <ol className="admin-status-history">{history.map((entry) => <li key={entry.id}><span>{entry.eventType === 'workflow' ? workflowLabels[entry.toStatus] || entry.toStatus : entry.toStatus}</span><time>{new Date(entry.createdAt).toLocaleString('ko-KR')}</time>{entry.note && <small>{entry.note}</small>}</li>)}</ol>
+          <div className="admin-section-heading"><div><h2>{t.detail.historyTitle}</h2><p>{t.detail.historyBody}</p></div></div>
+          <ol className="admin-status-history">{history.map((entry) => <li key={entry.id}><span>{entry.eventType === 'workflow' ? t.workflow[entry.toStatus] || entry.toStatus : entry.toStatus}</span><time>{new Date(entry.createdAt).toLocaleString(dateLocale)}</time>{entry.note && <small>{entry.note}</small>}</li>)}</ol>
         </section>}
       </div>
 
       <aside className="admin-editor-summary">
-        <h2>운영 요약</h2>
-        <dl><dt>현재 단계</dt><dd>{workflowLabels[workflowStatus] || workflowStatus}</dd><dt>원 요청 품목</dt><dd>{form.items.length}</dd><dt>취소·부족</dt><dd>{exceptionItems.length}</dd><dt>준비 금액</dt><dd>{formatMoney(total, quote.currency)}</dd><dt>PDF 버전</dt><dd>{quote.currentRevision || '-'}</dd></dl>
-        {editable && <button className="primary-action" disabled={!dirty || saving} type="submit">{saving ? '저장 중...' : '준비 결과 저장'}</button>}
-        {editable && <button disabled={saving || publicationBlocked} type="button" onClick={openIssueDialog}>{quote.currentDocumentId ? 'PDF 새 버전 발행' : '준비 결과 PDF 발행'}</button>}
-        {nextAction && canWrite && !legacyLocked && <button className="admin-workflow-next" disabled={saving || (nextAction.status === 'receipt_sent' && (dirty || !quote.currentDocumentId || publicationBlocked))} type="button" onClick={() => transitionWorkflow(nextAction.status)}><NextActionIcon size={17} />{nextAction.label}</button>}
-        {workflowStatus === 'receipt_sent' && canWrite && !legacyLocked && <button disabled={saving} type="button" onClick={() => transitionWorkflow('picking')}><RotateCcw size={16} />피킹으로 되돌리기</button>}
-        {canWrite && cancellableWorkflowStatuses.has(workflowStatus) && !legacyLocked && <label className="admin-field admin-workflow-note"><span>운영 메모 / 전체 취소 사유</span><textarea rows="3" value={workflowNote} onChange={(event) => setWorkflowNote(event.target.value)} /></label>}
-        {canWrite && cancellableWorkflowStatuses.has(workflowStatus) && !legacyLocked && <button className="admin-danger-text" disabled={saving} type="button" onClick={() => transitionWorkflow('cancelled')}><Ban size={16} />견적 전체 취소</button>}
+        <h2>{t.detail.summaryTitle}</h2>
+        <dl><dt>{t.detail.currentStage}</dt><dd>{t.workflow[workflowStatus] || workflowStatus}</dd><dt>{t.detail.requestedItems}</dt><dd>{form.items.length}</dd><dt>{t.detail.exceptions}</dt><dd>{exceptionItems.length}</dd><dt>{t.detail.preparedTotal}</dt><dd>{formatMoney(total, quote.currency)}</dd><dt>{t.detail.pdfVersion}</dt><dd>{quote.currentRevision || '-'}</dd></dl>
+        {editable && <button className="primary-action" disabled={!dirty || saving} type="submit">{saving ? t.detail.saving : t.detail.saveResult}</button>}
+        {editable && <button disabled={saving || publicationBlocked} type="button" onClick={openIssueDialog}>{quote.currentDocumentId ? t.detail.issueNewVersion : t.detail.issueResult}</button>}
+        {nextAction && canWrite && !legacyLocked && <button className="admin-workflow-next" disabled={saving || (nextAction.status === 'receipt_sent' && (dirty || !quote.currentDocumentId || publicationBlocked))} type="button" onClick={() => transitionWorkflow(nextAction.status)}><NextActionIcon size={17} />{t.nextActions[workflowStatus]}</button>}
+        {workflowStatus === 'receipt_sent' && canWrite && !legacyLocked && <button disabled={saving} type="button" onClick={() => transitionWorkflow('picking')}><RotateCcw size={16} />{t.detail.revertPicking}</button>}
+        {canWrite && cancellableWorkflowStatuses.has(workflowStatus) && !legacyLocked && <label className="admin-field admin-workflow-note"><span>{t.detail.workflowNote}</span><textarea rows="3" value={workflowNote} onChange={(event) => setWorkflowNote(event.target.value)} /></label>}
+        {canWrite && cancellableWorkflowStatuses.has(workflowStatus) && !legacyLocked && <button className="admin-danger-text" disabled={saving} type="button" onClick={() => transitionWorkflow('cancelled')}><Ban size={16} />{t.detail.cancelAll}</button>}
       </aside>
     </form>
 
-    <AdminSaveBar visible={dirty && editable} saving={saving} onDiscard={discard} onSave={() => saveDraft()} />
-    <AdminConfirmDialog busy={saving} confirmLabel={confirm?.confirmLabel} danger={confirm?.danger} description={confirm?.description} open={Boolean(confirm)} title={confirm?.title || ''} onCancel={() => !saving && setConfirm(null)} onConfirm={confirm?.action} />
-    <AdminToast message={toast.message} tone={toast.tone} onClose={() => setToast({ message: '', tone: 'success' })} />
+    <AdminSaveBar ariaLabel={t.detail.saveBarAria} dirtyLabel={t.detail.unsavedChanges} discardLabel={t.detail.discard} saveLabel={t.detail.save} savingLabel={t.detail.saving} visible={dirty && editable} saving={saving} onDiscard={discard} onSave={() => saveDraft()} />
+    <AdminConfirmDialog busy={saving} busyLabel={t.detail.processing} cancelLabel={t.detail.cancel} confirmLabel={confirm?.confirmLabel} danger={confirm?.danger} description={confirm?.description} open={Boolean(confirm)} title={confirm?.title || ''} onCancel={() => !saving && setConfirm(null)} onConfirm={confirm?.action} />
+    <AdminToast closeLabel={t.detail.closeToast} message={toast.message} tone={toast.tone} onClose={() => setToast({ message: '', tone: 'success' })} />
   </>
 }
