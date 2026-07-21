@@ -46,3 +46,14 @@ test('admin shell navigation derives visible labels from the route locale', () =
   assert.match(shell, /\{t\.shell\.backToCatalog\}/)
   assert.doesNotMatch(shell, /label: '(?:홈|상품|견적|고객|운영|분석)'/)
 })
+
+test('route loading fallbacks derive their messages from the active locale', () => {
+  const app = read('src/App.jsx')
+
+  assert.match(app, /const routeLoadingCopy =/)
+  assert.match(app, /admin: 'Loading the admin workspace\.'/)
+  assert.match(app, /const \{ locale \} = useLocalePath\(\)/)
+  assert.match(app, /resolveLocaleCopy\(routeLoadingCopy, locale\)/)
+  assert.match(app, /className="admin-page-loading" role="status">\{copy\.admin\}/)
+  assert.match(app, /className="route-page-loading" role="status">\{copy\.store\}/)
+})

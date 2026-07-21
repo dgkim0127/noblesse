@@ -4,16 +4,39 @@ import './App.css'
 import { CommerceProvider } from './commerce/CommerceContext'
 import { StoreShell } from './components/StoreShell'
 import { HomePage } from './pages/HomePage'
-import { buildLocalizedPath, canonicalizeLocale, isLocalePathSegment, stripLocalePrefix, taiwanLocale, useLocalePath } from './utils/locale'
+import { buildLocalizedPath, canonicalizeLocale, isLocalePathSegment, resolveLocaleCopy, stripLocalePrefix, taiwanLocale, useLocalePath } from './utils/locale'
 
 const lazyNamed = (loader, exportName) => lazy(() => loader().then((module) => ({ default: module[exportName] })))
 
+const routeLoadingCopy = {
+  kr: {
+    admin: '관리 화면을 불러오는 중입니다.',
+    store: '페이지를 불러오는 중입니다.',
+  },
+  en: {
+    admin: 'Loading the admin workspace.',
+    store: 'Loading the page.',
+  },
+  jp: {
+    admin: '管理画面を読み込んでいます。',
+    store: 'ページを読み込んでいます。',
+  },
+  cn: {
+    admin: '正在載入管理頁面。',
+    store: '正在載入頁面。',
+  },
+}
+
 function AdminPageFallback() {
-  return <div className="admin-page-loading">관리 화면을 불러오는 중입니다.</div>
+  const { locale } = useLocalePath()
+  const copy = resolveLocaleCopy(routeLoadingCopy, locale)
+  return <div className="admin-page-loading" role="status">{copy.admin}</div>
 }
 
 function StorePageFallback() {
-  return <div className="route-page-loading" role="status">페이지를 불러오는 중입니다.</div>
+  const { locale } = useLocalePath()
+  const copy = resolveLocaleCopy(routeLoadingCopy, locale)
+  return <div className="route-page-loading" role="status">{copy.store}</div>
 }
 
 const AccountPage = lazyNamed(() => import('./pages/AccountPage'), 'AccountPage')
