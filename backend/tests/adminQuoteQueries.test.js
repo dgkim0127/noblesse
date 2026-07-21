@@ -157,7 +157,18 @@ test("updateQuoteDraft keeps quantity parameters consistently typed", async () =
     fulfillment_status: "partial",
     cancelled_quantity: 1,
     cancellation_reason: "quantity_shortage",
-    cancellation_note: "One item unavailable"
+    cancellation_note: "One item unavailable",
+    product_image_set: {
+      gallery: [{
+        id: "image-1",
+        isPrimary: true,
+        thumb: "https://example.test/product-thumb.webp",
+        objectKeys: { thumb: "products/private/product-thumb.webp" }
+      }]
+    },
+    product_image_alt: {
+      gallery: [{ id: "image-1", altText: "Test product" }]
+    }
   };
   const client = {
     async query(sql, params = []) {
@@ -208,6 +219,12 @@ test("updateQuoteDraft keeps quantity parameters consistently typed", async () =
   assert.equal(result.items[0].confirmedQuantity, 1);
   assert.equal(result.items[0].cancelledQuantity, 1);
   assert.equal(result.items[0].cancellationReason, "quantity_shortage");
+  assert.deepEqual(result.items[0].productImage, {
+    id: "image-1",
+    url: "https://example.test/product-thumb.webp",
+    altText: "Test product"
+  });
+  assert.equal("objectKey" in result.items[0].productImage, false);
 });
 
 test("updateQuoteStatus cancels a quote and writes status history and audit log", async () => {
@@ -226,7 +243,7 @@ test("updateQuoteStatus cancels a quote and writes status history and audit log"
   assert.equal(result.auditLogId, "audit-1");
 });
 
-test("updateWorkflowStatus records the offline receipt handoff without creating an order or payment", async () => {
+test("updateWorkflowStatus records picking completion without creating an order or payment", async () => {
   const calls = [];
   let workflowStatus = "picking";
   const quoteRow = {
@@ -271,7 +288,7 @@ test("updateWorkflowStatus records the offline receipt handoff without creating 
 
   const result = await createAdminQuoteQueries({ async connect() { return client; } }).updateWorkflowStatus(
     quoteId,
-    { status: "receipt_sent", note: "Receipt sent by SNS" },
+    { status: "receipt_sent", note: "Picking completed from the issued PDF" },
     adminViewer
   );
 

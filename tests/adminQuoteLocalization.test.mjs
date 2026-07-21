@@ -8,11 +8,11 @@ import { getAdminQuoteDateLocale, getAdminQuoteWorkflowCopy } from '../src/pages
 const read = (path) => readFileSync(join(process.cwd(), path), 'utf8')
 
 test('admin quote workflow copy resolves all supported locales and the legacy Chinese route', () => {
-  assert.equal(getAdminQuoteWorkflowCopy('kr').detail.prepareTitle, '1. 상품 준비')
-  assert.equal(getAdminQuoteWorkflowCopy('en').detail.prepareTitle, '1. Prepare items')
-  assert.equal(getAdminQuoteWorkflowCopy('jp').detail.prepareTitle, '1. 商品準備')
-  assert.equal(getAdminQuoteWorkflowCopy('zh-TW').detail.prepareTitle, '1. 商品備貨')
-  assert.equal(getAdminQuoteWorkflowCopy('cn').detail.prepareTitle, '1. 商品備貨')
+  assert.equal(getAdminQuoteWorkflowCopy('kr').detail.prepareTitle, '1. 물건 확인·챙기기')
+  assert.equal(getAdminQuoteWorkflowCopy('en').detail.prepareTitle, '1. Check and pack items')
+  assert.equal(getAdminQuoteWorkflowCopy('jp').detail.prepareTitle, '1. 商品確認・準備')
+  assert.equal(getAdminQuoteWorkflowCopy('zh-TW').detail.prepareTitle, '1. 確認與備貨')
+  assert.equal(getAdminQuoteWorkflowCopy('cn').detail.prepareTitle, '1. 確認與備貨')
 
   assert.equal(getAdminQuoteDateLocale('kr'), 'ko-KR')
   assert.equal(getAdminQuoteDateLocale('en'), 'en-US')

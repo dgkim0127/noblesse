@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import sharp from "sharp";
 import { conflict, internalError, notFound } from "../utils/errors.js";
 import { createPaginationMeta, parsePagination, slicePageRows } from "../utils/pagination.js";
 import {
@@ -16,6 +17,7 @@ const WORKFLOW_STATUSES = ["received", "picking", "receipt_sent", "payment_confi
 const FULFILLMENT_STATUSES = ["pending", "ready", "partial", "cancelled"];
 const CANCELLATION_REASONS = ["out_of_stock", "quantity_shortage", "quality_issue", "discontinued", "other"];
 const DOCUMENT_LOCALES = ["kr", "en", "jp", "zh-TW"];
+const MAX_PICKING_IMAGE_BYTES = 5 * 1024 * 1024;
 
 function parseQuoteFilters(filters) {
   const pagination = parsePagination(filters);
@@ -129,6 +131,11 @@ function createDocumentSnapshot(candidate) {
       id: item.id,
       productCode: item.productCode,
       productName: item.productName || item.productCode,
+      productImage: item.productImage ? {
+        id: item.productImage.id || "",
+        url: item.productImage.url || "",
+        altText: item.productImage.altText || ""
+      } : null,
       color: item.color || "",
       size: item.size || "",
       selectedOptions: Array.isArray(item.selectedOptions) ? item.selectedOptions : [],
@@ -143,6 +150,58 @@ function createDocumentSnapshot(candidate) {
       itemNote: item.itemNote || ""
     }))
   };
+}
+
+async function readObjectBuffer(objectStore, objectKey) {
+  if (!objectKey || typeof objectStore?.createReadStream !== "function") return null;
+  const stream = await objectStore.createReadStream(objectKey);
+  if (Buffer.isBuffer(stream)) return stream.length <= MAX_PICKING_IMAGE_BYTES ? stream : null;
+
+  const chunks = [];
+  let totalBytes = 0;
+  for await (const chunk of stream) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    totalBytes += buffer.length;
+    if (totalBytes > MAX_PICKING_IMAGE_BYTES) return null;
+    chunks.push(buffer);
+  }
+  return Buffer.concat(chunks);
+}
+
+async function createPickingThumbnail(objectStore, productImage) {
+  try {
+    const source = await readObjectBuffer(objectStore, productImage?.objectKey);
+    if (!source?.length) return null;
+    return await sharp(source, { failOn: "error" })
+      .rotate()
+      .resize({ width: 180, height: 180, fit: "contain", background: "#ffffff" })
+      .flatten({ background: "#ffffff" })
+      .jpeg({ quality: 84 })
+      .toBuffer();
+  } catch {
+    return null;
+  }
+}
+
+async function createPdfRenderSnapshot(snapshot, candidateItems, objectStore) {
+  const sourceById = new Map((candidateItems || []).map((item) => [item.id, item.productImage]));
+  const imageCache = new Map();
+  const items = [];
+
+  for (const item of snapshot.items || []) {
+    const productImage = sourceById.get(item.id);
+    const objectKey = productImage?.objectKey || "";
+    let imageBuffer = null;
+    if (objectKey) {
+      if (!imageCache.has(objectKey)) {
+        imageCache.set(objectKey, await createPickingThumbnail(objectStore, productImage));
+      }
+      imageBuffer = imageCache.get(objectKey);
+    }
+    items.push({ ...item, imageBuffer });
+  }
+
+  return { ...snapshot, items };
 }
 
 async function cleanupObject(objectStore, objectKey) {
@@ -216,7 +275,8 @@ export function createAdminQuoteService({ queries, objectStore, pdfRenderer = cr
       }
 
       const snapshot = createDocumentSnapshot(candidate);
-      const pdf = await pdfRenderer(snapshot);
+      const renderSnapshot = await createPdfRenderSnapshot(snapshot, candidate.items, objectStore);
+      const pdf = await pdfRenderer(renderSnapshot);
       if (!Buffer.isBuffer(pdf) || pdf.length === 0) throw internalError("Quote PDF generation failed");
       const pdfSha256 = crypto.createHash("sha256").update(pdf).digest("hex");
       const objectKey = `quotes/${id}/revision-${snapshot.revision}-${crypto.randomUUID()}.pdf`;
@@ -280,8 +340,8 @@ export function createAdminQuoteService({ queries, objectStore, pdfRenderer = cr
       const result = await queries.updateWorkflowStatus(id, { status, note }, adminViewer);
       if (!result) throw notFound("Quote not found");
       if (result.invalidTransition) throw conflict(`Workflow cannot move from ${result.fromStatus} to ${status}`);
-      if (result.unresolvedItems) throw conflict("Resolve every line as ready, partial, or cancelled before marking the SNS receipt as sent");
-      if (result.documentRequired) throw conflict("Issue the prepared-items PDF before marking the SNS receipt as sent");
+      if (result.unresolvedItems) throw conflict("Resolve every line as ready, partial, or cancelled before completing picking");
+      if (result.documentRequired) throw conflict("Issue the prepared-items PDF before completing picking");
       if (result.noPreparedItems) throw conflict("At least one item must be prepared before continuing");
       return result;
     }

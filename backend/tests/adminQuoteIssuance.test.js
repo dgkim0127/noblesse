@@ -24,6 +24,12 @@ function createCandidate() {
     items: [{
       id: itemId,
       productCode: "NB-001",
+      productImage: {
+        id: "image-1",
+        url: "/api/catalog/media/products/NB-001/thumb.webp",
+        objectKey: "products/NB-001/thumb.webp",
+        altText: "NB-001 product"
+      },
       selectedOptions: [{
         groupId: "color",
         valueId: "gold",
@@ -58,7 +64,11 @@ test("issueQuote stores an immutable customer snapshot and excludes internal mem
     },
     objectStore: {
       async save(input) { saved.push(input); },
-      async deleteMany() {}
+      async deleteMany() {},
+      async createReadStream(objectKey) {
+        assert.equal(objectKey, "products/NB-001/thumb.webp");
+        return Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" fill="#ff8fa9"/></svg>');
+      }
     },
     async pdfRenderer(snapshot) {
       assert.equal(snapshot.adminMemo, undefined);
@@ -71,6 +81,9 @@ test("issueQuote stores an immutable customer snapshot and excludes internal mem
       assert.equal(snapshot.items[0].cancellationReason, "quantity_shortage");
       assert.equal(snapshot.items[0].subtotal, 12000);
       assert.equal(snapshot.items[0].selectedOptions[0].valueLabels.en, "Gold");
+      assert.equal(snapshot.items[0].productImage.url, "/api/catalog/media/products/NB-001/thumb.webp");
+      assert.ok(Buffer.isBuffer(snapshot.items[0].imageBuffer));
+      assert.ok(snapshot.items[0].imageBuffer.length > 0);
       return Buffer.from("%PDF-test");
     }
   });
@@ -83,6 +96,9 @@ test("issueQuote stores an immutable customer snapshot and excludes internal mem
   assert.equal(saved[0].cacheControl, "private, max-age=0, no-store");
   assert.match(saved[0].objectKey, new RegExp(`^quotes/${quoteId}/revision-1-`));
   assert.equal(issuedInput.snapshot.adminMemo, undefined);
+  assert.equal(issuedInput.snapshot.items[0].productImage.url, "/api/catalog/media/products/NB-001/thumb.webp");
+  assert.equal(issuedInput.snapshot.items[0].productImage.objectKey, undefined);
+  assert.equal(issuedInput.snapshot.items[0].imageBuffer, undefined);
   assert.equal(issuedInput.pdfSha256.length, 64);
 });
 

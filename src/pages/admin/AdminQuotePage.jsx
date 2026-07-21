@@ -1,4 +1,4 @@
-import { Ban, Banknote, Check, Download, FileCheck2, PackageCheck, RotateCcw, Send, Truck } from 'lucide-react'
+import { Ban, Banknote, Check, Download, FileCheck2, ImageIcon, PackageCheck, RotateCcw, Send, Truck } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
@@ -25,7 +25,7 @@ const workflowSteps = ['received', 'picking', 'receipt_sent', 'payment_confirmed
 const cancellationReasonKeys = ['out_of_stock', 'quantity_shortage', 'quality_issue', 'discontinued', 'other']
 const nextWorkflowAction = {
   received: { status: 'picking', icon: PackageCheck },
-  picking: { status: 'receipt_sent', icon: Send },
+  picking: { status: 'receipt_sent', icon: PackageCheck },
   receipt_sent: { status: 'payment_confirmed', icon: Banknote },
   payment_confirmed: { status: 'shipped', icon: Truck },
   shipped: { status: 'completed', icon: Check },
@@ -344,7 +344,7 @@ export function AdminQuotePage() {
                 const legacySummary = [item.color, item.size].filter(Boolean)
                 const needsCancellationReason = ['partial', 'cancelled'].includes(item.fulfillmentStatus)
                 return <tr className={`fulfillment-${item.fulfillmentStatus}`} key={item.id}>
-                  <td data-label={t.detail.columns.product}><strong>{item.productName || item.productCode}</strong><small>{[item.productCode, ...(optionSummary.length ? optionSummary : legacySummary)].filter(Boolean).join(' / ')}</small></td>
+                  <td data-label={t.detail.columns.product}><div className="admin-picking-product"><div className="admin-picking-product-image">{item.productImage?.url ? <img alt={item.productImage.altText || item.productName || item.productCode} loading="lazy" src={item.productImage.url} /> : <ImageIcon aria-hidden="true" size={22} />}</div><div><strong>{item.productName || item.productCode}</strong><small>{[item.productCode, ...(optionSummary.length ? optionSummary : legacySummary)].filter(Boolean).join(' / ')}</small></div></div></td>
                   <td data-label={t.detail.columns.requested}><strong>{requested}</strong></td>
                   <td data-label={t.detail.columns.prepared}><input aria-label={formatAdminCopy(t.detail.preparedQuantityAria, { code: item.productCode })} disabled={!editable} max={requested} min="0" type="number" value={item.confirmedQuantity} onChange={(event) => setPreparedQuantity(item.id, event.target.value)} /><div className="admin-picking-shortcuts"><button disabled={!editable} type="button" onClick={() => markItem(item.id, 'ready')}>{t.detail.prepareItemAll}</button><button disabled={!editable} type="button" onClick={() => markItem(item.id, 'cancelled')}>{t.detail.outOfStock}</button></div></td>
                   <td data-label={t.detail.columns.cancelled}><strong className={cancelled > 0 ? 'admin-cancelled-quantity' : ''}>{cancelled}</strong></td>
