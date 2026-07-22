@@ -128,6 +128,40 @@ test('quote workflow separates customer documents from internal notes and direct
   assert.doesNotMatch(adminQuote, /checkout|createOrder|paymentIntent/i)
 })
 
+test('admin quote preparation uses responsive work cards and one contextual action path', () => {
+  const quotePage = read('src/pages/admin/AdminQuotePage.jsx')
+  const adminShell = read('src/components/AdminShell.jsx')
+  const storeShell = read('src/components/StoreShell.jsx')
+  const appStyles = read('src/App.css')
+  const adminStyles = read('src/styles/admin-console.css')
+
+  assert.match(quotePage, /className="admin-picking-list"/)
+  assert.match(quotePage, /className=\{`admin-picking-item fulfillment-/)
+  assert.match(quotePage, /className="admin-picking-options"/)
+  assert.match(quotePage, /const cancelled = Math\.max\(requested - prepared, 0\)/)
+  assert.match(quotePage, /const needsCancellationReason = \['partial', 'cancelled'\]\.includes\(item\.fulfillmentStatus\)/)
+  assert.doesNotMatch(quotePage, /className="admin-picking-table"/)
+  assert.doesNotMatch(quotePage, /AdminSaveBar/)
+
+  assert.match(quotePage, /className="admin-quote-workflow-compact"/)
+  assert.match(quotePage, /className="admin-quote-additional-settings"/)
+  assert.match(quotePage, /className="admin-editor-section admin-quote-history-section"/)
+  assert.match(quotePage, /className="admin-quote-task-bar"/)
+  assert.match(quotePage, /orderDocuments\(documents, quote\?\.currentDocumentId\)/)
+  assert.match(quotePage, /groupWorkflowHistory\(history\)/)
+  assert.match(quotePage, /entry\.eventType === 'workflow'/)
+
+  assert.match(adminShell, /className="admin-mobile-appbar"/)
+  assert.match(adminShell, /className="admin-mobile-bottom-nav"/)
+  assert.match(storeShell, /admin-route-shell/)
+  assert.match(appStyles, /\.site-shell\.admin-route-shell > \.top-marquee/)
+  assert.match(appStyles, /\.site-shell\.admin-route-shell > \.site-header/)
+  assert.match(adminStyles, /\.admin-picking-item \{[\s\S]*?grid-template-columns: minmax\(280px, 1\.35fr\) minmax\(280px, 0\.9fr\) minmax\(180px, 0\.55fr\)/)
+  assert.match(adminStyles, /\.admin-picking-identity > code[\s\S]*?overflow-wrap: anywhere/)
+  assert.match(adminStyles, /\.admin-picking-shortcuts button,[\s\S]*?min-height: 44px/)
+  assert.match(adminStyles, /@media \(max-width: 820px\)[\s\S]*?\.admin-picking-item \{[\s\S]*?display: block/)
+})
+
 test('admin console uses restrained neutral styling without gradients', () => {
   const styles = read('src/styles/admin-console.css')
   assert.doesNotMatch(styles, /linear-gradient|radial-gradient/)
