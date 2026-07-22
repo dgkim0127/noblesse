@@ -1,6 +1,6 @@
 import { Ban, Banknote, Check, Download, FileCheck2, ImageIcon, MoreHorizontal, PackageCheck, RotateCcw, Send, Truck } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
 import { formatMoney } from '../../utils/commerce'
 import { useLocalePath } from '../../utils/locale'
@@ -15,6 +15,7 @@ import {
 } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy } from './adminCopy'
+import { createAdminQuoteSampleItems, createAdminQuoteSampleQuote, isAdminQuoteSampleMode } from './adminQuoteSampleItems'
 import { getAdminQuoteDateLocale, useAdminQuoteWorkflowCopy } from './adminQuoteWorkflowCopy'
 
 const legacyLockedStatuses = new Set(['accepted', 'rejected', 'cancelled'])
@@ -113,6 +114,7 @@ function groupWorkflowHistory(history) {
 
 export function AdminQuotePage() {
   const { quoteId } = useParams()
+  const [searchParams] = useSearchParams()
   const t = useAdminQuoteWorkflowCopy()
   const { locale } = useLocalePath()
   const dateLocale = getAdminQuoteDateLocale(locale)
@@ -128,15 +130,21 @@ export function AdminQuotePage() {
   const [toast, setToast] = useState({ message: '', tone: 'success' })
   const [confirm, setConfirm] = useState(null)
   const { data, error, status } = useAdminApiResource((api, token) => api.getQuote(quoteId, token), [quoteId, refreshKey])
+  const sampleMode = isAdminQuoteSampleMode(searchParams, globalThis.location?.hostname || '')
+  const quote = useMemo(() => sampleMode ? createAdminQuoteSampleQuote(data?.quote) : data?.quote, [data?.quote, sampleMode])
+  const sourceItems = useMemo(
+    () => sampleMode ? createAdminQuoteSampleItems(data?.items || [], locale) : data?.items || [],
+    [data?.items, locale, sampleMode],
+  )
 
   useEffect(() => {
     if (status !== 'ready') return
-    const next = quoteToForm(data?.quote, data?.items || [])
+    const next = quoteToForm(quote, sourceItems)
     initialFormRef.current = structuredClone(next)
     setForm(next)
-    setWorkflowNote(data?.quote?.workflowNote || '')
+    setWorkflowNote(quote?.workflowNote || '')
     setDirty(false)
-  }, [data, status])
+  }, [quote, sourceItems, status])
 
   useEffect(() => {
     if (!dirty) return undefined
@@ -149,12 +157,12 @@ export function AdminQuotePage() {
   }, [dirty])
 
   const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
-  const quote = data?.quote
-  const documents = useMemo(() => data?.documents || [], [data?.documents])
-  const history = useMemo(() => data?.history || [], [data?.history])
+  const documents = useMemo(() => sampleMode ? [] : data?.documents || [], [data?.documents, sampleMode])
+  const history = useMemo(() => sampleMode ? [] : data?.history || [], [data?.history, sampleMode])
   const workflowStatus = quote?.workflowStatus || 'received'
   const legacyLocked = legacyLockedStatuses.has(quote?.status)
-  const editable = canWrite && !legacyLocked && lineEditableWorkflowStatuses.has(workflowStatus)
+  const canPersist = canWrite && !sampleMode
+  const editable = canPersist && !legacyLocked && lineEditableWorkflowStatuses.has(workflowStatus)
   const total = useMemo(() => (form?.items || []).reduce((sum, item) => {
     const quantity = Number(item.confirmedQuantity)
     const unitPrice = Number(item.confirmedUnitPrice)
@@ -254,6 +262,7 @@ export function AdminQuotePage() {
   }
 
   const issueQuote = async () => {
+    if (!canPersist) return
     setConfirm(null)
     if (!form.validUntil) {
       setToast({ message: t.detail.validUntilRequired, tone: 'error' })
@@ -274,6 +283,7 @@ export function AdminQuotePage() {
   }
 
   const transitionWorkflow = async (targetStatus) => {
+    if (!canPersist) return
     if (targetStatus === 'receipt_sent' && dirty) {
       setToast({ message: t.detail.saveBeforeReceipt, tone: 'error' })
       return
@@ -352,8 +362,8 @@ export function AdminQuotePage() {
           <summary aria-label={t.detail.moreActions} title={t.detail.moreActions}><MoreHorizontal size={18} /></summary>
           <div>
             <AdminLink className="admin-quote-menu-link" to={`/admin/inquiries/${quote.inquiryId}`}>{t.detail.sourceRequest}</AdminLink>
-            {workflowStatus === 'receipt_sent' && canWrite && !legacyLocked && <button disabled={saving} type="button" onClick={() => transitionWorkflow('picking')}><RotateCcw size={16} />{t.detail.revertPicking}</button>}
-            {canWrite && cancellableWorkflowStatuses.has(workflowStatus) && !legacyLocked && <button className="admin-danger-text" disabled={saving} type="button" onClick={openCancellationDialog}><Ban size={16} />{t.detail.cancelAll}</button>}
+            {workflowStatus === 'receipt_sent' && canPersist && !legacyLocked && <button disabled={saving} type="button" onClick={() => transitionWorkflow('picking')}><RotateCcw size={16} />{t.detail.revertPicking}</button>}
+            {canPersist && cancellableWorkflowStatuses.has(workflowStatus) && !legacyLocked && <button className="admin-danger-text" disabled={saving} type="button" onClick={openCancellationDialog}><Ban size={16} />{t.detail.cancelAll}</button>}
           </div>
         </details>
       </>}
@@ -377,6 +387,7 @@ export function AdminQuotePage() {
         <p>{t.detail.operationBody}</p>
       </AdminNotice>
     </div>
+    {sampleMode && <AdminNotice tone="warning"><strong>{t.detail.sampleModeTitle}</strong><p>{t.detail.sampleModeBody}</p></AdminNotice>}
     {!canWrite && <AdminNotice><strong>{t.detail.readOnlyTitle}</strong><p>{t.detail.readOnlyBody}</p></AdminNotice>}
     {legacyLocked && <AdminNotice tone="warning"><strong>{t.detail.legacyTitle}</strong><p>{t.detail.legacyBody}</p></AdminNotice>}
 
@@ -469,7 +480,7 @@ export function AdminQuotePage() {
       </aside>
     </form>
 
-    {canWrite && !legacyLocked && (dirty || nextAction) && <div className="admin-quote-task-bar" role="region" aria-label={t.detail.saveBarAria}>
+    {canPersist && !legacyLocked && (dirty || nextAction) && <div className="admin-quote-task-bar" role="region" aria-label={t.detail.saveBarAria}>
       <strong>{dirty ? t.detail.unsavedChanges : t.workflow[workflowStatus] || workflowStatus}</strong>
       <div className="admin-actions">
         {dirty && editable && <button disabled={saving} type="button" onClick={discard}>{t.detail.discard}</button>}

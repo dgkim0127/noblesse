@@ -2,8 +2,24 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import test from 'node:test'
+import { createAdminQuoteSampleItems, isAdminQuoteSampleMode } from '../src/pages/admin/adminQuoteSampleItems.js'
 
 const read = (path) => readFileSync(join(process.cwd(), path), 'utf8')
+
+test('quote density preview creates 15 safe display-only sample items', () => {
+  const items = createAdminQuoteSampleItems([{ productImage: { url: '/sample.webp', altText: 'source' } }], 'kr')
+  const params = new URLSearchParams('sampleItems=15')
+
+  assert.equal(items.length, 15)
+  assert.equal(new Set(items.map((item) => item.id)).size, 15)
+  assert.equal(new Set(items.map((item) => item.productCode)).size, 15)
+  assert.ok(items.every((item) => item.productName && item.productImage?.url && item.selectedOptions.length === 3))
+  assert.ok(items.some((item) => item.fulfillmentStatus === 'partial'))
+  assert.ok(items.some((item) => item.fulfillmentStatus === 'cancelled'))
+  assert.equal(isAdminQuoteSampleMode(params, 'noblesse--admin-quote-responsive-ux-09rxtpa7.web.app'), true)
+  assert.equal(isAdminQuoteSampleMode(params, 'localhost'), true)
+  assert.equal(isAdminQuoteSampleMode(params, 'noblesse.web.app'), false)
+})
 
 test('product operations use dedicated list and editor workflows', () => {
   const list = read('src/pages/admin/AdminProductsPage.jsx')
