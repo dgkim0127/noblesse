@@ -3,12 +3,14 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
 const app = readFileSync('src/App.jsx', 'utf8')
+const commerce = readFileSync('src/commerce/CommerceContext.jsx', 'utf8')
 const home = readFileSync('src/pages/HomePage.jsx', 'utf8')
 const budget = JSON.parse(readFileSync('performance-budget.json', 'utf8'))
 
 test('account quote catalog detail and admin routes are loaded on demand', () => {
   for (const page of [
     'AccountPage',
+    'HomePage',
     'InquiryListPage',
     'LoginPage',
     'MyInquiriesPage',
@@ -23,6 +25,11 @@ test('account quote catalog detail and admin routes are loaded on demand', () =>
 
   assert.match(app, /lazyNamed\(\(\) => import\('\.\/components\/AdminShell'\)/)
   assert.doesNotMatch(app, /import \{ AdminShell \} from/)
+})
+
+test('firebase authentication is split from the initial storefront shell', () => {
+  assert.match(commerce, /import\('\.\.\/services\/authService'\)/)
+  assert.doesNotMatch(commerce, /from '\.\.\/services\/authService'/)
 })
 
 test('mobile performance budget keeps initial payload and list rendering bounded', () => {
@@ -45,4 +52,13 @@ test('home showcase auto-advances one image set without cloned carousel panels',
   assert.match(home, /buyerConceptPanels\.map/)
   assert.doesNotMatch(home, /\.\.\.buyerConceptPanels/)
   assert.doesNotMatch(home, /setInterval\(slide/)
+})
+
+test('home defers alternate product images and serves responsive showcase images', () => {
+  assert.match(home, /const \[shouldLoadAlternateImages, setShouldLoadAlternateImages\] = useState\(false\)/)
+  assert.match(home, /const visibleCardImages = shouldLoadAlternateImages \? cardImages : cardImages\.slice\(0, 1\)/)
+  assert.match(home, /onPointerEnter=\{revealAlternateImages\}/)
+  assert.match(home, /\{visibleCardImages\.map/)
+  assert.match(home, /sizes="\(max-width: 760px\)/)
+  assert.match(home, /fetchPriority=\{index === 0 \? 'high' : 'auto'\}/)
 })

@@ -4,7 +4,6 @@ import { createAdminApi } from '../api/adminApi'
 import { createBuyerApi } from '../api/buyerApi'
 import { createApiClient } from '../api/client'
 import { getRuntimeConfig } from '../config/runtimeConfig'
-import { getCurrentUserIdToken, getUserIdToken, isAuthConfigured, registerWithCredentials, signInWithCredentials, signOutCurrentUser, subscribeAuthState } from '../services/authService'
 import {
   buildInquiryRows,
   buildInquirySnapshot,
@@ -33,6 +32,17 @@ const formatInquiryId = () => `INQ-${new Date().toISOString().slice(0, 10).repla
 const viewerStates = new Set(['guest', 'pending', 'approved', 'admin'])
 const adminPricePageLimit = 100
 const adminPricePageCap = 20
+let authServicePromise
+
+function loadAuthService() {
+  authServicePromise ||= import('../services/authService')
+  return authServicePromise
+}
+
+async function getCurrentUserIdToken(...args) {
+  const authService = await loadAuthService()
+  return authService.getCurrentUserIdToken(...args)
+}
 
 function upsertInquiry(inquiries, nextInquiry) {
   const nextKey = getInquiryKey(nextInquiry)
@@ -237,49 +247,66 @@ export function CommerceProvider({ children }) {
   useEffect(() => {
     if (isMockMode || !runtimeConfig.isConfigured) return undefined
 
-    if (!isAuthConfigured()) {
-      setApiProfile(null)
-      setAuthStatus('config-missing')
-      setAuthError('')
-      return undefined
-    }
-
     let isMounted = true
+    let unsubscribe = () => {}
 
-    const unsubscribe = subscribeAuthState(async (user) => {
-      if (!isMounted) return
-      if (!user) {
-        setApiProfile(null)
-        setProductPrices([])
-        setInquiries([])
-        setAuthStatus('signed-out')
-        setAuthError('')
-        return
-      }
-
-      setAuthStatus('checking')
-      setAuthError('')
-
+    async function startAuthSubscription() {
       try {
-        const token = await getUserIdToken(user)
-        const nextState = await loadAuthenticatedCommerceState({
-          apiBaseUrl: runtimeConfig.apiBaseUrl,
-          token,
-        })
+        const authService = await loadAuthService()
         if (!isMounted) return
-        setApiProfile(nextState.profile)
-        setProductPrices(nextState.prices)
-        setInquiries(nextState.inquiries)
-        setAuthStatus('authenticated')
+
+        if (!authService.isAuthConfigured()) {
+          setApiProfile(null)
+          setAuthStatus('config-missing')
+          setAuthError('')
+          return
+        }
+
+        unsubscribe = authService.subscribeAuthState(async (user) => {
+          if (!isMounted) return
+          if (!user) {
+            setApiProfile(null)
+            setProductPrices([])
+            setInquiries([])
+            setAuthStatus('signed-out')
+            setAuthError('')
+            return
+          }
+
+          setAuthStatus('checking')
+          setAuthError('')
+
+          try {
+            const token = await authService.getUserIdToken(user)
+            const nextState = await loadAuthenticatedCommerceState({
+              apiBaseUrl: runtimeConfig.apiBaseUrl,
+              token,
+            })
+            if (!isMounted) return
+            setApiProfile(nextState.profile)
+            setProductPrices(nextState.prices)
+            setInquiries(nextState.inquiries)
+            setAuthStatus('authenticated')
+          } catch (error) {
+            if (!isMounted) return
+            setApiProfile(null)
+            setProductPrices([])
+            setInquiries([])
+            setAuthStatus('error')
+            setAuthError(error?.message || 'Unable to verify buyer profile.')
+          }
+        })
       } catch (error) {
         if (!isMounted) return
         setApiProfile(null)
         setProductPrices([])
         setInquiries([])
         setAuthStatus('error')
-        setAuthError(error?.message || 'Unable to verify buyer profile.')
+        setAuthError(error?.message || 'Unable to initialize authentication.')
       }
-    })
+    }
+
+    startAuthSubscription()
 
     return () => {
       isMounted = false
@@ -315,10 +342,12 @@ export function CommerceProvider({ children }) {
 
     setAuthStatus('checking')
     setAuthError('')
+    let authService
 
     try {
-      const credential = await signInWithCredentials(identifier, password, { remember, apiBaseUrl: runtimeConfig.apiBaseUrl })
-      const token = await getUserIdToken(credential.user, true)
+      authService = await loadAuthService()
+      const credential = await authService.signInWithCredentials(identifier, password, { remember, apiBaseUrl: runtimeConfig.apiBaseUrl })
+      const token = await authService.getUserIdToken(credential.user, true)
       const nextState = await loadAuthenticatedCommerceState({
         apiBaseUrl: runtimeConfig.apiBaseUrl,
         token,
@@ -328,7 +357,7 @@ export function CommerceProvider({ children }) {
       setInquiries(nextState.inquiries)
       setAuthStatus('authenticated')
     } catch (error) {
-      setAuthStatus(isAuthConfigured() ? 'error' : 'config-missing')
+      setAuthStatus(authService && !authService.isAuthConfigured() ? 'config-missing' : 'error')
       setAuthError(error?.message || 'Unable to sign in.')
       throw error
     }
@@ -342,10 +371,12 @@ export function CommerceProvider({ children }) {
 
     setAuthStatus('checking')
     setAuthError('')
+    let authService
 
     try {
-      const credential = await registerWithCredentials(email, password, { remember })
-      const token = await getUserIdToken(credential.user, true)
+      authService = await loadAuthService()
+      const credential = await authService.registerWithCredentials(email, password, { remember })
+      const token = await authService.getUserIdToken(credential.user, true)
       const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
       const buyerApi = createBuyerApi(apiClient)
       const result = await buyerApi.registerBuyer(profile, token)
@@ -370,7 +401,7 @@ export function CommerceProvider({ children }) {
       setAuthStatus('authenticated')
       return registeredProfile
     } catch (error) {
-      setAuthStatus(isAuthConfigured() ? 'error' : 'config-missing')
+      setAuthStatus(authService && !authService.isAuthConfigured() ? 'config-missing' : 'error')
       setAuthError(error?.message || 'Unable to register buyer.')
       throw error
     }
@@ -385,12 +416,13 @@ export function CommerceProvider({ children }) {
     if (typeof window !== 'undefined') {
       clearInquiryDraft(window.sessionStorage, buyer?.uid)
     }
-    await signOutCurrentUser()
+    const authService = await loadAuthService()
+    await authService.signOutCurrentUser()
     setInquiryItems([])
     setApiProfile(null)
     setProductPrices([])
     setInquiries([])
-    setAuthStatus(isAuthConfigured() ? 'signed-out' : 'config-missing')
+    setAuthStatus(authService.isAuthConfigured() ? 'signed-out' : 'config-missing')
     setAuthError('')
   }, [buyer?.uid, isMockMode, setViewerState])
 

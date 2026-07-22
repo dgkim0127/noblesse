@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ChevronDown, Clock3, Eye, EyeOff, Heart, LogOut, Search, ShieldCheck, ShoppingCart, UserRound, X } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import noblesseLogo from '../assets/noblesse-logo.png'
+import noblesseLogo from '../assets/noblesse-logo.webp'
 import { useCommerce } from '../commerce/commerceStore'
 import { getLoginErrorMessage } from '../services/authErrors'
 import { resolveLocaleCopy, supportedLocales, useLocalePath } from '../utils/locale'

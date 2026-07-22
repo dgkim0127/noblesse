@@ -1153,6 +1153,7 @@ function HomeProductCard({ product, index, variant = 'default', localeOverride =
   const locale = localeOverride || routeLocale
   const [isFavorite, setIsFavorite] = useState(false)
   const [favoriteNotice, setFavoriteNotice] = useState('')
+  const [shouldLoadAlternateImages, setShouldLoadAlternateImages] = useState(false)
   const productName = getLocalizedProductName(product, locale)
   const productAlt = getLocalizedProductAlt(product, locale)
   const price = getPrice(product.productId)
@@ -1165,6 +1166,7 @@ function HomeProductCard({ product, index, variant = 'default', localeOverride =
   const cardImages = galleryImages.length > 0
     ? galleryImages
     : fallbackImage ? [{ id: 'fallback', cardSrc: fallbackImage, position: { x: 50, y: 50 }, scale: 1 }] : []
+  const visibleCardImages = shouldLoadAlternateImages ? cardImages : cardImages.slice(0, 1)
   const adminPriceBooks = isAdmin ? getAdminPriceBooks(product.productId) : []
   const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
   const unavailablePriceLabel = resolveLocaleCopy({ kr: '가격 미등록', en: 'Price unavailable', jp: '価格未登録', cn: '價格未登記' }, locale, 'en')
@@ -1176,6 +1178,10 @@ function HomeProductCard({ product, index, variant = 'default', localeOverride =
   const statusLabel = product.isNew ? 'NEW' : product.isBest ? 'BEST' : 'B2B'
   const weeklyDemand = variant === 'weekly-pick' ? getWeeklyDemand(index) : null
   const weeklyDemandText = weeklyDemand ? formatWeeklyDemand(weeklyDemand, locale) : null
+
+  const revealAlternateImages = () => {
+    if (cardImages.length > 1) setShouldLoadAlternateImages(true)
+  }
 
   const handleFavoriteClick = (event) => {
     event.preventDefault()
@@ -1217,13 +1223,20 @@ function HomeProductCard({ product, index, variant = 'default', localeOverride =
 
   return <article className={`home-product-card variant-${variant}`} style={{ '--product-index': index }}>
     <div className="home-product-media">
-    <Link className={`home-product-image tone-${product.tone}`} to={toLocalePath(`/products/${product.productId}`)} aria-label={productName}>
+    <Link
+      className={`home-product-image tone-${product.tone}`}
+      to={toLocalePath(`/products/${product.productId}`)}
+      aria-label={productName}
+      onFocus={revealAlternateImages}
+      onPointerEnter={revealAlternateImages}
+    >
       <span className="home-product-status">{statusLabel}</span>
       <span className="jewel-shape" />
       <span className="home-product-image-cycle" style={{ '--cycle-delay': `${(index % 5) * 0.18}s` }}>
-        {cardImages.map((image, imageIndex) => <img
+        {visibleCardImages.map((image, imageIndex) => <img
           alt={imageIndex === 0 ? productAlt : ''}
           aria-hidden={imageIndex === 0 ? undefined : 'true'}
+          decoding="async"
           key={`${product.productId}-${image.id}`}
           loading="lazy"
           src={image.cardSrc}
@@ -1847,7 +1860,18 @@ export function HomePage({ editorMode = false, layoutOverride = null, localeOver
               const label = banner.label || homeShowcaseLabels[index] || 'NOBLESSE'
 
               return <Link className="home-showcase-panel" key={banner.key} onClick={handleShowcaseClick} to={toLocalePath(banner.to)}>
-                <img alt={bannerTitle} height="1200" loading={index === 0 ? 'eager' : 'lazy'} src={banner.image} srcSet={banner.imageSet?.card && banner.imageSet?.detail ? `${banner.imageSet.card} 600w, ${banner.imageSet.detail} 1200w` : undefined} style={{ objectPosition: `${banner.imagePosition?.x ?? 50}% ${banner.imagePosition?.y ?? 50}%` }} width="900" />
+                <img
+                  alt={bannerTitle}
+                  decoding="async"
+                  fetchPriority={index === 0 ? 'high' : 'auto'}
+                  height="1200"
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  sizes="(max-width: 760px) min(76vw, 310px), (max-width: 1180px) calc((100vw - 20px) / 3), min(25vw, 520px)"
+                  src={banner.imageSet?.card || banner.image}
+                  srcSet={banner.imageSet?.card && banner.imageSet?.detail ? `${banner.imageSet.card} 600w, ${banner.imageSet.detail} 1200w` : undefined}
+                  style={{ objectPosition: `${banner.imagePosition?.x ?? 50}% ${banner.imagePosition?.y ?? 50}%` }}
+                  width="900"
+                />
                 <span className="home-showcase-label">{label}</span>
                 <span className="home-showcase-copy">
                   <strong>{bannerTitle}</strong>
