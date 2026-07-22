@@ -53,3 +53,12 @@ test('home showcase auto-advances one image set without cloned carousel panels',
   assert.doesNotMatch(home, /\.\.\.buyerConceptPanels/)
   assert.doesNotMatch(home, /setInterval\(slide/)
 })
+
+test('home defers alternate product images and serves responsive showcase images', () => {
+  assert.match(home, /const \[shouldLoadAlternateImages, setShouldLoadAlternateImages\] = useState\(false\)/)
+  assert.match(home, /const visibleCardImages = shouldLoadAlternateImages \? cardImages : cardImages\.slice\(0, 1\)/)
+  assert.match(home, /onPointerEnter=\{revealAlternateImages\}/)
+  assert.match(home, /\{visibleCardImages\.map/)
+  assert.match(home, /sizes="\(max-width: 760px\)/)
+  assert.match(home, /fetchPriority=\{index === 0 \? 'high' : 'auto'\}/)
+})
