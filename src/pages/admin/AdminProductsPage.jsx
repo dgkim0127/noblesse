@@ -20,10 +20,6 @@ function getProductName(product) {
   return product.nameKo || product.nameEn || product.nameJa || product.nameZhTw || '이름 없음'
 }
 
-function getCategoryName(product) {
-  return product.categoryNameKo || product.categoryNameEn || product.categoryNameZhTw || product.categoryKey || '-'
-}
-
 function getThumb(product) {
   return product.imageSet?.thumb || product.imageSet?.card || product.imageSet?.detail || product.imageSet?.primary || ''
 }
@@ -35,17 +31,25 @@ function formatUpdatedAt(value) {
   return new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date)
 }
 
-function ProductStatusCell({ product }) {
-  return <div className="admin-product-health">
-    <AdminCompletionBadge complete={product.completion?.hasPrimaryImage} completeLabel="사진 완료" incompleteLabel="사진 없음" />
-    <AdminCompletionBadge complete={product.completion?.hasKrPrice} completeLabel="가격 완료" incompleteLabel="가격 없음" />
-  </div>
-}
-
 function LanguageCompletion({ product }) {
   const languages = product.completion?.languages || {}
   return <div className="admin-language-completion">
     {Object.entries(languageLabels).map(([locale, label]) => <span className={languages[locale] ? 'is-complete' : ''} key={locale} title={`${label} ${languages[locale] ? '완료' : '미완성'}`}>{locale === 'zh-TW' ? 'TW' : locale.toUpperCase()}</span>)}
+  </div>
+}
+
+function ProductCompletionCell({ product }) {
+  const missing = product.completion?.missing || []
+  return <div className="admin-product-completion">
+    <LanguageCompletion product={product} />
+    <AdminCompletionBadge complete={product.completion?.hasPrimaryImage} completeLabel="사진 완료" incompleteLabel="사진 없음" />
+    <small>{product.completion?.publishable ? '공개 가능' : `${missing.length || 1}개 확인 필요`}</small>
+  </div>
+}
+
+function ProductPriceCell({ product }) {
+  return <div className="admin-product-health">
+    <AdminCompletionBadge complete={product.completion?.hasKrPrice} completeLabel="KR 가격 등록" incompleteLabel="KR 가격 없음" />
   </div>
 }
 
@@ -215,16 +219,15 @@ export function AdminProductsPage() {
         <table className="admin-table admin-product-table">
           <thead><tr>
             <th className="admin-select-column"><input aria-label="현재 페이지 전체 선택" checked={allVisibleSelected} type="checkbox" onChange={(event) => setSelectedIds(event.target.checked ? products.map((product) => product.id) : [])} /></th>
-            <th>상품</th><th>카테고리</th><th>언어</th><th>사진 · 가격</th><th>공개</th><th>수정일</th><th><span className="sr-only">작업</span></th>
+            <th>상품</th><th>완성도</th><th>가격</th><th>공개</th><th>수정일</th><th><span className="sr-only">작업</span></th>
           </tr></thead>
           <tbody>{products.map((product) => <tr key={product.id}>
             <td data-label="선택"><input aria-label={`${getProductName(product)} 선택`} checked={selectedIds.includes(product.id)} type="checkbox" onChange={(event) => setSelectedIds((current) => event.target.checked ? [...new Set([...current, product.id])] : current.filter((id) => id !== product.id))} /></td>
             <td data-label="상품"><div className="admin-product-identity">{getThumb(product) ? <img alt="" loading="lazy" src={getThumb(product)} /> : <span className="admin-product-image-placeholder" />}
               <div><AdminLink className="admin-product-name" to={`/admin/products/${product.id}/edit`}>{getProductName(product)}</AdminLink><small>{product.code}</small>{!product.completion?.publishable && <small className="admin-missing-summary" title={(product.completion?.missing || []).join(', ')}>공개 준비 필요</small>}</div>
             </div></td>
-            <td data-label="카테고리">{getCategoryName(product)}</td>
-            <td data-label="언어"><LanguageCompletion product={product} /></td>
-            <td data-label="사진 · 가격"><ProductStatusCell product={product} /></td>
+            <td data-label="완성도"><ProductCompletionCell product={product} /></td>
+            <td data-label="가격"><ProductPriceCell product={product} /></td>
             <td data-label="공개"><span className={`admin-status ${product.isVisible ? 'approved' : 'draft'}`}>{product.isVisible ? '공개' : '비공개'}</span></td>
             <td data-label="수정일">{formatUpdatedAt(product.updatedAt)}</td>
             <td data-label="작업"><div className="admin-row-actions">

@@ -927,6 +927,17 @@ button:disabled,
   gap: 5px;
 }
 
+.admin-product-completion {
+  display: grid;
+  gap: 7px;
+  min-width: 150px;
+}
+
+.admin-product-completion > small {
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+
 .admin-language-completion span {
   align-items: center;
   background: #f0f1f4;
