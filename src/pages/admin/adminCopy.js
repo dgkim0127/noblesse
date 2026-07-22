@@ -15,6 +15,10 @@ const copy = {
         staging: '스테이징 API',
         development: '개발 모드',
       },
+      back: '뒤로가기',
+      mobileNavigation: '모바일 관리자 메뉴',
+      mobileQuotePreparation: '견적 준비',
+      more: '더보기',
       nav: {
         dashboard: '관리자 대시보드',
         buyers: '거래처',
@@ -412,6 +416,10 @@ copy.en = {
       staging: 'Staging API',
       development: 'Development mode',
     },
+    back: 'Back',
+    mobileNavigation: 'Mobile admin navigation',
+    mobileQuotePreparation: 'Quote preparation',
+    more: 'More',
     nav: {
       dashboard: 'Admin Dashboard',
       buyers: 'Buyers',
@@ -805,6 +813,10 @@ copy.jp = {
       staging: 'ステージングAPI',
       development: '開発モード',
     },
+    back: '戻る',
+    mobileNavigation: 'モバイル管理メニュー',
+    mobileQuotePreparation: '見積準備',
+    more: 'その他',
     nav: {
       dashboard: '管理ダッシュボード',
       buyers: '取引先',
@@ -1198,6 +1210,10 @@ copy.cn = {
       staging: '预发布 API',
       development: '开发模式',
     },
+    back: '返回',
+    mobileNavigation: '移动管理员菜单',
+    mobileQuotePreparation: '报价准备',
+    more: '更多',
     nav: {
       dashboard: '管理仪表板',
       buyers: '客户',
