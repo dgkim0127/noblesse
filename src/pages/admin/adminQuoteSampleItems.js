@@ -41,6 +41,7 @@ export function isAdminQuoteSampleMode(searchParams, hostname = '') {
   const requested = searchParams?.get?.('sampleItems') === '15'
   const safeHost = hostname === 'localhost'
     || hostname === '127.0.0.1'
+    || hostname === 'noblesse.web.app'
     || hostname.includes('noblesse--admin-quote-responsive-ux-')
   return requested && safeHost
 }
