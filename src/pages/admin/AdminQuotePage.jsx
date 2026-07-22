@@ -138,6 +138,27 @@ export function AdminQuotePage() {
     const unitPrice = Number(item.confirmedUnitPrice)
     return sum + (Number.isFinite(quantity) && Number.isFinite(unitPrice) ? quantity * unitPrice : 0)
   }, 0), [form?.items])
+  const pickingSummary = useMemo(() => {
+    const items = form?.items || []
+    const summary = items.reduce((current, item) => {
+      const requested = Number(item.requestedQuantity)
+      const prepared = Number(item.confirmedQuantity)
+      const safeRequested = Number.isFinite(requested) ? Math.max(requested, 0) : 0
+      const safePrepared = Number.isFinite(prepared) ? Math.min(Math.max(prepared, 0), safeRequested) : 0
+      const hasCancellation = ['partial', 'cancelled'].includes(item.fulfillmentStatus)
+      return {
+        requestedUnits: current.requestedUnits + safeRequested,
+        preparedUnits: current.preparedUnits + safePrepared,
+        cancelledUnits: current.cancelledUnits + (hasCancellation ? Math.max(safeRequested - safePrepared, 0) : 0),
+        resolvedItems: current.resolvedItems + (item.fulfillmentStatus === 'pending' ? 0 : 1),
+      }
+    }, { requestedUnits: 0, preparedUnits: 0, cancelledUnits: 0, resolvedItems: 0 })
+    return {
+      ...summary,
+      itemCount: items.length,
+      progress: items.length ? Math.round((summary.resolvedItems / items.length) * 100) : 0,
+    }
+  }, [form?.items])
   const exceptionItems = useMemo(() => (form?.items || []).filter((item) => ['partial', 'cancelled'].includes(item.fulfillmentStatus)), [form?.items])
   const unresolvedCount = useMemo(() => (form?.items || []).filter((item) => item.fulfillmentStatus === 'pending').length, [form?.items])
   const missingCancellationReasonCount = useMemo(() => (form?.items || []).filter((item) => (
@@ -330,8 +351,25 @@ export function AdminQuotePage() {
 
     <form className="admin-quote-workspace" onSubmit={(event) => { event.preventDefault(); saveDraft() }}>
       <div className="admin-editor-main">
-        <section className="admin-editor-section">
-          <div className="admin-section-heading"><div><h2>{t.detail.prepareTitle}</h2><p>{t.detail.prepareBody}</p></div>{editable && <button type="button" onClick={markAllReady}><PackageCheck size={17} />{t.detail.prepareAll}</button>}</div>
+        <section className="admin-editor-section admin-pc-picking-sheet">
+          <header className="admin-picking-sheet-header">
+            <div className="admin-picking-sheet-identity">
+              <span><PackageCheck aria-hidden="true" size={18} />{t.detail.prepareTitle}</span>
+              <h2>{quote.quoteNumber || quote.inquiryNumber || t.detail.fallbackTitle}</h2>
+              <p>{quote.companyName || t.detail.companyFallback} / {quote.currency} / {t.workflow[workflowStatus] || workflowStatus}</p>
+            </div>
+            <div className="admin-picking-sheet-progress">
+              <div><span>{pickingSummary.resolvedItems} / {pickingSummary.itemCount}</span><strong>{pickingSummary.progress}%</strong></div>
+              <progress aria-label={t.detail.prepareTitle} max="100" value={pickingSummary.progress} />
+            </div>
+          </header>
+          <dl className="admin-picking-kpis">
+            <div><dt>{t.detail.requestedItems}</dt><dd>{pickingSummary.itemCount}</dd></div>
+            <div><dt>{t.detail.columns.requested}</dt><dd>{pickingSummary.requestedUnits}</dd></div>
+            <div><dt>{t.detail.columns.prepared}</dt><dd>{pickingSummary.preparedUnits}</dd></div>
+            <div><dt>{t.detail.columns.cancelled}</dt><dd>{pickingSummary.cancelledUnits}</dd></div>
+          </dl>
+          <div className="admin-picking-command-bar"><div><h3>{t.detail.prepareTitle}</h3><p>{t.detail.prepareBody}</p></div>{editable && <button type="button" onClick={markAllReady}><PackageCheck size={17} />{t.detail.prepareAll}</button>}</div>
           <div className="admin-table-wrap">
             <table className="admin-table admin-quote-items-table admin-picking-table">
               <thead><tr><th>{t.detail.columns.product}</th><th>{t.detail.columns.requested}</th><th>{t.detail.columns.prepared}</th><th>{t.detail.columns.cancelled}</th><th>{t.detail.columns.result}</th><th>{t.detail.columns.unitPrice}</th><th>{t.detail.columns.amount}</th></tr></thead>
@@ -344,7 +382,7 @@ export function AdminQuotePage() {
                 const legacySummary = [item.color, item.size].filter(Boolean)
                 const needsCancellationReason = ['partial', 'cancelled'].includes(item.fulfillmentStatus)
                 return <tr className={`fulfillment-${item.fulfillmentStatus}`} key={item.id}>
-                  <td data-label={t.detail.columns.product}><div className="admin-picking-product"><div className="admin-picking-product-image">{item.productImage?.url ? <img alt={item.productImage.altText || item.productName || item.productCode} loading="lazy" src={item.productImage.url} /> : <ImageIcon aria-hidden="true" size={22} />}</div><div><strong>{item.productName || item.productCode}</strong><small>{[item.productCode, ...(optionSummary.length ? optionSummary : legacySummary)].filter(Boolean).join(' / ')}</small></div></div></td>
+                  <td data-label={t.detail.columns.product}><div className="admin-picking-product"><div className="admin-picking-product-image">{item.productImage?.url ? <img alt={item.productImage.altText || item.productName || item.productCode} loading="lazy" src={item.productImage.url} /> : <ImageIcon aria-hidden="true" size={22} />}</div><div><strong>{item.productName || item.productCode}</strong><small className="admin-picking-product-code">{item.productCode}</small><ul className="admin-picking-options">{(optionSummary.length ? optionSummary : legacySummary).map((option, optionIndex) => <li key={`${item.id}-option-${optionIndex}`}>{option}</li>)}</ul></div></div></td>
                   <td data-label={t.detail.columns.requested}><strong>{requested}</strong></td>
                   <td data-label={t.detail.columns.prepared}><input aria-label={formatAdminCopy(t.detail.preparedQuantityAria, { code: item.productCode })} disabled={!editable} max={requested} min="0" type="number" value={item.confirmedQuantity} onChange={(event) => setPreparedQuantity(item.id, event.target.value)} /><div className="admin-picking-shortcuts"><button disabled={!editable} type="button" onClick={() => markItem(item.id, 'ready')}>{t.detail.prepareItemAll}</button><button disabled={!editable} type="button" onClick={() => markItem(item.id, 'cancelled')}>{t.detail.outOfStock}</button></div></td>
                   <td data-label={t.detail.columns.cancelled}><strong className={cancelled > 0 ? 'admin-cancelled-quantity' : ''}>{cancelled}</strong></td>
