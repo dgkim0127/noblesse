@@ -147,14 +147,14 @@ export function AdminQuotePage() {
   }, [quote, sourceItems, status])
 
   useEffect(() => {
-    if (!dirty) return undefined
+    if (!dirty || sampleMode) return undefined
     const handleBeforeUnload = (event) => {
       event.preventDefault()
       event.returnValue = ''
     }
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [dirty])
+  }, [dirty, sampleMode])
 
   const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
   const documents = useMemo(() => sampleMode ? [] : data?.documents || [], [data?.documents, sampleMode])
@@ -162,7 +162,8 @@ export function AdminQuotePage() {
   const workflowStatus = quote?.workflowStatus || 'received'
   const legacyLocked = legacyLockedStatuses.has(quote?.status)
   const canPersist = canWrite && !sampleMode
-  const editable = canPersist && !legacyLocked && lineEditableWorkflowStatuses.has(workflowStatus)
+  const canEditDraft = canPersist || sampleMode
+  const editable = canEditDraft && !legacyLocked && lineEditableWorkflowStatuses.has(workflowStatus)
   const total = useMemo(() => (form?.items || []).reduce((sum, item) => {
     const quantity = Number(item.confirmedQuantity)
     const unitPrice = Number(item.confirmedUnitPrice)
@@ -242,7 +243,7 @@ export function AdminQuotePage() {
   }
 
   const saveDraft = async ({ quiet = false } = {}) => {
-    if (!editable) return null
+    if (!canPersist || !editable) return null
     setSaving(true)
     try {
       const result = await mutate((api, token) => api.updateQuote(quoteId, buildPayload(form), token))
@@ -448,7 +449,7 @@ export function AdminQuotePage() {
         </section>
 
         <section className="admin-editor-section admin-quote-document-section">
-          <div className="admin-section-heading"><div><h2>{t.detail.documentsTitle}</h2><p>{t.detail.documentsBody}</p></div>{editable && <button className="primary-action" disabled={saving || publicationBlocked} type="button" onClick={openIssueDialog}><Send size={17} />{quote.currentDocumentId ? t.detail.pdfReissue : t.detail.pdfIssue}</button>}</div>
+          <div className="admin-section-heading"><div><h2>{t.detail.documentsTitle}</h2><p>{t.detail.documentsBody}</p></div>{canPersist && editable && <button className="primary-action" disabled={saving || publicationBlocked} type="button" onClick={openIssueDialog}><Send size={17} />{quote.currentDocumentId ? t.detail.pdfReissue : t.detail.pdfIssue}</button>}</div>
           <label className="admin-field admin-valid-until-field"><span>{t.detail.validUntil} <b>*</b></span><input disabled={!editable} type="date" value={form.validUntil} onChange={(event) => setField('validUntil', event.target.value)} /></label>
           {currentDocument && <div className="admin-current-document"><FileCheck2 size={20} /><span><small>{t.detail.currentDocument}</small><strong>{formatAdminCopy(t.detail.version, { revision: currentDocument.revision })}</strong><em>{t.documentLanguages[currentDocument.documentLocale] || currentDocument.documentLocale} · {new Date(currentDocument.issuedAt).toLocaleString(dateLocale)}</em></span><button aria-label={formatAdminCopy(t.detail.downloadAria, { revision: currentDocument.revision })} disabled={saving} title={t.detail.downloadTitle} type="button" onClick={() => downloadDocument(currentDocument)}><Download size={17} /></button></div>}
           {previousDocuments.length > 0 && <details className="admin-previous-documents"><summary>{formatAdminCopy(t.detail.previousDocuments, { count: previousDocuments.length })}</summary><div className="admin-document-list">{previousDocuments.map((document) => <div key={document.id}><FileCheck2 size={19} /><span><strong>{formatAdminCopy(t.detail.version, { revision: document.revision })}</strong><small>{t.documentLanguages[document.documentLocale] || document.documentLocale} · {new Date(document.issuedAt).toLocaleString(dateLocale)}</small></span><button aria-label={formatAdminCopy(t.detail.downloadAria, { revision: document.revision })} disabled={saving} title={t.detail.downloadTitle} type="button" onClick={() => downloadDocument(document)}><Download size={17} /></button></div>)}</div></details>}

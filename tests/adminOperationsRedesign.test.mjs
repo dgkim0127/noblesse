@@ -25,6 +25,11 @@ test('quote density preview creates 15 safe display-only sample items', () => {
   assert.equal(isAdminQuoteSampleMode(new URLSearchParams('sampleItems=10'), 'noblesse.web.app'), false)
   assert.equal(isAdminQuoteSampleMode(params, 'example.com'), false)
   assert.match(quotePage, /admin-quote-workspace\$\{sampleMode \? ' is-sample-preview' : ''\}/)
+  assert.match(quotePage, /const canEditDraft = canPersist \|\| sampleMode/)
+  assert.match(quotePage, /const editable = canEditDraft && !legacyLocked/)
+  assert.match(quotePage, /if \(!dirty \|\| sampleMode\) return undefined/)
+  assert.match(quotePage, /if \(!canPersist \|\| !editable\) return null/)
+  assert.match(quotePage, /\{canPersist && editable && <button className="primary-action"/)
   assert.match(adminStyles, /\.admin-quote-workspace\.is-sample-preview button:disabled \{\s*cursor: default;/)
 })
 
