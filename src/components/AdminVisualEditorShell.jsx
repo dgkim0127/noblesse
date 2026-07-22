@@ -234,7 +234,10 @@ export function AdminVisualEditorShell({
                 {Icon ? <Icon aria-hidden="true" size={17} /> : null}
                 <span><strong>{section.label}</strong>{section.description ? <small>{section.description}</small> : null}</span>
               </button>
-              <span className={`admin-visual-editor-section-status is-${section.status || 'neutral'}`} title={section.statusLabel || ''} />
+              <span className="admin-visual-editor-section-state" title={section.statusLabel || ''}>
+                <span className={`admin-visual-editor-section-status is-${section.status || 'neutral'}`} />
+                {section.statusText ? <small>{section.statusText}</small> : null}
+              </span>
               {typeof section.visible === 'boolean' ? <button
                 aria-label={section.visible ? `${section.label} 숨기기` : `${section.label} 표시하기`}
                 className="admin-visual-editor-visibility"

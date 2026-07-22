@@ -3649,8 +3649,23 @@ button:disabled,
 .admin-visual-editor-section-status {
   background: #aeb2bc;
   border-radius: 50%;
+  flex: 0 0 auto;
   height: 7px;
   width: 7px;
+}
+
+.admin-visual-editor-section-state {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 5px;
+}
+
+.admin-visual-editor-section-state small {
+  color: var(--admin-muted);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .admin-visual-editor-section-status.is-complete {
@@ -3659,6 +3674,10 @@ button:disabled,
 
 .admin-visual-editor-section-status.is-warning {
   background: #c77a10;
+}
+
+.admin-visual-editor-section-status.is-error {
+  background: #bf3650;
 }
 
 .admin-visual-editor-order {
@@ -4649,6 +4668,87 @@ button:disabled,
   display: grid;
   gap: 14px;
   padding: 2px 14px 18px;
+}
+
+.admin-product-readiness {
+  background: #fff8e8;
+  border: 1px solid #ead9b8;
+  color: var(--admin-warning);
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+}
+
+.admin-product-readiness.is-ready {
+  background: #edf8f2;
+  border-color: #c9e6d6;
+  color: var(--admin-success);
+}
+
+.admin-product-readiness p {
+  color: var(--admin-text);
+  font-size: 11px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.admin-product-review-steps {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-product-review-step {
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 10px 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.admin-product-review-step:hover,
+.admin-product-review-step:focus-visible {
+  background: #f7f7fa;
+  border-color: rgb(42 35 79 / 42%);
+  outline: 0;
+}
+
+.admin-product-review-step > span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.admin-product-review-step small {
+  color: var(--admin-muted);
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
+.admin-product-review-step em {
+  color: var(--admin-muted);
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 750;
+}
+
+.admin-product-review-step.is-complete em {
+  color: var(--admin-success);
+}
+
+.admin-product-review-step.is-warning em {
+  color: var(--admin-warning);
+}
+
+.admin-product-review-step.is-error em {
+  color: #bf3650;
 }
 
 .admin-product-inspector-field {
