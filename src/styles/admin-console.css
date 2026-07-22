@@ -6947,9 +6947,7 @@ button:disabled,
   }
 
   .admin-quote-operation-notice .admin-notice p {
-    font-size: 12px;
-    line-height: 1.45;
-    margin-top: 3px;
+    display: none;
   }
 
   .admin-quote-mobile-summary > summary {
@@ -6975,7 +6973,26 @@ button:disabled,
     padding: 0 0 12px;
   }
 
-  .admin-picking-section .admin-section-heading > button,
+  .admin-picking-section {
+    gap: 12px;
+  }
+
+  .admin-picking-section .admin-section-heading {
+    align-items: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-bottom: 0;
+  }
+
+  .admin-picking-section .admin-section-heading p {
+    display: none;
+  }
+
+  .admin-picking-section .admin-section-heading > button {
+    align-self: center;
+    width: auto;
+  }
+
   .admin-quote-document-section .admin-section-heading > button {
     align-self: stretch;
     width: 100%;
