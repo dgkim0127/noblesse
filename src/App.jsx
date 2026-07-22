@@ -3,10 +3,11 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from '
 import './App.css'
 import { CommerceProvider } from './commerce/CommerceContext'
 import { StoreShell } from './components/StoreShell'
-import { HomePage } from './pages/HomePage'
 import { buildLocalizedPath, canonicalizeLocale, isLocalePathSegment, resolveLocaleCopy, stripLocalePrefix, taiwanLocale, useLocalePath } from './utils/locale'
 
 const lazyNamed = (loader, exportName) => lazy(() => loader().then((module) => ({ default: module[exportName] })))
+
+const HomePage = lazyNamed(() => import('./pages/HomePage'), 'HomePage')
 
 const routeLoadingCopy = {
   kr: {
