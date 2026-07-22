@@ -47,6 +47,8 @@ test('product operations use dedicated list and editor workflows', () => {
   for (const locale of ["'kr'", "'en'", "'jp'", "'zh-TW'"]) assert.match(editor, new RegExp(locale))
   assert.match(editor, /AdminSaveBar/)
   assert.match(editor, /getReadiness/)
+  assert.match(editor, /getRegistrationChecks/)
+  assert.match(editor, /publishAttempted/)
   assert.match(editor, /prices\.write/)
   assert.match(editor, /ProductDetailView/)
   assert.match(editor, /editor=\{editorBridge\}/)
@@ -54,6 +56,22 @@ test('product operations use dedicated list and editor workflows', () => {
   assert.match(editor, /AdminVisualEditorShell/)
   assert.match(editor, /productSections/)
   assert.match(editor, /selectProductSection/)
+  for (const label of [
+    '카테고리·기본 정보',
+    '다국어 상품명·요약',
+    '상품 이미지',
+    '옵션·피어싱 규격',
+    'MOQ·승인 회원 가격',
+    '상세 콘텐츠',
+    '공개·홈 노출 설정',
+    '최종 검토',
+  ]) assert.match(editor, new RegExp(label))
+  assert.match(editor, /missing\.length === 0 \? 'complete' : publishAttempted \? 'error' : 'warning'/)
+  assert.match(editor, /focusEditorIssue\(firstIncompleteStep\?\.id \|\| 'review'\)/)
+  assert.match(editor, /setPublishAttempted\(true\)/)
+  assert.doesNotMatch(editor, /openInspectorGroup === 'basic'/)
+  assert.doesNotMatch(editor, /openInspectorGroup === 'trade'/)
+  assert.doesNotMatch(editor, /openInspectorGroup === 'operations'/)
   assert.match(editor, /inspectorGroupByField/)
   assert.match(editor, /selectEditorField/)
   assert.match(editor, /beginInline/)
@@ -67,6 +85,8 @@ test('product operations use dedicated list and editor workflows', () => {
   assert.match(visualShell, /tablet: 1024/)
   assert.match(visualShell, /mobile: 390/)
   assert.match(visualShell, /function AdminFixedPreviewCanvas/)
+  assert.match(visualShell, /section\.statusText/)
+  assert.match(visualShell, /admin-visual-editor-section-state/)
   assert.match(visualShell, /new ResizeObserver\(updateLayout\)/)
   assert.doesNotMatch(visualShell, /requestAnimationFrame/)
   assert.match(visualShell, /window\.addEventListener\('resize', updateLayout\)/)
