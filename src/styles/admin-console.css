@@ -6424,6 +6424,10 @@ button:disabled,
   padding-bottom: 82px;
 }
 
+.admin-quote-workspace.is-sample-preview button:disabled {
+  cursor: default;
+}
+
 .admin-picking-list {
   display: grid;
   gap: 12px;
