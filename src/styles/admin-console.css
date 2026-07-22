@@ -25,6 +25,10 @@ body:has(.admin-console-shell) {
   overflow-y: visible;
 }
 
+body:has(.admin-console-shell) {
+  min-width: 0;
+}
+
 /* Home showcase editor */
 .admin-showcase-editor-layout {
   display: grid;
@@ -3804,6 +3808,11 @@ button:disabled,
   display: none;
 }
 
+.admin-visual-editor .admin-visual-editor-backdrop {
+  animation: none;
+  transition: opacity 160ms ease;
+}
+
 .is-visual-editor-route .admin-product-visual-editor {
   gap: 0;
   margin: 0;
@@ -4040,7 +4049,7 @@ button:disabled,
 
 @media (prefers-reduced-motion: reduce) {
   .admin-visual-editor-inspector,
-  .admin-visual-editor-backdrop {
+  .admin-visual-editor .admin-visual-editor-backdrop {
     transition: none;
   }
 }
@@ -6991,6 +7000,12 @@ button:disabled,
     display: none;
   }
 
+  .admin-console-main .admin-page-header > .admin-actions > a.admin-mobile-primary-action {
+    display: inline-flex;
+    min-height: 44px;
+    padding-inline: 12px;
+  }
+
   .admin-quote-workflow {
     display: none;
   }
@@ -7193,6 +7208,18 @@ button:disabled,
   }
 
   .admin-quote-task-bar .admin-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .admin-console-main .admin-page-header:has(.admin-mobile-primary-action) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-console-main .admin-page-header > .admin-actions:has(.admin-mobile-primary-action),
+  .admin-console-main .admin-page-header > .admin-actions > a.admin-mobile-primary-action {
+    justify-content: center;
     width: 100%;
   }
 }

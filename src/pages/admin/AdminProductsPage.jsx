@@ -186,7 +186,7 @@ export function AdminProductsPage() {
     <AdminPageHeader
       title="상품"
       description="상품 정보와 공개 준비 상태를 확인하고 관리합니다."
-      actions={hasPermission('catalog.write') && <AdminLink className="primary-action" to="/admin/products/new"><PackagePlus size={17} />새 상품</AdminLink>}
+      actions={hasPermission('catalog.write') && <AdminLink className="primary-action admin-mobile-primary-action" to="/admin/products/new"><PackagePlus size={17} />새 상품</AdminLink>}
     />
 
     <section className="admin-resource-index">
