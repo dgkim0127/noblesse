@@ -9,6 +9,8 @@ const read = (path) => readFileSync(join(process.cwd(), path), 'utf8')
 test('quote density preview creates 15 safe display-only sample items', () => {
   const items = createAdminQuoteSampleItems([{ productImage: { url: '/sample.webp', altText: 'source' } }], 'kr')
   const params = new URLSearchParams('sampleItems=15')
+  const quotePage = read('src/pages/admin/AdminQuotePage.jsx')
+  const adminStyles = read('src/styles/admin-console.css')
 
   assert.equal(items.length, 15)
   assert.equal(new Set(items.map((item) => item.id)).size, 15)
@@ -22,6 +24,8 @@ test('quote density preview creates 15 safe display-only sample items', () => {
   assert.equal(isAdminQuoteSampleMode(new URLSearchParams(), 'noblesse.web.app'), false)
   assert.equal(isAdminQuoteSampleMode(new URLSearchParams('sampleItems=10'), 'noblesse.web.app'), false)
   assert.equal(isAdminQuoteSampleMode(params, 'example.com'), false)
+  assert.match(quotePage, /admin-quote-workspace\$\{sampleMode \? ' is-sample-preview' : ''\}/)
+  assert.match(adminStyles, /\.admin-quote-workspace\.is-sample-preview button:disabled \{\s*cursor: default;/)
 })
 
 test('product operations use dedicated list and editor workflows', () => {

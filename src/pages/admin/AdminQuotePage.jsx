@@ -396,7 +396,7 @@ export function AdminQuotePage() {
       <dl><dt>{t.detail.exceptions}</dt><dd>{exceptionItems.length}</dd><dt>{t.detail.pdfVersion}</dt><dd>{quote.currentRevision || '-'}</dd></dl>
     </details>
 
-    <form className="admin-quote-workspace" onSubmit={(event) => { event.preventDefault(); saveDraft() }}>
+    <form className={`admin-quote-workspace${sampleMode ? ' is-sample-preview' : ''}`} onSubmit={(event) => { event.preventDefault(); saveDraft() }}>
       <div className="admin-editor-main">
         <section className="admin-editor-section admin-picking-section">
           <div className="admin-section-heading"><div><h2>{t.detail.prepareTitle}</h2><p>{t.detail.prepareBody}</p></div>{editable && <button type="button" onClick={markAllReady}><PackageCheck size={17} />{t.detail.prepareAll}</button>}</div>
