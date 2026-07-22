@@ -8,6 +8,18 @@
   font-family: Inter, Pretendard, "Noto Sans KR", Arial, sans-serif;
 }
 
+@media (max-width: 820px) {
+  .site-shell.admin-route-shell > .top-marquee,
+  .site-shell.admin-route-shell > .site-header,
+  .site-shell.admin-route-shell > .site-footer {
+    display: none !important;
+  }
+
+  .site-shell.admin-route-shell {
+    min-height: 100dvh;
+  }
+}
+
 .route-page-loading {
   align-items: center;
   color: #666371;

@@ -2,8 +2,24 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import test from 'node:test'
+import { createAdminQuoteSampleItems, isAdminQuoteSampleMode } from '../src/pages/admin/adminQuoteSampleItems.js'
 
 const read = (path) => readFileSync(join(process.cwd(), path), 'utf8')
+
+test('quote density preview creates 15 safe display-only sample items', () => {
+  const items = createAdminQuoteSampleItems([{ productImage: { url: '/sample.webp', altText: 'source' } }], 'kr')
+  const params = new URLSearchParams('sampleItems=15')
+
+  assert.equal(items.length, 15)
+  assert.equal(new Set(items.map((item) => item.id)).size, 15)
+  assert.equal(new Set(items.map((item) => item.productCode)).size, 15)
+  assert.ok(items.every((item) => item.productName && item.productImage?.url && item.selectedOptions.length === 3))
+  assert.ok(items.some((item) => item.fulfillmentStatus === 'partial'))
+  assert.ok(items.some((item) => item.fulfillmentStatus === 'cancelled'))
+  assert.equal(isAdminQuoteSampleMode(params, 'noblesse--admin-quote-responsive-ux-09rxtpa7.web.app'), true)
+  assert.equal(isAdminQuoteSampleMode(params, 'localhost'), true)
+  assert.equal(isAdminQuoteSampleMode(params, 'noblesse.web.app'), false)
+})
 
 test('product operations use dedicated list and editor workflows', () => {
   const list = read('src/pages/admin/AdminProductsPage.jsx')
@@ -126,6 +142,40 @@ test('quote workflow separates customer documents from internal notes and direct
   assert.match(buyerQuotes, /상품 준비 견적서에서 선택 옵션과 준비·취소 수량을 확인한 뒤/)
   assert.match(buyerQuotes, /사이트에서는 주문이나 결제가 생성되지 않습니다/)
   assert.doesNotMatch(adminQuote, /checkout|createOrder|paymentIntent/i)
+})
+
+test('admin quote preparation uses responsive work cards and one contextual action path', () => {
+  const quotePage = read('src/pages/admin/AdminQuotePage.jsx')
+  const adminShell = read('src/components/AdminShell.jsx')
+  const storeShell = read('src/components/StoreShell.jsx')
+  const appStyles = read('src/App.css')
+  const adminStyles = read('src/styles/admin-console.css')
+
+  assert.match(quotePage, /className="admin-picking-list"/)
+  assert.match(quotePage, /className=\{`admin-picking-item fulfillment-/)
+  assert.match(quotePage, /className="admin-picking-options"/)
+  assert.match(quotePage, /const cancelled = Math\.max\(requested - prepared, 0\)/)
+  assert.match(quotePage, /const needsCancellationReason = \['partial', 'cancelled'\]\.includes\(item\.fulfillmentStatus\)/)
+  assert.doesNotMatch(quotePage, /className="admin-picking-table"/)
+  assert.doesNotMatch(quotePage, /AdminSaveBar/)
+
+  assert.match(quotePage, /className="admin-quote-workflow-compact"/)
+  assert.match(quotePage, /className="admin-quote-additional-settings"/)
+  assert.match(quotePage, /className="admin-editor-section admin-quote-history-section"/)
+  assert.match(quotePage, /className="admin-quote-task-bar"/)
+  assert.match(quotePage, /orderDocuments\(documents, quote\?\.currentDocumentId\)/)
+  assert.match(quotePage, /groupWorkflowHistory\(history\)/)
+  assert.match(quotePage, /entry\.eventType === 'workflow'/)
+
+  assert.match(adminShell, /className="admin-mobile-appbar"/)
+  assert.match(adminShell, /className="admin-mobile-bottom-nav"/)
+  assert.match(storeShell, /admin-route-shell/)
+  assert.match(appStyles, /\.site-shell\.admin-route-shell > \.top-marquee/)
+  assert.match(appStyles, /\.site-shell\.admin-route-shell > \.site-header/)
+  assert.match(adminStyles, /\.admin-picking-item \{[\s\S]*?grid-template-columns: minmax\(280px, 1\.35fr\) minmax\(280px, 0\.9fr\) minmax\(180px, 0\.55fr\)/)
+  assert.match(adminStyles, /\.admin-picking-identity > code[\s\S]*?overflow-wrap: anywhere/)
+  assert.match(adminStyles, /\.admin-picking-shortcuts button,[\s\S]*?min-height: 44px/)
+  assert.match(adminStyles, /@media \(max-width: 820px\)[\s\S]*?\.admin-picking-item \{[\s\S]*?display: block/)
 })
 
 test('admin console uses restrained neutral styling without gradients', () => {
