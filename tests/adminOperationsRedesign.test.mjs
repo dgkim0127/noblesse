@@ -18,7 +18,10 @@ test('quote density preview creates 15 safe display-only sample items', () => {
   assert.ok(items.some((item) => item.fulfillmentStatus === 'cancelled'))
   assert.equal(isAdminQuoteSampleMode(params, 'noblesse--admin-quote-responsive-ux-09rxtpa7.web.app'), true)
   assert.equal(isAdminQuoteSampleMode(params, 'localhost'), true)
-  assert.equal(isAdminQuoteSampleMode(params, 'noblesse.web.app'), false)
+  assert.equal(isAdminQuoteSampleMode(params, 'noblesse.web.app'), true)
+  assert.equal(isAdminQuoteSampleMode(new URLSearchParams(), 'noblesse.web.app'), false)
+  assert.equal(isAdminQuoteSampleMode(new URLSearchParams('sampleItems=10'), 'noblesse.web.app'), false)
+  assert.equal(isAdminQuoteSampleMode(params, 'example.com'), false)
 })
 
 test('product operations use dedicated list and editor workflows', () => {
