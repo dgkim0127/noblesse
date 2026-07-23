@@ -1,4 +1,4 @@
-import { FileArchive, FileText, GripVertical, ImagePlus, Images, ListChecks, PackageCheck, RotateCcw, Settings2, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react'
+import { BadgeDollarSign, ClipboardCheck, FileArchive, FileText, FolderTree, GripVertical, ImagePlus, Images, Languages, PackageCheck, RotateCcw, Settings2, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
@@ -50,31 +50,44 @@ const localeTabs = [
   { key: 'zh-TW', label: '繁體中文' },
 ]
 const inspectorGroups = [
-  { id: 'basic', label: '기본 정보' },
-  { id: 'images', label: '이미지' },
-  { id: 'trade', label: '옵션·가격' },
-  { id: 'details', label: '상세 정보' },
-  { id: 'operations', label: '운영 설정' },
+  { id: 'basics', label: '카테고리·기본 정보' },
+  { id: 'localization', label: '다국어 상품명·요약' },
+  { id: 'images', label: '상품 이미지' },
+  { id: 'options', label: '옵션·피어싱 규격' },
+  { id: 'commercial', label: 'MOQ·승인 회원 가격' },
+  { id: 'details', label: '상세 콘텐츠' },
+  { id: 'visibility', label: '공개·홈 노출 설정' },
+  { id: 'review', label: '최종 검토' },
 ]
 const inspectorGroupByField = {
-  name: 'basic',
-  summary: 'basic',
-  code: 'basic',
-  category: 'basic',
+  name: 'localization',
+  summary: 'localization',
+  code: 'basics',
+  category: 'basics',
+  productInfo: 'basics',
   image: 'images',
-  options: 'trade',
-  colors: 'trade',
-  sizes: 'trade',
-  moq: 'trade',
-  price: 'trade',
+  options: 'options',
+  colors: 'options',
+  sizes: 'options',
+  specs: 'options',
+  moq: 'commercial',
+  price: 'commercial',
   headline: 'details',
   body: 'details',
   detailBlocks: 'details',
   care: 'details',
-  productInfo: 'details',
-  specs: 'details',
-  readiness: 'operations',
-  settings: 'operations',
+  readiness: 'review',
+  settings: 'visibility',
+}
+const defaultFieldByStep = {
+  basics: 'code',
+  localization: 'name',
+  images: 'image',
+  options: 'options',
+  commercial: 'moq',
+  details: 'detailBlocks',
+  visibility: 'settings',
+  review: 'readiness',
 }
 const emptyTranslation = {
   name: '',
@@ -327,6 +340,7 @@ function getReadiness(form, { hasImage, hasPrice, images }) {
   for (const { key, label } of localeTabs) {
     if (!form.translations[key].name.trim() || !form.translations[key].summary.trim()) missing.push(`${label} 상품명과 요약`)
   }
+  if (!form.code.trim()) missing.push('상품 코드')
   if (!form.categoryKey) missing.push('카테고리')
   if (!hasImage) missing.push('대표 이미지')
   if (!hasPrice) missing.push('활성 KR 가격')
@@ -340,6 +354,44 @@ function getReadiness(form, { hasImage, hasPrice, images }) {
     }
   }
   return { ready: missing.length === 0, missing: [...new Set(missing)] }
+}
+
+function getRegistrationChecks(form, { hasImage, hasPrice, images, publishAttempted }) {
+  const localizationMissing = []
+  for (const { key, label } of localeTabs) {
+    if (!form.translations[key].name.trim() || !form.translations[key].summary.trim()) {
+      localizationMissing.push(`${label} 상품명과 요약`)
+    }
+  }
+
+  const detailMissing = [...getProductDetailBlockDraftIssues(form.detailContentBase.blocks, images)]
+  for (const field of ['headline', 'body']) {
+    const anyUsed = localeTabs.some(({ key }) => form.translations[key][field].trim())
+    if (!anyUsed) continue
+    for (const { key, label } of localeTabs) {
+      if (!form.translations[key][field].trim()) detailMissing.push(`${label} 상세 ${field === 'headline' ? '제목' : '본문'}`)
+    }
+  }
+
+  const checks = [
+    { id: 'basics', missing: [!form.code.trim() && '상품 코드', !form.categoryKey && '카테고리'].filter(Boolean) },
+    { id: 'localization', missing: localizationMissing },
+    { id: 'images', missing: hasImage ? [] : ['대표 이미지'] },
+    { id: 'options', missing: getProductOptionDraftIssues(form.optionGroups, images) },
+    { id: 'commercial', missing: [!(Number(form.moqDefault) >= 1) && '상품 최소 수량', !hasPrice && '활성 KR 가격'].filter(Boolean) },
+    { id: 'details', missing: detailMissing },
+    { id: 'visibility', missing: [] },
+  ]
+  const allMissing = [...new Set(checks.flatMap((check) => check.missing))]
+  checks.push({ id: 'review', missing: allMissing })
+
+  return checks.map(({ id, missing }) => ({
+    id,
+    missing: [...new Set(missing)],
+    status: missing.length === 0 ? 'complete' : publishAttempted ? 'error' : 'warning',
+    statusLabel: missing.length === 0 ? '완료' : publishAttempted ? `${missing.length}개 오류` : `${missing.length}개 확인 필요`,
+    statusText: missing.length === 0 ? '완료' : publishAttempted ? `오류 ${missing.length}` : `확인 ${missing.length}`,
+  }))
 }
 
 function InspectorGroup({ children, group, open }) {
@@ -383,7 +435,7 @@ export function AdminProductEditorPage() {
   const [activeLocale, setActiveLocale] = useState('kr')
   const [activeEditor, setActiveEditor] = useState(null)
   const [selectedField, setSelectedField] = useState(null)
-  const [openInspectorGroup, setOpenInspectorGroup] = useState('basic')
+  const [openInspectorGroup, setOpenInspectorGroup] = useState('basics')
   const [inspectorOpen, setInspectorOpen] = useState(false)
   const [previewMode, setPreviewMode] = useState('desktop')
   const [images, setImages] = useState([])
@@ -397,6 +449,7 @@ export function AdminProductEditorPage() {
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState({ message: '', tone: 'success' })
   const [confirm, setConfirm] = useState(null)
+  const [publishAttempted, setPublishAttempted] = useState(false)
 
   const resource = useAdminApiResource(async (api, token) => {
     const categoriesResult = await api.getCategories({ limit: 200 }, token)
@@ -425,6 +478,11 @@ export function AdminProductEditorPage() {
     setImages(nextImages)
     setSelectedImageId(nextImages[0]?.id || '')
     setPriceSaved(Boolean(resource.data?.price?.isActive))
+    setActiveEditor(null)
+    setSelectedField(null)
+    setOpenInspectorGroup('basics')
+    setInspectorOpen(false)
+    setPublishAttempted(false)
     setDirty(false)
     setImagesDirty(false)
     setPriceDirty(false)
@@ -463,6 +521,15 @@ export function AdminProductEditorPage() {
     ? price.isActive && price.wholesalePrice !== '' && Number(price.wholesalePrice) >= 0
     : priceSaved
   const readiness = useMemo(() => getReadiness(form, { hasImage, hasPrice, images }), [form, hasImage, hasPrice, images])
+  const registrationChecks = useMemo(
+    () => getRegistrationChecks(form, { hasImage, hasPrice, images, publishAttempted }),
+    [form, hasImage, hasPrice, images, publishAttempted],
+  )
+  const registrationCheckById = useMemo(
+    () => Object.fromEntries(registrationChecks.map((check) => [check.id, check])),
+    [registrationChecks],
+  )
+  const firstIncompleteStep = registrationChecks.find((check) => check.id !== 'review' && check.missing.length)
   const previewCategory = categories.find((item) => item.categoryId === form.categoryKey)
   const selectedImage = images.find((image) => image.id === selectedImageId) || images[0] || null
 
@@ -720,8 +787,9 @@ export function AdminProductEditorPage() {
     setPrice({ ...initialRef.current.price })
     setActiveEditor(null)
     setSelectedField(null)
-    setOpenInspectorGroup('basic')
+    setOpenInspectorGroup('basics')
     setInspectorOpen(false)
+    setPublishAttempted(false)
     inlineSnapshotRef.current = null
     setDirty(false)
     setImagesDirty(false)
@@ -729,16 +797,26 @@ export function AdminProductEditorPage() {
     setToast({ message: '변경사항을 되돌렸습니다.', tone: 'success' })
   }
 
+  const focusEditorIssue = (stepId, field = defaultFieldByStep[stepId]) => {
+    setOpenInspectorGroup(stepId)
+    setSelectedField(field)
+    setInspectorOpen(true)
+  }
+
   const saveProduct = async ({ publish = false } = {}) => {
     if (!form.code.trim()) {
+      focusEditorIssue('basics', 'code')
       setToast({ message: '상품 코드를 입력해 주세요.', tone: 'error' })
       return
     }
     if (!localeTabs.some(({ key }) => form.translations[key].name.trim())) {
+      focusEditorIssue('localization', 'name')
       setToast({ message: '한 개 이상의 언어로 상품명을 입력해 주세요.', tone: 'error' })
       return
     }
     if (publish && !readiness.ready) {
+      setPublishAttempted(true)
+      focusEditorIssue(firstIncompleteStep?.id || 'review')
       setToast({ message: `공개 전에 ${readiness.missing.join(', ')} 항목을 완료해 주세요.`, tone: 'error' })
       setConfirm(null)
       return
@@ -790,8 +868,9 @@ export function AdminProductEditorPage() {
       setForm(nextForm)
       setActiveEditor(null)
       setSelectedField(null)
-      setOpenInspectorGroup('basic')
+      setOpenInspectorGroup('basics')
       setInspectorOpen(false)
+      setPublishAttempted(false)
       inlineSnapshotRef.current = null
       setDirty(false)
       setImagesDirty(false)
@@ -807,14 +886,20 @@ export function AdminProductEditorPage() {
     }
   }
 
-  const requestPublish = () => setConfirm({
-    title: '상품을 공개할까요?',
-    description: readiness.ready
-      ? '저장 후 로그인 거래처가 상품 목록과 상세에서 확인할 수 있습니다.'
-      : `아직 완료되지 않은 항목: ${readiness.missing.join(', ')}`,
-    confirmLabel: '저장 후 공개',
-    action: () => saveProduct({ publish: true }),
-  })
+  const requestPublish = () => {
+    if (!readiness.ready) {
+      setPublishAttempted(true)
+      focusEditorIssue(firstIncompleteStep?.id || 'review')
+      setToast({ message: `공개 전에 ${readiness.missing.join(', ')} 항목을 완료해 주세요.`, tone: 'error' })
+      return
+    }
+    setConfirm({
+      title: '상품을 공개할까요?',
+      description: '저장 후 로그인 거래처가 상품 목록과 상세에서 확인할 수 있습니다.',
+      confirmLabel: '저장 후 공개',
+      action: () => saveProduct({ publish: true }),
+    })
+  }
 
   const currentTranslation = form.translations[activeLocale]
   const draftProduct = buildDraftProduct({ category: previewCategory, form, images, product })
@@ -832,7 +917,7 @@ export function AdminProductEditorPage() {
     inlineSnapshotRef.current = { field, value, wasDirty: dirty }
     setActiveEditor({ field, kind: 'inline' })
     setSelectedField(field)
-    setOpenInspectorGroup(inspectorGroupByField[field] || 'basic')
+    setOpenInspectorGroup(inspectorGroupByField[field] || 'basics')
   }
   const changeInline = (field, value) => setTranslationField(activeLocale, field, value)
   const commitInline = (field) => {
@@ -856,7 +941,7 @@ export function AdminProductEditorPage() {
   }
   const selectEditorField = (field, trigger = null, { openPanel = true } = {}) => {
     setSelectedField(field)
-    setOpenInspectorGroup(inspectorGroupByField[field] || 'basic')
+    setOpenInspectorGroup(inspectorGroupByField[field] || 'basics')
     if (trigger) inspectorReturnFocusRef.current = trigger
     if (openPanel) setInspectorOpen(true)
   }
@@ -879,56 +964,61 @@ export function AdminProductEditorPage() {
     values: currentTranslation,
   }
 
-  const sectionDefaultField = {
-    basic: 'name',
-    images: 'image',
-    trade: 'options',
-    details: 'detailBlocks',
-    operations: 'settings',
-  }
+  const completedLocales = localeTabs.filter(({ key }) => (
+    form.translations[key].name.trim() && form.translations[key].summary.trim()
+  )).length
+  const visibleHomeSections = Object.values(form.homePlacement).filter((value) => value === true).length
   const productSections = [
     {
-      id: 'basic',
-      label: '기본 정보',
-      description: currentTranslation.name || '상품명과 분류',
-      icon: FileText,
-      status: currentTranslation.name.trim() && currentTranslation.summary.trim() && form.code.trim() && form.categoryKey ? 'complete' : 'warning',
-      statusLabel: '상품명, 요약, 코드와 카테고리',
+      id: 'basics',
+      label: '카테고리·기본 정보',
+      description: `${form.code || '상품 코드'} · ${previewCategory?.nameKo || previewCategory?.nameEn || '카테고리 선택'}`,
+      icon: FolderTree,
+    },
+    {
+      id: 'localization',
+      label: '다국어 상품명·요약',
+      description: `${completedLocales}/4개 언어 입력`,
+      icon: Languages,
     },
     {
       id: 'images',
-      label: '이미지',
+      label: '상품 이미지',
       description: images.length ? `${images.length}장 · 첫 사진이 대표` : '사진을 추가하세요',
       icon: Images,
-      status: hasImage ? 'complete' : 'warning',
-      statusLabel: hasImage ? '이미지 준비 완료' : '대표 이미지 필요',
     },
     {
-      id: 'trade',
-      label: '옵션·가격',
-      description: `${form.optionGroups.length}개 옵션 그룹 · ${hasPrice ? 'KR 가격 설정됨' : '가격 확인 필요'}`,
+      id: 'options',
+      label: '옵션·피어싱 규격',
+      description: `${form.optionGroups.length}개 옵션 그룹 · 착용 규격`,
       icon: SlidersHorizontal,
-      status: hasPrice && getProductOptionDraftIssues(form.optionGroups, images).length === 0 ? 'complete' : 'warning',
-      statusLabel: hasPrice ? '옵션 번역과 값 확인' : '활성 KR 가격 필요',
+    },
+    {
+      id: 'commercial',
+      label: 'MOQ·승인 회원 가격',
+      description: `MOQ ${form.moqDefault || 1} · ${hasPrice ? 'KR 가격 설정됨' : '가격 확인 필요'}`,
+      icon: BadgeDollarSign,
     },
     {
       id: 'details',
-      label: '상세 정보',
-      description: `${normalizeProductDetailBlocks(form.detailContentBase.blocks).length}개 콘텐츠 블록 · 착용·소재·규격`,
-      icon: ListChecks,
-      status: normalizeProductDetailBlocks(form.detailContentBase.blocks).length > 0 ? 'complete' : 'neutral',
-      statusLabel: '선택 상세 콘텐츠',
+      label: '상세 콘텐츠',
+      description: `${normalizeProductDetailBlocks(form.detailContentBase.blocks).length}개 콘텐츠 블록`,
+      icon: FileText,
     },
     {
-      id: 'operations',
-      label: '운영 설정',
-      description: readiness.ready ? '공개 준비 완료' : `${readiness.missing.length}개 항목 확인`,
+      id: 'visibility',
+      label: '공개·홈 노출 설정',
+      description: `홈 ${visibleHomeSections}개 영역 · ${product?.isVisible ? '공개' : '비공개'}`,
       icon: Settings2,
-      status: readiness.ready ? 'complete' : 'warning',
-      statusLabel: readiness.ready ? '공개 가능' : '공개 준비 확인 필요',
     },
-  ]
-  const selectProductSection = (sectionId, field = sectionDefaultField[sectionId]) => {
+    {
+      id: 'review',
+      label: '최종 검토',
+      description: readiness.ready ? '공개 준비 완료' : `${readiness.missing.length}개 항목 확인`,
+      icon: ClipboardCheck,
+    },
+  ].map((section) => ({ ...section, ...(registrationCheckById[section.id] || {}) }))
+  const selectProductSection = (sectionId, field = defaultFieldByStep[sectionId]) => {
     if (activeEditor?.kind === 'inline') commitInline(activeEditor.field)
     else setActiveEditor(null)
     setOpenInspectorGroup(sectionId)
@@ -960,7 +1050,7 @@ export function AdminProductEditorPage() {
         onCloseInspector={closeInspector}
         onDeviceChange={setPreviewMode}
         onLocaleChange={(key) => { if (activeEditor?.kind === 'inline') commitInline(activeEditor.field); else setActiveEditor(null); setActiveLocale(key) }}
-        onReadinessClick={() => selectProductSection('operations', 'readiness')}
+        onReadinessClick={() => selectProductSection('review', 'readiness')}
         onSelectSection={selectProductSection}
         previewAriaLabel="실제 상품 상세 화면 편집 미리보기"
         readiness={{ ready: readiness.ready, label: readiness.ready ? '공개 준비 완료' : `${readiness.missing.length}개 확인 필요` }}
@@ -968,31 +1058,33 @@ export function AdminProductEditorPage() {
         selectedSectionId={openInspectorGroup}
         title={isEditing ? getTranslation(product, 'kr').name || product?.code || '상품 수정' : '새 상품'}
         inspector={<>
-          <InspectorField activeField={selectedField} field="readiness">
-            <div className={`admin-product-inspector-readiness${readiness.ready ? ' is-ready' : ''}`}>
-              <span>공개 준비</span>
-              <strong>{readiness.ready ? '공개할 수 있습니다.' : `${readiness.missing.length}개 항목이 필요합니다.`}</strong>
-              {!readiness.ready && <p>{readiness.missing.join(', ')}</p>}
-            </div>
-          </InspectorField>
-
           <div className="admin-product-inspector-groups">
-            <InspectorGroup group={inspectorGroups[0]} open={openInspectorGroup === 'basic'} onOpen={() => setOpenInspectorGroup('basic')}>
-              <InspectorField activeField={selectedField} field="name">
-                <label className="admin-field"><span>{editorBridge.localeLabel} 상품명 <b>*</b></span><input maxLength="240" value={currentTranslation.name} onChange={(event) => setTranslationField(activeLocale, 'name', event.target.value)} /></label>
-              </InspectorField>
-              <InspectorField activeField={selectedField} field="summary">
-                <label className="admin-field"><span>{editorBridge.localeLabel} 한 줄 요약 <b>*</b></span><textarea maxLength="4000" rows="3" value={currentTranslation.summary} onChange={(event) => setTranslationField(activeLocale, 'summary', event.target.value)} /></label>
-              </InspectorField>
+            <InspectorGroup group={inspectorGroups[0]} open={openInspectorGroup === 'basics'}>
               <InspectorField activeField={selectedField} field="code">
                 <label className="admin-field"><span>상품 코드 <b>*</b></span><input disabled={isEditing} maxLength="80" placeholder="NB-001" value={form.code} onChange={(event) => setField('code', event.target.value)} /><small>{isEditing ? '등록된 상품 코드는 변경할 수 없습니다.' : '저장 후에는 상품 코드를 변경할 수 없습니다.'}</small></label>
               </InspectorField>
               <InspectorField activeField={selectedField} field="category">
                 <label className="admin-field"><span>카테고리</span><select value={form.categoryKey} onChange={(event) => setField('categoryKey', event.target.value)}><option value="">선택</option>{categories.map((item) => <option key={item.id} value={item.categoryId}>{item.nameKo || item.nameEn || item.nameZhTw || item.categoryId}</option>)}</select></label>
               </InspectorField>
+              <InspectorField activeField={selectedField} field="productInfo">
+                <div className="admin-form-grid">
+                  <label className="admin-field"><span>소재</span><input value={form.material} onChange={(event) => setField('material', event.target.value)} /></label>
+                  <label className="admin-field"><span>원산지</span><input maxLength="20" value={form.origin} onChange={(event) => setField('origin', event.target.value)} /></label>
+                  <label className="admin-field"><span>예상 납기</span><input placeholder="영업일 기준 7-10일" value={form.leadTime} onChange={(event) => setField('leadTime', event.target.value)} /></label>
+                </div>
+              </InspectorField>
             </InspectorGroup>
 
-            <InspectorGroup group={inspectorGroups[1]} open={openInspectorGroup === 'images'} onOpen={() => setOpenInspectorGroup('images')}>
+            <InspectorGroup group={inspectorGroups[1]} open={openInspectorGroup === 'localization'}>
+              <InspectorField activeField={selectedField} field="name">
+                <label className="admin-field"><span>{editorBridge.localeLabel} 상품명 <b>*</b></span><input maxLength="240" value={currentTranslation.name} onChange={(event) => setTranslationField(activeLocale, 'name', event.target.value)} /></label>
+              </InspectorField>
+              <InspectorField activeField={selectedField} field="summary">
+                <label className="admin-field"><span>{editorBridge.localeLabel} 한 줄 요약 <b>*</b></span><textarea maxLength="4000" rows="3" value={currentTranslation.summary} onChange={(event) => setTranslationField(activeLocale, 'summary', event.target.value)} /></label>
+              </InspectorField>
+            </InspectorGroup>
+
+            <InspectorGroup group={inspectorGroups[2]} open={openInspectorGroup === 'images'}>
               <InspectorField activeField={selectedField} field="image">
                 <div
                   className={`admin-product-image-dropzone${imageDropActive ? ' is-active' : ''}`}
@@ -1055,7 +1147,7 @@ export function AdminProductEditorPage() {
               </InspectorField>
             </InspectorGroup>
 
-            <InspectorGroup group={inspectorGroups[2]} open={openInspectorGroup === 'trade'} onOpen={() => setOpenInspectorGroup('trade')}>
+            <InspectorGroup group={inspectorGroups[3]} open={openInspectorGroup === 'options'}>
               <InspectorField activeField={selectedField} field="options">
                 <ProductOptionGroupsEditor
                   activeLocale={activeLocale}
@@ -1065,40 +1157,6 @@ export function AdminProductEditorPage() {
                   onSelectField={selectEditorField}
                 />
                 {form.optionGroups.length === 0 && <button className="admin-link-button admin-product-template-action" type="button" onClick={() => applyPiercingTemplate({ includeOptions: true, includeDetails: true })}>피어싱 기본 옵션·상세 구성 넣기</button>}
-              </InspectorField>
-              <InspectorField activeField={selectedField} field="moq">
-                <div className="admin-form-grid">
-                  <label className="admin-field"><span>상품 최소 수량</span><input min="1" type="number" value={form.moqDefault} onChange={(event) => setField('moqDefault', event.target.value)} /></label>
-                  <label className="admin-field"><span>가격 MOQ</span><input disabled={!canWritePrices} min="1" type="number" value={price.moq} onChange={(event) => setPriceField('moq', event.target.value)} /></label>
-                </div>
-              </InspectorField>
-              <InspectorField activeField={selectedField} field="price">
-                <div className="admin-form-grid">
-                  <label className="admin-field"><span>KR 도매가 (KRW)</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.wholesalePrice} onChange={(event) => setPriceField('wholesalePrice', event.target.value)} /></label>
-                  <label className="admin-field"><span>권장 소비자가</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.retailPrice} onChange={(event) => setPriceField('retailPrice', event.target.value)} /></label>
-                  <label className="admin-field"><span>최소 견적 금액</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.minOrderAmount} onChange={(event) => setPriceField('minOrderAmount', event.target.value)} /></label>
-                  <label className="admin-switch"><input checked={price.isActive} disabled={!canWritePrices} type="checkbox" onChange={(event) => setPriceField('isActive', event.target.checked)} /><span>KR 가격 활성화</span></label>
-                </div>
-                {!canWritePrices && <p className="admin-help-text">가격 수정 권한이 없어 읽기 전용으로 표시됩니다.</p>}
-              </InspectorField>
-            </InspectorGroup>
-
-            <InspectorGroup group={inspectorGroups[3]} open={openInspectorGroup === 'details'} onOpen={() => setOpenInspectorGroup('details')}>
-              <InspectorField activeField={selectedField} field="detailBlocks">
-                <ProductDetailBlocksEditor
-                  activeLocale={activeLocale}
-                  blocks={form.detailContentBase.blocks}
-                  images={images}
-                  onChange={setDetailBlocks}
-                  onTemplate={() => applyPiercingTemplate({ includeOptions: false, includeDetails: true })}
-                />
-              </InspectorField>
-              <InspectorField activeField={selectedField} field="productInfo">
-                <div className="admin-form-grid">
-                  <label className="admin-field"><span>소재</span><input value={form.material} onChange={(event) => setField('material', event.target.value)} /></label>
-                  <label className="admin-field"><span>원산지</span><input maxLength="20" value={form.origin} onChange={(event) => setField('origin', event.target.value)} /></label>
-                  <label className="admin-field"><span>예상 납기</span><input placeholder="영업일 기준 7-10일" value={form.leadTime} onChange={(event) => setField('leadTime', event.target.value)} /></label>
-                </div>
               </InspectorField>
               <InspectorField activeField={selectedField} field="specs">
                 <div className="admin-product-spec-editor">
@@ -1131,7 +1189,37 @@ export function AdminProductEditorPage() {
               </InspectorField>
             </InspectorGroup>
 
-            <InspectorGroup group={inspectorGroups[4]} open={openInspectorGroup === 'operations'} onOpen={() => setOpenInspectorGroup('operations')}>
+            <InspectorGroup group={inspectorGroups[4]} open={openInspectorGroup === 'commercial'}>
+              <InspectorField activeField={selectedField} field="moq">
+                <div className="admin-form-grid">
+                  <label className="admin-field"><span>상품 최소 수량</span><input min="1" type="number" value={form.moqDefault} onChange={(event) => setField('moqDefault', event.target.value)} /></label>
+                  <label className="admin-field"><span>가격 MOQ</span><input disabled={!canWritePrices} min="1" type="number" value={price.moq} onChange={(event) => setPriceField('moq', event.target.value)} /></label>
+                </div>
+              </InspectorField>
+              <InspectorField activeField={selectedField} field="price">
+                <div className="admin-form-grid">
+                  <label className="admin-field"><span>KR 도매가 (KRW)</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.wholesalePrice} onChange={(event) => setPriceField('wholesalePrice', event.target.value)} /></label>
+                  <label className="admin-field"><span>권장 소비자가</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.retailPrice} onChange={(event) => setPriceField('retailPrice', event.target.value)} /></label>
+                  <label className="admin-field"><span>최소 견적 금액</span><input disabled={!canWritePrices} inputMode="numeric" min="0" type="number" value={price.minOrderAmount} onChange={(event) => setPriceField('minOrderAmount', event.target.value)} /></label>
+                  <label className="admin-switch"><input checked={price.isActive} disabled={!canWritePrices} type="checkbox" onChange={(event) => setPriceField('isActive', event.target.checked)} /><span>KR 가격 활성화</span></label>
+                </div>
+                {!canWritePrices && <p className="admin-help-text">가격 수정 권한이 없어 읽기 전용으로 표시됩니다.</p>}
+              </InspectorField>
+            </InspectorGroup>
+
+            <InspectorGroup group={inspectorGroups[5]} open={openInspectorGroup === 'details'}>
+              <InspectorField activeField={selectedField} field="detailBlocks">
+                <ProductDetailBlocksEditor
+                  activeLocale={activeLocale}
+                  blocks={form.detailContentBase.blocks}
+                  images={images}
+                  onChange={setDetailBlocks}
+                  onTemplate={() => applyPiercingTemplate({ includeOptions: false, includeDetails: true })}
+                />
+              </InspectorField>
+            </InspectorGroup>
+
+            <InspectorGroup group={inspectorGroups[6]} open={openInspectorGroup === 'visibility'}>
               <InspectorField activeField={selectedField} field="settings">
                 <div className="admin-form-grid">
                   <label className="admin-field"><span>피어싱 유형</span><input value={form.taxonomy.piercingType || ''} onChange={(event) => setNestedField('taxonomy', 'piercingType', event.target.value)} /></label>
@@ -1157,6 +1245,24 @@ export function AdminProductEditorPage() {
                       ['showInSteadySelection', '스테디 셀렉션'],
                     ].map(([field, label]) => <label className="admin-switch" key={field}><input checked={Boolean(form.homePlacement[field])} type="checkbox" onChange={(event) => setNestedField('homePlacement', field, event.target.checked)} /><span>{label}</span></label>)}
                   </div>
+                </div>
+              </InspectorField>
+            </InspectorGroup>
+
+            <InspectorGroup group={inspectorGroups[7]} open={openInspectorGroup === 'review'}>
+              <InspectorField activeField={selectedField} field="readiness">
+                <div className={`admin-product-readiness ${readiness.ready ? 'is-ready' : ''}`}>
+                  <strong>{readiness.ready ? '공개 준비가 완료되었습니다.' : `${readiness.missing.length}개 항목을 확인해 주세요.`}</strong>
+                  {!readiness.ready && <p>{readiness.missing.join(', ')}</p>}
+                </div>
+                <div className="admin-product-review-steps">
+                  {registrationChecks.filter((check) => check.id !== 'review').map((check) => {
+                    const section = productSections.find((item) => item.id === check.id)
+                    return <button className={`admin-product-review-step is-${check.status}`} key={check.id} type="button" onClick={() => selectProductSection(check.id)}>
+                      <span><strong>{section?.label}</strong><small>{section?.description}</small></span>
+                      <em>{check.statusLabel}</em>
+                    </button>
+                  })}
                 </div>
               </InspectorField>
             </InspectorGroup>

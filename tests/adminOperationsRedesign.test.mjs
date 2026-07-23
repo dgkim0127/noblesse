@@ -41,12 +41,15 @@ test('product operations use dedicated list and editor workflows', () => {
   const styles = read('src/styles/admin-console.css')
 
   assert.match(list, /\/admin\/products\/new/)
+  assert.match(list, /admin-mobile-primary-action/)
   assert.doesNotMatch(list, /\/admin\/catalog\/new/)
   assert.match(list, /bulkUpdateProducts/)
   assert.match(list, /duplicateProduct/)
   for (const locale of ["'kr'", "'en'", "'jp'", "'zh-TW'"]) assert.match(editor, new RegExp(locale))
   assert.match(editor, /AdminSaveBar/)
   assert.match(editor, /getReadiness/)
+  assert.match(editor, /getRegistrationChecks/)
+  assert.match(editor, /publishAttempted/)
   assert.match(editor, /prices\.write/)
   assert.match(editor, /ProductDetailView/)
   assert.match(editor, /editor=\{editorBridge\}/)
@@ -54,6 +57,22 @@ test('product operations use dedicated list and editor workflows', () => {
   assert.match(editor, /AdminVisualEditorShell/)
   assert.match(editor, /productSections/)
   assert.match(editor, /selectProductSection/)
+  for (const label of [
+    '카테고리·기본 정보',
+    '다국어 상품명·요약',
+    '상품 이미지',
+    '옵션·피어싱 규격',
+    'MOQ·승인 회원 가격',
+    '상세 콘텐츠',
+    '공개·홈 노출 설정',
+    '최종 검토',
+  ]) assert.match(editor, new RegExp(label))
+  assert.match(editor, /missing\.length === 0 \? 'complete' : publishAttempted \? 'error' : 'warning'/)
+  assert.match(editor, /focusEditorIssue\(firstIncompleteStep\?\.id \|\| 'review'\)/)
+  assert.match(editor, /setPublishAttempted\(true\)/)
+  assert.doesNotMatch(editor, /openInspectorGroup === 'basic'/)
+  assert.doesNotMatch(editor, /openInspectorGroup === 'trade'/)
+  assert.doesNotMatch(editor, /openInspectorGroup === 'operations'/)
   assert.match(editor, /inspectorGroupByField/)
   assert.match(editor, /selectEditorField/)
   assert.match(editor, /beginInline/)
@@ -67,6 +86,8 @@ test('product operations use dedicated list and editor workflows', () => {
   assert.match(visualShell, /tablet: 1024/)
   assert.match(visualShell, /mobile: 390/)
   assert.match(visualShell, /function AdminFixedPreviewCanvas/)
+  assert.match(visualShell, /section\.statusText/)
+  assert.match(visualShell, /admin-visual-editor-section-state/)
   assert.match(visualShell, /new ResizeObserver\(updateLayout\)/)
   assert.doesNotMatch(visualShell, /requestAnimationFrame/)
   assert.match(visualShell, /window\.addEventListener\('resize', updateLayout\)/)
@@ -112,6 +133,9 @@ test('visual product editor keeps both navigation and the inspector stable witho
   assert.match(styles, /\.admin-visual-editor-workspace[\s\S]*?grid-template-columns: 200px 340px minmax\(0, 1fr\)/)
   assert.match(styles, /\.admin-visual-editor-sections,[\s\S]*?\.admin-visual-editor-inspector[\s\S]*?overflow-y: auto/)
   assert.match(styles, /\.admin-visual-editor-canvas[\s\S]*?overflow: auto/)
+  assert.match(styles, /body:has\(\.admin-console-shell\)[\s\S]*?min-width: 0/)
+  assert.match(styles, /a\.admin-mobile-primary-action[\s\S]*?display: inline-flex[\s\S]*?min-height: 44px/)
+  assert.match(styles, /\.admin-visual-editor \.admin-visual-editor-backdrop[\s\S]*?animation: none/)
   assert.match(styles, /\.admin-product-detail-canvas \.pd-page[\s\S]*?gap: 32px[\s\S]*?margin: 0[\s\S]*?padding-top: 32px[\s\S]*?width: 100%/)
   assert.match(styles, /\.admin-product-detail-canvas \.pd-breadcrumb \.pd-editor-target-trigger[\s\S]*?position: static/)
   assert.match(styles, /@media \(max-width: 1279px\) and \(min-width: 821px\)[\s\S]*?\.admin-visual-editor-inspector[\s\S]*?position: fixed[\s\S]*?transform: translateX\(-110%\)/)
