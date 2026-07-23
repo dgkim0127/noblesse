@@ -33,3 +33,76 @@ for (const documentLocale of ["kr", "en", "jp", "zh-TW"]) {
     assert.ok(buffer.length < 12 * 1024 * 1024);
   });
 }
+
+test("quote PDF paginates 15 mixed option lines without dropping the summary", async () => {
+  const items = Array.from({ length: 15 }, (_, index) => {
+    const requestedQuantity = index % 5 === 1 ? 3 : 2;
+    const fulfillmentStatus = index % 5 === 0
+      ? "cancelled"
+      : index % 5 === 1
+        ? "partial"
+        : "ready";
+    const quantity = fulfillmentStatus === "cancelled"
+      ? 0
+      : fulfillmentStatus === "partial"
+        ? requestedQuantity - 1
+        : requestedQuantity;
+    const cancelledQuantity = requestedQuantity - quantity;
+    const unitPrice = 1500 + index * 100;
+
+    return {
+      id: `line-${index + 1}`,
+      productCode: `NB-SAMPLE-${String(index + 1).padStart(2, "0")}`,
+      productName: `Piercing Sample ${index + 1}`,
+      selectedOptions: [
+        {
+          groupLabels: { en: "Color" },
+          valueLabels: { en: index % 2 === 0 ? "Gold" : "Pink" }
+        },
+        {
+          groupLabels: { en: "Bar length" },
+          valueLabels: { en: index % 2 === 0 ? "6mm" : "8mm" }
+        },
+        {
+          groupLabels: { en: "Gauge" },
+          valueLabels: { en: index % 2 === 0 ? "1.2mm / 16G" : "1.0mm / 18G" }
+        }
+      ],
+      requestedQuantity,
+      quantity,
+      cancelledQuantity,
+      fulfillmentStatus,
+      cancellationReason: fulfillmentStatus === "cancelled"
+        ? "out_of_stock"
+        : fulfillmentStatus === "partial"
+          ? "quantity_shortage"
+          : "",
+      cancellationNote: cancelledQuantity > 0
+        ? `Line ${index + 1} could not be fully prepared`
+        : "",
+      unitPrice,
+      subtotal: quantity * unitPrice
+    };
+  });
+  const total = items.reduce((sum, item) => sum + item.subtotal, 0);
+
+  const buffer = await createQuotePdfBuffer({
+    documentLocale: "en",
+    quoteNumber: "QT-20260723-15-LINES",
+    issuedAt: "2026-07-23T00:00:00.000Z",
+    validUntil: "2099-12-31",
+    buyer: { companyName: "Noblesse Multi Item Buyer", country: "KR" },
+    currency: "KRW",
+    total,
+    leadTime: "7 days",
+    shippingNote: "Prepared items only",
+    customerNote: "Prepared and cancelled quantities are shown per line.",
+    items
+  });
+  const pageCount = (buffer.toString("latin1").match(/\/Type\s*\/Page\b/g) || []).length;
+
+  assert.equal(buffer.subarray(0, 4).toString("ascii"), "%PDF");
+  assert.ok(pageCount >= 3);
+  assert.ok(buffer.length > 5000);
+  assert.ok(buffer.length < 12 * 1024 * 1024);
+});
