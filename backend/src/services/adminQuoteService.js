@@ -108,6 +108,10 @@ function createQuoteNumber(quote) {
 
 function createDocumentSnapshot(candidate) {
   const quote = candidate.quote;
+  const pricingSummary = candidate.pricingSummary || null;
+  const pricingLinesByItemId = new Map(
+    (pricingSummary?.lines || []).map((line) => [String(line.itemId), line])
+  );
   return {
     schemaVersion: 3,
     quoteId: quote.id,
@@ -117,7 +121,8 @@ function createDocumentSnapshot(candidate) {
     revision: candidate.nextRevision,
     documentLocale: quote.documentLocale,
     currency: quote.currency,
-    total: Number(quote.confirmedTotal || 0),
+    total: Number(pricingSummary?.totalAmount ?? quote.confirmedTotal ?? 0),
+    pricingSummary,
     issuedAt: new Date().toISOString(),
     validUntil: quote.validUntil,
     leadTime: quote.leadTime || "",
@@ -127,28 +132,31 @@ function createDocumentSnapshot(candidate) {
       companyName: candidate.buyer?.companyName || "",
       country: candidate.buyer?.country || ""
     },
-    items: (candidate.items || []).map((item) => ({
-      id: item.id,
-      productCode: item.productCode,
-      productName: item.productName || item.productCode,
-      productImage: item.productImage ? {
-        id: item.productImage.id || "",
-        url: item.productImage.url || "",
-        altText: item.productImage.altText || ""
-      } : null,
-      color: item.color || "",
-      size: item.size || "",
-      selectedOptions: Array.isArray(item.selectedOptions) ? item.selectedOptions : [],
-      requestedQuantity: Number(item.requestedQuantity),
-      quantity: Number(item.confirmedQuantity),
-      cancelledQuantity: Number(item.cancelledQuantity || 0),
-      fulfillmentStatus: item.fulfillmentStatus || "ready",
-      cancellationReason: item.cancellationReason || "",
-      cancellationNote: item.cancellationNote || "",
-      unitPrice: Number(item.confirmedUnitPrice),
-      subtotal: Number(item.confirmedSubtotal),
-      itemNote: item.itemNote || ""
-    }))
+    items: (candidate.items || []).map((item) => {
+      const pricingLine = pricingLinesByItemId.get(String(item.id));
+      return {
+        id: item.id,
+        productCode: item.productCode,
+        productName: item.productName || item.productCode,
+        productImage: item.productImage ? {
+          id: item.productImage.id || "",
+          url: item.productImage.url || "",
+          altText: item.productImage.altText || ""
+        } : null,
+        color: item.color || "",
+        size: item.size || "",
+        selectedOptions: Array.isArray(item.selectedOptions) ? item.selectedOptions : [],
+        requestedQuantity: Number(item.requestedQuantity),
+        quantity: Number(item.confirmedQuantity),
+        cancelledQuantity: Number(item.cancelledQuantity || 0),
+        fulfillmentStatus: item.fulfillmentStatus || "ready",
+        cancellationReason: item.cancellationReason || "",
+        cancellationNote: item.cancellationNote || "",
+        unitPrice: Number(pricingLine?.unitPrice ?? item.confirmedUnitPrice),
+        subtotal: Number(pricingLine?.lineSubtotal ?? item.confirmedSubtotal),
+        itemNote: item.itemNote || ""
+      };
+    })
   };
 }
 
@@ -267,7 +275,7 @@ export function createAdminQuoteService({ queries, objectStore, pdfRenderer = cr
       return result;
     },
 
-    async issueQuote(quoteId, adminViewer) {
+    async issueQuote(quoteId, adminViewer, options = {}) {
       const id = validateUuid(quoteId, "quoteId");
       if (!objectStore?.save || !objectStore?.deleteMany) {
         throw internalError("Quote document storage is not configured");
@@ -286,7 +294,10 @@ export function createAdminQuoteService({ queries, objectStore, pdfRenderer = cr
         throw validationError("Every prepared quote line requires a valid quantity and unit price");
       }
 
-      const snapshot = createDocumentSnapshot(candidate);
+      const snapshot = createDocumentSnapshot({
+        ...candidate,
+        pricingSummary: options.pricingSummary || null
+      });
       const renderSnapshot = await createPdfRenderSnapshot(snapshot, candidate.items, objectStore);
       const pdf = await pdfRenderer(renderSnapshot);
       if (!Buffer.isBuffer(pdf) || pdf.length === 0) throw internalError("Quote PDF generation failed");

@@ -13,6 +13,7 @@ import { createAdminDashboardQueries } from "./db/queries/adminDashboardQueries.
 import { createAdminInquiryQueries } from "./db/queries/adminInquiryQueries.js";
 import { createAdminFxQueries } from "./db/queries/adminFxQueries.js";
 import { createAdminPriceQueries } from "./db/queries/adminPriceQueries.js";
+import { createAdminPosQueries } from "./db/queries/adminPosQueries.js";
 import { createAdminProductQueries } from "./db/queries/adminProductQueries.js";
 import { createAdminQuoteQueries } from "./db/queries/adminQuoteQueries.js";
 import { createBuyerInquiryQueries } from "./db/queries/buyerInquiryQueries.js";
@@ -40,6 +41,7 @@ import { createAdminHomeShowcaseService } from "./services/adminHomeShowcaseServ
 import { createAdminHomeLayoutService } from "./services/adminHomeLayoutService.js";
 import { createAdminFxService } from "./services/adminFxService.js";
 import { createAdminPriceService } from "./services/adminPriceService.js";
+import { createAdminPosService } from "./services/adminPosService.js";
 import { createAdminProductService } from "./services/adminProductService.js";
 import {
   createAdminProductImageService,
@@ -95,6 +97,22 @@ export function createApp(options = {}) {
     options.queries?.homeLayout || createHomeLayoutQueries(pool);
   const homeLayoutService =
     options.services?.homeLayout || createHomeLayoutService({ queries: homeLayoutQueries });
+  const adminQuoteQueries =
+    options.queries?.admin?.quotes || createAdminQuoteQueries(pool);
+  const adminQuoteService =
+    options.services?.admin?.quotes ||
+    createAdminQuoteService({
+      queries: adminQuoteQueries,
+      objectStore: imageObjectStore
+    });
+  const adminPosQueries =
+    options.queries?.admin?.pos || createAdminPosQueries(pool);
+  const adminPosService =
+    options.services?.admin?.pos ||
+    createAdminPosService({
+      queries: adminPosQueries,
+      quoteService: adminQuoteService
+    });
   const services = {
     catalog:
       options.services?.catalog ||
@@ -184,12 +202,8 @@ export function createApp(options = {}) {
               objectStore: imageObjectStore
             })
         }),
-      quotes:
-        options.services?.admin?.quotes ||
-        createAdminQuoteService({
-          queries: options.queries?.admin?.quotes || createAdminQuoteQueries(pool),
-          objectStore: imageObjectStore
-        })
+      quotes: adminQuoteService,
+      pos: adminPosService
     }
   };
 
