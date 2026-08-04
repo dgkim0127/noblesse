@@ -42,6 +42,7 @@ function mapQuoteState(row) {
   if (!row) return null;
   return {
     quoteId: row.admin_quote_id,
+    isOnlineQuote: Boolean(row.is_online_quote),
     version: Number(row.version || 1),
     posCustomerId: row.pos_customer_id || null,
     customerSnapshot: row.customer_snapshot || null,
@@ -50,6 +51,12 @@ function mapQuoteState(row) {
     finalizedSnapshot: row.finalized_snapshot || null,
     finalizedDocumentId: row.finalized_document_id || null,
     finalizedAt: row.finalized_at || null,
+    publishedSnapshot: row.published_snapshot || null,
+    publishedDocumentId: row.published_document_id || null,
+    publishedAt: row.published_at || null,
+    linkedReceiptId: row.linked_receipt_id || null,
+    linkedReceiptSnapshot: row.linked_receipt_snapshot || null,
+    receiptLinkedAt: row.receipt_linked_at || null,
     updatedByUid: row.updated_by_uid || null,
     createdAt: row.created_at,
     updatedAt: row.updated_at
@@ -94,6 +101,7 @@ export function createAdminPosQueries(pool) {
       const result = await pool.query(
         `update public.pos_quote_states
             set version = version + 1,
+                is_online_quote = true,
                 updated_by_uid = $3,
                 updated_at = now()
           where admin_quote_id = $1
@@ -134,7 +142,9 @@ export function createAdminPosQueries(pool) {
                 customer_snapshot = $4::jsonb,
                 deduction_amount = $5,
                 last_preview = $6::jsonb,
-                updated_by_uid = $7,
+                finalized_snapshot = case when $7 then null else finalized_snapshot end,
+                finalized_at = case when $7 then null else finalized_at end,
+                updated_by_uid = $8,
                 updated_at = now()
           where admin_quote_id = $1
             and version = $2
@@ -146,6 +156,7 @@ export function createAdminPosQueries(pool) {
           input.customerSnapshot ? JSON.stringify(input.customerSnapshot) : null,
           input.deductionAmount || 0,
           input.lastPreview ? JSON.stringify(input.lastPreview) : null,
+          Boolean(input.invalidateFinalization),
           actorUid
         ]
       );
@@ -188,9 +199,8 @@ export function createAdminPosQueries(pool) {
                   deduction_amount = $5,
                   last_preview = $6::jsonb,
                   finalized_snapshot = $7::jsonb,
-                  finalized_document_id = $8,
                   finalized_at = now(),
-                  updated_by_uid = $9,
+                  updated_by_uid = $8,
                   updated_at = now()
             where admin_quote_id = $1
               and version = $2
@@ -203,7 +213,6 @@ export function createAdminPosQueries(pool) {
             input.deductionAmount || 0,
             JSON.stringify(input.snapshot),
             JSON.stringify(input.snapshot),
-            input.documentId,
             actorUid
           ]
         );
@@ -228,6 +237,50 @@ export function createAdminPosQueries(pool) {
       } finally {
         client.release();
       }
+    },
+
+    async savePublishedState(quoteId, version, input, actorUid) {
+      const result = await pool.query(
+        `update public.pos_quote_states
+            set published_snapshot = $3::jsonb,
+                published_document_id = $4,
+                published_at = now(),
+                updated_by_uid = $5,
+                updated_at = now()
+          where admin_quote_id = $1
+            and version = $2
+        returning *`,
+        [
+          quoteId,
+          version,
+          JSON.stringify(input.snapshot),
+          input.documentId,
+          actorUid
+        ]
+      );
+      return mapQuoteState(result.rows[0]);
+    },
+
+    async saveReceiptState(quoteId, version, input, actorUid) {
+      const result = await pool.query(
+        `update public.pos_quote_states
+            set linked_receipt_id = $3,
+                linked_receipt_snapshot = $4::jsonb,
+                receipt_linked_at = now(),
+                updated_by_uid = $5,
+                updated_at = now()
+          where admin_quote_id = $1
+            and version = $2
+        returning *`,
+        [
+          quoteId,
+          version,
+          input.receiptId,
+          input.receiptSnapshot ? JSON.stringify(input.receiptSnapshot) : null,
+          actorUid
+        ]
+      );
+      return mapQuoteState(result.rows[0]);
     },
 
     async getBuyerCustomer(buyerId) {

@@ -834,6 +834,25 @@ export function createAdminRoutes({
     })
   );
 
+  router.get(
+    "/pos/records",
+    requireAdmin,
+    can("quotes.read"),
+    asyncRoute(async (req, res) => {
+      const result = await services.pos.listUnifiedRecords(
+        req.query,
+        req.adminViewer
+      );
+      res.json({
+        data: {
+          records: result.records,
+          totalAmount: result.totalAmount
+        },
+        meta: withRequestId(req, result.meta)
+      });
+    })
+  );
+
   router.put(
     "/pos/quotes/:quoteId/picking",
     requireAdmin,
@@ -873,6 +892,34 @@ export function createAdminRoutes({
         req.adminViewer
       );
       res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/pos/quotes/:quoteId/publish",
+    requireAdmin,
+    can("quotes.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.publishQuote(
+        req.params.quoteId,
+        req.body,
+        req.adminViewer
+      );
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/pos/quotes/:quoteId/receipt-link",
+    requireAdmin,
+    can("quotes.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.linkReceipt(
+        req.params.quoteId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
     })
   );
 

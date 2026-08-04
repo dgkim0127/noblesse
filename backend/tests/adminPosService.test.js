@@ -25,6 +25,13 @@ function createQuoteDetail() {
       {
         id: "line-1",
         productId: "product-1",
+        productCode: "NB-CLOVER-01",
+        productName: "4-Way Green Clover Barbell",
+        imageUrl: "https://example.com/clover.webp",
+        selectedOptions: [
+          { groupId: "color", groupLabel: "색상", valueId: "gold", valueLabel: "골드" },
+          { groupId: "bar-length", groupLabel: "바 길이", valueId: "6mm", valueLabel: "6mm" }
+        ],
         requestedQuantity: 2,
         confirmedQuantity: 2,
         requestedPriceSnapshot: 2_000,
@@ -43,6 +50,10 @@ function createHarness(overrides = {}) {
     upsertItems: [],
     updates: [],
     issues: [],
+    publications: [],
+    receiptLinks: [],
+    deviceRegistrations: [],
+    pickingStates: [],
     restores: [],
     clears: [],
     completions: []
@@ -72,15 +83,45 @@ function createHarness(overrides = {}) {
     restoreQuoteVersion: async (...args) => {
       calls.restores.push(args);
     },
-    savePickingState: async (_quoteId, version, input) => ({
-      quoteId: "quote-1",
-      version,
-      ...input
-    }),
+    savePickingState: async (_quoteId, version, input) => {
+      calls.pickingStates.push(input);
+      return {
+        quoteId: "quote-1",
+        version,
+        ...input,
+        finalizedSnapshot: input.invalidateFinalization ? null : undefined,
+        finalizedAt: input.invalidateFinalization ? null : undefined
+      };
+    },
     saveFinalizedState: async (_quoteId, version, input) => ({
       state: { quoteId: "quote-1", version, finalizedAt: "2026-07-23T00:00:00Z" },
       priceSnapshot: { id: "snapshot-1", ...input }
     }),
+    savePublishedState: async (_quoteId, version, input) => {
+      calls.publications.push(input);
+      return {
+        quoteId: "quote-1",
+        version,
+        publishedAt: input.publishedAt,
+        publishedSnapshot: input.snapshot
+      };
+    },
+    saveReceiptState: async (_quoteId, version, input) => {
+      calls.receiptLinks.push(input);
+      return {
+        quoteId: "quote-1",
+        version,
+        linkedReceiptId: input.receiptId
+      };
+    },
+    registerDevice: async (input) => {
+      calls.deviceRegistrations.push({ operation: "register", input });
+      return { id: "device-1", version: 1, ...input };
+    },
+    unregisterDevice: async (input) => {
+      calls.deviceRegistrations.push({ operation: "unregister", input });
+      return { id: "device-1", version: input.expectedVersion, active: false };
+    },
     upsertCustomer: async (input) => {
       calls.upsertCustomers.push(input);
       return input;
@@ -107,7 +148,13 @@ function createHarness(overrides = {}) {
     },
     issueQuote: async (_quoteId, _viewer, options) => {
       calls.issues.push(options);
-      return { document: { id: "document-1" } };
+      return {
+        document: {
+          id: "document-1",
+          version: 1,
+          documentNumber: "QT-20260730-0001"
+        }
+      };
     },
     ...overrides.quoteService
   };
@@ -190,7 +237,32 @@ test("partial picking requires a cancellation reason and releases the claimed ve
   assert.equal(calls.clears.length, 1);
 });
 
-test("finalizing issues the server-priced document without creating sales or stock movement", async () => {
+test("saving changed picking results invalidates the previous internal finalization", async () => {
+  const { service, calls } = createHarness();
+
+  const result = await service.savePicking(
+    "quote-1",
+    {
+      expectedVersion: 1,
+      idempotencyKey: "pick-after-finalize",
+      items: [
+        {
+          id: "line-1",
+          preparedQuantity: 1,
+          cancellationReason: "out_of_stock"
+        }
+      ]
+    },
+    viewer
+  );
+
+  assert.equal(calls.pickingStates.length, 1);
+  assert.equal(calls.pickingStates[0].invalidateFinalization, true);
+  assert.equal(result.pos.state.finalizedSnapshot, null);
+  assert.equal(result.pos.state.finalizedAt, null);
+});
+
+test("internal finalization stores the server-priced snapshot without publishing a document", async () => {
   const { service, calls } = createHarness();
 
   const result = await service.finalizeQuote(
@@ -201,9 +273,7 @@ test("finalizing issues the server-priced document without creating sales or sto
       items: [
         {
           id: "line-1",
-          preparedQuantity: 2,
-          overrideUnitPrice: 1_800,
-          overrideReason: "Counter price confirmation"
+          preparedQuantity: 2
         }
       ]
     },
@@ -211,9 +281,130 @@ test("finalizing issues the server-priced document without creating sales or sto
   );
 
   assert.equal(calls.updates.length, 1);
+  assert.equal(calls.issues.length, 0);
+  assert.equal(result.issue, null);
+  assert.equal(result.pos.pricing.totalAmount, 4_400);
+  assert.equal(result.pos.finalizedSnapshot.items[0].requestedQuantity, 2);
+  assert.equal(result.pos.finalizedSnapshot.items[0].preparedQuantity, 2);
+  assert.equal(result.pos.finalizedSnapshot.items[0].cancelledQuantity, 0);
+  assert.equal(result.pos.finalizedSnapshot.items[0].imageUrl, "https://example.com/clover.webp");
+  assert.deepEqual(result.sideEffects, {
+    saleCreated: false,
+    orderCreated: false,
+    paymentCreated: false,
+    stockChanged: false
+  });
+});
+
+test("customer publication issues one document from the finalized snapshot", async () => {
+  const finalizedSnapshot = {
+    calculationVersion: "noblesse-online-quote-v2",
+    items: createQuoteDetail().items,
+    pricing: {
+      subtotal: 3_600,
+      supplyAmount: 3_600,
+      vatAmount: 360,
+      totalAmount: 3_960,
+      priceBands: [{ unitPrice: 1_800, quantity: 2, subtotal: 3_600 }]
+    }
+  };
+  const { service, calls } = createHarness({
+    queries: {
+      getQuoteState: async () => ({
+        quoteId: "quote-1",
+        version: 1,
+        deductionAmount: 0,
+        finalizedSnapshot
+      })
+    }
+  });
+
+  const result = await service.publishQuote(
+    "quote-1",
+    {
+      expectedVersion: 1,
+      idempotencyKey: "publish-1"
+    },
+    viewer
+  );
+
   assert.equal(calls.issues.length, 1);
   assert.equal(calls.issues[0].pricingSummary.totalAmount, 3_960);
+  assert.equal(calls.publications.length, 1);
+  assert.equal(calls.publications[0].documentId, "document-1");
+  assert.equal(result.pos.publishedSnapshot.document.version, 1);
   assert.deepEqual(result.sideEffects, {
+    saleCreated: false,
+    orderCreated: false,
+    paymentCreated: false,
+    stockChanged: false
+  });
+});
+
+test("stale customer publication is rejected before a document is issued", async () => {
+  const finalizedSnapshot = {
+    pricing: {
+      subtotal: 4_000,
+      supplyAmount: 4_000,
+      vatAmount: 400,
+      totalAmount: 4_400,
+      priceBands: [{ unitPrice: 2_000, quantity: 2, subtotal: 4_000 }]
+    }
+  };
+  const { service, calls } = createHarness({
+    queries: {
+      getQuoteState: async () => ({
+        quoteId: "quote-1",
+        version: 2,
+        finalizedSnapshot
+      }),
+      claimQuoteVersion: async () => ({ claimed: false, state: null })
+    }
+  });
+
+  await assert.rejects(
+    () =>
+      service.publishQuote(
+        "quote-1",
+        {
+          expectedVersion: 1,
+          idempotencyKey: "publish-stale"
+        },
+        viewer
+      ),
+    (error) => error.code === "CONFLICT"
+  );
+
+  assert.equal(calls.issues.length, 0);
+  assert.equal(calls.publications.length, 0);
+});
+
+test("linking an existing PORS receipt never creates a receipt or a sale", async () => {
+  const { service, calls } = createHarness({
+    queries: {
+      getQuoteState: async () => ({
+        quoteId: "quote-1",
+        version: 1,
+        publishedAt: "2026-07-30T00:00:00Z"
+      })
+    }
+  });
+
+  const result = await service.linkReceipt(
+    "quote-1",
+    {
+      expectedVersion: 1,
+      idempotencyKey: "receipt-link-1",
+      receiptId: "existing-receipt-1",
+      receiptSnapshot: { totalAmount: 3_960 }
+    },
+    viewer
+  );
+
+  assert.equal(calls.receiptLinks.length, 1);
+  assert.equal(calls.receiptLinks[0].receiptId, "existing-receipt-1");
+  assert.deepEqual(result.sideEffects, {
+    receiptCreated: false,
     saleCreated: false,
     orderCreated: false,
     paymentCreated: false,

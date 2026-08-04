@@ -25,6 +25,13 @@ export const runtimePrivilegeManifest = Object.freeze({
   admin_quote_items: ["SELECT", "INSERT", "UPDATE"],
   admin_quote_documents: ["SELECT", "INSERT"],
   admin_quote_status_history: ["SELECT", "INSERT"],
+  pos_customers: ["SELECT", "INSERT", "UPDATE"],
+  pos_items: ["SELECT", "INSERT", "UPDATE"],
+  buyer_pos_links: ["SELECT", "INSERT", "UPDATE"],
+  product_pos_links: ["SELECT", "INSERT", "UPDATE"],
+  pos_quote_states: ["SELECT", "INSERT", "UPDATE"],
+  pos_quote_price_snapshots: ["SELECT", "INSERT"],
+  pos_idempotency_keys: ["SELECT", "INSERT", "UPDATE", "DELETE"],
   banners: [],
   catalog_files: [],
   audit_logs: ["SELECT", "INSERT"],
@@ -57,6 +64,7 @@ const querySourceModules = Object.freeze([
   "adminPriceQueries.js",
   "adminProductQueries.js",
   "adminQuoteQueries.js",
+  "adminPosQueries.js",
   "homeShowcaseQueries.js",
   "homeLayoutQueries.js"
 ]);

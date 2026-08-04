@@ -107,7 +107,7 @@ const makeGeneralCustomer = (quote) => {
     id: null,
     name: asText(quote?.companyName) || "General customer",
     discountRate: 0,
-    vatEnabled: !isOverseas,
+    vatEnabled: true,
     isOverseas,
     isActive: true,
     pricingRules: {},
@@ -118,10 +118,10 @@ const makeGeneralCustomer = (quote) => {
 const toCustomerSnapshot = (customer) => ({
   id: customer?.id || null,
   name: asText(customer?.name) || "General customer",
-  discountRate: Number(customer?.discountRate || 0),
-  vatEnabled: Boolean(customer?.vatEnabled),
+  discountRate: 0,
+  vatEnabled: true,
   isOverseas: Boolean(customer?.isOverseas),
-  pricingRules: customer?.pricingRules || {},
+  pricingRules: {},
   connectionStatus: customer?.id ? "linked" : "unlinked"
 });
 
@@ -150,26 +150,37 @@ const createAdminQuoteUpdate = ({
   detail,
   pricing,
   submittedItems,
-  validUntil,
-  documentLocale
+  body
 }) => {
   const pricingByItemId = new Map(
     pricing.lines.map((line) => [String(line.itemId), line])
   );
 
   return {
-    leadTime: detail.quote.leadTime || "",
-    shippingNote: detail.quote.shippingNote || "",
+    leadTime:
+      body?.leadTime === undefined
+        ? detail.quote.leadTime || ""
+        : asText(body.leadTime),
+    shippingNote:
+      body?.shippingNote === undefined
+        ? detail.quote.shippingNote || ""
+        : asText(body.shippingNote),
     validUntil:
-      asOptionalText(validUntil) ||
+      asOptionalText(body?.validUntil) ||
       detail.quote.validUntil ||
       addDays(new Date(), 7),
     documentLocale:
-      asOptionalText(documentLocale) ||
+      asOptionalText(body?.documentLocale) ||
       detail.quote.documentLocale ||
       "kr",
-    customerNote: detail.quote.customerNote || "",
-    adminMemo: detail.quote.adminMemo || "",
+    customerNote:
+      body?.customerNote === undefined
+        ? detail.quote.customerNote || ""
+        : asText(body.customerNote),
+    adminMemo:
+      body?.adminMemo === undefined
+        ? detail.quote.adminMemo || ""
+        : asText(body.adminMemo),
     items: detail.items.map((item) => {
       const submitted = submittedItems.get(String(item.id)) || {};
       const priced = pricingByItemId.get(String(item.id));
@@ -216,6 +227,67 @@ const createAdminQuoteUpdate = ({
         cancellationNote
       };
     })
+  };
+};
+
+const resolveImageUrl = (item) =>
+  item?.imageUrl ||
+  item?.imageSet?.thumb ||
+  item?.imageSet?.card ||
+  null;
+
+const createFinalizedSnapshot = ({
+  context,
+  pricing,
+  submittedItems
+}) => {
+  const pricingByItemId = new Map(
+    pricing.lines.map((line) => [String(line.itemId), line])
+  );
+
+  return {
+    schemaVersion: 2,
+    calculationVersion: CALCULATION_VERSION,
+    finalizedAt: new Date().toISOString(),
+    quoteId: context.detail.quote.id,
+    quoteNumber: context.detail.quote.quoteNumber || null,
+    customer: toCustomerSnapshot(context.customer),
+    items: context.detail.items.map((item) => {
+      const submitted = submittedItems.get(String(item.id)) || {};
+      const priced = pricingByItemId.get(String(item.id));
+      return {
+        itemId: item.id,
+        productId: item.productId || null,
+        productCode: item.productCode || item.code || null,
+        productName: item.productName || item.name || null,
+        imageSet: item.imageSet || null,
+        imageUrl: resolveImageUrl(item),
+        selectedOptions: Array.isArray(item.selectedOptions)
+          ? item.selectedOptions
+          : [],
+        requestedQuantity: priced?.requestedQuantity || 0,
+        preparedQuantity: priced?.preparedQuantity || 0,
+        cancelledQuantity: priced?.cancelledQuantity || 0,
+        cancellationReason:
+          priced?.cancelledQuantity > 0
+            ? asOptionalText(
+                submitted.cancellationReason || item.cancellationReason
+              )
+            : null,
+        cancellationNote:
+          priced?.cancelledQuantity > 0
+            ? asOptionalText(
+                submitted.cancellationNote || item.cancellationNote
+              )
+            : null,
+        baseUnitPrice: priced?.baseUnitPrice || 0,
+        unitPrice: priced?.unitPrice || 0,
+        lineSubtotal: priced?.lineSubtotal || 0,
+        priceSource: priced?.priceSource || "site_snapshot",
+        overrideReason: priced?.overrideReason || null
+      };
+    }),
+    pricing
   };
 };
 
@@ -274,23 +346,16 @@ export function createAdminPosService({ queries, quoteService }) {
       throw notFound("Quote not found.");
     }
 
-    const [state, linkedCustomer, productMappings] = await Promise.all([
+    const [state, productMappings] = await Promise.all([
       queries.getQuoteState(quoteId),
-      detail.quote.buyerId
-        ? queries.getBuyerCustomer(detail.quote.buyerId)
-        : Promise.resolve(null),
       queries.getProductMappings(
         detail.items.map((item) => item.productId).filter(Boolean)
       )
     ]);
 
-    const customer =
-      linkedCustomer?.isActive === true
-        ? {
-            ...linkedCustomer,
-            connectionStatus: "linked"
-          }
-        : makeGeneralCustomer(detail.quote);
+    // Website-originated quotes are never connected to a PORS customer.
+    // PORS customer discounts remain available for normal sales only.
+    const customer = makeGeneralCustomer(detail.quote);
 
     const productMappingsById = new Map(
       productMappings.map((entry) => [
@@ -335,40 +400,44 @@ export function createAdminPosService({ queries, quoteService }) {
         );
       }
 
-      const mappedItem = mapping?.isActive === true ? mapping : null;
+      if (
+        submitted.overrideUnitPrice !== undefined ||
+        submitted.overrideReason !== undefined
+      ) {
+        throw validationError(
+          "Online quotes must use the request-time unit price without overrides."
+        );
+      }
 
       return {
         itemId: item.id,
         productId: item.productId,
-        posItemId: mappedItem?.id || null,
+        posItemId: mapping?.isActive === true ? mapping.id : null,
         requestedQuantity,
         preparedQuantity,
         baseUnitPrice:
-          mappedItem?.basePrice ?? item.requestedPriceSnapshot ?? 0,
-        discountable: mappedItem?.discountable !== false,
-        priceSource: mappedItem ? "pors" : "site_snapshot",
-        overrideUnitPrice:
-          submitted.overrideUnitPrice === undefined ||
-          submitted.overrideUnitPrice === null ||
-          submitted.overrideUnitPrice === ""
-            ? null
-            : asNonNegativeNumber(
-                submitted.overrideUnitPrice,
-                `items.${item.id}.overrideUnitPrice`
-              ),
-        overrideReason: asOptionalText(submitted.overrideReason)
+          item.requestedPriceSnapshot ??
+          item.confirmedUnitPrice ??
+          0,
+        discountable: false,
+        priceSource: "site_snapshot"
       };
     });
 
+    const requestedDeduction = asNonNegativeNumber(
+      body.deductionAmount ?? 0,
+      "deductionAmount"
+    );
+    if (requestedDeduction !== 0) {
+      throw validationError(
+        "Online quotes do not support deductions or customer discounts."
+      );
+    }
+
     return calculatePosQuote({
-      customer: context.customer,
+      customer: toCustomerSnapshot(context.customer),
       lines: requestedItems,
-      deductionAmount: asNonNegativeNumber(
-        body.deductionAmount ??
-          context.state?.deductionAmount ??
-          0,
-        "deductionAmount"
-      )
+      deductionAmount: 0
     });
   };
 
@@ -414,14 +483,19 @@ export function createAdminPosService({ queries, quoteService }) {
   };
 
   const getCapabilities = async () => ({
-    version: 1,
+    version: 2,
     calculationVersion: CALCULATION_VERSION,
     features: {
       readQuotes: true,
       savePicking: true,
       pricePreview: true,
       finalizeQuote: true,
-      customerLinking: true,
+      publishQuote: true,
+      linkReceipt: true,
+      unifiedRecords: true,
+      deviceRegistration: false,
+      pushNotifications: false,
+      customerLinking: false,
       productLinking: true,
       createsSale: false,
       createsOrder: false,
@@ -441,27 +515,26 @@ export function createAdminPosService({ queries, quoteService }) {
       states.map((state) => [String(state.quoteId), state])
     );
 
-    const enriched = await Promise.all(
-      quotes.map(async (quote) => {
-        const customer = quote.buyerId
-          ? await queries.getBuyerCustomer(quote.buyerId)
-          : null;
+    const enriched = quotes.map((quote) => {
         const state = stateByQuoteId.get(String(quote.id)) || null;
         return {
           ...quote,
           pos: {
             version: state?.version || 1,
-            connectionStatus:
-              customer?.isActive === true ? "linked" : "unlinked",
-            customer: customer?.isActive === true
-              ? toCustomerSnapshot(customer)
-              : toCustomerSnapshot(makeGeneralCustomer(quote)),
+            connectionStatus: "unlinked",
+            customer: toCustomerSnapshot(makeGeneralCustomer(quote)),
             finalizedAt: state?.finalizedAt || null,
-            pricing: state?.lastPreview || null
+            publishedAt: state?.publishedAt || null,
+            linkedReceiptId: state?.linkedReceiptId || null,
+            linkedReceiptSnapshot: state?.linkedReceiptSnapshot || null,
+            pricing:
+              state?.publishedSnapshot?.pricing ||
+              state?.finalizedSnapshot?.pricing ||
+              state?.lastPreview ||
+              null
           }
         };
-      })
-    );
+      });
 
     return {
       ...result,
@@ -512,8 +585,7 @@ export function createAdminPosService({ queries, quoteService }) {
             detail: context.detail,
             pricing,
             submittedItems,
-            validUntil: body?.validUntil,
-            documentLocale: body?.documentLocale
+            body
           });
 
           await quoteService.updateQuote(quoteId, update, viewer);
@@ -524,7 +596,8 @@ export function createAdminPosService({ queries, quoteService }) {
               posCustomerId: context.customer.id,
               customerSnapshot: toCustomerSnapshot(context.customer),
               deductionAmount: pricing.deductionAmount,
-              lastPreview: pricing
+              lastPreview: pricing,
+              invalidateFinalization: true
             },
             actorUid
           );
@@ -578,7 +651,8 @@ export function createAdminPosService({ queries, quoteService }) {
               posCustomerId: context.customer.id,
               customerSnapshot: toCustomerSnapshot(context.customer),
               deductionAmount: pricing.deductionAmount,
-              lastPreview: pricing
+              lastPreview: pricing,
+              invalidateFinalization: false
             },
             actorUid
           );
@@ -610,7 +684,6 @@ export function createAdminPosService({ queries, quoteService }) {
         const context = await loadQuoteContext(quoteId, viewer);
         const submittedItems = normalizeItemsById(body?.items);
         let claim;
-        let issued = null;
 
         try {
           claim = await claimQuoteVersion({
@@ -627,31 +700,106 @@ export function createAdminPosService({ queries, quoteService }) {
             detail: context.detail,
             pricing,
             submittedItems,
-            validUntil: body?.validUntil,
-            documentLocale: body?.documentLocale
+            body
           });
 
           await quoteService.updateQuote(quoteId, update, viewer);
-          issued = await quoteService.issueQuote(quoteId, viewer, {
-            pricingSummary: pricing
+          const snapshot = createFinalizedSnapshot({
+            context,
+            pricing,
+            submittedItems
           });
           const finalized = await queries.saveFinalizedState(
             quoteId,
             claim.claimedVersion,
             {
               calculationVersion: CALCULATION_VERSION,
-              snapshot: pricing,
+              snapshot,
               posCustomerId: context.customer.id,
               customerSnapshot: toCustomerSnapshot(context.customer),
-              deductionAmount: pricing.deductionAmount,
-              documentId: issued.document.id
+              deductionAmount: 0
             },
             actorUid
           );
 
           if (!finalized?.state) {
             throw conflict(
-              "The quote document was issued, but final POS state confirmation failed. Refresh before retrying."
+              "The quote changed while its internal finalization was being saved."
+            );
+          }
+
+          return {
+            quote: await quoteService.getQuoteById(quoteId, viewer),
+            issue: null,
+            pos: {
+              ...finalized,
+              customer: toCustomerSnapshot(context.customer),
+              pricing,
+              finalizedSnapshot: snapshot
+            },
+            sideEffects: {
+              saleCreated: false,
+              orderCreated: false,
+              paymentCreated: false,
+              stockChanged: false
+            }
+          };
+        } catch (error) {
+          await restoreClaim({ quoteId, claim, actorUid });
+          throw error;
+        }
+      }
+    });
+
+  const publishQuote = async (quoteId, body, viewer) =>
+    withIdempotency({
+      operation: `pos.quote.publish:${quoteId}`,
+      idempotencyKey: body?.idempotencyKey,
+      viewer,
+      execute: async (actorUid) => {
+        const context = await loadQuoteContext(quoteId, viewer);
+        const finalizedSnapshot = context.state?.finalizedSnapshot;
+        if (!finalizedSnapshot?.pricing) {
+          throw validationError(
+            "The quote must be internally finalized before customer publication."
+          );
+        }
+
+        let claim;
+        let issued = null;
+        try {
+          claim = await claimQuoteVersion({
+            quoteId,
+            expectedVersion: body?.expectedVersion,
+            actorUid
+          });
+          issued = await quoteService.issueQuote(quoteId, viewer, {
+            pricingSummary: finalizedSnapshot.pricing
+          });
+          const publishedAt = new Date().toISOString();
+          const snapshot = {
+            ...finalizedSnapshot,
+            publishedAt,
+            document: {
+              id: issued.document.id,
+              version: issued.document.version || null,
+              documentNumber: issued.document.documentNumber || null
+            }
+          };
+          const state = await queries.savePublishedState(
+            quoteId,
+            claim.claimedVersion,
+            {
+              snapshot,
+              documentId: issued.document.id,
+              publishedAt
+            },
+            actorUid
+          );
+
+          if (!state) {
+            throw conflict(
+              "The quote document was issued, but publication confirmation failed. Refresh before retrying."
             );
           }
 
@@ -659,9 +807,10 @@ export function createAdminPosService({ queries, quoteService }) {
             quote: await quoteService.getQuoteById(quoteId, viewer),
             issue: issued,
             pos: {
-              ...finalized,
+              state,
+              publishedSnapshot: snapshot,
               customer: toCustomerSnapshot(context.customer),
-              pricing
+              pricing: finalizedSnapshot.pricing
             },
             sideEffects: {
               saleCreated: false,
@@ -678,6 +827,112 @@ export function createAdminPosService({ queries, quoteService }) {
         }
       }
     });
+
+  const linkReceipt = async (quoteId, body, viewer) =>
+    withIdempotency({
+      operation: `pos.quote.receipt-link:${quoteId}`,
+      idempotencyKey: body?.idempotencyKey,
+      viewer,
+      execute: async (actorUid) => {
+        const context = await loadQuoteContext(quoteId, viewer);
+        if (!context.state?.publishedAt) {
+          throw validationError(
+            "Only a customer-published quote can be linked to a PORS receipt."
+          );
+        }
+        const receiptId = asRequiredText(body?.receiptId, "receiptId");
+        const receiptSnapshot = asObject(
+          body?.receiptSnapshot,
+          "receiptSnapshot"
+        );
+        let claim;
+
+        try {
+          claim = await claimQuoteVersion({
+            quoteId,
+            expectedVersion: body?.expectedVersion,
+            actorUid
+          });
+          const state = await queries.saveReceiptState(
+            quoteId,
+            claim.claimedVersion,
+            {
+              receiptId,
+              receiptSnapshot
+            },
+            actorUid
+          );
+          if (!state) {
+            throw conflict(
+              "The quote changed while its PORS receipt link was being saved."
+            );
+          }
+          return {
+            state,
+            receipt: {
+              id: receiptId,
+              snapshot: receiptSnapshot
+            },
+            sideEffects: {
+              receiptCreated: false,
+              saleCreated: false,
+              orderCreated: false,
+              paymentCreated: false,
+              stockChanged: false
+            }
+          };
+        } catch (error) {
+          await restoreClaim({ quoteId, claim, actorUid });
+          throw error;
+        }
+      }
+    });
+
+  const listUnifiedRecords = async (filters, viewer) => {
+    const result = await listQuotes(filters, viewer);
+    const source = asOptionalText(filters?.source);
+    const publicationStatus = asOptionalText(filters?.publicationStatus);
+    const records = result.quotes
+      .map((quote) => {
+        const state = quote.pos || {};
+        const isPublished = Boolean(state.publishedAt);
+        const isReceipt = Boolean(state.linkedReceiptId);
+        const sourceType = isReceipt ? "pors_receipt" : "online_quote";
+        const publishedPricing =
+          state.pricing && isPublished ? state.pricing : null;
+        return {
+          id: quote.id,
+          source: sourceType,
+          quote,
+          publishedAt: state.publishedAt || null,
+          linkedReceiptId: state.linkedReceiptId || null,
+          amount: isPublished
+            ? Number(
+                state.linkedReceiptSnapshot?.totalAmount ??
+                publishedPricing?.totalAmount ??
+                0
+              )
+            : 0
+        };
+      })
+      .filter((record) => !source || record.source === source)
+      .filter((record) => {
+        if (!publicationStatus) return true;
+        return publicationStatus === "published"
+          ? Boolean(record.publishedAt)
+          : !record.publishedAt;
+      });
+
+    const { quotes: _quotes, ...page } = result;
+    return {
+      ...page,
+      records,
+      totalAmount: records.reduce(
+        (sum, record) => sum + record.amount,
+        0
+      )
+    };
+  };
 
   const listCustomers = async (filters) => queries.listCustomers(filters);
 
@@ -878,6 +1133,9 @@ export function createAdminPosService({ queries, quoteService }) {
     savePicking,
     previewPrice,
     finalizeQuote,
+    publishQuote,
+    linkReceipt,
+    listUnifiedRecords,
     syncCatalog,
     listCustomers,
     createCustomer,

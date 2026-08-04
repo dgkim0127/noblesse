@@ -32,7 +32,13 @@ function mapBuyerQuote(row) {
     rejectedAt: row.rejected_at || null,
     workflowVersion: Number(row.workflow_version || 1),
     workflowStatus: row.workflow_status || "received",
-    workflowNote: row.workflow_note || ""
+    workflowNote: row.workflow_note || "",
+    isOnlineQuote: Boolean(row.is_online_quote),
+    isPublishedOnlineQuote:
+      Boolean(row.is_online_quote) &&
+      Boolean(row.published_at) &&
+      Boolean(row.published_document_id) &&
+      String(row.published_document_id) === String(row.current_document_id)
   };
 }
 
@@ -78,10 +84,15 @@ const buyerQuoteSelect = `
     d.revision,
     d.document_locale,
     d.snapshot,
-    d.issued_at
+    d.issued_at,
+    pqs.admin_quote_id as pos_quote_id,
+    pqs.is_online_quote,
+    pqs.published_document_id,
+    pqs.published_at
   from public.admin_quotes q
   join public.inquiries i on i.id = q.inquiry_id
   left join public.admin_quote_documents d on d.id = q.current_document_id
+  left join public.pos_quote_states pqs on pqs.admin_quote_id = q.id
 `;
 
 export function createBuyerQuoteQueries(pool) {
@@ -95,7 +106,15 @@ export function createBuyerQuoteQueries(pool) {
          limit 1`,
         [viewer.buyerId, inquiryId]
       );
-      if (!result.rows[0]) return null;
+      const row = result.rows[0];
+      if (!row) return null;
+      if (
+        row.is_online_quote &&
+        (!row.published_at ||
+          String(row.published_document_id) !== String(row.current_document_id))
+      ) {
+        return null;
+      }
       const [itemsResult, historyResult] = await Promise.all([
         pool.query(
           `
@@ -138,10 +157,18 @@ export function createBuyerQuoteQueries(pool) {
           from public.admin_quote_documents d
           join public.admin_quotes q on q.id = d.admin_quote_id
           join public.inquiries i on i.id = q.inquiry_id
+          left join public.pos_quote_states pqs on pqs.admin_quote_id = q.id
           where i.buyer_id = $1
             and q.id = $2
             and d.id = $3
             and q.current_document_id = d.id
+            and (
+              pqs.is_online_quote is not true
+              or (
+                pqs.published_at is not null
+                and pqs.published_document_id = d.id
+              )
+            )
           limit 1
         `,
         [viewer.buyerId, quoteId, documentId]
@@ -161,9 +188,10 @@ export function createBuyerQuoteQueries(pool) {
         await client.query("begin");
         const existingResult = await client.query(
           `
-            select q.*, i.buyer_id
+            select q.*, i.buyer_id, pqs.admin_quote_id as pos_quote_id, pqs.is_online_quote
             from public.admin_quotes q
             join public.inquiries i on i.id = q.inquiry_id
+            left join public.pos_quote_states pqs on pqs.admin_quote_id = q.id
             where q.id = $1 and i.buyer_id = $2
             for update of q
           `,
@@ -174,7 +202,7 @@ export function createBuyerQuoteQueries(pool) {
           await client.query("rollback");
           return null;
         }
-        if (Number(existing.workflow_version || 1) >= 2) {
+        if (existing.is_online_quote || Number(existing.workflow_version || 1) >= 2) {
           await client.query("rollback");
           return { decisionDisabled: true };
         }

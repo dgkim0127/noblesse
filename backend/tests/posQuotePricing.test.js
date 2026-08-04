@@ -2,64 +2,56 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { calculatePosQuote } from "../src/services/posQuotePricing.js";
 
-test("POS quote pricing applies deduction, customer discount, and VAT in order", () => {
+test("online quote pricing uses prepared quantities, fixed zero discount, and VAT 10%", () => {
   const result = calculatePosQuote({
     customer: {
       id: "store-1",
       name: "Test Store",
-      discountRate: 10,
-      vatEnabled: true,
-      isOverseas: false
+      discountRate: 25,
+      vatEnabled: false,
+      isOverseas: true
     },
     deductionAmount: 10_000,
     lines: [
       {
         itemId: "line-1",
-        requestedQuantity: 10,
-        preparedQuantity: 10,
-        baseUnitPrice: 10_000,
-        discountable: true,
-        priceSource: "pors"
-      }
-    ]
-  });
-
-  assert.equal(result.subtotal, 100_000);
-  assert.equal(result.deductionAmount, 10_000);
-  assert.equal(result.discountAmount, 9_000);
-  assert.equal(result.supplyAmount, 81_000);
-  assert.equal(result.vatAmount, 8_100);
-  assert.equal(result.totalAmount, 89_100);
-  assert.equal(result.discountSource, "customer");
-});
-
-test("POS quote pricing excludes protected items from discount", () => {
-  const result = calculatePosQuote({
-    customer: { discountRate: 10, vatEnabled: false },
-    lines: [
-      {
-        itemId: "discountable",
-        requestedQuantity: 1,
-        preparedQuantity: 1,
-        baseUnitPrice: 100_000,
+        requestedQuantity: 5,
+        preparedQuantity: 5,
+        baseUnitPrice: 1_800,
         discountable: true
       },
       {
-        itemId: "protected",
-        requestedQuantity: 1,
-        preparedQuantity: 1,
-        baseUnitPrice: 100_000,
-        discountable: false
+        itemId: "line-2",
+        requestedQuantity: 4,
+        preparedQuantity: 4,
+        baseUnitPrice: 1_400
+      },
+      {
+        itemId: "line-3",
+        requestedQuantity: 5,
+        preparedQuantity: 3,
+        baseUnitPrice: 1_400
       }
     ]
   });
 
-  assert.equal(result.subtotal, 200_000);
-  assert.equal(result.discountAmount, 10_000);
-  assert.equal(result.totalAmount, 190_000);
+  assert.equal(result.subtotal, 18_800);
+  assert.equal(result.deductionAmount, 0);
+  assert.equal(result.discountAmount, 0);
+  assert.equal(result.appliedDiscountRate, 0);
+  assert.equal(result.supplyAmount, 18_800);
+  assert.equal(result.vatAmount, 1_880);
+  assert.equal(result.totalAmount, 20_680);
+  assert.deepEqual(result.priceBands, [
+    { unitPrice: 1_400, quantity: 7, subtotal: 9_800 },
+    { unitPrice: 1_800, quantity: 5, subtotal: 9_000 }
+  ]);
+  assert.equal(result.lines[2].cancelledQuantity, 2);
+  assert.equal(result.customer.discountRate, 0);
+  assert.equal(result.customer.vatEnabled, true);
 });
 
-test("POS quote pricing requires a reason for line price overrides", () => {
+test("online quote pricing rejects line price overrides", () => {
   assert.throws(
     () => calculatePosQuote({
       lines: [{
@@ -67,16 +59,16 @@ test("POS quote pricing requires a reason for line price overrides", () => {
         requestedQuantity: 1,
         preparedQuantity: 1,
         baseUnitPrice: 1_800,
-        overrideUnitPrice: 1_500
+        overrideUnitPrice: 1_500,
+        overrideReason: "manual correction"
       }]
     }),
-    /requires a reason/
+    /request-time unit price/
   );
 });
 
 test("POS quote pricing groups prepared quantities by final unit price", () => {
   const result = calculatePosQuote({
-    customer: { vatEnabled: false },
     lines: [
       {
         itemId: "line-1",
