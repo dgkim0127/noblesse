@@ -389,6 +389,64 @@ export function createAdminApi(apiClient) {
       }))
     },
 
+    async getPosQuotes(params = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/pos/quotes${buildQuery(params)}`, {
+        token: requireToken(token),
+      }))
+    },
+
+    async getPosRecords(params = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/pos/records${buildQuery(params)}`, {
+        token: requireToken(token),
+      }))
+    },
+
+    async getPosQuote(quoteId, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/pos/quotes/${encodeURIComponent(quoteId)}`, {
+        token: requireToken(token),
+      }))
+    },
+
+    async savePosQuotePicking(quoteId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/pos/quotes/${encodeURIComponent(quoteId)}/picking`, {
+        method: 'PUT',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async previewPosQuotePrice(quoteId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/pos/quotes/${encodeURIComponent(quoteId)}/price-preview`, {
+        method: 'POST',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async finalizePosQuote(quoteId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/pos/quotes/${encodeURIComponent(quoteId)}/finalize`, {
+        method: 'POST',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async publishPosQuote(quoteId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/pos/quotes/${encodeURIComponent(quoteId)}/publish`, {
+        method: 'POST',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
+    async linkPosQuoteReceipt(quoteId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/pos/quotes/${encodeURIComponent(quoteId)}/receipt-link`, {
+        method: 'POST',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
     async updateProductVisibility(productId, isVisible, token) {
       return unwrap(await apiClient.apiFetch(`/admin/products/${encodeURIComponent(productId)}/visibility`, {
         method: 'PATCH',
