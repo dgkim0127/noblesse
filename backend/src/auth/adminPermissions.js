@@ -15,6 +15,7 @@ export const PERMISSIONS = [
   "prices.write",
   "quotes.read",
   "quotes.write",
+  "customers.manage_pricing",
   "analytics.read",
   "admins.read",
   "admins.manage",
@@ -55,6 +56,7 @@ export const ADMIN_ROLE_PERMISSIONS = {
     "prices.write",
     "quotes.read",
     "quotes.write",
+    "customers.manage_pricing",
     "analytics.read",
     "audit.read"
   ],

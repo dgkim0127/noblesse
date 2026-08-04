@@ -1,4 +1,4 @@
-import { Ban, Banknote, Check, Download, FileCheck2, ImageIcon, MoreHorizontal, PackageCheck, RotateCcw, Send, Truck } from 'lucide-react'
+import { Download, FileCheck2, ImageIcon, MoreHorizontal, PackageCheck, Send } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
@@ -16,19 +16,18 @@ import {
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy } from './adminCopy'
 import { createAdminQuoteSampleItems, createAdminQuoteSampleQuote, isAdminQuoteSampleMode } from './adminQuoteSampleItems'
+import { useAdminPosQuoteCopy } from './adminPosQuoteCopy'
 import { getAdminQuoteDateLocale, useAdminQuoteWorkflowCopy } from './adminQuoteWorkflowCopy'
 
 const legacyLockedStatuses = new Set(['accepted', 'rejected', 'cancelled'])
 const lineEditableWorkflowStatuses = new Set(['received', 'picking'])
-const cancellableWorkflowStatuses = new Set(['received', 'picking', 'receipt_sent'])
-const workflowSteps = ['received', 'picking', 'receipt_sent', 'payment_confirmed', 'shipped', 'completed']
+const workflowSteps = ['received', 'picking', 'finalized', 'published']
 const cancellationReasonKeys = ['out_of_stock', 'quantity_shortage', 'quality_issue', 'discontinued', 'other']
-const nextWorkflowAction = {
-  received: { status: 'picking', icon: PackageCheck },
-  picking: { status: 'receipt_sent', icon: PackageCheck },
-  receipt_sent: { status: 'payment_confirmed', icon: Banknote },
-  payment_confirmed: { status: 'shipped', icon: Truck },
-  shipped: { status: 'completed', icon: Check },
+
+function createIdempotencyKey(action, quoteId) {
+  const suffix = globalThis.crypto?.randomUUID?.()
+    || `${Date.now()}-${Math.random().toString(16).slice(2)}`
+  return `${action}-${quoteId}-${suffix}`
 }
 
 function deriveFulfillmentStatus(confirmedQuantity, requestedQuantity) {
@@ -48,20 +47,26 @@ function quoteToForm(quote, items) {
     documentLocale: quote?.documentLocale || 'en',
     customerNote: quote?.customerNote || '',
     adminMemo: quote?.adminMemo || '',
-    items: (items || []).map((item) => ({
-      ...item,
-      confirmedQuantity: String(item.confirmedQuantity ?? item.requestedQuantity ?? 0),
-      confirmedUnitPrice: String(item.confirmedUnitPrice ?? item.requestedPriceSnapshot ?? 0),
-      fulfillmentStatus: item.fulfillmentStatus || 'pending',
-      cancellationReason: item.cancellationReason || '',
-      cancellationNote: item.cancellationNote || '',
-      itemNote: item.itemNote || '',
-    })),
+    items: (items || []).map((item) => {
+      const requested = Number(item.requestedQuantity || 0)
+      const confirmed = Number(item.preparedQuantity ?? item.confirmedQuantity ?? requested)
+      return {
+        ...item,
+        confirmedQuantity: String(confirmed),
+        confirmedUnitPrice: String(item.requestedPriceSnapshot ?? item.confirmedUnitPrice ?? 0),
+        fulfillmentStatus: item.fulfillmentStatus || deriveFulfillmentStatus(confirmed, requested),
+        cancellationReason: item.cancellationReason || '',
+        cancellationNote: item.cancellationNote || '',
+        itemNote: item.itemNote || '',
+      }
+    }),
   }
 }
 
-function buildPayload(form) {
+function buildPosPayload(form, quoteId, version, action) {
   return {
+    expectedVersion: Number(version || 1),
+    idempotencyKey: createIdempotencyKey(action, quoteId),
     leadTime: form.leadTime,
     shippingNote: form.shippingNote,
     validUntil: form.validUntil || undefined,
@@ -70,9 +75,7 @@ function buildPayload(form) {
     adminMemo: form.adminMemo,
     items: form.items.map((item) => ({
       id: item.id,
-      confirmedQuantity: Number(item.confirmedQuantity),
-      confirmedUnitPrice: Number(item.confirmedUnitPrice),
-      fulfillmentStatus: item.fulfillmentStatus,
+      preparedQuantity: Number(item.confirmedQuantity),
       cancellationReason: item.cancellationReason || undefined,
       cancellationNote: item.cancellationNote,
       itemNote: item.itemNote,
@@ -116,6 +119,7 @@ export function AdminQuotePage() {
   const { quoteId } = useParams()
   const [searchParams] = useSearchParams()
   const t = useAdminQuoteWorkflowCopy()
+  const posT = useAdminPosQuoteCopy()
   const { locale } = useLocalePath()
   const dateLocale = getAdminQuoteDateLocale(locale)
   const { hasPermission } = useAdminAccess()
@@ -126,10 +130,9 @@ export function AdminQuotePage() {
   const [form, setForm] = useState(null)
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [workflowNote, setWorkflowNote] = useState('')
   const [toast, setToast] = useState({ message: '', tone: 'success' })
   const [confirm, setConfirm] = useState(null)
-  const { data, error, status } = useAdminApiResource((api, token) => api.getQuote(quoteId, token), [quoteId, refreshKey])
+  const { data, error, status } = useAdminApiResource((api, token) => api.getPosQuote(quoteId, token), [quoteId, refreshKey])
   const sampleMode = isAdminQuoteSampleMode(searchParams, globalThis.location?.hostname || '')
   const quote = useMemo(() => sampleMode ? createAdminQuoteSampleQuote(data?.quote) : data?.quote, [data?.quote, sampleMode])
   const sourceItems = useMemo(
@@ -142,7 +145,6 @@ export function AdminQuotePage() {
     const next = quoteToForm(quote, sourceItems)
     initialFormRef.current = structuredClone(next)
     setForm(next)
-    setWorkflowNote(quote?.workflowNote || '')
     setDirty(false)
   }, [quote, sourceItems, status])
 
@@ -159,16 +161,25 @@ export function AdminQuotePage() {
   const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
   const documents = useMemo(() => sampleMode ? [] : data?.documents || [], [data?.documents, sampleMode])
   const history = useMemo(() => sampleMode ? [] : data?.history || [], [data?.history, sampleMode])
-  const workflowStatus = quote?.workflowStatus || 'received'
+  const posState = sampleMode ? { version: 1 } : data?.pos?.state || { version: 1 }
+  const workflowStatus = posState.publishedAt
+    ? 'published'
+    : posState.finalizedAt
+      ? 'finalized'
+      : Number(posState.version || 1) > 1 || posState.lastPreview
+        ? 'picking'
+        : 'received'
   const legacyLocked = legacyLockedStatuses.has(quote?.status)
   const canPersist = canWrite && !sampleMode
   const canEditDraft = canPersist || sampleMode
   const editable = canEditDraft && !legacyLocked && lineEditableWorkflowStatuses.has(workflowStatus)
-  const total = useMemo(() => (form?.items || []).reduce((sum, item) => {
+  const supplyAmount = useMemo(() => (form?.items || []).reduce((sum, item) => {
     const quantity = Number(item.confirmedQuantity)
     const unitPrice = Number(item.confirmedUnitPrice)
     return sum + (Number.isFinite(quantity) && Number.isFinite(unitPrice) ? quantity * unitPrice : 0)
   }, 0), [form?.items])
+  const vatAmount = Math.round(supplyAmount * 0.1)
+  const total = supplyAmount + vatAmount
   const exceptionItems = useMemo(() => (form?.items || []).filter((item) => ['partial', 'cancelled'].includes(item.fulfillmentStatus)), [form?.items])
   const unresolvedCount = useMemo(() => (form?.items || []).filter((item) => item.fulfillmentStatus === 'pending').length, [form?.items])
   const missingCancellationReasonCount = useMemo(() => (form?.items || []).filter((item) => (
@@ -179,7 +190,7 @@ export function AdminQuotePage() {
     const requested = Number(item.requestedQuantity)
     return !Number.isFinite(prepared) || prepared < 0 || prepared > requested
   }).length, [form?.items])
-  const publicationBlocked = unresolvedCount > 0 || missingCancellationReasonCount > 0 || invalidPreparedQuantityCount > 0
+  const finalizationBlocked = unresolvedCount > 0 || missingCancellationReasonCount > 0 || invalidPreparedQuantityCount > 0
   const localeOptions = Object.entries(t.documentLanguages)
   const cancellationReasons = cancellationReasonKeys.map((value) => [value, t.cancellationReasons[value]])
   const orderedDocuments = useMemo(() => orderDocuments(documents, quote?.currentDocumentId), [documents, quote?.currentDocumentId])
@@ -242,69 +253,84 @@ export function AdminQuotePage() {
     setDirty(true)
   }
 
+  const handlePosError = (actionError, fallback) => (
+    actionError?.status === 409 ? posT.conflict : actionError?.message || fallback
+  )
+
   const saveDraft = async ({ quiet = false } = {}) => {
     if (!canPersist || !editable) return null
     setSaving(true)
     try {
-      const result = await mutate((api, token) => api.updateQuote(quoteId, buildPayload(form), token))
-      const next = quoteToForm(result.data?.quote || quote, result.data?.items || form.items)
+      const result = await mutate((api, token) => api.savePosQuotePicking(
+        quoteId,
+        buildPosPayload(form, quoteId, posState.version, 'save-picking'),
+        token,
+      ))
+      const nextQuote = result.data?.quote || quote
+      const nextItems = result.data?.items || result.data?.quote?.items || form.items
+      const next = quoteToForm(nextQuote, nextItems)
       initialFormRef.current = structuredClone(next)
       setForm(next)
       setDirty(false)
       setRefreshKey((current) => current + 1)
-      if (!quiet) setToast({ message: t.detail.saved, tone: 'success' })
+      if (!quiet) setToast({ message: posT.saved, tone: 'success' })
       return result
     } catch (saveError) {
-      setToast({ message: saveError?.message || t.detail.saveFailed, tone: 'error' })
+      setToast({ message: handlePosError(saveError, posT.saveFailed), tone: 'error' })
       return null
     } finally {
       setSaving(false)
     }
   }
 
-  const issueQuote = async () => {
-    if (!canPersist) return
+  const finalizeQuote = async () => {
     setConfirm(null)
+    if (!canPersist) return
+    if (dirty) {
+      setToast({ message: posT.saveBeforeFinalize, tone: 'error' })
+      return
+    }
     if (!form.validUntil) {
       setToast({ message: t.detail.validUntilRequired, tone: 'error' })
       return
     }
+    if (finalizationBlocked) {
+      setToast({ message: t.detail.invalidQuantityBody || posT.saveBeforeFinalize, tone: 'error' })
+      return
+    }
     setSaving(true)
     try {
-      await mutate((api, token) => api.updateQuote(quoteId, buildPayload(form), token))
-      const issued = await mutate((api, token) => api.issueQuote(quoteId, token))
-      setDirty(false)
-      setToast({ message: formatAdminCopy(t.detail.issueSuccess, { revision: issued.data?.document?.revision || '' }), tone: 'success' })
+      await mutate((api, token) => api.finalizePosQuote(
+        quoteId,
+        buildPosPayload(form, quoteId, posState.version, 'finalize'),
+        token,
+      ))
+      setToast({ message: posT.finalized, tone: 'success' })
       setRefreshKey((current) => current + 1)
-    } catch (issueError) {
-      setToast({ message: issueError?.message || t.detail.issueFailed, tone: 'error' })
+    } catch (finalizeError) {
+      setToast({ message: handlePosError(finalizeError, posT.finalizeFailed), tone: 'error' })
     } finally {
       setSaving(false)
     }
   }
 
-  const transitionWorkflow = async (targetStatus) => {
-    if (!canPersist) return
-    if (targetStatus === 'receipt_sent' && dirty) {
-      setToast({ message: t.detail.saveBeforeReceipt, tone: 'error' })
-      return
-    }
-    if (targetStatus === 'cancelled' && !workflowNote.trim()) {
-      setToast({ message: t.detail.cancellationNoteRequired, tone: 'error' })
-      return
-    }
+  const publishQuote = async () => {
     setConfirm(null)
+    if (!canPersist) return
     setSaving(true)
     try {
-      if (dirty && editable) {
-        await mutate((api, token) => api.updateQuote(quoteId, buildPayload(form), token))
-      }
-      await mutate((api, token) => api.updateQuoteWorkflow(quoteId, targetStatus, workflowNote.trim(), token))
-      setDirty(false)
-      setToast({ message: formatAdminCopy(t.detail.workflowChanged, { status: t.workflow[targetStatus] || targetStatus }), tone: 'success' })
+      await mutate((api, token) => api.publishPosQuote(
+        quoteId,
+        {
+          expectedVersion: Number(posState.version || 1),
+          idempotencyKey: createIdempotencyKey('publish', quoteId),
+        },
+        token,
+      ))
+      setToast({ message: posT.published, tone: 'success' })
       setRefreshKey((current) => current + 1)
-    } catch (workflowError) {
-      setToast({ message: workflowError?.message || t.detail.workflowFailed, tone: 'error' })
+    } catch (publishError) {
+      setToast({ message: handlePosError(publishError, posT.publishFailed), tone: 'error' })
     } finally {
       setSaving(false)
     }
@@ -327,25 +353,22 @@ export function AdminQuotePage() {
     setDirty(false)
   }
 
-  const openIssueDialog = () => setConfirm({
-    kind: 'issue',
-    title: quote.currentDocumentId ? t.detail.issueNewTitle : t.detail.issueTitle,
-    description: t.detail.issueDescription,
-    confirmLabel: quote.currentDocumentId ? t.detail.reissue : t.detail.issue,
-    action: issueQuote,
+  const openFinalizeDialog = () => setConfirm({
+    kind: 'finalize',
+    title: posT.finalizeTitle,
+    description: posT.finalizeDescription,
+    confirmLabel: posT.finalizeButton,
+    action: finalizeQuote,
   })
 
-  const openCancellationDialog = () => setConfirm({
-    kind: 'cancel',
-    title: t.detail.cancelDialogTitle,
-    description: t.detail.cancelDialogDescription,
-    confirmLabel: t.detail.cancelAll,
-    danger: true,
-    action: () => transitionWorkflow('cancelled'),
+  const openPublishDialog = () => setConfirm({
+    kind: 'publish',
+    title: posT.publishTitle,
+    description: posT.publishDescription,
+    confirmLabel: posT.publishButton,
+    action: publishQuote,
   })
 
-  const nextAction = nextWorkflowAction[workflowStatus]
-  const NextActionIcon = nextAction?.icon
   const activeStepIndex = workflowSteps.indexOf(workflowStatus)
   const currentDocument = orderedDocuments[0]?.id === quote.currentDocumentId
     ? orderedDocuments[0]
@@ -356,15 +379,13 @@ export function AdminQuotePage() {
     <AdminPageHeader
       eyebrow={t.detail.eyebrow}
       title={quote.quoteNumber || quote.inquiryNumber || t.detail.fallbackTitle}
-      description={`${quote.companyName || t.detail.companyFallback} / ${quote.currency} / ${t.workflow[workflowStatus] || workflowStatus}`}
+      description={`${quote.companyName || t.detail.companyFallback} / ${quote.currency} / ${posT.workflow[workflowStatus] || workflowStatus}`}
       actions={<>
         <AdminLink to="/admin/quotes">{t.detail.list}</AdminLink>
         <details className="admin-quote-more-menu">
           <summary aria-label={t.detail.moreActions} title={t.detail.moreActions}><MoreHorizontal size={18} /></summary>
           <div>
             <AdminLink className="admin-quote-menu-link" to={`/admin/inquiries/${quote.inquiryId}`}>{t.detail.sourceRequest}</AdminLink>
-            {workflowStatus === 'receipt_sent' && canPersist && !legacyLocked && <button disabled={saving} type="button" onClick={() => transitionWorkflow('picking')}><RotateCcw size={16} />{t.detail.revertPicking}</button>}
-            {canPersist && cancellableWorkflowStatuses.has(workflowStatus) && !legacyLocked && <button className="admin-danger-text" disabled={saving} type="button" onClick={openCancellationDialog}><Ban size={16} />{t.detail.cancelAll}</button>}
           </div>
         </details>
       </>}
@@ -372,20 +393,19 @@ export function AdminQuotePage() {
 
     <section className="admin-quote-workflow" aria-label={t.detail.workflowAria}>
       {workflowSteps.map((step, index) => <div className={`${index <= activeStepIndex ? 'is-complete' : ''} ${step === workflowStatus ? 'is-current' : ''}`} key={step}>
-        <span>{index + 1}</span><strong>{t.workflow[step]}</strong>
+        <span>{index + 1}</span><strong>{posT.workflow[step]}</strong>
       </div>)}
-      {workflowStatus === 'cancelled' && <div className="is-cancelled"><span><Ban size={15} /></span><strong>{t.workflow.cancelled}</strong></div>}
     </section>
 
     <details className="admin-quote-workflow-compact">
-      <summary><strong>{workflowStatus === 'cancelled' ? t.workflow.cancelled : `${activeStepIndex + 1}/${workflowSteps.length} ${t.workflow[workflowStatus] || workflowStatus}`}</strong><span>{t.detail.allStages}</span></summary>
-      <ol>{workflowSteps.map((step, index) => <li className={step === workflowStatus ? 'is-current' : ''} key={step}><span>{index + 1}</span>{t.workflow[step]}</li>)}</ol>
+      <summary><strong>{`${Math.max(activeStepIndex + 1, 1)}/${workflowSteps.length} ${posT.workflow[workflowStatus] || workflowStatus}`}</strong><span>{t.detail.allStages}</span></summary>
+      <ol>{workflowSteps.map((step, index) => <li className={step === workflowStatus ? 'is-current' : ''} key={step}><span>{index + 1}</span>{posT.workflow[step]}</li>)}</ol>
     </details>
 
     <div className="admin-quote-operation-notice">
       <AdminNotice tone="info">
-        <strong>{t.detail.operationTitle}</strong>
-        <p>{t.detail.operationBody}</p>
+        <strong>{posT.operationTitle}</strong>
+        <p>{posT.operationDescription}</p>
       </AdminNotice>
     </div>
     {sampleMode && <AdminNotice tone="warning"><strong>{t.detail.sampleModeTitle}</strong><p>{t.detail.sampleModeBody}</p></AdminNotice>}
@@ -393,7 +413,7 @@ export function AdminQuotePage() {
     {legacyLocked && <AdminNotice tone="warning"><strong>{t.detail.legacyTitle}</strong><p>{t.detail.legacyBody}</p></AdminNotice>}
 
     <details className="admin-quote-mobile-summary">
-      <summary><strong>{t.workflow[workflowStatus] || workflowStatus}</strong><span>{t.detail.requestedItems} {form.items.length} · {formatMoney(total, quote.currency)}</span></summary>
+      <summary><strong>{posT.workflow[workflowStatus] || workflowStatus}</strong><span>{t.detail.requestedItems} {form.items.length} / {formatMoney(total, quote.currency)}</span></summary>
       <dl><dt>{t.detail.exceptions}</dt><dd>{exceptionItems.length}</dd><dt>{t.detail.pdfVersion}</dt><dd>{quote.currentRevision || '-'}</dd></dl>
     </details>
 
@@ -433,7 +453,7 @@ export function AdminQuotePage() {
                 </div>
                 <div className="admin-picking-result-panel">
                   <div className="admin-picking-result-heading"><small>{t.detail.columns.result}</small><span className={`admin-status ${item.fulfillmentStatus}`}>{t.fulfillment[item.fulfillmentStatus]}</span></div>
-                  <label><small>{t.detail.columns.unitPrice}</small><input aria-label={formatAdminCopy(t.detail.unitPriceAria, { code: item.productCode })} disabled={!editable || prepared === 0} min="0" step="0.01" type="number" value={item.confirmedUnitPrice} onChange={(event) => setItemField(item.id, 'confirmedUnitPrice', event.target.value)} /></label>
+                  <div className="admin-picking-unit-price"><small>{t.detail.columns.unitPrice}</small><strong title={posT.unitPriceReadOnly}>{formatMoney(Number(item.confirmedUnitPrice || 0), quote.currency)}</strong></div>
                   <div className="admin-picking-subtotal"><small>{t.detail.columns.amount}</small><strong>{formatMoney(subtotal, quote.currency)}</strong></div>
                 </div>
                 {needsCancellationReason && <div className="admin-cancellation-fields">
@@ -449,8 +469,10 @@ export function AdminQuotePage() {
         </section>
 
         <section className="admin-editor-section admin-quote-document-section">
-          <div className="admin-section-heading"><div><h2>{t.detail.documentsTitle}</h2><p>{t.detail.documentsBody}</p></div>{canPersist && editable && <button className="primary-action" disabled={saving || publicationBlocked} type="button" onClick={openIssueDialog}><Send size={17} />{quote.currentDocumentId ? t.detail.pdfReissue : t.detail.pdfIssue}</button>}</div>
+          <div className="admin-section-heading"><div><h2>{t.detail.documentsTitle}</h2><p>{t.detail.documentsBody}</p></div></div>
           <label className="admin-field admin-valid-until-field"><span>{t.detail.validUntil} <b>*</b></span><input disabled={!editable} type="date" value={form.validUntil} onChange={(event) => setField('validUntil', event.target.value)} /></label>
+          {workflowStatus === 'finalized' && !currentDocument && <AdminNotice tone="info"><strong>{posT.internalHidden}</strong></AdminNotice>}
+          {workflowStatus === 'published' && <AdminNotice tone="success"><strong>{posT.publishedNotice}</strong></AdminNotice>}
           {currentDocument && <div className="admin-current-document"><FileCheck2 size={20} /><span><small>{t.detail.currentDocument}</small><strong>{formatAdminCopy(t.detail.version, { revision: currentDocument.revision })}</strong><em>{t.documentLanguages[currentDocument.documentLocale] || currentDocument.documentLocale} · {new Date(currentDocument.issuedAt).toLocaleString(dateLocale)}</em></span><button aria-label={formatAdminCopy(t.detail.downloadAria, { revision: currentDocument.revision })} disabled={saving} title={t.detail.downloadTitle} type="button" onClick={() => downloadDocument(currentDocument)}><Download size={17} /></button></div>}
           {previousDocuments.length > 0 && <details className="admin-previous-documents"><summary>{formatAdminCopy(t.detail.previousDocuments, { count: previousDocuments.length })}</summary><div className="admin-document-list">{previousDocuments.map((document) => <div key={document.id}><FileCheck2 size={19} /><span><strong>{formatAdminCopy(t.detail.version, { revision: document.revision })}</strong><small>{t.documentLanguages[document.documentLocale] || document.documentLocale} · {new Date(document.issuedAt).toLocaleString(dateLocale)}</small></span><button aria-label={formatAdminCopy(t.detail.downloadAria, { revision: document.revision })} disabled={saving} title={t.detail.downloadTitle} type="button" onClick={() => downloadDocument(document)}><Download size={17} /></button></div>)}</div></details>}
           <details className="admin-quote-additional-settings">
@@ -469,7 +491,7 @@ export function AdminQuotePage() {
           <summary><span><strong>{formatAdminCopy(t.detail.historyCount, { count: workflowHistoryGroups.reduce((sum, group) => sum + group.entries.length, 0) })}</strong><small>{t.detail.historyBody}</small></span></summary>
           <ol className="admin-status-history">{workflowHistoryGroups.map((group) => {
             const latest = group.entries.at(-1)
-            return <li key={`${group.status}-${latest.id}`}><span>{t.workflow[group.status] || group.status}</span><time>{new Date(latest.createdAt).toLocaleString(dateLocale)}</time>{latest.note && <small>{latest.note}</small>}{group.entries.length > 1 && <details><summary>{formatAdminCopy(t.detail.historyEvents, { count: group.entries.length })}</summary><ul>{group.entries.map((entry) => <li key={entry.id}><time>{new Date(entry.createdAt).toLocaleString(dateLocale)}</time>{entry.note && <small>{entry.note}</small>}</li>)}</ul></details>}</li>
+            return <li key={`${group.status}-${latest.id}`}><span>{posT.workflow[group.status] || t.workflow[group.status] || group.status}</span><time>{new Date(latest.createdAt).toLocaleString(dateLocale)}</time>{latest.note && <small>{latest.note}</small>}{group.entries.length > 1 && <details><summary>{formatAdminCopy(t.detail.historyEvents, { count: group.entries.length })}</summary><ul>{group.entries.map((entry) => <li key={entry.id}><time>{new Date(entry.createdAt).toLocaleString(dateLocale)}</time>{entry.note && <small>{entry.note}</small>}</li>)}</ul></details>}</li>
           })}</ol>
         </details>}
 
@@ -477,22 +499,22 @@ export function AdminQuotePage() {
 
       <aside className="admin-editor-summary admin-quote-desktop-summary">
         <h2>{t.detail.summaryTitle}</h2>
-        <dl><dt>{t.detail.currentStage}</dt><dd>{t.workflow[workflowStatus] || workflowStatus}</dd><dt>{t.detail.requestedItems}</dt><dd>{form.items.length}</dd><dt>{t.detail.exceptions}</dt><dd>{exceptionItems.length}</dd><dt>{t.detail.preparedTotal}</dt><dd>{formatMoney(total, quote.currency)}</dd></dl>
+        <dl><dt>{t.detail.currentStage}</dt><dd>{posT.workflow[workflowStatus] || workflowStatus}</dd><dt>{t.detail.requestedItems}</dt><dd>{form.items.length}</dd><dt>{t.detail.exceptions}</dt><dd>{exceptionItems.length}</dd><dt>{posT.supplyAmount}</dt><dd>{formatMoney(supplyAmount, quote.currency)}</dd><dt>{posT.vatAmount}</dt><dd>{formatMoney(vatAmount, quote.currency)}</dd><dt>{posT.totalAmount}</dt><dd>{formatMoney(total, quote.currency)}</dd></dl>
       </aside>
     </form>
 
-    {canPersist && !legacyLocked && (dirty || nextAction) && <div className="admin-quote-task-bar" role="region" aria-label={t.detail.saveBarAria}>
-      <strong>{dirty ? t.detail.unsavedChanges : t.workflow[workflowStatus] || workflowStatus}</strong>
+    {canPersist && !legacyLocked && (dirty || ['received', 'picking', 'finalized'].includes(workflowStatus)) && <div className="admin-quote-task-bar" role="region" aria-label={t.detail.saveBarAria}>
+      <strong>{dirty ? t.detail.unsavedChanges : posT.workflow[workflowStatus] || workflowStatus}</strong>
       <div className="admin-actions">
         {dirty && editable && <button disabled={saving} type="button" onClick={discard}>{t.detail.discard}</button>}
         {dirty && editable
           ? <button className="primary-action" disabled={saving} type="button" onClick={() => saveDraft()}>{saving ? t.detail.saving : t.detail.saveResult}</button>
-          : nextAction && <button className="primary-action admin-workflow-next" disabled={saving || (nextAction.status === 'receipt_sent' && (!quote.currentDocumentId || publicationBlocked))} type="button" onClick={() => transitionWorkflow(nextAction.status)}><NextActionIcon size={17} />{t.nextActions[workflowStatus]}</button>}
+          : workflowStatus === 'finalized'
+            ? <button className="primary-action admin-workflow-next" disabled={saving} type="button" onClick={openPublishDialog}><Send size={17} />{posT.publishButton}</button>
+            : <button className="primary-action admin-workflow-next" disabled={saving || finalizationBlocked || !form.validUntil} type="button" onClick={openFinalizeDialog}><FileCheck2 size={17} />{posT.finalizeButton}</button>}
       </div>
     </div>}
-    <AdminConfirmDialog busy={saving} busyLabel={t.detail.processing} cancelLabel={t.detail.cancel} confirmDisabled={confirm?.kind === 'cancel' && !workflowNote.trim()} confirmLabel={confirm?.confirmLabel} danger={confirm?.danger} description={confirm?.description} open={Boolean(confirm)} title={confirm?.title || ''} onCancel={() => !saving && setConfirm(null)} onConfirm={confirm?.action}>
-      {confirm?.kind === 'cancel' && <label className="admin-field admin-cancel-dialog-note"><span>{t.detail.workflowNote}</span><textarea autoFocus placeholder={t.detail.cancelReasonPlaceholder} rows="4" value={workflowNote} onChange={(event) => setWorkflowNote(event.target.value)} /></label>}
-    </AdminConfirmDialog>
+    <AdminConfirmDialog busy={saving} busyLabel={t.detail.processing} cancelLabel={t.detail.cancel} confirmLabel={confirm?.confirmLabel} danger={confirm?.danger} description={confirm?.description} open={Boolean(confirm)} title={confirm?.title || ''} onCancel={() => !saving && setConfirm(null)} onConfirm={confirm?.action} />
     <AdminToast closeLabel={t.detail.closeToast} message={toast.message} tone={toast.tone} onClose={() => setToast({ message: '', tone: 'success' })} />
   </>
 }

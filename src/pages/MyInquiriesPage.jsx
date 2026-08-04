@@ -271,6 +271,7 @@ export function MyInquiriesPage() {
     const quoteCurrency = issuedQuote?.currency || issuedQuote?.snapshot?.currency || selectedCurrency
     const localizedWorkflow = workflowCopy[locale] || workflowCopy.en
     const localizedCancellation = cancellationCopy[locale] || cancellationCopy.en
+    const isOnlineQuote = Boolean(issuedQuote?.isOnlineQuote)
 
     return <main className="content">
       <Link className="back" to={toLocalePath('/my-inquiries')}>Inquiry history</Link>
@@ -300,11 +301,11 @@ export function MyInquiriesPage() {
       {quoteStatus === 'loading' && !issuedQuote && <p className="auth-notice" role="status">Loading issued quote...</p>}
       {quoteStatus === 'error' && <p className="auth-notice" role="alert">{quoteError}</p>}
       {issuedQuote && <section className="buyer-quote-document">
-        <header><div><span>{issuedQuote.revision ? `Version ${issuedQuote.revision}` : quotationCopy.title}</span><h2>{issuedQuote.documentId ? quotationCopy.document : quotationCopy.title}</h2><p>{issuedQuote.quoteNumber || selected.inquiryNumber}</p></div><span className={`status status-${issuedQuote.workflowStatus}`}>{localizedWorkflow[issuedQuote.workflowStatus] || issuedQuote.workflowStatus}</span></header>
-        <ol className="buyer-quote-workflow" aria-label={quotationCopy.title}>{['received', 'picking', 'receipt_sent', 'payment_confirmed', 'shipped', 'completed'].map((step, index, steps) => {
+        <header><div><span>{issuedQuote.revision ? `Version ${issuedQuote.revision}` : quotationCopy.title}</span><h2>{issuedQuote.documentId ? quotationCopy.document : quotationCopy.title}</h2><p>{issuedQuote.quoteNumber || selected.inquiryNumber}</p></div>{!isOnlineQuote && <span className={`status status-${issuedQuote.workflowStatus}`}>{localizedWorkflow[issuedQuote.workflowStatus] || issuedQuote.workflowStatus}</span>}</header>
+        {!isOnlineQuote && <ol className="buyer-quote-workflow" aria-label={quotationCopy.title}>{['received', 'picking', 'receipt_sent', 'payment_confirmed', 'shipped', 'completed'].map((step, index, steps) => {
           const currentIndex = steps.indexOf(issuedQuote.workflowStatus)
           return <li className={`${index <= currentIndex ? 'is-complete' : ''} ${step === issuedQuote.workflowStatus ? 'is-current' : ''}`} key={step}><span>{index + 1}</span><small>{localizedWorkflow[step]}</small></li>
-        })}</ol>
+        })}</ol>}
         <div className="buyer-preparation-heading"><strong>{quotationCopy.title}</strong><span>{quotationCopy.requested} / {quotationCopy.prepared} / {quotationCopy.cancelled}</span></div>
         <div className="buyer-quote-lines buyer-preparation-lines">{livePreparationItems.map((item, index) => {
           const optionSummary = formatSelectedProductOptions(item.selectedOptions, locale)
@@ -326,7 +327,7 @@ export function MyInquiriesPage() {
           <dt>{quotationCopy.shipping}</dt><dd>{issuedQuote.shippingNote || issuedQuote.snapshot?.shippingNote || '-'}</dd>
         </dl>}
         {(issuedQuote.customerNote || issuedQuote.snapshot?.customerNote) && <div className="buyer-quote-note"><strong>{quotationCopy.note}</strong><p>{issuedQuote.customerNote || issuedQuote.snapshot.customerNote}</p></div>}
-        <p className="buyer-quote-external-payment">{quotationCopy.externalPayment}</p>
+        {!isOnlineQuote && <p className="buyer-quote-external-payment">{quotationCopy.externalPayment}</p>}
         {issuedQuote.documentId && <div className="buyer-quote-actions"><button className="secondary-action" disabled={quoteStatus === 'loading'} type="button" onClick={downloadQuote}><Download size={17} />{quotationCopy.download}</button></div>}
       </section>}
     </main>

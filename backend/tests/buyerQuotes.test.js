@@ -85,6 +85,26 @@ test("buyer document access is served only after an ownership query succeeds", a
   assert.equal(result.filename, "QT-001-v1.pdf");
 });
 
+test("buyer online quote query hides an unpublished or superseded POS document", async () => {
+  const rows = [{
+    ...buyerQuoteRow(),
+    pos_quote_id: quoteId,
+    is_online_quote: true,
+    published_at: null,
+    published_document_id: null
+  }];
+  const queries = createBuyerQuoteQueries({
+    async query(sql) {
+      if (String(sql).includes("from public.admin_quotes q")) return { rows };
+      throw new Error(`Unexpected query: ${sql}`);
+    }
+  });
+
+  const result = await queries.getQuoteForInquiry(viewer, inquiryId);
+
+  assert.equal(result, null);
+});
+
 test("buyer quote query accepts only the current sent document and records history", async () => {
   const calls = [];
   let status = "sent";
@@ -143,6 +163,36 @@ test("buyer quote query disables accept and reject for the offline fulfillment w
       if (["begin", "rollback"].includes(normalized)) return { rows: [] };
       if (normalized.includes("select q.*, i.buyer_id")) {
         return { rows: [{ ...buyerQuoteRow(), workflow_version: 2, workflow_status: "picking", buyer_id: viewer.buyerId }] };
+      }
+      throw new Error(`Unexpected query: ${sql}`);
+    },
+    release() {}
+  };
+  const queries = createBuyerQuoteQueries({ async connect() { return client; } });
+
+  const result = await queries.decideQuote(viewer, quoteId, { documentId, decision: "accepted", note: "" });
+
+  assert.equal(result.decisionDisabled, true);
+  assert.equal(calls.some((sql) => sql.startsWith("update public.admin_quotes")), false);
+  assert.equal(calls.includes("rollback"), true);
+});
+
+test("buyer quote query disables decisions for POS online quotes", async () => {
+  const calls = [];
+  const client = {
+    async query(sql) {
+      const normalized = String(sql).toLowerCase().replace(/\s+/g, " ").trim();
+      calls.push(normalized);
+      if (["begin", "rollback"].includes(normalized)) return { rows: [] };
+      if (normalized.includes("select q.*, i.buyer_id")) {
+        return {
+          rows: [{
+            ...buyerQuoteRow(),
+            buyer_id: viewer.buyerId,
+            pos_quote_id: quoteId,
+            is_online_quote: true
+          }]
+        };
       }
       throw new Error(`Unexpected query: ${sql}`);
     },

@@ -800,6 +800,225 @@ export function createAdminRoutes({
     })
   );
 
+  router.get(
+    "/pos/capabilities",
+    requireAdmin,
+    can("quotes.read"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.getCapabilities(req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.put(
+    "/pos/catalog-sync",
+    requireAdmin,
+    can("customers.manage_pricing"),
+    can("prices.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.syncCatalog(req.body, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/pos/quotes",
+    requireAdmin,
+    can("quotes.read"),
+    asyncRoute(async (req, res) => {
+      const result = await services.pos.listQuotes(req.query, req.adminViewer);
+      res.json({
+        data: { quotes: result.quotes },
+        meta: withRequestId(req, result.meta)
+      });
+    })
+  );
+
+  router.get(
+    "/pos/records",
+    requireAdmin,
+    can("quotes.read"),
+    asyncRoute(async (req, res) => {
+      const result = await services.pos.listUnifiedRecords(
+        req.query,
+        req.adminViewer
+      );
+      res.json({
+        data: {
+          records: result.records,
+          totalAmount: result.totalAmount
+        },
+        meta: withRequestId(req, result.meta)
+      });
+    })
+  );
+
+  router.put(
+    "/pos/quotes/:quoteId/picking",
+    requireAdmin,
+    can("quotes.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.savePicking(
+        req.params.quoteId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/pos/quotes/:quoteId/price-preview",
+    requireAdmin,
+    can("quotes.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.previewPrice(
+        req.params.quoteId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/pos/quotes/:quoteId/finalize",
+    requireAdmin,
+    can("quotes.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.finalizeQuote(
+        req.params.quoteId,
+        req.body,
+        req.adminViewer
+      );
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/pos/quotes/:quoteId/publish",
+    requireAdmin,
+    can("quotes.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.publishQuote(
+        req.params.quoteId,
+        req.body,
+        req.adminViewer
+      );
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/pos/quotes/:quoteId/receipt-link",
+    requireAdmin,
+    can("quotes.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.linkReceipt(
+        req.params.quoteId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/pos/quotes/:quoteId",
+    requireAdmin,
+    can("quotes.read"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.getQuoteById(req.params.quoteId, req.adminViewer);
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/pos/customers",
+    requireAdmin,
+    can("quotes.read"),
+    asyncRoute(async (req, res) => {
+      const customers = await services.pos.listCustomers(req.query, req.adminViewer);
+      res.json({ data: { customers }, meta: withRequestId(req) });
+    })
+  );
+
+  router.post(
+    "/pos/customers",
+    requireAdmin,
+    can("customers.manage_pricing"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.createCustomer(req.body, req.adminViewer);
+      res.status(201).json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.put(
+    "/pos/customers/:customerId",
+    requireAdmin,
+    can("customers.manage_pricing"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.updateCustomer(
+        req.params.customerId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.put(
+    "/pos/buyers/:buyerId/link",
+    requireAdmin,
+    can("customers.manage_pricing"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.linkBuyer(
+        req.params.buyerId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.get(
+    "/pos/items",
+    requireAdmin,
+    can("quotes.read"),
+    asyncRoute(async (req, res) => {
+      const items = await services.pos.listItems(req.query, req.adminViewer);
+      res.json({ data: { items }, meta: withRequestId(req) });
+    })
+  );
+
+  router.put(
+    "/pos/items/:itemId",
+    requireAdmin,
+    can("prices.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.updateItem(
+        req.params.itemId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
+  router.put(
+    "/pos/products/:productId/link",
+    requireAdmin,
+    can("catalog.write"),
+    asyncRoute(async (req, res) => {
+      const data = await services.pos.linkProduct(
+        req.params.productId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
   router.delete("*", () => {
     throw notFound("Admin delete routes are not implemented");
   });

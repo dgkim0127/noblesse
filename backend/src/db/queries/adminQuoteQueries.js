@@ -26,6 +26,7 @@ function mapQuote(row) {
   return {
     id: row.id,
     inquiryId: row.inquiry_id,
+    buyerId: row.buyer_id || null,
     inquiryNumber: row.inquiry_number,
     quoteNumber: row.quote_number || null,
     companyName: row.company_name || null,
@@ -183,6 +184,7 @@ const quoteSelect = `
     aq.id,
     aq.inquiry_id,
     i.inquiry_number,
+    i.buyer_id,
     aq.quote_number,
     b.company_name,
     b.country,
@@ -537,7 +539,9 @@ export function createAdminQuoteQueries(pool) {
         }
         const totalResult = await client.query("select coalesce(sum(round(confirmed_quantity * confirmed_unit_price, 2)), 0) as total from public.admin_quote_items where admin_quote_id = $1", [quoteId]);
         const total = toNumber(totalResult.rows[0].total);
-        if (Math.abs(total - toNumber(input.snapshot.total)) > 0.001) {
+        const expectedLineTotal =
+          input.snapshot.pricingSummary?.subtotal ?? input.snapshot.total;
+        if (Math.abs(total - toNumber(expectedLineTotal)) > 0.001) {
           await client.query("rollback");
           return { stale: true };
         }
