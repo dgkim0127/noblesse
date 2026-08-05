@@ -51,6 +51,7 @@ export function getEnv(source = process.env) {
     firebasePrivateKey: source.FIREBASE_PRIVATE_KEY || "",
     firebaseStorageBucket: source.FIREBASE_STORAGE_BUCKET || "",
     porsQuoteReadToken: source.PORS_QUOTE_READ_TOKEN || "",
+    porsQuoteWriteToken: source.PORS_QUOTE_WRITE_TOKEN || "",
     allowHealthOnlyStartup: source.ALLOW_HEALTH_ONLY_STARTUP === "true",
     allowedOrigins: parseAllowedOrigins(source.ALLOWED_ORIGINS),
     logLevel: source.LOG_LEVEL || "info"

@@ -4,6 +4,7 @@ import { getEnv } from "./config/env.js";
 import { createFirebaseTokenVerifier } from "./auth/firebaseAuth.js";
 import { createRequireAdmin } from "./auth/requireAdmin.js";
 import { createRequirePorsQuoteRead } from "./auth/requirePorsQuoteRead.js";
+import { createRequirePorsQuoteWrite } from "./auth/requirePorsQuoteWrite.js";
 import { createPostgresViewerLoader, createRequireFirebaseIdentity, createRequireUser } from "./auth/requireUser.js";
 import { createPool } from "./db/pool.js";
 import { createAdminBuyerQueries } from "./db/queries/adminBuyerQueries.js";
@@ -231,6 +232,9 @@ export function createApp(options = {}) {
   const requirePorsQuoteRead =
     options.auth?.requirePorsQuoteRead ||
     createRequirePorsQuoteRead({ readToken: env.porsQuoteReadToken });
+  const requirePorsQuoteWrite =
+    options.auth?.requirePorsQuoteWrite ||
+    createRequirePorsQuoteWrite({ writeToken: env.porsQuoteWriteToken });
 
   const app = express();
 
@@ -271,7 +275,8 @@ export function createApp(options = {}) {
     "/api/pors",
     createPorsQuoteRoutes({
       posService: services.admin.pos,
-      requirePorsQuoteRead
+      requirePorsQuoteRead,
+      requirePorsQuoteWrite
     })
   );
 
