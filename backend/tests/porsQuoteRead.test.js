@@ -4,6 +4,7 @@ import { createApp } from "../src/app.js";
 import { request } from "./testClient.js";
 
 const readToken = "test-pors-read-token";
+const writeToken = "test-pors-write-token";
 
 async function requestStatus(app, path, options = {}) {
   const server = app.listen(0);
@@ -25,7 +26,8 @@ function createPorsReadApp() {
       nodeEnv: "test",
       isProduction: false,
       allowedOrigins: [],
-      porsQuoteReadToken: readToken
+      porsQuoteReadToken: readToken,
+      porsQuoteWriteToken: writeToken
     },
     services: {
       admin: {
@@ -37,6 +39,26 @@ function createPorsReadApp() {
           async getQuoteById(quoteId, viewer) {
             calls.push({ operation: "detail", quoteId, viewer });
             return { quote: { id: quoteId }, items: [] };
+          },
+          async savePicking(quoteId, payload, viewer) {
+            calls.push({ operation: "picking", quoteId, payload, viewer });
+            return { quote: { id: quoteId }, state: { version: 2 } };
+          },
+          async previewPrice(quoteId, payload, viewer) {
+            calls.push({ operation: "price-preview", quoteId, payload, viewer });
+            return { pricing: { totalAmount: 1100 } };
+          },
+          async finalizeQuote(quoteId, payload, viewer) {
+            calls.push({ operation: "finalize", quoteId, payload, viewer });
+            return { quote: { id: quoteId }, state: { version: 3 } };
+          },
+          async publishQuote(quoteId, payload, viewer) {
+            calls.push({ operation: "publish", quoteId, payload, viewer });
+            return { quote: { id: quoteId }, state: { version: 4 } };
+          },
+          async linkReceipt(quoteId, payload, viewer) {
+            calls.push({ operation: "receipt-link", quoteId, payload, viewer });
+            return { quote: { id: quoteId }, receiptLink: payload.receiptLink };
           }
         }
       }
@@ -71,16 +93,66 @@ test("PORS quote reads accept the scoped device token", async () => {
   assert.deepEqual(calls[0].viewer.permissions, ["quotes.read"]);
 });
 
-test("PORS read route exposes no quote write endpoint", async () => {
+test("PORS quote writes reject missing and read-only device tokens", async () => {
   const { app } = createPorsReadApp();
-  const status = await requestStatus(app, "/api/pors/quotes/quote-1/picking", {
+  const path = "/api/pors/quotes/quote-1/picking";
+  const missing = await requestStatus(app, path, {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ expectedVersion: 1, idempotencyKey: "missing-write" })
+  });
+  const readOnly = await requestStatus(app, path, {
     method: "PUT",
     headers: {
       "content-type": "application/json",
       "x-pors-quote-read-token": readToken
     },
-    body: JSON.stringify({ expectedVersion: 1, idempotencyKey: "blocked-write" })
+    body: JSON.stringify({ expectedVersion: 1, idempotencyKey: "read-only-write" })
   });
 
-  assert.equal(status, 404);
+  assert.equal(missing, 401);
+  assert.equal(readOnly, 401);
+});
+
+test("PORS quote write routes use only the scoped device writer", async () => {
+  const { app, calls } = createPorsReadApp();
+  const headers = {
+    "content-type": "application/json",
+    "x-pors-quote-write-token": writeToken
+  };
+  const operations = [
+    { path: "picking", method: "PUT", expectedStatus: 200 },
+    { path: "price-preview", method: "POST", expectedStatus: 200 },
+    { path: "finalize", method: "POST", expectedStatus: 201 },
+    { path: "publish", method: "POST", expectedStatus: 201 },
+    { path: "receipt-link", method: "POST", expectedStatus: 200 }
+  ];
+
+  for (const [index, operation] of operations.entries()) {
+    const payload = {
+      expectedVersion: index + 1,
+      idempotencyKey: `device-write-${operation.path}`
+    };
+    if (operation.path === "receipt-link") {
+      payload.receiptLink = { receiptId: "receipt-1" };
+    }
+    const response = await request(app, `/api/pors/quotes/quote-1/${operation.path}`, {
+      method: operation.method,
+      headers,
+      body: JSON.stringify(payload)
+    });
+    assert.equal(response.status, operation.expectedStatus);
+  }
+
+  assert.equal(calls.length, operations.length);
+  assert.deepEqual(
+    calls.map((call) => call.operation),
+    ["picking", "price-preview", "finalize", "publish", "receipt-link"]
+  );
+  for (const call of calls) {
+    assert.equal(call.viewer.authUid, "pors-managed-device");
+    assert.deepEqual(call.viewer.permissions, ["quotes.read", "quotes.write"]);
+    assert.match(call.payload.idempotencyKey, /^device-write-/);
+    assert.ok(Number.isInteger(call.payload.expectedVersion));
+  }
 });
