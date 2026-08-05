@@ -3,6 +3,7 @@ import express from "express";
 import { getEnv } from "./config/env.js";
 import { createFirebaseTokenVerifier } from "./auth/firebaseAuth.js";
 import { createRequireAdmin } from "./auth/requireAdmin.js";
+import { createRequirePorsQuoteRead } from "./auth/requirePorsQuoteRead.js";
 import { createPostgresViewerLoader, createRequireFirebaseIdentity, createRequireUser } from "./auth/requireUser.js";
 import { createPool } from "./db/pool.js";
 import { createAdminBuyerQueries } from "./db/queries/adminBuyerQueries.js";
@@ -31,6 +32,7 @@ import { createAuthRoutes } from "./routes/authRoutes.js";
 import { createBuyerRoutes } from "./routes/buyerRoutes.js";
 import { createCatalogRoutes } from "./routes/catalogRoutes.js";
 import { createHealthRoutes } from "./routes/healthRoutes.js";
+import { createPorsQuoteRoutes } from "./routes/porsQuoteRoutes.js";
 import { createAdminBuyerService } from "./services/adminBuyerService.js";
 import { createAdminAccessService } from "./services/adminAccessService.js";
 import { createAdminAnalyticsService } from "./services/adminAnalyticsService.js";
@@ -226,6 +228,9 @@ export function createApp(options = {}) {
       verifier: options.auth?.adminVerifier || verifier,
       loadAdminUserByAuthUid
     });
+  const requirePorsQuoteRead =
+    options.auth?.requirePorsQuoteRead ||
+    createRequirePorsQuoteRead({ readToken: env.porsQuoteReadToken });
 
   const app = express();
 
@@ -260,6 +265,13 @@ export function createApp(options = {}) {
     createAdminRoutes({
       services: services.admin,
       requireAdmin
+    })
+  );
+  app.use(
+    "/api/pors",
+    createPorsQuoteRoutes({
+      posService: services.admin.pos,
+      requirePorsQuoteRead
     })
   );
 
