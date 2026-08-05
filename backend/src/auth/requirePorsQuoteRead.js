@@ -12,19 +12,21 @@ function matchesToken(expected, provided) {
   return crypto.timingSafeEqual(expectedBuffer, providedBuffer);
 }
 
-export function createRequirePorsQuoteRead({ readToken }) {
+export function createRequirePorsQuoteRead({ readToken, writeToken }) {
   const expectedToken = String(readToken || "").trim();
+  const expectedWriteToken = String(writeToken || "").trim();
 
   return function requirePorsQuoteRead(req, _res, next) {
     const providedToken = String(req.get(READ_TOKEN_HEADER) || "").trim();
-    if (!matchesToken(expectedToken, providedToken)) {
+    const usesWriteToken = matchesToken(expectedWriteToken, providedToken);
+    if (!matchesToken(expectedToken, providedToken) && !usesWriteToken) {
       next(unauthorized("PORS quote read access required"));
       return;
     }
 
     req.porsQuoteViewer = {
-      userId: "pors-readonly-device",
-      authUid: "pors-readonly-device",
+      userId: usesWriteToken ? "pors-managed-device" : "pors-readonly-device",
+      authUid: usesWriteToken ? "pors-managed-device" : "pors-readonly-device",
       role: "service",
       status: "approved",
       accountStatus: "active",

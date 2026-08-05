@@ -231,7 +231,10 @@ export function createApp(options = {}) {
     });
   const requirePorsQuoteRead =
     options.auth?.requirePorsQuoteRead ||
-    createRequirePorsQuoteRead({ readToken: env.porsQuoteReadToken });
+    createRequirePorsQuoteRead({
+      readToken: env.porsQuoteReadToken,
+      writeToken: env.porsQuoteWriteToken
+    });
   const requirePorsQuoteWrite =
     options.auth?.requirePorsQuoteWrite ||
     createRequirePorsQuoteWrite({ writeToken: env.porsQuoteWriteToken });

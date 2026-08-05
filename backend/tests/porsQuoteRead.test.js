@@ -93,6 +93,17 @@ test("PORS quote reads accept the scoped device token", async () => {
   assert.deepEqual(calls[0].viewer.permissions, ["quotes.read"]);
 });
 
+test("PORS quote writers can read without a second device credential", async () => {
+  const { app, calls } = createPorsReadApp();
+  const response = await request(app, "/api/pors/quotes", {
+    headers: { "x-pors-quote-read-token": writeToken }
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(calls[0].viewer.authUid, "pors-managed-device");
+  assert.deepEqual(calls[0].viewer.permissions, ["quotes.read"]);
+});
+
 test("PORS quote writes reject missing and read-only device tokens", async () => {
   const { app } = createPorsReadApp();
   const path = "/api/pors/quotes/quote-1/picking";
