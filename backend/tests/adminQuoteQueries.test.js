@@ -11,6 +11,14 @@ const adminViewer = {
   ipAddress: "127.0.0.1",
   userAgent: "node-test"
 };
+const porsViewer = {
+  userId: null,
+  authUid: "pors-managed-device",
+  role: "system",
+  requestId: "req-pors-test",
+  ipAddress: "127.0.0.1",
+  userAgent: "node-test"
+};
 
 function createFakePool({ duplicate = false, inquiryRows = [{ id: inquiryId, inquiry_number: "INQ-001", currency: "JPY", estimated_total: 22000 }] } = {}) {
   const calls = [];
@@ -204,10 +212,11 @@ test("updateQuoteDraft keeps quantity parameters consistently typed", async () =
       cancellationReason: "quantity_shortage",
       cancellationNote: "One item unavailable"
     }]
-  }, adminViewer);
+  }, porsViewer);
 
   const itemUpdate = calls.find((call) => call.sql.toLowerCase().startsWith("update public.admin_quote_items"));
   const quoteUpdate = calls.find((call) => call.sql.toLowerCase().startsWith("update public.admin_quotes"));
+  const auditInsert = calls.find((call) => call.sql.toLowerCase().startsWith("insert into public.audit_logs"));
   assert.match(itemUpdate.sql, /confirmed_quantity = \$3::integer/i);
   assert.match(itemUpdate.sql, /round\(\(\$3::integer \* \$4::numeric\), 2\)/i);
   assert.match(itemUpdate.sql, /cancelled_quantity = greatest\(requested_quantity - \$3::integer, 0\)/i);
@@ -215,6 +224,7 @@ test("updateQuoteDraft keeps quantity parameters consistently typed", async () =
   assert.match(quoteUpdate.sql, /set status = 'draft'/i);
   assert.match(quoteUpdate.sql, /current_document_id = null/i);
   assert.match(quoteUpdate.sql, /quoted_at = null/i);
+  assert.deepEqual(auditInsert.params.slice(0, 2), [null, "system"]);
   assert.equal(result.quote.confirmedTotal, 1800);
   assert.equal(result.items[0].confirmedQuantity, 1);
   assert.equal(result.items[0].cancelledQuantity, 1);

@@ -25,7 +25,7 @@ export function createRequirePorsQuoteWrite({ writeToken }) {
     req.porsQuoteViewer = {
       userId: null,
       authUid: "pors-managed-device",
-      role: "service",
+      role: "system",
       status: "approved",
       accountStatus: "active",
       permissions: ["quotes.read", "quotes.write"],
