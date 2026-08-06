@@ -229,6 +229,21 @@ test('admin buyer status update uses PATCH and status body only', async () => {
   assert.equal(result.data.auditLogId, 'audit-1')
 })
 
+test('admin buyer deletion uses DELETE and exact confirmation body', async () => {
+  const { calls, client } = createMockApiClient({ data: { deleted: { buyerId: 'buyer-1' }, auditLogId: 'audit-delete-1' } })
+  const adminApi = createAdminApi(client)
+
+  const result = await adminApi.deleteBuyer('11111111-1111-4111-8111-111111111111', {
+    confirmation: 'buyer@example.test',
+  }, 'admin-token')
+
+  assert.equal(calls[0].path, '/admin/buyers/11111111-1111-4111-8111-111111111111')
+  assert.equal(calls[0].options.method, 'DELETE')
+  assert.equal(calls[0].options.token, 'admin-token')
+  assert.deepEqual(calls[0].options.body, { confirmation: 'buyer@example.test' })
+  assert.equal(result.data.auditLogId, 'audit-delete-1')
+})
+
 test('admin product visibility update uses PATCH and isVisible body only', async () => {
   const { calls, client } = createMockApiClient({ data: { product: { isVisible: false }, auditLogId: 'audit-1' } })
   const adminApi = createAdminApi(client)

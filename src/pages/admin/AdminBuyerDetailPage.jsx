@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAdminAccess } from '../../components/AdminAccessContext'
-import { AdminLink, AdminMoney, AdminPageHeader, AdminPreviewNote, AdminStatus } from './AdminPageParts'
+import { AdminConfirmDialog, AdminLink, AdminMoney, AdminPageHeader, AdminPreviewNote, AdminStatus } from './AdminPageParts'
 import { AdminApiState, shouldShowAdminApiState, useAdminApiMutation, useAdminApiResource } from './adminApiPageUtils'
 import { formatAdminCopy, getAdminStatusLabel, useAdminCopy } from './adminCopy'
 
@@ -12,11 +12,14 @@ function formatDate(value) {
 
 export function AdminBuyerDetailPage() {
   const t = useAdminCopy()
-  const { hasPermission } = useAdminAccess()
+  const { admin, hasPermission } = useAdminAccess()
+  const navigate = useNavigate()
   const { buyerId } = useParams()
   const [refreshKey, setRefreshKey] = useState(0)
   const [saving, setSaving] = useState('')
   const [message, setMessage] = useState('')
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const { data, error, status } = useAdminApiResource((api, token) => api.getBuyer(buyerId, token), [buyerId, refreshKey])
   const mutate = useAdminApiMutation()
   const apiState = shouldShowAdminApiState(status) ? <AdminApiState error={error} status={status} /> : null
@@ -49,6 +52,23 @@ export function AdminBuyerDetailPage() {
       setSaving('')
     }
   }
+
+  const deleteBuyerAccount = async () => {
+    if (!buyer?.email || deleteConfirmation.trim().toLowerCase() !== buyer.email.toLowerCase()) return
+    setSaving('delete')
+    setMessage('')
+    try {
+      await mutate((api, token) => api.deleteBuyer(buyer.id, {
+        confirmation: deleteConfirmation.trim(),
+      }, token))
+      navigate('/admin/buyers', { replace: true })
+    } catch (error) {
+      setMessage(error?.message || t.buyers.deleteFailed || '회원을 삭제할 수 없습니다.')
+      setSaving('')
+    }
+  }
+
+  const canDelete = admin?.adminRole === 'owner' && hasPermission('admins.manage')
 
   return <>
     <AdminPageHeader
@@ -101,6 +121,10 @@ export function AdminBuyerDetailPage() {
           >
             {t.common.set} {getAdminStatusLabel(t, nextStatus)}
           </button>)}
+          {canDelete && <button className="danger-action" type="button" onClick={() => {
+            setDeleteOpen(true)
+            setDeleteConfirmation('')
+          }}>{t.buyers.deleteAccount || '회원 삭제'}</button>}
         </div>
       </article>
       <article className="admin-card">
@@ -143,5 +167,28 @@ export function AdminBuyerDetailPage() {
         {recentInquiries.length === 0 && <p className="admin-empty">{t.buyers.noRecentInquiries}</p>}
       </div>
     </section>
+    <AdminConfirmDialog
+      busy={saving === 'delete'}
+      confirmDisabled={!buyer.email || deleteConfirmation.trim().toLowerCase() !== buyer.email.toLowerCase()}
+      confirmLabel={t.buyers.deleteAccount || '회원 삭제'}
+      danger
+      description={formatAdminCopy(t.buyers.deleteConfirm || '{buyer} 회원과 모든 견적 기록을 영구 삭제합니다. 계속하려면 이메일을 입력하세요: {email}', {
+        buyer: buyer.companyName || buyer.email,
+        email: buyer.email,
+      })}
+      open={deleteOpen}
+      title={t.buyers.deleteTitle || '회원 영구 삭제'}
+      onCancel={() => {
+        if (saving) return
+        setDeleteOpen(false)
+        setDeleteConfirmation('')
+      }}
+      onConfirm={deleteBuyerAccount}
+    >
+      <label className="admin-field">
+        <span>{t.buyers.deleteConfirmationLabel || '삭제할 회원의 이메일 입력'}</span>
+        <input autoComplete="off" placeholder={buyer.email || ''} value={deleteConfirmation} onChange={(event) => setDeleteConfirmation(event.target.value)} />
+      </label>
+    </AdminConfirmDialog>
   </>
 }

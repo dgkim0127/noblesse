@@ -140,9 +140,13 @@ test('admin buyer pages separate account and verification status', () => {
   assert.match(buyersPage, /hasPermission\('admins\.manage'\)/)
   assert.match(buyersPage, /promoteBuyerToOperator/)
   assert.match(buyersPage, /promoteUserToAdmin/)
+  assert.match(buyersPage, /api\.deleteBuyer/)
+  assert.match(buyersPage, /deleteConfirmation/)
+  assert.match(buyersPage, /adminRole === 'owner'/)
   assert.match(detailPage, /verificationStatus/)
   assert.match(detailPage, /accountStatus/)
   assert.match(detailPage, /buyers\.sensitive\.read/)
+  assert.match(detailPage, /api\.deleteBuyer/)
   assert.match(detailPage, /Masked by permission/)
 })
 
