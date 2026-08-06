@@ -42,6 +42,19 @@ export function createBuyerApi(apiClient) {
       return response.data?.productPrices || []
     },
 
+    async getRecentProducts(token) {
+      return unwrap(await apiClient.apiFetch('/buyer/recent-products', {
+        token: requireToken(token),
+      }))
+    },
+
+    async recordRecentProduct(productCode, token) {
+      return unwrap(await apiClient.apiFetch(`/buyer/recent-products/${encodeURIComponent(productCode)}`, {
+        method: 'PUT',
+        token: requireToken(token),
+      }))
+    },
+
     async getInquiries(params = {}, token) {
       return unwrap(await apiClient.apiFetch(`/buyer/inquiries${buildQuery(params)}`, { token: requireToken(token) }))
     },

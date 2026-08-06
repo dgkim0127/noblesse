@@ -33,6 +33,7 @@ const formatInquiryId = () => `INQ-${new Date().toISOString().slice(0, 10).repla
 const viewerStates = new Set(['guest', 'pending', 'approved', 'admin'])
 const adminPricePageLimit = 100
 const adminPricePageCap = 20
+const recentProductLimit = 10
 let authServicePromise
 
 function loadAuthService() {
@@ -142,6 +143,8 @@ export function CommerceProvider({ children }) {
   const skipNextInquiryDraftPersistRef = useRef(false)
   const [inquiries, setInquiries] = useState([])
   const inquiriesRef = useRef([])
+  const [recentProductViews, setRecentProductViews] = useState([])
+  const recentProductViewsRef = useRef([])
   const [mockProfiles, setMockProfiles] = useState({ guest: guestProfile })
   const [apiProfile, setApiProfile] = useState(null)
   const [authStatus, setAuthStatus] = useState('signed-out')
@@ -187,6 +190,10 @@ export function CommerceProvider({ children }) {
   useEffect(() => {
     inquiriesRef.current = inquiries
   }, [inquiries])
+
+  useEffect(() => {
+    recentProductViewsRef.current = recentProductViews
+  }, [recentProductViews])
 
   useEffect(() => {
     let isMounted = true
@@ -276,6 +283,7 @@ export function CommerceProvider({ children }) {
             setApiProfile(null)
             setProductPrices([])
             setInquiries([])
+            setRecentProductViews([])
             setAuthStatus('signed-out')
             setAuthError('')
             return
@@ -300,6 +308,7 @@ export function CommerceProvider({ children }) {
             setApiProfile(null)
             setProductPrices([])
             setInquiries([])
+            setRecentProductViews([])
             setAuthStatus('error')
             setAuthError(error?.message || 'Unable to verify buyer profile.')
           }
@@ -309,6 +318,7 @@ export function CommerceProvider({ children }) {
         setApiProfile(null)
         setProductPrices([])
         setInquiries([])
+        setRecentProductViews([])
         setAuthStatus('error')
         setAuthError(error?.message || 'Unable to initialize authentication.')
       }
@@ -454,6 +464,7 @@ export function CommerceProvider({ children }) {
     setApiProfile(null)
     setProductPrices([])
     setInquiries([])
+    setRecentProductViews([])
     setAuthStatus(authService.isAuthConfigured() ? 'signed-out' : 'config-missing')
     setAuthError('')
   }, [buyer?.uid, isMockMode, setViewerState])
@@ -514,6 +525,49 @@ export function CommerceProvider({ children }) {
     setInquiries(nextInquiries)
     return nextInquiries
   }, [isApproved, isMockMode, runtimeConfig.apiBaseUrl])
+
+  const refreshRecentProducts = useCallback(async () => {
+    if (isMockMode) return recentProductViewsRef.current
+    if (!isApproved || isAdminViewer) return []
+
+    const token = await getCurrentUserIdToken()
+    const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+    const buyerApi = createBuyerApi(apiClient)
+    const result = await buyerApi.getRecentProducts(token)
+    const nextRecentProducts = result.data?.recentProducts || []
+    setRecentProductViews(nextRecentProducts)
+    return nextRecentProducts
+  }, [isAdminViewer, isApproved, isMockMode, runtimeConfig.apiBaseUrl])
+
+  const recordRecentProductView = useCallback(async (productCode) => {
+    const normalizedProductCode = String(productCode || '').trim().toUpperCase()
+    if (!normalizedProductCode || !isApproved || isAdminViewer) return null
+
+    if (isMockMode) {
+      const recentProduct = {
+        productCode: normalizedProductCode,
+        viewedAt: new Date().toISOString(),
+      }
+      setRecentProductViews((current) => [
+        recentProduct,
+        ...current.filter((item) => item.productCode !== normalizedProductCode),
+      ].slice(0, recentProductLimit))
+      return recentProduct
+    }
+
+    const token = await getCurrentUserIdToken()
+    const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
+    const buyerApi = createBuyerApi(apiClient)
+    const result = await buyerApi.recordRecentProduct(normalizedProductCode, token)
+    const recentProduct = result.data?.recentProduct || null
+    if (recentProduct) {
+      setRecentProductViews((current) => [
+        recentProduct,
+        ...current.filter((item) => item.productCode !== recentProduct.productCode),
+      ].slice(0, recentProductLimit))
+    }
+    return recentProduct
+  }, [isAdminViewer, isApproved, isMockMode, runtimeConfig.apiBaseUrl])
 
   const loadInquiry = useCallback(async (inquiryId) => {
     if (isMockMode) {
@@ -673,6 +727,8 @@ export function CommerceProvider({ children }) {
     isPending,
     productPrices,
     products,
+    recentProductViews,
+    recordRecentProductView,
     removeInquiryItem,
     registerBuyer,
     loadInquiry,
@@ -680,6 +736,7 @@ export function CommerceProvider({ children }) {
     decideInquiryQuote,
     downloadInquiryQuoteDocument,
     refreshInquiries,
+    refreshRecentProducts,
     setViewerState,
     signIn,
     signOut,

@@ -211,6 +211,46 @@ test("buyer API calls price and inquiry endpoints with token", async () => {
   assert.equal(calls[4].options.body.companyName, "Buyer Company");
 });
 
+test("buyer API reads and records account recent products", async () => {
+  const calls = [];
+  const apiClient = {
+    async apiFetch(path, options) {
+      calls.push({ path, options });
+      if (path === "/buyer/recent-products") {
+        return {
+          data: {
+            data: {
+              recentProducts: [{ productCode: "NB-RECENT-1", viewedAt: "2026-08-06T00:00:00.000Z" }]
+            },
+            meta: { requestId: "recent-list" }
+          }
+        };
+      }
+      return {
+        data: {
+          data: {
+            recentProduct: { productCode: "NB-RECENT-1", viewedAt: "2026-08-06T00:00:00.000Z" }
+          },
+          meta: { requestId: "recent-write" }
+        }
+      };
+    }
+  };
+  const buyerApi = createBuyerApi(apiClient);
+
+  const list = await buyerApi.getRecentProducts("buyer-token");
+  const recorded = await buyerApi.recordRecentProduct("NB-RECENT-1", "buyer-token");
+
+  assert.equal(list.data.recentProducts[0].productCode, "NB-RECENT-1");
+  assert.equal(recorded.data.recentProduct.productCode, "NB-RECENT-1");
+  assert.deepEqual(calls.map((call) => call.path), [
+    "/buyer/recent-products",
+    "/buyer/recent-products/NB-RECENT-1"
+  ]);
+  assert.equal(calls[1].options.method, "PUT");
+  assert.equal(calls[1].options.token, "buyer-token");
+});
+
 test("auth API resolves login identifier without sending password", async () => {
   const calls = [];
   const authApi = createAuthApi({

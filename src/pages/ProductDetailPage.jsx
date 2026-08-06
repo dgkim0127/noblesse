@@ -7,7 +7,7 @@ import {
   Pencil,
   Plus,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { CatalogCard } from '../components/CatalogCard'
 import { ProductDetailBlocks } from '../components/ProductDetailBlocks'
@@ -1320,11 +1320,24 @@ export function ProductDetailPage() {
     isAdmin,
     isApproved,
     products,
+    recordRecentProductView,
     submitProductInquiry,
     viewerState,
   } = useCommerce()
   const { contentLocale, locale, toLocalePath } = useLocalePath()
   const product = products.find((item) => item.productId === productId)
+  const productCode = product?.code || ''
+  const recordedProductCodeRef = useRef('')
+
+  useEffect(() => {
+    if (!productCode || !isApproved || isAdmin || recordedProductCodeRef.current === productCode) return
+    recordedProductCodeRef.current = productCode
+    recordRecentProductView(productCode).catch(() => {
+      if (recordedProductCodeRef.current === productCode) {
+        recordedProductCodeRef.current = ''
+      }
+    })
+  }, [isAdmin, isApproved, productCode, recordRecentProductView])
 
   if (dataStatus === 'loading') {
     return <main className="content pd-page"><div className="empty">Loading product details...</div></main>

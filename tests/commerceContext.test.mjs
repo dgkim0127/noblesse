@@ -35,3 +35,15 @@ test('registration immediately loads buyer prices and inquiries when the profile
   assert.match(source, /if \(isQuoteEnabledBuyer\(registeredProfile\)\) \{[\s\S]*?buyerApi\.getProductPrices\(token\)[\s\S]*?buyerApi\.getInquiries\(\{\}, token\)/)
   assert.match(source, /canUseQuoteFlow: isApproved/)
 })
+
+test('commerce context exposes account-scoped recent product helpers', () => {
+  const source = readSource('src/commerce/CommerceContext.jsx')
+
+  assert.match(source, /const \[recentProductViews, setRecentProductViews\] = useState\(\[\]\)/)
+  assert.match(source, /buyerApi\.getRecentProducts\(token\)/)
+  assert.match(source, /buyerApi\.recordRecentProduct\(normalizedProductCode, token\)/)
+  assert.match(source, /\.slice\(0, recentProductLimit\)/)
+  assert.match(source, /recentProductViews,/)
+  assert.match(source, /recordRecentProductView,/)
+  assert.match(source, /refreshRecentProducts,/)
+})
