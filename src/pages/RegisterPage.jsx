@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import {
   areRequiredAgreementsAccepted,
@@ -9,6 +9,7 @@ import {
   getAgreementSummaryForRegister,
   getInitialAgreements,
 } from '../services/agreementService'
+import { getRegistrationErrorMessage, isExistingRegistrationError } from '../services/authErrors'
 import { resolveLocaleCopy, useLocalePath } from '../utils/locale'
 
 const registerCopy = {
@@ -289,6 +290,7 @@ const registerStepCopy = {
     memoPlaceholder: '관심 제품, 예상 수량, 판매 지역 등 필요한 내용만 간단히 적어주세요.',
     backToAgreements: '동의 항목 다시 보기',
     requiredOnly: '필수 항목에만',
+    existingLogin: '기존 계정으로 로그인',
   },
   en: {
     continue: 'Agree',
@@ -304,6 +306,7 @@ const registerStepCopy = {
     memoPlaceholder: 'Briefly add products, quantity, market, or trade notes.',
     backToAgreements: 'Back to agreements',
     requiredOnly: 'Required items only',
+    existingLogin: 'Sign in to existing account',
   },
   jp: {
     continue: '同意する',
@@ -319,6 +322,7 @@ const registerStepCopy = {
     memoPlaceholder: '気になる商品、数量、販売地域などを簡単に入力してください。',
     backToAgreements: '同意項目に戻る',
     requiredOnly: '必須項目のみ',
+    existingLogin: '既存のアカウントでログイン',
   },
   cn: {
     continue: '同意',
@@ -334,6 +338,7 @@ const registerStepCopy = {
     memoPlaceholder: '请简单填写感兴趣的产品、预计数量、销售地区等。',
     backToAgreements: '返回同意项目',
     requiredOnly: '仅必填项目',
+    existingLogin: '使用现有账户登录',
   },
 }
 
@@ -926,6 +931,7 @@ export function RegisterPage() {
   const [loginIdValue, setLoginIdValue] = useState('')
   const [duplicateStatus, setDuplicateStatus] = useState(null)
   const [submitNotice, setSubmitNotice] = useState('')
+  const [showExistingLogin, setShowExistingLogin] = useState(false)
   const [submitStatus, setSubmitStatus] = useState('idle')
   const agreementSummaries = getAgreementSummaryForRegister()
   const registerAgreementSummaries = [ageAgreementSummary, ...agreementSummaries]
@@ -1013,6 +1019,7 @@ export function RegisterPage() {
     event.preventDefault()
     if (submitStatus === 'submitting') return
     setSubmitNotice('')
+    setShowExistingLogin(false)
     if (!requiredAccepted) return
 
     const passwordInput = event.currentTarget.elements.password
@@ -1060,7 +1067,8 @@ export function RegisterPage() {
         })
         navigate(toLocalePath('/account'))
       } catch (error) {
-        setSubmitNotice(error?.message || 'Unable to send buyer registration inquiry.')
+        setSubmitNotice(getRegistrationErrorMessage(error, locale))
+        setShowExistingLogin(isExistingRegistrationError(error))
         setSubmitStatus('idle')
       }
       return
@@ -1332,6 +1340,7 @@ export function RegisterPage() {
         </div>
         <div className="account-actions agreement-actions">
           {submitNotice && <p className="auth-notice" role="status">{submitNotice}</p>}
+          {showExistingLogin && <Link className="secondary-action" to={toLocalePath('/login')}>{stepCopy.existingLogin}</Link>}
           <button className="primary-action" data-testid="request-buyer-access-submit" disabled={submitStatus === 'submitting'} type="submit">{submitStatus === 'submitting' ? `${stepCopy.submit}...` : stepCopy.submit}</button>
         </div>
       </form>}

@@ -23,6 +23,10 @@ export function isAuthConfigured() {
   return hasFirebaseConfig && Boolean(auth)
 }
 
+export function getCurrentAuthUser() {
+  return isAuthConfigured() ? auth.currentUser : null
+}
+
 export function subscribeAuthState(onChange) {
   if (!isAuthConfigured()) {
     onChange(null)

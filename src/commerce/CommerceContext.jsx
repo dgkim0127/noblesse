@@ -27,6 +27,7 @@ import { CommerceContext } from './commerceStore'
 import { getInquiryKey } from './inquiryKeys'
 import { cloneHomeLayout, defaultHomeLayout, normalizeHomeLayout } from '../config/homeLayout'
 import { clearInquiryDraft, loadInquiryDraft, saveInquiryDraft } from './inquiryDraftStorage'
+import { resolveRegistrationCredential } from '../services/registrationCredential'
 
 const formatInquiryId = () => `INQ-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${String(Date.now()).slice(-3)}`
 const viewerStates = new Set(['guest', 'pending', 'approved', 'admin'])
@@ -42,6 +43,13 @@ function loadAuthService() {
 async function getCurrentUserIdToken(...args) {
   const authService = await loadAuthService()
   return authService.getCurrentUserIdToken(...args)
+}
+
+function isMissingBuyerProfileError(error) {
+  return error?.code === 'UNAUTHORIZED' ||
+    error?.code === 'NOT_FOUND' ||
+    error?.status === 401 ||
+    error?.status === 404
 }
 
 function upsertInquiry(inquiries, nextInquiry) {
@@ -375,8 +383,32 @@ export function CommerceProvider({ children }) {
 
     try {
       authService = await loadAuthService()
-      const credential = await authService.registerWithCredentials(email, password, { remember })
+      const { credential, existingFirebaseAccount } = await resolveRegistrationCredential({
+        authService,
+        email,
+        password,
+        remember,
+        apiBaseUrl: runtimeConfig.apiBaseUrl,
+      })
+
       const token = await authService.getUserIdToken(credential.user, true)
+
+      if (existingFirebaseAccount) {
+        try {
+          const existingState = await loadAuthenticatedCommerceState({
+            apiBaseUrl: runtimeConfig.apiBaseUrl,
+            token,
+          })
+          setApiProfile(existingState.profile)
+          setProductPrices(existingState.prices)
+          setInquiries(existingState.inquiries)
+          setAuthStatus('authenticated')
+          return existingState.profile
+        } catch (profileError) {
+          if (!isMissingBuyerProfileError(profileError)) throw profileError
+        }
+      }
+
       const apiClient = createApiClient({ baseUrl: runtimeConfig.apiBaseUrl })
       const buyerApi = createBuyerApi(apiClient)
       const result = await buyerApi.registerBuyer(profile, token)
