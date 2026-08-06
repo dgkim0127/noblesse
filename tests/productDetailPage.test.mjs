@@ -52,6 +52,15 @@ test('product detail can submit a direct product inquiry through the commerce he
   assert.match(commerce, /productCode: product\.code/)
 })
 
+test('product detail records a recent product view without blocking product rendering', () => {
+  const source = readSource('src/pages/ProductDetailPage.jsx')
+
+  assert.match(source, /recordRecentProductView/)
+  assert.match(source, /recordedProductCodeRef/)
+  assert.match(source, /recordRecentProductView\(productCode\)\.catch/)
+  assert.match(source, /if \(!productCode \|\| !isApproved \|\| isAdmin/)
+})
+
 test('product detail uses scoped pd layout and related products are selected from relevant product signals', () => {
   const source = readSource('src/pages/ProductDetailPage.jsx')
   const styles = readSource('src/App.css')

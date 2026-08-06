@@ -6,6 +6,7 @@ export const migrationLedgerTable = "app_schema_migrations";
 export const runtimePrivilegeManifest = Object.freeze({
   users: ["SELECT", "INSERT", "UPDATE", "DELETE"],
   buyers: ["SELECT", "INSERT", "UPDATE", "DELETE"],
+  buyer_recent_product_views: ["SELECT", "INSERT", "UPDATE", "DELETE"],
   buyer_agreements: ["SELECT", "INSERT"],
   terms_versions: ["SELECT"],
   categories: ["SELECT", "INSERT", "UPDATE"],
@@ -54,6 +55,7 @@ const querySourceModules = Object.freeze([
   "buyerQueries.js",
   "buyerRegistrationQueries.js",
   "buyerInquiryQueries.js",
+  "buyerRecentProductQueries.js",
   "buyerQuoteQueries.js",
   "adminAccessQueries.js",
   "adminDashboardQueries.js",

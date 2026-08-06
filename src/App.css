@@ -8609,6 +8609,155 @@ h6 {
   max-width: 680px;
 }
 
+.account-product-page {
+  display: grid;
+  gap: clamp(34px, 5vw, 64px);
+}
+
+.account-product-intro {
+  display: grid;
+  max-width: 760px;
+  gap: 8px;
+}
+
+.account-product-intro p,
+.account-product-heading p {
+  margin: 0;
+  color: var(--noblesse-main);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.account-product-intro h1 {
+  margin: 0;
+  color: var(--noblesse-sub);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(38px, 5vw, 64px);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.account-product-intro span,
+.account-product-heading span {
+  color: #7c7483;
+  line-height: 1.65;
+}
+
+.account-product-shelf {
+  display: grid;
+  gap: 24px;
+}
+
+.account-product-heading {
+  display: flex;
+  gap: 24px;
+  align-items: end;
+  justify-content: space-between;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e9dfd9;
+}
+
+.account-product-heading > div {
+  display: grid;
+  max-width: 720px;
+  gap: 7px;
+}
+
+.account-product-heading h2 {
+  margin: 0;
+  color: var(--noblesse-sub);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 400;
+}
+
+.account-product-heading .secondary-action {
+  flex: 0 0 auto;
+}
+
+.account-product-message {
+  margin: 0;
+  border-radius: 10px;
+  padding: 13px 16px;
+  color: #686072;
+  background: #fff8fa;
+}
+
+.account-product-message.is-error {
+  color: #a6264a;
+  background: #fff2f5;
+}
+
+.account-product-empty,
+.account-access-notice {
+  border: 1px solid #eee4df;
+  border-radius: 14px;
+  padding: clamp(22px, 4vw, 38px);
+  background: #fff;
+}
+
+.account-product-empty {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+}
+
+.account-product-empty h2,
+.account-product-empty p,
+.account-access-notice h2,
+.account-access-notice p {
+  margin: 0;
+}
+
+.account-product-empty p,
+.account-access-notice p {
+  color: #7c7483;
+  line-height: 1.65;
+}
+
+.account-access-notice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+}
+
+.account-access-notice > svg {
+  color: var(--noblesse-main);
+}
+
+.account-access-notice > div:not(.account-access-actions) {
+  display: grid;
+  gap: 6px;
+}
+
+.account-access-actions {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 700px) {
+  .account-product-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .account-access-notice {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .account-access-notice > .secondary-action,
+  .account-access-actions {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .account-access-actions > a {
+    flex: 1 1 0;
+  }
+}
+
 .account-overview {
   display: grid;
   gap: 10px;
