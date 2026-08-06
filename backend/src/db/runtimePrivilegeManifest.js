@@ -25,7 +25,6 @@ export const runtimePrivilegeManifest = Object.freeze({
   admin_quote_items: ["SELECT", "INSERT", "UPDATE"],
   admin_quote_documents: ["SELECT", "INSERT", "UPDATE"],
   admin_quote_status_history: ["SELECT", "INSERT"],
-  admin_quote_history: ["SELECT", "UPDATE"],
   pos_customers: ["SELECT", "INSERT", "UPDATE"],
   pos_items: ["SELECT", "INSERT", "UPDATE"],
   buyer_pos_links: ["SELECT", "INSERT", "UPDATE"],

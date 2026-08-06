@@ -472,7 +472,6 @@ export function createAdminBuyerQueries(pool) {
         await client.query("update public.admin_permission_overrides set granted_by = null where granted_by = $1", [existing.user_id]);
         await client.query("update public.admin_quotes set quoted_by = null where quoted_by = $1", [existing.user_id]);
         await client.query("update public.admin_quote_documents set issued_by = null where issued_by = $1", [existing.user_id]);
-        await client.query("update public.admin_quote_history set actor_user_id = null where actor_user_id = $1", [existing.user_id]);
         const userDeleteResult = await client.query(
           "delete from public.users where id = $1 and role = 'buyer' returning id",
           [existing.user_id]
