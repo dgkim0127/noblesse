@@ -74,3 +74,28 @@ export function createFirebaseUserLookup(env, adminModule = admin) {
     }
   };
 }
+
+export function createFirebaseUserManager(env, adminModule = admin) {
+  if (getFirebaseCredentialMode(env) === "missing") {
+    return {
+      async deleteUser() {
+        throw internalError("Firebase Admin credentials are not configured.");
+      }
+    };
+  }
+
+  const app = getFirebaseAdminApp(env, adminModule);
+  return {
+    async deleteUser(authUid) {
+      try {
+        await app.auth().deleteUser(authUid);
+        return { deleted: true, alreadyMissing: false };
+      } catch (error) {
+        if (error?.code === "auth/user-not-found") {
+          return { deleted: false, alreadyMissing: true };
+        }
+        throw error;
+      }
+    }
+  };
+}

@@ -340,6 +340,165 @@ export function createAdminBuyerQueries(pool) {
       };
     },
 
+    async getBuyerDeletionCandidate(buyerId) {
+      assertPool(pool);
+      const result = await pool.query(
+        `
+          select
+            b.id,
+            b.user_id,
+            b.company_name,
+            b.contact_name,
+            u.email,
+            u.auth_uid,
+            u.role,
+            (select count(*)::int from public.inquiries i where i.buyer_id = b.id) as inquiry_count
+          from public.buyers b
+          join public.users u on u.id = b.user_id
+          where b.id = $1 and u.role = 'buyer'
+        `,
+        [buyerId]
+      );
+      const row = result.rows[0];
+      if (!row) return null;
+      return {
+        buyerId: row.id,
+        userId: row.user_id,
+        email: row.email,
+        authUid: row.auth_uid,
+        companyName: row.company_name,
+        contactName: row.contact_name,
+        inquiryCount: Number(row.inquiry_count || 0)
+      };
+    },
+
+    async deleteBuyer(buyerId, adminViewer = {}) {
+      assertTransactionPool(pool);
+      const client = await pool.connect();
+      const actor = getAdminActor(adminViewer);
+      try {
+        await client.query("begin");
+        const existingResult = await client.query(
+          `
+            select
+              b.id,
+              b.user_id,
+              b.company_name,
+              b.contact_name,
+              u.email,
+              u.auth_uid,
+              u.role
+            from public.buyers b
+            join public.users u on u.id = b.user_id
+            where b.id = $1 and u.role = 'buyer'
+            for update
+          `,
+          [buyerId]
+        );
+        const existing = existingResult.rows[0];
+        if (!existing) {
+          await client.query("rollback");
+          return null;
+        }
+
+        const dependencyResult = await client.query(
+          `
+            select
+              (select count(*)::int from public.inquiries i where i.buyer_id = $1) as inquiry_count,
+              coalesce(array_agg(d.pdf_object_key) filter (where d.pdf_object_key is not null), '{}') as pdf_object_keys
+            from public.admin_quote_documents d
+            join public.admin_quotes q on q.id = d.admin_quote_id
+            join public.inquiries i on i.id = q.inquiry_id
+            where i.buyer_id = $1
+          `,
+          [buyerId]
+        );
+        const dependencies = dependencyResult.rows[0] || {};
+        const inquiryCount = Number(dependencies.inquiry_count || 0);
+        const pdfObjectKeys = Array.isArray(dependencies.pdf_object_keys)
+          ? dependencies.pdf_object_keys.filter(Boolean)
+          : [];
+        const beforeSnapshot = {
+          id: existing.id,
+          userId: existing.user_id,
+          email: existing.email,
+          companyName: existing.company_name,
+          contactName: existing.contact_name,
+          inquiryCount,
+          quoteDocumentCount: pdfObjectKeys.length
+        };
+        const auditResult = await client.query(
+          `
+            insert into public.audit_logs (
+              actor_user_id,
+              actor_role,
+              action,
+              target_table,
+              target_id,
+              before_snapshot,
+              after_snapshot,
+              request_id,
+              ip_address,
+              user_agent
+            )
+            values ($1, $2, $3, $4, $5, $6::jsonb, null, $7, $8, $9)
+            returning id
+          `,
+          [
+            actor.userId,
+            actor.role,
+            "admin.buyer.delete",
+            "buyers",
+            buyerId,
+            beforeSnapshot,
+            actor.requestId,
+            actor.ipAddress,
+            actor.userAgent
+          ]
+        );
+
+        await client.query("delete from public.inquiries where buyer_id = $1", [buyerId]);
+        await client.query("delete from public.buyers where id = $1", [buyerId]);
+        await client.query(
+          `
+            update public.buyers
+            set approved_by = null,
+                reviewed_by = null,
+                assigned_admin_id = null
+            where approved_by = $1 or reviewed_by = $1 or assigned_admin_id = $1
+          `,
+          [existing.user_id]
+        );
+        await client.query("update public.admin_permission_overrides set granted_by = null where granted_by = $1", [existing.user_id]);
+        await client.query("update public.admin_quotes set quoted_by = null where quoted_by = $1", [existing.user_id]);
+        await client.query("update public.admin_quote_documents set issued_by = null where issued_by = $1", [existing.user_id]);
+        await client.query("update public.admin_quote_history set actor_user_id = null where actor_user_id = $1", [existing.user_id]);
+        const userDeleteResult = await client.query(
+          "delete from public.users where id = $1 and role = 'buyer' returning id",
+          [existing.user_id]
+        );
+        if (!userDeleteResult.rows[0]) {
+          throw new Error("Buyer user deletion did not remove a row");
+        }
+
+        await client.query("commit");
+        return {
+          buyerId,
+          userId: existing.user_id,
+          email: existing.email,
+          authUid: existing.auth_uid,
+          inquiryCount,
+          pdfObjectKeys,
+          auditLogId: auditResult.rows[0]?.id || null
+        };
+      } catch (error) {
+        await client.query("rollback");
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+
     async updateBuyerVerificationStatus(buyerId, input, adminViewer = {}) {
       assertTransactionPool(pool);
       const client = await pool.connect();

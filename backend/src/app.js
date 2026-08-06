@@ -1,7 +1,7 @@
 import cors from "cors";
 import express from "express";
 import { getEnv } from "./config/env.js";
-import { createFirebaseTokenVerifier } from "./auth/firebaseAuth.js";
+import { createFirebaseTokenVerifier, createFirebaseUserManager } from "./auth/firebaseAuth.js";
 import { createRequireAdmin } from "./auth/requireAdmin.js";
 import { createRequirePorsQuoteRead } from "./auth/requirePorsQuoteRead.js";
 import { createRequirePorsQuoteWrite } from "./auth/requirePorsQuoteWrite.js";
@@ -174,7 +174,9 @@ export function createApp(options = {}) {
       buyers:
         options.services?.admin?.buyers ||
         createAdminBuyerService({
-          queries: options.queries?.admin?.buyers || createAdminBuyerQueries(pool)
+          queries: options.queries?.admin?.buyers || createAdminBuyerQueries(pool),
+          identityManager: options.identityManager || createFirebaseUserManager(env),
+          objectStore: imageObjectStore
         }),
       categories:
         options.services?.admin?.categories ||
