@@ -89,6 +89,7 @@ test("PORS quote reads accept the scoped device token", async () => {
   assert.deepEqual(list.body.quotes, [{ id: "quote-1" }]);
   assert.equal(detail.status, 200);
   assert.equal(detail.body.quote.id, "quote-1");
+  assert.equal(calls[0].viewer.userId, null);
   assert.equal(calls[0].viewer.authUid, "pors-readonly-device");
   assert.deepEqual(calls[0].viewer.permissions, ["quotes.read"]);
 });
@@ -100,7 +101,9 @@ test("PORS quote writers can read without a second device credential", async () 
   });
 
   assert.equal(response.status, 200);
+  assert.equal(calls[0].viewer.userId, null);
   assert.equal(calls[0].viewer.authUid, "pors-managed-device");
+  assert.equal(calls[0].viewer.role, "system");
   assert.deepEqual(calls[0].viewer.permissions, ["quotes.read"]);
 });
 
@@ -161,7 +164,9 @@ test("PORS quote write routes use only the scoped device writer", async () => {
     ["picking", "price-preview", "finalize", "publish", "receipt-link"]
   );
   for (const call of calls) {
+    assert.equal(call.viewer.userId, null);
     assert.equal(call.viewer.authUid, "pors-managed-device");
+    assert.equal(call.viewer.role, "system");
     assert.deepEqual(call.viewer.permissions, ["quotes.read", "quotes.write"]);
     assert.match(call.payload.idempotencyKey, /^device-write-/);
     assert.ok(Number.isInteger(call.payload.expectedVersion));
