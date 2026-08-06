@@ -43,7 +43,18 @@ test('register page blocks profile submission before required agreements', () =>
   assert.match(source, /disabled=\{!requiredAccepted\}/)
   assert.match(source, /buildAgreementSnapshot\(agreements\)/)
   assert.match(source, /await registerBuyer\(\{/)
+  assert.match(source, /getRegistrationErrorMessage\(error, locale\)/)
+  assert.match(source, /isExistingRegistrationError\(error\)/)
   assert.doesNotMatch(source, /createUserWithEmailAndPassword/)
+})
+
+test('registration can resume a Firebase account whose buyer profile was not saved', () => {
+  const source = readWorkspaceFile('src/commerce/CommerceContext.jsx')
+
+  assert.match(source, /resolveRegistrationCredential\(\{/)
+  assert.match(source, /existingFirebaseAccount/)
+  assert.match(source, /isMissingBuyerProfileError\(profileError\)/)
+  assert.match(source, /buyerApi\.registerBuyer\(profile, token\)/)
 })
 
 test('legacy cn signup route canonicalizes to Taiwan Chinese signup behavior', () => {
