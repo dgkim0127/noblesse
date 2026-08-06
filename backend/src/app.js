@@ -19,6 +19,7 @@ import { createAdminPosQueries } from "./db/queries/adminPosQueries.js";
 import { createAdminProductQueries } from "./db/queries/adminProductQueries.js";
 import { createAdminQuoteQueries } from "./db/queries/adminQuoteQueries.js";
 import { createBuyerInquiryQueries } from "./db/queries/buyerInquiryQueries.js";
+import { createBuyerRecentProductQueries } from "./db/queries/buyerRecentProductQueries.js";
 import { createBuyerQuoteQueries } from "./db/queries/buyerQuoteQueries.js";
 import { createBuyerRegistrationQueries } from "./db/queries/buyerRegistrationQueries.js";
 import { createLoginIdentifierQueries } from "./db/queries/loginIdentifierQueries.js";
@@ -53,6 +54,7 @@ import {
 } from "./services/adminProductImageService.js";
 import { createAdminQuoteService } from "./services/adminQuoteService.js";
 import { createBuyerInquiryService } from "./services/buyerInquiryService.js";
+import { createBuyerRecentProductService } from "./services/buyerRecentProductService.js";
 import { createBuyerQuoteService } from "./services/buyerQuoteService.js";
 import { createBuyerRegistrationService } from "./services/buyerRegistrationService.js";
 import { createBuyerService } from "./services/buyerService.js";
@@ -134,6 +136,12 @@ export function createApp(options = {}) {
       options.services?.buyerInquiries ||
       createBuyerInquiryService({
         queries: options.queries?.buyerInquiries || createBuyerInquiryQueries(pool)
+      }),
+    buyerRecentProducts:
+      options.services?.buyerRecentProducts ||
+      createBuyerRecentProductService({
+        queries:
+          options.queries?.buyerRecentProducts || createBuyerRecentProductQueries(pool)
       }),
     buyerQuotes:
       options.services?.buyerQuotes ||
@@ -264,6 +272,7 @@ export function createApp(options = {}) {
       buyerService: services.buyer,
       buyerRegistrationService: services.buyerRegistration,
       buyerInquiryService: services.buyerInquiries,
+      buyerRecentProductService: services.buyerRecentProducts,
       buyerQuoteService: services.buyerQuotes,
       requireFirebaseIdentity,
       requireUser

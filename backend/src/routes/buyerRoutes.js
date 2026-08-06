@@ -8,6 +8,7 @@ export function createBuyerRoutes({
   buyerRegistrationService,
   buyerService,
   buyerInquiryService,
+  buyerRecentProductService,
   buyerQuoteService,
   requireFirebaseIdentity,
   requireUser
@@ -49,6 +50,35 @@ export function createBuyerRoutes({
     asyncRoute(async (req, res) => {
       const productPrices = await buyerInquiryService.listProductPrices(req.viewer);
       res.json({ productPrices });
+    })
+  );
+
+  router.get(
+    "/recent-products",
+    requireUser,
+    asyncRoute(async (req, res) => {
+      const recentProducts = await buyerRecentProductService.listRecentProducts(req.viewer);
+      res.setHeader("cache-control", "private, no-store");
+      res.json({
+        data: { recentProducts },
+        meta: { requestId: req.id }
+      });
+    })
+  );
+
+  router.put(
+    "/recent-products/:productCode",
+    requireUser,
+    asyncRoute(async (req, res) => {
+      const recentProduct = await buyerRecentProductService.recordProductView(
+        req.params.productCode,
+        req.viewer
+      );
+      res.setHeader("cache-control", "private, no-store");
+      res.json({
+        data: { recentProduct },
+        meta: { requestId: req.id }
+      });
     })
   );
 
