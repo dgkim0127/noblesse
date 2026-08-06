@@ -8,7 +8,7 @@ import {
   validateUuid,
   validationError
 } from "../utils/validators.js";
-import { notFound } from "../utils/errors.js";
+import { forbidden, notFound } from "../utils/errors.js";
 
 const BUYER_VERIFICATION_STATUSES = ["draft", "pending", "approved", "rejected", "suspended"];
 const ACCOUNT_STATUSES = ["active", "blocked"];
@@ -48,7 +48,13 @@ function parseBuyerFilters(filters) {
   };
 }
 
-export function createAdminBuyerService({ queries }) {
+function canDeleteBuyers(adminViewer) {
+  return adminViewer?.adminRole === "owner" &&
+    Array.isArray(adminViewer?.permissions) &&
+    adminViewer.permissions.includes("admins.manage");
+}
+
+export function createAdminBuyerService({ queries, identityManager = null, objectStore = null }) {
   return {
     async listBuyers(filters = {}, adminViewer) {
       const parsed = parseBuyerFilters(filters);
@@ -152,6 +158,50 @@ export function createAdminBuyerService({ queries }) {
         throw notFound("Buyer not found");
       }
       return result;
+    },
+
+    async deleteBuyer(buyerId, body = {}, adminViewer) {
+      if (!canDeleteBuyers(adminViewer)) {
+        throw forbidden("Only the owner administrator can delete buyer accounts");
+      }
+      const id = validateUuid(buyerId, "buyerId");
+      const safeBody = rejectUnknownFields(body, ["confirmation"]);
+      const confirmation = parseOptionalString(safeBody.confirmation, { maxLength: 254 });
+      if (!confirmation) {
+        throw validationError("confirmation is required");
+      }
+
+      const candidate = await queries.getBuyerDeletionCandidate(id, { adminViewer });
+      if (!candidate) {
+        throw notFound("Buyer not found");
+      }
+      if (String(candidate.email || "").toLowerCase() !== confirmation.toLowerCase()) {
+        throw validationError("confirmation must match the buyer email");
+      }
+      if (!candidate.authUid || !identityManager?.deleteUser) {
+        throw validationError("Buyer login identity cannot be deleted");
+      }
+
+      await identityManager.deleteUser(candidate.authUid);
+      const result = await queries.deleteBuyer(id, adminViewer);
+      if (!result) {
+        throw notFound("Buyer not found");
+      }
+
+      if (result.pdfObjectKeys?.length && objectStore?.deleteMany) {
+        await objectStore.deleteMany(result.pdfObjectKeys);
+      }
+
+      return {
+        deleted: {
+          buyerId: result.buyerId,
+          email: result.email,
+          inquiryCount: result.inquiryCount,
+          quoteDocumentCount: result.pdfObjectKeys?.length || 0,
+          authAccountDeleted: true
+        },
+        auditLogId: result.auditLogId
+      };
     }
   };
 }

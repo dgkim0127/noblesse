@@ -71,6 +71,34 @@ function createAppWithBuyers() {
   });
 }
 
+function createOwnerDeletionApp(calls = []) {
+  return createApp({
+    env: { nodeEnv: "test", isProduction: false, allowedOrigins: [] },
+    services: {
+      admin: {
+        dashboard: {},
+        inquiries: {},
+        buyers: {
+          async deleteBuyer(id, body, adminViewer) {
+            calls.push({ id, body, adminViewer });
+            return {
+              deleted: { buyerId: id, email: body.confirmation, authAccountDeleted: true },
+              auditLogId: "audit-delete-1"
+            };
+          }
+        },
+        products: {}
+      }
+    },
+    auth: {
+      adminVerifier: { async verifyIdToken() { return { uid: "owner-uid" }; } },
+      async loadAdminUserByAuthUid() {
+        return { userId: "owner-1", role: "admin", status: "approved", adminRole: "owner" };
+      }
+    }
+  });
+}
+
 test("GET /api/admin/buyers returns buyers list", async () => {
   const response = await request(createAppWithBuyers(), "/api/admin/buyers", {
     headers: { authorization: "Bearer admin-token" }
@@ -217,4 +245,44 @@ test("PATCH /api/admin/buyers/:buyerId/status returns NOT_FOUND for unknown buye
 
   assert.equal(response.status, 404);
   assert.equal(response.body.error.code, "NOT_FOUND");
+});
+
+test("DELETE /api/admin/buyers/:buyerId is owner-only and forwards confirmation", async () => {
+  const calls = [];
+  const response = await request(
+    createOwnerDeletionApp(calls),
+    "/api/admin/buyers/11111111-1111-4111-8111-111111111111",
+    {
+      method: "DELETE",
+      headers: {
+        authorization: "Bearer owner-token",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({ confirmation: "buyer@example.test" })
+    }
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.data.deleted.authAccountDeleted, true);
+  assert.equal(calls[0].id, "11111111-1111-4111-8111-111111111111");
+  assert.deepEqual(calls[0].body, { confirmation: "buyer@example.test" });
+  assert.equal(calls[0].adminViewer.adminRole, "owner");
+});
+
+test("DELETE /api/admin/buyers/:buyerId rejects manager access", async () => {
+  const response = await request(
+    createAppWithBuyers(),
+    "/api/admin/buyers/11111111-1111-4111-8111-111111111111",
+    {
+      method: "DELETE",
+      headers: {
+        authorization: "Bearer admin-token",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({ confirmation: "buyer@example.test" })
+    }
+  );
+
+  assert.equal(response.status, 403);
+  assert.equal(response.body.error.code, "FORBIDDEN");
 });

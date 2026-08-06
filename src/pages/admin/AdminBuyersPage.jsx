@@ -71,6 +71,8 @@ export function AdminBuyersPage() {
   const [savingAction, setSavingAction] = useState('')
   const [message, setMessage] = useState('')
   const [promoteTarget, setPromoteTarget] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const filters = useMemo(() => ({
     verificationStatus: ['draft', 'pending', 'approved', 'rejected', 'suspended'].includes(filter) ? filter : '',
     accountStatus: filter === 'blocked' ? 'blocked' : '',
@@ -151,12 +153,39 @@ export function AdminBuyersPage() {
     }
   }
 
+  const requestBuyerDeletion = (buyer) => {
+    setDeleteTarget(buyer)
+    setDeleteConfirmation('')
+    setMessage('')
+  }
+
+  const deleteBuyerAccount = async () => {
+    const buyer = deleteTarget
+    if (!buyer?.email || deleteConfirmation.trim().toLowerCase() !== buyer.email.toLowerCase()) return
+    setSavingAction(`${buyer.id}:delete`)
+    setMessage('')
+    try {
+      await mutate((api, token) => api.deleteBuyer(buyer.id, {
+        confirmation: deleteConfirmation.trim(),
+      }, token))
+      setMessage(formatAdminCopy(t.buyers.deleteSuccess || '{buyer} 회원을 삭제했습니다.', { buyer: getBuyerTitle(buyer) }))
+      setDeleteTarget(null)
+      setDeleteConfirmation('')
+      setRefreshKey((current) => current + 1)
+    } catch (error) {
+      setMessage(error?.message || t.buyers.deleteFailed || '회원을 삭제할 수 없습니다.')
+    } finally {
+      setSavingAction('')
+    }
+  }
+
   const renderStatusActions = (buyer) => {
     const currentVerification = buyer.verificationStatus || buyer.status
     const currentAccount = buyer.accountStatus || 'active'
     const canReview = hasPermission('buyers.review')
     const canSuspend = hasPermission('buyers.suspend')
     const canPromoteOperator = admin?.adminRole === 'owner' && hasPermission('admins.manage')
+    const canDelete = admin?.adminRole === 'owner' && hasPermission('admins.manage')
 
     return <div className="admin-buyer-status-panel">
       <div className="admin-buyer-status-row">
@@ -194,6 +223,16 @@ export function AdminBuyersPage() {
           onClick={() => requestBuyerPromotion(buyer)}
         >
           {t.buyers.promoteOperator || '운영자로 지정'}
+        </button>
+      </div>}
+      {canDelete && <div className="admin-actions tight">
+        <button
+          className="danger-action"
+          disabled={savingAction === `${buyer.id}:delete`}
+          type="button"
+          onClick={() => requestBuyerDeletion(buyer)}
+        >
+          {t.buyers.deleteAccount || '회원 삭제'}
         </button>
       </div>}
       {!canPromoteOperator && <p className="admin-permission-note">{t.buyers.promotePermissionNote || '운영자 지정은 최고 관리자 권한이 필요합니다.'}</p>}
@@ -261,5 +300,33 @@ export function AdminBuyersPage() {
       onCancel={() => !savingAction && setPromoteTarget(null)}
       onConfirm={promoteBuyerToOperator}
     />
+    <AdminConfirmDialog
+      busy={Boolean(deleteTarget && savingAction === `${deleteTarget.id}:delete`)}
+      confirmDisabled={!deleteTarget?.email || deleteConfirmation.trim().toLowerCase() !== deleteTarget.email.toLowerCase()}
+      confirmLabel={t.buyers.deleteAccount || '회원 삭제'}
+      danger
+      description={deleteTarget ? formatAdminCopy(t.buyers.deleteConfirm || '{buyer} 회원과 모든 견적 기록을 영구 삭제합니다. 계속하려면 이메일을 입력하세요: {email}', {
+        buyer: getBuyerTitle(deleteTarget),
+        email: deleteTarget.email,
+      }) : ''}
+      open={Boolean(deleteTarget)}
+      title={t.buyers.deleteTitle || '회원 영구 삭제'}
+      onCancel={() => {
+        if (savingAction) return
+        setDeleteTarget(null)
+        setDeleteConfirmation('')
+      }}
+      onConfirm={deleteBuyerAccount}
+    >
+      <label className="admin-field">
+        <span>{t.buyers.deleteConfirmationLabel || '삭제할 회원의 이메일 입력'}</span>
+        <input
+          autoComplete="off"
+          placeholder={deleteTarget?.email || ''}
+          value={deleteConfirmation}
+          onChange={(event) => setDeleteConfirmation(event.target.value)}
+        />
+      </label>
+    </AdminConfirmDialog>
   </>
 }

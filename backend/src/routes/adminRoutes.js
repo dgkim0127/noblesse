@@ -276,6 +276,20 @@ export function createAdminRoutes({
     })
   );
 
+  router.delete(
+    "/buyers/:buyerId",
+    requireAdmin,
+    can("admins.manage"),
+    asyncRoute(async (req, res) => {
+      const data = await services.buyers.deleteBuyer(
+        req.params.buyerId,
+        req.body,
+        req.adminViewer
+      );
+      res.json({ data, meta: withRequestId(req) });
+    })
+  );
+
   router.get(
     "/products",
     requireAdmin,

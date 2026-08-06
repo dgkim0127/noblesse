@@ -4,8 +4,8 @@ export const runtimeSchemaName = "public";
 export const migrationLedgerTable = "app_schema_migrations";
 
 export const runtimePrivilegeManifest = Object.freeze({
-  users: ["SELECT", "INSERT", "UPDATE"],
-  buyers: ["SELECT", "INSERT", "UPDATE"],
+  users: ["SELECT", "INSERT", "UPDATE", "DELETE"],
+  buyers: ["SELECT", "INSERT", "UPDATE", "DELETE"],
   buyer_agreements: ["SELECT", "INSERT"],
   terms_versions: ["SELECT"],
   categories: ["SELECT", "INSERT", "UPDATE"],
@@ -19,11 +19,11 @@ export const runtimePrivilegeManifest = Object.freeze({
   product_collections: [],
   home_showcase_slides: ["SELECT", "INSERT", "UPDATE", "DELETE"],
   home_page_configs: ["SELECT", "UPDATE"],
-  inquiries: ["SELECT", "INSERT", "UPDATE"],
+  inquiries: ["SELECT", "INSERT", "UPDATE", "DELETE"],
   inquiry_items: ["SELECT", "INSERT"],
   admin_quotes: ["SELECT", "INSERT", "UPDATE"],
   admin_quote_items: ["SELECT", "INSERT", "UPDATE"],
-  admin_quote_documents: ["SELECT", "INSERT"],
+  admin_quote_documents: ["SELECT", "INSERT", "UPDATE"],
   admin_quote_status_history: ["SELECT", "INSERT"],
   pos_customers: ["SELECT", "INSERT", "UPDATE"],
   pos_items: ["SELECT", "INSERT", "UPDATE"],

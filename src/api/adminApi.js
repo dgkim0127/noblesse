@@ -171,6 +171,14 @@ export function createAdminApi(apiClient) {
       }))
     },
 
+    async deleteBuyer(buyerId, input = {}, token) {
+      return unwrap(await apiClient.apiFetch(`/admin/buyers/${encodeURIComponent(buyerId)}`, {
+        method: 'DELETE',
+        token: requireToken(token),
+        body: input,
+      }))
+    },
+
     async getProducts(params = {}, token) {
       return unwrap(await apiClient.apiFetch(`/admin/products${buildQuery(params)}`, { token: requireToken(token) }))
     },
