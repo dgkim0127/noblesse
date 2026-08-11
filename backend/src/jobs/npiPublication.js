@@ -69,6 +69,14 @@ function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
 }
 
+function normalizeManifestLineEndings(rawBytes) {
+  const text = rawBytes.toString("utf8");
+  if (text.replaceAll("\r\n", "").includes("\r")) {
+    fail("manifest contains unsupported line endings");
+  }
+  return Buffer.from(text.replaceAll("\r\n", "\n"), "utf8");
+}
+
 function hasText(value) {
   return typeof value === "string" && value.trim().length > 0;
 }
@@ -115,7 +123,7 @@ function assertExactSet(actualValues, expectedValues, label) {
 }
 
 export function validatePublicationManifest(rawManifest, rawBytes) {
-  if (sha256(rawBytes) !== expectedManifestSha256) fail("manifest SHA-256 mismatch");
+  if (sha256(normalizeManifestLineEndings(rawBytes)) !== expectedManifestSha256) fail("manifest SHA-256 mismatch");
   if (rawManifest?.schemaVersion !== 1) fail("unsupported manifest schema");
   if (rawManifest?.policy?.uploadAsDraft !== true || rawManifest?.policy?.publishAutomatically !== false) {
     fail("unsafe source manifest policy");

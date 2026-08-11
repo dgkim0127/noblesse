@@ -33,3 +33,16 @@ test("publication manifest validation fails closed if the pinned bytes change", 
     /manifest SHA-256 mismatch/
   );
 });
+
+test("publication manifest accepts a checkout-only CRLF conversion but rejects other byte changes", async () => {
+  const bytes = await readFile(manifestUrl);
+  const text = bytes.toString("utf8");
+  const lfText = text.replaceAll("\r\n", "\n");
+  const parsed = JSON.parse(lfText);
+
+  assert.doesNotThrow(() => validatePublicationManifest(parsed, Buffer.from(lfText.replaceAll("\n", "\r\n"), "utf8")));
+  assert.throws(
+    () => validatePublicationManifest(parsed, Buffer.from(`${lfText}\r`, "utf8")),
+    /unsupported line endings/
+  );
+});
