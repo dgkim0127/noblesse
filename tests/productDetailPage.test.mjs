@@ -93,6 +93,23 @@ test('product detail uses scoped pd layout and related products are selected fro
   assert.match(styles, /\.pd-process-grid[\s\S]*?repeat\(3,/)
 })
 
+test('product detail offers desktop mouse hover magnification without changing touch or editor behavior', () => {
+  const source = readSource('src/pages/ProductDetailPage.jsx')
+  const styles = readSource('src/App.css')
+
+  assert.match(source, /createProductImageMagnifierFrame/)
+  assert.match(source, /const canMagnify = Boolean\(!editor && selectedImage\?\.zoomSrc\)/)
+  assert.match(source, /onMouseEnter=\{updateMagnifier\}/)
+  assert.match(source, /onMouseMove=\{updateMagnifier\}/)
+  assert.match(source, /className="pd-image-magnifier-lens"/)
+  assert.match(source, /className="pd-image-zoom-panel"/)
+  assert.match(source, /selectedImage\.zoomSrc/)
+  assert.match(source, /onMouseLeave=\{stopMagnifier\}/)
+  assert.match(styles, /@media \(min-width: 1181px\) and \(hover: hover\) and \(pointer: fine\)/)
+  assert.match(styles, /\.pd-image-zoom-panel[\s\S]*?position: fixed/)
+  assert.match(styles, /\.pd-image-magnifier-lens,[\s\S]*?\.pd-image-zoom-panel[\s\S]*?display: none/)
+})
+
 test('product detail exposes piercing-specific structure without fixed promotional filler', () => {
   const source = readSource('src/pages/ProductDetailPage.jsx')
 

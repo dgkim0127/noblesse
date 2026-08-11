@@ -23,6 +23,7 @@ import {
   useLocalePath,
 } from '../utils/locale'
 import { imagePresentationStyle, productGalleryEntries } from '../utils/productImageGallery'
+import { createProductImageMagnifierFrame } from '../utils/productImageMagnifier'
 import {
   getEffectiveProductOptionGroups,
   getLegacySelectionFromSnapshots,
@@ -762,6 +763,11 @@ const getRelatedProducts = (products, product) => {
 function ProductGallery({ activeImageId = '', copy, editor, product, productAlt }) {
   const images = useMemo(() => buildGalleryImages(product, productAlt, copy), [copy, product, productAlt])
   const [selectedId, setSelectedId] = useState(images[0]?.id || '')
+  const [magnifierFrame, setMagnifierFrame] = useState(null)
+  const [loadedZoomSrc, setLoadedZoomSrc] = useState('')
+  const [failedZoomSrc, setFailedZoomSrc] = useState('')
+  const magnifierAnimationRef = useRef(null)
+  const pendingMagnifierFrameRef = useRef(null)
 
   useEffect(() => {
     setSelectedId((current) => {
@@ -773,14 +779,119 @@ function ProductGallery({ activeImageId = '', copy, editor, product, productAlt 
 
   const selectedImage = images.find((image) => image.id === selectedId) || images[0] || null
   const secondaryImages = images.filter((image) => image.id !== selectedImage?.id).slice(0, 2)
+  const canMagnify = Boolean(!editor && selectedImage?.zoomSrc)
+  const hasSeparateZoomImage = Boolean(
+    selectedImage?.zoomSrc
+    && selectedImage.zoomSrc !== selectedImage.detailSrc
+    && failedZoomSrc !== selectedImage.zoomSrc,
+  )
+
+  const stopMagnifier = () => {
+    pendingMagnifierFrameRef.current = null
+    if (magnifierAnimationRef.current !== null) {
+      window.cancelAnimationFrame(magnifierAnimationRef.current)
+      magnifierAnimationRef.current = null
+    }
+    setMagnifierFrame(null)
+  }
+
+  const updateMagnifier = (event) => {
+    if (
+      !canMagnify
+      || !window.matchMedia('(min-width: 1181px) and (hover: hover) and (pointer: fine)').matches
+    ) return
+
+    const nextFrame = createProductImageMagnifierFrame({
+      clientX: event.clientX,
+      clientY: event.clientY,
+      rect: event.currentTarget.getBoundingClientRect(),
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+    })
+    if (!nextFrame) {
+      stopMagnifier()
+      return
+    }
+    pendingMagnifierFrameRef.current = nextFrame
+    if (magnifierAnimationRef.current !== null) return
+    magnifierAnimationRef.current = window.requestAnimationFrame(() => {
+      magnifierAnimationRef.current = null
+      setMagnifierFrame(pendingMagnifierFrameRef.current)
+    })
+  }
+
+  useEffect(() => {
+    setLoadedZoomSrc('')
+    setFailedZoomSrc('')
+    stopMagnifier()
+  }, [selectedImage?.id, selectedImage?.zoomSrc])
+
+  useEffect(() => {
+    const closeMagnifier = () => stopMagnifier()
+    window.addEventListener('resize', closeMagnifier)
+    window.addEventListener('scroll', closeMagnifier, true)
+    return () => {
+      window.removeEventListener('resize', closeMagnifier)
+      window.removeEventListener('scroll', closeMagnifier, true)
+      closeMagnifier()
+    }
+  }, [])
 
   return <section className={`pd-gallery ${secondaryImages.length > 0 ? 'has-side-images' : 'is-single'}`} aria-label={copy.gallery}>
     <div className="pd-gallery-grid">
-      <figure className={`pd-main-image tone-${product.tone}`}>
-        {selectedImage
-          ? <img src={selectedImage.detailSrc} alt={selectedImage.alt} loading="eager" width="1200" height="1200" style={imagePresentationStyle(selectedImage)} onError={(event) => { event.currentTarget.hidden = true }} />
-          : <div className="pd-image-placeholder"><Images size={32} /><span>{copy.noImage}</span></div>}
-      </figure>
+      <div className="pd-main-media">
+        <figure
+          className={`pd-main-image tone-${product.tone}${canMagnify ? ' can-magnify' : ''}`}
+          onPointerCancel={stopMagnifier}
+          onMouseEnter={updateMagnifier}
+          onMouseLeave={stopMagnifier}
+          onMouseMove={updateMagnifier}
+        >
+          {selectedImage
+            ? <img draggable="false" src={selectedImage.detailSrc} alt={selectedImage.alt} loading="eager" width="1200" height="1200" style={imagePresentationStyle(selectedImage)} onError={(event) => { event.currentTarget.hidden = true; stopMagnifier() }} />
+            : <div className="pd-image-placeholder"><Images size={32} /><span>{copy.noImage}</span></div>}
+          {magnifierFrame && <span
+            aria-hidden="true"
+            className="pd-image-magnifier-lens"
+            style={{
+              height: `${magnifierFrame.lensPercent}%`,
+              left: `${magnifierFrame.xPercent}%`,
+              top: `${magnifierFrame.yPercent}%`,
+              width: `${magnifierFrame.lensPercent}%`,
+            }}
+          />}
+        </figure>
+        {magnifierFrame && selectedImage && <div
+          aria-hidden="true"
+          className="pd-image-zoom-panel"
+          style={magnifierFrame.panel}
+        >
+          <div
+            className="pd-image-zoom-stage"
+            style={{
+              transform: `matrix(${magnifierFrame.stage.scale}, 0, 0, ${magnifierFrame.stage.scale}, ${magnifierFrame.stage.translateX}, ${magnifierFrame.stage.translateY})`,
+            }}
+          >
+            <img
+              alt=""
+              className="pd-image-zoom-fallback"
+              draggable="false"
+              src={selectedImage.detailSrc}
+              style={imagePresentationStyle(selectedImage)}
+              onError={stopMagnifier}
+            />
+            {hasSeparateZoomImage && <img
+              alt=""
+              className={`pd-image-zoom-source${loadedZoomSrc === selectedImage.zoomSrc ? ' is-ready' : ''}`}
+              draggable="false"
+              src={selectedImage.zoomSrc}
+              style={imagePresentationStyle(selectedImage)}
+              onError={() => setFailedZoomSrc(selectedImage.zoomSrc)}
+              onLoad={() => setLoadedZoomSrc(selectedImage.zoomSrc)}
+            />}
+          </div>
+        </div>}
+      </div>
       {secondaryImages.length > 0 && <div className="pd-side-images" aria-hidden="true">
         {secondaryImages.map((image) => <figure className="pd-side-image" key={`side-${image.id}`}>
           <img src={image.cardSrc || image.detailSrc} alt="" loading="lazy" width="600" height="600" style={imagePresentationStyle(image)} onError={(event) => { event.currentTarget.hidden = true }} />
@@ -794,6 +905,7 @@ function ProductGallery({ activeImageId = '', copy, editor, product, productAlt 
         className={selectedImage?.id === image.id ? 'pd-thumb is-active' : 'pd-thumb'}
         key={image.id}
         onClick={() => {
+          stopMagnifier()
           setSelectedId(image.id)
           editor?.selectImage?.(image.id)
         }}
