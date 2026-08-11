@@ -32,7 +32,7 @@ import { resolveRegistrationCredential } from '../services/registrationCredentia
 const formatInquiryId = () => `INQ-${new Date().toISOString().slice(0, 10).replaceAll('-', '')}-${String(Date.now()).slice(-3)}`
 const viewerStates = new Set(['guest', 'pending', 'approved', 'admin'])
 const adminPricePageLimit = 100
-const adminPricePageCap = 20
+const adminPriceRowSafetyLimit = 10_000
 const recentProductLimit = 10
 let authServicePromise
 
@@ -65,8 +65,13 @@ function upsertInquiry(inquiries, nextInquiry) {
 async function loadAdminProductPrices(adminApi, token) {
   const prices = []
   let offset = 0
+  const visitedOffsets = new Set()
 
-  for (let page = 0; page < adminPricePageCap; page += 1) {
+  while (true) {
+    if (visitedOffsets.has(offset)) {
+      throw new Error('Admin price pagination returned a repeated offset.')
+    }
+    visitedOffsets.add(offset)
     const result = await adminApi.getPrices({
       active: true,
       limit: adminPricePageLimit,
@@ -84,6 +89,9 @@ async function loadAdminProductPrices(adminApi, token) {
     const parsedNextOffset = Number(nextOffset)
     if (nextOffset === null || nextOffset === undefined || pagePrices.length === 0 || !Number.isFinite(parsedNextOffset)) {
       break
+    }
+    if (prices.length >= adminPriceRowSafetyLimit) {
+      throw new Error('Admin price pagination exceeded the safety limit.')
     }
     offset = parsedNextOffset
   }
@@ -338,9 +346,25 @@ export function CommerceProvider({ children }) {
     getDiscountedPrice(getPriceForBuyer(productPrices, productId, buyer, isApproved), buyer?.discountRate)
   ), [buyer, isApproved, productPrices])
 
+  const adminPriceBooksByProduct = useMemo(() => {
+    const grouped = new Map()
+    if (!isAdminViewer) return grouped
+    for (const price of productPrices) {
+      const productId = price.productId
+      if (!productId) continue
+      const productPricesForId = grouped.get(productId) || []
+      productPricesForId.push(price)
+      grouped.set(productId, productPricesForId)
+    }
+    for (const [productId, productPricesForId] of grouped) {
+      grouped.set(productId, getAdminPriceBooksForProduct(productPricesForId, productId))
+    }
+    return grouped
+  }, [isAdminViewer, productPrices])
+
   const getAdminPriceBooks = useCallback((productId) => (
-    isAdminViewer ? getAdminPriceBooksForProduct(productPrices, productId) : []
-  ), [isAdminViewer, productPrices])
+    adminPriceBooksByProduct.get(productId) || []
+  ), [adminPriceBooksByProduct])
 
   const inquiryRows = useMemo(() => buildInquiryRows(inquiryItems, products, buyer, isApproved, productPrices), [buyer, inquiryItems, isApproved, productPrices, products])
   const estimatedTotal = inquiryRows.reduce((sum, row) => sum + row.subtotal, 0)
