@@ -929,7 +929,7 @@ async function insertPolicies(client, { targets, insertedPrices, appliedAt }) {
       inserted.latest_reference_rate_snapshot_id::text,
       inserted.last_applied_rate_snapshot_id::text
     from inserted
-    order by product_id, target_market
+    order by inserted.product_id, inserted.target_market
   `, [JSON.stringify(payload), appliedAt]);
   if (result.rows.length !== targets.length) fail("set-based FX_AUTO policy insert count mismatch");
   return result.rows;

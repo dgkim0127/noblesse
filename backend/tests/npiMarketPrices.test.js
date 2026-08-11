@@ -548,6 +548,10 @@ test("full mode creates one exact 2,178-row set and a rerun is a verified no-op"
   assert.equal(insertMarkers.length, 1);
   assert.match(insertMarkers[0], /jsonb_to_recordset/i);
   assert.doesNotMatch(insertMarkers[0], /on conflict/i);
+  const policyInsert = fake.calls
+    .map((call) => call.sql)
+    .find((sql) => sql.includes("npi-market-prices:insert-policies"));
+  assert.match(policyInsert, /order by inserted\.product_id, inserted\.target_market/i);
 
   const writeCountBeforeRetry = fake.calls.filter((call) => /npi-market-prices:insert-/i.test(call.sql)).length;
   const second = await executeNpiMarketPrices({
