@@ -15306,7 +15306,8 @@ h6 {
 
   .pd-image-zoom-stage {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
     transform-origin: 0 0;
     backface-visibility: hidden;
     will-change: transform;

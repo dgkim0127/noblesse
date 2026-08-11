@@ -837,6 +837,8 @@ function ProductGallery({ activeImageId = '', copy, editor, product, productAlt 
         frame.panel.top,
         frame.panel.width,
         frame.panel.height,
+        frame.render.width,
+        frame.render.height,
       ].join(':')
       if (magnifierGeometryKeyRef.current !== geometryKey) {
         magnifierGeometryKeyRef.current = geometryKey
@@ -849,6 +851,10 @@ function ProductGallery({ activeImageId = '', copy, editor, product, productAlt 
           left: `${frame.panel.left}px`,
           top: `${frame.panel.top}px`,
           width: `${frame.panel.width}px`,
+        })
+        Object.assign(stage.style, {
+          height: `${frame.render.height}px`,
+          width: `${frame.render.width}px`,
         })
       }
       lens.style.transform = `translate3d(${frame.lens.left}px, ${frame.lens.top}px, 0)`

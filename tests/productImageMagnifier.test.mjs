@@ -13,7 +13,7 @@ const rect = {
   height: 600,
 }
 
-test('image magnifier centers the selected point in an aspect-matched preview', () => {
+test('image magnifier centers the selected point in a square preview', () => {
   const frame = createProductImageMagnifierFrame({
     clientX: 300,
     clientY: 420,
@@ -26,9 +26,10 @@ test('image magnifier centers the selected point in an aspect-matched preview', 
   assert.equal(frame.xPercent, 50)
   assert.equal(frame.yPercent, 50)
   assert.equal(frame.lensPercent, 40)
-  assert.deepEqual(frame.lens, { left: 120, top: 180, width: 160, height: 240 })
-  assert.deepEqual(frame.panel, { left: 518, top: 120, width: 400, height: 600 })
-  assert.deepEqual(frame.stage, { scale: 2.5, translateX: -300, translateY: -450 })
+  assert.deepEqual(frame.lens, { left: 120, top: 220, width: 160, height: 160 })
+  assert.deepEqual(frame.panel, { left: 518, top: 120, width: 400, height: 400 })
+  assert.deepEqual(frame.render, { width: 400, height: 600 })
+  assert.deepEqual(frame.stage, { scale: 2.5, translateX: -300, translateY: -550 })
 })
 
 test('image magnifier clamps the lens at every image edge', () => {
@@ -47,14 +48,16 @@ test('image magnifier clamps the lens at every image edge', () => {
     viewportHeight: 900,
   })
 
-  assert.deepEqual([topLeft.xPercent, topLeft.yPercent], [20, 20])
-  assert.deepEqual([bottomRight.xPercent, bottomRight.yPercent], [80, 80])
-  assert.deepEqual(topLeft.lens, { left: 0, top: 0, width: 160, height: 240 })
-  assert.deepEqual(bottomRight.lens, { left: 240, top: 360, width: 160, height: 240 })
+  assert.equal(topLeft.xPercent, 20)
+  assert.equal(topLeft.yPercent, 40 / 3)
+  assert.equal(bottomRight.xPercent, 80)
+  assert.equal(bottomRight.yPercent, 260 / 3)
+  assert.deepEqual(topLeft.lens, { left: 0, top: 0, width: 160, height: 160 })
+  assert.deepEqual(bottomRight.lens, { left: 240, top: 440, width: 160, height: 160 })
   assert.equal(topLeft.stage.translateX, 0)
   assert.equal(topLeft.stage.translateY, 0)
   assert.equal(bottomRight.stage.translateX, -600)
-  assert.equal(bottomRight.stage.translateY, -900)
+  assert.equal(bottomRight.stage.translateY, -1100)
 })
 
 test('image magnifier hides when the source box or right-side preview space is unsafe', () => {

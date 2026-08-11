@@ -107,6 +107,8 @@ test('product detail offers desktop mouse hover magnification without changing t
   assert.match(source, /magnifierRectRef\.current \|\| event\.currentTarget\.getBoundingClientRect\(\)/)
   assert.match(source, /lens\.style\.transform = `translate3d/)
   assert.match(source, /stage\.style\.transform = `translate3d/)
+  assert.match(source, /height: `\$\{frame\.render\.height\}px`/)
+  assert.match(source, /width: `\$\{frame\.render\.width\}px`/)
   assert.doesNotMatch(source, /setMagnifierFrame/)
   assert.match(source, /selectedImage\.zoomSrc/)
   assert.match(source, /onMouseLeave=\{stopMagnifier\}/)
