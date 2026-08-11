@@ -12,7 +12,7 @@ import {
 import { parseMultipartFormData } from "../utils/multipart.js";
 
 const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
-const maxImages = 8;
+const maxImages = 10;
 const maxFileBytes = 10 * 1024 * 1024;
 const imageVariants = {
   thumb: 300,

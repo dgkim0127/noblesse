@@ -112,3 +112,41 @@ test("updateProductVisibility rolls back and releases when product is not found"
   assert.equal(texts.includes("commit"), false);
   assert.equal(fake.releaseCount, 1);
 });
+
+test("updateProductVisibility publishes with Korean and English names while optional locales and descriptions are empty", async () => {
+  const publishableRow = {
+    ...existingProductRow,
+    name_zh_tw: null,
+    description_ko: null,
+    description_en: null,
+    description_ja: null,
+    description_zh_tw: null,
+    image_set: { primary: "https://example.com/product.webp" },
+    has_kr_price: true,
+    is_visible: false
+  };
+  const fake = createFakePool({ selectRows: [publishableRow] });
+
+  const result = await createAdminProductQueries(fake.pool).updateProductVisibility(productId, true, adminViewer);
+
+  assert.equal(result.incomplete, undefined);
+  assert.equal(result.product.isVisible, true);
+  assert.equal(fake.calls.some((call) => call.sql.toLowerCase().startsWith("update public.products")), true);
+});
+
+test("updateProductVisibility still blocks publication when the English name is empty", async () => {
+  const incompleteRow = {
+    ...existingProductRow,
+    name_en: null,
+    image_set: { primary: "https://example.com/product.webp" },
+    has_kr_price: true,
+    is_visible: false
+  };
+  const fake = createFakePool({ selectRows: [incompleteRow] });
+
+  const result = await createAdminProductQueries(fake.pool).updateProductVisibility(productId, true, adminViewer);
+
+  assert.equal(result.incomplete, true);
+  assert.deepEqual(result.missing, ["translations.en"]);
+  assert.equal(fake.calls.some((call) => call.sql.toLowerCase().startsWith("update public.products")), false);
+});

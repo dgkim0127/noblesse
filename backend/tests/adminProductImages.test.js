@@ -471,7 +471,7 @@ test("POST /api/admin/products/:productId/images rejects too many images", async
   const chunks = [
     Buffer.from(`--${boundary}\r\ncontent-disposition: form-data; name="metadata"\r\ncontent-type: application/json\r\n\r\n{}\r\n`)
   ];
-  for (let index = 0; index < 9; index += 1) {
+  for (let index = 0; index < 11; index += 1) {
     chunks.push(
       Buffer.from(`--${boundary}\r\ncontent-disposition: form-data; name="images"; filename="photo-${index}.png"\r\ncontent-type: image/png\r\n\r\n`),
       pngBytes,

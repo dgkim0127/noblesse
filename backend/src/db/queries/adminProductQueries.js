@@ -15,6 +15,7 @@ function assertTransactionPool(pool) {
 }
 
 const productLocales = ["kr", "en", "jp", "zh-TW"];
+const requiredPublishLocales = ["kr", "en"];
 
 function hasText(value) {
   return typeof value === "string" && value.trim().length > 0;
@@ -33,7 +34,7 @@ function getLocalizedDetailMissing(row) {
   }
   const missing = [];
   for (const key of keys) {
-    for (const locale of productLocales) {
+    for (const locale of requiredPublishLocales) {
       if (!hasText(translations[locale]?.[key])) missing.push(`detailContent.translations.${locale}.${key}`);
     }
   }
@@ -42,10 +43,10 @@ function getLocalizedDetailMissing(row) {
 
 function createProductCompletion(row) {
   const languageFields = {
-    kr: [row.name_ko, row.description_ko],
-    en: [row.name_en, row.description_en],
-    jp: [row.name_ja, row.description_ja],
-    "zh-TW": [row.name_zh_tw, row.description_zh_tw]
+    kr: [row.name_ko],
+    en: [row.name_en],
+    jp: [row.name_ja],
+    "zh-TW": [row.name_zh_tw]
   };
   const languages = Object.fromEntries(
     Object.entries(languageFields).map(([locale, fields]) => [locale, fields.every(hasText)])
@@ -54,8 +55,8 @@ function createProductCompletion(row) {
   const hasPrimaryImage = Boolean(imageSet.primary || imageSet.detail || imageSet.card || imageSet.thumb);
   const hasKrPrice = Boolean(row.has_kr_price);
   const missing = [];
-  for (const [locale, complete] of Object.entries(languages)) {
-    if (!complete) missing.push(`translations.${locale}`);
+  for (const locale of requiredPublishLocales) {
+    if (!languages[locale]) missing.push(`translations.${locale}`);
   }
   if (!row.category_id) missing.push("category");
   if (!hasPrimaryImage) missing.push("primaryImage");
