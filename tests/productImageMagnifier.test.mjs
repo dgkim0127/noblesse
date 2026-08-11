@@ -26,6 +26,7 @@ test('image magnifier centers the selected point in an aspect-matched preview', 
   assert.equal(frame.xPercent, 50)
   assert.equal(frame.yPercent, 50)
   assert.equal(frame.lensPercent, 40)
+  assert.deepEqual(frame.lens, { left: 120, top: 180, width: 160, height: 240 })
   assert.deepEqual(frame.panel, { left: 518, top: 120, width: 400, height: 600 })
   assert.deepEqual(frame.stage, { scale: 2.5, translateX: -300, translateY: -450 })
 })
@@ -48,6 +49,8 @@ test('image magnifier clamps the lens at every image edge', () => {
 
   assert.deepEqual([topLeft.xPercent, topLeft.yPercent], [20, 20])
   assert.deepEqual([bottomRight.xPercent, bottomRight.yPercent], [80, 80])
+  assert.deepEqual(topLeft.lens, { left: 0, top: 0, width: 160, height: 240 })
+  assert.deepEqual(bottomRight.lens, { left: 240, top: 360, width: 160, height: 240 })
   assert.equal(topLeft.stage.translateX, 0)
   assert.equal(topLeft.stage.translateY, 0)
   assert.equal(bottomRight.stage.translateX, -600)

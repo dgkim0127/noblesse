@@ -57,22 +57,38 @@ export function createProductImageMagnifierFrame({
   const lensHalfPercent = 50 / safeScale
   const xPercent = clamp(((safeClientX - left) / width) * 100, lensHalfPercent, 100 - lensHalfPercent)
   const yPercent = clamp(((safeClientY - top) / height) * 100, lensHalfPercent, 100 - lensHalfPercent)
-  const panelTop = clamp(top, viewportTopInset, safeViewportHeight - panelHeight - viewportEdgeInset)
+  const resolvedPanelWidth = Math.floor(panelWidth)
+  const resolvedPanelHeight = Math.floor(panelHeight)
+  const lensWidth = Math.round(width / safeScale)
+  const lensHeight = Math.round(height / safeScale)
+  const lensCenterX = width * (xPercent / 100)
+  const lensCenterY = height * (yPercent / 100)
+  const panelTop = clamp(
+    Math.round(top),
+    viewportTopInset,
+    Math.floor(safeViewportHeight - resolvedPanelHeight - viewportEdgeInset),
+  )
 
   return {
     xPercent,
     yPercent,
     lensPercent: 100 / safeScale,
+    lens: {
+      left: Math.round(lensCenterX - (lensWidth / 2)),
+      top: Math.round(lensCenterY - (lensHeight / 2)),
+      width: lensWidth,
+      height: lensHeight,
+    },
     panel: {
-      left: right + panelGap,
+      left: Math.round(right + panelGap),
       top: panelTop,
-      width: panelWidth,
-      height: panelHeight,
+      width: resolvedPanelWidth,
+      height: resolvedPanelHeight,
     },
     stage: {
       scale: safeScale,
-      translateX: panelWidth * (0.5 - safeScale * (xPercent / 100)),
-      translateY: panelHeight * (0.5 - safeScale * (yPercent / 100)),
+      translateX: Math.round(resolvedPanelWidth * (0.5 - safeScale * (xPercent / 100))),
+      translateY: Math.round(resolvedPanelHeight * (0.5 - safeScale * (yPercent / 100))),
     },
   }
 }

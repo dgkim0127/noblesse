@@ -7,7 +7,7 @@ import {
   Pencil,
   Plus,
 } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { CatalogCard } from '../components/CatalogCard'
 import { ProductDetailBlocks } from '../components/ProductDetailBlocks'
@@ -763,9 +763,13 @@ const getRelatedProducts = (products, product) => {
 function ProductGallery({ activeImageId = '', copy, editor, product, productAlt }) {
   const images = useMemo(() => buildGalleryImages(product, productAlt, copy), [copy, product, productAlt])
   const [selectedId, setSelectedId] = useState(images[0]?.id || '')
-  const [magnifierFrame, setMagnifierFrame] = useState(null)
-  const [loadedZoomSrc, setLoadedZoomSrc] = useState('')
-  const [failedZoomSrc, setFailedZoomSrc] = useState('')
+  const magnifierLensRef = useRef(null)
+  const magnifierPanelRef = useRef(null)
+  const magnifierStageRef = useRef(null)
+  const zoomSourceRef = useRef(null)
+  const failedZoomSourceRef = useRef('')
+  const magnifierRectRef = useRef(null)
+  const magnifierGeometryKeyRef = useRef('')
   const magnifierAnimationRef = useRef(null)
   const pendingMagnifierFrameRef = useRef(null)
 
@@ -782,18 +786,20 @@ function ProductGallery({ activeImageId = '', copy, editor, product, productAlt 
   const canMagnify = Boolean(!editor && selectedImage?.zoomSrc)
   const hasSeparateZoomImage = Boolean(
     selectedImage?.zoomSrc
-    && selectedImage.zoomSrc !== selectedImage.detailSrc
-    && failedZoomSrc !== selectedImage.zoomSrc,
+    && selectedImage.zoomSrc !== selectedImage.detailSrc,
   )
 
-  const stopMagnifier = () => {
+  const stopMagnifier = useCallback(() => {
     pendingMagnifierFrameRef.current = null
+    magnifierRectRef.current = null
+    magnifierGeometryKeyRef.current = ''
     if (magnifierAnimationRef.current !== null) {
       window.cancelAnimationFrame(magnifierAnimationRef.current)
       magnifierAnimationRef.current = null
     }
-    setMagnifierFrame(null)
-  }
+    magnifierLensRef.current?.classList.remove('is-active')
+    magnifierPanelRef.current?.classList.remove('is-active')
+  }, [])
 
   const updateMagnifier = (event) => {
     if (
@@ -801,10 +807,12 @@ function ProductGallery({ activeImageId = '', copy, editor, product, productAlt 
       || !window.matchMedia('(min-width: 1181px) and (hover: hover) and (pointer: fine)').matches
     ) return
 
+    const rect = magnifierRectRef.current || event.currentTarget.getBoundingClientRect()
+    magnifierRectRef.current = rect
     const nextFrame = createProductImageMagnifierFrame({
       clientX: event.clientX,
       clientY: event.clientY,
-      rect: event.currentTarget.getBoundingClientRect(),
+      rect,
       viewportWidth: window.innerWidth,
       viewportHeight: window.innerHeight,
     })
@@ -816,26 +824,65 @@ function ProductGallery({ activeImageId = '', copy, editor, product, productAlt 
     if (magnifierAnimationRef.current !== null) return
     magnifierAnimationRef.current = window.requestAnimationFrame(() => {
       magnifierAnimationRef.current = null
-      setMagnifierFrame(pendingMagnifierFrameRef.current)
+      const frame = pendingMagnifierFrameRef.current
+      const lens = magnifierLensRef.current
+      const panel = magnifierPanelRef.current
+      const stage = magnifierStageRef.current
+      if (!frame || !lens || !panel || !stage) return
+
+      const geometryKey = [
+        frame.lens.width,
+        frame.lens.height,
+        frame.panel.left,
+        frame.panel.top,
+        frame.panel.width,
+        frame.panel.height,
+      ].join(':')
+      if (magnifierGeometryKeyRef.current !== geometryKey) {
+        magnifierGeometryKeyRef.current = geometryKey
+        Object.assign(lens.style, {
+          height: `${frame.lens.height}px`,
+          width: `${frame.lens.width}px`,
+        })
+        Object.assign(panel.style, {
+          height: `${frame.panel.height}px`,
+          left: `${frame.panel.left}px`,
+          top: `${frame.panel.top}px`,
+          width: `${frame.panel.width}px`,
+        })
+      }
+      lens.style.transform = `translate3d(${frame.lens.left}px, ${frame.lens.top}px, 0)`
+      stage.style.transform = `translate3d(${frame.stage.translateX}px, ${frame.stage.translateY}px, 0) scale(${frame.stage.scale})`
+      lens.classList.add('is-active')
+      panel.classList.add('is-active')
+
+      const zoomSource = zoomSourceRef.current
+      if (
+        hasSeparateZoomImage
+        && zoomSource
+        && failedZoomSourceRef.current !== selectedImage.zoomSrc
+        && !zoomSource.getAttribute('src')
+      ) {
+        zoomSource.setAttribute('src', selectedImage.zoomSrc)
+      }
     })
   }
 
   useEffect(() => {
-    setLoadedZoomSrc('')
-    setFailedZoomSrc('')
+    failedZoomSourceRef.current = ''
     stopMagnifier()
-  }, [selectedImage?.id, selectedImage?.zoomSrc])
+  }, [selectedImage?.id, selectedImage?.zoomSrc, stopMagnifier])
 
   useEffect(() => {
     const closeMagnifier = () => stopMagnifier()
     window.addEventListener('resize', closeMagnifier)
-    window.addEventListener('scroll', closeMagnifier, true)
+    window.addEventListener('scroll', closeMagnifier, { passive: true })
     return () => {
       window.removeEventListener('resize', closeMagnifier)
-      window.removeEventListener('scroll', closeMagnifier, true)
+      window.removeEventListener('scroll', closeMagnifier)
       closeMagnifier()
     }
-  }, [])
+  }, [stopMagnifier])
 
   return <section className={`pd-gallery ${secondaryImages.length > 0 ? 'has-side-images' : 'is-single'}`} aria-label={copy.gallery}>
     <div className="pd-gallery-grid">
@@ -850,27 +897,21 @@ function ProductGallery({ activeImageId = '', copy, editor, product, productAlt 
           {selectedImage
             ? <img draggable="false" src={selectedImage.detailSrc} alt={selectedImage.alt} loading="eager" width="1200" height="1200" style={imagePresentationStyle(selectedImage)} onError={(event) => { event.currentTarget.hidden = true; stopMagnifier() }} />
             : <div className="pd-image-placeholder"><Images size={32} /><span>{copy.noImage}</span></div>}
-          {magnifierFrame && <span
+          {canMagnify && <span
             aria-hidden="true"
             className="pd-image-magnifier-lens"
-            style={{
-              height: `${magnifierFrame.lensPercent}%`,
-              left: `${magnifierFrame.xPercent}%`,
-              top: `${magnifierFrame.yPercent}%`,
-              width: `${magnifierFrame.lensPercent}%`,
-            }}
+            ref={magnifierLensRef}
           />}
         </figure>
-        {magnifierFrame && selectedImage && <div
+        {canMagnify && selectedImage && <div
           aria-hidden="true"
           className="pd-image-zoom-panel"
-          style={magnifierFrame.panel}
+          key={`magnifier-${selectedImage.id}-${selectedImage.zoomSrc}`}
+          ref={magnifierPanelRef}
         >
           <div
             className="pd-image-zoom-stage"
-            style={{
-              transform: `matrix(${magnifierFrame.stage.scale}, 0, 0, ${magnifierFrame.stage.scale}, ${magnifierFrame.stage.translateX}, ${magnifierFrame.stage.translateY})`,
-            }}
+            ref={magnifierStageRef}
           >
             <img
               alt=""
@@ -882,12 +923,18 @@ function ProductGallery({ activeImageId = '', copy, editor, product, productAlt 
             />
             {hasSeparateZoomImage && <img
               alt=""
-              className={`pd-image-zoom-source${loadedZoomSrc === selectedImage.zoomSrc ? ' is-ready' : ''}`}
+              className="pd-image-zoom-source"
+              data-zoom-src={selectedImage.zoomSrc}
               draggable="false"
-              src={selectedImage.zoomSrc}
+              key={selectedImage.zoomSrc}
+              ref={zoomSourceRef}
               style={imagePresentationStyle(selectedImage)}
-              onError={() => setFailedZoomSrc(selectedImage.zoomSrc)}
-              onLoad={() => setLoadedZoomSrc(selectedImage.zoomSrc)}
+              onError={(event) => {
+                failedZoomSourceRef.current = selectedImage.zoomSrc
+                event.currentTarget.classList.remove('is-ready')
+                event.currentTarget.removeAttribute('src')
+              }}
+              onLoad={(event) => event.currentTarget.classList.add('is-ready')}
             />}
           </div>
         </div>}
