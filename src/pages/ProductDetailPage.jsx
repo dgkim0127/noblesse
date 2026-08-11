@@ -22,7 +22,11 @@ import {
   getLocalizedProductName,
   useLocalePath,
 } from '../utils/locale'
-import { imagePresentationStyle, productGalleryEntries } from '../utils/productImageGallery'
+import {
+  imagePresentationStyle,
+  productDetailImageSlots,
+  productGalleryEntries,
+} from '../utils/productImageGallery'
 import { createProductImageMagnifierFrame } from '../utils/productImageMagnifier'
 import {
   getEffectiveProductOptionGroups,
@@ -965,6 +969,30 @@ function ProductGallery({ activeImageId = '', copy, editor, product, productAlt 
   </section>
 }
 
+function productContextImageKey(image) {
+  const source = image?.detailSrc || image?.cardSrc || ''
+  return source ? `${image?.id || ''}|${source}` : ''
+}
+
+function ProductContextImage({ className = '', image, onError }) {
+  const source = image?.detailSrc || image?.cardSrc
+  if (!source) return null
+  return <figure className={`pd-context-image ${className}`.trim()}>
+    <img
+      alt={image.alt || ''}
+      height="1200"
+      loading="lazy"
+      src={source}
+      style={imagePresentationStyle(image)}
+      width="1200"
+      onError={(event) => {
+        event.currentTarget.parentElement.hidden = true
+        onError?.(image)
+      }}
+    />
+  </figure>
+}
+
 function ProductOptionGroup({ copy, editor, group, locale, onSelect, selectedValueId }) {
   const normalizedLocale = locale === 'cn' ? 'zh-TW' : locale
   const activeValues = group.values.filter((value) => value.active)
@@ -1087,6 +1115,7 @@ export function ProductDetailView({
   const [directStatus, setDirectStatus] = useState('idle')
   const [directError, setDirectError] = useState('')
   const [directInquiry, setDirectInquiry] = useState(null)
+  const [failedContextImageKeys, setFailedContextImageKeys] = useState([])
 
   useEffect(() => {
     const explicitGroups = Array.isArray(product?.optionGroups) && product.optionGroups.length > 0
@@ -1108,7 +1137,14 @@ export function ProductDetailView({
     setDirectStatus('idle')
     setDirectError('')
     setDirectInquiry(null)
+    setFailedContextImageKeys([])
   }, [product?.productId])
+
+  const handleContextImageError = useCallback((image) => {
+    const key = productContextImageKey(image)
+    if (!key) return
+    setFailedContextImageKeys((current) => current.includes(key) ? current : [...current, key])
+  }, [])
 
   if (!product) return <main className="content pd-page"><div className="empty">{copy.notFound}</div></main>
 
@@ -1206,7 +1242,17 @@ export function ProductDetailView({
     [copy.moq, effectiveVisibleMoq ? `${effectiveVisibleMoq} pcs` : ''],
   ].filter(([, value]) => value)
 
-  const detailBlocks = product.detailContent?.blocks || []
+  const detailBlocks = Array.isArray(product.detailContent?.blocks) ? product.detailContent.blocks : []
+  const visibleDetailBlocks = detailBlocks.filter((block) => block?.visible !== false)
+  const reservedDetailImageIds = visibleDetailBlocks.flatMap((block) => Array.isArray(block?.imageIds) ? block.imageIds : [])
+  const assignedDetailImageSlots = productDetailImageSlots(galleryImages, {
+    includeOverview: visibleDetailBlocks.length === 0,
+    reservedImageIds: reservedDetailImageIds,
+  })
+  const detailImageSlots = Object.fromEntries(Object.entries(assignedDetailImageSlots).map(([slot, image]) => [
+    slot,
+    image && !failedContextImageKeys.includes(productContextImageKey(image)) ? image : null,
+  ]))
   const hasDetailStory = detailBlocks.length > 0 || galleryImages.length > 1 || productDetailContent.headline || productDetailContent.body || editor
   const hasMaterialAndCare = structureRows.length > 0 || materialGuideBody || wearingGuideBody || careGuideBody || editor
 
@@ -1382,14 +1428,14 @@ export function ProductDetailView({
       <ProductEditorTarget editor={editor} field="detailBlocks" label="상세 콘텐츠">
         <ProductDetailBlocks
           blocks={detailBlocks}
-          care={careGuideBody}
-          careTitle={copy.careGuide}
           description={productDetailContent.body || description || copy.detailImagesIntro}
           editor={editor}
           galleryImages={galleryImages}
           headline={productDetailContent.headline || productName}
+          legacyOverviewImage={detailImageSlots.overview}
           locale={contentLocale}
           noImageCopy={copy.noImage}
+          onLegacyOverviewImageError={handleContextImageError}
           specificationTitle={copy.specification}
           specifications={specificationItems}
         />
@@ -1401,12 +1447,13 @@ export function ProductDetailView({
         <div><p>{copy.productInfo}</p><h2>{copy.specification}</h2></div>
         <span>{copy.specificationIntro}</span>
       </div>
-      <div className="pd-spec-layout is-data-only">
+      <div className={`pd-spec-layout ${detailImageSlots.specification ? 'has-context-image' : 'is-data-only'}`}>
         <ProductEditorTarget align="end" editor={editor} field="specs" label="상세 스펙"><dl className="pd-spec-table">
             {productInfoRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
             {effectiveVisibleMoq && <div><dt>{copy.moq}</dt><dd>{effectiveVisibleMoq} pcs</dd></div>}
             {specificationRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
           </dl></ProductEditorTarget>
+        <ProductContextImage className="pd-spec-image" image={detailImageSlots.specification} onError={handleContextImageError} />
         <ProductEditorTarget align="end" editor={editor} field="care" label="사이즈 안내">
           <aside className="pd-size-note"><strong>{copy.sizeGuide}</strong><p>{sizeGuideBody}</p></aside>
         </ProductEditorTarget>
@@ -1418,7 +1465,8 @@ export function ProductDetailView({
         <div><p>{copy.productStructure}</p><h2>{copy.materialAndCare}</h2></div>
         {materialGuideBody && <span>{materialGuideBody}</span>}
       </div>
-      <div className="pd-material-care-grid">
+      <div className={`pd-material-care-grid${detailImageSlots.material ? ' has-context-image' : ''}`}>
+        <ProductContextImage className="pd-material-context-image" image={detailImageSlots.material} onError={handleContextImageError} />
         <ProductEditorTarget editor={editor} field="productInfo" label="제품 구조">
           <dl className="pd-structure-list">
             {structureRows.length > 0

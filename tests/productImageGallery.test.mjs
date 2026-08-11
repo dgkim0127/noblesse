@@ -9,6 +9,7 @@ import {
 } from '../src/utils/adminProductImageFiles.js'
 import {
   imageDraftsToPreviewSet,
+  productDetailImageSlots,
   productGalleryEntries,
 } from '../src/utils/productImageGallery.js'
 
@@ -86,6 +87,56 @@ test('legacy single image remains one centered gallery photo', () => {
   assert.equal(gallery[0].detailSrc, '/detail.webp')
   assert.deepEqual(gallery[0].position, { x: 50, y: 50 })
   assert.equal(gallery[0].scale, 1)
+})
+
+test('detail image slots distribute unique supporting photos by section', () => {
+  const images = Array.from({ length: 6 }, (_, index) => ({ id: `image-${index + 1}`, detailSrc: `/image-${index + 1}.webp` }))
+
+  const slots = productDetailImageSlots(images)
+  assert.equal(slots.overview.id, 'image-2')
+  assert.equal(slots.material.id, 'image-3')
+  assert.equal(slots.specification.id, 'image-6')
+  assert.equal(new Set(Object.values(slots).map((image) => image.id)).size, 3)
+
+  assert.deepEqual(productDetailImageSlots(images.slice(0, 3)), {
+    overview: images[1],
+    material: null,
+    specification: images[2],
+  })
+  assert.deepEqual(productDetailImageSlots(images, {
+    includeOverview: false,
+    reservedImageIds: ['image-2', 'image-4'],
+  }), {
+    overview: null,
+    material: images[2],
+    specification: images[5],
+  })
+
+  assert.deepEqual(productDetailImageSlots([
+    images[0],
+    images[1],
+    { id: 'reserved-source-alias', detailSrc: images[1].detailSrc },
+    images[2],
+  ], {
+    includeOverview: false,
+    reservedImageIds: ['image-2'],
+  }), {
+    overview: null,
+    material: null,
+    specification: images[2],
+  })
+
+  assert.deepEqual(productDetailImageSlots([
+    images[0],
+    { id: 'empty' },
+    { id: 'duplicate-primary', detailSrc: images[0].detailSrc },
+    { id: 'duplicate-source', detailSrc: images[1].detailSrc },
+    images[1],
+  ]), {
+    overview: { id: 'duplicate-source', detailSrc: images[1].detailSrc },
+    material: null,
+    specification: null,
+  })
 })
 
 test('preview image set makes the first draft primary and preserves presentation', () => {

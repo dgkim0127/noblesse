@@ -23,12 +23,22 @@ function getLocalizedDetailBlockCopy(block, locale, allowFallback = true) {
   return exact
 }
 
-function DetailImage({ image, preserveRatio = false }) {
-  if (!image) return null
+function DetailImage({ image, onError, preserveRatio = false }) {
+  const source = image?.detailSrc || image?.cardSrc
+  if (!source) return null
   const style = preserveRatio
     ? { objectFit: 'contain', objectPosition: 'center', transform: 'none' }
     : { objectFit: 'cover', ...imagePresentationStyle(image) }
-  return <img alt={image.alt || ''} loading="lazy" src={image.detailSrc || image.cardSrc} style={style} />
+  return <img
+    alt={image.alt || ''}
+    loading="lazy"
+    src={source}
+    style={style}
+    onError={(event) => {
+      event.currentTarget.closest('figure')?.setAttribute('hidden', '')
+      onError?.(image)
+    }}
+  />
 }
 
 function BlockImages({ block, copy, editor, galleryImages }) {
@@ -64,35 +74,40 @@ function DetailBlock({ block, blockCopy, editor, galleryImages, noImageCopy, spe
   return null
 }
 
-function LegacyDetailContent({ care, careTitle, description, galleryImages, headline, noImageCopy, specificationTitle, specifications }) {
-  const supportingImages = galleryImages.slice(1)
+function LegacyDetailContent({ description, headline, legacyOverviewImage, noImageCopy, onLegacyOverviewImageError }) {
   return <div className="pd-content-blocks is-legacy">
-    {(headline || description) && <header className="pd-content-heading"><h2>{headline}</h2>{description && <p>{description}</p>}</header>}
-    {supportingImages.length > 0 && <div className="pd-content-image-grid is-legacy-gallery">
-      {supportingImages.map((image) => <figure key={image.id}><DetailImage image={image} /></figure>)}
-    </div>}
-    {specifications.length > 0 && <section className="pd-content-spec"><h2>{specificationTitle}</h2><dl>{specifications.map((item) => <div key={item.key}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl></section>}
-    {care && <aside className="pd-content-notice"><strong>{careTitle}</strong><p>{care}</p></aside>}
-    {!headline && !description && !supportingImages.length && !specifications.length && <div className="pd-image-placeholder"><Images size={28} /><span>{noImageCopy}</span></div>}
+    {legacyOverviewImage
+      ? <section className="pd-content-image-text is-imageLeft is-legacy-story">
+        <figure className="pd-content-image"><DetailImage image={legacyOverviewImage} onError={onLegacyOverviewImageError} preserveRatio /></figure>
+        <div>{headline && <h2>{headline}</h2>}{description && <p>{description}</p>}</div>
+      </section>
+      : (headline || description) && <header className="pd-content-heading"><h2>{headline}</h2>{description && <p>{description}</p>}</header>}
+    {!headline && !description && !legacyOverviewImage && <div className="pd-image-placeholder"><Images size={28} /><span>{noImageCopy}</span></div>}
   </div>
 }
 
 export function ProductDetailBlocks({
   blocks,
-  care = '',
-  careTitle = 'Care guide',
   description = '',
   editor = null,
   galleryImages = [],
   headline = '',
+  legacyOverviewImage = null,
   locale = 'kr',
   noImageCopy = 'No image',
+  onLegacyOverviewImageError,
   specificationTitle = 'Specification',
   specifications = [],
 }) {
   const visibleBlocks = normalizeProductDetailBlocks(blocks).filter((block) => block.visible)
   if (!visibleBlocks.length) {
-    return <LegacyDetailContent care={care} careTitle={careTitle} description={description} galleryImages={galleryImages} headline={headline} noImageCopy={noImageCopy} specificationTitle={specificationTitle} specifications={specifications} />
+    return <LegacyDetailContent
+      description={description}
+      headline={headline}
+      legacyOverviewImage={legacyOverviewImage}
+      noImageCopy={noImageCopy}
+      onLegacyOverviewImageError={onLegacyOverviewImageError}
+    />
   }
 
   return <div className="pd-content-blocks">

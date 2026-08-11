@@ -81,6 +81,41 @@ export function productGalleryEntries(product, fallbackAlt = '') {
   })
 }
 
+export function productDetailImageSlots(images = [], { includeOverview = true, reservedImageIds = [] } = {}) {
+  const emptySlots = { overview: null, material: null, specification: null }
+  if (!Array.isArray(images) || images.length < 2) return emptySlots
+
+  const reservedIds = new Set(reservedImageIds.map(String).filter(Boolean))
+  const seenIds = new Set()
+  const seenSources = new Set()
+  const primaryId = String(images[0]?.id || '')
+  const primarySource = images[0]?.detailSrc || images[0]?.cardSrc || ''
+  if (primaryId) seenIds.add(primaryId)
+  if (primarySource) seenSources.add(primarySource)
+  images.forEach((image) => {
+    if (!reservedIds.has(String(image?.id || ''))) return
+    const source = image?.detailSrc || image?.cardSrc || ''
+    if (source) seenSources.add(source)
+  })
+  const supportingImages = images.slice(1).filter((image) => {
+    const id = String(image?.id || '')
+    const source = image?.detailSrc || image?.cardSrc || ''
+    if (!source || (id && reservedIds.has(id)) || (id && seenIds.has(id)) || seenSources.has(source)) return false
+    if (id) seenIds.add(id)
+    seenSources.add(source)
+    return true
+  })
+  if (!supportingImages.length) return emptySlots
+
+  const overview = includeOverview ? supportingImages[0] : null
+  const sectionImages = includeOverview ? supportingImages.slice(1) : supportingImages
+  return {
+    overview,
+    material: sectionImages.length >= 2 ? sectionImages[0] : null,
+    specification: sectionImages.length >= 1 ? sectionImages[sectionImages.length - 1] : null,
+  }
+}
+
 export function productToImageDrafts(product) {
   return productGalleryEntries(product).map((image, index) => ({
     id: image.id,
