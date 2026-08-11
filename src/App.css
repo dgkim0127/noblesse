@@ -15260,7 +15260,12 @@ h6 {
 }
 
 .pd-main-image {
-  min-height: clamp(620px, 48vw, 820px);
+  aspect-ratio: 1;
+  min-height: 0;
+}
+
+.pd-main-image img {
+  min-height: 0;
 }
 
 @media (min-width: 1181px) and (hover: hover) and (pointer: fine) {

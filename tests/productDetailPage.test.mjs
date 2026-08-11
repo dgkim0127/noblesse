@@ -118,6 +118,20 @@ test('product detail offers desktop mouse hover magnification without changing t
   assert.match(styles, /\.pd-image-magnifier-lens,[\s\S]*?\.pd-image-zoom-panel[\s\S]*?display: none/)
 })
 
+test('product gallery uses one square hero image with thumbnails below', () => {
+  const source = readSource('src/pages/ProductDetailPage.jsx')
+  const styles = readSource('src/App.css')
+  const adminStyles = readSource('src/styles/admin-console.css')
+
+  assert.match(source, /className="pd-gallery is-single"/)
+  assert.doesNotMatch(source, /secondaryImages|className="pd-side-images"/)
+  assert.match(source, /className="pd-thumbs"/)
+  assert.match(source, /editor\?\.selectImage\?\.\(image\.id\)/)
+  assert.match(styles, /\.pd-main-image \{[\s\S]*?aspect-ratio: 1;[\s\S]*?min-height: 0;/)
+  assert.match(styles, /\.pd-main-image img \{[\s\S]*?min-height: 0;/)
+  assert.match(adminStyles, /\.admin-product-detail-canvas\.is-desktop \.pd-main-image \{[\s\S]*?aspect-ratio: 1;[\s\S]*?min-height: 0;/)
+})
+
 test('product detail exposes piercing-specific structure without fixed promotional filler', () => {
   const source = readSource('src/pages/ProductDetailPage.jsx')
 

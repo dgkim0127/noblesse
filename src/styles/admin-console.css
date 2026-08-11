@@ -4246,12 +4246,12 @@ button:disabled,
 }
 
 .admin-product-detail-canvas.is-desktop .pd-main-image {
-  aspect-ratio: auto;
-  min-height: 720px;
+  aspect-ratio: 1;
+  min-height: 0;
 }
 
 .admin-product-detail-canvas.is-desktop .pd-main-image img {
-  min-height: inherit;
+  min-height: 0;
 }
 
 .admin-product-detail-canvas.is-desktop .pd-panel h1 {

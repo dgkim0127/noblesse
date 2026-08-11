@@ -782,7 +782,6 @@ function ProductGallery({ activeImageId = '', copy, editor, product, productAlt 
   }, [activeImageId, editor?.selectedImageId, images])
 
   const selectedImage = images.find((image) => image.id === selectedId) || images[0] || null
-  const secondaryImages = images.filter((image) => image.id !== selectedImage?.id).slice(0, 2)
   const canMagnify = Boolean(!editor && selectedImage?.zoomSrc)
   const hasSeparateZoomImage = Boolean(
     selectedImage?.zoomSrc
@@ -890,7 +889,7 @@ function ProductGallery({ activeImageId = '', copy, editor, product, productAlt 
     }
   }, [stopMagnifier])
 
-  return <section className={`pd-gallery ${secondaryImages.length > 0 ? 'has-side-images' : 'is-single'}`} aria-label={copy.gallery}>
+  return <section className="pd-gallery is-single" aria-label={copy.gallery}>
     <div className="pd-gallery-grid">
       <div className="pd-main-media">
         <figure
@@ -945,11 +944,6 @@ function ProductGallery({ activeImageId = '', copy, editor, product, productAlt 
           </div>
         </div>}
       </div>
-      {secondaryImages.length > 0 && <div className="pd-side-images" aria-hidden="true">
-        {secondaryImages.map((image) => <figure className="pd-side-image" key={`side-${image.id}`}>
-          <img src={image.cardSrc || image.detailSrc} alt="" loading="lazy" width="600" height="600" style={imagePresentationStyle(image)} onError={(event) => { event.currentTarget.hidden = true }} />
-        </figure>)}
-      </div>}
     </div>
     {images.length > 1 && <div className="pd-thumbs" role="list" aria-label={copy.thumbnail}>
       {images.map((image) => <button
