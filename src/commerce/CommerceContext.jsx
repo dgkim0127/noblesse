@@ -278,7 +278,8 @@ export function CommerceProvider({ children }) {
         const authService = await loadAuthService()
         if (!isMounted) return
 
-        if (!authService.isAuthConfigured()) {
+        if (!await authService.ensureAuthConfigured()) {
+          if (!isMounted) return
           setApiProfile(null)
           setAuthStatus('config-missing')
           setAuthError('')

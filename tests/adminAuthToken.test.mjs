@@ -12,8 +12,9 @@ function readWorkspaceFile(path) {
 test('admin auth token waits for Firebase auth hydration before failing closed', () => {
   const authService = readWorkspaceFile('src/services/authService.js')
 
-  assert.match(authService, /function waitForCurrentUser\(timeoutMs = 3000\)/)
-  assert.match(authService, /onAuthStateChanged\(auth, \(user\) =>/)
-  assert.match(authService, /if \(auth\.currentUser\) return getUserIdToken\(auth\.currentUser, forceRefresh\)/)
-  assert.match(authService, /const user = waitForAuth \? await waitForCurrentUser\(timeoutMs\) : null/)
+  assert.match(authService, /function waitForCurrentUser\(clientAuth, timeoutMs = 3000\)/)
+  assert.match(authService, /onAuthStateChanged\(clientAuth, \(user\) =>/)
+  assert.match(authService, /const clientAuth = await getFirebaseAuth\(\)/)
+  assert.match(authService, /if \(clientAuth\.currentUser\) return getUserIdToken\(clientAuth\.currentUser, forceRefresh\)/)
+  assert.match(authService, /const user = waitForAuth \? await waitForCurrentUser\(clientAuth, timeoutMs\) : null/)
 })

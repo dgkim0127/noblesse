@@ -7,20 +7,25 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth'
-import { auth, hasFirebaseConfig } from '../firebase.js'
+import { auth, getFirebaseAuth, hasFirebaseConfig } from '../firebase.js'
 import { resolveEmailForSignIn } from './loginIdentifierResolver.js'
 
-function requireAuth() {
-  if (!hasFirebaseConfig || !auth) {
+async function requireAuth() {
+  const clientAuth = auth || await getFirebaseAuth()
+  if (!clientAuth) {
     const error = new Error('Firebase client configuration is required for login.')
     error.code = 'CONFIGURATION_ERROR'
     throw error
   }
-  return auth
+  return clientAuth
 }
 
 export function isAuthConfigured() {
   return hasFirebaseConfig && Boolean(auth)
+}
+
+export async function ensureAuthConfigured() {
+  return Boolean(await getFirebaseAuth())
 }
 
 export function getCurrentAuthUser() {
@@ -28,16 +33,28 @@ export function getCurrentAuthUser() {
 }
 
 export function subscribeAuthState(onChange) {
-  if (!isAuthConfigured()) {
-    onChange(null)
-    return () => {}
-  }
+  let disposed = false
+  let unsubscribe = () => {}
 
-  return onAuthStateChanged(auth, onChange)
+  getFirebaseAuth().then((clientAuth) => {
+    if (disposed) return
+    if (!clientAuth) {
+      onChange(null)
+      return
+    }
+    unsubscribe = onAuthStateChanged(clientAuth, onChange)
+  }).catch(() => {
+    if (!disposed) onChange(null)
+  })
+
+  return () => {
+    disposed = true
+    unsubscribe()
+  }
 }
 
 export async function signInWithCredentials(identifier, password, { remember = true, apiBaseUrl = '/api' } = {}) {
-  const clientAuth = requireAuth()
+  const clientAuth = await requireAuth()
   const safePassword = String(password || '')
   const email = await resolveEmailForSignIn(identifier, {
     apiBaseUrl,
@@ -55,7 +72,7 @@ export async function signInWithCredentials(identifier, password, { remember = t
 }
 
 export async function registerWithCredentials(email, password, { remember = true } = {}) {
-  const clientAuth = requireAuth()
+  const clientAuth = await requireAuth()
   const safeEmail = String(email || '').trim()
   const safePassword = String(password || '')
 
@@ -70,8 +87,9 @@ export async function registerWithCredentials(email, password, { remember = true
 }
 
 export async function signOutCurrentUser() {
-  if (!isAuthConfigured()) return
-  await signOut(auth)
+  const clientAuth = await getFirebaseAuth()
+  if (!clientAuth) return
+  await signOut(clientAuth)
 }
 
 export async function getUserIdToken(user, forceRefresh = false) {
@@ -79,20 +97,15 @@ export async function getUserIdToken(user, forceRefresh = false) {
   return user.getIdToken(forceRefresh)
 }
 
-function waitForCurrentUser(timeoutMs = 3000) {
+function waitForCurrentUser(clientAuth, timeoutMs = 3000) {
   return new Promise((resolve) => {
-    if (!isAuthConfigured()) {
-      resolve(null)
-      return
-    }
-
     let unsubscribe = () => {}
     const timeoutId = setTimeout(() => {
       unsubscribe()
-      resolve(auth.currentUser || null)
+      resolve(clientAuth.currentUser || null)
     }, timeoutMs)
 
-    unsubscribe = onAuthStateChanged(auth, (user) => {
+    unsubscribe = onAuthStateChanged(clientAuth, (user) => {
       clearTimeout(timeoutId)
       unsubscribe()
       resolve(user)
@@ -101,8 +114,9 @@ function waitForCurrentUser(timeoutMs = 3000) {
 }
 
 export async function getCurrentUserIdToken(forceRefresh = false, { waitForAuth = true, timeoutMs = 3000 } = {}) {
-  if (!isAuthConfigured()) return ''
-  if (auth.currentUser) return getUserIdToken(auth.currentUser, forceRefresh)
-  const user = waitForAuth ? await waitForCurrentUser(timeoutMs) : null
+  const clientAuth = await getFirebaseAuth()
+  if (!clientAuth) return ''
+  if (clientAuth.currentUser) return getUserIdToken(clientAuth.currentUser, forceRefresh)
+  const user = waitForAuth ? await waitForCurrentUser(clientAuth, timeoutMs) : null
   return getUserIdToken(user, forceRefresh)
 }
