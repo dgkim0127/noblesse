@@ -12,7 +12,7 @@ function readWorkspaceFile(path) {
 test('admin account page redirects to the admin workspace', () => {
   const page = readWorkspaceFile('src/pages/AccountPage.jsx')
 
-  assert.match(page, /import \{ Link, Navigate \} from 'react-router-dom'/)
+  assert.match(page, /import \{ Link, Navigate, useNavigate \} from 'react-router-dom'/)
   assert.match(page, /if \(isAdmin\) return <Navigate replace to=\{toLocalePath\('\/admin'\)\} \/>/)
 })
 

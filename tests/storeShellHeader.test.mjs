@@ -33,7 +33,7 @@ test('logged-in header has an explicit sign-out action that returns home', () =>
 
   assert.match(shell, /import \{[^}]*LogOut[^}]*\} from 'lucide-react'/)
   assert.match(shell, /const handleHeaderSignOut = async \(\) => \{[\s\S]*await signOut\(\)[\s\S]*navigate\(toLocalePath\('\/'\)\)[\s\S]*\}/)
-  assert.match(shell, /\{!isGuest && <IconAction label=\{copy\.logout\} onClick=\{handleHeaderSignOut\}><LogOut size=\{18\} \/><\/IconAction>\}/)
+  assert.match(shell, /\{!isGuest && <IconAction className="header-logout-action" label=\{copy\.logout\} onClick=\{handleHeaderSignOut\}><LogOut size=\{18\} \/><\/IconAction>\}/)
 })
 
 test('login modal submit action keeps visible contrast in every button state', () => {
@@ -74,4 +74,14 @@ test('admin routes do not run storefront scroll-collapse behavior', () => {
   assert.match(shell, /const isAdminRoute = \/\^\\\/admin\(\?:\\\/\|\$\)\//)
   assert.match(shell, /useEffect\(\(\) => \{\s+if \(isAdminRoute\) \{[\s\S]*setIsMarqueeCollapsed\(false\)[\s\S]*setIsHeaderCompact\(false\)[\s\S]*return undefined/)
   assert.match(shell, /useEffect\(\(\) => \{\s+if \(isAdminRoute\) return undefined\s+\s*let wheelLock = false/)
+})
+
+test('mobile header disables side layout and exposes an accessible language dropdown', () => {
+  const shell = readWorkspaceFile('src/components/StoreShell.jsx')
+
+  assert.match(shell, /const isDropdown = isCompact \|\| isMobileDropdown/)
+  assert.match(shell, /aria-expanded=\{isDropdown \? isOpen : undefined\}/)
+  assert.match(shell, /const sideLayout = !isMobile && scrollY > 150/)
+  assert.match(shell, /const compact = scrollY > \(isMobile \? 160 : 520\)/)
+  assert.match(shell, /if \(window\.matchMedia\('\(max-width: 760px\)'\)\.matches\) return/)
 })

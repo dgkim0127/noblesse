@@ -662,6 +662,7 @@ const homeShowcaseControlCopy = {
     next: '다음 스냅',
     pause: '자동 슬라이드 일시정지',
     play: '자동 슬라이드 재생',
+    goTo: '번 슬라이드로 이동',
   },
   en: {
     group: 'Snap carousel controls',
@@ -669,6 +670,7 @@ const homeShowcaseControlCopy = {
     next: 'Next snap',
     pause: 'Pause automatic slides',
     play: 'Play automatic slides',
+    goTo: 'Go to slide',
   },
   jp: {
     group: 'スナップスライド操作',
@@ -676,6 +678,7 @@ const homeShowcaseControlCopy = {
     next: '次のスナップ',
     pause: '自動スライドを一時停止',
     play: '自動スライドを再生',
+    goTo: '番目のスライドへ移動',
   },
   cn: {
     group: '快照輪播控制',
@@ -683,6 +686,7 @@ const homeShowcaseControlCopy = {
     next: '下一張快照',
     pause: '暫停自動輪播',
     play: '播放自動輪播',
+    goTo: '前往投影片',
   },
 }
 
@@ -1405,6 +1409,7 @@ export function HomePage({ editorMode = false, layoutOverride = null, localeOver
   const homeRootRef = useRef(null)
   const showcaseScrollerRef = useRef(null)
   const showcaseInteractionRef = useRef(0)
+  const showcaseScrollFrameRef = useRef(0)
   const sectionNavAnchorRef = useRef(null)
   const sectionNavTriggerRef = useRef(null)
   const showcaseDragRef = useRef({
@@ -1415,6 +1420,7 @@ export function HomePage({ editorMode = false, layoutOverride = null, localeOver
   })
   const [isShowcaseDragging, setIsShowcaseDragging] = useState(false)
   const [isShowcaseAutoplayPaused, setIsShowcaseAutoplayPaused] = useState(false)
+  const [activeShowcaseIndex, setActiveShowcaseIndex] = useState(0)
   const [isSectionNavFixed, setIsSectionNavFixed] = useState(false)
   const [activeHomeSection, setActiveHomeSection] = useState(homeSectionNav[0].id)
   const { dataMode, homeLayout: commerceHomeLayout, homeShowcase, isApproved, products } = useCommerce()
@@ -1552,6 +1558,34 @@ export function HomePage({ editorMode = false, layoutOverride = null, localeOver
     return firstPanel.getBoundingClientRect().width + gap
   }, [])
 
+  const syncShowcaseIndex = useCallback(() => {
+    const scroller = showcaseScrollerRef.current
+    const step = getShowcaseStep()
+    if (!scroller || !step || showcasePanels.length === 0) return
+
+    const nextIndex = Math.min(showcasePanels.length - 1, Math.max(0, Math.round(scroller.scrollLeft / step)))
+    setActiveShowcaseIndex((current) => (current === nextIndex ? current : nextIndex))
+  }, [getShowcaseStep, showcasePanels.length])
+
+  const handleShowcaseScroll = () => {
+    window.cancelAnimationFrame(showcaseScrollFrameRef.current)
+    showcaseScrollFrameRef.current = window.requestAnimationFrame(syncShowcaseIndex)
+  }
+
+  const scrollShowcaseToIndex = useCallback((index) => {
+    const scroller = showcaseScrollerRef.current
+    const step = getShowcaseStep()
+    if (!scroller || !step) return
+
+    const safeIndex = Math.min(showcasePanels.length - 1, Math.max(0, index))
+    showcaseInteractionRef.current = Date.now()
+    setActiveShowcaseIndex(safeIndex)
+    scroller.scrollTo({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      left: safeIndex * step,
+    })
+  }, [getShowcaseStep, showcasePanels.length])
+
   const scrollShowcase = useCallback((direction) => {
     const scroller = showcaseScrollerRef.current
     const step = getShowcaseStep()
@@ -1616,6 +1650,14 @@ export function HomePage({ editorMode = false, layoutOverride = null, localeOver
       document.removeEventListener('visibilitychange', markInteraction)
     }
   }, [editorMode, isShowcaseAutoplayPaused, scrollShowcase])
+
+  useEffect(() => {
+    if (activeShowcaseIndex < showcasePanels.length) return
+    setActiveShowcaseIndex(0)
+    showcaseScrollerRef.current?.scrollTo({ left: 0 })
+  }, [activeShowcaseIndex, showcasePanels.length])
+
+  useEffect(() => () => window.cancelAnimationFrame(showcaseScrollFrameRef.current), [])
 
   useEffect(() => {
     if (!activeHomeSectionNav.some((item) => item.id === activeHomeSection)) {
@@ -1788,6 +1830,7 @@ export function HomePage({ editorMode = false, layoutOverride = null, localeOver
     const step = getShowcaseStep()
     if (scroller && step) {
       scroller.scrollLeft = Math.round(scroller.scrollLeft / step) * step
+      syncShowcaseIndex()
     }
   }
 
@@ -1850,6 +1893,7 @@ export function HomePage({ editorMode = false, layoutOverride = null, localeOver
             onPointerLeave={handleShowcasePointerEnd}
             onPointerMove={handleShowcasePointerMove}
             onPointerUp={handleShowcasePointerEnd}
+            onScroll={handleShowcaseScroll}
             ref={showcaseScrollerRef}
           >
             <div className="home-showcase-track">
@@ -1866,7 +1910,7 @@ export function HomePage({ editorMode = false, layoutOverride = null, localeOver
                   fetchPriority={index === 0 ? 'high' : 'auto'}
                   height="1200"
                   loading={index === 0 ? 'eager' : 'lazy'}
-                  sizes="(max-width: 760px) min(76vw, 310px), (max-width: 1180px) calc((100vw - 20px) / 3), min(25vw, 520px)"
+                  sizes="(max-width: 760px) calc(100vw - 24px), (max-width: 1180px) calc((100vw - 20px) / 3), min(25vw, 520px)"
                   src={banner.imageSet?.card || banner.image}
                   srcSet={banner.imageSet?.card && banner.imageSet?.detail ? `${banner.imageSet.card} 600w, ${banner.imageSet.detail} 1200w` : undefined}
                   style={{ objectPosition: `${banner.imagePosition?.x ?? 50}% ${banner.imagePosition?.y ?? 50}%` }}
@@ -1882,6 +1926,16 @@ export function HomePage({ editorMode = false, layoutOverride = null, localeOver
             })}
             </div>
           </div>
+          {!editorMode && showcasePanels.length > 1 ? <div className="home-showcase-dots" aria-label={showcaseControlCopy.group}>
+            {showcasePanels.map((banner, index) => <button
+              aria-current={activeShowcaseIndex === index ? 'true' : undefined}
+              aria-label={['kr', 'jp'].includes(locale) ? `${index + 1}${showcaseControlCopy.goTo}` : `${showcaseControlCopy.goTo} ${index + 1}`}
+              className={activeShowcaseIndex === index ? 'is-active' : undefined}
+              key={banner.key}
+              onClick={() => scrollShowcaseToIndex(index)}
+              type="button"
+            />)}
+          </div> : null}
           {!editorMode ? <div className="home-showcase-controls" aria-label={showcaseControlCopy.group}>
             <button aria-label={showcaseControlCopy.previous} className="home-showcase-control home-showcase-control--previous" onClick={() => handleShowcaseControl(-1)} type="button"><ChevronLeft aria-hidden="true" /></button>
             <button aria-label={isShowcaseAutoplayPaused ? showcaseControlCopy.play : showcaseControlCopy.pause} className="home-showcase-control home-showcase-control--autoplay" onClick={handleShowcaseAutoplayToggle} type="button">{isShowcaseAutoplayPaused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}</button>

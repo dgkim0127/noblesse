@@ -1,0 +1,572 @@
+/* Storefront-only mobile overrides. Keep this file after legacy and typography styles. */
+
+.account-mobile-logout {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .site-shell:not(.admin-route-shell) {
+    overflow-x: clip;
+  }
+
+  .site-shell:not(.admin-route-shell) > .top-marquee {
+    display: none !important;
+    height: 0 !important;
+    max-height: 0 !important;
+  }
+
+  .site-shell:not(.admin-route-shell) > .site-header,
+  .site-shell:not(.admin-route-shell).home-image-shell:not(.has-compact-header) > .site-header,
+  .site-shell:not(.admin-route-shell).home-image-shell.has-side-layout:not(.has-compact-header) > .site-header {
+    position: sticky !important;
+    inset: 0 0 auto !important;
+    z-index: 20 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    background: rgb(255 253 249 / 97%) !important;
+    border-bottom: 1px solid rgb(42 35 79 / 9%) !important;
+    backdrop-filter: blur(14px);
+  }
+
+  .site-shell:not(.admin-route-shell) .header-main,
+  .site-shell:not(.admin-route-shell).home-image-shell:not(.has-compact-header) .header-main,
+  .site-shell:not(.admin-route-shell).home-image-shell.has-side-layout:not(.has-compact-header) .header-main,
+  .site-shell:not(.admin-route-shell).product-list-shell .header-main {
+    display: grid !important;
+    grid-template-columns: minmax(82px, 1fr) auto !important;
+    grid-template-rows: 44px 48px !important;
+    align-items: center !important;
+    align-content: center !important;
+    gap: 8px 6px !important;
+    width: calc(100% - 24px) !important;
+    height: auto !important;
+    min-height: 108px !important;
+    margin: 0 auto !important;
+    padding: 8px 0 !important;
+    transform: none !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .brand,
+  .site-shell:not(.admin-route-shell).home-image-shell:not(.has-compact-header) .brand,
+  .site-shell:not(.admin-route-shell).home-image-shell.has-side-layout:not(.has-compact-header) .brand,
+  .site-shell:not(.admin-route-shell).product-list-shell .brand {
+    position: static !important;
+    inset: auto !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-self: start !important;
+    gap: 5px !important;
+    width: auto !important;
+    max-width: 112px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .brand-logo {
+    flex: 0 0 38px !important;
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .brand .brand-name-window {
+    display: block !important;
+    width: auto !important;
+    max-width: 66px !important;
+    min-width: 0 !important;
+    min-height: 28px !important;
+    overflow: hidden !important;
+    font-size: clamp(18px, 5.6vw, 23px) !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .compact-brand-title,
+  .site-shell:not(.admin-route-shell) .header-lower {
+    display: none !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .header-actions,
+  .site-shell:not(.admin-route-shell).home-image-shell:not(.has-compact-header) .header-actions,
+  .site-shell:not(.admin-route-shell).home-image-shell.has-side-layout:not(.has-compact-header) .header-actions,
+  .site-shell:not(.admin-route-shell).product-list-shell .header-actions {
+    position: static !important;
+    inset: auto !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 2px !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    transform: none !important;
+    white-space: nowrap !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .header-actions .icon-action,
+  .site-shell:not(.admin-route-shell) .header-actions a.icon-action,
+  .site-shell:not(.admin-route-shell) .header-actions button.icon-action {
+    position: relative !important;
+    flex: 0 0 36px !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    font-size: 0 !important;
+    line-height: 1 !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .header-actions .icon-action svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+  }
+
+  .site-shell:not(.admin-route-shell) .header-my-label,
+  .site-shell:not(.admin-route-shell) .header-actions button.header-guest-my-action,
+  .site-shell:not(.admin-route-shell) .header-actions button.header-logout-action {
+    display: none !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .header-actions button.compact-search-action {
+    display: none !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .top-search,
+  .site-shell:not(.admin-route-shell).home-image-shell:not(.has-compact-header) .top-search,
+  .site-shell:not(.admin-route-shell).home-image-shell.has-side-layout:not(.has-compact-header) .top-search,
+  .site-shell:not(.admin-route-shell).product-list-shell .top-search {
+    position: static !important;
+    inset: auto !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .header-search {
+    width: 100% !important;
+    min-height: 44px !important;
+    padding: 8px 10px 8px 14px !important;
+    border: 1px solid rgb(42 35 79 / 14%) !important;
+    border-radius: 13px !important;
+    background: #fff !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .header-search input {
+    min-width: 0 !important;
+    font-size: 16px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .language-switch,
+  .site-shell:not(.admin-route-shell) .language-switch.compact,
+  .site-shell:not(.admin-route-shell) .site-header .language-switch.is-dropdown {
+    --language-button-width: 38px !important;
+    position: relative !important;
+    flex: 0 0 38px !important;
+    display: block !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    height: 38px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 19px !important;
+    overflow: visible !important;
+    background: #fff8f8 !important;
+    box-shadow: inset 0 0 0 1px rgb(255 143 169 / 24%) !important;
+    transform: none !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .language-switch-indicator {
+    display: none !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .language-dropdown-trigger,
+  .site-shell:not(.admin-route-shell) .language-switch.is-dropdown .language-dropdown-trigger {
+    position: relative !important;
+    z-index: 2 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 19px !important;
+    background: transparent !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .language-switch > a,
+  .site-shell:not(.admin-route-shell) .language-switch.is-dropdown > a {
+    position: absolute !important;
+    right: 0 !important;
+    top: 38px !important;
+    z-index: 40 !important;
+    display: grid !important;
+    place-items: center !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 !important;
+    border: 1px solid rgb(42 35 79 / 12%) !important;
+    border-radius: 10px !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    background: #fff !important;
+    box-shadow: 0 9px 24px rgb(42 35 79 / 12%) !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .language-switch.is-open > a,
+  .site-shell:not(.admin-route-shell) .language-switch:focus-within > a {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .language-switch > a:nth-of-type(1) { transform: translateY(4px) !important; }
+  .site-shell:not(.admin-route-shell) .language-switch > a:nth-of-type(2) { transform: translateY(46px) !important; }
+  .site-shell:not(.admin-route-shell) .language-switch > a:nth-of-type(3) { transform: translateY(88px) !important; }
+  .site-shell:not(.admin-route-shell) .language-switch > a:nth-of-type(4) { transform: translateY(130px) !important; }
+
+  .site-shell:not(.admin-route-shell).has-compact-header > .site-header,
+  .site-shell:not(.admin-route-shell) > .site-header.is-compact {
+    position: fixed !important;
+    inset: 0 0 auto !important;
+    height: 56px !important;
+    min-height: 56px !important;
+  }
+
+  .site-shell:not(.admin-route-shell).has-compact-header {
+    padding-top: 116px !important;
+  }
+
+  .site-shell:not(.admin-route-shell).has-compact-header .header-main,
+  .site-shell:not(.admin-route-shell) > .site-header.is-compact .header-main,
+  .site-shell:not(.admin-route-shell).home-image-shell.has-compact-header .header-main,
+  .site-shell:not(.admin-route-shell).product-list-shell.has-compact-header .header-main {
+    grid-template-columns: 40px minmax(0, 1fr) !important;
+    grid-template-rows: 48px !important;
+    gap: 4px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    padding: 4px 0 !important;
+  }
+
+  .site-shell:not(.admin-route-shell).has-compact-header .brand,
+  .site-shell:not(.admin-route-shell) > .site-header.is-compact .brand,
+  .site-shell:not(.admin-route-shell).home-image-shell.has-compact-header .site-header .brand,
+  .site-shell:not(.admin-route-shell).product-list-shell.has-compact-header .site-header .brand {
+    grid-column: 1 !important;
+    display: inline-flex !important;
+    width: 40px !important;
+    max-width: 40px !important;
+  }
+
+  .site-shell:not(.admin-route-shell).has-compact-header .brand-logo,
+  .site-shell:not(.admin-route-shell) > .site-header.is-compact .brand-logo {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .site-shell:not(.admin-route-shell).has-compact-header .brand .brand-name-window,
+  .site-shell:not(.admin-route-shell) > .site-header.is-compact .brand .brand-name-window,
+  .site-shell:not(.admin-route-shell).has-compact-header .top-search,
+  .site-shell:not(.admin-route-shell) > .site-header.is-compact .top-search {
+    display: none !important;
+  }
+
+  .site-shell:not(.admin-route-shell).has-compact-header .header-actions,
+  .site-shell:not(.admin-route-shell) > .site-header.is-compact .header-actions,
+  .site-shell:not(.admin-route-shell).home-image-shell.has-compact-header .header-actions,
+  .site-shell:not(.admin-route-shell).product-list-shell.has-compact-header .header-actions {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+
+  .site-shell:not(.admin-route-shell).has-compact-header .header-actions button.compact-search-action,
+  .site-shell:not(.admin-route-shell) > .site-header.is-compact .header-actions button.compact-search-action {
+    display: inline-grid !important;
+  }
+
+  .site-shell:not(.admin-route-shell).has-compact-header .header-side-icon,
+  .site-shell:not(.admin-route-shell) > .site-header.is-compact .header-side-icon {
+    display: none !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .compact-search-panel {
+    top: 56px !important;
+    right: 12px !important;
+    left: 12px !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  .home-showcase-stage {
+    position: relative;
+    width: 100%;
+  }
+
+  .home-showcase-section {
+    --showcase-reference-card: calc(100vw - 24px) !important;
+    --showcase-reference-gap: 12px !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .home-showcase-grid {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    box-sizing: border-box !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-padding-inline: 12px !important;
+    scroll-snap-type: x mandatory !important;
+    scrollbar-width: none !important;
+    touch-action: pan-x pan-y !important;
+  }
+
+  .home-showcase-grid::-webkit-scrollbar,
+  .home-showcase-categories::-webkit-scrollbar,
+  .home-section-nav::-webkit-scrollbar,
+  .home-section-nav-fixed::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .home-showcase-track {
+    display: flex !important;
+    width: max-content !important;
+    gap: 12px !important;
+  }
+
+  .home-showcase-panel {
+    flex: 0 0 calc(100vw - 24px) !important;
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    aspect-ratio: 4 / 5 !important;
+    scroll-snap-align: start !important;
+    scroll-snap-stop: always !important;
+  }
+
+  .home-showcase-controls {
+    top: 14px !important;
+    right: 20px !important;
+    left: auto !important;
+  }
+
+  .home-showcase-control--previous,
+  .home-showcase-control--next {
+    display: none !important;
+  }
+
+  .home-showcase-control--autoplay {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
+  }
+
+  .home-showcase-dots {
+    position: absolute;
+    right: 0;
+    bottom: 12px;
+    left: 0;
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    pointer-events: none;
+  }
+
+  .home-showcase-dots button {
+    position: relative;
+    width: 28px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    pointer-events: auto;
+  }
+
+  .home-showcase-dots button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 62%);
+    box-shadow: 0 0 0 1px rgb(42 35 79 / 20%);
+    transform: translate(-50%, -50%);
+    transition: width 160ms ease, background 160ms ease;
+  }
+
+  .home-showcase-dots button.is-active::before {
+    width: 18px;
+    background: #fff;
+  }
+
+  .home-showcase-categories {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    margin: 8px 0 0 !important;
+    padding: 4px 12px 8px !important;
+    box-sizing: border-box !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    scroll-padding-inline: 12px !important;
+    scroll-snap-type: x proximity !important;
+    scrollbar-width: none !important;
+  }
+
+  .home-showcase-categories a {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: max-content !important;
+    min-height: 44px !important;
+    padding: 0 14px !important;
+    scroll-snap-align: start !important;
+  }
+
+  .home-section-nav,
+  .home-section-nav-fixed {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    box-sizing: border-box !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    scroll-padding-inline: 12px !important;
+    scroll-snap-type: x proximity !important;
+    scrollbar-width: none !important;
+  }
+
+  .home-section-nav-fixed {
+    inset: 56px 0 auto !important;
+    min-height: 48px !important;
+    transform: none !important;
+  }
+
+  .home-section-nav button,
+  .home-section-nav-fixed button {
+    flex: 0 0 auto !important;
+    min-width: max-content !important;
+    min-height: 44px !important;
+    padding: 0 13px !important;
+    scroll-snap-align: start !important;
+    white-space: nowrap !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .content,
+  .site-shell:not(.admin-route-shell) .section-wrap,
+  .site-shell:not(.admin-route-shell) .preview-bar,
+  .site-shell:not(.admin-route-shell) .site-footer {
+    width: calc(100% - 24px) !important;
+    max-width: calc(100% - 24px) !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+  }
+
+  .account-mobile-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 46px;
+    margin-top: 8px;
+    border: 1px solid rgb(42 35 79 / 18%);
+    border-radius: 12px;
+    color: var(--noblesse-sub);
+    background: #fff;
+    font: inherit;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 360px) {
+  .site-shell:not(.admin-route-shell) .header-main {
+    grid-template-columns: minmax(74px, 1fr) auto !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .brand-logo {
+    flex-basis: 34px !important;
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .brand .brand-name-window {
+    max-width: 52px !important;
+    font-size: 18px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .header-actions .icon-action,
+  .site-shell:not(.admin-route-shell) .header-actions a.icon-action,
+  .site-shell:not(.admin-route-shell) .header-actions button.icon-action {
+    flex-basis: 34px !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .language-switch,
+  .site-shell:not(.admin-route-shell) .language-switch.compact,
+  .site-shell:not(.admin-route-shell) .site-header .language-switch.is-dropdown,
+  .site-shell:not(.admin-route-shell) .language-dropdown-trigger,
+  .site-shell:not(.admin-route-shell) .language-switch.is-dropdown .language-dropdown-trigger {
+    --language-button-width: 36px !important;
+    flex-basis: 36px !important;
+    width: 36px !important;
+    min-width: 36px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 760px) {
+  .home-showcase-grid {
+    scroll-behavior: auto !important;
+  }
+
+  .home-showcase-dots button::before {
+    transition: none;
+  }
+}

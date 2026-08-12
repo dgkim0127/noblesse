@@ -403,11 +403,25 @@ function AnimatedSearchPlaceholder({ text }) {
 
 function LanguageSwitch({ countryLabels, isCompact = false, languageSwitch, locale, toLanguagePath }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isMobileDropdown, setIsMobileDropdown] = useState(false)
   const activeIndex = supportedLocales.indexOf(locale)
   const activeCountry = countryLabels[locale] ?? locale
-  const switchClassName = `language-switch compact ${isCompact ? 'is-dropdown' : ''} ${isOpen ? 'is-open' : ''}`.trim()
+  const isDropdown = isCompact || isMobileDropdown
+  const switchClassName = `language-switch compact ${isDropdown ? 'is-dropdown' : ''} ${isOpen ? 'is-open' : ''}`.trim()
 
   const closeMenu = () => setIsOpen(false)
+
+  useEffect(() => {
+    const mobileQuery = window.matchMedia('(max-width: 760px)')
+    const syncMobileDropdown = () => {
+      setIsMobileDropdown(mobileQuery.matches)
+      if (!mobileQuery.matches && !isCompact) setIsOpen(false)
+    }
+
+    syncMobileDropdown()
+    mobileQuery.addEventListener?.('change', syncMobileDropdown)
+    return () => mobileQuery.removeEventListener?.('change', syncMobileDropdown)
+  }, [isCompact])
 
   return <div
     className={switchClassName}
@@ -420,7 +434,7 @@ function LanguageSwitch({ countryLabels, isCompact = false, languageSwitch, loca
     <button
       className="language-dropdown-trigger"
       type="button"
-      aria-expanded={isCompact ? isOpen : undefined}
+      aria-expanded={isDropdown ? isOpen : undefined}
       aria-label={`${languageSwitch}: ${activeCountry}`}
       onClick={() => setIsOpen((current) => !current)}
     >
@@ -540,11 +554,13 @@ export function StoreShell() {
       return undefined
     }
 
+    const mobileQuery = window.matchMedia('(max-width: 760px)')
     const handleScroll = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop || 0
-      const marqueeCollapsed = scrollY > 24
-      const sideLayout = scrollY > 150
-      const compact = scrollY > 520
+      const isMobile = mobileQuery.matches
+      const marqueeCollapsed = isMobile || scrollY > 24
+      const sideLayout = !isMobile && scrollY > 150
+      const compact = scrollY > (isMobile ? 160 : 520)
       setIsMarqueeCollapsed(marqueeCollapsed)
       setIsSideLayout(sideLayout)
       setIsHeaderCompact(compact)
@@ -555,6 +571,7 @@ export function StoreShell() {
     handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
     document.addEventListener('scroll', handleScroll, { passive: true })
+    mobileQuery.addEventListener?.('change', handleScroll)
     let animationFrame = 0
     const interval = window.setInterval(handleScroll, 120)
 
@@ -568,6 +585,7 @@ export function StoreShell() {
     return () => {
       window.removeEventListener('scroll', handleScroll)
       document.removeEventListener('scroll', handleScroll)
+      mobileQuery.removeEventListener?.('change', handleScroll)
       window.cancelAnimationFrame(animationFrame)
       window.clearInterval(interval)
       document.documentElement.classList.remove('noblesse-marquee-collapsed')
@@ -582,6 +600,7 @@ export function StoreShell() {
     let wheelLock = false
 
     const handleFirstWheel = (event) => {
+      if (window.matchMedia('(max-width: 760px)').matches) return
       if (window.scrollY > 2 || Math.abs(event.deltaY) < 8 || wheelLock) return
 
       const marqueeHeight = document.querySelector('.top-marquee')?.getBoundingClientRect().height || 30
@@ -872,19 +891,19 @@ export function StoreShell() {
           </div>}
         </div>
 
-        <nav className="header-actions" aria-label={copy.memberNav}>
+        <nav className={`header-actions ${isGuest ? 'is-guest' : ''} ${isApproved ? 'is-approved' : ''}`.trim()} aria-label={copy.memberNav}>
           {usesHomeStyleHeader && <>
             {isGuest
               ? <>
                 <IconAction className="header-login-icon-action" label={copy.login} onClick={openLoginModal}><UserRound size={17} /></IconAction>
                 <IconAction className="header-side-icon" label={sideCopy.myInquiries} onClick={openLoginRequiredModal}><Clock3 size={17} /></IconAction>
-                <IconAction className="header-my-action" label={copy.account} onClick={openLoginRequiredModal}>{sideCopy.my}</IconAction>
+                <IconAction className="header-my-action header-guest-my-action" label={copy.account} onClick={openLoginRequiredModal}><UserRound size={17} /><span className="header-my-label">{sideCopy.my}</span></IconAction>
               </>
               : <>
                 {isAdmin && <IconAction className="header-side-icon" label={copy.adminPreview} to={toLocalePath('/admin')}><ShieldCheck size={17} /></IconAction>}
                 {isApproved && <InquiryListHeaderAction count={inquiryListCount} label={sideCopy.inquiryList} size={17} to={toLocalePath(inquiryListPath)} />}
                 <IconAction className="header-side-icon" label={sideCopy.myInquiries} to={toLocalePath(myInquiriesPath)}><Clock3 size={17} /></IconAction>
-                <IconAction className="header-my-action" label={copy.account} to={toLocalePath('/account')}>{sideCopy.my}</IconAction>
+                <IconAction className="header-my-action" label={copy.account} to={toLocalePath('/account')}><UserRound size={17} /><span className="header-my-label">{sideCopy.my}</span></IconAction>
               </>}
           </>}
           {isGuest && !usesHomeStyleHeader && <IconAction label={copy.login} onClick={openLoginModal}><UserRound size={18} /></IconAction>}
@@ -902,7 +921,7 @@ export function StoreShell() {
             <IconAction label={sideCopy.myInquiries} to={toLocalePath(myInquiriesPath)}><Clock3 size={18} /></IconAction>
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}
-          {!isGuest && <IconAction label={copy.logout} onClick={handleHeaderSignOut}><LogOut size={18} /></IconAction>}
+          {!isGuest && <IconAction className="header-logout-action" label={copy.logout} onClick={handleHeaderSignOut}><LogOut size={18} /></IconAction>}
           <button className={`icon-action compact-search-action ${isCompactSearchOpen ? 'active' : ''}`} type="button" aria-label={copy.search} onClick={toggleCompactSearch}><Search size={18} /></button>
           <LanguageSwitch countryLabels={copy.countryLabels} isCompact={isHeaderCompact} languageSwitch={copy.languageSwitch} locale={locale} toLanguagePath={toLanguagePath} />
         </nav>

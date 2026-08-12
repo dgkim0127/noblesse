@@ -1,6 +1,6 @@
-import { Clock3, UserRound } from 'lucide-react'
+import { Clock3, LogOut, UserRound } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { CatalogCard } from '../components/CatalogCard'
 import { useCommerce } from '../commerce/commerceStore'
 import { useLocalePath } from '../utils/locale'
@@ -23,6 +23,7 @@ const accountCopy = {
     guestBody: '상품을 살펴보고 마음에 든 제품을 어느 기기에서든 다시 찾아보세요.',
     login: '로그인',
     register: '회원가입',
+    logout: '로그아웃',
     restrictedTitle: '계정 이용 상태를 확인해주세요.',
     restrictedBody: '현재 계정에서는 최근 본 상품을 저장할 수 없습니다. 담당자 확인 후 다시 이용해주세요.',
   },
@@ -43,6 +44,7 @@ const accountCopy = {
     guestBody: 'Browse the catalog and return to products you liked from any device.',
     login: 'Sign in',
     register: 'Sign up',
+    logout: 'Sign out',
     restrictedTitle: 'Please check your account access.',
     restrictedBody: 'Recently viewed products cannot be saved for this account. Contact Noblesse for assistance.',
   },
@@ -63,6 +65,7 @@ const accountCopy = {
     guestBody: 'カタログを閲覧し、気になった商品をどの端末からでも再確認できます。',
     login: 'ログイン',
     register: '会員登録',
+    logout: 'ログアウト',
     restrictedTitle: 'アカウントの利用状態をご確認ください。',
     restrictedBody: '現在のアカウントでは最近見た商品を保存できません。担当者にお問い合わせください。',
   },
@@ -83,6 +86,7 @@ const accountCopy = {
     guestBody: '瀏覽商品後，可在任何裝置上再次找到感興趣的款式。',
     login: '登入',
     register: '註冊',
+    logout: '登出',
     restrictedTitle: '請確認帳號使用狀態。',
     restrictedBody: '目前帳號無法儲存最近瀏覽商品，請聯絡 Noblesse 協助確認。',
   },
@@ -100,6 +104,7 @@ function sortNewProducts(products) {
 }
 
 export function AccountPage() {
+  const navigate = useNavigate()
   const {
     dataError,
     dataStatus,
@@ -109,6 +114,7 @@ export function AccountPage() {
     products,
     recentProductViews,
     refreshRecentProducts,
+    signOut,
   } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const copy = accountCopy[locale] || accountCopy.en
@@ -152,6 +158,11 @@ export function AccountPage() {
   const displayedProducts = hasRecentProducts ? recentProducts : newProducts
   const canShowProducts = dataStatus !== 'loading' && recentStatus !== 'loading'
   const showRecentHeading = hasRecentProducts || recentStatus === 'idle' || recentStatus === 'loading'
+
+  const handleSignOut = async () => {
+    await signOut()
+    navigate(toLocalePath('/'))
+  }
 
   if (isAdmin) return <Navigate replace to={toLocalePath('/admin')} />
 
@@ -198,5 +209,10 @@ export function AccountPage() {
           <Link className="secondary-action" to={toLocalePath('/products')}>{copy.viewAll}</Link>
         </div> : null}
     </section> : null}
+
+    {!isGuest ? <button className="account-mobile-logout" type="button" onClick={handleSignOut}>
+      <LogOut aria-hidden="true" size={18} />
+      {copy.logout}
+    </button> : null}
   </main>
 }
