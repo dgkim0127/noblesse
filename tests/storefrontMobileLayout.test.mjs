@@ -41,7 +41,13 @@ test('mobile showcase renders one 4 by 5 card with synchronized dots', () => {
 
 test('mobile tabs meet touch sizing and account owns the sign-out action', () => {
   assert.match(mobile, /\.home-showcase-categories a \{[\s\S]*min-height: 44px !important/)
+  assert.match(mobile, /width: calc\(\(100vw - 32px\) \/ 2\) !important/)
   assert.match(mobile, /\.home-section-nav button,[\s\S]*min-height: 44px !important/)
   assert.match(account, /className="account-mobile-logout"/)
   assert.match(account, /await signOut\(\)[\s\S]*navigate\(toLocalePath\('\/'\)\)/)
+})
+
+test('mobile language flag stays centered with a corner dropdown cue', () => {
+  assert.match(mobile, /\.language-dropdown-trigger \.flag-icon \{[\s\S]*left: 50% !important;[\s\S]*translate\(-50%, -50%\)/)
+  assert.match(mobile, /\.language-dropdown-trigger svg \{[\s\S]*right: 1px !important;[\s\S]*bottom: 3px !important/)
 })
