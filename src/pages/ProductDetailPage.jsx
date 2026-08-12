@@ -1245,16 +1245,19 @@ export function ProductDetailView({
   const detailBlocks = Array.isArray(product.detailContent?.blocks) ? product.detailContent.blocks : []
   const visibleDetailBlocks = detailBlocks.filter((block) => block?.visible !== false)
   const reservedDetailImageIds = visibleDetailBlocks.flatMap((block) => Array.isArray(block?.imageIds) ? block.imageIds : [])
+  const hasMaterialAndCare = structureRows.length > 0 || materialGuideBody || wearingGuideBody || careGuideBody || editor
   const assignedDetailImageSlots = productDetailImageSlots(galleryImages, {
     includeOverview: visibleDetailBlocks.length === 0,
+    includeMaterial: hasMaterialAndCare,
     reservedImageIds: reservedDetailImageIds,
   })
   const detailImageSlots = Object.fromEntries(Object.entries(assignedDetailImageSlots).map(([slot, image]) => [
     slot,
-    image && !failedContextImageKeys.includes(productContextImageKey(image)) ? image : null,
+    Array.isArray(image)
+      ? image.filter((item) => !failedContextImageKeys.includes(productContextImageKey(item)))
+      : image && !failedContextImageKeys.includes(productContextImageKey(image)) ? image : null,
   ]))
   const hasDetailStory = detailBlocks.length > 0 || galleryImages.length > 1 || productDetailContent.headline || productDetailContent.body || editor
-  const hasMaterialAndCare = structureRows.length > 0 || materialGuideBody || wearingGuideBody || careGuideBody || editor
 
   const addSelectedItem = () => {
     if (editor || missingRequiredOptions.length > 0) return
@@ -1427,6 +1430,7 @@ export function ProductDetailView({
     {hasDetailStory && <section className="pd-editorial pd-detail-story" data-section="01" id="pd-overview">
       <ProductEditorTarget editor={editor} field="detailBlocks" label="상세 콘텐츠">
         <ProductDetailBlocks
+          additionalImages={detailImageSlots.additional}
           blocks={detailBlocks}
           description={productDetailContent.body || description || copy.detailImagesIntro}
           editor={editor}

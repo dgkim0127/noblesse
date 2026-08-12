@@ -142,14 +142,18 @@ test('legacy product photos are distributed beside overview, specification, and 
   assert.match(source, /reservedImageIds: reservedDetailImageIds/)
   assert.match(source, /failedContextImageKeys/)
   assert.match(source, /legacyOverviewImage=\{detailImageSlots\.overview\}/)
+  assert.match(source, /additionalImages=\{detailImageSlots\.additional\}/)
   assert.match(source, /onLegacyOverviewImageError=\{handleContextImageError\}/)
   assert.match(source, /className="pd-spec-image" image=\{detailImageSlots\.specification\}/)
   assert.match(source, /className="pd-material-context-image" image=\{detailImageSlots\.material\}/)
   assert.match(blocks, /is-imageLeft is-legacy-story/)
+  assert.match(blocks, /function AdaptiveDetailGallery/)
+  assert.match(blocks, /pd-story-gallery/)
   assert.doesNotMatch(blocks, /is-legacy-gallery|galleryImages\.slice\(1\)/)
   assert.match(styles, /\.pd-spec-layout\.has-context-image/)
   assert.match(styles, /\.pd-material-care-grid\.has-context-image/)
   assert.match(adminStyles, /\.admin-product-detail-canvas\.is-mobile \.pd-content-image-text/)
+  assert.match(adminStyles, /\.admin-product-detail-canvas\.is-mobile \.pd-story-gallery/)
 })
 
 test('product detail uses premium section framing without changing the B2B flow', () => {

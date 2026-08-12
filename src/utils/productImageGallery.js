@@ -81,8 +81,12 @@ export function productGalleryEntries(product, fallbackAlt = '') {
   })
 }
 
-export function productDetailImageSlots(images = [], { includeOverview = true, reservedImageIds = [] } = {}) {
-  const emptySlots = { overview: null, material: null, specification: null }
+export function productDetailImageSlots(images = [], {
+  includeOverview = true,
+  includeMaterial = true,
+  reservedImageIds = [],
+} = {}) {
+  const emptySlots = { overview: null, material: null, specification: null, additional: [] }
   if (!Array.isArray(images) || images.length < 2) return emptySlots
 
   const reservedIds = new Set(reservedImageIds.map(String).filter(Boolean))
@@ -109,10 +113,15 @@ export function productDetailImageSlots(images = [], { includeOverview = true, r
 
   const overview = includeOverview ? supportingImages[0] : null
   const sectionImages = includeOverview ? supportingImages.slice(1) : supportingImages
+  const material = includeMaterial && sectionImages.length >= 2 ? sectionImages[0] : null
+  const specification = sectionImages.length >= 1 ? sectionImages[sectionImages.length - 1] : null
+  const additionalStart = material ? 1 : 0
+  const additionalEnd = specification ? sectionImages.length - 1 : sectionImages.length
   return {
     overview,
-    material: sectionImages.length >= 2 ? sectionImages[0] : null,
-    specification: sectionImages.length >= 1 ? sectionImages[sectionImages.length - 1] : null,
+    material,
+    specification,
+    additional: sectionImages.slice(additionalStart, additionalEnd),
   }
 }
 

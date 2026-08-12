@@ -96,12 +96,14 @@ test('detail image slots distribute unique supporting photos by section', () => 
   assert.equal(slots.overview.id, 'image-2')
   assert.equal(slots.material.id, 'image-3')
   assert.equal(slots.specification.id, 'image-6')
-  assert.equal(new Set(Object.values(slots).map((image) => image.id)).size, 3)
+  assert.deepEqual(slots.additional.map((image) => image.id), ['image-4', 'image-5'])
+  assert.equal(new Set([slots.overview, slots.material, slots.specification, ...slots.additional].map((image) => image.id)).size, 5)
 
   assert.deepEqual(productDetailImageSlots(images.slice(0, 3)), {
     overview: images[1],
     material: null,
     specification: images[2],
+    additional: [],
   })
   assert.deepEqual(productDetailImageSlots(images, {
     includeOverview: false,
@@ -110,6 +112,16 @@ test('detail image slots distribute unique supporting photos by section', () => 
     overview: null,
     material: images[2],
     specification: images[5],
+    additional: [images[4]],
+  })
+
+  assert.deepEqual(productDetailImageSlots(images.slice(0, 5), {
+    includeMaterial: false,
+  }), {
+    overview: images[1],
+    material: null,
+    specification: images[4],
+    additional: [images[2], images[3]],
   })
 
   assert.deepEqual(productDetailImageSlots([
@@ -124,6 +136,7 @@ test('detail image slots distribute unique supporting photos by section', () => 
     overview: null,
     material: null,
     specification: images[2],
+    additional: [],
   })
 
   assert.deepEqual(productDetailImageSlots([
@@ -136,6 +149,7 @@ test('detail image slots distribute unique supporting photos by section', () => 
     overview: { id: 'duplicate-source', detailSrc: images[1].detailSrc },
     material: null,
     specification: null,
+    additional: [],
   })
 })
 

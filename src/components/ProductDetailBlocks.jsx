@@ -41,6 +41,16 @@ function DetailImage({ image, onError, preserveRatio = false }) {
   />
 }
 
+function AdaptiveDetailGallery({ images = [] }) {
+  if (!images.length) return null
+  const density = images.length === 1 ? 'is-single' : images.length === 2 ? 'is-pair' : 'is-many'
+  return <section className={`pd-story-gallery ${density}`} aria-label="Additional product images">
+    {images.map((image, index) => <figure className={index === 0 && images.length >= 3 ? 'is-featured' : ''} key={image.id || image.detailSrc}>
+      <DetailImage image={image} preserveRatio />
+    </figure>)}
+  </section>
+}
+
 function BlockImages({ block, copy, editor, galleryImages }) {
   const images = block.imageIds.map((id) => galleryImages.find((image) => image.id === id)).filter(Boolean)
   if (!images.length) {
@@ -74,7 +84,7 @@ function DetailBlock({ block, blockCopy, editor, galleryImages, noImageCopy, spe
   return null
 }
 
-function LegacyDetailContent({ description, headline, legacyOverviewImage, noImageCopy, onLegacyOverviewImageError }) {
+function LegacyDetailContent({ additionalImages, description, headline, legacyOverviewImage, noImageCopy, onLegacyOverviewImageError }) {
   return <div className="pd-content-blocks is-legacy">
     {legacyOverviewImage
       ? <section className="pd-content-image-text is-imageLeft is-legacy-story">
@@ -82,11 +92,13 @@ function LegacyDetailContent({ description, headline, legacyOverviewImage, noIma
         <div><span aria-hidden="true" className="pd-story-ornament" />{headline && <h2>{headline}</h2>}{description && <p>{description}</p>}</div>
       </section>
       : (headline || description) && <header className="pd-content-heading"><h2>{headline}</h2>{description && <p>{description}</p>}</header>}
+    <AdaptiveDetailGallery images={additionalImages} />
     {!headline && !description && !legacyOverviewImage && <div className="pd-image-placeholder"><Images size={28} /><span>{noImageCopy}</span></div>}
   </div>
 }
 
 export function ProductDetailBlocks({
+  additionalImages = [],
   blocks,
   description = '',
   editor = null,
@@ -102,6 +114,7 @@ export function ProductDetailBlocks({
   const visibleBlocks = normalizeProductDetailBlocks(blocks).filter((block) => block.visible)
   if (!visibleBlocks.length) {
     return <LegacyDetailContent
+      additionalImages={additionalImages}
       description={description}
       headline={headline}
       legacyOverviewImage={legacyOverviewImage}
@@ -121,5 +134,6 @@ export function ProductDetailBlocks({
       specificationTitle={specificationTitle}
       specifications={specifications}
     />)}
+    <AdaptiveDetailGallery images={additionalImages} />
   </div>
 }
