@@ -5,6 +5,14 @@
 }
 
 @media (max-width: 760px) {
+  :where(html, body):has(.site-shell:not(.admin-route-shell)) {
+    scrollbar-width: none !important;
+  }
+
+  :where(html, body):has(.site-shell:not(.admin-route-shell))::-webkit-scrollbar {
+    display: none !important;
+  }
+
   .site-shell:not(.admin-route-shell) {
     overflow-x: clip;
   }
@@ -456,14 +464,16 @@
   }
 
   .home-showcase-categories {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    justify-content: flex-start !important;
+    display: grid !important;
+    grid-auto-flow: column !important;
+    grid-auto-columns: 108px !important;
+    grid-template-rows: repeat(2, 38px) !important;
+    justify-content: start !important;
     width: 100% !important;
     margin: 8px 0 0 !important;
     padding: 4px 12px 8px !important;
     box-sizing: border-box !important;
-    gap: 8px !important;
+    gap: 6px 8px !important;
     overflow-x: auto !important;
     scroll-padding-inline: 12px !important;
     scroll-snap-type: x mandatory !important;
@@ -471,7 +481,6 @@
   }
 
   .home-showcase-categories a {
-    flex: 0 0 auto !important;
     justify-content: center !important;
     width: 108px !important;
     min-width: 108px !important;

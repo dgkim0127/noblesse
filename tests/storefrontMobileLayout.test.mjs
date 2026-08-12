@@ -16,6 +16,8 @@ test('mobile overrides load last and stay scoped away from admin routes', () => 
   assert.match(mobile, /@media \(max-width: 760px\)/)
   assert.match(mobile, /\.site-shell:not\(\.admin-route-shell\)/)
   assert.match(mobile, /> \.top-marquee \{[\s\S]*display: none !important/)
+  assert.match(mobile, /:where\(html, body\):has\(\.site-shell:not\(\.admin-route-shell\)\)[\s\S]*scrollbar-width: none !important/)
+  assert.match(mobile, /:where\(html, body\):has\(\.site-shell:not\(\.admin-route-shell\)\)::\-webkit-scrollbar[\s\S]*display: none !important/)
 })
 
 test('mobile header uses two rows before scroll and one compact row after scroll', () => {
@@ -42,6 +44,7 @@ test('mobile showcase renders one 4 by 5 card with synchronized dots', () => {
 })
 
 test('mobile tabs stay compact and account owns the sign-out action', () => {
+  assert.match(mobile, /\.home-showcase-categories \{[\s\S]*display: grid !important;[\s\S]*grid-auto-flow: column !important;[\s\S]*grid-template-rows: repeat\(2, 38px\) !important/)
   assert.match(mobile, /\.home-showcase-categories a \{[\s\S]*width: 108px !important;[\s\S]*min-height: 38px !important/)
   assert.match(mobile, /\.home-showcase-categories a \.home-category-icon,[\s\S]*width: 18px !important;[\s\S]*height: 18px !important/)
   assert.match(mobile, /\.home-section-nav button,[\s\S]*min-height: 44px !important/)
