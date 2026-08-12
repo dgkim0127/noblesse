@@ -1,3 +1,5 @@
+import { createArchiveProductLocalization, shouldGenerateArchiveLocalization } from '../utils/archiveProductLocalization.js'
+
 const toneByMaterial = [
   ['gold', 'gold'],
   ['opal', 'opal'],
@@ -17,16 +19,42 @@ function inferTone(product) {
 
 export function adaptApiProduct(product) {
   const productId = product.code || product.productCode || product.id
+  const nameKo = product.nameKo || product.nameEn || productId
+  const archiveLocalization = shouldGenerateArchiveLocalization(product, productId)
+    ? createArchiveProductLocalization(nameKo)
+    : null
+  const nameEn = archiveLocalization && (!product.nameEn || product.nameEn === nameKo || /\p{Script=Hangul}/u.test(product.nameEn))
+    ? archiveLocalization.nameEn
+    : product.nameEn || nameKo || productId
+  const nameJa = archiveLocalization && (!product.nameJa || /\p{Script=Hangul}/u.test(product.nameJa))
+    ? archiveLocalization.nameJa
+    : product.nameJa || nameEn || nameKo || productId
+  const sourceZhTw = product.nameZhTw || product.nameCn || ''
+  const nameZhTw = archiveLocalization && (!sourceZhTw || sourceZhTw === nameKo || /\p{Script=Hangul}/u.test(sourceZhTw))
+    ? archiveLocalization.nameZhTw
+    : sourceZhTw || nameEn || nameKo || productId
+
+  const hasHangul = (value) => /\p{Script=Hangul}/u.test(String(value || ''))
+  const descriptionEn = archiveLocalization && (!product.descriptionEn || hasHangul(product.descriptionEn))
+    ? archiveLocalization.descriptionEn
+    : product.descriptionEn || product.descriptionKo || ''
+  const descriptionJa = archiveLocalization && (!product.descriptionJa || hasHangul(product.descriptionJa))
+    ? archiveLocalization.descriptionJa
+    : product.descriptionJa || descriptionEn || product.descriptionKo || ''
+  const sourceDescriptionZhTw = product.descriptionZhTw || product.descriptionCn || ''
+  const descriptionZhTw = archiveLocalization && (!sourceDescriptionZhTw || hasHangul(sourceDescriptionZhTw))
+    ? archiveLocalization.descriptionZhTw
+    : sourceDescriptionZhTw || descriptionEn || product.descriptionKo || ''
 
   return {
     productId,
     id: product.id,
     code: product.code || productId,
-    nameKo: product.nameKo || product.nameEn || productId,
-    nameEn: product.nameEn || product.nameKo || productId,
-    nameJa: product.nameJa || product.nameEn || product.nameKo || productId,
-    nameZhTw: product.nameZhTw || product.nameCn || product.nameEn || product.nameKo || productId,
-    nameCn: product.nameZhTw || product.nameCn || product.nameEn || product.nameKo || productId,
+    nameKo,
+    nameEn,
+    nameJa,
+    nameZhTw,
+    nameCn: nameZhTw,
     categoryId: product.categoryId || 'uncategorized',
     categoryNameKo: product.categoryNameKo || '',
     categoryNameEn: product.categoryNameEn || '',
@@ -67,10 +95,10 @@ export function adaptApiProduct(product) {
     isBest: Boolean(product.isBest),
     sortOrder: product.sortOrder || 0,
     descriptionKo: product.descriptionKo || product.descriptionEn || '',
-    descriptionEn: product.descriptionEn || product.descriptionKo || '',
-    descriptionJa: product.descriptionJa || product.descriptionEn || product.descriptionKo || '',
-    descriptionZhTw: product.descriptionZhTw || product.descriptionCn || product.descriptionEn || product.descriptionKo || '',
-    descriptionCn: product.descriptionZhTw || product.descriptionCn || product.descriptionEn || product.descriptionKo || '',
+    descriptionEn,
+    descriptionJa,
+    descriptionZhTw,
+    descriptionCn: descriptionZhTw,
     searchKeywords: normalizeStringArray(product.searchKeywords),
     createdAt: product.createdAt || null,
     updatedAt: product.updatedAt || null,

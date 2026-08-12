@@ -78,7 +78,6 @@ export function CatalogCard({ product }) {
       </div>
     </div>
     <div className="catalog-body">
-      <small>{product.code}</small>
       <Link to={toLocalePath(`/products/${product.productId}`)}><h3>{productName}</h3></Link>
       <p>{product.material}</p>
       {adminPriceBooks.length > 0
