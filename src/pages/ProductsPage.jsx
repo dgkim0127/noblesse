@@ -14,6 +14,7 @@ import { getCatalogFilterOptionLabel, loadCatalogFilterOptions, subscribeCatalog
 import { productMatchesCatalogSearch } from '../services/productSearch'
 import { getExplicitCatalogProductTabKey } from '../utils/catalogProductTabs'
 import { getLocaleContentKey, useLocalePath } from '../utils/locale'
+import { comparePiercingStoneCountAscending } from '../utils/piercingStoneCount'
 
 const _productPageCopy = {
   kr: {
@@ -374,6 +375,7 @@ const productListUiCopy = {
     sort: '상품정렬',
     total: (count) => `총 ${count}개`,
     sortOptions: [
+      { value: 'stone-count-low', label: '방 개수 적은순' },
       { value: 'new', label: '신상품순' },
       { value: 'best', label: '베스트순' },
       { value: 'name', label: '상품명순' },
@@ -395,6 +397,7 @@ const productListUiCopy = {
     sort: 'Sort products',
     total: (count) => `${count} total`,
     sortOptions: [
+      { value: 'stone-count-low', label: 'Fewest stones' },
       { value: 'new', label: 'Newest' },
       { value: 'best', label: 'Best' },
       { value: 'name', label: 'Name' },
@@ -416,6 +419,7 @@ const productListUiCopy = {
     sort: '商品並び替え',
     total: (count) => `全${count}点`,
     sortOptions: [
+      { value: 'stone-count-low', label: '石数が少ない順' },
       { value: 'new', label: '新着順' },
       { value: 'best', label: '人気順' },
       { value: 'name', label: '商品名順' },
@@ -437,6 +441,7 @@ const productListUiCopy = {
     sort: '商品排序',
     total: (count) => `共 ${count} 個`,
     sortOptions: [
+      { value: 'stone-count-low', label: '鑲石數量少優先' },
       { value: 'new', label: '新品優先' },
       { value: 'best', label: '熱門優先' },
       { value: 'name', label: '按商品名' },
@@ -1090,7 +1095,6 @@ export function ProductsPage() {
   const navigate = useNavigate()
   const routeParams = useParams()
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [sortMode, setSortMode] = useState('new')
   const [isSortOpen, setIsSortOpen] = useState(false)
   const [managedFilterOptions, setManagedFilterOptions] = useState(() => loadCatalogFilterOptions())
   const { locale, toLocalePath } = useLocalePath()
@@ -1110,6 +1114,12 @@ export function ProductsPage() {
   const priceMin = searchParams.get('priceMin') ?? ''
   const priceMax = searchParams.get('priceMaxCustom') ?? ''
   const taxonomyFilters = getFiltersFromSearchParams(searchParams, routeParams)
+  const isCubicLineFilter = (taxonomyFilters.decorationMaterials || []).includes('cubic')
+  const requestedSortMode = searchParams.get('sort') || ''
+  const supportedSortModes = new Set((uiCopy.sortOptions || []).map((option) => option.value))
+  const sortMode = supportedSortModes.has(requestedSortMode)
+    ? requestedSortMode
+    : (isCubicLineFilter ? 'stone-count-low' : 'new')
   const hasTaxonomyFilters = Object.entries(taxonomyFilters).some(([key, value]) => (
     key !== 'entryBasis' && (Array.isArray(value) ? value.length : Boolean(value))
   ))
@@ -1144,6 +1154,7 @@ export function ProductsPage() {
   })
 
   const sortedProducts = [...filtered].sort((a, b) => {
+    if (sortMode === 'stone-count-low') return comparePiercingStoneCountAscending(a, b)
     if (sortMode === 'best') return Number(b.isBest) - Number(a.isBest) || a.sortOrder - b.sortOrder
     if (sortMode === 'name') return String(a.nameKo || a.nameEn).localeCompare(String(b.nameKo || b.nameEn), 'ko')
     if (sortMode === 'price-low' || sortMode === 'price-high') {
@@ -1526,7 +1537,7 @@ export function ProductsPage() {
           </button>
           {isSortOpen ? <div className="product-sort-menu" role="listbox" aria-label={uiCopy.sort}>
             {sortOptions.map((option) => <button className={sortMode === option.value ? 'active' : ''} key={option.value} type="button" role="option" aria-selected={sortMode === option.value} onClick={() => {
-              setSortMode(option.value)
+              setFilter('sort', option.value)
               setIsSortOpen(false)
             }}>
               {option.label}
