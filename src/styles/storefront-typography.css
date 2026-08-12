@@ -1,0 +1,400 @@
+:root {
+  --type-caption: clamp(0.75rem, 0.72rem + 0.12vw, 0.82rem);
+  --type-small: clamp(0.82rem, 0.78rem + 0.16vw, 0.91rem);
+  --type-body: clamp(0.94rem, 0.9rem + 0.18vw, 1.04rem);
+  --type-card: clamp(0.9rem, 0.84rem + 0.24vw, 1.02rem);
+  --type-subheading: clamp(1.08rem, 0.98rem + 0.42vw, 1.34rem);
+  --type-heading: clamp(1.55rem, 1.28rem + 1.05vw, 2.2rem);
+  --type-display: clamp(2.25rem, 1.85rem + 1.65vw, 3.25rem);
+  --type-hero: clamp(2.65rem, 2rem + 2.75vw, 4.5rem);
+}
+
+html {
+  font-size: 16px;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+.site-shell:not(.admin-route-shell) {
+  font-size: var(--type-body);
+  line-height: 1.6;
+}
+
+.site-shell:not(.admin-route-shell) :is(button, input, select, textarea) {
+  font-family: inherit;
+}
+
+.site-shell:not(.admin-route-shell) :is(p, li, dd, input, select, textarea) {
+  line-height: 1.65;
+}
+
+.site-shell:not(.admin-route-shell) :is(.content, .section-wrap) :is(h1, h2, h3) {
+  text-wrap: balance;
+}
+
+.site-shell:not(.admin-route-shell) :is(.content, .section-wrap) h1 {
+  font-size: var(--type-display);
+  line-height: 1.12;
+}
+
+.site-shell:not(.admin-route-shell) :is(.content, .section-wrap) h2 {
+  font-size: var(--type-heading);
+  line-height: 1.22;
+}
+
+.site-shell:not(.admin-route-shell) :is(.content, .section-wrap) h3 {
+  font-size: var(--type-subheading);
+  line-height: 1.35;
+}
+
+.site-shell:not(.admin-route-shell) :is(.content, .section-wrap) p,
+.site-shell:not(.admin-route-shell) :is(.content, .section-wrap) li,
+.site-shell:not(.admin-route-shell) :is(.content, .section-wrap) dd {
+  font-size: var(--type-body);
+}
+
+.site-shell:not(.admin-route-shell) :is(.content, .section-wrap) small {
+  font-size: var(--type-caption);
+  line-height: 1.5;
+}
+
+/* Header and navigation */
+.site-shell:not(.admin-route-shell) :is(
+  .header-nav a,
+  .header-search input,
+  .search-placeholder-animated,
+  .compact-search-form input,
+  .preview-bar,
+  .search-popover button,
+  .search-popover p
+) {
+  font-size: var(--type-small);
+  line-height: 1.45;
+}
+
+.site-shell:not(.admin-route-shell) :is(.search-popover h2, .compact-search-content h2) {
+  font-size: var(--type-subheading);
+  line-height: 1.3;
+}
+
+.site-shell:not(.admin-route-shell) .brand .brand-name-window,
+.site-shell:not(.admin-route-shell) .compact-brand-title .brand-name-window {
+  font-size: clamp(1.15rem, 1.02rem + 0.5vw, 1.5rem);
+  line-height: 1;
+}
+
+/* Home and shared page headings */
+.site-shell:not(.admin-route-shell) :is(.hero h1, .visual-hero h1) {
+  font-size: var(--type-hero);
+  line-height: 1.05;
+}
+
+.site-shell:not(.admin-route-shell) :is(.page-title h1, .product-page-title h1) {
+  font-size: var(--type-display);
+  line-height: 1.08;
+}
+
+.site-shell:not(.admin-route-shell) :is(
+  .section-title h2,
+  .home-product-section-title h2,
+  .campaign-banner h2,
+  .account-product-intro h1,
+  .quote-cart-hero h1
+) {
+  font-size: var(--type-heading);
+  line-height: 1.16;
+}
+
+.site-shell:not(.admin-route-shell) :is(
+  .page-title p,
+  .section-title p,
+  .home-product-section-title p,
+  .account-product-intro p,
+  .quote-cart-hero p
+) {
+  font-size: var(--type-body);
+  line-height: 1.7;
+}
+
+/* Catalog, tabs, filters, and sorting */
+.site-shell:not(.admin-route-shell) :is(
+  .product-breadcrumb,
+  .product-folder-trail,
+  .product-sort-label,
+  .product-total-count,
+  .product-filter-trigger b,
+  .product-filter-row > span,
+  .product-filter-row button,
+  .product-filter-search input,
+  .product-filter-search button,
+  .product-filter-selected,
+  .product-filter-reset
+) {
+  font-size: var(--type-small);
+  line-height: 1.45;
+}
+
+.site-shell:not(.admin-route-shell) :is(
+  .product-primary-tabs button,
+  .product-material-tabs button,
+  .product-category-tabs button,
+  .product-sort-button,
+  .product-sort-menu button
+) {
+  font-size: var(--type-small);
+  line-height: 1.3;
+}
+
+.site-shell:not(.admin-route-shell) .product-filter-row strong {
+  font-size: var(--type-card);
+  line-height: 1.35;
+}
+
+.site-shell:not(.admin-route-shell) .catalog-body h3,
+.site-shell:not(.admin-route-shell) .home-product-info strong {
+  font-size: var(--type-card);
+  line-height: 1.45;
+}
+
+.site-shell:not(.admin-route-shell) :is(
+  .catalog-body p,
+  .home-product-info small,
+  .catalog-card-notice,
+  .approved-price,
+  .locked-price
+) {
+  font-size: var(--type-small);
+  line-height: 1.5;
+}
+
+.site-shell:not(.admin-route-shell) :is(.catalog-image b, .home-product-status) {
+  font-size: var(--type-caption);
+  line-height: 1.2;
+}
+
+/* Product detail */
+.site-shell:not(.admin-route-shell) .pd-panel h1 {
+  font-size: clamp(2.45rem, 2rem + 1.9vw, 3.7rem);
+  line-height: 1.06;
+}
+
+.site-shell:not(.admin-route-shell) :is(
+  .pd-summary,
+  .pd-alt-name,
+  .pd-access-box p,
+  .pd-info-card p,
+  .pd-info-card li,
+  .pd-content-block p,
+  .pd-size-note p,
+  .pd-shipping-note p,
+  .pd-care-guides p,
+  .pd-process-grid p
+) {
+  font-size: var(--type-body);
+  line-height: 1.75;
+}
+
+.site-shell:not(.admin-route-shell) :is(
+  .pd-eyebrow,
+  .pd-badges span,
+  .pd-meta-list dt,
+  .pd-option-group > span,
+  .pd-section-heading > span,
+  .pd-story-gallery-heading span
+) {
+  font-size: var(--type-caption);
+  line-height: 1.4;
+}
+
+.site-shell:not(.admin-route-shell) :is(
+  .pd-meta-list dd,
+  .pd-option-button,
+  .pd-primary-action,
+  .pd-secondary-action,
+  .pd-direct-inquiry-form label,
+  .pd-assurance-strip span
+) {
+  font-size: var(--type-small);
+  line-height: 1.45;
+}
+
+.site-shell:not(.admin-route-shell) :is(
+  .pd-section-heading h2,
+  .pd-content-spec h2,
+  .pd-story-gallery-heading strong
+) {
+  font-size: var(--type-heading);
+  line-height: 1.18;
+}
+
+.site-shell:not(.admin-route-shell) :is(
+  .pd-info-card h2,
+  .pd-info-card h3,
+  .pd-size-note strong,
+  .pd-shipping-note strong,
+  .pd-care-guides strong
+) {
+  font-size: var(--type-subheading);
+  line-height: 1.3;
+}
+
+/* Login, registration, account, and inquiry flows */
+.site-shell:not(.admin-route-shell) :is(
+  .auth-panel > h1,
+  .login-modal h2,
+  .account-product-intro h1,
+  .quote-cart-hero h1,
+  .inquiry-detail h1
+) {
+  font-size: var(--type-display);
+  line-height: 1.12;
+}
+
+.site-shell:not(.admin-route-shell) :is(
+  .auth-form label,
+  .register-field-label,
+  .agreement-row,
+  .account-access-notice p,
+  .account-product-message,
+  .quote-cart-product p,
+  .quote-cart-term,
+  .quote-cart-summary-card dt,
+  .quote-cart-summary-card dd,
+  .inquiry-card,
+  .inquiry-meta
+) {
+  font-size: var(--type-small);
+  line-height: 1.55;
+}
+
+.site-shell:not(.admin-route-shell) :is(
+  .auth-form input,
+  .auth-form textarea,
+  .register-grid input,
+  .register-grid select,
+  .register-grid textarea
+) {
+  font-size: var(--type-body);
+  line-height: 1.4;
+}
+
+.site-shell:not(.admin-route-shell) :is(
+  .primary-action,
+  .secondary-action,
+  .text-action,
+  .quote-cart-primary,
+  .quote-cart-empty-link,
+  .account-actions button,
+  .account-actions a
+) {
+  font-size: var(--type-small);
+  line-height: 1.35;
+}
+
+/* Footer stays compact but readable. */
+.site-shell:not(.admin-route-shell) .site-footer {
+  font-size: var(--type-caption) !important;
+  line-height: 1.6;
+}
+
+.site-shell:not(.admin-route-shell) .site-footer-brand > strong {
+  font-size: clamp(1.75rem, 1.55rem + 0.8vw, 2.35rem) !important;
+}
+
+.site-shell:not(.admin-route-shell) :is(
+  .site-footer-brand > p,
+  .site-footer-column span,
+  .site-footer-links
+) {
+  font-size: var(--type-caption) !important;
+  line-height: 1.6 !important;
+}
+
+.site-shell:not(.admin-route-shell) .site-footer-column h2 {
+  font-size: var(--type-small) !important;
+  line-height: 1.25 !important;
+}
+
+@media (max-width: 760px) {
+  :root {
+    --type-caption: 0.75rem;
+    --type-small: 0.82rem;
+    --type-body: 0.94rem;
+    --type-card: 0.9rem;
+    --type-subheading: 1.08rem;
+    --type-heading: clamp(1.45rem, 6.5vw, 1.82rem);
+    --type-display: clamp(1.95rem, 8.5vw, 2.55rem);
+    --type-hero: clamp(2.2rem, 10vw, 3rem);
+  }
+
+  .site-shell:not(.admin-route-shell) {
+    line-height: 1.58;
+  }
+
+  .site-shell:not(.admin-route-shell) :is(.page-title h1, .product-page-title h1) {
+    font-size: var(--type-display);
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-panel h1 {
+    font-size: clamp(2rem, 9.2vw, 2.65rem);
+    line-height: 1.08;
+  }
+
+  .site-shell:not(.admin-route-shell) :is(
+    .product-primary-tabs button,
+    .product-material-tabs button,
+    .product-category-tabs button
+  ) {
+    white-space: nowrap;
+  }
+
+  .site-shell:not(.admin-route-shell) :is(
+    .catalog-body h3,
+    .home-product-info strong
+  ) {
+    font-size: var(--type-card);
+    line-height: 1.4;
+  }
+
+  .site-shell:not(.admin-route-shell) :is(
+    .auth-form input,
+    .auth-form textarea,
+    .register-grid input,
+    .register-grid select,
+    .register-grid textarea,
+    .header-search input,
+    .compact-search-form input
+  ) {
+    font-size: 1rem;
+  }
+
+  .site-shell:not(.admin-route-shell) :is(
+    .primary-action,
+    .secondary-action,
+    .quote-cart-primary,
+    .quote-cart-empty-link,
+    .pd-primary-action,
+    .pd-secondary-action,
+    .account-actions button,
+    .account-actions a
+  ) {
+    font-size: var(--type-body);
+  }
+}
+
+@media (max-width: 390px) {
+  :root {
+    --type-small: 0.8rem;
+    --type-body: 0.91rem;
+    --type-card: 0.86rem;
+  }
+
+  .site-shell:not(.admin-route-shell) :is(
+    .product-primary-tabs button,
+    .product-material-tabs button,
+    .product-category-tabs button,
+    .product-sort-button
+  ) {
+    font-size: 0.8rem;
+  }
+}
