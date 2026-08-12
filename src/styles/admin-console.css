@@ -5517,10 +5517,14 @@ button:disabled,
 
 .admin-product-detail-canvas.is-mobile .pd-key-facts dl,
 .admin-product-detail-canvas.is-mobile .pd-detail-gallery,
-.admin-product-detail-canvas.is-mobile .pd-story-gallery,
-.admin-product-detail-canvas.is-mobile .pd-story-gallery.is-many,
+.admin-product-detail-canvas.is-mobile .pd-story-gallery-grid,
+.admin-product-detail-canvas.is-mobile .pd-story-gallery.is-many .pd-story-gallery-grid,
 .admin-product-detail-canvas.is-mobile .pd-content-image-text {
   grid-template-columns: 1fr;
+}
+
+.admin-product-detail-canvas.is-mobile .pd-story-gallery.is-pair figure {
+  transform: none;
 }
 
 .admin-product-detail-canvas.is-mobile .pd-story-gallery.is-many figure.is-featured {

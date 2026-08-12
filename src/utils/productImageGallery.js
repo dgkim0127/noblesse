@@ -83,11 +83,12 @@ export function productGalleryEntries(product, fallbackAlt = '') {
 
 export function productDetailImageSlots(images = [], {
   includeOverview = true,
+  includePrimaryInOverview = true,
   includeMaterial = true,
   reservedImageIds = [],
 } = {}) {
   const emptySlots = { overview: null, material: null, specification: null, additional: [] }
-  if (!Array.isArray(images) || images.length < 2) return emptySlots
+  if (!Array.isArray(images) || !images.length) return emptySlots
 
   const reservedIds = new Set(reservedImageIds.map(String).filter(Boolean))
   const seenIds = new Set()
@@ -109,10 +110,17 @@ export function productDetailImageSlots(images = [], {
     seenSources.add(source)
     return true
   })
-  if (!supportingImages.length) return emptySlots
+  const primaryCanBeReused = includePrimaryInOverview
+    && primarySource
+    && (!primaryId || !reservedIds.has(primaryId))
+  const overview = includeOverview
+    ? primaryCanBeReused ? images[0] : supportingImages[0] || null
+    : null
+  if (!supportingImages.length && !overview) return emptySlots
 
-  const overview = includeOverview ? supportingImages[0] : null
-  const sectionImages = includeOverview ? supportingImages.slice(1) : supportingImages
+  const sectionImages = includeOverview && overview !== images[0]
+    ? supportingImages.slice(1)
+    : supportingImages
   const material = includeMaterial && sectionImages.length >= 2 ? sectionImages[0] : null
   const specification = sectionImages.length >= 1 ? sectionImages[sectionImages.length - 1] : null
   const additionalStart = material ? 1 : 0

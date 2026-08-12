@@ -45,9 +45,16 @@ function AdaptiveDetailGallery({ images = [] }) {
   if (!images.length) return null
   const density = images.length === 1 ? 'is-single' : images.length === 2 ? 'is-pair' : 'is-many'
   return <section className={`pd-story-gallery ${density}`} aria-label="Additional product images">
-    {images.map((image, index) => <figure className={index === 0 && images.length >= 3 ? 'is-featured' : ''} key={image.id || image.detailSrc}>
-      <DetailImage image={image} preserveRatio />
-    </figure>)}
+    <header className="pd-story-gallery-heading" aria-hidden="true">
+      <span>NOBLESSE DETAILS</span>
+      <strong>PHOTO STORY</strong>
+    </header>
+    <div className="pd-story-gallery-grid">
+      {images.map((image, index) => <figure className={index === 0 && images.length >= 3 ? 'is-featured' : ''} key={image.id || image.detailSrc}>
+        <DetailImage image={image} preserveRatio />
+        <span className="pd-story-image-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+      </figure>)}
+    </div>
   </section>
 }
 

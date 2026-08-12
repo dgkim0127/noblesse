@@ -89,19 +89,19 @@ test('legacy single image remains one centered gallery photo', () => {
   assert.equal(gallery[0].scale, 1)
 })
 
-test('detail image slots distribute unique supporting photos by section', () => {
+test('detail image slots reuse the hero and distribute every unique photo by section', () => {
   const images = Array.from({ length: 6 }, (_, index) => ({ id: `image-${index + 1}`, detailSrc: `/image-${index + 1}.webp` }))
 
   const slots = productDetailImageSlots(images)
-  assert.equal(slots.overview.id, 'image-2')
-  assert.equal(slots.material.id, 'image-3')
+  assert.equal(slots.overview.id, 'image-1')
+  assert.equal(slots.material.id, 'image-2')
   assert.equal(slots.specification.id, 'image-6')
-  assert.deepEqual(slots.additional.map((image) => image.id), ['image-4', 'image-5'])
-  assert.equal(new Set([slots.overview, slots.material, slots.specification, ...slots.additional].map((image) => image.id)).size, 5)
+  assert.deepEqual(slots.additional.map((image) => image.id), ['image-3', 'image-4', 'image-5'])
+  assert.equal(new Set([slots.overview, slots.material, slots.specification, ...slots.additional].map((image) => image.id)).size, 6)
 
   assert.deepEqual(productDetailImageSlots(images.slice(0, 3)), {
-    overview: images[1],
-    material: null,
+    overview: images[0],
+    material: images[1],
     specification: images[2],
     additional: [],
   })
@@ -118,10 +118,10 @@ test('detail image slots distribute unique supporting photos by section', () => 
   assert.deepEqual(productDetailImageSlots(images.slice(0, 5), {
     includeMaterial: false,
   }), {
-    overview: images[1],
+    overview: images[0],
     material: null,
     specification: images[4],
-    additional: [images[2], images[3]],
+    additional: [images[1], images[2], images[3]],
   })
 
   assert.deepEqual(productDetailImageSlots([
@@ -146,9 +146,9 @@ test('detail image slots distribute unique supporting photos by section', () => 
     { id: 'duplicate-source', detailSrc: images[1].detailSrc },
     images[1],
   ]), {
-    overview: { id: 'duplicate-source', detailSrc: images[1].detailSrc },
+    overview: images[0],
     material: null,
-    specification: null,
+    specification: { id: 'duplicate-source', detailSrc: images[1].detailSrc },
     additional: [],
   })
 })
