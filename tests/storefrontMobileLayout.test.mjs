@@ -39,9 +39,9 @@ test('mobile showcase renders one 4 by 5 card with synchronized dots', () => {
   assert.match(mobile, /scroll-snap-type: x mandatory !important/)
 })
 
-test('mobile tabs meet touch sizing and account owns the sign-out action', () => {
-  assert.match(mobile, /\.home-showcase-categories a \{[\s\S]*min-height: 44px !important/)
-  assert.match(mobile, /width: calc\(\(100vw - 32px\) \/ 2\) !important/)
+test('mobile tabs stay compact and account owns the sign-out action', () => {
+  assert.match(mobile, /\.home-showcase-categories a \{[\s\S]*width: 108px !important;[\s\S]*min-height: 38px !important/)
+  assert.match(mobile, /\.home-showcase-categories a \.home-category-icon,[\s\S]*width: 18px !important;[\s\S]*height: 18px !important/)
   assert.match(mobile, /\.home-section-nav button,[\s\S]*min-height: 44px !important/)
   assert.match(account, /className="account-mobile-logout"/)
   assert.match(account, /await signOut\(\)[\s\S]*navigate\(toLocalePath\('\/'\)\)/)

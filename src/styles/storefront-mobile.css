@@ -473,14 +473,23 @@
   .home-showcase-categories a {
     flex: 0 0 auto !important;
     justify-content: center !important;
-    width: calc((100vw - 32px) / 2) !important;
-    min-width: calc((100vw - 32px) / 2) !important;
-    max-width: calc((100vw - 32px) / 2) !important;
-    min-height: 44px !important;
-    padding: 0 10px !important;
+    width: 108px !important;
+    min-width: 108px !important;
+    max-width: 108px !important;
+    min-height: 38px !important;
+    padding: 0 8px !important;
+    gap: 5px !important;
     box-sizing: border-box !important;
+    font-size: 12.5px !important;
     scroll-snap-align: start !important;
     scroll-snap-stop: always !important;
+  }
+
+  .home-showcase-categories a .home-category-icon,
+  .home-showcase-categories a .home-category-emoji {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 13px !important;
   }
 
   .home-section-nav,
