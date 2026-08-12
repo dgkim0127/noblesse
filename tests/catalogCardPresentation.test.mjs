@@ -18,6 +18,8 @@ test('catalog tabs remove duplicate combined decoration shortcuts', () => {
 test('the ㄷ-shaped bar keeps the Korean shape symbol in every locale', () => {
   assert.doesNotMatch(page, /dBar: 'D/)
   assert.doesNotMatch(taxonomy, /d_bar: \{[^}]*'D/)
-  assert.equal(page.match(/dBar: 'ㄷ'/g)?.length, 4)
-  assert.equal(taxonomy.match(/d_bar: \{ kr: 'ㄷ', en: 'ㄷ', jp: 'ㄷ', cn: 'ㄷ' \}/g)?.length, 2)
+  for (const label of ["dBar: 'ㄷ 바'", "dBar: 'ㄷ Bar'", "dBar: 'ㄷバー'", "dBar: 'ㄷ形桿'"]) {
+    assert.match(page, new RegExp(label))
+  }
+  assert.equal(taxonomy.match(/d_bar: \{ kr: 'ㄷ 바', en: 'ㄷ Bar', jp: 'ㄷバー', cn: 'ㄷ形桿' \}/g)?.length, 2)
 })
