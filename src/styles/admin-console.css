@@ -5527,11 +5527,6 @@ button:disabled,
   transform: none;
 }
 
-.admin-product-detail-canvas.is-mobile .pd-story-gallery.is-many figure.is-featured {
-  grid-row: auto;
-  aspect-ratio: 1;
-}
-
 .admin-product-detail-canvas.is-mobile .pd-content-image-text.is-imageRight > :first-child {
   order: initial;
 }

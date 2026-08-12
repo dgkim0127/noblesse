@@ -152,6 +152,7 @@ test('legacy product photos are distributed beside overview, specification, and 
   assert.match(blocks, /NOBLESSE DETAILS/)
   assert.match(blocks, /PHOTO STORY/)
   assert.match(blocks, /pd-story-image-number/)
+  assert.doesNotMatch(blocks, /pd-story-gallery[\s\S]*is-featured/)
   assert.doesNotMatch(blocks, /is-legacy-gallery|galleryImages\.slice\(1\)/)
   assert.match(styles, /\.pd-story-gallery-heading/)
   assert.match(styles, /\.pd-story-gallery\.is-pair figure:nth-child\(2\)/)

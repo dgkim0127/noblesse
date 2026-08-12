@@ -16126,11 +16126,6 @@ h6 {
   transform: translateY(clamp(30px, 5vw, 72px));
 }
 
-.pd-story-gallery.is-many figure.is-featured {
-  grid-row: span 2;
-  aspect-ratio: auto;
-}
-
 .pd-story-gallery img {
   display: block;
   width: 100%;
@@ -16562,11 +16557,6 @@ h6 {
   .pd-story-gallery.is-pair figure:first-child,
   .pd-story-gallery.is-pair figure:nth-child(2) {
     transform: none;
-  }
-
-  .pd-story-gallery.is-many figure.is-featured {
-    grid-row: auto;
-    aspect-ratio: 1;
   }
 
   .pd-content-image-text.is-imageRight > :first-child {

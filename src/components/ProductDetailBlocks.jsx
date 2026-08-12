@@ -50,7 +50,7 @@ function AdaptiveDetailGallery({ images = [] }) {
       <strong>PHOTO STORY</strong>
     </header>
     <div className="pd-story-gallery-grid">
-      {images.map((image, index) => <figure className={index === 0 && images.length >= 3 ? 'is-featured' : ''} key={image.id || image.detailSrc}>
+      {images.map((image, index) => <figure key={image.id || image.detailSrc}>
         <DetailImage image={image} preserveRatio />
         <span className="pd-story-image-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
       </figure>)}
