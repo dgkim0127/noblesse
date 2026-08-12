@@ -47,9 +47,15 @@ test('mobile tabs stay compact and account owns the sign-out action', () => {
   assert.match(mobile, /\.home-showcase-categories \{[\s\S]*display: grid !important;[\s\S]*grid-auto-flow: column !important;[\s\S]*grid-template-rows: repeat\(2, 38px\) !important/)
   assert.match(mobile, /\.home-showcase-categories a \{[\s\S]*width: 108px !important;[\s\S]*min-height: 38px !important/)
   assert.match(mobile, /\.home-showcase-categories a \.home-category-icon,[\s\S]*width: 18px !important;[\s\S]*height: 18px !important/)
+  assert.match(mobile, /\.home-showcase-categories a b \{[\s\S]*max-width: calc\(100% - 23px\) !important;[\s\S]*text-overflow: ellipsis !important/)
   assert.match(mobile, /\.home-section-nav button,[\s\S]*min-height: 44px !important/)
   assert.match(account, /className="account-mobile-logout"/)
   assert.match(account, /await signOut\(\)[\s\S]*navigate\(toLocalePath\('\/'\)\)/)
+})
+
+test('product cards use a localized product badge instead of a generic B2B label', () => {
+  assert.match(home, /const defaultProductBadgeLabel = \{[\s\S]*kr: '피어싱',[\s\S]*en: 'PIERCING'/)
+  assert.match(home, /productBadge\.toUpperCase\(\) !== 'B2B'[\s\S]*resolveLocaleCopy\(defaultProductBadgeLabel, locale, 'en'\)/)
 })
 
 test('mobile language flag stays centered with a corner dropdown cue', () => {

@@ -13,6 +13,15 @@ test('Firebase credential errors keep the credential guidance', () => {
   )
 })
 
+test('login configuration errors use customer-facing copy without exposing Firebase', () => {
+  for (const locale of ['kr', 'en', 'jp', 'zh-TW']) {
+    const message = getLoginErrorMessage({ code: 'CONFIGURATION_ERROR' }, locale)
+    assert.doesNotMatch(message, /Firebase/i)
+  }
+
+  assert.match(getLoginErrorMessage({ code: 'CONFIGURATION_ERROR' }, 'kr'), /로그인 서비스/)
+})
+
 test('backend profile rejection is not reported as a wrong password', () => {
   const message = getLoginErrorMessage({ code: 'UNAUTHORIZED' }, 'kr')
 

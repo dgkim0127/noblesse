@@ -501,6 +501,14 @@
     font-size: 13px !important;
   }
 
+  .home-showcase-categories a b {
+    display: block !important;
+    max-width: calc(100% - 23px) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
   .home-section-nav,
   .home-section-nav-fixed {
     display: flex !important;

@@ -1150,6 +1150,13 @@ const priceAfterApprovalLabel = {
   cn: '登入後可查看價格',
 }
 
+const defaultProductBadgeLabel = {
+  kr: '피어싱',
+  en: 'PIERCING',
+  jp: 'ピアス',
+  cn: '穿孔',
+}
+
 function HomeProductCard({ product, index, variant = 'default', localeOverride = '' }) {
   const { addInquiryItem, approvedPrice, getAdminPriceBooks, getPrice, isAdmin, isApproved, viewerState } = useCommerce()
   const { locale: routeLocale, toLocalePath } = useLocalePath()
@@ -1179,7 +1186,14 @@ function HomeProductCard({ product, index, variant = 'default', localeOverride =
     : isApproved && price
     ? formatMoney(approvedPrice(product.productId), price.currency)
     : isApproved ? unavailablePriceLabel : resolveLocaleCopy(priceAfterApprovalLabel, locale, 'en')
-  const statusLabel = product.isNew ? 'NEW' : product.isBest ? 'BEST' : 'B2B'
+  const productBadge = String(product.badge || '').trim()
+  const statusLabel = product.isNew
+    ? 'NEW'
+    : product.isBest
+      ? 'BEST'
+      : productBadge && productBadge.toUpperCase() !== 'B2B'
+        ? productBadge
+        : resolveLocaleCopy(defaultProductBadgeLabel, locale, 'en')
   const weeklyDemand = variant === 'weekly-pick' ? getWeeklyDemand(index) : null
   const weeklyDemandText = weeklyDemand ? formatWeeklyDemand(weeklyDemand, locale) : null
 
