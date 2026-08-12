@@ -12,6 +12,7 @@ import {
 } from '../data/productTaxonomy'
 import { getCatalogFilterOptionLabel, loadCatalogFilterOptions, subscribeCatalogFilterOptions } from '../services/catalogFilterOptions'
 import { productMatchesCatalogSearch } from '../services/productSearch'
+import { getExplicitCatalogProductTabKey } from '../utils/catalogProductTabs'
 import { getLocaleContentKey, useLocalePath } from '../utils/locale'
 
 const _productPageCopy = {
@@ -1313,7 +1314,9 @@ export function ProductsPage() {
     if (tab.param && tab.value) return filterMatches(tab)
     return false
   }
-  const activeProductTab = productTabs.find((tab) => !tab.clear && isProductTabActive(tab))?.key ?? 'all'
+  const activeProductTab = getExplicitCatalogProductTabKey(productTabs, searchParams)
+    || productTabs.find((tab) => !tab.clear && isProductTabActive(tab))?.key
+    || 'all'
 
   const submitSearch = (event) => {
     event.preventDefault()
