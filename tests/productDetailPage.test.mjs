@@ -152,6 +152,22 @@ test('legacy product photos are distributed beside overview, specification, and 
   assert.match(adminStyles, /\.admin-product-detail-canvas\.is-mobile \.pd-content-image-text/)
 })
 
+test('product detail uses premium section framing without changing the B2B flow', () => {
+  const source = readSource('src/pages/ProductDetailPage.jsx')
+  const blocks = readSource('src/components/ProductDetailBlocks.jsx')
+  const styles = readSource('src/App.css')
+
+  assert.match(source, /pd-detail-story" data-section="01"/)
+  assert.match(source, /pd-specification-section" data-section="02"/)
+  assert.match(source, /pd-material-care-section" data-section="03"/)
+  assert.match(source, /pd-delivery-section" data-section=/)
+  assert.match(blocks, /className="pd-story-ornament"/)
+  assert.match(styles, /\.pd-editorial\[data-section\]::before/)
+  assert.match(styles, /\.pd-delivery-section \{/)
+  assert.match(styles, /\.pd-key-facts dl > div::before/)
+  assert.doesNotMatch(source, /buy now|checkout|payment/i)
+})
+
 test('product detail exposes piercing-specific structure without fixed promotional filler', () => {
   const source = readSource('src/pages/ProductDetailPage.jsx')
 

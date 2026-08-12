@@ -79,7 +79,7 @@ function LegacyDetailContent({ description, headline, legacyOverviewImage, noIma
     {legacyOverviewImage
       ? <section className="pd-content-image-text is-imageLeft is-legacy-story">
         <figure className="pd-content-image"><DetailImage image={legacyOverviewImage} onError={onLegacyOverviewImageError} preserveRatio /></figure>
-        <div>{headline && <h2>{headline}</h2>}{description && <p>{description}</p>}</div>
+        <div><span aria-hidden="true" className="pd-story-ornament" />{headline && <h2>{headline}</h2>}{description && <p>{description}</p>}</div>
       </section>
       : (headline || description) && <header className="pd-content-heading"><h2>{headline}</h2>{description && <p>{description}</p>}</header>}
     {!headline && !description && !legacyOverviewImage && <div className="pd-image-placeholder"><Images size={28} /><span>{noImageCopy}</span></div>}

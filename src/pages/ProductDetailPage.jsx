@@ -1424,7 +1424,7 @@ export function ProductDetailView({
       <a href="#pd-delivery">{copy.sectionDelivery}</a>
     </nav>
 
-    {hasDetailStory && <section className="pd-editorial pd-detail-story" id="pd-overview">
+    {hasDetailStory && <section className="pd-editorial pd-detail-story" data-section="01" id="pd-overview">
       <ProductEditorTarget editor={editor} field="detailBlocks" label="상세 콘텐츠">
         <ProductDetailBlocks
           blocks={detailBlocks}
@@ -1442,7 +1442,7 @@ export function ProductDetailView({
       </ProductEditorTarget>
     </section>}
 
-    <section className="pd-editorial pd-specification-section" id="pd-specification">
+    <section className="pd-editorial pd-specification-section" data-section="02" id="pd-specification">
       <div className="pd-section-heading">
         <div><p>{copy.productInfo}</p><h2>{copy.specification}</h2></div>
         <span>{copy.specificationIntro}</span>
@@ -1460,7 +1460,7 @@ export function ProductDetailView({
       </div>
     </section>
 
-    {hasMaterialAndCare && <section className="pd-editorial pd-material-care-section" id="pd-material">
+    {hasMaterialAndCare && <section className="pd-editorial pd-material-care-section" data-section="03" id="pd-material">
       <div className="pd-section-heading">
         <div><p>{copy.productStructure}</p><h2>{copy.materialAndCare}</h2></div>
         {materialGuideBody && <span>{materialGuideBody}</span>}
@@ -1484,7 +1484,7 @@ export function ProductDetailView({
       </div>
     </section>}
 
-    <section className="pd-editorial pd-delivery-section" id="pd-delivery">
+    <section className="pd-editorial pd-delivery-section" data-section={hasMaterialAndCare ? '04' : '03'} id="pd-delivery">
       <div className="pd-section-heading">
         <div><p>{copy.wholesale}</p><h2>{copy.quoteWorkflow}</h2></div>
         <span>{quoteWorkflowLead}</span>
