@@ -690,7 +690,7 @@ const productFilterGroups = [
     label: '소재',
     options: [
       { label: '실버925', dimension: 'baseMaterial', param: 'baseMaterial', value: 'silver925' },
-      { label: '써지컬 바', dimension: 'baseMaterial', param: 'baseMaterial', value: 'brass' },
+      { label: '신주/브라스', dimension: 'baseMaterial', param: 'baseMaterial', value: 'brass' },
       { label: '써지컬', dimension: 'baseMaterial', param: 'baseMaterial', value: 'surgical' },
       { label: '부자재', dimension: 'productGroup', param: 'group', value: 'parts' },
     ],
@@ -864,7 +864,7 @@ const productMaterialDisplayLabels = {
   kr: {
     silver925: '실버925',
     surgical: '써지컬 스틸',
-    brass: '써지컬 바',
+    brass: '신주/브라스',
     titanium: '티타늄',
     acrylic: '아크릴',
     other: '기타소재',
@@ -917,10 +917,10 @@ const productShapeLabelCopy = {
 }
 
 const productMaterialTabCopy = {
-  kr: { all: '전체', silver925: '실버925', brass: '써지컬 바', surgical: '써지컬', parts: '부자재' },
-  en: { all: 'All', silver925: 'Silver 925', brass: 'Surgical Bar', surgical: 'Surgical', parts: 'Parts' },
-  jp: { all: 'すべて', silver925: 'シルバー925', brass: 'サージカルバー', surgical: 'サージカル', parts: 'パーツ' },
-  cn: { all: '全部', silver925: '925銀', brass: '医用鋼桿', surgical: '医用鋼', parts: '配件' },
+  kr: { all: '전체', silver925: '실버925', brass: '신주/브라스', surgical: '써지컬', parts: '부자재' },
+  en: { all: 'All', silver925: 'Silver 925', brass: 'Brass', surgical: 'Surgical', parts: 'Parts' },
+  jp: { all: 'すべて', silver925: 'シルバー925', brass: '真鍮', surgical: 'サージカル', parts: 'パーツ' },
+  cn: { all: '全部', silver925: '925銀', brass: '黃銅', surgical: '医用鋼', parts: '配件' },
 }
 
 const productTabLabelCopy = {

@@ -1,4 +1,5 @@
 import { getLocaleContentKey } from '../utils/locale.js'
+import { inferPiercingArchiveTaxonomy } from './productTaxonomyInference.js'
 
 export const taxonomyLocales = ['kr', 'en', 'jp', 'cn']
 
@@ -488,30 +489,48 @@ export function createProductTaxonomy({ categoryId, material, collectionIds = []
 
 export function getProductTaxonomy(product) {
   const taxonomy = product?.taxonomy && typeof product.taxonomy === 'object' ? product.taxonomy : {}
+  const inferred = inferPiercingArchiveTaxonomy(product) || {}
   const categoryId = product?.categoryId || ''
-  const structures = [...asArray(taxonomy.structures || product?.structures)]
+  const structures = [...resolvedTaxonomyArray(taxonomy, 'structures', product?.structures, inferred.structures)]
 
   if (barbellCategoryIds.has(categoryId) && !structures.includes('barbell')) {
     structures.push('barbell')
   }
 
   return {
-    productGroup: taxonomy.productGroup || product?.productGroup || (piercingCategoryIds.has(categoryId) ? 'piercing' : undefined),
-    piercingType: taxonomy.piercingType || product?.piercingType || (ringCategoryIds.has(categoryId) ? 'ring' : undefined),
-    baseMaterial: taxonomy.baseMaterial || product?.baseMaterial || materialMap[product?.material],
-    allSurgical: Boolean(taxonomy.allSurgical ?? product?.allSurgical),
-    decorationMaterials: asArray(taxonomy.decorationMaterials || product?.decorationMaterials),
-    partType: asArray(taxonomy.partType || product?.partType),
+    productGroup: taxonomy.productGroup || product?.productGroup || inferred.productGroup || (piercingCategoryIds.has(categoryId) ? 'piercing' : undefined),
+    piercingType: taxonomy.piercingType || product?.piercingType || inferred.piercingType || (ringCategoryIds.has(categoryId) ? 'ring' : undefined),
+    baseMaterial: taxonomy.baseMaterial || product?.baseMaterial || materialMap[product?.material] || inferred.baseMaterial,
+    allSurgical: Boolean(Object.hasOwn(taxonomy, 'allSurgical')
+      ? taxonomy.allSurgical
+      : inferred.inferenceSource
+        ? inferred.allSurgical
+        : product?.allSurgical),
+    decorationMaterials: resolvedTaxonomyArray(taxonomy, 'decorationMaterials', product?.decorationMaterials, inferred.decorationMaterials),
+    partType: resolvedTaxonomyArray(taxonomy, 'partType', product?.partType, inferred.partType),
     structures,
-    styles: asArray(taxonomy.styles || product?.styles),
-    shapes: asArray(taxonomy.shapes || product?.shapes),
-    saleType: taxonomy.saleType || product?.saleType,
+    styles: resolvedTaxonomyArray(taxonomy, 'styles', product?.styles, inferred.styles),
+    shapes: resolvedTaxonomyArray(taxonomy, 'shapes', product?.shapes, inferred.shapes),
+    saleType: taxonomy.saleType || product?.saleType || inferred.saleType,
   }
 }
 
 function asArray(value) {
   if (value === undefined || value === null || value === '') return []
   return Array.isArray(value) ? value.filter(Boolean) : [value].filter(Boolean)
+}
+
+function firstNonEmptyArray(...values) {
+  for (const value of values) {
+    const items = asArray(value)
+    if (items.length) return items
+  }
+  return []
+}
+
+function resolvedTaxonomyArray(taxonomy, key, ...fallbacks) {
+  if (Object.hasOwn(taxonomy, key)) return asArray(taxonomy[key])
+  return firstNonEmptyArray(...fallbacks)
 }
 
 function taxonomyHasValue(product, dimension, value) {
