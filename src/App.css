@@ -6184,6 +6184,16 @@ h6 {
   white-space: nowrap;
 }
 
+.product-load-more {
+  display: flex;
+  justify-content: center;
+  padding: clamp(28px, 4vw, 56px) 0 8px;
+}
+
+.product-load-more .secondary-action {
+  min-width: 190px;
+}
+
 @keyframes productSortDrop {
   from {
     opacity: 0;

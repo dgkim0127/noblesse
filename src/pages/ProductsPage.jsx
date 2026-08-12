@@ -1,5 +1,5 @@
 import { ChevronDown, Search, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { CatalogCard } from '../components/CatalogCard'
 import { useCommerce } from '../commerce/commerceStore'
@@ -374,6 +374,7 @@ const productListUiCopy = {
     categoryMessage: (count) => `선택한 조건에 맞는 피어싱 ${count}개를 확인해보세요.`,
     sort: '상품정렬',
     total: (count) => `총 ${count}개`,
+    loadMore: (count) => `상품 ${count}개 더 보기`,
     sortOptions: [
       { value: 'stone-count-low', label: '방 개수 적은순' },
       { value: 'new', label: '신상품순' },
@@ -396,6 +397,7 @@ const productListUiCopy = {
     categoryMessage: (count) => `Browse ${count} piercing items for this selection.`,
     sort: 'Sort products',
     total: (count) => `${count} total`,
+    loadMore: (count) => `Load ${count} more products`,
     sortOptions: [
       { value: 'stone-count-low', label: 'Fewest stones' },
       { value: 'new', label: 'Newest' },
@@ -418,6 +420,7 @@ const productListUiCopy = {
     categoryMessage: (count) => `選択条件に合うピアスを${count}点表示しています。`,
     sort: '商品並び替え',
     total: (count) => `全${count}点`,
+    loadMore: (count) => `商品をさらに${count}点表示`,
     sortOptions: [
       { value: 'stone-count-low', label: '石数が少ない順' },
       { value: 'new', label: '新着順' },
@@ -440,6 +443,7 @@ const productListUiCopy = {
     categoryMessage: (count) => `已顯示符合條件的 ${count} 個穿孔商品。`,
     sort: '商品排序',
     total: (count) => `共 ${count} 個`,
+    loadMore: (count) => `再顯示 ${count} 個商品`,
     sortOptions: [
       { value: 'stone-count-low', label: '鑲石數量少優先' },
       { value: 'new', label: '新品優先' },
@@ -530,6 +534,7 @@ const productTabSets = {
 }
 
 const productTabControlledParams = ['type', 'style', 'saleType', 'category', 'structure', 'decoration', 'allSurgical', 'partType']
+const productListBatchSize = 24
 
 const productMaterialTabs = [
   { key: 'all', value: '' },
@@ -1096,6 +1101,8 @@ export function ProductsPage() {
   const routeParams = useParams()
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [isSortOpen, setIsSortOpen] = useState(false)
+  const [productWindow, setProductWindow] = useState({ key: '', count: productListBatchSize })
+  const loadMoreRef = useRef(null)
   const [managedFilterOptions, setManagedFilterOptions] = useState(() => loadCatalogFilterOptions())
   const { locale, toLocalePath } = useLocalePath()
   const contentLocale = getLocaleContentKey(locale)
@@ -1164,6 +1171,42 @@ export function ProductsPage() {
     }
     return Number(b.isNew) - Number(a.isNew) || a.sortOrder - b.sortOrder
   })
+  const productWindowKey = [
+    routeParams.collectionId,
+    routeParams.piercingType,
+    routeParams.baseMaterial,
+    routeParams.shape,
+    searchParams.toString(),
+  ].filter(Boolean).join('|')
+  const visibleProductCount = productWindow.key === productWindowKey
+    ? productWindow.count
+    : productListBatchSize
+  const visibleProducts = sortedProducts.slice(0, visibleProductCount)
+  const remainingProductCount = Math.max(0, sortedProducts.length - visibleProducts.length)
+  const nextProductBatchSize = Math.min(productListBatchSize, remainingProductCount)
+
+  useEffect(() => {
+    setProductWindow({ key: productWindowKey, count: productListBatchSize })
+  }, [productWindowKey])
+
+  useEffect(() => {
+    const target = loadMoreRef.current
+    if (!target || remainingProductCount <= 0 || typeof IntersectionObserver === 'undefined') return undefined
+
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return
+      setProductWindow((current) => ({
+        key: productWindowKey,
+        count: Math.min(
+          (current.key === productWindowKey ? current.count : productListBatchSize) + productListBatchSize,
+          sortedProducts.length,
+        ),
+      }))
+    }, { rootMargin: '800px 0px' })
+
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [productWindowKey, remainingProductCount, sortedProducts.length])
 
   if (dataStatus === 'loading') {
     return <main className="content"><section className="empty product-empty"><h2>Loading catalog...</h2><p>Product metadata is being loaded from the catalog API.</p></section></main>
@@ -1549,7 +1592,17 @@ export function ProductsPage() {
     </div>
 
     {sortedProducts.length > 0
-      ? <div className="catalog-grid product-results">{sortedProducts.map((product) => <CatalogCard key={product.productId} product={product} />)}</div>
+      ? <><div className="catalog-grid product-results">{visibleProducts.map((product) => <CatalogCard key={product.productId} product={product} />)}</div>
+        {remainingProductCount > 0 && <div className="product-load-more" ref={loadMoreRef}>
+          <button className="secondary-action" type="button" onClick={() => setProductWindow((current) => ({
+            key: productWindowKey,
+            count: Math.min(
+              (current.key === productWindowKey ? current.count : productListBatchSize) + productListBatchSize,
+              sortedProducts.length,
+            ),
+          }))}>{uiCopy.loadMore(nextProductBatchSize)}</button>
+        </div>}
+      </>
       : <section className="empty product-empty"><h2>{copy.emptyTitle}</h2><p>{copy.emptyBody}</p><small>{copy.emptySmall}</small><Link className="secondary-action" to={toLocalePath('/products')}>{copy.clearFilters}</Link></section>}
   </main>
 }

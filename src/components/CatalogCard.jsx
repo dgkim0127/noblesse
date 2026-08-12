@@ -65,7 +65,7 @@ export function CatalogCard({ product }) {
     <div className="catalog-media">
       <Link className={`catalog-image tone-${product.tone}`} to={toLocalePath(`/products/${product.productId}`)} aria-label={productName}>
         <span className="jewel-shape" />
-        {product.imageSet?.card && <img src={product.imageSet.card} alt={productAlt} loading="lazy" width="600" height="900" style={{ objectFit: 'cover', ...imagePresentationStyle(product.imageSet) }} onError={(event) => { event.currentTarget.hidden = true }} />}
+        {product.imageSet?.card && <img src={product.imageSet.card} alt={productAlt} loading="lazy" decoding="async" width="600" height="900" style={{ objectFit: 'cover', ...imagePresentationStyle(product.imageSet) }} onError={(event) => { event.currentTarget.hidden = true }} />}
         {product.isNew && <b>NEW</b>}
       </Link>
       <div className="catalog-quick-actions" aria-label={`${productName} actions`}>
