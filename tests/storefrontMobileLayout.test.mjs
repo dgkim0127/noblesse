@@ -51,3 +51,9 @@ test('mobile language flag stays centered with a corner dropdown cue', () => {
   assert.match(mobile, /\.language-dropdown-trigger \.flag-icon \{[\s\S]*left: 50% !important;[\s\S]*translate\(-50%, -50%\)/)
   assert.match(mobile, /\.language-dropdown-trigger svg \{[\s\S]*right: 1px !important;[\s\S]*bottom: 3px !important/)
 })
+
+test('mobile brand keeps every locale name visible and vertically centered', () => {
+  assert.match(mobile, /\.brand \{[\s\S]*max-width: 132px !important/)
+  assert.match(mobile, /\.brand \.brand-name-window \{[\s\S]*display: inline-grid !important;[\s\S]*align-items: center !important;[\s\S]*max-width: 86px !important/)
+  assert.match(mobile, /@media \(max-width: 360px\)[\s\S]*\.brand \.brand-name-window \{[\s\S]*max-width: 78px !important/)
+})
