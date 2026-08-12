@@ -1910,7 +1910,7 @@ export function HomePage({ editorMode = false, layoutOverride = null, localeOver
                   fetchPriority={index === 0 ? 'high' : 'auto'}
                   height="1200"
                   loading={index === 0 ? 'eager' : 'lazy'}
-                  sizes="(max-width: 760px) calc(100vw - 24px), (max-width: 1180px) calc((100vw - 20px) / 3), min(25vw, 520px)"
+                  sizes="(max-width: 760px) 100vw, (max-width: 1180px) calc((100vw - 20px) / 3), min(25vw, 520px)"
                   src={banner.imageSet?.card || banner.image}
                   srcSet={banner.imageSet?.card && banner.imageSet?.detail ? `${banner.imageSet.card} 600w, ${banner.imageSet.detail} 1200w` : undefined}
                   style={{ objectPosition: `${banner.imagePosition?.x ?? 50}% ${banner.imagePosition?.y ?? 50}%` }}
