@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react'
-import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
+import { lazy, Suspense, useEffect, useRef } from 'react'
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigationType, useParams } from 'react-router-dom'
 import './App.css'
 import { CommerceProvider } from './commerce/CommerceContext'
 import { StoreShell } from './components/StoreShell'
@@ -38,6 +38,43 @@ function StorePageFallback() {
   const { locale } = useLocalePath()
   const copy = resolveLocaleCopy(routeLoadingCopy, locale)
   return <div className="route-page-loading" role="status">{copy.store}</div>
+}
+
+function RouteScrollManager() {
+  const location = useLocation()
+  const navigationType = useNavigationType()
+  const positionsRef = useRef(new Map())
+
+  useEffect(() => {
+    const previousRestoration = window.history.scrollRestoration
+    window.history.scrollRestoration = 'manual'
+    return () => {
+      window.history.scrollRestoration = previousRestoration
+    }
+  }, [])
+
+  useEffect(() => {
+    const locationKey = location.key
+    const positions = positionsRef.current
+    const savedTop = navigationType === 'POP' ? positions.get(locationKey) : 0
+    const frame = window.requestAnimationFrame(() => {
+      if (location.hash) {
+        const target = document.getElementById(decodeURIComponent(location.hash.slice(1)))
+        if (target) {
+          target.scrollIntoView()
+          return
+        }
+      }
+      window.scrollTo({ left: 0, top: savedTop ?? 0, behavior: 'auto' })
+    })
+
+    return () => {
+      positions.set(locationKey, window.scrollY || document.documentElement.scrollTop || 0)
+      window.cancelAnimationFrame(frame)
+    }
+  }, [location.hash, location.key, location.pathname, location.search, navigationType])
+
+  return null
 }
 
 const AccountPage = lazyNamed(() => import('./pages/AccountPage'), 'AccountPage')
@@ -105,7 +142,7 @@ function LocaleShell() {
 }
 
 function App() {
-  return <BrowserRouter><CommerceProvider><Suspense fallback={<StorePageFallback />}><Routes>
+  return <BrowserRouter><RouteScrollManager /><CommerceProvider><Suspense fallback={<StorePageFallback />}><Routes>
     <Route element={<StoreShell />}>
       <Route path="/" element={<HomePage />} />
       <Route path="/products" element={<ProductsPage />} />
