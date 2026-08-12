@@ -23,7 +23,10 @@ test('product detail gates buyer price and MOQ behind approved buyer or admin pr
   assert.match(source, /const canViewAdminPrices = Boolean\(isAdmin && adminPriceBooks\.length > 0\)/)
   assert.match(source, /const requestMoq = canUseTradeTerms \? price\.moq : product\?\.moqDefault \|\| 1/)
   assert.match(source, /const visibleMoq = canUseTradeTerms \? price\.moq : canRequestProductQuote \? requestMoq : canViewAdminPrices \? adminPriceBooks\[0\]\?\.moq : null/)
-  assert.match(source, /!canViewAdminPrices && <Link className="pd-secondary-action"/)
+  assert.match(source, /const openGuestLoginModal = \(\) =>/)
+  assert.match(source, /new CustomEvent\('noblesse:open-login-modal'\)/)
+  assert.match(source, /viewerState === 'guest'[\s\S]*?<button aria-haspopup="dialog" className="pd-secondary-action"/)
+  assert.match(source, /<Link className="pd-secondary-action" to=\{toLocalePath\(accessLink\)\}>/)
 })
 
 test('shared product detail editor uses active locale values without storefront fallback', () => {

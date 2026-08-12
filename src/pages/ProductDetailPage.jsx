@@ -1178,6 +1178,9 @@ export function ProductDetailView({
   const currentQuantity = normalizeQuantity(quantity, effectiveRequestMoq || 1)
   const accessLink = viewerState === 'guest' ? '/login' : '/account'
   const accessLabel = viewerState === 'guest' ? copy.requestAccess : copy.reviewStatus
+  const openGuestLoginModal = () => {
+    window.dispatchEvent(new CustomEvent('noblesse:open-login-modal'))
+  }
   const relatedProducts = getRelatedProducts(products, product)
 
   const productInfoRows = [
@@ -1410,7 +1413,9 @@ export function ProductDetailView({
           <LockKeyhole size={20} />
           <strong>{canViewAdminPrices ? copy.adminPriceBooks : copy.approvalRequired}</strong>
           <p>{viewerState === 'pending' ? copy.statusPending : canViewAdminPrices ? copy.buyerOnly : copy.statusGuest}</p>
-          {!canViewAdminPrices && <Link className="pd-secondary-action" to={toLocalePath(accessLink)}>{accessLabel}</Link>}
+          {!canViewAdminPrices && (viewerState === 'guest'
+            ? <button aria-haspopup="dialog" className="pd-secondary-action" type="button" onClick={openGuestLoginModal}>{accessLabel}</button>
+            : <Link className="pd-secondary-action" to={toLocalePath(accessLink)}>{accessLabel}</Link>)}
         </div>}
       </aside>
     </section>
@@ -1514,7 +1519,9 @@ export function ProductDetailView({
     <div className="pd-mobile-action" aria-label={copy.quoteNotice}>
       {showQuoteTools
         ? editor ? <button className="pd-primary-action" disabled type="button">{copy.directInquirySubmit}</button> : <a className="pd-primary-action" href="#pd-inquiry-form">{copy.directInquirySubmit}</a>
-        : !canViewAdminPrices && <Link className="pd-secondary-action" to={toLocalePath(accessLink)}>{accessLabel}</Link>}
+        : !canViewAdminPrices && (viewerState === 'guest'
+          ? <button aria-haspopup="dialog" className="pd-secondary-action" type="button" onClick={openGuestLoginModal}>{accessLabel}</button>
+          : <Link className="pd-secondary-action" to={toLocalePath(accessLink)}>{accessLabel}</Link>)}
     </div>
   </main>
 }
