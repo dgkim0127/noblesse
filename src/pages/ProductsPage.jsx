@@ -477,16 +477,14 @@ const productPrimaryTabs = [
 const productTabSets = {
   all: [
     { key: 'all', clear: true },
-    { key: 'bundleSale', param: 'saleType', value: 'bundle' },
+    { key: 'parts', param: 'group', value: 'parts' },
     { key: 'barbell', param: 'structure', value: 'barbell', multi: true },
     { key: 'dropAntique', param: 'style', values: ['drop', 'antique'] },
     { key: 'pearlAcrylic', param: 'decoration', values: ['pearl', 'mother_of_pearl', 'acrylic_applique'] },
     { key: 'mirrorStone', param: 'decoration', values: ['mirrorball', 'stone'] },
-    { key: 'parts', param: 'group', value: 'parts' },
   ],
   silver925: [
     { key: 'all', clear: true },
-    { key: 'bundleSale', param: 'saleType', value: 'bundle' },
     { key: 'barbell', param: 'structure', value: 'barbell', multi: true },
     { key: 'pearlShell', param: 'decoration', values: ['pearl', 'mother_of_pearl'] },
     { key: 'plainLine', param: 'style', value: 'plain', multi: true },
@@ -1122,8 +1120,10 @@ export function ProductsPage() {
   const priceMax = searchParams.get('priceMaxCustom') ?? ''
   const taxonomyFilters = getFiltersFromSearchParams(searchParams, routeParams)
   const isCubicLineFilter = (taxonomyFilters.decorationMaterials || []).includes('cubic')
+  const isPartsCatalog = taxonomyFilters.productGroup === 'parts'
   const requestedSortMode = searchParams.get('sort') || ''
-  const supportedSortModes = new Set((uiCopy.sortOptions || []).map((option) => option.value))
+  const availableSortOptions = (uiCopy.sortOptions || []).filter((option) => !isPartsCatalog || option.value !== 'stone-count-low')
+  const supportedSortModes = new Set(availableSortOptions.map((option) => option.value))
   const sortMode = supportedSortModes.has(requestedSortMode)
     ? requestedSortMode
     : (isCubicLineFilter ? 'stone-count-low' : 'new')
@@ -1383,7 +1383,7 @@ export function ProductsPage() {
   }
 
   const activePrimaryLabel = activeProductTab === 'all' ? '' : productTabLabels[activeProductTab] || uiCopy.tabs[activeProductTab]
-  const sortOptions = uiCopy.sortOptions ?? productListUiCopy.en.sortOptions
+  const sortOptions = availableSortOptions.length > 0 ? availableSortOptions : productListUiCopy.en.sortOptions
   const activeSortLabel = sortOptions.find((option) => option.value === sortMode)?.label ?? sortOptions[0].label
   const materialLabels = productMaterialDisplayLabels[contentLocale] ?? productMaterialDisplayLabels.kr
   const breadcrumbCopy = productCleanBreadcrumbCopy[contentLocale] ?? productCleanBreadcrumbCopy.kr
@@ -1440,10 +1440,13 @@ export function ProductsPage() {
         ...(activePrimaryLabel ? [{ label: activePrimaryLabel }] : []),
       ]
       : [
-        ...(taxonomyFilters.productGroup === 'parts' ? [{ label: breadcrumbCopy.parts, to: '/products?group=parts' }] : []),
-        ...(materialBreadcrumbLabel ? [{ label: materialBreadcrumbLabel, to: `/products?baseMaterial=${taxonomyFilters.baseMaterial}` }] : []),
-        { label: breadcrumbCopy.piercing, to: '/products' },
-        ...(activePrimaryLabel ? [{ label: activePrimaryLabel }] : []),
+        ...(taxonomyFilters.productGroup === 'parts'
+          ? [{ label: breadcrumbCopy.parts, to: '/products?group=parts' }]
+          : [
+            ...(materialBreadcrumbLabel ? [{ label: materialBreadcrumbLabel, to: `/products?baseMaterial=${taxonomyFilters.baseMaterial}` }] : []),
+            { label: breadcrumbCopy.piercing, to: '/products' },
+            ...(activePrimaryLabel ? [{ label: activePrimaryLabel }] : []),
+          ]),
       ]),
   ]
   const pageTitle = isCollectionEntry
