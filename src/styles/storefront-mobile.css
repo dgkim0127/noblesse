@@ -614,6 +614,36 @@
   }
 
   /* Quote guide: restore the vertical timeline after legacy three-column rules. */
+  .site-shell:not(.admin-route-shell) .pd-delivery-section {
+    padding: 44px 18px 34px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section[data-section]::before {
+    top: 18px !important;
+    right: 18px !important;
+    font-size: 60px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-layout {
+    gap: 22px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-intro .pd-section-heading {
+    gap: 12px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-intro .pd-section-heading h2 {
+    max-width: 100% !important;
+    font-size: clamp(25px, 7vw, 28px) !important;
+    line-height: 1.18 !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-intro .pd-section-heading > span {
+    max-width: 100% !important;
+    font-size: clamp(13px, 3.75vw, 14px) !important;
+    line-height: 1.72 !important;
+  }
+
   .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-list {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) !important;
@@ -633,10 +663,10 @@
 
   .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-list li {
     grid-template-columns: 42px minmax(0, 1fr) !important;
-    gap: 16px !important;
+    gap: 14px !important;
     width: 100% !important;
     min-width: 0 !important;
-    padding-bottom: 24px !important;
+    padding-bottom: 20px !important;
   }
 
   .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-list li + li {
@@ -644,8 +674,39 @@
   }
 
   .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-list strong {
-    width: 42px !important;
-    height: 42px !important;
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 17px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-list li > div {
+    gap: 5px !important;
+    padding-top: 2px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-list h3 {
+    font-size: clamp(18px, 4.8vw, 19px) !important;
+    line-height: 1.25 !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-list p {
+    font-size: 14px !important;
+    line-height: 1.68 !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-shipping-note {
+    gap: 8px !important;
+    padding: 18px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-shipping-note strong {
+    font-size: 16px !important;
+    line-height: 1.35 !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-shipping-note p {
+    font-size: 14px !important;
+    line-height: 1.68 !important;
   }
 
   .account-mobile-logout {

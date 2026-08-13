@@ -82,3 +82,11 @@ test('mobile quote guide overrides legacy horizontal step columns', () => {
   assert.match(mobile, /\.pd-process-list::before \{[\s\S]*right: auto !important;[\s\S]*bottom: 21px !important;[\s\S]*left: 20px !important/)
   assert.match(mobile, /\.pd-process-list li \{[\s\S]*grid-template-columns: 42px minmax\(0, 1fr\) !important/)
 })
+
+test('mobile quote guide uses compact type scales across narrow screens', () => {
+  assert.match(mobile, /\.pd-delivery-section \{[\s\S]*padding: 44px 18px 34px !important/)
+  assert.match(mobile, /\.pd-process-intro \.pd-section-heading h2 \{[\s\S]*font-size: clamp\(25px, 7vw, 28px\) !important/)
+  assert.match(mobile, /\.pd-process-intro \.pd-section-heading > span \{[\s\S]*font-size: clamp\(13px, 3\.75vw, 14px\) !important/)
+  assert.match(mobile, /\.pd-process-list h3 \{[\s\S]*font-size: clamp\(18px, 4\.8vw, 19px\) !important/)
+  assert.match(mobile, /\.pd-process-list p \{[\s\S]*font-size: 14px !important/)
+})
