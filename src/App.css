@@ -16614,3 +16614,151 @@ h6 {
     grid-template-columns: minmax(100px, 0.7fr) minmax(0, 1fr);
   }
 }
+
+/* Storefront delivery section: keep the quote flow light, editorial, and easy to scan. */
+.site-shell:not(.admin-route-shell) .pd-delivery-section {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #e9dfd9;
+  color: var(--noblesse-sub);
+  background: #f7f2ee;
+  box-shadow: 0 24px 60px rgba(42, 35, 79, 0.1);
+}
+
+.site-shell:not(.admin-route-shell) .pd-delivery-section[data-section]::before {
+  top: 30px;
+  right: clamp(24px, 5vw, 72px);
+  color: rgba(42, 35, 79, 0.055);
+  font-size: clamp(86px, 10vw, 148px);
+  line-height: 0.8;
+}
+
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-section-heading p,
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid strong {
+  color: var(--noblesse-main);
+}
+
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-section-heading h2,
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid h3,
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-shipping-note strong {
+  color: var(--noblesse-sub);
+}
+
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-section-heading > span,
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid p,
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-shipping-note p {
+  color: #756d78;
+}
+
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid {
+  position: relative;
+  gap: 16px;
+  overflow: visible;
+  border: 0;
+}
+
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid::before {
+  position: absolute;
+  z-index: 0;
+  top: 47px;
+  right: 14%;
+  left: 14%;
+  height: 1px;
+  background: #e4d4d0;
+  content: '';
+}
+
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid article {
+  position: relative;
+  z-index: 1;
+  min-height: 218px;
+  gap: 13px;
+  border: 1px solid #e7ddd7;
+  border-radius: 18px;
+  padding: clamp(24px, 2.7vw, 36px);
+  background: #fffdfb;
+  box-shadow: 0 12px 28px rgba(42, 35, 79, 0.07);
+}
+
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid article + article {
+  border-left: 1px solid #e7ddd7;
+}
+
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid strong {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid #f8b4c4;
+  border-radius: 50%;
+  background: #fff4f6;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid h3 {
+  font-family: var(--noblesse-sans, "Pretendard", sans-serif);
+  font-size: clamp(19px, 1.5vw, 24px);
+  font-weight: 800;
+}
+
+.site-shell:not(.admin-route-shell) .pd-delivery-section .pd-shipping-note {
+  max-width: none;
+  border: 1px solid #e7ddd7;
+  border-left: 3px solid var(--noblesse-main);
+  border-radius: 14px;
+  background: #fffdfb;
+  box-shadow: 0 10px 24px rgba(42, 35, 79, 0.05);
+}
+
+@media (max-width: 1180px) {
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid {
+    gap: 12px;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid::before {
+    display: none;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid article {
+    min-height: 0;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid article + article {
+    border-left: 1px solid #e7ddd7;
+    border-top: 1px solid #e7ddd7;
+    padding-top: clamp(24px, 2.7vw, 36px);
+  }
+}
+
+@media (max-width: 760px) {
+  .site-shell:not(.admin-route-shell) .pd-delivery-section[data-section]::before {
+    top: 20px;
+    right: 20px;
+    font-size: 76px;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid article {
+    gap: 11px;
+    border-radius: 14px;
+    padding: 22px 20px;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid article + article {
+    border-left: 1px solid #e7ddd7;
+    border-top: 1px solid #e7ddd7;
+    padding-top: 22px;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-grid strong {
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-shipping-note {
+    padding: 20px;
+  }
+}
