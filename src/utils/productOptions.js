@@ -11,6 +11,20 @@ export const productOptionLocales = ['kr', 'en', 'jp', 'zh-TW']
 
 const optionGroupTypes = new Set(['text', 'swatch'])
 
+const legacyColorLabels = {
+  black: { kr: '블랙', en: 'Black', jp: 'ブラック', 'zh-TW': '黑色' },
+  blue: { kr: '블루', en: 'Blue', jp: 'ブルー', 'zh-TW': '藍色' },
+  clear: { kr: '클리어', en: 'Clear', jp: 'クリア', 'zh-TW': '透明' },
+  gold: { kr: '골드', en: 'Gold', jp: 'ゴールド', 'zh-TW': '金色' },
+  ivory: { kr: '아이보리', en: 'Ivory', jp: 'アイボリー', 'zh-TW': '象牙色' },
+  pink: { kr: '핑크', en: 'Pink', jp: 'ピンク', 'zh-TW': '粉色' },
+  'pink opal': { kr: '핑크 오팔', en: 'Pink Opal', jp: 'ピンクオパール', 'zh-TW': '粉色蛋白石' },
+  rainbow: { kr: '레인보우', en: 'Rainbow', jp: 'レインボー', 'zh-TW': '彩虹色' },
+  'rose gold': { kr: '로즈 골드', en: 'Rose Gold', jp: 'ローズゴールド', 'zh-TW': '玫瑰金' },
+  silver: { kr: '실버', en: 'Silver', jp: 'シルバー', 'zh-TW': '銀色' },
+  'white opal': { kr: '화이트 오팔', en: 'White Opal', jp: 'ホワイトオパール', 'zh-TW': '白色蛋白石' },
+}
+
 const localeLabels = {
   kr: '한국어',
   en: 'English',
@@ -160,9 +174,12 @@ function stableHash(value) {
 
 function legacyValue(kind, value, index) {
   const label = String(value || '').trim()
+  const localizedLabels = kind === 'color'
+    ? legacyColorLabels[label.toLocaleLowerCase('en-US')]
+    : null
   return normalizeValue({
     id: `legacy-${kind}-${stableHash(`${index}:${label}`)}`,
-    labels: Object.fromEntries(productOptionLocales.map((locale) => [locale, label])),
+    labels: localizedLabels || Object.fromEntries(productOptionLocales.map((locale) => [locale, label])),
   }, index)
 }
 

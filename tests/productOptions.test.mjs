@@ -9,9 +9,11 @@ import {
   hasBodyJewelryGaugeConflict,
 } from '../src/utils/bodyJewelryGauge.js'
 import {
+  createLegacyProductOptionGroups,
   createProductOptionPreset,
   formatSelectedProductOptions,
   getEffectiveProductOptionGroups,
+  getLocalizedOptionLabel,
   getMissingRequiredProductOptions,
   getSelectedOptionSnapshots,
   productOptionCombinationKey,
@@ -70,6 +72,16 @@ test('Gold plus 6mm and Pink plus 8mm produce separate stable inquiry combinatio
   assert.equal(productOptionCombinationKey(gold), 'bar-length:6mm|color:gold')
   assert.equal(productOptionCombinationKey(pink), 'bar-length:8mm|color:pink')
   assert.notEqual(productOptionCombinationKey(gold), productOptionCombinationKey(pink))
+})
+
+test('legacy English color values are localized for each storefront language', () => {
+  const [colorGroup] = createLegacyProductOptionGroups({ colors: ['White Opal', 'Pink Opal'] })
+
+  assert.equal(getLocalizedOptionLabel(colorGroup.values[0].labels, 'kr'), '화이트 오팔')
+  assert.equal(getLocalizedOptionLabel(colorGroup.values[0].labels, 'en'), 'White Opal')
+  assert.equal(getLocalizedOptionLabel(colorGroup.values[0].labels, 'jp'), 'ホワイトオパール')
+  assert.equal(getLocalizedOptionLabel(colorGroup.values[0].labels, 'zh-TW'), '白色蛋白石')
+  assert.equal(getLocalizedOptionLabel(colorGroup.values[1].labels, 'kr'), '핑크 오팔')
 })
 
 test('option selections resolve localized snapshots for buyer and quote displays', () => {
