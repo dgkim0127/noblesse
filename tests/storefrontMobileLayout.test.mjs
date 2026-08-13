@@ -68,3 +68,11 @@ test('mobile brand keeps every locale name visible and vertically centered', () 
   assert.match(mobile, /\.brand \.brand-name-window \{[\s\S]*display: inline-grid !important;[\s\S]*align-items: center !important;[\s\S]*max-width: 86px !important/)
   assert.match(mobile, /@media \(max-width: 360px\)[\s\S]*\.brand \.brand-name-window \{[\s\S]*max-width: 78px !important/)
 })
+
+test('mobile product specifications stack the photo and keep code rows readable', () => {
+  assert.match(mobile, /\.pd-spec-layout,[\s\S]*display: flex !important;[\s\S]*flex-direction: column !important/)
+  assert.match(mobile, /\.pd-spec-layout > \.pd-spec-image \{[\s\S]*order: -1 !important;[\s\S]*width: min\(100%, 360px\) !important/)
+  assert.match(mobile, /\.pd-spec-layout > \* \{[\s\S]*grid-column: auto !important;[\s\S]*width: 100% !important/)
+  assert.match(mobile, /\.pd-spec-table div \{[\s\S]*grid-template-columns: minmax\(82px, 0\.72fr\) minmax\(0, 1\.28fr\) !important/)
+  assert.match(mobile, /\.pd-page \{[\s\S]*padding-bottom: 132px !important/)
+})
