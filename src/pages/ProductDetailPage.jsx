@@ -94,14 +94,14 @@ const detailCopy = {
     quantity: '수량',
     quantityNote: (moq) => `수량은 MOQ 단위로 조정됩니다. 기준 단위: ${moq} pcs`,
     quoteNotice: '견적 안내',
-    quoteStepConfirm: '조건 확정',
-    quoteStepConfirmBody: '최종 조건은 담당자 확인 후 안내됩니다.',
-    quoteStepReceive: '기준 확인',
-    quoteStepReceiveBody: '가격, 재고, 납기, 포장 조건을 확인합니다.',
-    quoteStepSelect: '상품 선택',
-    quoteStepSelectBody: '색상, 사이즈, 수량을 선택해 견적 검토를 요청합니다.',
-    quoteWorkflow: '견적 진행 방식',
-    quoteWorkflowLead: '이 페이지는 B2B 견적 요청을 위한 상품 검토 도구입니다.',
+    quoteStepConfirm: '조건 안내',
+    quoteStepConfirmBody: '확인된 가격과 출고 일정을 안내합니다.',
+    quoteStepReceive: '내용 확인',
+    quoteStepReceiveBody: '요청하신 구성과 재고, 납기 조건을 확인합니다.',
+    quoteStepSelect: '구성 선택',
+    quoteStepSelectBody: '색상, 사이즈, 수량을 선택해 문의 목록에 담습니다.',
+    quoteWorkflow: '상품 확인부터 견적 안내까지',
+    quoteWorkflowLead: '원하는 옵션과 수량을 선택해 문의를 남겨주세요. 확인 후 가능한 조건을 안내해드립니다.',
     quoteNoticeText: '견적 요청은 최종 거래 확정이 아닙니다. Noblesse가 재고, 납기, 공급 조건을 확인한 뒤 최종 견적 기준을 안내합니다.',
     requestAccess: '거래처 등록 또는 로그인',
     reviewStatus: '계정 상태 보기',
@@ -126,7 +126,7 @@ const detailCopy = {
     thumbnail: '썸네일',
     unavailable: '불가',
     viewLarge: '큰 이미지 보기',
-    wholesale: '도매 기준',
+    wholesale: '견적 안내',
   },
   en: {
     addToInquiry: 'Add to Inquiry List',
@@ -178,14 +178,14 @@ const detailCopy = {
     quantity: 'Quantity',
     quantityNote: (moq) => `Quantity is adjusted by MOQ units. Unit: ${moq} pcs`,
     quoteNotice: 'Quote notice',
-    quoteStepConfirm: 'Confirm terms',
-    quoteStepConfirmBody: 'Final terms are guided after staff review.',
-    quoteStepReceive: 'Review basis',
-    quoteStepReceiveBody: 'Price, stock, lead time, and packaging terms are checked.',
-    quoteStepSelect: 'Select items',
-    quoteStepSelectBody: 'Select finish, size, and quantity to request quote review.',
-    quoteWorkflow: 'Quote workflow',
-    quoteWorkflowLead: 'This page is a B2B quote-request product review tool.',
+    quoteStepConfirm: 'Receive terms',
+    quoteStepConfirmBody: 'We share the confirmed price and shipping schedule.',
+    quoteStepReceive: 'Review request',
+    quoteStepReceiveBody: 'We check the requested set, stock, and lead time.',
+    quoteStepSelect: 'Choose your set',
+    quoteStepSelectBody: 'Select finish, size, and quantity, then add the request.',
+    quoteWorkflow: 'From selection to quote',
+    quoteWorkflowLead: 'Choose the options and quantity you need. We will review the request and share the available terms.',
     quoteNoticeText: 'A Request Quote is not a final trade confirmation. Noblesse reviews stock, lead time, and trade terms before sending the final quote basis.',
     requestAccess: 'Register or sign in',
     reviewStatus: 'View account status',
@@ -210,7 +210,7 @@ const detailCopy = {
     thumbnail: 'thumbnail',
     unavailable: 'Unavailable',
     viewLarge: 'View large image',
-    wholesale: 'Wholesale basis',
+    wholesale: 'Quote guide',
   },
   jp: {
     addToInquiry: '見積リストに追加',
@@ -262,14 +262,14 @@ const detailCopy = {
     quantity: '数量',
     quantityNote: (moq) => `数量はMOQ単位で調整されます。基準単位: ${moq} pcs`,
     quoteNotice: '見積案内',
-    quoteStepConfirm: '条件確定',
-    quoteStepConfirmBody: '最終条件は担当者確認後に案内されます。',
-    quoteStepReceive: '基準確認',
-    quoteStepReceiveBody: '価格、在庫、納期、包装条件を確認します。',
-    quoteStepSelect: '商品選択',
-    quoteStepSelectBody: 'カラー、サイズ、数量を選択して見積確認を依頼します。',
-    quoteWorkflow: '見積の流れ',
-    quoteWorkflowLead: 'このページはB2B見積依頼のための商品確認ツールです。',
+    quoteStepConfirm: '条件のご案内',
+    quoteStepConfirmBody: '確認した価格と出荷予定をご案内します。',
+    quoteStepReceive: '内容を確認',
+    quoteStepReceiveBody: 'ご希望の構成、在庫、納期を確認します。',
+    quoteStepSelect: '構成を選ぶ',
+    quoteStepSelectBody: 'カラー、サイズ、数量を選び、問い合わせに追加します。',
+    quoteWorkflow: '商品確認から見積案内まで',
+    quoteWorkflowLead: 'ご希望のオプションと数量を選択してください。内容を確認して条件をご案内します。',
     quoteNoticeText: '見積依頼は最終注文や決済ではありません。Noblesseが在庫、納期、取引条件を確認したうえで最終見積基準を案内します。',
     requestAccess: '取引先登録またはログイン',
     reviewStatus: 'アカウント状態を見る',
@@ -294,7 +294,7 @@ const detailCopy = {
     thumbnail: 'サムネイル',
     unavailable: '不可',
     viewLarge: '大きい画像を見る',
-    wholesale: '卸取引基準',
+    wholesale: '見積案内',
   },
   cn: {
     addToInquiry: '加入詢價清單',
@@ -346,14 +346,14 @@ const detailCopy = {
     quantity: '數量',
     quantityNote: (moq) => `數量會依 MOQ 單位調整。基準單位：${moq} pcs`,
     quoteNotice: '詢價說明',
-    quoteStepConfirm: '確認條件',
-    quoteStepConfirmBody: '最終條件由負責人確認後提供。',
-    quoteStepReceive: '確認基準',
-    quoteStepReceiveBody: '確認價格、庫存、交期與包裝條件。',
-    quoteStepSelect: '選擇商品',
-    quoteStepSelectBody: '選擇顏色、尺寸與數量後請求詢價審核。',
-    quoteWorkflow: '詢價流程',
-    quoteWorkflowLead: '本頁是 B2B 詢價商品檢視工具。',
+    quoteStepConfirm: '提供條件',
+    quoteStepConfirmBody: '確認價格與出貨時間後向您說明。',
+    quoteStepReceive: '確認內容',
+    quoteStepReceiveBody: '確認您選擇的組合、庫存與交期。',
+    quoteStepSelect: '選擇組合',
+    quoteStepSelectBody: '選擇顏色、尺寸與數量後加入詢問清單。',
+    quoteWorkflow: '從商品確認到報價說明',
+    quoteWorkflowLead: '選擇需要的選項與數量後留下詢問，我們確認內容後說明可行條件。',
     quoteNoticeText: '詢價請求不是最終訂單或付款。Noblesse 會確認庫存、交期與交易條件後，再提供最終報價基準。',
     requestAccess: '註冊或登入買家帳戶',
     reviewStatus: '查看帳戶狀態',
@@ -378,7 +378,7 @@ const detailCopy = {
     thumbnail: '縮圖',
     unavailable: '不支援',
     viewLarge: '查看大圖',
-    wholesale: '批發基準',
+    wholesale: '報價說明',
   },
 }
 
@@ -455,14 +455,14 @@ const cleanDetailCopy = {
     quantity: '수량',
     quantityNote: (moq) => `수량은 MOQ 단위로 조정됩니다. 기준 단위: ${moq} pcs`,
     quoteNotice: '견적 안내',
-    quoteStepConfirm: '조건 확정',
-    quoteStepConfirmBody: '최종 조건은 담당자 확인 후 안내합니다.',
-    quoteStepReceive: '기준 확인',
-    quoteStepReceiveBody: '가격, 재고, 납기, 포장 조건을 확인합니다.',
-    quoteStepSelect: '상품 선택',
-    quoteStepSelectBody: '색상, 사이즈, 수량을 선택해 견적 검토를 요청합니다.',
-    quoteWorkflow: '견적 진행 방식',
-    quoteWorkflowLead: '이 페이지는 B2B 견적 요청을 위한 상품 검토 도구입니다.',
+    quoteStepConfirm: '조건 안내',
+    quoteStepConfirmBody: '확인된 가격과 출고 일정을 안내합니다.',
+    quoteStepReceive: '내용 확인',
+    quoteStepReceiveBody: '요청하신 구성과 재고, 납기 조건을 확인합니다.',
+    quoteStepSelect: '구성 선택',
+    quoteStepSelectBody: '색상, 사이즈, 수량을 선택해 문의 목록에 담습니다.',
+    quoteWorkflow: '상품 확인부터 견적 안내까지',
+    quoteWorkflowLead: '원하는 옵션과 수량을 선택해 문의를 남겨주세요. 확인 후 가능한 조건을 안내해드립니다.',
     quoteNoticeText: '견적 요청은 최종 거래 확정이 아닙니다. Noblesse가 재고, 납기, 공급 조건을 확인한 뒤 최종 견적 기준을 안내합니다.',
     requestAccess: '거래처 등록 또는 로그인',
     reviewStatus: '계정 상태 보기',
@@ -486,7 +486,7 @@ const cleanDetailCopy = {
     thumbnail: '썸네일',
     unavailable: '불가',
     viewLarge: '큰 이미지 보기',
-    wholesale: '도매 기준',
+    wholesale: '견적 안내',
     gauge: '게이지',
     length: '길이',
     barLength: '바 길이',
@@ -547,8 +547,14 @@ const cleanDetailCopy = {
     quietDetailLead: '画像、素材、オプション、見積案内を分け、必要な情報を素早く確認できます。',
     materialHeadline: '素材基準を明確に案内します。',
     materialGuideText: (material) => `${material}基準で登録された商品です。メッキ、仕上げ、国別表記基準は見積確認時に再確認してください。`,
-    quoteWorkflow: '見積の流れ',
-    quoteWorkflowLead: 'このページはB2B見積依頼のための商品確認ツールです。',
+    quoteStepConfirm: '条件のご案内',
+    quoteStepConfirmBody: '確認した価格と出荷予定をご案内します。',
+    quoteStepReceive: '内容を確認',
+    quoteStepReceiveBody: 'ご希望の構成、在庫、納期を確認します。',
+    quoteStepSelect: '構成を選ぶ',
+    quoteStepSelectBody: 'カラー、サイズ、数量を選び、問い合わせに追加します。',
+    quoteWorkflow: '商品確認から見積案内まで',
+    quoteWorkflowLead: 'ご希望のオプションと数量を選択してください。内容を確認して条件をご案内します。',
     quoteNoticeText: '見積依頼は最終取引の確定ではありません。Noblesseが在庫、納期、供給条件を確認した後、最終見積基準を案内します。',
     shippingNoticeText: '出荷日程、包装、交換可否は見積確認後、商品状態と取引条件に応じて別途案内します。',
     sizeGuideText: 'ピアスのサイズと着用感はデザインや測定方法により異なります。見積依頼前に詳細仕様をご確認ください。',
@@ -612,8 +618,14 @@ const cleanDetailCopy = {
     quietDetailLead: '圖片、材質、選項與詢價說明分區呈現，方便買家快速確認重點。',
     materialHeadline: '材質標準清楚標示。',
     materialGuideText: (material) => `此商品以 ${material} 登錄。鍍層、表面處理與各市場標示要求，請於詢價確認階段再次確認。`,
-    quoteWorkflow: '詢價流程',
-    quoteWorkflowLead: '本頁是 B2B 詢價用的商品檢視工具。',
+    quoteStepConfirm: '提供條件',
+    quoteStepConfirmBody: '確認價格與出貨時間後向您說明。',
+    quoteStepReceive: '確認內容',
+    quoteStepReceiveBody: '確認您選擇的組合、庫存與交期。',
+    quoteStepSelect: '選擇組合',
+    quoteStepSelectBody: '選擇顏色、尺寸與數量後加入詢問清單。',
+    quoteWorkflow: '從商品確認到報價說明',
+    quoteWorkflowLead: '選擇需要的選項與數量後留下詢問，我們確認內容後說明可行條件。',
     quoteNoticeText: '詢價請求並非最終交易確認。Noblesse 會確認庫存、交期與供應條件後，再提供最終報價基準。',
     shippingNoticeText: '出貨時程、包裝與交換可否，將於詢價確認後依商品狀態與交易條件另行說明。',
     sizeGuideText: '耳飾尺寸與配戴感會因設計與測量方式而異。詢價前請確認登錄的詳細規格。',
@@ -1167,7 +1179,10 @@ export function ProductDetailView({
   const wearingGuideBody = productDetailContent.wearingGuide || ''
   const careGuideBody = productDetailContent.careGuide || productDetailContent.care || ''
   const shippingNoticeBody = productDetailContent.exchangeNotice || copy.shippingNoticeText
-  const quoteWorkflowLead = productDetailContent.wholesaleNotice || copy.quoteWorkflowLead
+  const customQuoteWorkflowLead = String(productDetailContent.wholesaleNotice || '').trim()
+  const quoteWorkflowLead = customQuoteWorkflowLead && !/(?:\bB2B\b|도매|wholesale|卸|批發)/i.test(customQuoteWorkflowLead)
+    ? customQuoteWorkflowLead
+    : copy.quoteWorkflowLead
   const productTaxonomy = product.taxonomy || {}
   const galleryImages = buildGalleryImages(product, productAlt, copy)
   const saleTypeLabels = {
@@ -1494,14 +1509,18 @@ export function ProductDetailView({
     </section>}
 
     <section className="pd-editorial pd-delivery-section" data-section={hasMaterialAndCare ? '04' : '03'} id="pd-delivery">
-      <div className="pd-section-heading">
-        <div><p>{copy.wholesale}</p><h2>{copy.quoteWorkflow}</h2></div>
-        <span>{quoteWorkflowLead}</span>
-      </div>
-      <div className="pd-process-grid">
-        <article><strong>01</strong><h3>{copy.quoteStepSelect}</h3><p>{copy.quoteStepSelectBody}</p></article>
-        <article><strong>02</strong><h3>{copy.quoteStepReceive}</h3><p>{copy.quoteStepReceiveBody}</p></article>
-        <article><strong>03</strong><h3>{copy.quoteStepConfirm}</h3><p>{copy.quoteStepConfirmBody}</p></article>
+      <div className="pd-process-layout">
+        <div className="pd-process-intro">
+          <div className="pd-section-heading">
+            <div><p>{copy.wholesale}</p><h2>{copy.quoteWorkflow}</h2></div>
+            <span>{quoteWorkflowLead}</span>
+          </div>
+        </div>
+        <ol className="pd-process-grid pd-process-list">
+          <li><strong>01</strong><div><h3>{copy.quoteStepSelect}</h3><p>{copy.quoteStepSelectBody}</p></div></li>
+          <li><strong>02</strong><div><h3>{copy.quoteStepReceive}</h3><p>{copy.quoteStepReceiveBody}</p></div></li>
+          <li><strong>03</strong><div><h3>{copy.quoteStepConfirm}</h3><p>{copy.quoteStepConfirmBody}</p></div></li>
+        </ol>
       </div>
       <aside className="pd-shipping-note"><strong>{copy.shippingNotice}</strong><p>{shippingNoticeBody}</p></aside>
     </section>
