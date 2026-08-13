@@ -680,9 +680,9 @@
   }
 
   .product-list-content .product-sort-button {
-    min-height: 36px;
-    padding: 6px 7px;
-    font-size: 10px;
+    min-height: 32px;
+    padding: 4px 6px;
+    font-size: 9.5px;
   }
 
   .product-list-content .product-filter-control {
@@ -690,14 +690,20 @@
   }
 
   .product-list-content .product-filter-trigger {
-    min-width: 72px;
-    min-height: 36px;
-    gap: 5px;
-    padding: 7px 9px;
+    min-width: 64px;
+    min-height: 32px;
+    gap: 4px;
+    padding: 5px 7px;
   }
 
   .product-list-content .product-filter-trigger b {
-    font-size: 10px;
+    font-size: 9px;
+  }
+
+  .product-list-content .product-filter-trigger svg,
+  .product-list-content .product-sort-button svg {
+    width: 14px;
+    height: 14px;
   }
 
   .product-list-content .product-primary-tabs {
@@ -706,9 +712,9 @@
   }
 
   .product-list-content .product-primary-tabs button {
-    min-height: 34px;
-    padding: 7px 11px;
-    font-size: 11px;
+    min-height: 32px;
+    padding: 6px 9px;
+    font-size: 10px;
   }
 
   .product-list-content .product-filter-popover {
@@ -771,8 +777,13 @@
   }
 
   .catalog-card .catalog-quick-action {
-    width: 33px;
-    height: 33px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .catalog-card .catalog-quick-action svg {
+    width: 15px;
+    height: 15px;
   }
 
   .catalog-card .catalog-body {
@@ -823,8 +834,8 @@
   }
 
   .catalog-card .catalog-quick-action {
-    width: 31px;
-    height: 31px;
+    width: 29px;
+    height: 29px;
   }
 }
 

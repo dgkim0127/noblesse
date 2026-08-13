@@ -33,3 +33,10 @@ test('product grids keep four, three and two column storefront breakpoints', () 
   assert.match(css, /@media \(max-width: 1100px\)[\s\S]*?repeat\(3,/)
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?repeat\(2,/)
 })
+
+test('mobile discovery controls use compact visual button sizes', () => {
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.product-list-content \.product-sort-button \{[\s\S]*?min-height: 32px;/)
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.product-list-content \.product-filter-trigger \{[\s\S]*?min-width: 64px;[\s\S]*?min-height: 32px;/)
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.product-list-content \.product-primary-tabs button \{[\s\S]*?min-height: 32px;/)
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.catalog-card \.catalog-quick-action \{[\s\S]*?width: 30px;[\s\S]*?height: 30px;/)
+})
