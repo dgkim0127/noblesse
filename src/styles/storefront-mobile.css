@@ -422,15 +422,14 @@
   }
 
   .home-showcase-dots {
-    position: absolute;
-    right: 0;
-    bottom: 12px;
-    left: 0;
+    position: static;
     z-index: 8;
     display: flex;
+    min-height: 30px;
     align-items: center;
     justify-content: center;
     gap: 1px;
+    background: #fffdf9;
     pointer-events: none;
   }
 
@@ -452,15 +451,15 @@
     width: 7px;
     height: 7px;
     border-radius: 999px;
-    background: rgb(255 255 255 / 62%);
-    box-shadow: 0 0 0 1px rgb(42 35 79 / 20%);
+    background: rgb(42 35 79 / 24%);
+    box-shadow: none;
     transform: translate(-50%, -50%);
     transition: width 160ms ease, background 160ms ease;
   }
 
   .home-showcase-dots button.is-active::before {
     width: 18px;
-    background: #fff;
+    background: var(--noblesse-main);
   }
 
   .home-showcase-categories {

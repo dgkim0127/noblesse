@@ -41,6 +41,7 @@ test('mobile showcase renders one 4 by 5 card with synchronized dots', () => {
   assert.match(mobile, /\.home-showcase-panel \{[\s\S]*flex: 0 0 100vw !important;[\s\S]*width: 100vw !important/)
   assert.match(mobile, /aspect-ratio: 4 \/ 5 !important/)
   assert.match(mobile, /scroll-snap-type: x mandatory !important/)
+  assert.match(mobile, /\.home-showcase-dots \{[\s\S]*position: static;[\s\S]*min-height: 30px;[\s\S]*background: #fffdf9;/)
 })
 
 test('mobile tabs stay compact and account owns the sign-out action', () => {
