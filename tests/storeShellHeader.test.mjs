@@ -15,10 +15,25 @@ test('header renders the inquiry list as a cart-style action with an item count'
 
   assert.match(shell, /ShoppingCart/)
   assert.match(shell, /function InquiryListHeaderAction/)
-  assert.match(shell, /className="inquiry-list-header-action"/)
+  assert.match(shell, /className=\{`inquiry-list-header-action/)
   assert.match(shell, /className="inquiry-list-count"/)
   assert.match(styles, /\.inquiry-list-header-action/)
   assert.match(styles, /\.inquiry-list-count/)
+})
+
+test('adding a detail item flies a circular indicator into the inquiry list header action', () => {
+  const shell = readWorkspaceFile('src/components/StoreShell.jsx')
+  const detail = readWorkspaceFile('src/pages/ProductDetailPage.jsx')
+  const styles = readWorkspaceFile('src/App.css')
+
+  assert.match(detail, /ref=\{addToInquiryButtonRef\}/)
+  assert.match(detail, /new CustomEvent\('noblesse:inquiry-item-added'/)
+  assert.match(shell, /window\.addEventListener\('noblesse:inquiry-item-added'/)
+  assert.match(shell, /className="inquiry-list-flight"/)
+  assert.match(shell, /isReceiving=\{isInquiryReceiving\}/)
+  assert.match(styles, /@keyframes inquiry-list-flight-to-header/)
+  assert.match(styles, /@keyframes inquiry-list-header-receive/)
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/)
 })
 
 test('admin my-inquiries header action opens the admin inquiry queue', () => {

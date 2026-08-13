@@ -467,12 +467,12 @@ function IconAction({ children, label, onClick, to, className = '' }) {
   </NavLink>
 }
 
-function InquiryListHeaderAction({ count, label, size = 18, to }) {
+function InquiryListHeaderAction({ count, isReceiving = false, label, size = 18, to }) {
   const safeCount = Number.isFinite(count) ? count : 0
   const badgeLabel = safeCount > 99 ? '99+' : String(safeCount)
   const ariaLabel = safeCount > 0 ? `${label} ${badgeLabel}` : label
 
-  return <IconAction className="inquiry-list-header-action" label={ariaLabel} to={to}>
+  return <IconAction className={`inquiry-list-header-action${isReceiving ? ' is-receiving' : ''}`} label={ariaLabel} to={to}>
     <ShoppingCart size={size} />
     {safeCount > 0 && <span className="inquiry-list-count" aria-hidden="true">{badgeLabel}</span>}
   </IconAction>
@@ -488,6 +488,7 @@ export function StoreShell() {
   const compactSearchCloseTimerRef = useRef(null)
   const compactSearchVisibleRef = useRef(false)
   const loginModalCloseTimerRef = useRef(null)
+  const inquiryFlightTimersRef = useRef([])
   const [headerSearch, setHeaderSearch] = useState('')
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [compactSearchPhase, setCompactSearchPhase] = useState('closed')
@@ -502,6 +503,8 @@ export function StoreShell() {
   const [loginModalNotice, setLoginModalNotice] = useState('')
   const [isAutoLoginEnabled, setIsAutoLoginEnabled] = useState(true)
   const [isLoginPasswordVisible, setIsLoginPasswordVisible] = useState(false)
+  const [inquiryFlight, setInquiryFlight] = useState(null)
+  const [isInquiryReceiving, setIsInquiryReceiving] = useState(false)
   const {
     dataError,
     dataMode,
@@ -542,6 +545,58 @@ export function StoreShell() {
   const isProductBrowsingRoute = /^\/(?:products|collections|piercing|material|shape)(?:\/|$)/.test(pathnameWithoutLocale)
   const usesHomeStyleHeader = isHomeImageRoute || isProductBrowsingRoute
   const inquiryListCount = Array.isArray(inquiryRows) ? inquiryRows.length : 0
+
+  useEffect(() => {
+    const clearFlightTimers = () => {
+      inquiryFlightTimersRef.current.forEach((timer) => window.clearTimeout(timer))
+      inquiryFlightTimersRef.current = []
+    }
+    const handleInquiryAdded = (event) => {
+      const sourceRect = event.detail?.sourceRect
+      const target = document.querySelector('.inquiry-list-header-action')
+      if (!sourceRect || !target) return
+
+      const targetRect = target.getBoundingClientRect()
+      const startX = Number(sourceRect.left) + Number(sourceRect.width) / 2 - 18
+      const startY = Number(sourceRect.top) + Number(sourceRect.height) / 2 - 18
+      const endX = targetRect.left + targetRect.width / 2 - 18
+      const endY = targetRect.top + targetRect.height / 2 - 18
+      if (![startX, startY, endX, endY].every(Number.isFinite)) return
+
+      clearFlightTimers()
+      setIsInquiryReceiving(false)
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      if (reducedMotion) {
+        setInquiryFlight(null)
+        setIsInquiryReceiving(true)
+        inquiryFlightTimersRef.current = [window.setTimeout(() => setIsInquiryReceiving(false), 420)]
+        return
+      }
+
+      const deltaX = endX - startX
+      const deltaY = endY - startY
+      setInquiryFlight({
+        id: `${Date.now()}-${Math.random()}`,
+        startX,
+        startY,
+        midX: deltaX * 0.48,
+        midY: deltaY * 0.42 - 22,
+        endX: deltaX,
+        endY: deltaY,
+      })
+      inquiryFlightTimersRef.current = [
+        window.setTimeout(() => setIsInquiryReceiving(true), 540),
+        window.setTimeout(() => setInquiryFlight(null), 760),
+        window.setTimeout(() => setIsInquiryReceiving(false), 1080),
+      ]
+    }
+
+    window.addEventListener('noblesse:inquiry-item-added', handleInquiryAdded)
+    return () => {
+      window.removeEventListener('noblesse:inquiry-item-added', handleInquiryAdded)
+      clearFlightTimers()
+    }
+  }, [])
 
   useEffect(() => {
     if (isAdminRoute) {
@@ -901,7 +956,7 @@ export function StoreShell() {
               </>
               : <>
                 {isAdmin && <IconAction className="header-side-icon" label={copy.adminPreview} to={toLocalePath('/admin')}><ShieldCheck size={17} /></IconAction>}
-                {isApproved && <InquiryListHeaderAction count={inquiryListCount} label={sideCopy.inquiryList} size={17} to={toLocalePath(inquiryListPath)} />}
+                {isApproved && <InquiryListHeaderAction count={inquiryListCount} isReceiving={isInquiryReceiving} label={sideCopy.inquiryList} size={17} to={toLocalePath(inquiryListPath)} />}
                 <IconAction className="header-side-icon" label={sideCopy.myInquiries} to={toLocalePath(myInquiriesPath)}><Clock3 size={17} /></IconAction>
                 <IconAction className="header-my-action" label={copy.account} to={toLocalePath('/account')}><UserRound size={17} /><span className="header-my-label">{sideCopy.my}</span></IconAction>
               </>}
@@ -912,7 +967,7 @@ export function StoreShell() {
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}
           {!usesHomeStyleHeader && isApproved && <>
-            <InquiryListHeaderAction count={inquiryListCount} label={sideCopy.inquiryList} to={toLocalePath(inquiryListPath)} />
+            <InquiryListHeaderAction count={inquiryListCount} isReceiving={isInquiryReceiving} label={sideCopy.inquiryList} to={toLocalePath(inquiryListPath)} />
             <IconAction label={sideCopy.myInquiries} to={toLocalePath(myInquiriesPath)}><Clock3 size={18} /></IconAction>
             <IconAction label={copy.account} to={toLocalePath('/account')}><UserRound size={18} /></IconAction>
           </>}
@@ -987,6 +1042,19 @@ export function StoreShell() {
         </button>)}
       </div>}
     </header>
+    {inquiryFlight && <span
+      aria-hidden="true"
+      className="inquiry-list-flight"
+      key={inquiryFlight.id}
+      style={{
+        '--inquiry-flight-start-x': `${inquiryFlight.startX}px`,
+        '--inquiry-flight-start-y': `${inquiryFlight.startY}px`,
+        '--inquiry-flight-mid-x': `${inquiryFlight.midX}px`,
+        '--inquiry-flight-mid-y': `${inquiryFlight.midY}px`,
+        '--inquiry-flight-end-x': `${inquiryFlight.endX}px`,
+        '--inquiry-flight-end-y': `${inquiryFlight.endY}px`,
+      }}
+    />}
     {isLoginModalOpen && <div
       className={`login-modal-overlay ${isLoginModalClosing ? 'is-closing' : ''}`.trim()}
       role="presentation"

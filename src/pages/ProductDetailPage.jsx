@@ -1135,6 +1135,7 @@ export function ProductDetailView({
   const [directError, setDirectError] = useState('')
   const [directInquiry, setDirectInquiry] = useState(null)
   const [failedContextImageKeys, setFailedContextImageKeys] = useState([])
+  const addToInquiryButtonRef = useRef(null)
 
   useEffect(() => {
     const explicitGroups = Array.isArray(product?.optionGroups) && product.optionGroups.length > 0
@@ -1289,11 +1290,24 @@ export function ProductDetailView({
 
   const addSelectedItem = () => {
     if (editor || missingRequiredOptions.length > 0) return
+    const buttonRect = addToInquiryButtonRef.current?.getBoundingClientRect()
     addInquiryItem(product.productId, {
       color: selectedLegacyOptions.color,
       size: selectedLegacyOptions.size,
       selectedOptions: selectedOptionIds,
     }, currentQuantity)
+    if (buttonRect) {
+      window.dispatchEvent(new CustomEvent('noblesse:inquiry-item-added', {
+        detail: {
+          sourceRect: {
+            left: buttonRect.left,
+            top: buttonRect.top,
+            width: buttonRect.width,
+            height: buttonRect.height,
+          },
+        },
+      }))
+    }
   }
   const updateQuantity = (nextQuantity) => setQuantity(normalizeQuantity(nextQuantity, effectiveRequestMoq || 1))
   const submitSelectedProductInquiry = async () => {
@@ -1414,7 +1428,7 @@ export function ProductDetailView({
               value={directMemo}
             />
             <div className="pd-direct-actions">
-              <button className="pd-secondary-action" disabled={Boolean(editor) || missingRequiredOptions.length > 0} type="button" onClick={addSelectedItem}><Plus size={17} />{copy.addToInquiry}</button>
+              <button className="pd-secondary-action" disabled={Boolean(editor) || missingRequiredOptions.length > 0} ref={addToInquiryButtonRef} type="button" onClick={addSelectedItem}><Plus size={17} />{copy.addToInquiry}</button>
               <button
                 className="pd-primary-action"
                 disabled={Boolean(editor) || directStatus === 'submitting' || missingRequiredOptions.length > 0}
