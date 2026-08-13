@@ -1,4 +1,5 @@
 import { Heart, LockKeyhole, Plus } from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatAdminPriceBook } from '../config/currency'
@@ -46,9 +47,17 @@ const cardCopy = {
   },
 }
 
+const memberActionNoticeCopy = {
+  kr: '회원가입 또는 로그인 후 이용할 수 있어요.',
+  en: 'Sign up or sign in to use this feature.',
+  jp: '会員登録またはログイン後にご利用いただけます。',
+  cn: '註冊會員或登入後即可使用。',
+}
+
 export function CatalogCard({ product }) {
-  const { addInquiryItem, approvedPrice, getAdminPriceBooks, getPrice, isAdmin, isApproved } = useCommerce()
+  const { addInquiryItem, approvedPrice, getAdminPriceBooks, getPrice, isAdmin, isApproved, viewerState } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
+  const [isFavorite, setIsFavorite] = useState(false)
   const price = getPrice(product.productId)
   const copy = resolveLocaleCopy(cardCopy, locale)
   const adminPriceLabel = resolveLocaleCopy({ kr: '관리자 가격', en: 'Admin prices', jp: '管理者価格', cn: '管理员价格' }, locale, 'en')
@@ -60,6 +69,32 @@ export function CatalogCard({ product }) {
   const detailPath = toLocalePath(`/products/${product.productId}`)
   const adminPriceBooks = isAdmin ? getAdminPriceBooks(product.productId) : []
   const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
+  const memberActionNotice = resolveLocaleCopy(memberActionNoticeCopy, locale, 'en')
+  const actionLockLabel = viewerState === 'guest' ? memberActionNotice : copy.lockedButton
+  const addActionDisabled = viewerState !== 'guest' && !canUseTradeTerms
+
+  const openMemberAccessModal = () => {
+    window.dispatchEvent(new CustomEvent('noblesse:open-login-modal', {
+      detail: { notice: memberActionNotice },
+    }))
+  }
+
+  const handleAddInquiryClick = () => {
+    if (viewerState === 'guest') {
+      openMemberAccessModal()
+      return
+    }
+    if (!canUseTradeTerms) return
+    addInquiryItem(product.productId)
+  }
+
+  const handleFavoriteClick = () => {
+    if (viewerState === 'guest') {
+      openMemberAccessModal()
+      return
+    }
+    setIsFavorite((current) => !current)
+  }
   const favoriteLabel = resolveLocaleCopy({ kr: '좋아요', en: 'Favorite', jp: 'お気に入り', cn: '收藏' }, locale, 'en')
   return <article className="catalog-card">
     <div className="catalog-media">
@@ -71,9 +106,9 @@ export function CatalogCard({ product }) {
       <div className="catalog-quick-actions" aria-label={`${productName} actions`}>
         {canUseTradeTerms && requiresOptionSelection
           ? <Link className="catalog-quick-action" to={detailPath} title={copy.selectOptions} aria-label={copy.selectOptions}><Plus size={17} /></Link>
-          : <button className="catalog-quick-action" type="button" disabled={!canUseTradeTerms} onClick={() => addInquiryItem(product.productId)} title={canUseTradeTerms ? copy.add : copy.lockedButton} aria-label={canUseTradeTerms ? copy.add : copy.lockedButton}><Plus size={17} /></button>}
-        <button className="catalog-quick-action" type="button" title={favoriteLabel} aria-label={favoriteLabel}>
-          <Heart size={17} />
+          : <button className="catalog-quick-action" type="button" disabled={addActionDisabled} onClick={handleAddInquiryClick} title={canUseTradeTerms ? copy.add : actionLockLabel} aria-label={canUseTradeTerms ? copy.add : actionLockLabel}><Plus size={17} /></button>}
+        <button className={`catalog-quick-action${isFavorite ? ' is-saved' : ''}`} type="button" aria-pressed={isFavorite} title={favoriteLabel} aria-label={favoriteLabel} onClick={handleFavoriteClick}>
+          <Heart size={17} fill={isFavorite ? 'currentColor' : 'none'} />
         </button>
       </div>
     </div>
@@ -86,6 +121,6 @@ export function CatalogCard({ product }) {
     </div>
     {canUseTradeTerms && requiresOptionSelection
       ? <Link className="add-inquiry" to={detailPath}><Plus size={16} />{copy.selectOptions}</Link>
-      : <button className="add-inquiry" type="button" disabled={!canUseTradeTerms} onClick={() => addInquiryItem(product.productId)}><Plus size={16} />{canUseTradeTerms ? copy.add : copy.lockedButton}</button>}
+      : <button className="add-inquiry" type="button" disabled={addActionDisabled} onClick={handleAddInquiryClick}><Plus size={16} />{canUseTradeTerms ? copy.add : actionLockLabel}</button>}
   </article>
 }

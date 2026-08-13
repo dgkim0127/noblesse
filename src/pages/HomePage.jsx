@@ -1157,11 +1157,19 @@ const defaultProductBadgeLabel = {
   cn: '穿孔',
 }
 
+const memberActionNoticeCopy = {
+  kr: '회원가입 또는 로그인 후 이용할 수 있어요.',
+  en: 'Sign up or sign in to use this feature.',
+  jp: '会員登録またはログイン後にご利用いただけます。',
+  cn: '註冊會員或登入後即可使用。',
+}
+
 function HomeProductCard({ product, index, variant = 'default', localeOverride = '' }) {
   const { addInquiryItem, approvedPrice, getAdminPriceBooks, getPrice, isAdmin, isApproved, viewerState } = useCommerce()
   const { locale: routeLocale, toLocalePath } = useLocalePath()
   const navigate = useNavigate()
   const locale = localeOverride || routeLocale
+  const memberActionNotice = resolveLocaleCopy(memberActionNoticeCopy, locale, 'en')
   const [isFavorite, setIsFavorite] = useState(false)
   const [favoriteNotice, setFavoriteNotice] = useState('')
   const [shouldLoadAlternateImages, setShouldLoadAlternateImages] = useState(false)
@@ -1201,14 +1209,18 @@ function HomeProductCard({ product, index, variant = 'default', localeOverride =
     if (cardImages.length > 1) setShouldLoadAlternateImages(true)
   }
 
+  const openMemberAccessModal = () => {
+    window.dispatchEvent(new CustomEvent('noblesse:open-login-modal', {
+      detail: { notice: memberActionNotice },
+    }))
+  }
+
   const handleFavoriteClick = (event) => {
     event.preventDefault()
     event.stopPropagation()
 
     if (viewerState === 'guest') {
-      setFavoriteNotice('로그인 후 사용할 수 있어요')
-      window.clearTimeout(window.__noblesseFavoriteNoticeTimer)
-      window.__noblesseFavoriteNoticeTimer = window.setTimeout(() => setFavoriteNotice(''), 1800)
+      openMemberAccessModal()
       return
     }
 
@@ -1218,6 +1230,11 @@ function HomeProductCard({ product, index, variant = 'default', localeOverride =
   const handleInquiryActionClick = (event) => {
     event.preventDefault()
     event.stopPropagation()
+
+    if (viewerState === 'guest') {
+      openMemberAccessModal()
+      return
+    }
 
     if (!isApproved) {
       setFavoriteNotice('로그인 후 이용 가능')

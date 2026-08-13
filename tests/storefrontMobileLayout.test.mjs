@@ -90,3 +90,8 @@ test('mobile quote guide uses compact type scales across narrow screens', () => 
   assert.match(mobile, /\.pd-process-list h3 \{[\s\S]*font-size: clamp\(18px, 4\.8vw, 19px\) !important/)
   assert.match(mobile, /\.pd-process-list p \{[\s\S]*font-size: 14px !important/)
 })
+
+test('mobile product section navigation keeps labels on one line', () => {
+  assert.match(mobile, /\.pd-section-nav \{[\s\S]*min-height: 48px !important/)
+  assert.match(mobile, /\.pd-section-nav a \{[\s\S]*flex: 1 1 0 !important;[\s\S]*font-size: 11px !important;[\s\S]*white-space: nowrap !important/)
+})

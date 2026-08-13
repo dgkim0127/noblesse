@@ -613,6 +613,33 @@
     padding: 18px !important;
   }
 
+  /* Keep every product-detail section label visible without a two-line sticky bar. */
+  .site-shell:not(.admin-route-shell) .pd-section-nav {
+    gap: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 48px !important;
+    padding: 12px 8px !important;
+    overflow: visible !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-section-nav a {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    padding: 0 4px !important;
+    color: #746b76 !important;
+    font-size: 11px !important;
+    letter-spacing: 0 !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+    text-transform: none !important;
+    white-space: nowrap !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-section-nav a::after {
+    bottom: -6px !important;
+  }
+
   /* Quote guide: restore the vertical timeline after legacy three-column rules. */
   .site-shell:not(.admin-route-shell) .pd-delivery-section {
     padding: 44px 18px 34px !important;
