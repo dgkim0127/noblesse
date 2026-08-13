@@ -557,10 +557,10 @@ export function StoreShell() {
       if (!sourceRect || !target) return
 
       const targetRect = target.getBoundingClientRect()
-      const startX = Number(sourceRect.left) + Number(sourceRect.width) / 2 - 18
-      const startY = Number(sourceRect.top) + Number(sourceRect.height) / 2 - 18
-      const endX = targetRect.left + targetRect.width / 2 - 18
-      const endY = targetRect.top + targetRect.height / 2 - 18
+      const startX = Number(sourceRect.left) + Number(sourceRect.width) / 2 - 16
+      const startY = Number(sourceRect.top) + Number(sourceRect.height) / 2 - 16
+      const endX = targetRect.left + targetRect.width / 2 - 16
+      const endY = targetRect.top + targetRect.height / 2 - 16
       if (![startX, startY, endX, endY].every(Number.isFinite)) return
 
       clearFlightTimers()
@@ -569,7 +569,7 @@ export function StoreShell() {
       if (reducedMotion) {
         setInquiryFlight(null)
         setIsInquiryReceiving(true)
-        inquiryFlightTimersRef.current = [window.setTimeout(() => setIsInquiryReceiving(false), 420)]
+        inquiryFlightTimersRef.current = [window.setTimeout(() => setIsInquiryReceiving(false), 300)]
         return
       }
 
@@ -585,9 +585,9 @@ export function StoreShell() {
         endY: deltaY,
       })
       inquiryFlightTimersRef.current = [
-        window.setTimeout(() => setIsInquiryReceiving(true), 540),
-        window.setTimeout(() => setInquiryFlight(null), 760),
-        window.setTimeout(() => setIsInquiryReceiving(false), 1080),
+        window.setTimeout(() => setIsInquiryReceiving(true), 350),
+        window.setTimeout(() => setInquiryFlight(null), 520),
+        window.setTimeout(() => setIsInquiryReceiving(false), 760),
       ]
     }
 

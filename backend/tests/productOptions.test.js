@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   createLegacyOptionGroups,
+  getEffectiveOptionGroups,
   getOptionPublishIssues,
   normalizeOptionGroups,
   resolveSelectedOptions,
@@ -51,6 +52,35 @@ test("legacy colors and sizes become stable required option groups", () => {
     colors: ["Gold", "Pink"],
     sizes: ["6mm", "8mm"]
   });
+});
+
+test("archive hints become matching quote options while unsafe parsed lengths are ignored", () => {
+  const groups = getEffectiveOptionGroups({
+    colors: [],
+    sizes: [],
+    specs: {
+      optionHints: {
+        colors: ["오알", "골드", "핑크"],
+        barLengthsMm: [6, 8, 8007]
+      }
+    }
+  });
+
+  assert.deepEqual(groups.map((group) => group.id), ["legacy-color", "legacy-size"]);
+  assert.deepEqual(groups[0].values.map((value) => value.labels.kr), ["오팔", "골드", "핑크"]);
+  assert.deepEqual(groups[1].values.map((value) => value.labels.kr), ["6mm", "8mm"]);
+
+  const selected = resolveSelectedOptions(
+    { specs: { optionHints: { colors: ["오알", "골드", "핑크"], barLengthsMm: [6, 8] } } },
+    {
+      selectedOptions: [
+        { groupId: groups[0].id, valueId: groups[0].values[0].id },
+        { groupId: groups[1].id, valueId: groups[1].values[1].id }
+      ]
+    }
+  );
+  assert.equal(selected.color, "오팔");
+  assert.equal(selected.size, "8mm");
 });
 
 test("selected option IDs are validated and stored as localized snapshots", () => {

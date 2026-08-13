@@ -193,6 +193,7 @@ async function querySnapshot(client) {
       p.image_set,
       p.colors,
       p.sizes,
+      p.specs,
       p.option_groups,
       p.detail_content,
       p.is_visible,

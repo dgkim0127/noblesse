@@ -5,6 +5,7 @@ import test from 'node:test'
 const page = readFileSync('src/pages/ProductsPage.jsx', 'utf8')
 const card = readFileSync('src/components/CatalogCard.jsx', 'utf8')
 const css = readFileSync('src/styles/product-catalog-premium.css', 'utf8')
+const quickOptionCss = readFileSync('src/styles/catalog-quick-option.css', 'utf8')
 
 test('product discovery keeps a compact summary and accessible filter drawer', () => {
   assert.match(page, /className="product-page-summary"/)
@@ -26,6 +27,17 @@ test('catalog cards use portrait media and request alternate photos only on fine
   assert.match(card, /catalog-quick-action--inquiry/)
   assert.doesNotMatch(card, /className="add-inquiry"/)
   assert.match(css, /\.catalog-card \.catalog-media,[\s\S]*?aspect-ratio: 4 \/ 5;/)
+})
+
+test('catalog inquiry action opens a quick option sheet before adding', () => {
+  assert.match(card, /<SlidersHorizontal size=\{17\}/)
+  assert.match(card, /className="catalog-option-dialog"/)
+  assert.match(card, /getMissingRequiredProductOptions\(optionGroups, quickOptionSelection\)/)
+  assert.match(card, /selectedOptions: selectedOptionPairs\(quickOptionSelection\)/)
+  assert.match(card, /const added = addInquiryItem/)
+  assert.match(card, /new CustomEvent\('noblesse:inquiry-item-added'/)
+  assert.match(quickOptionCss, /\.catalog-option-dialog \{[\s\S]*?width: min\(460px,/)
+  assert.match(quickOptionCss, /@media \(max-width: 760px\)[\s\S]*?\.catalog-option-dialog \{[\s\S]*?width: 100%;/)
 })
 
 test('product grids keep four, three and two column storefront breakpoints', () => {

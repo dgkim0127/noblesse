@@ -26,3 +26,21 @@ test('legacy opal typo is corrected in catalog colors and localized option label
     cn: '\u6B50\u6CCA',
   })
 })
+
+test('archive option hints fill missing colors and safe bar lengths', () => {
+  const product = adaptApiProduct({
+    code: 'NPI-OPTIONS',
+    nameKo: 'Archive options',
+    colors: [],
+    sizes: [],
+    specs: {
+      optionHints: {
+        colors: ['\uC624\uC54C', '\uACE8\uB4DC', '\uD551\uD06C'],
+        barLengthsMm: [6, 8, 8007],
+      },
+    },
+  })
+
+  assert.deepEqual(product.colors, ['\uC624\uD314', '\uACE8\uB4DC', '\uD551\uD06C'])
+  assert.deepEqual(product.sizes, ['6mm', '8mm'])
+})

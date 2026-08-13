@@ -1,12 +1,14 @@
-import { Heart, LockKeyhole, Plus } from 'lucide-react'
-import { useState } from 'react'
+import { Check, Heart, LockKeyhole, Minus, Plus, SlidersHorizontal, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatAdminPriceBook } from '../config/currency'
 import { formatMoney } from '../utils/commerce'
 import { getLocalizedProductAlt, getLocalizedProductName, resolveLocaleCopy, useLocalePath } from '../utils/locale'
 import { imagePresentationStyle, productGalleryEntries } from '../utils/productImageGallery'
-import { getEffectiveProductOptionGroups } from '../utils/productOptions'
+import { getEffectiveProductOptionGroups, getLocalizedOptionLabel, getMissingRequiredProductOptions, selectedOptionPairs } from '../utils/productOptions'
+import '../styles/catalog-quick-option.css'
 
 const cardCopy = {
   kr: {
@@ -15,6 +17,13 @@ const cardCopy = {
     lockedButton: '로그인 필요',
     minQty: 'MOQ',
     memberPrice: '거래 조건',
+    noOptions: '별도 선택 옵션이 없는 상품입니다.',
+    quickAdd: '견적 리스트에 담기',
+    quickClose: '빠른 선택 닫기',
+    quickEyebrow: '빠른 선택',
+    quickTitle: '옵션 및 수량 선택',
+    quantity: '수량',
+    required: '필수',
     selectOptions: '옵션 선택',
     unavailable: '가격 미등록',
   },
@@ -24,6 +33,13 @@ const cardCopy = {
     lockedButton: 'Sign in required',
     minQty: 'Minimum qty',
     memberPrice: 'Trade terms',
+    noOptions: 'This product has no additional options.',
+    quickAdd: 'Add to Inquiry List',
+    quickClose: 'Close quick selection',
+    quickEyebrow: 'Quick selection',
+    quickTitle: 'Select options and quantity',
+    quantity: 'Quantity',
+    required: 'Required',
     selectOptions: 'Select options',
     unavailable: 'Price unavailable',
   },
@@ -33,6 +49,13 @@ const cardCopy = {
     lockedButton: 'ログインが必要です',
     minQty: '最小数量',
     memberPrice: '取引条件',
+    noOptions: '追加で選択するオプションはありません。',
+    quickAdd: '見積もりリストに追加',
+    quickClose: 'クイック選択を閉じる',
+    quickEyebrow: 'クイック選択',
+    quickTitle: 'オプションと数量を選択',
+    quantity: '数量',
+    required: '必須',
     selectOptions: 'オプションを選択',
     unavailable: '価格未登録',
   },
@@ -42,6 +65,13 @@ const cardCopy = {
     lockedButton: '需要登入',
     minQty: '最小数量',
     memberPrice: '交易条件',
+    noOptions: '此商品沒有其他選項。',
+    quickAdd: '加入詢價清單',
+    quickClose: '關閉快速選擇',
+    quickEyebrow: '快速選擇',
+    quickTitle: '選擇規格與數量',
+    quantity: '數量',
+    required: '必填',
     selectOptions: '选择选项',
     unavailable: '价格未登记',
   },
@@ -61,6 +91,10 @@ export function CatalogCard({ product, priority = false }) {
   const [shouldLoadAlternateImage, setShouldLoadAlternateImage] = useState(false)
   const [showAlternateImage, setShowAlternateImage] = useState(false)
   const [failedImageSources, setFailedImageSources] = useState([])
+  const [isQuickOptionOpen, setIsQuickOptionOpen] = useState(false)
+  const [quickOptionSelection, setQuickOptionSelection] = useState({})
+  const [quickQuantity, setQuickQuantity] = useState(1)
+  const quickAddButtonRef = useRef(null)
   const price = getPrice(product.productId)
   const copy = resolveLocaleCopy(cardCopy, locale)
   const adminPriceLabel = resolveLocaleCopy({ kr: '관리자 가격', en: 'Admin prices', jp: '管理者価格', cn: '管理员价格' }, locale, 'en')
@@ -74,14 +108,28 @@ export function CatalogCard({ product, priority = false }) {
   const canShowPrimaryImage = Boolean(primaryImageSource) && !failedImageSources.includes(primaryImageSource)
   const canShowAlternateImage = Boolean(alternateImageSource) && !failedImageSources.includes(alternateImageSource)
   const canUseTradeTerms = isApproved && price
-  const hasExplicitOptions = Array.isArray(product.optionGroups || product.option_groups) && (product.optionGroups || product.option_groups).length > 0
-  const requiresOptionSelection = hasExplicitOptions && getEffectiveProductOptionGroups(product).some((group) => group.required)
-  const detailPath = toLocalePath(`/products/${product.productId}`)
   const adminPriceBooks = isAdmin ? getAdminPriceBooks(product.productId) : []
   const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
   const memberActionNotice = resolveLocaleCopy(memberActionNoticeCopy, locale, 'en')
   const actionLockLabel = viewerState === 'guest' ? memberActionNotice : copy.lockedButton
   const addActionDisabled = viewerState !== 'guest' && !canUseTradeTerms
+  const optionGroups = getEffectiveProductOptionGroups(product)
+  const quickMoq = Math.max(1, Number(price?.moq || product.moqDefault || 1))
+  const missingQuickOptions = getMissingRequiredProductOptions(optionGroups, quickOptionSelection)
+
+  useEffect(() => {
+    if (!isQuickOptionOpen) return undefined
+    const previousOverflow = document.body.style.overflow
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') setIsQuickOptionOpen(false)
+    }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleEscape)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleEscape)
+    }
+  }, [isQuickOptionOpen])
 
   const prepareAlternateImage = () => {
     if (!alternateImageSource || typeof window === 'undefined') return
@@ -103,13 +151,40 @@ export function CatalogCard({ product, priority = false }) {
     }))
   }
 
-  const handleAddInquiryClick = () => {
+  const handleQuickOptionOpen = () => {
     if (viewerState === 'guest') {
       openMemberAccessModal()
       return
     }
     if (!canUseTradeTerms) return
-    addInquiryItem(product.productId)
+    setQuickOptionSelection(Object.fromEntries(optionGroups.flatMap((group) => {
+      const activeValues = group.values.filter((value) => value.active)
+      return activeValues.length === 1 ? [[group.id, activeValues[0].id]] : []
+    })))
+    setQuickQuantity(quickMoq)
+    setIsQuickOptionOpen(true)
+  }
+
+  const handleQuickAdd = () => {
+    if (missingQuickOptions.length > 0) return
+    const sourceRect = quickAddButtonRef.current?.getBoundingClientRect()
+    const added = addInquiryItem(product.productId, {
+      selectedOptions: selectedOptionPairs(quickOptionSelection),
+    }, quickQuantity)
+    if (!added) return
+    if (sourceRect) {
+      window.dispatchEvent(new CustomEvent('noblesse:inquiry-item-added', {
+        detail: {
+          sourceRect: {
+            left: sourceRect.left,
+            top: sourceRect.top,
+            width: sourceRect.width,
+            height: sourceRect.height,
+          },
+        },
+      }))
+    }
+    setIsQuickOptionOpen(false)
   }
 
   const handleFavoriteClick = () => {
@@ -120,7 +195,6 @@ export function CatalogCard({ product, priority = false }) {
     setIsFavorite((current) => !current)
   }
   const favoriteLabel = resolveLocaleCopy({ kr: '좋아요', en: 'Favorite', jp: 'お気に入り', cn: '收藏' }, locale, 'en')
-  const optionGroups = getEffectiveProductOptionGroups(product)
   const colorGroup = optionGroups.find((group) => group.legacyKey === 'color' || group.id === 'legacy-color')
   const localizedColor = colorGroup?.values?.[0]?.labels
     ? resolveLocaleCopy(colorGroup.values[0].labels, locale, 'en')
@@ -141,9 +215,7 @@ export function CatalogCard({ product, priority = false }) {
         <button className={`catalog-quick-action catalog-quick-action--favorite${isFavorite ? ' is-saved' : ''}`} type="button" aria-pressed={isFavorite} title={favoriteLabel} aria-label={favoriteLabel} onClick={handleFavoriteClick}>
           <Heart size={17} fill={isFavorite ? 'currentColor' : 'none'} />
         </button>
-        {canUseTradeTerms && requiresOptionSelection
-          ? <Link className="catalog-quick-action catalog-quick-action--inquiry" to={detailPath} title={copy.selectOptions} aria-label={copy.selectOptions}><Plus size={17} /></Link>
-          : <button className="catalog-quick-action catalog-quick-action--inquiry" type="button" disabled={addActionDisabled} onClick={handleAddInquiryClick} title={canUseTradeTerms ? copy.add : actionLockLabel} aria-label={canUseTradeTerms ? copy.add : actionLockLabel}><Plus size={17} /></button>}
+        <button className="catalog-quick-action catalog-quick-action--inquiry" type="button" disabled={addActionDisabled} onClick={handleQuickOptionOpen} title={canUseTradeTerms ? copy.quickTitle : actionLockLabel} aria-label={canUseTradeTerms ? copy.quickTitle : actionLockLabel}><SlidersHorizontal size={17} /></button>
       </div>
     </div>
     <div className="catalog-body">
@@ -153,5 +225,51 @@ export function CatalogCard({ product, priority = false }) {
         ? <div className="approved-price admin-price-books"><strong>{adminPriceLabel}</strong><span className="admin-price-book-grid">{adminPriceItems.map((item, index) => <span className="admin-price-book-item" key={`${item.market}-${item.currency}-${index}`}><img alt={item.flagLabel} className="admin-price-book-flag" src={item.flagSrc} /><span className="admin-price-book-value"><b>{item.amount}</b><span>{item.symbol}</span><em>{item.currency}</em></span></span>)}</span></div>
         : canUseTradeTerms ? <div className="approved-price"><strong>{formatMoney(approvedPrice(product.productId), price.currency)}</strong><span>{copy.minQty} {price.moq} / {copy.memberPrice} · {price.currency}</span></div> : <div className="locked-price"><LockKeyhole size={14} />{isApproved ? copy.unavailable : copy.locked}</div>}
     </div>
+    {isQuickOptionOpen && typeof document !== 'undefined' && createPortal(<div className="catalog-option-overlay" role="presentation" onMouseDown={(event) => {
+      if (event.target === event.currentTarget) setIsQuickOptionOpen(false)
+    }}>
+      <section aria-labelledby={`catalog-option-title-${product.productId}`} aria-modal="true" className="catalog-option-dialog" role="dialog">
+        <header className="catalog-option-dialog-header">
+          {canShowPrimaryImage && <img alt="" aria-hidden="true" src={primaryImageSource} />}
+          <div>
+            <small>{copy.quickEyebrow}</small>
+            <h2 id={`catalog-option-title-${product.productId}`}>{copy.quickTitle}</h2>
+            <p>{productName}</p>
+          </div>
+          <button aria-label={copy.quickClose} className="catalog-option-close" type="button" onClick={() => setIsQuickOptionOpen(false)}><X size={18} /></button>
+        </header>
+        <div className="catalog-option-dialog-body">
+          {optionGroups.length > 0 ? optionGroups.map((group) => {
+            const activeValues = group.values.filter((value) => value.active)
+            return <div className={`catalog-option-group${group.required && !quickOptionSelection[group.id] ? ' is-required' : ''}`} key={group.id}>
+              <span>{getLocalizedOptionLabel(group.labels, locale)}{group.required && <small>{copy.required}</small>}</span>
+              <div>
+                {activeValues.map((value) => <button
+                  aria-pressed={quickOptionSelection[group.id] === value.id}
+                  className={quickOptionSelection[group.id] === value.id ? 'is-active' : ''}
+                  key={value.id}
+                  type="button"
+                  onClick={() => setQuickOptionSelection((current) => ({ ...current, [group.id]: value.id }))}
+                >
+                  {group.type === 'swatch' && <i aria-hidden="true" style={{ backgroundColor: value.swatch || '#f4f1f2' }} />}
+                  {getLocalizedOptionLabel(value.labels, locale)}
+                </button>)}
+              </div>
+            </div>
+          }) : <p className="catalog-option-empty">{copy.noOptions}</p>}
+          <div className="catalog-option-quantity">
+            <span>{copy.quantity}</span>
+            <div>
+              <button aria-label="Decrease quantity" disabled={quickQuantity <= quickMoq} type="button" onClick={() => setQuickQuantity((current) => Math.max(quickMoq, current - quickMoq))}><Minus size={15} /></button>
+              <strong>{quickQuantity}</strong>
+              <button aria-label="Increase quantity" type="button" onClick={() => setQuickQuantity((current) => current + quickMoq)}><Plus size={15} /></button>
+            </div>
+          </div>
+        </div>
+        <footer className="catalog-option-dialog-footer">
+          <button ref={quickAddButtonRef} disabled={missingQuickOptions.length > 0} type="button" onClick={handleQuickAdd}><Check size={18} />{copy.quickAdd}</button>
+        </footer>
+      </section>
+    </div>, document.body)}
   </article>
 }

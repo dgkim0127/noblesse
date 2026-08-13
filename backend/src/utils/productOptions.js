@@ -172,9 +172,29 @@ function legacyValue(kind, value, index) {
   };
 }
 
+const LEGACY_COLOR_CORRECTIONS = new Map([
+  ["오알", "오팔"]
+]);
+
+function normalizeLegacyColors(colors) {
+  return (Array.isArray(colors) ? colors : [])
+    .map(String)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((item) => LEGACY_COLOR_CORRECTIONS.get(item) || item);
+}
+
+function importedBarLengthSizes(specs = {}) {
+  const values = Array.isArray(specs?.optionHints?.barLengthsMm) ? specs.optionHints.barLengthsMm : [];
+  return [...new Set(values
+    .map(Number)
+    .filter((value) => Number.isFinite(value) && value > 0 && value <= 50)
+    .map((value) => `${Number.isInteger(value) ? value : Number(value.toFixed(2))}mm`))];
+}
+
 export function createLegacyOptionGroups({ colors = [], sizes = [] } = {}) {
   const groups = [];
-  const safeColors = Array.isArray(colors) ? colors.map(String).map((item) => item.trim()).filter(Boolean) : [];
+  const safeColors = normalizeLegacyColors(colors);
   const safeSizes = Array.isArray(sizes) ? sizes.map(String).map((item) => item.trim()).filter(Boolean) : [];
   if (safeColors.length > 0) {
     groups.push({
@@ -206,7 +226,12 @@ export function getEffectiveOptionGroups(product = {}) {
       ? product.option_groups
       : [];
   if (explicit.length > 0) return normalizeOptionGroups(explicit) || [];
-  return createLegacyOptionGroups({ colors: product.colors, sizes: product.sizes });
+  const legacyGroups = createLegacyOptionGroups({ colors: product.colors, sizes: product.sizes });
+  if (legacyGroups.length > 0) return legacyGroups;
+  return createLegacyOptionGroups({
+    colors: product.specs?.optionHints?.colors,
+    sizes: importedBarLengthSizes(product.specs)
+  });
 }
 
 function firstLabel(labels = {}) {

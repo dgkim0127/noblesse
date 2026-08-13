@@ -106,6 +106,7 @@ async function loadPricedProduct(client, productCode, market, currency) {
         p.material,
         p.colors,
         p.sizes,
+        p.specs,
         p.option_groups,
         pp.id,
         pp.market,
@@ -142,6 +143,7 @@ async function loadVisibleProduct(client, productCode) {
         p.moq_default,
         p.colors,
         p.sizes,
+        p.specs,
         p.option_groups
       from public.products p
       where p.code = $1

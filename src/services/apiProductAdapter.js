@@ -27,6 +27,14 @@ function normalizeLegacyColors(colors) {
   return normalizeStringArray(colors).map((color) => legacyOptionLabelCorrections[color]?.kr || color)
 }
 
+function normalizeImportedBarLengthSizes(specs) {
+  const values = Array.isArray(specs?.optionHints?.barLengthsMm) ? specs.optionHints.barLengthsMm : []
+  return [...new Set(values
+    .map(Number)
+    .filter((value) => Number.isFinite(value) && value > 0 && value <= 50)
+    .map((value) => `${Number.isInteger(value) ? value : Number(value.toFixed(2))}mm`))]
+}
+
 function normalizeLegacyOptionGroups(value) {
   if (!Array.isArray(value)) return []
 
@@ -75,6 +83,10 @@ export function adaptApiProduct(product, { apiBaseUrl } = {}) {
   const descriptionZhTw = archiveLocalization && (!sourceDescriptionZhTw || hasHangul(sourceDescriptionZhTw))
     ? archiveLocalization.descriptionZhTw
     : sourceDescriptionZhTw || descriptionEn || product.descriptionKo || ''
+  const productColors = normalizeLegacyColors(product.colors)
+  const importedColors = normalizeLegacyColors(product.specs?.optionHints?.colors)
+  const productSizes = normalizeStringArray(product.sizes)
+  const importedBarLengthSizes = normalizeImportedBarLengthSizes(product.specs)
 
   return {
     productId,
@@ -93,8 +105,8 @@ export function adaptApiProduct(product, { apiBaseUrl } = {}) {
     categoryNameCn: product.categoryNameZhTw || product.categoryNameCn || '',
     collectionIds: normalizeStringArray(product.collectionIds),
     material: product.material || '',
-    colors: normalizeLegacyColors(product.colors),
-    sizes: normalizeStringArray(product.sizes),
+    colors: productColors.length > 0 ? productColors : importedColors,
+    sizes: productSizes.length > 0 ? productSizes : importedBarLengthSizes,
     optionGroups: normalizeLegacyOptionGroups(Array.isArray(product.optionGroups)
       ? product.optionGroups
       : product.option_groups),

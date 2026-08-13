@@ -8,7 +8,7 @@ const home = readFileSync('src/pages/HomePage.jsx', 'utf8')
 test('guest catalog card actions open the sign-up or sign-in modal', () => {
   assert.match(catalogCard, /const memberActionNoticeCopy =/)
   assert.match(catalogCard, /new CustomEvent\('noblesse:open-login-modal', \{[\s\S]*detail: \{ notice: memberActionNotice \}/)
-  assert.match(catalogCard, /const handleAddInquiryClick = \(\) => \{[\s\S]*viewerState === 'guest'[\s\S]*openMemberAccessModal\(\)/)
+  assert.match(catalogCard, /const handleQuickOptionOpen = \(\) => \{[\s\S]*viewerState === 'guest'[\s\S]*openMemberAccessModal\(\)/)
   assert.match(catalogCard, /const handleFavoriteClick = \(\) => \{[\s\S]*viewerState === 'guest'[\s\S]*openMemberAccessModal\(\)/)
   assert.match(catalogCard, /disabled=\{addActionDisabled\}/)
 })

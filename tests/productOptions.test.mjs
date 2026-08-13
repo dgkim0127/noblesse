@@ -11,6 +11,7 @@ import {
 import {
   createProductOptionPreset,
   formatSelectedProductOptions,
+  getEffectiveProductOptionGroups,
   getMissingRequiredProductOptions,
   getSelectedOptionSnapshots,
   productOptionCombinationKey,
@@ -51,6 +52,15 @@ const optionGroups = [
 test('required product options stay incomplete until every group has a selected value', () => {
   assert.deepEqual(getMissingRequiredProductOptions(optionGroups, {}).map((group) => group.id), ['color', 'bar-length'])
   assert.deepEqual(getMissingRequiredProductOptions(optionGroups, { color: 'gold', 'bar-length': '6mm' }), [])
+})
+
+test('adapted archive hints become required color and bar length selections', () => {
+  const groups = getEffectiveProductOptionGroups({ colors: ['오팔', '골드', '핑크'], sizes: ['6mm', '8mm'] })
+
+  assert.deepEqual(groups.map((group) => group.id), ['legacy-color', 'legacy-size'])
+  assert.deepEqual(groups[0].values.map((value) => value.labels.kr), ['오팔', '골드', '핑크'])
+  assert.deepEqual(groups[1].values.map((value) => value.labels.kr), ['6mm', '8mm'])
+  assert.equal(groups.every((group) => group.required), true)
 })
 
 test('Gold plus 6mm and Pink plus 8mm produce separate stable inquiry combinations', () => {
