@@ -14,6 +14,7 @@ import { ProductDetailBlocks } from '../components/ProductDetailBlocks'
 import { getInquiryKey, getInquiryRoutePath } from '../commerce/inquiryKeys'
 import { useCommerce } from '../commerce/commerceStore'
 import { formatAdminPriceBook } from '../config/currency'
+import { getProductTaxonomy } from '../data/productTaxonomy'
 import { formatMoney } from '../utils/commerce'
 import {
   getLocalizedProductAlt,
@@ -761,11 +762,17 @@ const getLocalizedCategoryName = (product, contentLocale) => {
 
 const getRelatedProducts = (products, product) => {
   const productCollections = new Set(asList(product.collectionIds))
+  const productTaxonomy = getProductTaxonomy(product)
+  const productStructures = new Set(productTaxonomy.structures)
   return products
     .filter((item) => item.productId !== product.productId && item.isVisible)
     .map((item) => {
+      const itemTaxonomy = getProductTaxonomy(item)
       let score = 0
-      if (item.categoryId && item.categoryId === product.categoryId) score += 8
+      if (item.categoryId && item.categoryId === product.categoryId) score += 12
+      if (itemTaxonomy.structures.some((value) => productStructures.has(value))) score += 8
+      if (productTaxonomy.piercingType && itemTaxonomy.piercingType === productTaxonomy.piercingType) score += 4
+      if (productTaxonomy.productGroup && itemTaxonomy.productGroup === productTaxonomy.productGroup) score += 1
       if (asList(item.collectionIds).some((id) => productCollections.has(id))) score += 4
       if (item.material && item.material === product.material) score += 2
       return { item, score }
@@ -1197,6 +1204,9 @@ export function ProductDetailView({
     window.dispatchEvent(new CustomEvent('noblesse:open-login-modal'))
   }
   const relatedProducts = getRelatedProducts(products, product)
+  const relatedCatalogPath = getProductTaxonomy(product).structures.includes('barbell')
+    ? '/products?structure=barbell'
+    : `/products?category=${product.categoryId}`
 
   const productInfoRows = [
     [copy.productCode, product.code],
@@ -1528,7 +1538,7 @@ export function ProductDetailView({
     <section className="pd-related">
       <div className="pd-section-heading">
         <div><p>{copy.category}</p><h2>{copy.categoryProducts}</h2></div>
-        {editor ? <span>{copy.categoryView}</span> : <Link to={toLocalePath(`/products?category=${product.categoryId}`)}>{copy.categoryView}</Link>}
+        {editor ? <span>{copy.categoryView}</span> : <Link to={toLocalePath(relatedCatalogPath)}>{copy.categoryView}</Link>}
       </div>
       {relatedProducts.length > 0
         ? <div className="catalog-grid">{relatedProducts.map((item) => <CatalogCard key={item.productId} product={item} />)}</div>
