@@ -76,3 +76,9 @@ test('mobile product specifications stack the photo and keep code rows readable'
   assert.match(mobile, /\.pd-spec-table div \{[\s\S]*grid-template-columns: minmax\(82px, 0\.72fr\) minmax\(0, 1\.28fr\) !important/)
   assert.match(mobile, /\.pd-page \{[\s\S]*padding-bottom: 132px !important/)
 })
+
+test('mobile quote guide overrides legacy horizontal step columns', () => {
+  assert.match(mobile, /\.pd-delivery-section \.pd-process-list \{[\s\S]*grid-template-columns: minmax\(0, 1fr\) !important/)
+  assert.match(mobile, /\.pd-process-list::before \{[\s\S]*right: auto !important;[\s\S]*bottom: 21px !important;[\s\S]*left: 20px !important/)
+  assert.match(mobile, /\.pd-process-list li \{[\s\S]*grid-template-columns: 42px minmax\(0, 1fr\) !important/)
+})

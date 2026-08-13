@@ -613,6 +613,41 @@
     padding: 18px !important;
   }
 
+  /* Quote guide: restore the vertical timeline after legacy three-column rules. */
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-list {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-list::before {
+    top: 21px !important;
+    right: auto !important;
+    bottom: 21px !important;
+    left: 20px !important;
+    width: 1px !important;
+    height: auto !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-list li {
+    grid-template-columns: 42px minmax(0, 1fr) !important;
+    gap: 16px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding-bottom: 24px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-list li + li {
+    padding-top: 4px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .pd-delivery-section .pd-process-list strong {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
   .account-mobile-logout {
     display: inline-flex;
     align-items: center;
