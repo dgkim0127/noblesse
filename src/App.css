@@ -14660,6 +14660,18 @@ h6 {
   gap: 10px;
   overflow-x: auto;
   padding: 2px 2px 8px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.pd-thumbs::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.pd-breadcrumb:not(.is-editor-breadcrumb) > :last-child {
+  display: none;
 }
 
 .pd-thumb {

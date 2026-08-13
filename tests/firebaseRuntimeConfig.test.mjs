@@ -25,3 +25,12 @@ test('authentication waits for runtime Firebase initialization before deciding c
   assert.match(auth, /getFirebaseAuth\(\)\.then/)
   assert.match(commerce, /if \(!await authService\.ensureAuthConfigured\(\)\)/)
 })
+
+test('local API preview proxies Firebase Hosting runtime configuration from the configured API origin', () => {
+  const vite = read('vite.config.js')
+
+  assert.match(vite, /loadEnv\(mode, process\.cwd\(\), 'VITE_'\)/)
+  assert.match(vite, /'\/__\/firebase'/)
+  assert.match(vite, /target: firebaseHostingProxyTarget/)
+  assert.match(vite, /changeOrigin: true/)
+})

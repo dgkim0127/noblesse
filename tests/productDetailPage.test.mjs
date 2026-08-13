@@ -70,6 +70,7 @@ test('product detail uses scoped pd layout and related products are selected fro
 
   assert.match(source, /className="content pd-page"/)
   assert.match(source, /className="pd-section-nav"/)
+  assert.match(source, /pd-breadcrumb\$\{editor \? ' is-editor-breadcrumb' : ''\}/)
   assert.match(source, /id="pd-overview"/)
   assert.match(source, /id="pd-specification"/)
   assert.match(source, /id="pd-material"/)
@@ -93,6 +94,8 @@ test('product detail uses scoped pd layout and related products are selected fro
   assert.match(styles, /\.pd-mobile-action/)
   assert.match(styles, /\.pd-direct-inquiry-form/)
   assert.match(styles, /\.pd-detail-gallery/)
+  assert.match(styles, /\.pd-thumbs::\-webkit-scrollbar/)
+  assert.match(styles, /\.pd-breadcrumb:not\(\.is-editor-breadcrumb\) > :last-child/)
   assert.match(styles, /\.pd-content-blocks/)
   assert.match(styles, /\.pd-content-image-text/)
   assert.match(styles, /\.pd-material-care-grid/)

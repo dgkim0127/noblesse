@@ -1324,7 +1324,7 @@ export function ProductDetailView({
   }
 
   return <main className={`content pd-page${editor ? ' is-editor-preview' : ''}`}>
-    <nav className="pd-breadcrumb" aria-label="Breadcrumb">
+    <nav className={`pd-breadcrumb${editor ? ' is-editor-breadcrumb' : ''}`} aria-label="Breadcrumb">
       {editor ? <span><ChevronLeft size={16} />{copy.back}</span> : <Link to={toLocalePath('/products')}><ChevronLeft size={16} />{copy.back}</Link>}
       <ProductEditorTarget editor={editor} field="category" label="카테고리"><span>{categoryName || '카테고리 선택'}</span></ProductEditorTarget>
       <ProductEditorTarget align="end" editor={editor} field="code" label="상품 코드"><span>{product.code || '상품 코드 입력'}</span></ProductEditorTarget>
