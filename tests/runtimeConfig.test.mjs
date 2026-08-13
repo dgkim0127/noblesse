@@ -82,3 +82,42 @@ test('api product adapter preserves public catalog fields without protected pric
 test('api products adapter tolerates non-array responses', () => {
   assert.deepEqual(adaptApiProducts(null), [])
 })
+
+test('api product adapter resolves relative media routes against an absolute API origin', () => {
+  const product = adaptApiProduct({
+    code: 'NB-MEDIA-001',
+    imageSet: {
+      card: '/api/catalog/media/card-token',
+      gallery: [
+        {
+          id: 'primary',
+          url: '/api/catalog/media/gallery-original-token',
+          card: '/api/catalog/media/gallery-card-token',
+          detail: '/api/catalog/media/gallery-detail-token',
+          sources: {
+            thumb: { url: '/api/catalog/media/gallery-thumb-token' },
+          },
+        },
+      ],
+    },
+  }, { apiBaseUrl: 'https://preview.example.com/api' })
+
+  assert.equal(product.imageSet.card, 'https://preview.example.com/api/catalog/media/card-token')
+  assert.equal(product.imageSet.gallery[0].url, 'https://preview.example.com/api/catalog/media/gallery-original-token')
+  assert.equal(product.imageSet.gallery[0].card, 'https://preview.example.com/api/catalog/media/gallery-card-token')
+  assert.equal(product.imageSet.gallery[0].detail, 'https://preview.example.com/api/catalog/media/gallery-detail-token')
+  assert.equal(product.imageSet.gallery[0].sources.thumb.url, 'https://preview.example.com/api/catalog/media/gallery-thumb-token')
+})
+
+test('api product adapter keeps same-origin and already absolute asset URLs unchanged', () => {
+  const product = adaptApiProduct({
+    code: 'NB-MEDIA-002',
+    imageSet: {
+      card: '/api/catalog/media/card-token',
+      detail: 'https://cdn.example.com/detail.webp',
+    },
+  }, { apiBaseUrl: '/api' })
+
+  assert.equal(product.imageSet.card, '/api/catalog/media/card-token')
+  assert.equal(product.imageSet.detail, 'https://cdn.example.com/detail.webp')
+})

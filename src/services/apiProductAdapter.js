@@ -1,4 +1,5 @@
 import { createArchiveProductLocalization, shouldGenerateArchiveLocalization } from '../utils/archiveProductLocalization.js'
+import { resolveApiImageSet } from '../utils/apiAssetUrl.js'
 
 const toneByMaterial = [
   ['gold', 'gold'],
@@ -17,7 +18,7 @@ function inferTone(product) {
   return toneByMaterial.find(([needle]) => text.includes(needle))?.[1] || 'silver'
 }
 
-export function adaptApiProduct(product) {
+export function adaptApiProduct(product, { apiBaseUrl } = {}) {
   const productId = product.code || product.productCode || product.id
   const nameKo = product.nameKo || product.nameEn || productId
   const archiveLocalization = shouldGenerateArchiveLocalization(product, productId)
@@ -73,7 +74,7 @@ export function adaptApiProduct(product) {
     moqDefault: product.moqDefault || 1,
     leadTime: product.leadTime || '',
     origin: product.origin || '',
-    imageSet: product.imageSet || {},
+    imageSet: resolveApiImageSet(product.imageSet, apiBaseUrl),
     imageAlt: product.imageAlt || {},
     taxonomy: product.taxonomy || null,
     productGroup: product.taxonomy?.productGroup || product.productGroup || undefined,
@@ -106,6 +107,6 @@ export function adaptApiProduct(product) {
   }
 }
 
-export function adaptApiProducts(products) {
-  return Array.isArray(products) ? products.map(adaptApiProduct).filter((product) => product.productId) : []
+export function adaptApiProducts(products, options) {
+  return Array.isArray(products) ? products.map((product) => adaptApiProduct(product, options)).filter((product) => product.productId) : []
 }

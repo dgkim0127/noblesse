@@ -4,6 +4,7 @@ import { createAdminApi } from '../api/adminApi'
 import { createBuyerApi } from '../api/buyerApi'
 import { createApiClient } from '../api/client'
 import { getRuntimeConfig } from '../config/runtimeConfig'
+import { resolveApiShowcaseSlides } from '../utils/apiAssetUrl'
 import {
   buildInquiryRows,
   buildInquirySnapshot,
@@ -243,8 +244,8 @@ export function CommerceProvider({ children }) {
         if (!isMounted) return
         setMockProfiles({ guest: guestProfile })
         setProductPrices([])
-        setProducts(adaptApiProducts(apiProducts))
-        setHomeShowcase(showcaseSlides)
+        setProducts(adaptApiProducts(apiProducts, { apiBaseUrl: runtimeConfig.apiBaseUrl }))
+        setHomeShowcase(resolveApiShowcaseSlides(showcaseSlides, runtimeConfig.apiBaseUrl))
         setHomeLayout(normalizeHomeLayout(publishedHomeLayout))
         setInquiries([])
         setDataStatus('ready')
