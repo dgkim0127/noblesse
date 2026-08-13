@@ -25,7 +25,7 @@ const cardCopy = {
     quantity: '수량',
     required: '필수',
     selectOptions: '옵션 선택',
-    unavailable: '가격 미등록',
+    unavailable: '가격 확인 중',
   },
   en: {
     add: 'Ask about this product',
@@ -41,7 +41,7 @@ const cardCopy = {
     quantity: 'Quantity',
     required: 'Required',
     selectOptions: 'Select options',
-    unavailable: 'Price unavailable',
+    unavailable: 'Price being confirmed',
   },
   jp: {
     add: 'この商品を問い合わせる',
@@ -57,7 +57,7 @@ const cardCopy = {
     quantity: '数量',
     required: '必須',
     selectOptions: 'オプションを選択',
-    unavailable: '価格未登録',
+    unavailable: '価格確認中',
   },
   cn: {
     add: '咨询此商品',
@@ -73,7 +73,7 @@ const cardCopy = {
     quantity: '數量',
     required: '必填',
     selectOptions: '选择选项',
-    unavailable: '价格未登记',
+    unavailable: '價格確認中',
   },
 }
 
@@ -222,11 +222,7 @@ export function CatalogCard({ product, priority = false }) {
     setIsFavorite((current) => !current)
   }
   const favoriteLabel = resolveLocaleCopy({ kr: '좋아요', en: 'Favorite', jp: 'お気に入り', cn: '收藏' }, locale, 'en')
-  const colorGroup = optionGroups.find((group) => group.legacyKey === 'color' || group.id === 'legacy-color')
-  const localizedColor = colorGroup?.values?.[0]?.labels
-    ? resolveLocaleCopy(colorGroup.values[0].labels, locale, 'en')
-    : (product.colors || [])[0]
-  const productMetadata = [product.material, localizedColor].filter(Boolean)
+  const productMetadata = [product.material].filter(Boolean)
   return <article className="catalog-card">
     <div className={`catalog-media${showAlternateImage && canShowAlternateImage ? ' is-showing-alternate' : ''}`} onPointerEnter={prepareAlternateImage} onPointerLeave={hideAlternateImage} onFocus={prepareAlternateImage} onBlur={(event) => {
       if (!event.currentTarget.contains(event.relatedTarget)) hideAlternateImage()

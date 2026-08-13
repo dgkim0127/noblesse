@@ -29,6 +29,13 @@ test('catalog cards use portrait media and request alternate photos only on fine
   assert.match(css, /\.catalog-card \.catalog-media,[\s\S]*?aspect-ratio: 4 \/ 5;/)
 })
 
+test('catalog cards omit color summaries and avoid a false unregistered-price label', () => {
+  assert.match(card, /const productMetadata = \[product\.material\]\.filter\(Boolean\)/)
+  assert.doesNotMatch(card, /const localizedColor =/)
+  assert.doesNotMatch(card, /가격 미등록/)
+  assert.match(card, /가격 확인 중/)
+})
+
 test('catalog inquiry action opens a quick option sheet before adding', () => {
   assert.match(card, /<SlidersHorizontal size=\{17\}/)
   assert.match(card, /className="catalog-option-dialog"/)
