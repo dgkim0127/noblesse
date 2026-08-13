@@ -1,3 +1,36 @@
+.catalog-quick-action--inquiry {
+  position: relative;
+  isolation: isolate;
+  transition: transform 160ms cubic-bezier(.2, .8, .2, 1), color 160ms ease, background-color 160ms ease;
+}
+
+.catalog-quick-action--inquiry::after {
+  position: absolute;
+  z-index: -1;
+  inset: -5px;
+  border: 1px solid rgb(255 143 169 / 65%);
+  border-radius: 50%;
+  content: "";
+  opacity: 0;
+  transform: scale(.7);
+}
+
+.catalog-quick-action--inquiry:hover,
+.catalog-quick-action--inquiry:focus-visible {
+  color: var(--noblesse-sub);
+  background: #fff1f5;
+  transform: translateY(-1px) rotate(-3deg);
+}
+
+.catalog-quick-action--inquiry:hover::after,
+.catalog-quick-action--inquiry:focus-visible::after {
+  animation: catalog-quick-action-halo 420ms cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.catalog-quick-action--inquiry:active {
+  transform: scale(.9);
+}
+
 .catalog-option-overlay {
   position: fixed;
   z-index: 2200;
@@ -7,6 +40,7 @@
   padding: 18px;
   background: rgb(36 31 45 / 42%);
   backdrop-filter: blur(5px);
+  animation: catalog-option-overlay-in 150ms ease-out both;
 }
 
 .catalog-option-dialog {
@@ -18,16 +52,29 @@
   border-radius: 24px;
   background: #fffdf9;
   box-shadow: 0 24px 70px rgb(42 35 79 / 24%);
-  animation: catalog-option-dialog-in 160ms cubic-bezier(.22, .78, .28, 1) both;
+  transform-origin: 50% 100%;
+  animation: catalog-option-dialog-in 320ms cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.catalog-option-overlay.is-closing {
+  animation: catalog-option-overlay-out 170ms ease-in both;
+}
+
+.catalog-option-overlay.is-closing .catalog-option-dialog {
+  animation: catalog-option-dialog-out 170ms cubic-bezier(.4, 0, 1, 1) both;
 }
 
 .catalog-option-dialog-header {
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) 38px;
+  grid-template-columns: minmax(0, 1fr) 38px;
   gap: 13px;
   align-items: center;
   padding: 18px 18px 15px;
   border-bottom: 1px solid #eee6e3;
+}
+
+.catalog-option-dialog-header.has-image {
+  grid-template-columns: 58px minmax(0, 1fr) 38px;
 }
 
 .catalog-option-dialog-header > img {
@@ -75,6 +122,13 @@
   border-radius: 50%;
   color: var(--noblesse-sub);
   background: #fff;
+  transition: transform 180ms cubic-bezier(.2, .8, .2, 1), background-color 180ms ease;
+}
+
+.catalog-option-close:hover,
+.catalog-option-close:focus-visible {
+  background: #fff4f7;
+  transform: rotate(6deg) scale(1.04);
 }
 
 .catalog-option-dialog-body {
@@ -87,6 +141,8 @@
 .catalog-option-group {
   display: grid;
   gap: 8px;
+  animation: catalog-option-group-in 300ms cubic-bezier(.16, 1, .3, 1) both;
+  animation-delay: calc(70ms + var(--catalog-option-order, 0) * 38ms);
 }
 
 .catalog-option-group > span,
@@ -120,6 +176,7 @@
   background: #fff;
   font-size: 12px;
   font-weight: 650;
+  transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease, transform 180ms cubic-bezier(.2, .8, .2, 1);
 }
 
 .catalog-option-group > div > button:hover,
@@ -128,6 +185,15 @@
   border-color: var(--noblesse-main);
   color: var(--noblesse-sub);
   background: rgb(255 143 169 / 10%);
+}
+
+.catalog-option-group > div > button:hover,
+.catalog-option-group > div > button:focus-visible {
+  transform: translateY(-1px);
+}
+
+.catalog-option-group > div > button.is-active {
+  animation: catalog-option-choice-pop 220ms cubic-bezier(.2, .9, .25, 1);
 }
 
 .catalog-option-group > div > button i {
@@ -199,6 +265,19 @@
   background: var(--noblesse-sub);
   font-size: 14px;
   font-weight: 800;
+  box-shadow: 0 10px 24px rgb(42 35 79 / 14%);
+  transition: transform 160ms cubic-bezier(.2, .8, .2, 1), box-shadow 160ms ease;
+}
+
+.catalog-option-dialog-footer > button:not(:disabled):hover,
+.catalog-option-dialog-footer > button:not(:disabled):focus-visible {
+  box-shadow: 0 14px 30px rgb(42 35 79 / 20%);
+  transform: translateY(-1px);
+}
+
+.catalog-option-dialog-footer > button:not(:disabled):active {
+  box-shadow: 0 6px 16px rgb(42 35 79 / 16%);
+  transform: translateY(1px) scale(.985);
 }
 
 .catalog-option-dialog-footer > button:disabled {
@@ -207,8 +286,38 @@
 }
 
 @keyframes catalog-option-dialog-in {
-  from { opacity: 0; transform: translateY(12px) scale(.985); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  0% { opacity: 0; transform: translateY(24px) scale(.965); }
+  72% { opacity: 1; transform: translateY(-2px) scale(1.004); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes catalog-option-dialog-out {
+  to { opacity: 0; transform: translateY(18px) scale(.975); }
+}
+
+@keyframes catalog-option-overlay-in {
+  from { opacity: 0; }
+}
+
+@keyframes catalog-option-overlay-out {
+  to { opacity: 0; }
+}
+
+@keyframes catalog-option-group-in {
+  from { opacity: 0; transform: translateY(9px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes catalog-option-choice-pop {
+  0% { transform: scale(.96); }
+  60% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+@keyframes catalog-quick-action-halo {
+  0% { opacity: 0; transform: scale(.7); }
+  45% { opacity: .8; }
+  100% { opacity: 0; transform: scale(1.15); }
 }
 
 @media (max-width: 760px) {
@@ -224,9 +333,14 @@
   }
 
   .catalog-option-dialog-header {
-    grid-template-columns: 50px minmax(0, 1fr) 36px;
+    grid-template-columns: minmax(0, 1fr) 36px;
     gap: 11px;
     padding: 15px 14px 13px;
+  }
+
+
+  .catalog-option-dialog-header.has-image {
+    grid-template-columns: 50px minmax(0, 1fr) 36px;
   }
 
   .catalog-option-dialog-header > img {
@@ -250,6 +364,15 @@
 
 @media (prefers-reduced-motion: reduce) {
   .catalog-option-dialog {
+    animation: none;
+    transition: none;
+  }
+
+  .catalog-option-overlay,
+  .catalog-option-group,
+  .catalog-option-group > div > button.is-active,
+  .catalog-quick-action--inquiry:hover::after,
+  .catalog-quick-action--inquiry:focus-visible::after {
     animation: none;
     transition: none;
   }

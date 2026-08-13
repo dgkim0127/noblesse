@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ChevronDown, Clock3, Eye, EyeOff, Heart, LogOut, Search, ShieldCheck, ShoppingCart, UserRound, X } from 'lucide-react'
+import { Check, ChevronDown, Clock3, Eye, EyeOff, Heart, LogOut, Search, ShieldCheck, ShoppingCart, UserRound, X } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import noblesseLogo from '../assets/noblesse-logo.webp'
 import { useCommerce } from '../commerce/commerceStore'
@@ -583,6 +583,9 @@ export function StoreShell() {
         midY: deltaY * 0.42 - 22,
         endX: deltaX,
         endY: deltaY,
+        imageSrc: typeof event.detail?.imageSrc === 'string' ? event.detail.imageSrc : '',
+        label: typeof event.detail?.label === 'string' ? event.detail.label : '',
+        quantity: Math.max(1, Number(event.detail?.quantity) || 1),
       })
       inquiryFlightTimersRef.current = [
         window.setTimeout(() => setIsInquiryReceiving(true), 350),
@@ -1044,7 +1047,7 @@ export function StoreShell() {
     </header>
     {inquiryFlight && <span
       aria-hidden="true"
-      className="inquiry-list-flight"
+      className={`inquiry-list-flight${inquiryFlight.imageSrc ? ' has-product-image' : ''}`}
       key={inquiryFlight.id}
       style={{
         '--inquiry-flight-start-x': `${inquiryFlight.startX}px`,
@@ -1054,7 +1057,12 @@ export function StoreShell() {
         '--inquiry-flight-end-x': `${inquiryFlight.endX}px`,
         '--inquiry-flight-end-y': `${inquiryFlight.endY}px`,
       }}
-    />}
+    >
+      {inquiryFlight.imageSrc
+        ? <img alt="" aria-hidden="true" src={inquiryFlight.imageSrc} />
+        : <Check aria-hidden="true" size={15} strokeWidth={3} />}
+      {inquiryFlight.quantity > 1 && <b aria-hidden="true">{inquiryFlight.quantity}</b>}
+    </span>}
     {isLoginModalOpen && <div
       className={`login-modal-overlay ${isLoginModalClosing ? 'is-closing' : ''}`.trim()}
       role="presentation"

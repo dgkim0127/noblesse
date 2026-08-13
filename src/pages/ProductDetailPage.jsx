@@ -1305,6 +1305,9 @@ export function ProductDetailView({
             width: buttonRect.width,
             height: buttonRect.height,
           },
+          imageSrc: galleryImages[0]?.thumbSrc || galleryImages[0]?.detailSrc || '',
+          label: productName,
+          quantity: currentQuantity,
         },
       }))
     }

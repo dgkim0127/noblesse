@@ -1,5 +1,5 @@
 import { Check, Heart, LockKeyhole, Minus, Plus, SlidersHorizontal, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
@@ -92,9 +92,13 @@ export function CatalogCard({ product, priority = false }) {
   const [showAlternateImage, setShowAlternateImage] = useState(false)
   const [failedImageSources, setFailedImageSources] = useState([])
   const [isQuickOptionOpen, setIsQuickOptionOpen] = useState(false)
+  const [isQuickOptionClosing, setIsQuickOptionClosing] = useState(false)
   const [quickOptionSelection, setQuickOptionSelection] = useState({})
   const [quickQuantity, setQuickQuantity] = useState(1)
   const quickAddButtonRef = useRef(null)
+  const quickActionButtonRef = useRef(null)
+  const quickCloseButtonRef = useRef(null)
+  const quickCloseTimerRef = useRef(null)
   const price = getPrice(product.productId)
   const copy = resolveLocaleCopy(cardCopy, locale)
   const adminPriceLabel = resolveLocaleCopy({ kr: '관리자 가격', en: 'Admin prices', jp: '管理者価格', cn: '管理员价格' }, locale, 'en')
@@ -117,19 +121,36 @@ export function CatalogCard({ product, priority = false }) {
   const quickMoq = Math.max(1, Number(price?.moq || product.moqDefault || 1))
   const missingQuickOptions = getMissingRequiredProductOptions(optionGroups, quickOptionSelection)
 
+  const closeQuickOption = useCallback(() => {
+    if (quickCloseTimerRef.current) return
+    setIsQuickOptionClosing(true)
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    quickCloseTimerRef.current = window.setTimeout(() => {
+      quickCloseTimerRef.current = null
+      setIsQuickOptionOpen(false)
+      setIsQuickOptionClosing(false)
+      quickActionButtonRef.current?.focus({ preventScroll: true })
+    }, prefersReducedMotion ? 0 : 170)
+  }, [])
+
   useEffect(() => {
     if (!isQuickOptionOpen) return undefined
     const previousOverflow = document.body.style.overflow
     const handleEscape = (event) => {
-      if (event.key === 'Escape') setIsQuickOptionOpen(false)
+      if (event.key === 'Escape') closeQuickOption()
     }
     document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', handleEscape)
+    window.requestAnimationFrame(() => quickCloseButtonRef.current?.focus({ preventScroll: true }))
     return () => {
       document.body.style.overflow = previousOverflow
       window.removeEventListener('keydown', handleEscape)
     }
-  }, [isQuickOptionOpen])
+  }, [closeQuickOption, isQuickOptionOpen])
+
+  useEffect(() => () => {
+    if (quickCloseTimerRef.current) window.clearTimeout(quickCloseTimerRef.current)
+  }, [])
 
   const prepareAlternateImage = () => {
     if (!alternateImageSource || typeof window === 'undefined') return
@@ -157,6 +178,9 @@ export function CatalogCard({ product, priority = false }) {
       return
     }
     if (!canUseTradeTerms) return
+    if (quickCloseTimerRef.current) window.clearTimeout(quickCloseTimerRef.current)
+    quickCloseTimerRef.current = null
+    setIsQuickOptionClosing(false)
     setQuickOptionSelection(Object.fromEntries(optionGroups.flatMap((group) => {
       const activeValues = group.values.filter((value) => value.active)
       return activeValues.length === 1 ? [[group.id, activeValues[0].id]] : []
@@ -181,10 +205,13 @@ export function CatalogCard({ product, priority = false }) {
             width: sourceRect.width,
             height: sourceRect.height,
           },
+          imageSrc: primaryImage?.thumbSrc || primaryImageSource,
+          label: productName,
+          quantity: quickQuantity,
         },
       }))
     }
-    setIsQuickOptionOpen(false)
+    closeQuickOption()
   }
 
   const handleFavoriteClick = () => {
@@ -215,7 +242,7 @@ export function CatalogCard({ product, priority = false }) {
         <button className={`catalog-quick-action catalog-quick-action--favorite${isFavorite ? ' is-saved' : ''}`} type="button" aria-pressed={isFavorite} title={favoriteLabel} aria-label={favoriteLabel} onClick={handleFavoriteClick}>
           <Heart size={17} fill={isFavorite ? 'currentColor' : 'none'} />
         </button>
-        <button className="catalog-quick-action catalog-quick-action--inquiry" type="button" disabled={addActionDisabled} onClick={handleQuickOptionOpen} title={canUseTradeTerms ? copy.quickTitle : actionLockLabel} aria-label={canUseTradeTerms ? copy.quickTitle : actionLockLabel}><SlidersHorizontal size={17} /></button>
+        <button ref={quickActionButtonRef} className="catalog-quick-action catalog-quick-action--inquiry" type="button" disabled={addActionDisabled} onClick={handleQuickOptionOpen} title={canUseTradeTerms ? copy.quickTitle : actionLockLabel} aria-label={canUseTradeTerms ? copy.quickTitle : actionLockLabel}><SlidersHorizontal size={17} /></button>
       </div>
     </div>
     <div className="catalog-body">
@@ -225,23 +252,23 @@ export function CatalogCard({ product, priority = false }) {
         ? <div className="approved-price admin-price-books"><strong>{adminPriceLabel}</strong><span className="admin-price-book-grid">{adminPriceItems.map((item, index) => <span className="admin-price-book-item" key={`${item.market}-${item.currency}-${index}`}><img alt={item.flagLabel} className="admin-price-book-flag" src={item.flagSrc} /><span className="admin-price-book-value"><b>{item.amount}</b><span>{item.symbol}</span><em>{item.currency}</em></span></span>)}</span></div>
         : canUseTradeTerms ? <div className="approved-price"><strong>{formatMoney(approvedPrice(product.productId), price.currency)}</strong><span>{copy.minQty} {price.moq} / {copy.memberPrice} · {price.currency}</span></div> : <div className="locked-price"><LockKeyhole size={14} />{isApproved ? copy.unavailable : copy.locked}</div>}
     </div>
-    {isQuickOptionOpen && typeof document !== 'undefined' && createPortal(<div className="catalog-option-overlay" role="presentation" onMouseDown={(event) => {
-      if (event.target === event.currentTarget) setIsQuickOptionOpen(false)
+    {isQuickOptionOpen && typeof document !== 'undefined' && createPortal(<div className={`catalog-option-overlay${isQuickOptionClosing ? ' is-closing' : ''}`} role="presentation" onMouseDown={(event) => {
+      if (event.target === event.currentTarget) closeQuickOption()
     }}>
-      <section aria-labelledby={`catalog-option-title-${product.productId}`} aria-modal="true" className="catalog-option-dialog" role="dialog">
-        <header className="catalog-option-dialog-header">
+      <section aria-busy={isQuickOptionClosing} aria-labelledby={`catalog-option-title-${product.productId}`} aria-modal="true" className="catalog-option-dialog" role="dialog">
+        <header className={`catalog-option-dialog-header${canShowPrimaryImage ? ' has-image' : ''}`}>
           {canShowPrimaryImage && <img alt="" aria-hidden="true" src={primaryImageSource} />}
           <div>
             <small>{copy.quickEyebrow}</small>
             <h2 id={`catalog-option-title-${product.productId}`}>{copy.quickTitle}</h2>
             <p>{productName}</p>
           </div>
-          <button aria-label={copy.quickClose} className="catalog-option-close" type="button" onClick={() => setIsQuickOptionOpen(false)}><X size={18} /></button>
+          <button ref={quickCloseButtonRef} aria-label={copy.quickClose} className="catalog-option-close" type="button" onClick={closeQuickOption}><X size={18} /></button>
         </header>
         <div className="catalog-option-dialog-body">
-          {optionGroups.length > 0 ? optionGroups.map((group) => {
+          {optionGroups.length > 0 ? optionGroups.map((group, groupIndex) => {
             const activeValues = group.values.filter((value) => value.active)
-            return <div className={`catalog-option-group${group.required && !quickOptionSelection[group.id] ? ' is-required' : ''}`} key={group.id}>
+            return <div className={`catalog-option-group${group.required && !quickOptionSelection[group.id] ? ' is-required' : ''}`} key={group.id} style={{ '--catalog-option-order': groupIndex }}>
               <span>{getLocalizedOptionLabel(group.labels, locale)}{group.required && <small>{copy.required}</small>}</span>
               <div>
                 {activeValues.map((value) => <button
@@ -267,7 +294,7 @@ export function CatalogCard({ product, priority = false }) {
           </div>
         </div>
         <footer className="catalog-option-dialog-footer">
-          <button ref={quickAddButtonRef} disabled={missingQuickOptions.length > 0} type="button" onClick={handleQuickAdd}><Check size={18} />{copy.quickAdd}</button>
+          <button ref={quickAddButtonRef} disabled={missingQuickOptions.length > 0 || isQuickOptionClosing} type="button" onClick={handleQuickAdd}><Check size={18} />{copy.quickAdd}</button>
         </footer>
       </section>
     </div>, document.body)}
