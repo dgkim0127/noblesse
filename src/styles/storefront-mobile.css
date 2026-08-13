@@ -552,6 +552,63 @@
     margin-left: auto !important;
   }
 
+  /* Keep the four regional admin prices inside narrow two-column product cards. */
+  .site-shell:not(.admin-route-shell) .home-product-info .admin-price-book-grid,
+  .site-shell:not(.admin-route-shell) .catalog-body .admin-price-book-grid {
+    display: grid !important;
+    width: 100% !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px 6px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .home-product-info .admin-price-book-item,
+  .site-shell:not(.admin-route-shell) .catalog-body .admin-price-book-item {
+    display: grid !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    grid-template-columns: 15px minmax(0, 1fr) !important;
+    gap: 3px !important;
+    align-items: start !important;
+    overflow: hidden !important;
+    white-space: normal !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .home-product-info .admin-price-book-flag,
+  .site-shell:not(.admin-route-shell) .catalog-body .admin-price-book-flag {
+    width: 15px !important;
+    height: 10px !important;
+    margin-top: 1px !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .home-product-info .admin-price-book-value,
+  .site-shell:not(.admin-route-shell) .catalog-body .admin-price-book-value {
+    display: grid !important;
+    min-width: 0 !important;
+    grid-template-columns: max-content max-content !important;
+    gap: 1px !important;
+    align-items: baseline !important;
+    justify-content: start !important;
+    font-size: clamp(9px, 2.8vw, 11px) !important;
+    line-height: 1 !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .home-product-info .admin-price-book-value b,
+  .site-shell:not(.admin-route-shell) .home-product-info .admin-price-book-value span,
+  .site-shell:not(.admin-route-shell) .catalog-body .admin-price-book-value b,
+  .site-shell:not(.admin-route-shell) .catalog-body .admin-price-book-value span {
+    margin: 0 !important;
+    font: inherit !important;
+    line-height: 1 !important;
+  }
+
+  .site-shell:not(.admin-route-shell) .home-product-info .admin-price-book-value em,
+  .site-shell:not(.admin-route-shell) .catalog-body .admin-price-book-value em {
+    grid-column: 1 / -1 !important;
+    margin-top: 2px !important;
+    font-size: 8px !important;
+    line-height: 1 !important;
+  }
+
   /* Product specification: stack the photo, facts, and guide as one mobile flow. */
   .site-shell:not(.admin-route-shell) .pd-page {
     padding-bottom: 132px !important;

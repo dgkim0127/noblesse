@@ -95,3 +95,10 @@ test('mobile product section navigation keeps labels on one line', () => {
   assert.match(mobile, /\.pd-section-nav \{[\s\S]*min-height: 48px !important/)
   assert.match(mobile, /\.pd-section-nav a \{[\s\S]*flex: 1 1 0 !important;[\s\S]*font-size: 11px !important;[\s\S]*white-space: nowrap !important/)
 })
+
+test('mobile regional prices stay within two-column product cards', () => {
+  assert.match(mobile, /\.home-product-info \.admin-price-book-grid,[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\) !important/)
+  assert.match(mobile, /\.home-product-info \.admin-price-book-item,[\s\S]*grid-template-columns: 15px minmax\(0, 1fr\) !important;[\s\S]*overflow: hidden !important/)
+  assert.match(mobile, /\.home-product-info \.admin-price-book-value,[\s\S]*grid-template-columns: max-content max-content !important/)
+  assert.match(mobile, /\.home-product-info \.admin-price-book-value em,[\s\S]*grid-column: 1 \/ -1 !important/)
+})
