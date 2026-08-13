@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import test from 'node:test'
+
+const page = readFileSync('src/pages/ProductsPage.jsx', 'utf8')
+const card = readFileSync('src/components/CatalogCard.jsx', 'utf8')
+const css = readFileSync('src/styles/product-catalog-premium.css', 'utf8')
+
+test('product discovery keeps a compact summary and accessible filter drawer', () => {
+  assert.match(page, /className="product-page-summary"/)
+  assert.match(page, /role="dialog" aria-modal="true"/)
+  assert.match(page, /className="product-filter-backdrop"/)
+  assert.match(page, /className="product-filter-drawer-actions"/)
+  assert.match(page, /removeSelectedFilterChip\(chip\)/)
+  assert.doesNotMatch(page, /className="product-material-tabs"/)
+  assert.match(css, /\.product-list-content \.product-page-head \{[\s\S]*?min-height: 0;/)
+})
+
+test('catalog cards use square media and request alternate photos only on fine-pointer interaction', () => {
+  assert.match(card, /export function CatalogCard\(\{ product, priority = false \}\)/)
+  assert.match(card, /productGalleryEntries\(product, productAlt\)/)
+  assert.match(card, /matchMedia\('\(hover: hover\) and \(pointer: fine\)'\)/)
+  assert.match(card, /shouldLoadAlternateImage && canShowAlternateImage/)
+  assert.match(card, /loading=\{priority \? 'eager' : 'lazy'\}/)
+  assert.match(card, /catalog-quick-action--favorite/)
+  assert.match(card, /catalog-quick-action--inquiry/)
+  assert.doesNotMatch(card, /className="add-inquiry"/)
+  assert.match(css, /\.catalog-card \.catalog-media,[\s\S]*?aspect-ratio: 1;/)
+})
+
+test('product grids keep four, three and two column storefront breakpoints', () => {
+  assert.match(css, /\.product-list-content \.product-results \{[\s\S]*?repeat\(4,/)
+  assert.match(css, /@media \(max-width: 1100px\)[\s\S]*?repeat\(3,/)
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?repeat\(2,/)
+})

@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigationType,
 import './App.css'
 import './styles/storefront-typography.css'
 import './styles/storefront-mobile.css'
+import './styles/product-catalog-premium.css'
 import { CommerceProvider } from './commerce/CommerceContext'
 import { StoreShell } from './components/StoreShell'
 import { buildLocalizedPath, canonicalizeLocale, isLocalePathSegment, resolveLocaleCopy, stripLocalePrefix, taiwanLocale, useLocalePath } from './utils/locale'

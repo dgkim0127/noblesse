@@ -1,4 +1,4 @@
-import { ChevronDown, Search, X } from 'lucide-react'
+import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { CatalogCard } from '../components/CatalogCard'
@@ -530,13 +530,36 @@ const productTabSets = {
 const productTabControlledParams = ['type', 'style', 'saleType', 'category', 'structure', 'decoration', 'allSurgical', 'partType']
 const productListBatchSize = 24
 
-const productMaterialTabs = [
-  { key: 'all', value: '' },
-  { key: 'silver925', value: 'silver925' },
-  { key: 'brass', value: 'brass' },
-  { key: 'surgical', value: 'surgical' },
-  { key: 'parts', param: 'group', value: 'parts' },
-]
+const productDiscoveryCopy = {
+  kr: {
+    closeFilters: '필터 닫기',
+    filterTitle: '상품 필터',
+    results: (count) => `${count}개 상품 보기`,
+    removeFilter: (label) => `${label} 조건 삭제`,
+    selected: '선택한 조건',
+  },
+  en: {
+    closeFilters: 'Close filters',
+    filterTitle: 'Product filters',
+    results: (count) => `View ${count} products`,
+    removeFilter: (label) => `Remove ${label} filter`,
+    selected: 'Selected filters',
+  },
+  jp: {
+    closeFilters: 'フィルターを閉じる',
+    filterTitle: '商品フィルター',
+    results: (count) => `${count}点の商品を見る`,
+    removeFilter: (label) => `${label}を削除`,
+    selected: '選択中の条件',
+  },
+  cn: {
+    closeFilters: '關閉篩選',
+    filterTitle: '商品篩選',
+    results: (count) => `查看 ${count} 個商品`,
+    removeFilter: (label) => `移除${label}條件`,
+    selected: '已選條件',
+  },
+}
 
 const _productShapeTabs = [
   { key: 'all', clear: true },
@@ -1097,12 +1120,34 @@ export function ProductsPage() {
   const [isSortOpen, setIsSortOpen] = useState(false)
   const [productWindow, setProductWindow] = useState({ key: '', count: productListBatchSize })
   const loadMoreRef = useRef(null)
+  const previousProductWindowKeyRef = useRef('')
+  const filterTriggerRef = useRef(null)
+  const filterCloseRef = useRef(null)
   const [managedFilterOptions, setManagedFilterOptions] = useState(() => loadCatalogFilterOptions())
   const { locale, toLocalePath } = useLocalePath()
   const contentLocale = getLocaleContentKey(locale)
   const copy = { ...(productListCopy[contentLocale] ?? productListCopy.kr), ...(taxonomyLabels[contentLocale] ?? taxonomyLabels.kr) }
   const uiCopy = productListUiCopy[contentLocale] ?? productListUiCopy.en
+  const discoveryCopy = productDiscoveryCopy[contentLocale] ?? productDiscoveryCopy.en
   useEffect(() => subscribeCatalogFilterOptions(setManagedFilterOptions), [])
+
+  useEffect(() => {
+    if (!isFilterOpen) return undefined
+    const previousOverflow = document.body.style.overflow
+    const focusTimer = window.setTimeout(() => filterCloseRef.current?.focus(), 0)
+    const closeOnEscape = (event) => {
+      if (event.key !== 'Escape') return
+      setIsFilterOpen(false)
+      window.requestAnimationFrame(() => filterTriggerRef.current?.focus())
+    }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
+      window.clearTimeout(focusTimer)
+      window.removeEventListener('keydown', closeOnEscape)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isFilterOpen])
 
   const routeCollection = routeParams.collectionId ?? ''
   const q = searchParams.get('q') ?? ''
@@ -1182,7 +1227,12 @@ export function ProductsPage() {
   const nextProductBatchSize = Math.min(productListBatchSize, remainingProductCount)
 
   useEffect(() => {
+    const shouldResetScroll = Boolean(previousProductWindowKeyRef.current && previousProductWindowKeyRef.current !== productWindowKey)
+    previousProductWindowKeyRef.current = productWindowKey
     setProductWindow({ key: productWindowKey, count: productListBatchSize })
+    if (!shouldResetScroll) return undefined
+    const scrollFrame = window.requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }))
+    return () => window.cancelAnimationFrame(scrollFrame)
   }, [productWindowKey])
 
   useEffect(() => {
@@ -1268,21 +1318,6 @@ export function ProductsPage() {
     setSearchParams(next)
   }
 
-  const applyMaterialTab = (tab) => {
-    const next = new URLSearchParams(searchParams)
-    next.delete('baseMaterial')
-    next.delete('materialBase')
-    next.delete('group')
-
-    if (tab.param === 'group' && tab.value) {
-      next.set('group', tab.value)
-    } else if (tab.value) {
-      next.set('baseMaterial', tab.value)
-    }
-
-    setSearchParams(next)
-  }
-
   const toggleProductFilterOption = (option) => {
     const next = new URLSearchParams(searchParams)
     const currentValues = next.getAll(option.param)
@@ -1339,10 +1374,8 @@ export function ProductsPage() {
   }
 
   const activeShapeValue = isShapeEntry ? (taxonomyFilters.shapes || [])[0] : ''
-  const materialTabLabels = productMaterialTabCopy[contentLocale] ?? productMaterialTabCopy.kr
   const activeMaterialTab = taxonomyFilters.productGroup === 'parts' ? 'parts' : taxonomyFilters.baseMaterial || 'all'
   const productTabs = isShapeEntry ? productPrimaryTabs : productTabSets[activeMaterialTab] || productTabSets.all
-  const showMaterialTabs = !isShapeEntry && activeMaterialTab === 'all'
   const productTabLabels = productTabLabelCopy[contentLocale] ?? productTabLabelCopy.kr
   const isProductTabActive = (tab) => {
     if (tab.legacyCategory) return shouldApplyLegacyCategory && category === tab.legacyCategory
@@ -1381,7 +1414,7 @@ export function ProductsPage() {
   const activePrimaryLabel = activeProductTab === 'all' ? '' : productTabLabels[activeProductTab] || uiCopy.tabs[activeProductTab]
   const sortOptions = availableSortOptions.length > 0 ? availableSortOptions : productListUiCopy.en.sortOptions
   const activeSortLabel = sortOptions.find((option) => option.value === sortMode)?.label ?? sortOptions[0].label
-  const materialLabels = productMaterialDisplayLabels[contentLocale] ?? productMaterialDisplayLabels.kr
+  const materialLabels = productMaterialDisplayLabels[contentLocale] ?? productMaterialTabCopy[contentLocale] ?? productMaterialDisplayLabels.kr
   const breadcrumbCopy = productCleanBreadcrumbCopy[contentLocale] ?? productCleanBreadcrumbCopy.kr
   const filterSearchCopy = productFilterSearchCopy[contentLocale] ?? productFilterSearchCopy.kr
   const priceCopy = productFilterPriceCopy[contentLocale] ?? productFilterPriceCopy.kr
@@ -1413,12 +1446,32 @@ export function ProductsPage() {
   const selectedFilterChips = [
     ...visibleProductFilterGroups.flatMap((group) => group.options
       .filter((option) => isFilterOptionActive(searchParams, option))
-      .map((option) => getFilterOptionLabel(option, locale))),
-    ...(pricePreset ? [priceCopy.under(pricePreset)] : []),
-    ...(priceMin ? [priceCopy.min(priceMin)] : []),
-    ...(priceMax ? [priceCopy.max(priceMax)] : []),
-    ...(q ? [q] : []),
+      .map((option) => ({
+        key: `${option.param}-${option.value}`,
+        label: getFilterOptionLabel(option, locale),
+        param: option.param,
+        value: option.value,
+      }))),
+    ...(pricePreset ? [{ key: 'price-preset', label: priceCopy.under(pricePreset), params: ['priceMax'] }] : []),
+    ...(priceMin ? [{ key: 'price-min', label: priceCopy.min(priceMin), params: ['priceMin'] }] : []),
+    ...(priceMax ? [{ key: 'price-max', label: priceCopy.max(priceMax), params: ['priceMaxCustom'] }] : []),
+    ...(q ? [{ key: 'query', label: q, params: ['q'] }] : []),
   ]
+  const removeSelectedFilterChip = (chip) => {
+    const next = new URLSearchParams(searchParams)
+    if (chip.params) {
+      chip.params.forEach((param) => next.delete(param))
+    } else {
+      const remaining = next.getAll(chip.param).filter((value) => value !== chip.value)
+      next.delete(chip.param)
+      remaining.forEach((value) => next.append(chip.param, value))
+    }
+    setSearchParams(next)
+  }
+  const closeFilterPanel = () => {
+    setIsFilterOpen(false)
+    window.requestAnimationFrame(() => filterTriggerRef.current?.focus())
+  }
   const materialBreadcrumbLabel = taxonomyFilters.baseMaterial ? materialLabels[taxonomyFilters.baseMaterial] : ''
   const isStandaloneMaterialTitle = ['brass'].includes(taxonomyFilters.baseMaterial) || taxonomyFilters.productGroup === 'parts'
   const activeShapeLabel = activeShapeValue ? getShapeTabLabel(activeShapeValue, locale) : ''
@@ -1463,9 +1516,25 @@ export function ProductsPage() {
         </span>)}
       </div>
 
-      <div className="page-title product-page-title">
-        <div><h1>{pageTitle}</h1></div>
-        <span>{copy.products(filtered.length)}</span>
+      <div className="product-page-summary">
+        <div className="page-title product-page-title">
+          <h1>{pageTitle}</h1>
+          <span>{uiCopy.total(filtered.length)}</span>
+        </div>
+        <div className="product-page-actions">
+          <div className={`product-sort-dropdown${isSortOpen ? ' is-open' : ''}`}>
+            <button className="product-sort-button" type="button" aria-haspopup="listbox" aria-expanded={isSortOpen} onClick={() => setIsSortOpen((current) => !current)}>
+              {activeSortLabel}
+              <ChevronDown size={15} aria-hidden="true" />
+            </button>
+            {isSortOpen ? <div className="product-sort-menu" role="listbox" aria-label={uiCopy.sort}>
+              {sortOptions.map((option) => <button className={sortMode === option.value ? 'active' : ''} key={option.value} type="button" role="option" aria-selected={sortMode === option.value} onClick={() => {
+                setFilter('sort', option.value)
+                setIsSortOpen(false)
+              }}>{option.label}</button>)}
+            </div> : null}
+          </div>
+        </div>
       </div>
 
       <nav className="product-primary-tabs" aria-label={copy.category}>
@@ -1474,22 +1543,19 @@ export function ProductsPage() {
         </button>)}
       </nav>
 
-      {showMaterialTabs ? <nav className="product-material-tabs" aria-label={copy.material}>
-        {productMaterialTabs.map((tab) => <button className={activeMaterialTab === tab.key ? 'active' : ''} key={tab.key} type="button" onClick={() => applyMaterialTab(tab)}>
-          {materialTabLabels[tab.key]}
-        </button>)}
-      </nav> : null}
-
+      {isFilterOpen && <button className="product-filter-backdrop" type="button" aria-label={discoveryCopy.closeFilters} onClick={closeFilterPanel} />}
       <div className={`product-filter-control${isFilterOpen ? ' is-open' : ''}`}>
-        <button className="product-filter-trigger" type="button" aria-expanded={isFilterOpen} aria-controls="product-filter-panel" onClick={() => setIsFilterOpen((current) => !current)}>
-          <span className="filter-toggle-icon" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </span>
+        <button className="product-filter-trigger" ref={filterTriggerRef} type="button" aria-expanded={isFilterOpen} aria-controls="product-filter-panel" onClick={() => setIsFilterOpen(true)}>
+          <SlidersHorizontal size={17} aria-hidden="true" />
           <b>{copy.filter}</b>
+          {selectedFilterChips.length > 0 && <span>{selectedFilterChips.length}</span>}
         </button>
-        {isFilterOpen ? <section className="product-filter-popover" id="product-filter-panel" aria-label={copy.filter}>
+        {isFilterOpen ? <section className="product-filter-popover" id="product-filter-panel" role="dialog" aria-modal="true" aria-labelledby="product-filter-title">
+          <header className="product-filter-drawer-head">
+            <div><small>NOBLESSE</small><h2 id="product-filter-title">{discoveryCopy.filterTitle}</h2></div>
+            <button ref={filterCloseRef} type="button" aria-label={discoveryCopy.closeFilters} onClick={closeFilterPanel}><X size={20} /></button>
+          </header>
+          <div className="product-filter-drawer-body">
           <div className="product-filter-header">
             <form className="product-filter-search product-filter-head-search" onSubmit={submitSearch}>
               <Search size={17} />
@@ -1554,44 +1620,32 @@ export function ProductsPage() {
               </form>
             </div>
           </div>
+          </div>
           <div className="product-filter-footer">
             <div className="product-filter-selected" aria-live="polite">
               <b>{copy.selectedFilters}</b>
               {selectedFilterChips.length > 0
                 ? <div>
-                  {selectedFilterChips.map((label) => <span key={label}>{label}</span>)}
+                  {selectedFilterChips.map((chip) => <span key={chip.key}>{chip.label}</span>)}
                 </div>
                 : <p>{copy.noSelectedFilters}</p>}
             </div>
-            <Link className="product-filter-reset" to={toLocalePath('/products')}><X size={15} />{copy.clearFilters}</Link>
+            <div className="product-filter-drawer-actions">
+              <Link className="product-filter-reset" to={toLocalePath('/products')} onClick={() => setIsFilterOpen(false)}>{copy.clearFilters}</Link>
+              <button className="product-filter-apply" type="button" onClick={closeFilterPanel}>{discoveryCopy.results(filtered.length)}</button>
+            </div>
           </div>
         </section> : null}
       </div>
     </div>
 
-    <div className="product-tools">
-      <div className="product-sort-select">
-        <span className="product-sort-label">{uiCopy.sort}</span>
-        <div className={`product-sort-dropdown${isSortOpen ? ' is-open' : ''}`}>
-          <button className="product-sort-button" type="button" aria-haspopup="listbox" aria-expanded={isSortOpen} onClick={() => setIsSortOpen((current) => !current)}>
-            {activeSortLabel}
-            <ChevronDown size={16} aria-hidden="true" />
-          </button>
-          {isSortOpen ? <div className="product-sort-menu" role="listbox" aria-label={uiCopy.sort}>
-            {sortOptions.map((option) => <button className={sortMode === option.value ? 'active' : ''} key={option.value} type="button" role="option" aria-selected={sortMode === option.value} onClick={() => {
-              setFilter('sort', option.value)
-              setIsSortOpen(false)
-            }}>
-              {option.label}
-            </button>)}
-          </div> : null}
-        </div>
-        <b className="product-total-count">{uiCopy.total(filtered.length)}</b>
-      </div>
-    </div>
+    {selectedFilterChips.length > 0 && <div className="product-active-filters" aria-label={discoveryCopy.selected}>
+      {selectedFilterChips.map((chip) => <button key={chip.key} type="button" aria-label={discoveryCopy.removeFilter(chip.label)} onClick={() => removeSelectedFilterChip(chip)}>{chip.label}<X size={13} /></button>)}
+      <Link to={toLocalePath('/products')}>{copy.clearFilters}</Link>
+    </div>}
 
     {sortedProducts.length > 0
-      ? <><div className="catalog-grid product-results">{visibleProducts.map((product) => <CatalogCard key={product.productId} product={product} />)}</div>
+      ? <><div className="catalog-grid product-results">{visibleProducts.map((product, index) => <CatalogCard key={`${productWindowKey}-${product.productId}`} product={product} priority={index < 4} />)}</div>
         {remainingProductCount > 0 && <div className="product-load-more" ref={loadMoreRef}>
           <button className="secondary-action" type="button" onClick={() => setProductWindow((current) => ({
             key: productWindowKey,
