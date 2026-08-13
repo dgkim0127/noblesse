@@ -16,7 +16,7 @@ test('product discovery keeps a compact summary and accessible filter drawer', (
   assert.match(css, /\.product-list-content \.product-page-head \{[\s\S]*?min-height: 0;/)
 })
 
-test('catalog cards use square media and request alternate photos only on fine-pointer interaction', () => {
+test('catalog cards use portrait media and request alternate photos only on fine-pointer interaction', () => {
   assert.match(card, /export function CatalogCard\(\{ product, priority = false \}\)/)
   assert.match(card, /productGalleryEntries\(product, productAlt\)/)
   assert.match(card, /matchMedia\('\(hover: hover\) and \(pointer: fine\)'\)/)
@@ -25,7 +25,7 @@ test('catalog cards use square media and request alternate photos only on fine-p
   assert.match(card, /catalog-quick-action--favorite/)
   assert.match(card, /catalog-quick-action--inquiry/)
   assert.doesNotMatch(card, /className="add-inquiry"/)
-  assert.match(css, /\.catalog-card \.catalog-media,[\s\S]*?aspect-ratio: 1;/)
+  assert.match(css, /\.catalog-card \.catalog-media,[\s\S]*?aspect-ratio: 4 \/ 5;/)
 })
 
 test('product grids keep four, three and two column storefront breakpoints', () => {

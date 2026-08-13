@@ -29,7 +29,7 @@ const seedApiProduct = {
 test('real seed product connects to public search and barbell taxonomy without false material matches', () => {
   const product = adaptApiProduct(seedApiProduct)
 
-  for (const query of ['4방', '초록클로버', '클로버', '바벨', 'clover', 'barbell', '오알']) {
+  for (const query of ['4방', '초록클로버', '클로버', '바벨', 'clover', 'barbell', '오팔']) {
     assert.equal(productMatchesCatalogSearch(product, query), true, query)
   }
 

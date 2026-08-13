@@ -120,7 +120,12 @@ export function CatalogCard({ product, priority = false }) {
     setIsFavorite((current) => !current)
   }
   const favoriteLabel = resolveLocaleCopy({ kr: '좋아요', en: 'Favorite', jp: 'お気に入り', cn: '收藏' }, locale, 'en')
-  const productMetadata = [product.material, ...(product.colors || []).slice(0, 1)].filter(Boolean)
+  const optionGroups = getEffectiveProductOptionGroups(product)
+  const colorGroup = optionGroups.find((group) => group.legacyKey === 'color' || group.id === 'legacy-color')
+  const localizedColor = colorGroup?.values?.[0]?.labels
+    ? resolveLocaleCopy(colorGroup.values[0].labels, locale, 'en')
+    : (product.colors || [])[0]
+  const productMetadata = [product.material, localizedColor].filter(Boolean)
   return <article className="catalog-card">
     <div className={`catalog-media${showAlternateImage && canShowAlternateImage ? ' is-showing-alternate' : ''}`} onPointerEnter={prepareAlternateImage} onPointerLeave={hideAlternateImage} onFocus={prepareAlternateImage} onBlur={(event) => {
       if (!event.currentTarget.contains(event.relatedTarget)) hideAlternateImage()

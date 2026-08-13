@@ -13,6 +13,35 @@ function normalizeStringArray(value) {
   return Array.isArray(value) ? value.filter(Boolean) : []
 }
 
+const legacyOptionLabelCorrections = {
+  '오알': {
+    kr: '오팔',
+    en: 'Opal',
+    jp: 'オパール',
+    'zh-TW': '歐泊',
+    cn: '歐泊',
+  },
+}
+
+function normalizeLegacyColors(colors) {
+  return normalizeStringArray(colors).map((color) => legacyOptionLabelCorrections[color]?.kr || color)
+}
+
+function normalizeLegacyOptionGroups(value) {
+  if (!Array.isArray(value)) return []
+
+  return value.map((group) => ({
+    ...group,
+    values: Array.isArray(group?.values)
+      ? group.values.map((option) => {
+          const rawLabels = option?.labels && typeof option.labels === 'object' ? option.labels : {}
+          const correction = legacyOptionLabelCorrections[rawLabels.kr]
+          return correction ? { ...option, labels: { ...rawLabels, ...correction } } : option
+        })
+      : group?.values,
+  }))
+}
+
 function inferTone(product) {
   const text = `${product?.material || ''} ${product?.nameEn || ''}`.toLowerCase()
   return toneByMaterial.find(([needle]) => text.includes(needle))?.[1] || 'silver'
@@ -64,13 +93,11 @@ export function adaptApiProduct(product, { apiBaseUrl } = {}) {
     categoryNameCn: product.categoryNameZhTw || product.categoryNameCn || '',
     collectionIds: normalizeStringArray(product.collectionIds),
     material: product.material || '',
-    colors: normalizeStringArray(product.colors),
+    colors: normalizeLegacyColors(product.colors),
     sizes: normalizeStringArray(product.sizes),
-    optionGroups: Array.isArray(product.optionGroups)
+    optionGroups: normalizeLegacyOptionGroups(Array.isArray(product.optionGroups)
       ? product.optionGroups
-      : Array.isArray(product.option_groups)
-        ? product.option_groups
-        : [],
+      : product.option_groups),
     moqDefault: product.moqDefault || 1,
     leadTime: product.leadTime || '',
     origin: product.origin || '',
