@@ -54,10 +54,20 @@ restart order from the Noblesse-related tasks are organized here:
   display, locale currency work, and product-detail QA
 - `docs/codex-handoff/04_SEPARATE_PORS_AND_PROCUREMENT.md` - boundaries for the
   separate PORS and Flutter procurement projects
+- `docs/codex-handoff/05_PORS_APP_HANDOFF.md` - restored B-computer PORS paths,
+  live GitHub branches/PR state, APK history, validation, and contract conflicts
+- `docs/codex-handoff/06_PROCUREMENT_APP_HANDOFF.md` - latest procurement app
+  behavior, Firebase/demo status, and the source-transfer blocker
 
 These documents contain no passwords, API keys, session cookies, or private
 tokens. Historical `D:\...` locations refer to the original computer and are
 not evidence that the same folders exist on the new computer.
+
+The PORS source has also been restored on the B computer at
+`C:\Users\MINE\Documents\Codex\pors`, with the latest unmerged quote branch in
+`C:\Users\MINE\Documents\Codex\pors-online-quote-workspace`. The Flutter
+procurement source has not been restored because no corresponding GitHub
+repository or B-computer folder was found as of 2026-08-14.
 
 ## First prompt for Codex
 

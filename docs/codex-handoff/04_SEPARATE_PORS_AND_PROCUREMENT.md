@@ -1,5 +1,8 @@
 # 별도 PORS와 Flutter 조달 앱 경계
 
+이 문서는 두 앱의 경계만 빠르게 확인하는 개요다. 실제 재개 전에는
+`05_PORS_APP_HANDOFF.md`와 `06_PROCUREMENT_APP_HANDOFF.md`를 각각 읽는다.
+
 ## 공통 원칙
 
 PORS, Noblesse 웹, Flutter 조달 앱은 이름과 데이터가 연결될 수 있어도
@@ -61,6 +64,10 @@ APK 요청이 다시 들어오면 다음 순서를 지킨다.
 이 앱을 B 컴퓨터로 옮길 때는 Noblesse 웹 체크포인트 안에 폴더를 만들지
 말고 별도 저장소를 clone한다. 원격 URL과 branch를 현재 증거로 확인한 뒤
 설치/테스트를 실행한다.
+
+2026-08-14 확인 결과 PORS는 GitHub에서 B 컴퓨터로 복원했지만, Flutter
+발주 앱에 해당하는 원격 저장소는 `dgkim0127` 계정에서 찾지 못했다. 따라서
+발주 앱 설명은 이어갈 수 있어도 소스 수정은 아직 할 수 없다.
 
 ## PostgreSQL 17 작업
 

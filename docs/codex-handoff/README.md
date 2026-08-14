@@ -41,6 +41,11 @@
 | PORS 본체 | `pors 앱 저장소 전용` | `D:\pors` 또는 전용 clean checkout | Noblesse 웹과 별도 | `04_SEPARATE_PORS_AND_PROCUREMENT.md` |
 | Flutter 조달 앱 | `발주 프로그램 계획 수립` | `D:\noblesse-procurement` | 데모 수준, 출시 경로 미검증 | `04_SEPARATE_PORS_AND_PROCUREMENT.md` |
 
+앱을 실제로 이어갈 때는 개요 문서 다음에 아래 상세 문서를 읽는다.
+
+- PORS 앱: `05_PORS_APP_HANDOFF.md`
+- Flutter 발주 앱: `06_PROCUREMENT_APP_HANDOFF.md`
+
 Codex 작업 ID는 작업을 찾거나 비교할 때만 사용한다.
 
 - 현재 기기 이전 작업: `019ffe2c-435e-7b71-a6cc-2034e1554cde`
@@ -65,6 +70,16 @@ Codex 작업 ID는 작업을 찾거나 비교할 때만 사용한다.
 
 B 컴퓨터에는 현재 `D:` 드라이브가 확인되지 않았다. 위 경로를 그대로
 명령에 넣지 말고, 먼저 실제 존재 여부와 원격 저장소/브랜치를 확인한다.
+
+2026-08-14에 B 컴퓨터로 실제 복원한 PORS 경로:
+
+| B 컴퓨터 경로 | 브랜치 | 용도 |
+| --- | --- | --- |
+| `C:\Users\MINE\Documents\Codex\pors` | `main` | 현재 GitHub 기본 앱 기준 |
+| `C:\Users\MINE\Documents\Codex\pors-online-quote-workspace` | `codex/pors-quote-list-compact` | Draft PR #5의 미병합 웹 견적 작업 |
+
+Flutter 발주 앱은 B 컴퓨터와 `dgkim0127` GitHub 저장소 목록 어디에도 소스가
+없었다. 대화 기록은 인수인계했지만 코드는 아직 이전되지 않았다.
 
 ## B 컴퓨터 Codex에 처음 보낼 문장
 
@@ -93,6 +108,24 @@ docs/codex-handoff/02_ONLINE_QUOTE_AND_PORS_INTEGRATION.md를 읽고,
 ```text
 docs/codex-handoff/03_CATALOG_PRICING_AND_PRODUCT_QA.md를 읽고,
 상품 카드 가격 작업의 원격 브랜치와 현재 검증 상태만 확인해줘.
+```
+
+PORS 앱은 아래처럼 시작한다.
+
+```text
+C:\Users\MINE\Documents\Codex\noblesse-handoff-bundle\docs\codex-handoff\05_PORS_APP_HANDOFF.md를 먼저 읽어줘.
+그 다음 C:\Users\MINE\Documents\Codex\pors-online-quote-workspace에서 현재
+브랜치, status, origin, Draft PR #5와 main 차이를 읽기 전용으로 확인해줘.
+PR #5는 자동 판매 등록과 수동 영수증 연결 계약이 충돌할 수 있으므로
+코드를 수정하거나 병합하지 말고 충돌 지점부터 보고해줘.
+```
+
+Flutter 발주 앱은 소스가 복원되기 전까지 아래처럼 요청한다.
+
+```text
+docs/codex-handoff/06_PROCUREMENT_APP_HANDOFF.md를 읽어줘. 현재 B 컴퓨터에는
+발주 앱 소스가 없으므로 새로 만들거나 추측해서 복구하지 말고, A 컴퓨터에서
+안전하게 GitHub로 옮기는 데 필요한 체크리스트만 확인해줘.
 ```
 
 ## 공통 금지 사항
