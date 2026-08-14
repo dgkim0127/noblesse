@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createBuyerInquiryQueries } from "../src/db/queries/buyerInquiryQueries.js";
 
-test("buyer product price query requires exact market and currency", async () => {
+test("buyer product price query returns every active market price for locale display", async () => {
   const calls = [];
   const pool = {
     async query(sql, params) {
@@ -18,10 +18,11 @@ test("buyer product price query requires exact market and currency", async () =>
   });
 
   assert.equal(calls.length, 1);
-  assert.match(calls[0].sql, /pp\.market = \$1/i);
-  assert.match(calls[0].sql, /pp\.currency = \$2/i);
-  assert.doesNotMatch(calls[0].sql, /pp\.currency = \$2\s+or\s+pp\.market = \$1/i);
-  assert.deepEqual(calls[0].params, ["TW", "TWD"]);
+  assert.doesNotMatch(calls[0].sql, /pp\.market = \$1/i);
+  assert.doesNotMatch(calls[0].sql, /pp\.currency = \$2/i);
+  assert.match(calls[0].sql, /pp\.visible_to = 'approved_only'/i);
+  assert.match(calls[0].sql, /pp\.is_active = true/i);
+  assert.equal(calls[0].params, undefined);
 });
 
 test("createInquiry rolls back if a priced product is not the viewer exact price book", async () => {
@@ -35,7 +36,7 @@ test("createInquiry rolls back if a priced product is not the viewer exact price
             product_id: "product-1",
             product_code: "NB-001",
             name_en: "Product",
-            name_ko: "?�품",
+            name_ko: "상품",
             category_id: "category-1",
             material: "Surgical Steel",
             id: "price-1",
@@ -91,7 +92,7 @@ test("createInquiry stores discounted cents and subtotal without floating drift"
             product_id: "product-1",
             product_code: "NB-001",
             name_en: "Product One",
-            name_ko: "?�품1",
+            name_ko: "상품1",
             category_id: "category-1",
             material: "Surgical Steel",
             id: "price-1",
@@ -105,7 +106,7 @@ test("createInquiry stores discounted cents and subtotal without floating drift"
             product_id: "product-2",
             product_code: "NB-002",
             name_en: "Product Two",
-            name_ko: "?�품2",
+            name_ko: "상품2",
             category_id: "category-1",
             material: "Cubic",
             id: "price-2",

@@ -6,6 +6,7 @@ import {
   getAdminMarketPriceBooksForProduct,
   getAdminPriceBooksForProduct,
   getDiscountedPrice,
+  getPriceForLocale,
   getViewerStateFromProfile,
   guestProfile,
   isApprovedBuyer,
@@ -103,6 +104,22 @@ test('active pending buyer exact market and currency price is available', () => 
 
   assert.equal(selected.isAvailable, true)
   assert.equal(selected.price.wholesalePrice, 12000)
+})
+
+test('catalog display price follows locale without changing the buyer assigned price book', () => {
+  const prices = [
+    { productId: 'NB-001', market: 'KR', currency: 'KRW', visibleTo: 'approved_only', isActive: true, wholesalePrice: 1800 },
+    { productId: 'NB-001', market: 'JP', currency: 'JPY', visibleTo: 'approved_only', isActive: true, wholesalePrice: 200 },
+    { productId: 'NB-001', market: 'US', currency: 'USD', visibleTo: 'approved_only', isActive: true, wholesalePrice: 1.23 },
+    { productId: 'NB-001', market: 'TW', currency: 'TWD', visibleTo: 'approved_only', isActive: true, wholesalePrice: 39.22 },
+  ]
+  const viewer = { role: 'buyer', accountStatus: 'active', verificationStatus: 'approved', assignedMarket: 'KR', currency: 'KRW' }
+
+  assert.equal(getPriceForLocale(prices, 'NB-001', 'kr', viewer).currency, 'KRW')
+  assert.equal(getPriceForLocale(prices, 'NB-001', 'en', viewer).currency, 'USD')
+  assert.equal(getPriceForLocale(prices, 'NB-001', 'jp', viewer).currency, 'JPY')
+  assert.equal(getPriceForLocale(prices, 'NB-001', 'cn', viewer).currency, 'TWD')
+  assert.equal(selectProductPrice({ prices, productId: 'NB-001', locale: 'en', viewer }).price.currency, 'KRW')
 })
 
 test('missing exact price is unavailable instead of using another market amount', () => {

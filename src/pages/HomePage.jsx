@@ -2,7 +2,6 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { ChevronLeft, ChevronRight, ClipboardList, Headphones, Heart, Mail, Pause, Play } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
-import { formatAdminPriceBook } from '../config/currency'
 import { defaultHomeLayout, getHomeLayoutText, normalizeHomeLayout, selectConfiguredProducts } from '../config/homeLayout'
 import { mockProducts } from '../data/catalog'
 import { homeTaxonomyLinks } from '../data/productTaxonomy'
@@ -1165,7 +1164,7 @@ const memberActionNoticeCopy = {
 }
 
 function HomeProductCard({ product, index, variant = 'default', localeOverride = '' }) {
-  const { addInquiryItem, approvedPrice, getAdminPriceBooks, getPrice, isAdmin, isApproved, viewerState } = useCommerce()
+  const { addInquiryItem, getLocalizedPrice, isAdmin, isApproved, localizedApprovedPrice, viewerState } = useCommerce()
   const { locale: routeLocale, toLocalePath } = useLocalePath()
   const navigate = useNavigate()
   const locale = localeOverride || routeLocale
@@ -1175,7 +1174,8 @@ function HomeProductCard({ product, index, variant = 'default', localeOverride =
   const [shouldLoadAlternateImages, setShouldLoadAlternateImages] = useState(false)
   const productName = getLocalizedProductName(product, locale)
   const productAlt = getLocalizedProductAlt(product, locale)
-  const price = getPrice(product.productId)
+  const localizedPrice = getLocalizedPrice(product.productId, locale)
+  const localizedAmount = localizedApprovedPrice(product.productId, locale)
   const hasExplicitOptions = Array.isArray(product.optionGroups || product.option_groups) && (product.optionGroups || product.option_groups).length > 0
   const requiresOptionSelection = hasExplicitOptions && getEffectiveProductOptionGroups(product).some((group) => group.required)
   const galleryImages = productGalleryEntries(product, productAlt)
@@ -1186,14 +1186,10 @@ function HomeProductCard({ product, index, variant = 'default', localeOverride =
     ? galleryImages
     : fallbackImage ? [{ id: 'fallback', cardSrc: fallbackImage, position: { x: 50, y: 50 }, scale: 1 }] : []
   const visibleCardImages = shouldLoadAlternateImages ? cardImages : cardImages.slice(0, 1)
-  const adminPriceBooks = isAdmin ? getAdminPriceBooks(product.productId) : []
-  const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
-  const unavailablePriceLabel = resolveLocaleCopy({ kr: '가격 미등록', en: 'Price unavailable', jp: '価格未登録', cn: '價格未登記' }, locale, 'en')
-  const displayPrice = adminPriceBooks.length > 0
-    ? null
-    : isApproved && price
-    ? formatMoney(approvedPrice(product.productId), price.currency)
-    : isApproved ? unavailablePriceLabel : resolveLocaleCopy(priceAfterApprovalLabel, locale, 'en')
+  const unavailablePriceLabel = resolveLocaleCopy({ kr: '가격 확인 중', en: 'Price being confirmed', jp: '価格確認中', cn: '價格確認中' }, locale, 'en')
+  const displayPrice = (isApproved || isAdmin) && localizedPrice && localizedAmount !== null
+    ? formatMoney(localizedAmount, localizedPrice.currency)
+    : isApproved || isAdmin ? unavailablePriceLabel : resolveLocaleCopy(priceAfterApprovalLabel, locale, 'en')
   const productBadge = String(product.badge || '').trim()
   const statusLabel = product.isNew
     ? 'NEW'
@@ -1300,9 +1296,7 @@ function HomeProductCard({ product, index, variant = 'default', localeOverride =
         </span> : null}
         <small>{product.material}</small>
       </Link>
-      {adminPriceItems.length > 0
-        ? <span className="admin-price-book-grid home-admin-price-book-grid">{adminPriceItems.map((item, index) => <span className="admin-price-book-item" key={`${item.market}-${item.currency}-${index}`}><img alt={item.flagLabel} className="admin-price-book-flag" src={item.flagSrc} /><span className="admin-price-book-value"><b>{item.amount}</b><span>{item.symbol}</span><em>{item.currency}</em></span></span>)}</span>
-        : <b>{displayPrice}</b>}
+      <b>{displayPrice}</b>
     </div>
   </article>
 }

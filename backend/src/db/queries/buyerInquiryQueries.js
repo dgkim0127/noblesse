@@ -157,7 +157,7 @@ async function loadVisibleProduct(client, productCode) {
 
 export function createBuyerInquiryQueries(pool) {
   return {
-    async listProductPrices(viewer) {
+    async listProductPrices(_viewer) {
       assertPool(pool);
       const result = await pool.query(
         `
@@ -175,15 +175,19 @@ export function createBuyerInquiryQueries(pool) {
           from public.product_prices pp
           join public.products p on p.id = pp.product_id
           where p.is_visible = true
-            and pp.market = $1
-            and pp.currency = $2
             and pp.visible_to = 'approved_only'
             and pp.is_active = true
           order by
             p.sort_order asc,
-            p.created_at desc
-        `,
-        [viewer.assignedMarket, viewer.currency]
+            p.created_at desc,
+            case pp.market
+              when 'KR' then 1
+              when 'JP' then 2
+              when 'US' then 3
+              when 'TW' then 4
+              else 5
+            end asc
+        `
       );
       return result.rows.map(mapProductPrice);
     },

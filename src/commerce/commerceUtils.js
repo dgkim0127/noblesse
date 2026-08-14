@@ -1,4 +1,4 @@
-import { getDisplayCurrency, isValidMarketCurrencyPair, marketCurrency, supportedMarkets } from '../config/currency.js'
+import { getDisplayCurrency, isValidMarketCurrencyPair, localeDefaultCurrency, marketCurrency, supportedMarkets } from '../config/currency.js'
 import { applyDiscount, multiplyMoney, sumMoney } from '../utils/money.js'
 import { productOptionCombinationKey, resolveProductOptionSelection } from '../utils/productOptions.js'
 
@@ -213,6 +213,25 @@ export const getApprovedBuyerPrice = (productPrices, productId, market, discount
 export const getPriceForBuyer = (productPrices, productId, buyer, _isApproved) => (
   selectProductPrice({ prices: productPrices, viewer: buyer, productId }).price
 )
+
+const localePriceMarket = {
+  KRW: 'KR',
+  JPY: 'JP',
+  USD: 'US',
+  TWD: 'TW',
+}
+
+export const getPriceForLocale = (productPrices, productId, locale, viewer) => {
+  if (!isQuoteEnabledBuyer(viewer) && !isAdmin(viewer)) return null
+  const currency = localeDefaultCurrency[locale] || localeDefaultCurrency.en
+  const market = localePriceMarket[currency]
+  if (!market) return null
+  return findExactPrice(productPrices, (price) => (
+    price.productId === productId
+    && price.market === market
+    && price.currency === currency
+  ))
+}
 
 const marketPriceBookOrder = ['KR', 'JP', 'US', 'TW', 'GLOBAL']
 

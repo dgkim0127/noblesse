@@ -13,6 +13,7 @@ import {
   getBuyerAccessFeatures,
   getDiscountedPrice,
   getAdminPriceBooksForProduct,
+  getPriceForLocale,
   getPriceForBuyer,
   getViewerStateFromProfile,
   isAdmin,
@@ -347,6 +348,14 @@ export function CommerceProvider({ children }) {
   const approvedPrice = useCallback((productId) => (
     getDiscountedPrice(getPriceForBuyer(productPrices, productId, buyer, isApproved), buyer?.discountRate)
   ), [buyer, isApproved, productPrices])
+
+  const getLocalizedPrice = useCallback((productId, locale) => (
+    getPriceForLocale(productPrices, productId, locale, buyer)
+  ), [buyer, productPrices])
+
+  const localizedApprovedPrice = useCallback((productId, locale) => (
+    getDiscountedPrice(getPriceForLocale(productPrices, productId, locale, buyer), buyer?.discountRate)
+  ), [buyer, productPrices])
 
   const adminPriceBooksByProduct = useMemo(() => {
     const grouped = new Map()
@@ -740,6 +749,7 @@ export function CommerceProvider({ children }) {
     dataStatus,
     estimatedTotal,
     getPrice,
+    getLocalizedPrice,
     getAdminPriceBooks,
     homeShowcase,
     homeLayout,
@@ -751,6 +761,7 @@ export function CommerceProvider({ children }) {
     canUseQuoteFlow: isApproved,
     isGuest,
     isPending,
+    localizedApprovedPrice,
     productPrices,
     products,
     recentProductViews,

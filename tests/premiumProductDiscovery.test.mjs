@@ -36,6 +36,15 @@ test('catalog cards omit color summaries and avoid a false unregistered-price la
   assert.match(card, /가격 확인 중/)
 })
 
+test('catalog cards show only the locale market price without trade metadata', () => {
+  assert.match(card, /getLocalizedPrice\(product\.productId, locale\)/)
+  assert.match(card, /localizedApprovedPrice\(product\.productId, locale\)/)
+  assert.match(card, /formatMoney\(displayAmount, displayPrice\.currency\)/)
+  assert.doesNotMatch(card, /copy\.minQty/)
+  assert.doesNotMatch(card, /copy\.memberPrice/)
+  assert.doesNotMatch(card, /admin-price-book-grid/)
+})
+
 test('catalog inquiry action opens a quick option sheet before adding', () => {
   assert.match(card, /<SlidersHorizontal size=\{17\}/)
   assert.match(card, /className="catalog-option-dialog"/)

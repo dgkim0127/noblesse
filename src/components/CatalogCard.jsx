@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { useCommerce } from '../commerce/commerceStore'
-import { formatAdminPriceBook } from '../config/currency'
 import { formatMoney } from '../utils/commerce'
 import { getLocalizedProductAlt, getLocalizedProductName, resolveLocaleCopy, useLocalePath } from '../utils/locale'
 import { imagePresentationStyle, productGalleryEntries } from '../utils/productImageGallery'
@@ -15,8 +14,6 @@ const cardCopy = {
     add: '제품 문의하기',
     locked: '로그인 후 가격 확인 가능',
     lockedButton: '로그인 필요',
-    minQty: 'MOQ',
-    memberPrice: '거래 조건',
     noOptions: '별도 선택 옵션이 없는 상품입니다.',
     quickAdd: '견적 리스트에 담기',
     quickClose: '빠른 선택 닫기',
@@ -31,8 +28,6 @@ const cardCopy = {
     add: 'Ask about this product',
     locked: 'Price available after sign-in',
     lockedButton: 'Sign in required',
-    minQty: 'Minimum qty',
-    memberPrice: 'Trade terms',
     noOptions: 'This product has no additional options.',
     quickAdd: 'Add to Inquiry List',
     quickClose: 'Close quick selection',
@@ -47,8 +42,6 @@ const cardCopy = {
     add: 'この商品を問い合わせる',
     locked: 'ログイン後に価格を確認できます',
     lockedButton: 'ログインが必要です',
-    minQty: '最小数量',
-    memberPrice: '取引条件',
     noOptions: '追加で選択するオプションはありません。',
     quickAdd: '見積もりリストに追加',
     quickClose: 'クイック選択を閉じる',
@@ -63,8 +56,6 @@ const cardCopy = {
     add: '咨询此商品',
     locked: '登入後可查看價格',
     lockedButton: '需要登入',
-    minQty: '最小数量',
-    memberPrice: '交易条件',
     noOptions: '此商品沒有其他選項。',
     quickAdd: '加入詢價清單',
     quickClose: '關閉快速選擇',
@@ -85,7 +76,7 @@ const memberActionNoticeCopy = {
 }
 
 export function CatalogCard({ product, priority = false }) {
-  const { addInquiryItem, approvedPrice, getAdminPriceBooks, getPrice, isAdmin, isApproved, viewerState } = useCommerce()
+  const { addInquiryItem, getLocalizedPrice, getPrice, isAdmin, isApproved, localizedApprovedPrice, viewerState } = useCommerce()
   const { locale, toLocalePath } = useLocalePath()
   const [isFavorite, setIsFavorite] = useState(false)
   const [shouldLoadAlternateImage, setShouldLoadAlternateImage] = useState(false)
@@ -100,8 +91,9 @@ export function CatalogCard({ product, priority = false }) {
   const quickCloseButtonRef = useRef(null)
   const quickCloseTimerRef = useRef(null)
   const price = getPrice(product.productId)
+  const displayPrice = getLocalizedPrice(product.productId, locale)
+  const displayAmount = localizedApprovedPrice(product.productId, locale)
   const copy = resolveLocaleCopy(cardCopy, locale)
-  const adminPriceLabel = resolveLocaleCopy({ kr: '관리자 가격', en: 'Admin prices', jp: '管理者価格', cn: '管理员价格' }, locale, 'en')
   const productName = getLocalizedProductName(product, locale)
   const productAlt = getLocalizedProductAlt(product, locale)
   const galleryImages = productGalleryEntries(product, productAlt)
@@ -112,8 +104,7 @@ export function CatalogCard({ product, priority = false }) {
   const canShowPrimaryImage = Boolean(primaryImageSource) && !failedImageSources.includes(primaryImageSource)
   const canShowAlternateImage = Boolean(alternateImageSource) && !failedImageSources.includes(alternateImageSource)
   const canUseTradeTerms = isApproved && price
-  const adminPriceBooks = isAdmin ? getAdminPriceBooks(product.productId) : []
-  const adminPriceItems = adminPriceBooks.map(formatAdminPriceBook)
+  const canShowDisplayPrice = (isApproved || isAdmin) && displayPrice && displayAmount !== null
   const memberActionNotice = resolveLocaleCopy(memberActionNoticeCopy, locale, 'en')
   const actionLockLabel = viewerState === 'guest' ? memberActionNotice : copy.lockedButton
   const addActionDisabled = viewerState !== 'guest' && !canUseTradeTerms
@@ -244,9 +235,9 @@ export function CatalogCard({ product, priority = false }) {
     <div className="catalog-body">
       <Link to={toLocalePath(`/products/${product.productId}`)}><h3>{productName}</h3></Link>
       {productMetadata.length > 0 && <p>{productMetadata.join(' · ')}</p>}
-      {adminPriceBooks.length > 0
-        ? <div className="approved-price admin-price-books"><strong>{adminPriceLabel}</strong><span className="admin-price-book-grid">{adminPriceItems.map((item, index) => <span className="admin-price-book-item" key={`${item.market}-${item.currency}-${index}`}><img alt={item.flagLabel} className="admin-price-book-flag" src={item.flagSrc} /><span className="admin-price-book-value"><b>{item.amount}</b><span>{item.symbol}</span><em>{item.currency}</em></span></span>)}</span></div>
-        : canUseTradeTerms ? <div className="approved-price"><strong>{formatMoney(approvedPrice(product.productId), price.currency)}</strong><span>{copy.minQty} {price.moq} / {copy.memberPrice} · {price.currency}</span></div> : <div className="locked-price"><LockKeyhole size={14} />{isApproved ? copy.unavailable : copy.locked}</div>}
+      {canShowDisplayPrice
+        ? <div className="approved-price"><strong>{formatMoney(displayAmount, displayPrice.currency)}</strong></div>
+        : <div className="locked-price"><LockKeyhole size={14} />{isApproved || isAdmin ? copy.unavailable : copy.locked}</div>}
     </div>
     {isQuickOptionOpen && typeof document !== 'undefined' && createPortal(<div className={`catalog-option-overlay${isQuickOptionClosing ? ' is-closing' : ''}`} role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget) closeQuickOption()

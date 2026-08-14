@@ -49,6 +49,7 @@ export function createBuyerRoutes({
     requireUser,
     asyncRoute(async (req, res) => {
       const productPrices = await buyerInquiryService.listProductPrices(req.viewer);
+      res.setHeader("cache-control", "private, no-store");
       res.json({ productPrices });
     })
   );
