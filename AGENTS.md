@@ -310,6 +310,8 @@ Avoid:
 
 # Validation
 
+Before changing files on a newly cloned machine, read `CODEX_HANDOFF.md` when it exists.
+
 Before finishing any task, check:
 
 - `npm install` works
