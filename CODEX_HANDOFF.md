@@ -39,14 +39,37 @@ Open the cloned `noblesse` folder as the workspace in Codex. Codex reads the
 root `AGENTS.md` automatically; that file contains the project identity,
 terminology, product constraints, routes, and validation requirements.
 
+## Detailed conversation handoff
+
+The original Codex task transcripts are not copied into this repository.
+Instead, the durable decisions, evidence, branches, unfinished work, and safe
+restart order from the Noblesse-related tasks are organized here:
+
+- `docs/codex-handoff/README.md` - master task index and B-computer startup
+- `docs/codex-handoff/01_NOBLESSE_WEB_AND_READINESS.md` - website, readiness,
+  inquiry-list history, and production cautions
+- `docs/codex-handoff/02_ONLINE_QUOTE_AND_PORS_INTEGRATION.md` - Noblesse/PORS
+  online quote contract, implementation state, blockers, and restart checks
+- `docs/codex-handoff/03_CATALOG_PRICING_AND_PRODUCT_QA.md` - catalog price
+  display, locale currency work, and product-detail QA
+- `docs/codex-handoff/04_SEPARATE_PORS_AND_PROCUREMENT.md` - boundaries for the
+  separate PORS and Flutter procurement projects
+
+These documents contain no passwords, API keys, session cookies, or private
+tokens. Historical `D:\...` locations refer to the original computer and are
+not evidence that the same folders exist on the new computer.
+
 ## First prompt for Codex
 
 ```text
-Read AGENTS.md and CODEX_HANDOFF.md completely. Confirm the workspace root,
-current branch, git status, and latest remote state before editing. Work only on
-codex/workspace-sync-20260814 unless I explicitly request a new branch. Do not
-merge main, deploy, run migrations, or add payment/direct-purchase features.
-First report the current status and ask what feature I want to continue.
+Read AGENTS.md, CODEX_HANDOFF.md, and docs/codex-handoff/README.md completely.
+Then read only the task document selected from that index. Confirm the workspace
+root, current branch, git status, latest remote state, and whether any historical
+D:\ workspace named in the task document actually exists on this computer.
+Work only on codex/workspace-sync-20260814 unless I explicitly request a new
+branch or a separate clean checkout. Do not merge main, deploy, run migrations,
+or add payment/direct-purchase features. First give me an evidence-based status
+and blocker report, then wait for me to choose which task to continue.
 ```
 
 ## Daily cross-device workflow
