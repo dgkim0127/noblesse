@@ -1,0 +1,22 @@
+// Merge these narrow matches into the current shared-project Firestore rules.
+// Do not deploy this file by itself: PORS rules must remain unchanged.
+match /noblesse_public_products/{productId} {
+  allow read: if true;
+  allow write: if false;
+}
+match /noblesse_public_categories/{categoryId} {
+  allow read: if true;
+  allow write: if false;
+}
+match /noblesse_public_collections/{collectionId} {
+  allow read: if true;
+  allow write: if false;
+}
+match /noblesse_public_banners/{bannerId} {
+  allow read: if true;
+  allow write: if false;
+}
+match /noblesse_buyer_views/{buyerUid}/{document=**} {
+  allow read: if request.auth != null && request.auth.uid == buyerUid;
+  allow write: if false;
+}

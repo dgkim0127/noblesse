@@ -1,0 +1,23 @@
+{
+  "version": "3.0",
+  "scope": "piercing ecommerce admin: auth, product management, product dashboard",
+  "stage_count": 16,
+  "stages": [
+    "STAGE_00_SCOPE_DECISIONS.md",
+    "STAGE_01_BOOTSTRAP_QUALITY.md",
+    "STAGE_02_AUTH_TENANCY_RLS.md",
+    "STAGE_03_ADMIN_SHELL_UI.md",
+    "STAGE_04_PRODUCT_DATABASE.md",
+    "STAGE_05_REFERENCE_DATA.md",
+    "STAGE_06_PRODUCT_LIST_READ.md",
+    "STAGE_07_PRODUCT_DRAFT_FORM.md",
+    "STAGE_08_VARIANTS_INVENTORY.md",
+    "STAGE_09_MEDIA_CONTENT_PUBLISH.md",
+    "STAGE_10_PRODUCT_OPERATIONS.md",
+    "STAGE_11_REUSABLE_TOOLS.md",
+    "STAGE_12_RELATIONS_SERIES.md",
+    "STAGE_13_DASHBOARD.md",
+    "STAGE_14_CSV_IMPORT.md",
+    "STAGE_15_HARDEN_DEPLOY.md"
+  ]
+}

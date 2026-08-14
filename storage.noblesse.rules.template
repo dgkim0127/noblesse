@@ -1,0 +1,18 @@
+// Merge these narrow matches into the current shared-project Storage rules.
+// Do not deploy this file by itself: PORS rules must remain unchanged.
+match /b/{bucket}/o {
+  match /noblesse/products/{productId}/{variant}/{fileName} {
+    allow read: if true;
+    allow write: if request.auth != null
+      && request.auth.token.noblesseAdmin == true
+      && variant in ['thumb', 'card', 'detail', 'zoom']
+      && request.resource.contentType == 'image/webp'
+      && request.resource.size < 10 * 1024 * 1024;
+  }
+  match /noblesse/catalogs/{market}/{fileName} {
+    allow read: if false;
+    allow write: if request.auth != null
+      && request.auth.token.noblesseAdmin == true
+      && request.resource.size < 25 * 1024 * 1024;
+  }
+}

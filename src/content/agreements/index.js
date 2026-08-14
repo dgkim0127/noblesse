@@ -1,8 +1,8 @@
-export { buyerTerms } from './buyerTerms'
-export { marketingConsent } from './marketingConsent'
-export { privacyCollectionUse } from './privacyCollectionUse'
-export { privacyPolicy } from './privacyPolicy'
 export { termsOfService } from './termsOfService'
+export { buyerTerms } from './buyerTerms'
+export { privacyPolicy } from './privacyPolicy'
+export { privacyCollectionUse } from './privacyCollectionUse'
+export { marketingConsent } from './marketingConsent'
 
 import { buyerTerms } from './buyerTerms'
 import { marketingConsent } from './marketingConsent'

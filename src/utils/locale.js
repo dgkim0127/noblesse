@@ -1,0 +1,83 @@
+import { useLocation } from 'react-router-dom'
+
+export const defaultLocale = 'kr'
+export const supportedLocales = ['kr', 'en', 'jp', 'cn']
+
+export const localeMeta = {
+  kr: { code: 'KR', brandName: '귀족', languageLabel: '피어싱' },
+  en: { code: 'EN', brandName: 'Noblesse', languageLabel: 'Piercing' },
+  jp: { code: 'JP', brandName: '貴族', languageLabel: 'ピアス' },
+  cn: { code: 'CN', brandName: '贵族', languageLabel: '穿孔' },
+}
+
+const splitPath = (path) => {
+  const match = String(path).match(/^([^?#]*)(.*)$/)
+  return { pathname: match?.[1] || '/', suffix: match?.[2] || '' }
+}
+
+export const hasLocalePrefix = (pathname) => {
+  const firstSegment = String(pathname).split('/').filter(Boolean)[0]
+  return supportedLocales.includes(firstSegment)
+}
+
+export const getLocaleFromPathname = (pathname) => {
+  const firstSegment = String(pathname).split('/').filter(Boolean)[0]
+  return supportedLocales.includes(firstSegment) ? firstSegment : defaultLocale
+}
+
+export const stripLocalePrefix = (pathname) => {
+  const segments = String(pathname).split('/').filter(Boolean)
+  if (!supportedLocales.includes(segments[0])) return pathname || '/'
+  const stripped = `/${segments.slice(1).join('/')}`
+  return stripped === '/' ? '/' : stripped.replace(/\/$/, '')
+}
+
+export const buildLocalizedPath = (targetPath, locale, forcePrefix = false) => {
+  if (!targetPath || !String(targetPath).startsWith('/')) return targetPath
+
+  const { pathname, suffix } = splitPath(targetPath)
+  const cleanPath = stripLocalePrefix(pathname)
+  const safeLocale = supportedLocales.includes(locale) ? locale : defaultLocale
+  const shouldPrefix = forcePrefix || safeLocale !== defaultLocale
+  const prefix = shouldPrefix ? `/${safeLocale}` : ''
+  const normalizedPath = cleanPath === '/' ? '' : cleanPath
+  const localizedPath = `${prefix}${normalizedPath}` || '/'
+  return `${localizedPath}${suffix}`
+}
+
+export function useLocalePath() {
+  const location = useLocation()
+  const locale = getLocaleFromPathname(location.pathname)
+  const prefixActive = hasLocalePrefix(location.pathname)
+  const toLocalePath = (path) => buildLocalizedPath(path, locale, prefixActive)
+  const toLanguagePath = (nextLocale) =>
+    buildLocalizedPath(`${stripLocalePrefix(location.pathname)}${location.search}${location.hash}`, nextLocale, true)
+
+  return {
+    locale,
+    localeMeta: localeMeta[locale],
+    toLanguagePath,
+    toLocalePath,
+  }
+}
+
+export const getLocalizedProductName = (product, locale) => {
+  if (locale === 'kr') return product.nameKo ?? product.nameEn
+  if (locale === 'jp') return product.nameJa ?? product.nameEn ?? product.nameKo
+  if (locale === 'cn') return product.nameZh ?? product.nameEn ?? product.nameKo
+  return product.nameEn ?? product.nameKo
+}
+
+export const getLocalizedProductDescription = (product, locale) => {
+  if (locale === 'kr') return product.descriptionKo ?? product.descriptionEn
+  if (locale === 'jp') return product.descriptionJa ?? product.descriptionEn ?? product.descriptionKo
+  if (locale === 'cn') return product.descriptionZh ?? product.descriptionEn ?? product.descriptionKo
+  return product.descriptionEn ?? product.descriptionKo
+}
+
+export const getLocalizedProductAlt = (product, locale) => {
+  if (locale === 'kr') return product.imageAlt?.ko ?? product.nameKo ?? product.nameEn
+  if (locale === 'jp') return product.imageAlt?.ja ?? product.nameJa ?? product.nameEn
+  if (locale === 'cn') return product.imageAlt?.zh ?? product.nameZh ?? product.nameEn ?? product.nameKo
+  return product.imageAlt?.en ?? product.nameEn ?? product.nameKo
+}
