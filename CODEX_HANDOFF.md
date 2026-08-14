@@ -4,8 +4,11 @@ Updated: 2026-08-14
 
 ## Purpose
 
-This branch is a checkpoint of the working tree from the original computer so
-the same project can be continued in Codex on another computer.
+This branch is a checkpoint of the Noblesse working tree and the durable index
+for the wider Noblesse company work. It lets another computer locate and safely
+continue the B2B website, PORS integration, procurement app, product management
+app, Blingping B2C site, product media, and business records without combining
+their repositories or copying secrets into Git.
 
 ## Repository and branch
 
@@ -46,6 +49,8 @@ Instead, the durable decisions, evidence, branches, unfinished work, and safe
 restart order from the Noblesse-related tasks are organized here:
 
 - `docs/codex-handoff/README.md` - master task index and B-computer startup
+- `docs/codex-handoff/00_COMPANY_MASTER_HANDOFF.md` - company-wide system,
+  asset, conversation, transfer-state, and blocker map
 - `docs/codex-handoff/01_NOBLESSE_WEB_AND_READINESS.md` - website, readiness,
   inquiry-list history, and production cautions
 - `docs/codex-handoff/02_ONLINE_QUOTE_AND_PORS_INTEGRATION.md` - Noblesse/PORS
@@ -58,6 +63,18 @@ restart order from the Noblesse-related tasks are organized here:
   live GitHub branches/PR state, APK history, validation, and contract conflicts
 - `docs/codex-handoff/06_PROCUREMENT_APP_HANDOFF.md` - latest procurement app
   behavior, Firebase/demo status, and the source-transfer blocker
+- `docs/codex-handoff/07_COMPANY_BRAND_PRODUCTS_MARKETS.md` - canonical brand,
+  B2B/B2C boundary, product taxonomy, pricing, and market research cautions
+- `docs/codex-handoff/08_COMPANY_SYSTEMS_AND_REPOSITORIES.md` - current repos,
+  workspaces, branches, draft PR stack, and ownership boundaries
+- `docs/codex-handoff/09_LOCAL_ASSETS_AND_TRANSFER_GAPS.md` - local product
+  media, ZIP archives, business documents, and A-to-B transfer gaps
+- `docs/codex-handoff/10_CONVERSATION_REGISTRY.md` - Codex/ChatGPT task map
+  without raw sensitive transcripts
+- `docs/codex-handoff/11_PRODUCT_S_APP_HANDOFF.md` - dirty local Flutter
+  product/inventory/staff app and safe continuation rules
+- `docs/codex-handoff/12_BLINGPING_B2C_HANDOFF.md` - separate consumer shop,
+  private deployment history, and missing normal Git remote
 
 These documents contain no passwords, API keys, session cookies, or private
 tokens. Historical `D:\...` locations refer to the original computer and are
@@ -69,10 +86,19 @@ The PORS source has also been restored on the B computer at
 procurement source has not been restored because no corresponding GitHub
 repository or B-computer folder was found as of 2026-08-14.
 
+Additional company source and media were found locally on the B computer, but
+they are not fully transferable through this Git branch: `product_s` has
+uncommitted user changes, Blingping has no normal Git remote, product photography
+is roughly 2.13 GB, and Downloads contains a previously audited 743-product ZIP
+set mixed with unrelated archives. Read the company master and local-assets
+documents before moving or publishing any of them.
+
 ## First prompt for Codex
 
 ```text
-Read AGENTS.md, CODEX_HANDOFF.md, and docs/codex-handoff/README.md completely.
+Read AGENTS.md, CODEX_HANDOFF.md,
+docs/codex-handoff/00_COMPANY_MASTER_HANDOFF.md, and
+docs/codex-handoff/README.md completely.
 Then read only the task document selected from that index. Confirm the workspace
 root, current branch, git status, latest remote state, and whether any historical
 D:\ workspace named in the task document actually exists on this computer.

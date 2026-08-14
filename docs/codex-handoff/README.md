@@ -1,13 +1,14 @@
-# Noblesse Codex 작업 인수인계 색인
+# 귀족회사 전체 Codex 작업 인수인계 색인
 
 작성 기준일: 2026-08-14
 
 ## 이 문서 묶음의 역할
 
-이 폴더는 A 컴퓨터에서 진행한 Noblesse 관련 Codex 작업을 B 컴퓨터에서
-안전하게 이어가기 위한 요약본이다. 원본 대화 전문을 복제한 것이 아니라,
-다시 작업하는 데 필요한 결정 사항, 작업공간, 브랜치, 검증 결과, 미완료
-항목, 금지 사항을 작업별로 정리했다.
+이 폴더는 A 컴퓨터에서 진행한 귀족회사 관련 Codex 작업을 B 컴퓨터에서
+안전하게 이어가기 위한 요약본이다. Noblesse 웹뿐 아니라 PORS, 발주 앱,
+상품관리 앱, Blingping B2C, 상품 원본 사진·ZIP, 브랜드·시장 기록까지
+연결한다. 원본 대화 전문을 복제한 것이 아니라 다시 작업하는 데 필요한
+결정 사항, 작업공간, 브랜치, 검증 결과, 미완료 항목과 금지 사항을 정리했다.
 
 현재 B 컴퓨터에서 확인된 체크포인트 복제본은 다음과 같다.
 
@@ -24,12 +25,25 @@
 
 1. 루트 `AGENTS.md`
 2. 루트 `CODEX_HANDOFF.md`
-3. 이 `README.md`
-4. 아래에서 사용자가 선택한 작업 문서 하나
+3. `00_COMPANY_MASTER_HANDOFF.md`
+4. 이 `README.md`
+5. 아래에서 사용자가 선택한 작업 문서 하나
 
 여러 문서의 코드를 한 작업공간에 동시에 섞지 않는다.
 
 ## 작업별 색인
+
+| 구분 | 역할 | 읽을 문서 |
+| --- | --- | --- |
+| 회사 전체 지도 | 모든 시스템·자산·누락·안전 규칙 | `00_COMPANY_MASTER_HANDOFF.md` |
+| 브랜드·상품·시장 | 브랜드 기준, 분류, 가격, 해외시장 | `07_COMPANY_BRAND_PRODUCTS_MARKETS.md` |
+| 시스템·저장소 | repo, branch, PR, 작업공간 경계 | `08_COMPANY_SYSTEMS_AND_REPOSITORIES.md` |
+| 로컬 원본 자산 | 사진, ZIP, 명함, 사업문서, 이전 누락 | `09_LOCAL_ASSETS_AND_TRANSFER_GAPS.md` |
+| 대화 연결 | Codex/ChatGPT 작업 ID와 주제 | `10_CONVERSATION_REGISTRY.md` |
+| 상품관리 앱 | Flutter/Firebase `product_s` | `11_PRODUCT_S_APP_HANDOFF.md` |
+| Blingping | 별도 B2C 소비자 쇼핑몰 | `12_BLINGPING_B2C_HANDOFF.md` |
+
+기존 Noblesse/PORS/발주 상세 문서는 아래에 이어진다.
 
 | 구분 | 관련 Codex 작업 | 당시 작업공간 | 상태 | 읽을 문서 |
 | --- | --- | --- | --- | --- |
@@ -126,6 +140,16 @@ Flutter 발주 앱은 소스가 복원되기 전까지 아래처럼 요청한다
 docs/codex-handoff/06_PROCUREMENT_APP_HANDOFF.md를 읽어줘. 현재 B 컴퓨터에는
 발주 앱 소스가 없으므로 새로 만들거나 추측해서 복구하지 말고, A 컴퓨터에서
 안전하게 GitHub로 옮기는 데 필요한 체크리스트만 확인해줘.
+```
+
+귀족회사 전체부터 확인할 때는 아래 문장을 사용한다.
+
+```text
+귀족회사 전체 인수인계를 시작할게. AGENTS.md, CODEX_HANDOFF.md,
+docs/codex-handoff/00_COMPANY_MASTER_HANDOFF.md와 README.md를 전부 읽어줘.
+아직 수정하지 말고 각 시스템의 실제 경로, Git/dirty 상태, local-only 자산,
+A 컴퓨터에서 추가로 가져와야 할 항목을 읽기 전용으로 점검해줘.
+Noblesse B2B, PORS, 발주 앱, product_s, Blingping B2C를 섞지 마.
 ```
 
 ## 공통 금지 사항
